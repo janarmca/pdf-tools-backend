@@ -155,8 +155,71 @@ app.post('/api/payment/create-order', requireAuth, async (req, res) => {
   }
 });
 
+// Shared logic: mark a transaction paid + credit the user. Guarded with
+// .eq('status','created') so it only ever runs ONCE even if both the
+// /verify call (below) and the webhook fire for the same payment.
+async function markPaidAndCredit(txn, paymentId) {
+  const { data: updated, error } = await supabase.from('transactions')
+    .update({ status: 'paid', razorpay_payment_id: paymentId })
+    .eq('id', txn.id)
+    .eq('status', 'created') // atomic guard against double-crediting
+    .select();
+  if (error) throw new Error(error.message);
+  if (!updated || !updated.length) return { already: true }; // someone else already credited this
+
+  if (txn.credits_purchased) {
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', txn.user_id).single();
+    await supabase.from('profiles').update({
+      credits: (profile?.credits || 0) + txn.credits_purchased
+    }).eq('id', txn.user_id);
+  } else if (txn.plan_purchased) {
+    const { data: plan } = await supabase.from('pricing_plans')
+      .select('duration_days').eq('plan', txn.plan_purchased).limit(1).single();
+    const days = plan?.duration_days || 30;
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    await supabase.from('profiles').update({
+      plan: txn.plan_purchased, plan_expires_at: expires
+    }).eq('id', txn.user_id);
+  }
+  return { already: false };
+}
+
 // ============================================================
-// POST /api/payment/webhook — Razorpay இங்கே payment success/failure அனுப்பும்
+// POST /api/payment/verify — Checkout success ஆன உடனேயே (frontend-ன்
+// Razorpay `handler` callback-ல் இருந்து) அழைக்கப்படும். Razorpay webhook
+// Dashboard-ல் தனியாக configure செய்ய வேண்டிய அவசியமே இல்லாமல், இதுவே
+// credits-ஐ உடனடியாக சேர்க்கும் — signature-ஐ நாமே HMAC மூலம் சரிபார்த்து
+// உறுதி செய்கிறோம் (Razorpay-ன் official verification முறை இது).
+// ============================================================
+app.post('/api/payment/verify', requireAuth, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: 'Payment details missing' });
+    }
+    const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+    if (expected !== razorpay_signature) {
+      return res.status(400).json({ error: 'கையொப்பம் பொருந்தவில்லை (invalid signature) — இது போலியான payment ஆக இருக்கலாம்.' });
+    }
+
+    const { data: txn, error } = await supabase.from('transactions')
+      .select('*').eq('razorpay_order_id', razorpay_order_id).eq('user_id', req.user.id).single();
+    if (error || !txn) return res.status(404).json({ error: 'Transaction record கிடைக்கவில்லை' });
+
+    const result = await markPaidAndCredit(txn, razorpay_payment_id);
+    res.json({ ok: true, already: result.already });
+  } catch (e) {
+    console.error('Verify error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
+// POST /api/payment/webhook — (Optional backup) Razorpay Dashboard-ல்
+// configure செய்தால் இங்கேயும் அதே credit-ஐ சேர்க்கும் — ஆனால் மேலே உள்ள
+// /verify endpoint-ஏ primary path, இது தேவைப்படாமலேயே app வேலை செய்யும்.
 // Razorpay Dashboard → Settings → Webhooks-ல் இந்த URL-ஐ பதிவு செய்யவும்:
 //   https://your-backend-domain.com/api/payment/webhook
 // ============================================================
@@ -170,34 +233,16 @@ async function handleWebhook(req, res) {
     if (signature !== expected) return res.status(400).json({ error: 'Invalid signature' });
 
     const event = JSON.parse(req.body.toString());
+    console.log('Webhook received:', event.event); // Render logs-ல் இதை பார்க்கலாம் — event வந்ததா இல்லையா என்று உறுதி செய்ய
     if (event.event === 'payment.captured') {
       const payment = event.payload.payment.entity;
       const orderId = payment.order_id;
 
       const { data: txn } = await supabase.from('transactions')
         .select('*').eq('razorpay_order_id', orderId).single();
-      if (!txn) return res.json({ ok: true }); // unknown order, ignore
+      if (!txn) { console.log('Webhook: no matching transaction for order', orderId); return res.json({ ok: true }); }
 
-      await supabase.from('transactions').update({
-        status: 'paid', razorpay_payment_id: payment.id
-      }).eq('razorpay_order_id', orderId);
-
-      if (txn.credits_purchased) {
-        // Credit pack — add credits to user's balance
-        const { data: profile } = await supabase.from('profiles').select('credits').eq('id', txn.user_id).single();
-        await supabase.from('profiles').update({
-          credits: (profile?.credits || 0) + txn.credits_purchased
-        }).eq('id', txn.user_id);
-      } else if (txn.plan_purchased) {
-        // Subscription — extend plan
-        const { data: plan } = await supabase.from('pricing_plans')
-          .select('duration_days').eq('plan', txn.plan_purchased).limit(1).single();
-        const days = plan?.duration_days || 30;
-        const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-        await supabase.from('profiles').update({
-          plan: txn.plan_purchased, plan_expires_at: expires
-        }).eq('id', txn.user_id);
-      }
+      await markPaidAndCredit(txn, payment.id);
     }
     res.json({ ok: true });
   } catch (e) {
