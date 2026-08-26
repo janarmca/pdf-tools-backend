@@ -133,8 +133,22 @@ app.post('/api/video/compress', requireAuth, upload.single('file'), async (req, 
 // ============================================================
 app.post('/api/credits/use', requireAuth, async (req, res) => {
   try {
-    const { toolId, cost } = req.body;
+    const { toolId, cost, checkOnly } = req.body;
     if (!toolId || !cost || cost < 1) return res.status(400).json({ error: 'Invalid request' });
+
+    if (checkOnly) {
+      // Some tools (video compress, the 6 AI tools) charge credits themselves
+      // when the actual action runs — for those, "unlocking" the tool should
+      // only VERIFY the person can afford it, not deduct twice.
+      const { data: profile, error } = await supabase.from('profiles')
+        .select('credits, plan, plan_expires_at').eq('id', req.user.id).single();
+      if (error) throw new Error(error.message);
+      const isPro = (profile.plan === 'pro' || profile.plan === 'business') &&
+        (!profile.plan_expires_at || new Date(profile.plan_expires_at) > new Date());
+      if (isPro || profile.credits >= cost) return res.json({ ok: true });
+      return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+    }
+
     const allowed = await deductCredits(req.user.id, cost, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
     res.json({ ok: true });
