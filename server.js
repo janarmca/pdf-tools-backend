@@ -22,81 +22,7 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-// ============================================================
-// Abuse protection — rate limiting + fake-account guards
-// ------------------------------------------------------------
-// NOTE on scaling: express-rate-limit stores counters in memory by default.
-// That's fine for a single Render/Railway instance, but if this service is
-// ever scaled to multiple instances, each instance gets its own counters —
-// so a determined attacker could get N× the limit by hitting different
-// instances. If/when you scale horizontally, swap in a shared store, e.g.
-// `rate-limit-redis` pointed at a small Redis/Upstash instance — the
-// `rateLimit({...})` calls below don't need to change, just add `store:`.
-// This also only limits THIS backend — most tools run client-side and are
-// gated by /api/credits/use, which the limiters below already cover.
-// ============================================================
-app.set('trust proxy', 1); // Render/Railway sit behind a proxy — needed for req.ip to be the real client IP, not the proxy's
-
-// Generic safety net across every route — generous, just stops raw floods/scrapers.
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 600,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many requests — please slow down and try again shortly.' }
-});
-
-// Per-IP, unauthenticated-safe: brute-forcing promo/gift codes (e.g. trying
-// WELCOME10, WELCOME11, WELCOME12...) is the main way these get abused.
-const redeemLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 8, keyGenerator: (req) => req.user?.id || req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many redeem attempts — please try again in an hour.' }
-});
-
-// Signup-bonus codes are the classic fake-account farming target: someone
-// scripts throwaway-email signups just to keep re-claiming a "new user" code.
-// IP-based limiting catches the common case of many accounts from one place;
-// it won't stop a rotating-IP attacker alone, so pair this with CAPTCHA
-// (hCaptcha/Cloudflare Turnstile) on the signup form itself — that has to live
-// on the frontend/Supabase Auth side, not here.
-const redeemIpLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 15, keyGenerator: (req) => req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many redeem attempts from this network — please try again later.' }
-});
-
-// AI calls cost real money per request (Gemini) regardless of credit balance,
-// so cap raw request volume too, not just "do they have enough credits".
-const aiAskLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 30, keyGenerator: (req) => req.user?.id || req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many AI requests this hour — please slow down.' }
-});
-
-// ffmpeg compression is CPU/memory heavy; even a paying user shouldn't be able
-// to queue unlimited jobs and starve the single server instance for everyone else.
-const videoCompressLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 20, keyGenerator: (req) => req.user?.id || req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many video jobs this hour — please wait a bit and try again.' }
-});
-
-// Prevents scripted spamming of Razorpay order creation (each call writes a
-// pending row to `transactions` even if never paid).
-const paymentOrderLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 20, keyGenerator: (req) => req.user?.id || req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many order attempts — please try again shortly.' }
-});
-
-// Generic credit-gate endpoint, called once per client-side tool use — high
-// ceiling since legitimate use (batch image edits etc.) can be bursty, but
-// still bounded so a script can't hammer it thousands of times a minute.
-const creditsUseLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, max: 100, keyGenerator: (req) => req.user?.id || req.ip,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many requests — please slow down.' }
-});
+app.set('trust proxy', 1); // Render sits behind a proxy — needed for rate-limit to see the real client IP
 
 // ---------- Supabase admin client (service_role — server-side மட்டும்) ----------
 const supabase = createClient(
@@ -110,12 +36,30 @@ const razorpay = process.env.RAZORPAY_KEY_ID ? new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 }) : null;
 
+// ============================================================
+// Abuse protection — rate limits by IP address. Three tiers:
+//   - generalLimiter: everything (a loose ceiling against outright flooding)
+//   - creditLimiter: credit-spending endpoints (slower, still generous for
+//     a real person clicking around, but blocks a script hammering the API)
+//   - redeemLimiter: strict — redeem codes are guessable strings, this stops
+//     someone brute-forcing promo codes
+// Rate-limiting alone won't stop someone making many free Supabase accounts to
+// farm the 5 free signup credits — for that, also enable "Confirm email"
+// under Supabase Dashboard → Authentication → Providers → Email, which
+// requires a real, unique inbox per account before it can be used.
+// ============================================================
+const generalLimiter = rateLimit({ windowMs: 15*60*1000, limit: 300, standardHeaders: true, legacyHeaders: false });
+const creditLimiter = rateLimit({ windowMs: 15*60*1000, limit: 40, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many requests — please slow down and try again in a few minutes.' } });
+const redeemLimiter = rateLimit({ windowMs: 60*60*1000, limit: 10, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many redeem attempts — please try again later.' } });
+
+app.use(generalLimiter);
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
 // Razorpay webhook needs the RAW body for signature verification, so we
 // register that route's body-parser separately, before the JSON parser.
 app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 app.use(express.json());
-app.use('/api/', globalLimiter); // baseline flood protection for every API route
 
 const upload = multer({ dest: os.tmpdir(), limits: { fileSize: 500 * 1024 * 1024 } });
 
@@ -169,7 +113,7 @@ app.get('/api/pricing', async (req, res) => {
 // POST /api/video/compress — உண்மையான ffmpeg (native, WASM அல்ல) — வேகமானது
 // multipart/form-data: file, crf, preset, width(optional)
 // ============================================================
-app.post('/api/video/compress', requireAuth, videoCompressLimiter, upload.single('file'), async (req, res) => {
+app.post('/api/video/compress', creditLimiter, requireAuth, upload.single('file'), async (req, res) => {
   const CREDIT_COST = 2; // இந்த tool-க்கு எத்தனை credits
   try {
     const allowed = await deductCredits(req.user.id, CREDIT_COST, 'videocompress');
@@ -208,7 +152,7 @@ app.post('/api/video/compress', requireAuth, videoCompressLimiter, upload.single
 // logic. Keeps monetization consistent without porting every algorithm
 // to Node. body: { toolId: 'imgenhance', cost: 1 }
 // ============================================================
-app.post('/api/credits/use', requireAuth, creditsUseLimiter, async (req, res) => {
+app.post('/api/credits/use', creditLimiter, requireAuth, async (req, res) => {
   try {
     const { toolId, cost, checkOnly } = req.body;
     if (!toolId || !cost || cost < 1) return res.status(400).json({ error: 'Invalid request' });
@@ -238,17 +182,8 @@ app.post('/api/credits/use', requireAuth, creditsUseLimiter, async (req, res) =>
 // POST /api/redeem — Redeem a promo/gift code for bonus credits.
 // body: { code: 'WELCOME10' }
 // ============================================================
-app.post('/api/redeem', requireAuth, redeemIpLimiter, redeemLimiter, async (req, res) => {
+app.post('/api/redeem', redeemLimiter, requireAuth, async (req, res) => {
   try {
-    // Fake-account guard: signup/promo codes are the main thing farmed with
-    // disposable-email throwaway accounts. Requiring a verified email before
-    // any code can be redeemed doesn't stop a determined attacker who's
-    // willing to click a real confirmation link, but it kills the fully
-    // automated "sign up + redeem in one script, never touch the inbox" case,
-    // which is the vast majority of this kind of abuse in practice.
-    if (!req.user.email_confirmed_at) {
-      return res.status(403).json({ error: 'Please verify your email address before redeeming a code.' });
-    }
     const code = (req.body.code || '').trim().toUpperCase();
     if (!code) return res.status(400).json({ error: 'Please enter a code' });
     const { data, error } = await supabase.rpc('redeem_code', { p_user_id: req.user.id, p_code: code });
@@ -268,7 +203,7 @@ app.post('/api/redeem', requireAuth, redeemIpLimiter, redeemLimiter, async (req,
 // clear "not configured" error instead of crashing.
 // body: multipart form — file (image), question (text)
 // ============================================================
-app.post('/api/ai/ask', requireAuth, aiAskLimiter, upload.single('file'), async (req, res) => {
+app.post('/api/ai/ask', creditLimiter, requireAuth, upload.single('file'), async (req, res) => {
   const CREDIT_COST = 1;
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -284,7 +219,7 @@ app.post('/api/ai/ask', requireAuth, aiAskLimiter, upload.single('file'), async 
     const mimeType = req.file.mimetype || 'image/jpeg';
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -313,7 +248,7 @@ app.post('/api/ai/ask', requireAuth, aiAskLimiter, upload.single('file'), async 
 // POST /api/payment/create-order — Razorpay order உருவாக்குதல்
 // body: { planId: 'credits_100' | 'pro_monthly' | ... }
 // ============================================================
-app.post('/api/payment/create-order', requireAuth, paymentOrderLimiter, async (req, res) => {
+app.post('/api/payment/create-order', creditLimiter, requireAuth, async (req, res) => {
   try {
     if (!razorpay) return res.status(500).json({ error: 'Razorpay இன்னும் இணைக்கப்படவில்லை (server .env-ல் keys இல்லை)' });
     const { planId } = req.body;
@@ -378,7 +313,7 @@ async function markPaidAndCredit(txn, paymentId) {
 // credits-ஐ உடனடியாக சேர்க்கும் — signature-ஐ நாமே HMAC மூலம் சரிபார்த்து
 // உறுதி செய்கிறோம் (Razorpay-ன் official verification முறை இது).
 // ============================================================
-app.post('/api/payment/verify', requireAuth, async (req, res) => {
+app.post('/api/payment/verify', creditLimiter, requireAuth, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
