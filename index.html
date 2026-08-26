@@ -299,14 +299,36 @@ async function initAuth(){
     render();
   });
 }
+// Wraps fetch() to our own backend with graceful handling for the very common
+// case where Render's free tier has put the service to sleep: the platform can
+// return a plain HTML "waking up" or error page instead of JSON while the
+// container boots (can take 30-50s), which would otherwise crash res.json()
+// with a cryptic "Unexpected token '<'" — this turns that into one clear,
+// actionable message instead, and retries once automatically.
+async function backendFetchJson(url, options, opts){
+  const allowRetry = !opts || opts.retry !== false;
+  const res = await fetch(url, options);
+  const text = await res.text();
+  let data;
+  try{ data = JSON.parse(text); }
+  catch(e){
+    if(allowRetry){
+      await new Promise(r=>setTimeout(r, 4000));
+      return backendFetchJson(url, options, { retry: false });
+    }
+    throw new Error('The server is starting up (this can take up to a minute on the free tier) — please wait a moment and try again.');
+  }
+  if(!res.ok && !data.error) throw new Error(`Server error (${res.status})`);
+  return data;
+}
 async function refreshProfile(){
   if(!sb || !authState.session) return;
   try{
-    const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/me', {
+    const data = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/me', {
       headers: { Authorization: 'Bearer ' + authState.session.access_token }
     });
-    if(res.ok) authState.profile = await res.json();
-  }catch(e){ /* backend maybe not deployed yet — app still works client-side-only */ }
+    if(!data.error) authState.profile = data;
+  }catch(e){ /* backend maybe not deployed yet, or still waking up — app still works client-side-only */ }
 }
 async function authSignUp(email, password){
   if(!sb) throw new Error(friendlyErrorMessage(null));
@@ -380,8 +402,7 @@ async function mountPricingModal(){
   overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   try{
-    const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/pricing');
-    const plans = await res.json();
+    const plans = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/pricing');
     const list = card.querySelector('#pricingList');
     list.innerHTML = '';
     plans.forEach(p=>{
@@ -401,7 +422,7 @@ async function mountPricingModal(){
       list.appendChild(row);
     });
   }catch(e){
-    card.querySelector('#pricingList').innerHTML = `<div class="note">Backend not connected yet. See backend/README.md.</div>`;
+    card.querySelector('#pricingList').innerHTML = `<div class="note">${friendlyErrorMessage(e)}</div>`;
   }
 }
 async function ensureRazorpayScript(){
@@ -413,11 +434,10 @@ async function startCheckout(planId, btn){
   btn.textContent = '...'; btn.disabled = true;
   try{
     await ensureRazorpayScript();
-    const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/payment/create-order', {
+    const order = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/payment/create-order', {
       method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token },
       body: JSON.stringify({ planId })
     });
-    const order = await res.json();
     if(order.error) throw new Error(order.error);
     const rzp = new Razorpay({
       key: order.keyId, amount: order.amount, currency: order.currency,
@@ -425,7 +445,7 @@ async function startCheckout(planId, btn){
       order_id: order.orderId,
       handler: async function(response){
         try{
-          const verifyRes = await fetch(APP_CONFIG.BACKEND_URL + '/api/payment/verify', {
+          const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/payment/verify', {
             method:'POST',
             headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token },
             body: JSON.stringify({
@@ -434,7 +454,6 @@ async function startCheckout(planId, btn){
               razorpay_signature: response.razorpay_signature
             })
           });
-          const result = await verifyRes.json();
           if(result.error) throw new Error(result.error);
           await refreshProfile(); render();
           showToast('✅ Payment successful! Credits have been added.', 'success');
@@ -573,16 +592,15 @@ function renderSettingsPage(){
         const code = redeemRow.querySelector('#__redeemInput').value.trim();
         if(!code) return;
         try{
-          const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/redeem', {
+          const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/redeem', {
             method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token},
             body: JSON.stringify({code})
           });
-          const result = await res.json();
           if(result.error) throw new Error(result.error);
           await refreshProfile();
           redeemMsg.innerHTML = `<span style="color:#1E7145; font-weight:700;">✅ +${result.creditsAdded} credits added!</span>`;
           paint();
-        }catch(e){ redeemMsg.innerHTML = `<span style="color:#C0392B; font-weight:700;">${e.message}</span>`; }
+        }catch(e){ redeemMsg.innerHTML = `<span style="color:#C0392B; font-weight:700;">${friendlyErrorMessage(e)}</span>`; }
       };
       body.appendChild(redeemRow);
       body.appendChild(redeemMsg);
@@ -958,11 +976,10 @@ async function mountPaidGate(body, tool, onUnlock){
   unlockBtn.onclick = async ()=>{
     unlockBtn.textContent = 'Unlocking…'; unlockBtn.disabled = true;
     try{
-      const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/credits/use', {
+      const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/credits/use', {
         method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token},
         body: JSON.stringify({ toolId: tool.id, cost: tool.cost })
       });
-      const result = await res.json();
       if(result.error) throw new Error(result.error);
       await refreshProfile();
       updateCreditsBadgeInline();
@@ -4775,8 +4792,11 @@ TOOL_IMPL.videocompress = {
           body: form
         });
         if(!res.ok){
-          const errJson = await res.json().catch(()=>({error:'Server பிழை'}));
-          throw new Error(errJson.error || 'Server பிழை');
+          const errText = await res.text();
+          let errMsg;
+          try{ errMsg = JSON.parse(errText).error; }
+          catch(e){ errMsg = 'The server is starting up (this can take up to a minute on the free tier) — please wait a moment and try again.'; }
+          throw new Error(errMsg || 'Server error');
         }
         prog.set(80,'Downloading…');
         const blob = await res.blob();
@@ -6898,11 +6918,10 @@ function mountAiUploadTool(container, config){
       form.append('file', file);
       form.append('question', question);
       form.append('toolId', config.toolId);
-      const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+      const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
         method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
       });
       prog.set(80,'Thinking…');
-      const result = await res.json();
       if(result.error) throw new Error(result.error);
       prog.set(100,'Done'); prog.remove();
       if(config.onAnswer) config.onAnswer(answerHolder, result.answer, body);
