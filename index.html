@@ -27,13 +27,13 @@
   .hero h1{font-size:26px; font-weight:800; margin:0 0 6px; letter-spacing:-0.4px;}
   .hero p{color:var(--sub); font-size:14px; margin:0; max-width:560px; line-height:1.5;}
 
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:8px;}
-  .tool-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 14px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:flex; flex-direction:column; gap:8px; text-align:left;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:14px; margin-top:8px;}
+  .tool-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:flex; flex-direction:column; gap:10px; text-align:left;}
   .tool-card:hover{transform:translateY(-2px); box-shadow:0 8px 20px rgba(20,30,60,.08);}
   .tool-card:active{transform:translateY(0);}
-  .tool-icon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;}
-  .tool-name{font-weight:700; font-size:13.5px; line-height:1.3;}
-  .tool-desc{font-size:11.5px; color:var(--sub); line-height:1.35;}
+  .tool-icon{width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;}
+  .tool-name{font-weight:800; font-size:15.5px; line-height:1.3;}
+  .tool-desc{font-size:12.5px; color:var(--sub); line-height:1.4;}
 
   .panel{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:24px; margin-top:10px;}
   .panel-head{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
@@ -72,7 +72,7 @@
   .btn.accent{background:var(--accent);}
   .btn-row{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;}
 
-  .thumbs{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:16px; margin-top:16px;}
+  .thumbs{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:18px; margin-top:16px;}
   .thumb{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:white; position:relative;}
   .thumb img, .thumb canvas{width:100%; display:block; background:#f0f0f0;}
   .thumb .tnum{position:absolute; top:8px; left:8px; background:rgba(32,36,43,.75); color:white; font-size:12px; font-weight:700; padding:3px 9px; border-radius:9px;}
@@ -1564,22 +1564,28 @@ function crossOriginWorkerBlobURL(url){
 function ensureFFmpeg(){
   if(window.__ffmpegReadyPromise) return window.__ffmpegReadyPromise;
   window.__ffmpegReadyPromise = (async ()=>{
+    let indicator = null;
     try{
+      indicator = el(`<div style="position:fixed; left:0; right:0; bottom:0; background:#20242B; color:#fff; font-size:12.5px; font-weight:700; padding:10px 16px; text-align:center; z-index:500;">⏳ Loading video engine (first time only, ~25MB)… <span id="__ffLoadPct">0%</span></div>`);
+      document.body.appendChild(indicator);
       await loadScriptOnce('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
       const { FFmpeg } = window.FFmpegWASM;
       const ffmpeg = new FFmpeg();
       const base = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      const pctEl = indicator.querySelector('#__ffLoadPct');
       await ffmpeg.load({
         coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
         // The ffmpeg.wasm UMD build spawns its own worker chunk (814.ffmpeg.js) as a
         // raw cross-origin Worker, which fails with "cannot be accessed from origin
         // 'null'" on pages without a real http(s) origin. Routing it through a blob
         // that just importScripts()'s the real file fixes it (see comment above).
         classWorkerURL: crossOriginWorkerBlobURL('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js')
       });
+      indicator.remove();
       return { ffmpeg, fetchFile };
     }catch(e){
+      if(indicator) indicator.remove();
       window.__ffmpegReadyPromise = null; // allow retry next time instead of caching a failure forever
       throw new Error('Could not load video engine — check your internet connection and try again. (' + (e && e.message ? e.message : e) + ')');
     }
@@ -1593,10 +1599,24 @@ async function fetchFile(file){
   if(typeof file === 'string'){ const r = await fetch(file); return new Uint8Array(await r.arrayBuffer()); }
   return new Uint8Array(file);
 }
-async function toBlobURL(url, mimeType){
+async function toBlobURL(url, mimeType, onProgress){
   const resp = await fetch(url);
-  const buf = await resp.arrayBuffer();
-  return URL.createObjectURL(new Blob([buf], {type: mimeType}));
+  const total = Number(resp.headers.get('content-length')) || 0;
+  if(!total || !resp.body || !onProgress){
+    const buf = await resp.arrayBuffer();
+    return URL.createObjectURL(new Blob([buf], {type: mimeType}));
+  }
+  const reader = resp.body.getReader();
+  const chunks = [];
+  let received = 0;
+  while(true){
+    const { done, value } = await reader.read();
+    if(done) break;
+    chunks.push(value);
+    received += value.length;
+    onProgress(received/total);
+  }
+  return URL.createObjectURL(new Blob(chunks, {type: mimeType}));
 }
 function fmtTime(s){
   s = Math.max(0, Math.round(s));
@@ -1846,19 +1866,21 @@ async function mountThumbTool(container, mode){
 
     for(let pos=0; pos<order.length; pos++){
       const pageIdx = order[pos];
-      const dataUrl = await renderThumbDataUrl(pdfjsDoc, pageIdx+1, 0.65); // larger, clearer preview
+      const dataUrl = await renderThumbDataUrl(pdfjsDoc, pageIdx+1, 1.0); // bigger, clearer preview
       const rot = rotations[pageIdx] || 0;
       const thumb = el(`
-        <div class="thumb ${removed.has(pageIdx)?'removed':''}" data-pos="${pos}">
+        <div class="thumb ${removed.has(pageIdx)?'removed':''}" data-pos="${pos}" style="position:relative;">
           <span class="tnum">${pos+1}</span>
-          <img src="${dataUrl}" style="transform:rotate(${rot}deg);">
+          <img src="${dataUrl}" style="transform:rotate(${rot}deg); ${removed.has(pageIdx)?'opacity:.35;':''}">
           <div class="tctrl"></div>
         </div>
       `);
       const ctrl = thumb.querySelector('.tctrl');
       if(mode==='remove'){
-        const b = el(`<button data-toggle="${pageIdx}">${removed.has(pageIdx)?'Restore':'Delete 🗑️'}</button>`);
-        ctrl.appendChild(b);
+        ctrl.innerHTML = `<label style="display:flex; align-items:center; gap:8px; cursor:pointer; width:100%; justify-content:center; padding:4px 0; font-weight:700; font-size:13px;">
+          <input type="checkbox" data-toggle="${pageIdx}" ${removed.has(pageIdx)?'checked':''} style="width:20px; height:20px; accent-color:var(--warn); cursor:pointer;">
+          Delete this page
+        </label>`;
       } else if(mode==='organize'){
         const bl = el(`<button data-left="${pos}">◀</button>`);
         const br = el(`<button data-right="${pos}">▶</button>`);
@@ -1871,13 +1893,17 @@ async function mountThumbTool(container, mode){
     }
     label.remove();
 
-    grid.addEventListener('click', (e)=>{
+    grid.addEventListener('change', (e)=>{
       const t = e.target;
       if(t.matches('[data-toggle]')){
         const idx = Number(t.getAttribute('data-toggle'));
-        if(removed.has(idx)) removed.delete(idx); else removed.add(idx);
+        if(t.checked) removed.add(idx); else removed.delete(idx);
         paintThumbs();
-      } else if(t.matches('[data-left]')){
+      }
+    });
+    grid.addEventListener('click', (e)=>{
+      const t = e.target;
+      if(t.matches('[data-left]')){
         const pos = Number(t.getAttribute('data-left'));
         if(pos>0){ const tmp=order[pos]; order[pos]=order[pos-1]; order[pos-1]=tmp; paintThumbs(); }
       } else if(t.matches('[data-right]')){
@@ -2311,12 +2337,23 @@ TOOL_IMPL.compress = {
         }
         prog.set(95,'Preparing…');
         const bytes = await outDoc.save();
-        prog.set(100,'Done');
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'compressed.pdf');
-        prog.remove();
+        prog.set(100,'Done'); prog.remove();
         const newSize = bytes.length;
-        const pct = Math.max(0, Math.round((1 - newSize/originalSize)*100));
-        mountResult(body, `${fmtBytes(originalSize)} → ${fmtBytes(newSize)} (${pct}% lower) — downloaded.`);
+        const pct = Math.round((1 - newSize/originalSize)*100);
+        if(pct < 5){
+          // This method rasterizes every page to a JPEG — great for scanned/image-heavy
+          // PDFs, but a mostly-text PDF is often ALREADY more compact as vector text
+          // than as an image, so this can fail to shrink it (or even grow it).
+          mountResult(body, `This PDF is already compact as text (vector) — converting it to images didn't reduce the size (${fmtBytes(originalSize)} → ${fmtBytes(newSize)}). This method works best on scanned/image-heavy PDFs.`).style.background='#FFF3E0';
+          const dlAnywayRow = el(`<div class="btn-row"></div>`);
+          const dlBtn = el(`<button class="btn secondary">Download anyway</button>`);
+          dlBtn.onclick = ()=> downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'compressed.pdf');
+          dlAnywayRow.appendChild(dlBtn);
+          body.appendChild(dlAnywayRow);
+        } else {
+          downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'compressed.pdf');
+          mountResult(body, `${fmtBytes(originalSize)} → ${fmtBytes(newSize)} (${pct}% lower) — downloaded.`);
+        }
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -3369,7 +3406,7 @@ TOOL_IMPL.pdfgray = {
         for(let i=1;i<=pdfjsDoc.numPages;i++){
           prog.set(10+(i/pdfjsDoc.numPages)*80, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
-          const viewport = page.getViewport({scale:2});
+          const viewport = page.getViewport({scale:2.5});
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width; canvas.height = viewport.height;
           await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
@@ -4337,22 +4374,28 @@ TOOL_IMPL.pdfcrop = {
       const rect = selector.getRect();
       const prog = mountProgress(body);
       try{
-        prog.set(15,'Reading…');
-        const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
-        const pages = doc.getPages();
-        pages.forEach((page,idx)=>{
-          prog.set(15 + (idx/pages.length)*70, `page ${idx+1}/${pages.length}…`);
-          const {width,height} = page.getSize();
-          const x = rect.fx0*width, w = (rect.fx1-rect.fx0)*width;
-          const yTop = rect.fy0*height, yBot = rect.fy1*height;
-          const y = height - yBot, h = yBot - yTop;
-          page.setCropBox(x, y, w, h);
+        prog.set(10,'Reading…');
+        const srcDoc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
+        const outDoc = await PDFDocument.create();
+        const srcPages = srcDoc.getPages();
+        const embedded = await outDoc.embedPages(srcPages);
+        embedded.forEach((ep, idx)=>{
+          prog.set(10 + (idx/embedded.length)*75, `page ${idx+1}/${embedded.length}…`);
+          const w = ep.width, h = ep.height;
+          const x0 = rect.fx0*w, x1 = rect.fx1*w;
+          const y0 = rect.fy0*h, y1 = rect.fy1*h; // fy measured from the TOP of the page
+          const cropW = Math.max(1, x1-x0), cropH = Math.max(1, y1-y0);
+          const newPage = outDoc.addPage([cropW, cropH]);
+          // Draw the full original page shifted so only the cropped region falls
+          // within the new (smaller) page boundary — this physically removes the
+          // rest, unlike setCropBox which many viewers simply ignore.
+          newPage.drawPage(ep, { x: -x0, y: -(h - y1), width: w, height: h });
         });
-        prog.set(92,'Preparing…');
-        const bytes = await doc.save();
+        prog.set(90,'Preparing…');
+        const bytes = await outDoc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-cropped.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Crop completed PDF downloaded.');
+        mountResult(body, 'Cropped PDF downloaded — every page cropped, works reliably in every viewer.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -4378,10 +4421,10 @@ TOOL_IMPL.pdfmeta = {
         const m = file._meta || {};
         const opts = el(`
           <div class="opts tamil">
-            <div class="field" style="grid-column:1/-1;"><label>தலைப்பு (Title)</label><input type="text" id="pmTitle" value="${(m.title||'').replace(/"/g,'&quot;')}"></div>
-            <div class="field"><label>எழுதியவர் (Author)</label><input type="text" id="pmAuthor" value="${(m.author||'').replace(/"/g,'&quot;')}"></div>
-            <div class="field"><label>பொருள் (Subject)</label><input type="text" id="pmSubject" value="${(m.subject||'').replace(/"/g,'&quot;')}"></div>
-            <div class="field" style="grid-column:1/-1;"><label>Keywords (காற்புள்ளியால் பிரிக்கவும்)</label><input type="text" id="pmKeywords" value="${(m.keywords||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field" style="grid-column:1/-1;"><label>தலைப்பு (Title)</label><input type="text" id="pmTitle" autocomplete="off" value="${(m.title||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field"><label>எழுதியவர் (Author)</label><input type="text" id="pmAuthor" autocomplete="off" value="${(m.author||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field"><label>பொருள் (Subject)</label><input type="text" id="pmSubject" autocomplete="off" value="${(m.subject||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field" style="grid-column:1/-1;"><label>Keywords (காற்புள்ளியால் பிரிக்கவும்)</label><input type="text" id="pmKeywords" autocomplete="off" value="${(m.keywords||'').replace(/"/g,'&quot;')}"></div>
           </div>
         `);
         body.appendChild(opts);
@@ -5380,10 +5423,6 @@ TOOL_IMPL.readaloud = {
     function loadVoices(){
       voices = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
     }
-    if(window.speechSynthesis){
-      loadVoices();
-      speechSynthesis.onvoiceschanged = loadVoices;
-    }
     function paint(){
       body.innerHTML = '';
       if(!window.speechSynthesis){
@@ -5448,6 +5487,10 @@ TOOL_IMPL.readaloud = {
       else if(voiceSel && voiceSel.startsWith('o-')) utterance.voice = otherVoices[Number(voiceSel.split('-')[1])];
       utterance.rate = rate;
       speechSynthesis.speak(utterance);
+    }
+    if(window.speechSynthesis){
+      loadVoices();
+      speechSynthesis.onvoiceschanged = ()=>{ loadVoices(); paint(); }; // voices load async in most browsers — re-render once they actually arrive
     }
     paint();
   }
@@ -6306,7 +6349,7 @@ TOOL_IMPL.pdfredact = {
 /* ===================== PDF FORM FILLER ===================== */
 TOOL_IMPL.pdfform = {
   mount(container){
-    let file = null, fields = [];
+    let file = null, fields = [], form = null;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
@@ -6314,13 +6357,12 @@ TOOL_IMPL.pdfform = {
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
           const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
-          let form;
           try{ form = doc.getForm(); }catch(e){ form = null; }
           fields = form ? form.getFields().map(f=>({ name:f.getName(), type:f.constructor.name })) : [];
           paint();
         }});
       if(file){
-        mountFileList(body, [file], ()=>{ file=null; fields=[]; paint(); });
+        mountFileList(body, [file], ()=>{ file=null; fields=[]; form=null; paint(); });
         if(!fields.length){
           body.appendChild(el(`<div class="note tamil">இந்த PDF-ல் நிரப்பக்கூடிய Form fields எதுவும் கண்டறியப்படவில்லை.</div>`));
           return;
@@ -6328,10 +6370,16 @@ TOOL_IMPL.pdfform = {
         body.appendChild(el(`<div class="note tamil">கண்டறியப்பட்ட ${fields.length} fields — மதிப்புகளை நிரப்பி சேமிக்கவும்.</div>`));
         const opts = el(`<div class="opts tamil"></div>`);
         fields.forEach((f,idx)=>{
-          const isBool = /CheckBox|RadioGroup/.test(f.type);
-          const fieldEl = isBool
-            ? el(`<div class="field-inline"><input type="checkbox" id="pf_${idx}"><label for="pf_${idx}">${escapeHtml(f.name)}</label></div>`)
-            : el(`<div class="field" style="grid-column:1/-1;"><label>${escapeHtml(f.name)}</label><input type="text" id="pf_${idx}"></div>`);
+          let fieldEl;
+          if(/CheckBox/.test(f.type)){
+            fieldEl = el(`<div class="field-inline"><input type="checkbox" id="pf_${idx}"><label for="pf_${idx}">${escapeHtml(f.name)}</label></div>`);
+          } else if(/RadioGroup|Dropdown|OptionList/.test(f.type)){
+            let options = [];
+            try{ options = form.getField(f.name).getOptions(); }catch(e){}
+            fieldEl = el(`<div class="field" style="grid-column:1/-1;"><label>${escapeHtml(f.name)}</label><select id="pf_${idx}"><option value="">— select —</option>${options.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('')}</select></div>`);
+          } else {
+            fieldEl = el(`<div class="field" style="grid-column:1/-1;"><label>${escapeHtml(f.name)}</label><input type="text" id="pf_${idx}" autocomplete="off"></div>`);
+          }
           opts.appendChild(fieldEl);
         });
         body.appendChild(opts);
@@ -6347,14 +6395,14 @@ TOOL_IMPL.pdfform = {
       try{
         prog.set(20,'நிரப்புகிறது…');
         const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
-        const form = doc.getForm();
+        const docForm = doc.getForm();
         fields.forEach((f,idx)=>{
           const input = body.querySelector('#pf_'+idx);
           try{
-            const field = form.getField(f.name);
+            const field = docForm.getField(f.name);
             if(/CheckBox/.test(f.type)){ if(input.checked) field.check(); else field.uncheck(); }
-            else if(/TextField/.test(f.type)){ field.setText(input.value||''); }
-            else if(/Dropdown|OptionList/.test(f.type)){ if(input.value) field.select(input.value); }
+            else if(/RadioGroup|Dropdown|OptionList/.test(f.type)){ if(input.value) field.select(input.value); }
+            else { field.setText(input.value||''); }
           }catch(e){ /* skip fields we can't safely set */ }
         });
         prog.set(80,'Preparing…');
