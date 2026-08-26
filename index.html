@@ -913,6 +913,11 @@ function renderToolPanel(toolId){
   return wrap;
 }
 
+// Tools that deduct credits themselves when their actual action runs (video
+// compress's /api/video/compress, and the 6 AI tools' shared /api/ai/ask) —
+// for these, the unlock gate below only CHECKS affordability, it doesn't also
+// deduct, otherwise the first use of the tool would be charged twice.
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -949,7 +954,7 @@ async function mountPaidGate(body, tool, onUnlock){
     // Fire-and-forget so it's logged server-side too (0-cost for Pro, per deduct_credits SQL logic)
     fetch(APP_CONFIG.BACKEND_URL + '/api/credits/use', {
       method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token},
-      body: JSON.stringify({ toolId: tool.id, cost: tool.cost })
+      body: JSON.stringify({ toolId: tool.id, cost: tool.cost, checkOnly: ACTION_CHARGED_TOOLS.has(tool.id) })
     }).catch(()=>{});
     return;
   }
@@ -965,24 +970,24 @@ async function mountPaidGate(body, tool, onUnlock){
     box.querySelector('#__gateBuy').onclick = ()=> mountPricingModal();
     return;
   }
+  const actionCharged = ACTION_CHARGED_TOOLS.has(tool.id);
   const box = el(`<div style="text-align:center; padding:40px 20px;">
     <div style="font-size:40px; margin-bottom:12px;">⚡</div>
-    <div style="font-weight:900; font-size:16px; margin-bottom:6px;">Unlock this tool</div>
-    <div style="color:var(--sub); font-size:13px; margin-bottom:18px;">This will use ${tool.cost} credit${tool.cost>1?'s':''} from your balance (${credits} available).</div>
-    <button class="btn" id="__gateUnlock">Use ${tool.cost} Credit${tool.cost>1?'s':''} &amp; Continue</button>
+    <div style="font-weight:900; font-size:16px; margin-bottom:6px;">${actionCharged ? 'Ready to use' : 'Unlock this tool'}</div>
+    <div style="color:var(--sub); font-size:13px; margin-bottom:18px;">${actionCharged ? `This tool costs ${tool.cost} credit${tool.cost>1?'s':''} each time you use it (you have ${credits}).` : `This will use ${tool.cost} credit${tool.cost>1?'s':''} from your balance (${credits} available).`}</div>
+    <button class="btn" id="__gateUnlock">${actionCharged ? 'Continue' : `Use ${tool.cost} Credit${tool.cost>1?'s':''} & Continue`}</button>
   </div>`);
   body.innerHTML = ''; body.appendChild(box);
   const unlockBtn = box.querySelector('#__gateUnlock');
   unlockBtn.onclick = async ()=>{
-    unlockBtn.textContent = 'Unlocking…'; unlockBtn.disabled = true;
+    unlockBtn.textContent = 'Checking…'; unlockBtn.disabled = true;
     try{
       const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/credits/use', {
         method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token},
-        body: JSON.stringify({ toolId: tool.id, cost: tool.cost })
+        body: JSON.stringify({ toolId: tool.id, cost: tool.cost, checkOnly: actionCharged })
       });
       if(result.error) throw new Error(result.error);
-      await refreshProfile();
-      updateCreditsBadgeInline();
+      if(!actionCharged){ await refreshProfile(); updateCreditsBadgeInline(); }
       onUnlock();
     }catch(e){
       body.innerHTML = `<div class="note" style="background:#FDEDEC;">Error: ${friendlyErrorMessage(e)}</div>`;
@@ -2470,7 +2475,59 @@ TOOL_IMPL.ocr = {
         };
         dlRow.appendChild(bTxt); dlRow.appendChild(bDocx); dlRow.appendChild(bPdf);
         body.appendChild(dlRow);
+
+        // Classical OCR (Tesseract) genuinely struggles with dense multi-column
+        // layouts — ID cards, forms with photos/QR codes mixed into the text,
+        // tables. Offer the AI-vision path as a one-click upgrade for exactly
+        // that case, instead of leaving the person stuck with a bad result.
+        const upgradeBox = el(`<div style="margin-top:14px; border:1px solid #BBD6FF; background:#EAF2FF; border-radius:12px; padding:14px 16px;">
+          <div style="font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:4px;">Not accurate enough? (common for ID cards, forms, tables)</div>
+          <div style="font-size:12px; color:var(--sub); margin-bottom:10px;">Try AI-Powered OCR — reads complex layouts far more reliably, including photos/QR codes mixed with text. 1 credit.</div>
+          <button class="btn secondary" id="ocrAiUpgrade" style="padding:8px 16px; font-size:12.5px;">🤖 Try AI-Powered OCR</button>
+          <div id="ocrAiResultHolder"></div>
+        </div>`);
+        body.appendChild(upgradeBox);
+        upgradeBox.querySelector('#ocrAiUpgrade').onclick = doAiOcrUpgrade;
       }
+    }
+    async function doAiOcrUpgrade(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use AI-Powered OCR.').style.background='#FDEDEC'; return; }
+      const btn = body.querySelector('#ocrAiUpgrade');
+      const holder = body.querySelector('#ocrAiResultHolder');
+      btn.disabled = true; btn.textContent = 'Reading with AI…';
+      const prog = mountProgress(body);
+      try{
+        prog.set(20, 'Sending to AI…');
+        let aiFile = file;
+        if(isPdf){
+          // /api/ai/ask expects a single image — render the PDF's first page for this upgrade path
+          const pdfjsDoc = await loadPdfJs(file._buf);
+          const page = await pdfjsDoc.getPage(1);
+          const viewport = page.getViewport({scale:2.2});
+          const canvas = document.createElement('canvas'); canvas.width=viewport.width; canvas.height=viewport.height;
+          await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+          const blob = await new Promise(res=> canvas.toBlob(res,'image/png'));
+          aiFile = new File([blob], 'page1.png', {type:'image/png'});
+        }
+        const form = new FormData();
+        form.append('file', aiFile);
+        form.append('question', 'Transcribe every piece of text visible in this image exactly as written, in its natural reading order. It may mix Tamil and English, and may be a form, ID card, or table with text near photos/QR codes — read all of it, including labels and small print. Output ONLY the transcribed text, nothing else.');
+        form.append('toolId', 'ocr');
+        prog.set(50,'Reading… (this can take a few seconds)');
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+        });
+        if(result.error) throw new Error(result.error);
+        prog.set(100,'Done'); prog.remove();
+        holder.innerHTML = '';
+        holder.appendChild(el(`<div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:14px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(result.answer)}</div>`));
+        const copyBtn = el(`<button class="btn secondary" style="margin-top:8px; padding:7px 14px; font-size:12px;">📋 Copy</button>`);
+        copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(result.answer).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
+        holder.appendChild(copyBtn);
+        updateCreditsBadgeInline();
+        refreshProfile();
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
+      finally{ btn.disabled=false; btn.textContent='🤖 Try AI-Powered OCR'; }
     }
 
     function preprocessForOcr(srcCanvasOrImg, w, h){
