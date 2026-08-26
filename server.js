@@ -123,6 +123,93 @@ app.post('/api/video/compress', requireAuth, upload.single('file'), async (req, 
 });
 
 // ============================================================
+// POST /api/credits/use — Generic credit-deduction gate.
+// Most Image/OCR/some Video tools still process the file entirely in the
+// browser (fast enough there, no need to re-upload the file to a server).
+// The frontend calls THIS endpoint first (no file upload, just a credit
+// check) to unlock the tool for that use, then runs its normal client-side
+// logic. Keeps monetization consistent without porting every algorithm
+// to Node. body: { toolId: 'imgenhance', cost: 1 }
+// ============================================================
+app.post('/api/credits/use', requireAuth, async (req, res) => {
+  try {
+    const { toolId, cost } = req.body;
+    if (!toolId || !cost || cost < 1) return res.status(400).json({ error: 'Invalid request' });
+    const allowed = await deductCredits(req.user.id, cost, toolId);
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
+// POST /api/redeem — Redeem a promo/gift code for bonus credits.
+// body: { code: 'WELCOME10' }
+// ============================================================
+app.post('/api/redeem', requireAuth, async (req, res) => {
+  try {
+    const code = (req.body.code || '').trim().toUpperCase();
+    if (!code) return res.status(400).json({ error: 'Please enter a code' });
+    const { data, error } = await supabase.rpc('redeem_code', { p_user_id: req.user.id, p_code: code });
+    if (error) throw new Error(error.message);
+    if (!data.ok) return res.status(400).json({ error: data.error });
+    res.json({ ok: true, creditsAdded: data.credits_added });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
+// POST /api/ai/ask — "Ask AI about your document" — uses Google Gemini
+// (vision-capable, currently the cheapest capable option — see
+// aistudio.google.com for a free API key). Add GEMINI_API_KEY to your
+// Render env vars to activate this feature; until then it returns a
+// clear "not configured" error instead of crashing.
+// body: multipart form — file (image), question (text)
+// ============================================================
+app.post('/api/ai/ask', requireAuth, upload.single('file'), async (req, res) => {
+  const CREDIT_COST = 1;
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
+    }
+    const toolId = req.body.toolId || 'askai'; // which of the 6 AI tools called this — for usage_logs
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+
+    const question = req.body.question || 'Summarize this document and pull out any key dates, numbers, or names.';
+    const imageBytes = fs.readFileSync(req.file.path);
+    const base64Image = imageBytes.toString('base64');
+    const mimeType = req.file.mimetype || 'image/jpeg';
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: question },
+              { inline_data: { mime_type: mimeType, data: base64Image } }
+            ]
+          }]
+        })
+      }
+    );
+    const geminiJson = await geminiRes.json();
+    fs.unlink(req.file.path, () => {});
+    if (!geminiRes.ok) throw new Error(geminiJson.error?.message || 'AI request failed');
+    const answer = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text || 'No answer returned.';
+    res.json({ ok: true, answer });
+  } catch (e) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
 // POST /api/payment/create-order — Razorpay order உருவாக்குதல்
 // body: { planId: 'credits_100' | 'pro_monthly' | ... }
 // ============================================================
@@ -252,5 +339,18 @@ async function handleWebhook(req, res) {
 }
 
 app.get('/health', (req, res) => res.json({ ok: true, ffmpeg: 'native', time: new Date().toISOString() }));
+
+// Catch-all for any route that doesn't exist (e.g. frontend calling a newer
+// endpoint than what's currently deployed here) — returns clear JSON instead
+// of Express's default HTML 404 page, which is what causes the confusing
+// "Unexpected token '<'" error on the frontend.
+app.use((req, res) => {
+  res.status(404).json({ error: `Route not found: ${req.method} ${req.path} — is this the latest server.js deployed?` });
+});
+// Catch-all for any unhandled error anywhere above — same reasoning, JSON not HTML.
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+});
 
 app.listen(PORT, () => console.log(`✅ Backend running on port ${PORT}`));
