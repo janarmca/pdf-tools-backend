@@ -220,7 +220,7 @@ const TOOLS = [
 let state = { view:'home', tool:null };
 
 // ============================================================
-// ⚙️ CONFIG — உங்கள் real Supabase project & backend URL-ஐ இங்கே மாற்றவும்.
+// ⚙️ CONFIG — Your real Supabase project & backend URL-here.
 // backend/README.md-ல் இவற்றை எப்படி பெறுவது என்ற வழிமுறை உள்ளது.
 // ============================================================
 const APP_CONFIG = {
@@ -396,7 +396,7 @@ function mountAuthModal(){
 
 async function mountPricingModal(){
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;"></div>`);
-  const card = el(`<div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;"><div style="font-weight:900; font-size:17px; margin-bottom:14px;">💎 Credits / Plan வாங்கு</div><div id="pricingList">ஏற்றுகிறது…</div><button id="pricClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button></div>`);
+  const card = el(`<div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;"><div style="font-weight:900; font-size:17px; margin-bottom:14px;">💎 Credits / Plan Buy</div><div id="pricingList">Loading…</div><button id="pricClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button></div>`);
   overlay.appendChild(card);
   card.querySelector('#pricClose').onclick = ()=> overlay.remove();
   overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
@@ -1008,7 +1008,7 @@ function mountUploader(container, opts){
   const box = el(`
     <div class="drop tamil" id="drop-${uid()}">
       <div class="drop-icon">📤</div>
-      <div class="drop-title">${opts.label || 'ஃபைலை drag & drop or tap அல்லது தட்டு'}</div>
+      <div class="drop-title">${opts.label || 'file drag & drop or tap or tap'}</div>
       <div class="drop-sub">${opts.sublabel || ''}</div>
       <input type="file" ${opts.multiple?'multiple':''} accept="${opts.accept||''}">
     </div>
@@ -1149,7 +1149,7 @@ async function htmlToFontCorrectPdfBytes(content, opts){
 }
 
 const OCR_LANGS = [
-  {code:'tam', label:'தமிழ் (Tamil)', font:"'Noto Sans Tamil'"},
+  {code:'tam', label:'Tamil', font:"'Noto Sans Tamil'"},
   {code:'eng', label:'English', font:"'Noto Sans'"},
   {code:'hin', label:'हिन्दी (Hindi)', font:"'Noto Sans Devanagari'"},
   {code:'tel', label:'తెలుగు (Telugu)', font:"'Noto Sans Telugu'"},
@@ -1272,7 +1272,7 @@ function applyDocFilter(canvas, mode){
 
 function getDocxLib(){
   if(!window.docx || !window.docx.Document){
-    throw new Error('Word (.docx) library ஏற்றப்படவில்லை. இணைய இணைப்பை சரிபார்த்து, பக்கத்தை மீண்டும் ஏற்றவும் (reload) செய்யவும்.');
+    throw new Error('Word (.docx) library did not load. Please check your internet connection and reload the page.');
   }
   return window.docx;
 }
@@ -1373,31 +1373,63 @@ self.onmessage = async (e)=>{
       }
     } else if(op === 'detectquad'){
       const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-      cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
-      const edges = track(new cv.Mat()); cv.Canny(gray, edges, 50, 150);
-      const kernel = track(cv.Mat.ones(5,5, cv.CV_8U));
-      cv.dilate(edges, edges, kernel);
-      const contours = track(new cv.MatVector());
-      const hierarchy = track(new cv.Mat());
-      cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
       const imgArea = width*height;
-      let best = null, bestArea = 0;
-      for(let i=0;i<contours.size();i++){
-        const cnt = contours.get(i);
-        const peri = cv.arcLength(cnt, true);
-        const approx = new cv.Mat();
-        cv.approxPolyDP(cnt, approx, 0.02*peri, true);
-        if(approx.rows === 4){
-          const area = Math.abs(cv.contourArea(approx));
-          if(area > bestArea && area > imgArea*0.15){
-            bestArea = area;
-            const pts = [];
-            for(let j=0;j<4;j++) pts.push({x: approx.data32S[j*2], y: approx.data32S[j*2+1]});
-            best = pts;
+
+      function findBestQuad(edgeMat, minAreaFrac){
+        const contours = new cv.MatVector();
+        const hierarchy = new cv.Mat();
+        cv.findContours(edgeMat, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+        let best = null, bestArea = 0, largestAny = null, largestAnyArea = 0;
+        for(let i=0;i<contours.size();i++){
+          const cnt = contours.get(i);
+          const area0 = Math.abs(cv.contourArea(cnt));
+          if(area0 > largestAnyArea){ largestAnyArea = area0; if(largestAny) largestAny.delete(); largestAny = cnt.clone(); }
+          const peri = cv.arcLength(cnt, true);
+          const approx = new cv.Mat();
+          cv.approxPolyDP(cnt, approx, 0.02*peri, true);
+          if(approx.rows === 4){
+            const area = Math.abs(cv.contourArea(approx));
+            if(area > bestArea && area > imgArea*minAreaFrac){
+              bestArea = area;
+              const pts = [];
+              for(let j=0;j<4;j++) pts.push({x: approx.data32S[j*2], y: approx.data32S[j*2+1]});
+              best = pts;
+            }
           }
+          approx.delete(); cnt.delete();
         }
-        approx.delete(); cnt.delete();
+        contours.delete(); hierarchy.delete();
+        if(!best && largestAny && largestAnyArea > imgArea*0.08){
+          // No clean 4-point shape found, but there IS a large-enough object —
+          // use its bounding rectangle as a much better guess than a full-frame default.
+          const r = cv.boundingRect(largestAny);
+          best = [{x:r.x,y:r.y},{x:r.x+r.width,y:r.y},{x:r.x+r.width,y:r.y+r.height},{x:r.x,y:r.y+r.height}];
+        }
+        if(largestAny) largestAny.delete();
+        return best;
       }
+
+      // Strategy 1: standard Canny edges (works well for high-contrast backgrounds).
+      const blur1 = track(new cv.Mat()); cv.GaussianBlur(gray, blur1, new cv.Size(5,5), 0);
+      const edges1 = track(new cv.Mat()); cv.Canny(blur1, edges1, 50, 150);
+      const kernel = track(cv.Mat.ones(5,5, cv.CV_8U));
+      cv.dilate(edges1, edges1, kernel);
+      let best = findBestQuad(edges1, 0.15);
+
+      // Strategy 2: adaptive threshold — handles uneven lighting / low-contrast
+      // backgrounds (e.g. a card photographed on a similarly-light surface).
+      if(!best){
+        const athresh = track(new cv.Mat());
+        cv.adaptiveThreshold(gray, athresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 15, 5);
+        cv.dilate(athresh, athresh, kernel);
+        best = findBestQuad(athresh, 0.12);
+      }
+      // Strategy 3: relax the area threshold further — catches documents that
+      // only fill a smaller portion of the frame.
+      if(!best){
+        best = findBestQuad(edges1, 0.06);
+      }
+
       mats.forEach(m=>{ try{ m.delete(); }catch(e){} });
       self.postMessage({ id, ok:true, quad: best });
       return;
@@ -1549,7 +1581,7 @@ function ensureFFmpeg(){
       return { ffmpeg, fetchFile };
     }catch(e){
       window.__ffmpegReadyPromise = null; // allow retry next time instead of caching a failure forever
-      throw new Error('வீடியோ இயந்திரம் ஏற்ற முடியவில்லை — இணைய இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும். (' + (e && e.message ? e.message : e) + ')');
+      throw new Error('Could not load video engine — check your internet connection and try again. (' + (e && e.message ? e.message : e) + ')');
     }
   })();
   return window.__ffmpegReadyPromise;
@@ -1582,7 +1614,7 @@ function getVideoDuration(file){
     const v = document.createElement('video');
     v.preload = 'metadata';
     v.onloadedmetadata = ()=>{ const d = v.duration; URL.revokeObjectURL(v.src); resolve(d); };
-    v.onerror = ()=>{ URL.revokeObjectURL(v.src); reject(new Error('வீடியோவை படிக்க முடியவில்லை')); };
+    v.onerror = ()=>{ URL.revokeObjectURL(v.src); reject(new Error('Could not read the video')); };
     v.src = URL.createObjectURL(file);
   });
 }
@@ -1595,7 +1627,7 @@ function ensureQrLib(){
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     script.async = true;
     script.onload = ()=> resolve(window.QRCode);
-    script.onerror = ()=> reject(new Error('QR கருவி ஏற்ற முடியவில்லை (இணையம் தேவை)'));
+    script.onerror = ()=> reject(new Error('QR Could not load tool (internet required)'));
     document.head.appendChild(script);
   });
   return window.__qrReadyPromise;
@@ -1725,7 +1757,7 @@ TOOL_IMPL.split = {
       const opts = el(`
         <div class="opts one tamil">
           <div class="field">
-            <label>பக்க வரம்பு (எ.கா. 1-3, 5, 7-9) — மொத்தம் ${pageCount} பக்கங்கள்</label>
+            <label>Page range (e.g. 1-3, 5, 7-9) — out of ${pageCount} பக்கங்கள்</label>
             <input type="text" id="rangeInput" placeholder="1-${pageCount}" value="1-${pageCount}">
           </div>
         </div>
@@ -1756,13 +1788,13 @@ TOOL_IMPL.split = {
     async function doSplit(){
       const rangeStr = body.querySelector('#rangeInput').value || `1-${pageCount}`;
       const idxs = parseRanges(rangeStr, pageCount);
-      if(!idxs.length){ mountResult(body,'சரியான பக்க வரம்பை உள்ளிடவும்.').style.background='#FDEDEC'; return; }
+      if(!idxs.length){ mountResult(body,'Please enter a valid page range.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         prog.set(20,'Reading…');
         const src = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const outDoc = await PDFDocument.create();
-        prog.set(50,'பக்கங்களை எடுக்கிறது…');
+        prog.set(50,'Extracting pages…');
         const pages = await outDoc.copyPages(src, idxs);
         pages.forEach(p=>outDoc.addPage(p));
         prog.set(90,'Preparing…');
@@ -1770,7 +1802,7 @@ TOOL_IMPL.split = {
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'split.pdf');
         prog.remove();
-        mountResult(body, `${idxs.length} பக்கங்கள் கொண்ட புதிய PDF downloaded.`);
+        mountResult(body, `${idxs.length} new file with PDF downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -1909,7 +1941,7 @@ TOOL_IMPL.merge = {
       body.innerHTML = '';
       mountUploader(body, {
         accept:'application/pdf', multiple:true,
-        label:'PDF ஃபைல்களை drag & drop or tap', sublabel:'2 அல்லது அதற்கு மேற்பட்ட PDF தேர்வு செய்யவும்',
+        label:'PDF ஃபைல்களை drag & drop or tap', sublabel:'2 or more PDFs',
         onAdd: async (fl)=>{
           for(const f of fl){ if(f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf')) files.push(f); }
           paint();
@@ -1921,7 +1953,7 @@ TOOL_IMPL.merge = {
           (idx,dir)=>{ const j=idx+dir; if(j<0||j>=files.length) return; const t=files[idx]; files[idx]=files[j]; files[j]=t; paint(); }
         );
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil" ${files.length<2?'disabled':''}>🧩 இணை (Merge)</button>`);
+        const btn = el(`<button class="btn tamil" ${files.length<2?'disabled':''}>🧩 Merge</button>`);
         btn.onclick = doMerge;
         row.appendChild(btn);
         body.appendChild(row);
@@ -1933,7 +1965,7 @@ TOOL_IMPL.merge = {
       try{
         const outDoc = await PDFDocument.create();
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} சேர்க்கிறது… (${i+1}/${files.length})`);
+          prog.set((i/files.length)*90, `${files[i].name} Adding… (${i+1}/${files.length})`);
           const buf = await readFileAsArrayBuffer(files[i]);
           const src = await PDFDocument.load(buf, {ignoreEncryption:true});
           const pages = await outDoc.copyPages(src, src.getPageIndices());
@@ -1944,7 +1976,7 @@ TOOL_IMPL.merge = {
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'merged.pdf');
         prog.remove();
-        mountResult(body, `${files.length} PDF-கள் ஒன்றாக இணைக்கப்பட்டு downloaded.`);
+        mountResult(body, `${files.length} PDF-files merged and downloaded.`);
       }catch(err){
         prog.remove();
         mountResult(body, 'Error: '+err.message).style.background = '#FDEDEC';
@@ -1972,7 +2004,7 @@ TOOL_IMPL.img2pdf = {
           (idx,dir)=>{ const j=idx+dir; if(j<0||j>=files.length) return; const t=files[idx]; files[idx]=files[j]; files[j]=t; paint(); }
         );
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🖼️ PDF ஆக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🖼️ PDF Make</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -1983,7 +2015,7 @@ TOOL_IMPL.img2pdf = {
       try{
         const outDoc = await PDFDocument.create();
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} சேர்க்கிறது…`);
+          prog.set((i/files.length)*90, `${files[i].name} Adding…`);
           const buf = await readFileAsArrayBuffer(files[i]);
           const isPng = files[i].type==='image/png' || files[i].name.toLowerCase().endsWith('.png');
           const img = isPng ? await outDoc.embedPng(buf) : await outDoc.embedJpg(buf);
@@ -1995,7 +2027,7 @@ TOOL_IMPL.img2pdf = {
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'images.pdf');
         prog.remove();
-        mountResult(body, `${files.length} படங்கள் கொண்ட PDF downloaded.`);
+        mountResult(body, `${files.length} images, containing PDF downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2019,11 +2051,11 @@ TOOL_IMPL.pdf2img = {
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
-              <label>தரம் (Quality/Resolution)</label>
+              <label>Quality/Resolution</label>
               <select id="qualSel">
-                <option value="1">சாதாரணம் (Fast)</option>
-                <option value="2" selected>நல்லது (Recommended)</option>
-                <option value="3">உயர் தரம் (High-res, மெதுவாக இருக்கும்)</option>
+                <option value="1">Standard (Fast)</option>
+                <option value="2" selected>Good (Recommended)</option>
+                <option value="3">High-res (slower)</option>
               </select>
             </div>
           </div>
@@ -2043,7 +2075,7 @@ TOOL_IMPL.pdf2img = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const zip = new JSZip();
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set((i/pdfjsDoc.numPages)*90, `பக்கம் ${i}/${pdfjsDoc.numPages}…`);
+          prog.set((i/pdfjsDoc.numPages)*90, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const viewport = page.getViewport({scale});
           const canvas = document.createElement('canvas');
@@ -2058,7 +2090,7 @@ TOOL_IMPL.pdf2img = {
         prog.set(100,'Done');
         downloadBlob(blob, 'pages.zip');
         prog.remove();
-        mountResult(body, `${pdfjsDoc.numPages} படங்கள் ZIP ஆக downloaded.`);
+        mountResult(body, `${pdfjsDoc.numPages} images as a ZIP downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2131,7 +2163,7 @@ TOOL_IMPL.watermark = {
         const font = await embedUnicodeFont(doc);
         const pages = doc.getPages();
         pages.forEach((page,i)=>{
-          prog.set(20 + (i/pages.length)*60, `பக்கம் ${i+1}/${pages.length}…`);
+          prog.set(20 + (i/pages.length)*60, `page ${i+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           page.drawText(text, {
             x: width/2 - (text.length*size*0.28), y: height/2,
@@ -2171,20 +2203,20 @@ TOOL_IMPL.pagenum = {
               <label>Position</label>
               <select id="pnPos">
                 <option value="bottom-center">கீழே Center</option>
-                <option value="bottom-right">கீழே வலது</option>
-                <option value="bottom-left">கீழே இடது</option>
-                <option value="top-right">மேலே வலது</option>
+                <option value="bottom-right">Bottom right</option>
+                <option value="bottom-left">Bottom left</option>
+                <option value="top-right">Top right</option>
               </select>
             </div>
             <div class="field">
-              <label>தொடக்க எண்</label>
+              <label>Starting number</label>
               <input type="number" id="pnStart" value="1" min="1">
             </div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">#️⃣ பக்க எண் சேர்</button>`);
+        const btn = el(`<button class="btn tamil">#️⃣ Add Page Number</button>`);
         btn.onclick = doApply;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2215,7 +2247,7 @@ TOOL_IMPL.pagenum = {
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'numbered.pdf');
         prog.remove();
-        mountResult(body, 'பக்க எண்கள் சேர்க்கப்பட்ட PDF downloaded.');
+        mountResult(body, 'PDF with page numbers downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2239,19 +2271,19 @@ TOOL_IMPL.compress = {
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
-              <label>சுருக்கும் Size</label>
+              <label>Compress Size</label>
               <select id="cLevel">
-                <option value="1.5">குறைந்த சுருக்கம் (தரம் அதிகம்)</option>
-                <option value="1.1" selected>நடுத்தரம் (பரிந்துரை)</option>
-                <option value="0.75">அதிக சுருக்கம் (Size குறைவு)</option>
+                <option value="1.5">Low compression (higher quality)</option>
+                <option value="1.1" selected>Medium (Recommended)</option>
+                <option value="0.75">High compression (smaller size)</option>
               </select>
             </div>
           </div>
-          <div class="note">இது ஒவ்வொரு பக்கத்தையும் படமாக மறுஉருவாக்கம் செய்து சுருக்கும் — படங்கள்/ஸ்கேன் செய்த PDF-க்கு சிறந்தது. எழுத்து-அடிப்படையிலான PDF-ல் எழுத்தை select/copy செய்யும் தன்மை போய்விடும்.</div>
+          <div class="note">This re-renders every page as an image to compress it — best for image-heavy/scanned PDFs. எழுத்து-அடிப்படையிலான PDF-ல் எழுத்தை select/copy does தன்மை போய்விடும்.</div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📦 சுருக்கு</button>`);
+        const btn = el(`<button class="btn tamil">📦 Compress</button>`);
         btn.onclick = doCompress;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2265,7 +2297,7 @@ TOOL_IMPL.compress = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const outDoc = await PDFDocument.create();
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set((i/pdfjsDoc.numPages)*85, `பக்கம் ${i}/${pdfjsDoc.numPages}…`);
+          prog.set((i/pdfjsDoc.numPages)*85, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const viewport = page.getViewport({scale});
           const canvas = document.createElement('canvas');
@@ -2284,7 +2316,7 @@ TOOL_IMPL.compress = {
         prog.remove();
         const newSize = bytes.length;
         const pct = Math.max(0, Math.round((1 - newSize/originalSize)*100));
-        mountResult(body, `${fmtBytes(originalSize)} → ${fmtBytes(newSize)} (${pct}% குறைவு) — downloaded.`);
+        mountResult(body, `${fmtBytes(originalSize)} → ${fmtBytes(newSize)} (${pct}% lower) — downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2317,10 +2349,10 @@ TOOL_IMPL.sign = {
 
       const sigWrap = el(`
         <div class="tamil" style="margin-top:16px;">
-          <label style="font-size:11.5px; font-weight:700; color:var(--sub); display:block; margin-bottom:6px;">உங்கள் கையொப்பத்தை வரையவும்</label>
+          <label style="font-size:11.5px; font-weight:700; color:var(--sub); display:block; margin-bottom:6px;">Draw your signature</label>
           <canvas class="sig-canvas" id="sigPad" width="600" height="180"></canvas>
           <div class="btn-row">
-            <button class="btn secondary tamil" id="clearSig">🧹 அழி</button>
+            <button class="btn secondary tamil" id="clearSig">🧹 Clear</button>
           </div>
         </div>
       `);
@@ -2335,11 +2367,11 @@ TOOL_IMPL.sign = {
       const opts = el(`
         <div class="opts tamil" style="margin-top:14px;">
           <div class="field">
-            <label>எந்த பக்கத்தில் (மொத்தம் ${pageCount})</label>
+            <label>Which page (out of ${pageCount})</label>
             <input type="number" id="signPage" value="${currentPage}" min="1" max="${pageCount}">
           </div>
           <div class="field">
-            <label>கையொப்பத்தின் அகலம் (%)</label>
+            <label>Signature width (%)</label>
             <input type="number" id="sigWidthPct" value="25" min="10" max="60">
           </div>
         </div>
@@ -2347,7 +2379,7 @@ TOOL_IMPL.sign = {
       body.appendChild(opts);
 
       const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn tamil">✍️ கையொப்பம் வை</button>`);
+      const btn = el(`<button class="btn tamil">✍️ Sign</button>`);
       btn.onclick = doApply;
       row.appendChild(btn);
       body.appendChild(row);
@@ -2392,14 +2424,14 @@ TOOL_IMPL.sign = {
         const {width, height} = page.getSize();
         const sigW = width*widthPct;
         const sigH = sigW * (sigImg.height/sigImg.width);
-        prog.set(60,'கையொப்பம் வைக்கிறது…');
+        prog.set(60,'Signக்கிறது…');
         page.drawImage(sigImg, { x: width*sigPos.xPct, y: height*sigPos.yPct, width: sigW, height: sigH });
         prog.set(90,'Preparing…');
         const bytes = await doc.save();
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'signed.pdf');
         prog.remove();
-        mountResult(body, `பக்கம் ${pageNum}-ல் கையொப்பம் வைக்கப்பட்ட PDF downloaded.`);
+        mountResult(body, `page ${pageNum}-ல் Signக்கப்பட்ட PDF downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2585,7 +2617,7 @@ TOOL_IMPL.ocr = {
               }
             }
           });
-          fullText += (images.length>1 ? `\n----- பக்கம் ${i+1} -----\n` : '') + data.text;
+          fullText += (images.length>1 ? `\n----- page ${i+1} -----\n` : '') + data.text;
         }
         recognizedText = fullText.trim();
         prog.set(100,'Done');
@@ -2624,17 +2656,17 @@ TOOL_IMPL.pdf2text = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         let fullText = '';
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set((i/pdfjsDoc.numPages)*95, `பக்கம் ${i}/${pdfjsDoc.numPages}…`);
+          prog.set((i/pdfjsDoc.numPages)*95, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const content = await page.getTextContent();
           const text = content.items.map(it=>it.str).join(' ');
-          fullText += `\n----- பக்கம் ${i} -----\n` + text + '\n';
+          fullText += `\n----- page ${i} -----\n` + text + '\n';
         }
         prog.set(100,'Done');
         downloadBlob(new Blob([fullText],{type:'text/plain;charset=utf-8'}), 'extracted-text.txt');
         prog.remove();
         if(fullText.trim().length < 20){
-          mountResult(body, 'எழுத்து மிகக் குறைவாக கிடைத்தது — இது ஸ்கேன் செய்த படமாக இருக்கலாம், "படத்திலிருந்து எழுத்து (OCR)" கருவியை பயன்படுத்தவும்.').style.background='#FFF6E5';
+          mountResult(body, 'எழுத்து மிகக் குறைவாக கிடைத்தது — இது ஸ்கேன் ed படமாக இருக்கலாம், "படத்திலிருந்து எழுத்து (OCR)" கருவியை பயன்படுத்தவும்.').style.background='#FFF6E5';
         } else {
           mountResult(body, 'உரை .txt ஃபைலாக downloaded.');
         }
@@ -2653,13 +2685,13 @@ TOOL_IMPL.word2pdf = {
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        label:'ஒரு Word (.docx) ஃபைலை drag & drop or tap', sublabel:'PDF ஆக மாற்றும் — எழுத்துரு சரியாக காட்டப்படும் (தமிழ் உட்பட)',
+        label:'ஒரு Word (.docx) file drag & drop or tap', sublabel:'PDF Convert toம் — எழுத்துரு சரியாக காட்டப்படும் (தமிழ் உட்பட)',
         onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📄 PDF ஆக மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">📄 PDF Convert to</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2668,9 +2700,9 @@ TOOL_IMPL.word2pdf = {
     async function doConvert(){
       const prog = mountProgress(body);
       try{
-        prog.set(20,'Word ஃபைலை Reading…');
+        prog.set(20,'Word file Reading…');
         const result = await mammoth.convertToHtml({arrayBuffer: file._buf});
-        prog.set(55,'PDF ஆக்குகிறது…');
+        prog.set(55,'PDF Creating…');
         const html = `<div style="font-family:'Noto Sans Tamil','Noto Sans Devanagari','Noto Sans',sans-serif;">${result.value}</div>`;
         const bytes = await htmlToFontCorrectPdfBytes(html, {isHtml:true, fontSize:15});
         prog.set(100,'Done');
@@ -2698,7 +2730,7 @@ TOOL_IMPL.pdf2word = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📃 Word ஆக மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">📃 Word Convert to</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2712,7 +2744,7 @@ TOOL_IMPL.pdf2word = {
         const { Document, Paragraph, TextRun, Packer } = getDocxLib();
         const children = [];
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set(15+(i/pdfjsDoc.numPages)*70, `பக்கம் ${i}/${pdfjsDoc.numPages}…`);
+          prog.set(15+(i/pdfjsDoc.numPages)*70, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const content = await page.getTextContent();
           const text = content.items.map(it=>it.str).join(' ');
@@ -2726,7 +2758,7 @@ TOOL_IMPL.pdf2word = {
         prog.set(100,'Done');
         downloadBlob(blob, file.name.replace(/\.pdf$/i,'')+'.docx');
         prog.remove();
-        mountResult(body, 'Word ஃபைல் (.docx) downloaded.').style.background='#FFF6E5';
+        mountResult(body, 'Word file (.docx) downloaded.').style.background='#FFF6E5';
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2742,13 +2774,13 @@ TOOL_IMPL.excel2pdf = {
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.xlsx,.xls,.csv',
-        label:'Excel (.xlsx/.xls/.csv) ஃபைலை drag & drop or tap', sublabel:'ஒவ்வொரு Sheet-ஐயும் PDF ஆக மாற்றும்',
+        label:'Excel (.xlsx/.xls/.csv) file drag & drop or tap', sublabel:'ஒவ்வொரு Sheet-ஐயும் PDF Convert toம்',
         onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📊 PDF ஆக மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">📊 PDF Convert to</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2768,7 +2800,7 @@ TOOL_IMPL.excel2pdf = {
           html += tblHtml;
         });
         html += `</div>`;
-        prog.set(55,'PDF ஆக்குகிறது…');
+        prog.set(55,'PDF Creating…');
         const bytes = await htmlToFontCorrectPdfBytes(html, {isHtml:true, fontSize:13});
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.(xlsx|xls|csv)$/i,'')+'.pdf');
@@ -2789,13 +2821,13 @@ TOOL_IMPL.excel2word = {
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.xlsx,.xls,.csv',
-        label:'Excel (.xlsx/.xls/.csv) ஃபைலை drag & drop or tap', sublabel:'Word (.docx) அட்டவணையாக மாற்றும்',
+        label:'Excel (.xlsx/.xls/.csv) file drag & drop or tap', sublabel:'Word (.docx) அட்டவணையாக Convert',
         onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📑 Word ஆக மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">📑 Word Convert to</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2826,7 +2858,7 @@ TOOL_IMPL.excel2word = {
         prog.set(100,'Done');
         downloadBlob(blob, file.name.replace(/\.(xlsx|xls|csv)$/i,'')+'.docx');
         prog.remove();
-        mountResult(body, 'Word ஃபைல் (.docx) downloaded.');
+        mountResult(body, 'Word file (.docx) downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -2847,10 +2879,10 @@ TOOL_IMPL.pdf2excel = {
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
-        const note = el(`<div class="note tamil">✅ இப்போது வரிசைகள் (rows) மற்றும் நெடுவரிசைகள் (columns) PDF-ல் இருக்கும் இடத்தை வைத்தே தானாக கண்டறியப்பட்டு, ஒவ்வொரு நெடுவரிசையும் Excel-ல் அதே இடத்தில் வரும் வகையில் சீரமைக்கப்படும் — PDF-ன் அட்டவணை வடிவமைப்பு அப்படியே பாதுகாக்கப்படும். (Scan செய்யப்பட்ட/படமாக உள்ள PDF எனில் முதலில் "OCR" கருவியை பயன்படுத்தவும்.)</div>`);
+        const note = el(`<div class="note tamil">✅ இப்போது வரிசைகள் (rows) மற்றும் நெடுவரிசைகள் (columns) PDF-ல் இருக்கும் இடத்தை வைத்தே தானாக கண்டறியப்பட்டு, ஒவ்வொரு நெடுவரிசையும் Excel-ல் அதே இடத்தில் வரும் வகையில் சீரமைக்கப்படும் — PDF-ன் அட்டவணை வடிவமைப்பு அப்படியே பாதுகாக்கப்படும். (Scan completed/படமாக உள்ள PDF எனில் முதலில் "OCR" கருவியை பயன்படுத்தவும்.)</div>`);
         body.appendChild(note);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🧮 Excel ஆக மாற்று (Exact Layout)</button>`);
+        const btn = el(`<button class="btn tamil">🧮 Excel Convert to (Exact Layout)</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -2874,7 +2906,7 @@ TOOL_IMPL.pdf2excel = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const wb = XLSX.utils.book_new();
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set(10+(i/pdfjsDoc.numPages)*75, `பக்கம் ${i}/${pdfjsDoc.numPages} — அட்டவணை கண்டறிகிறது…`);
+          prog.set(10+(i/pdfjsDoc.numPages)*75, `page ${i}/${pdfjsDoc.numPages} — அட்டவணை கண்டறிகிறது…`);
           const page = await pdfjsDoc.getPage(i);
           const content = await page.getTextContent();
           const items = content.items
@@ -2998,7 +3030,7 @@ TOOL_IMPL.camscan = {
         const introRow = el(`<div class="btn-row tamil" style="margin-top:0;"></div>`);
         const bCam = el(`<button class="btn">📷 Open Camera</button>`);
         bCam.onclick = openCamera;
-        const bGal = el(`<button class="btn secondary">🖼️ கேலரியிலிருந்து சேர்</button>`);
+        const bGal = el(`<button class="btn secondary">🖼️ கேலரியிலிருந்து Add</button>`);
         const galInput = el(`<input type="file" accept="image/*" multiple style="display:none;">`);
         bGal.onclick = ()=> galInput.click();
         galInput.addEventListener('change', async ()=>{
@@ -3013,7 +3045,7 @@ TOOL_IMPL.camscan = {
         introRow.appendChild(bCam); introRow.appendChild(bGal); introRow.appendChild(galInput);
         body.appendChild(introRow);
 
-        const note = el(`<div class="note tamil">உங்கள் கேமரா/படங்கள் browser-க்குள்ளேயே செயலாகும் — எங்கும் அப்லோட் ஆகாது. ஒவ்வொரு புகைப்படமும் விளிம்பு திருத்தத்திற்குப் பிறகு (corners drag செய்து) பட்டியலில் சேரும்; தேவையான Size புகைப்படங்கள் தொடர்ந்து எடுத்து இறுதியில் ஒரே PDF ஆக சேமிக்கலாம்.</div>`);
+        const note = el(`<div class="note tamil">Your கேமரா/படங்கள் browser-க்குள்ளேயே செயலாகும் — எங்கும் அப்லோட் ஆகாது. ஒவ்வொரு புகைப்படமும் விளிம்பு திருத்தத்திற்குப் பிறகு (corners drag edு) பட்டியலில் சேரும்; தேவையான Size புகைப்படங்கள் தொடர்ந்து எடுத்து இறுதியில் ஒரே PDF ஆக சேமிக்கலாம்.</div>`);
         body.appendChild(note);
 
         if(pages.length){
@@ -3029,13 +3061,13 @@ TOOL_IMPL.camscan = {
           });
           body.appendChild(grid);
           const finalRow = el(`<div class="btn-row tamil"></div>`);
-          const bSave = el(`<button class="btn accent">📕 PDF ஆக சேமி (${pages.length} பக்கம்)</button>`);
+          const bSave = el(`<button class="btn accent">📕 PDF ஆக சேமி (${pages.length} page)</button>`);
           bSave.onclick = doSavePdf;
-          const bClear = el(`<button class="btn secondary">🗑️ அனைத்தையும் அழி</button>`);
+          const bClear = el(`<button class="btn secondary">🗑️ அனைத்தையும் Clear</button>`);
           bClear.onclick = ()=>{ pages=[]; paint(); };
           finalRow.appendChild(bSave); finalRow.appendChild(bClear);
           body.appendChild(finalRow);
-          body.appendChild(el(`<div class="note tamil">💡 இந்த ஸ்கேன் PDF-ல் இருந்து தட்டச்சு செய்யக்கூடிய உரையை எடுக்க வேண்டுமா? Save செய்த பிறகு, முகப்புக்கு சென்று "🔎 படத்திலிருந்து எழுத்து (OCR)" கருவியை திற — அந்த PDF-ஐ போட்டால் உரையை படித்துத் தரும் (தமிழ் + 20 மொழிகள்).</div>`));
+          body.appendChild(el(`<div class="note tamil">💡 இந்த ஸ்கேன் PDF-ல் இருந்து தட்டச்சு that can be உரையை எடுக்க வேண்டுமா? Save ed பிறகு, முகப்புக்கு சென்று "🔎 படத்திலிருந்து எழுத்து (OCR)" கருவியை திற — அந்த PDF-ஐ போட்டால் உரையை படித்துத் தரும் (தமிழ் + 20 மொழிகள்).</div>`));
         }
       } else if(view === 'camera'){
         const wrap = el(`<div class="scan-video-wrap"><video id="scanVideo" autoplay playsinline muted></video></div>`);
@@ -3043,7 +3075,7 @@ TOOL_IMPL.camscan = {
         const video = wrap.querySelector('#scanVideo');
         video.srcObject = stream;
         video.play().catch(()=>{});
-        const badge = el(`<div class="tamil" style="text-align:center;margin-top:10px;font-weight:700;font-size:12.5px;color:var(--sub);">📄 சேர்க்கப்பட்ட பக்கங்கள்: ${pages.length}</div>`);
+        const badge = el(`<div class="tamil" style="text-align:center;margin-top:10px;font-weight:700;font-size:12.5px;color:var(--sub);">📄 added பக்கங்கள்: ${pages.length}</div>`);
         body.appendChild(badge);
         const shRow = el(`<div class="shutter-row"></div>`);
         const bStop = el(`<button class="scan-side-btn">✕ Close</button>`);
@@ -3055,7 +3087,7 @@ TOOL_IMPL.camscan = {
         shRow.appendChild(bStop); shRow.appendChild(bShutter); shRow.appendChild(bDone);
         body.appendChild(shRow);
       } else if(view === 'adjust'){
-        const title = el(`<div class="tamil" style="font-weight:700;font-size:13.5px;margin-bottom:10px;">🤖 AI ஆவண விளிம்பு தானாக கண்டறியப்படும் — தேவைப்பட்டால் 4 மூலைகளையும் இழுத்து சரிசெய்யவும்</div>`);
+        const title = el(`<div class="tamil" style="font-weight:700;font-size:13.5px;margin-bottom:10px;">🤖 AI ஆவண விளிம்பு தானாக கண்டறியப்படும் — தேவைப்பட்டால் 4 மூலைகளையும் இழுத்து சரிplease</div>`);
         body.appendChild(title);
         const wrap = el(`<div class="adjust-wrap" id="adjustWrap"></div>`);
         const imgEl = el(`<img id="adjustImg" src="${adjustImg}">`);
@@ -3084,7 +3116,7 @@ TOOL_IMPL.camscan = {
         bReset.onclick = ()=>{ corners = [{fx:0.02,fy:0.02},{fx:0.98,fy:0.02},{fx:0.98,fy:0.98},{fx:0.02,fy:0.98}]; updateOverlay(); };
         const bCancel = el(`<button class="btn secondary">✕ ரத்து</button>`);
         bCancel.onclick = ()=>{ startAdjustNext(); };
-        const bAdd = el(`<button class="btn">✅ பக்கத்தை சேர்</button>`);
+        const bAdd = el(`<button class="btn">✅ பக்கத்தை Add</button>`);
         bAdd.onclick = applyAdjust;
         btnRow.appendChild(bReset); btnRow.appendChild(bCancel); btnRow.appendChild(bAdd);
         body.appendChild(btnRow);
@@ -3093,7 +3125,7 @@ TOOL_IMPL.camscan = {
 
     async function openCamera(){
       if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
-        mountResult(body, '⚠️ இந்த பக்கத்தில் கேமராவை அணுக முடியவில்லை. இந்த HTML ஃபைலை WhatsApp/Telegram-க்குள்ளேயே திறக்காமல், மேலே உள்ள "⋮" மெனுவில் "Open in Chrome" / "Open in browser" தேர்ந்தெடுத்து Chrome-ல் திறக்கவும் (கேமராவிற்கு சரியான browser தேவை).').style.background='#FFF6E5';
+        mountResult(body, '⚠️ இந்த பக்கத்தில் கேமராவை அணுக முடியவில்லை. இந்த HTML file WhatsApp/Telegram-க்குள்ளேயே திறக்காமல், மேலே உள்ள "⋮" மெனுவில் "Open in Chrome" / "Open in browser" தேர்ந்தெடுத்து Chrome-ல் திறக்கவும் (கேமராவிற்கு சரியான browser தேவை).').style.background='#FFF6E5';
         return;
       }
       try{
@@ -3103,8 +3135,8 @@ TOOL_IMPL.camscan = {
         view = 'camera'; paint();
       }catch(err){
         let msg = 'கேமராவை திறக்க முடியவில்லை: '+err.message;
-        if(err.name==='NotAllowedError' || err.name==='PermissionDeniedError') msg = '📵 கேமரா அனுமதி மறுக்கப்பட்டது. Browser Settings → Site settings → Camera-ல் இந்த தளத்திற்கு அனுமதி கொடுத்து, பக்கத்தை மீண்டும் ஏற்றவும் (reload) செய்யவும்.';
-        else if(err.name==='NotFoundError' || err.name==='DevicesNotFoundError') msg = '📵 கேமரா கண்டறியப்படவில்லை. உங்கள் device-ல் கேமரா இருக்கிறதா என சரிபார்க்கவும்.';
+        if(err.name==='NotAllowedError' || err.name==='PermissionDeniedError') msg = '📵 கேமரா அனுமதி மறுக்கப்பட்டது. Browser Settings → Site settings → Camera-ல் இந்த தளத்திற்கு அனுமதி கொடுத்து, பக்கத்தை மீண்டும் ஏற்றவும் (reload) please.';
+        else if(err.name==='NotFoundError' || err.name==='DevicesNotFoundError') msg = '📵 கேமரா கண்டறியப்படவில்லை. Your device-ல் கேமரா இருக்கிறதா என சரிபார்க்கவும்.';
         else if(err.name==='NotReadableError' || err.name==='TrackStartError') msg = '📵 கேமராவை வேறு ஆப் ஏற்கனவே பயன்படுத்துகிறது. மற்ற ஆப்களை மூடிவிட்டு மீண்டும் முயற்சிக்கவும்.';
         mountResult(body, msg).style.background='#FDEDEC';
       }
@@ -3195,12 +3227,12 @@ TOOL_IMPL.camscan = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     async function doSavePdf(){
-      if(!pages.length){ mountResult(body,'குறைந்தது ஒரு பக்கத்தையாவது சேர்க்கவும்.').style.background='#FDEDEC'; return; }
+      if(!pages.length){ mountResult(body,'குறைந்தது ஒரு பக்கத்தையாவது add.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         const doc = await PDFDocument.create();
         for(let i=0;i<pages.length;i++){
-          prog.set((i/pages.length)*90, `பக்கம் ${i+1}/${pages.length} சேர்க்கிறது…`);
+          prog.set((i/pages.length)*90, `page ${i+1}/${pages.length} Adding…`);
           const p = pages[i];
           const bytes = Uint8Array.from(atob(p.dataUrl.split(',')[1]), c=>c.charCodeAt(0));
           const jpg = await doc.embedJpg(bytes);
@@ -3212,7 +3244,7 @@ TOOL_IMPL.camscan = {
         const bytes = await doc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'scanned-document.pdf');
         prog.remove();
-        mountResult(body, `${pages.length} பக்கங்கள் கொண்ட ஸ்கேன் செய்யப்பட்ட PDF downloaded.`);
+        mountResult(body, `${pages.length} பக்கங்கள் கொண்ட ஸ்கேன் completed PDF downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -3228,7 +3260,7 @@ TOOL_IMPL.imgcompress = {
       body.innerHTML = '';
       mountUploader(body, {
         accept:'image/*', multiple:true,
-        label:'JPG/PNG படங்களை drag & drop or tap', sublabel:'அளவை (file size) குறைத்து பதிவிறக்கலாம்',
+        label:'JPG/PNG the images drag & drop or tap', sublabel:'அளவை (file size) குறைத்து பதிவிறக்கலாம்',
         onAdd: (fl)=>{ files = files.concat(fl); paint(); }
       });
       if(files.length){
@@ -3322,7 +3354,7 @@ TOOL_IMPL.pdfgray = {
         });
         body.appendChild(filterRow);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">⚫ மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">⚫ Convert</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -3335,7 +3367,7 @@ TOOL_IMPL.pdfgray = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const outDoc = await PDFDocument.create();
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set(10+(i/pdfjsDoc.numPages)*80, `பக்கம் ${i}/${pdfjsDoc.numPages}…`);
+          prog.set(10+(i/pdfjsDoc.numPages)*80, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const viewport = page.getViewport({scale:2});
           const canvas = document.createElement('canvas');
@@ -3373,9 +3405,9 @@ TOOL_IMPL.vidvoice = {
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil" style="background:#EAF2FF; border-color:#BBD6FF;">பல வீடியோ Clips-ஐ (ஒவ்வொன்றும் தன் சொந்த குரலுடன்) ஒன்றாக இணைக்க வேண்டுமா? முகப்பில் உள்ள <b>"வீடியோ இணை (Merge)"</b> தனி கருவியை பயன்படுத்தவும் — அது இதற்கே சிறப்பாக வடிவமைக்கப்பட்டது.</div>`));
+      body.appendChild(el(`<div class="note tamil" style="background:#EAF2FF; border-color:#BBD6FF;">பல வீடியோ Clips-ஐ (ஒவ்வொன்றும் தன் சொந்த குரலுடன்) ஒன்றாக இணைக்க வேண்டுமா? முகப்பில் உள்ள <b>"வீடியோ Merge"</b> தனி கருவியை பயன்படுத்தவும் — அது இதற்கே சிறப்பாக வடிவமைக்கப்பட்டது.</div>`));
       const modeRow = el(`<div class="filter-row tamil"></div>`);
-      [['replace','🔁 குரல் மாற்று/கலக்க'],['extract','🎧 ஆடியோ எடு'],['record','🎥 வீடியோ+மைக் பதிவு']].forEach(([m,label])=>{
+      [['replace','🔁 குரல் Convert/கலக்க'],['extract','🎧 ஆடியோ எடு'],['record','🎥 வீடியோ+மைக் பதிவு']].forEach(([m,label])=>{
         const chip = el(`<button class="filter-chip ${mode===m?'active':''}" data-mode="${m}">${label}</button>`);
         modeRow.appendChild(chip);
       });
@@ -3387,8 +3419,8 @@ TOOL_IMPL.vidvoice = {
       body.appendChild(modeRow);
 
       if(mode === 'replace'){
-        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">ஒரு வீடியோவையும் ஒரு ஆடியோ/குரல் ஃபைலையும் தேர்ந்தெடு — வீடியோவின் ஆடியோவை புதிய குரலால் மாற்றலாம் அல்லது இரண்டையும் கலக்கலாம்.</div>`));
-        mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'MP4 / MOV / WEBM',
+        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">ஒரு the videoயும் ஒரு ஆடியோ/குரல் fileயும் தேர்ந்தெடு — வீடியோவின் ஆடியோவை புதிய குரலால் மாற்றலாம் அல்லது இரண்டையும் கலக்கலாம்.</div>`));
+        mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'MP4 / MOV / WEBM',
           onAdd:(fl)=>{ videoFile = fl[0]; paint(); } });
         if(videoFile) mountFileList(body, [videoFile], ()=>{ videoFile=null; paint(); });
         mountUploader(body, { accept:'audio/*', label:'குரல்/ஆடியோவை drag & drop or tap', sublabel:'MP3 / WAV / M4A / AAC',
@@ -3402,14 +3434,14 @@ TOOL_IMPL.vidvoice = {
           `);
           body.appendChild(opts);
           const row = el(`<div class="btn-row"></div>`);
-          const btn = el(`<button class="btn tamil">🔁 குரல் இணை / மாற்று</button>`);
+          const btn = el(`<button class="btn tamil">🔁 குரல் இணை / Convert</button>`);
           btn.onclick = doReplace;
           row.appendChild(btn);
           body.appendChild(row);
         }
       } else if(mode === 'extract'){
         body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">வீடியோவிலிருந்து ஆடியோவை (குரல்/பாடல்) தனியாக MP3 ஆக பிரித்தெடுக்கும்.</div>`));
-        mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+        mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
           onAdd:(fl)=>{ videoFile = fl[0]; paint(); } });
         if(videoFile){
           mountFileList(body, [videoFile], ()=>{ videoFile=null; paint(); });
@@ -3420,10 +3452,10 @@ TOOL_IMPL.vidvoice = {
           body.appendChild(row);
         }
       } else if(mode === 'record'){
-        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">கேமரா + மைக்கை பயன்படுத்தி வீடியோவும் குரலும் ஒன்றாக பதிவு செய்யலாம். பதிவு browser-க்குள்ளேயே நடக்கும்.</div>`));
+        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">கேமரா + மைக்கை பயன்படுத்தி வீடியோவும் குரலும் ஒன்றாக பதிவு can be done. பதிவு browser-க்குள்ளேயே நடக்கும்.</div>`));
         const vwrap = el(`<div class="scan-video-wrap"><video id="vvLive" autoplay playsinline muted></video></div>`);
         body.appendChild(vwrap);
-        const badge = el(`<div class="tamil" style="text-align:center;margin-top:10px;font-weight:800;font-size:13px;color:${recording?'var(--warn)':'var(--sub)'};">${recording? '🔴 பதிவாகிறது… '+fmtTime(recSeconds) : 'கேமராவைத் திற பதிவு செய்ய'}</div>`);
+        const badge = el(`<div class="tamil" style="text-align:center;margin-top:10px;font-weight:800;font-size:13px;color:${recording?'var(--warn)':'var(--sub)'};">${recording? '🔴 பதிவாகிறது… '+fmtTime(recSeconds) : 'கேமராவைத் திற பதிவு do'}</div>`);
         body.appendChild(badge);
         const row = el(`<div class="btn-row tamil" style="justify-content:center;"></div>`);
         if(!recStream){
@@ -3447,7 +3479,7 @@ TOOL_IMPL.vidvoice = {
           v.srcObject = recStream; v.play().catch(()=>{});
         }
         if(window.__vvLastRecording){
-          const rb = el(`<div class="result-box tamil"><div class="ri">✅</div><div class="rtext">பதிவு தயார் — கீழே பதிவிறக்கம் செய்யலாம்.</div></div>`);
+          const rb = el(`<div class="result-box tamil"><div class="ri">✅</div><div class="rtext">பதிவு தயார் — கீழே பதிவிறக்கம் can be done.</div></div>`);
           body.appendChild(rb);
           const dRow = el(`<div class="btn-row"></div>`);
           const dBtn = el(`<button class="btn tamil">⬇️ Download (.webm)</button>`);
@@ -3557,7 +3589,7 @@ TOOL_IMPL.vidsplit = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'ஒரு வீடியோவை drag & drop or tap', sublabel:'MP4 / MOV / WEBM — கட் ஆனாலும் தரம் குறையாது',
+      mountUploader(body, { accept:'video/*', label:'ஒரு the video drag & drop or tap', sublabel:'MP4 / MOV / WEBM — கட் ஆனாலும் தரம் குறையாது',
         onAdd: async (fl)=>{
           file = fl[0];
           try{ duration = await getVideoDuration(file); }catch(e){ duration = 0; }
@@ -3588,7 +3620,7 @@ TOOL_IMPL.vidsplit = {
           const opts = el(`
             <div class="opts one tamil">
               <div class="field">
-                <label>ஒவ்வொரு வரியிலும் ஒரு பகுதி — mm:ss-mm:ss (எ.கா. 00:00-00:30)</label>
+                <label>ஒவ்வொரு வரியிலும் ஒரு பகுதி — mm:ss-mm:ss (e.g.. 00:00-00:30)</label>
                 <textarea id="vsRanges" rows="4" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;" placeholder="00:00-00:30&#10;00:30-01:15">00:00-00:30</textarea>
               </div>
             </div>
@@ -3712,8 +3744,8 @@ TOOL_IMPL.wmremove = {
           }
         }
       } else {
-        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">வாட்டர்மார்க்/லோகோ இருக்கும் இடத்தை விரலால் (brush) தடவி குறி — சுற்றியுள்ள படத்தைக் கொண்டு அந்த பகுதி புத்திசாலித்தனமாக நிரப்பப்படும் (AI inpainting).</div>`));
-        mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'JPG / PNG',
+        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">வாட்டர்மார்க்/லோகோ இருக்கும் இடத்தை விரலால் (brush) தடவி குறி — சுற்றியுள்ள the imageக் கொண்டு அந்த பகுதி புத்திசாலித்தனமாக நிரப்பப்படும் (AI inpainting).</div>`));
+        mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'JPG / PNG',
           onAdd: async (fl)=>{
             file = fl[0];
             const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -3772,7 +3804,7 @@ TOOL_IMPL.wmremove = {
         const pages = doc.getPages();
         const targets = allPages ? pages : [pages[0]];
         targets.forEach((page,idx)=>{
-          prog.set(10 + (idx/targets.length)*75, `பக்கம் ${idx+1}/${targets.length}…`);
+          prog.set(10 + (idx/targets.length)*75, `page ${idx+1}/${targets.length}…`);
           const {width,height} = page.getSize();
           const x = rect.fx0*width, w = (rect.fx1-rect.fx0)*width;
           const yTop = rect.fy0*height, yBot = rect.fy1*height;
@@ -3822,7 +3854,7 @@ TOOL_IMPL.imgenhance = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'JPG / PNG — பல படங்களையும் ஒரே நேரத்தில் தேர்வு செய்யலாம்',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'JPG / PNG — பல the imagesயும் ஒரே நேரத்தில் தேர்வு can be done',
         onAdd: (fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
@@ -3992,8 +4024,8 @@ TOOL_IMPL.bgremove = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">பொருளை (subject) சுற்றி பெட்டி வரை — அதற்கு வெளியே உள்ள பின்னணி தானாக வெளிப்படையாக்கப்படும் (transparent PNG).</div>`));
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'JPG / PNG',
+      body.appendChild(el(`<div class="note tamil">பொருளை (subject) சுற்றி பெட்டி வரை — அதற்கு வெளியே உள்ள Background தானாக வெளிப்படையாக்கப்படும் (transparent PNG).</div>`));
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'JPG / PNG',
         onAdd: async (fl)=>{
           file = fl[0];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -4010,7 +4042,7 @@ TOOL_IMPL.bgremove = {
         mountFileList(body, [file], ()=>{ file=null; imgCanvas=null; previewUrl=null; paint(); });
         selector = mountRectSelector(body, previewUrl, {fx0:0.08, fy0:0.08, fx1:0.92, fy1:0.92});
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🪄 பின்னணி நீக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🪄 Background நீக்கு</button>`);
         btn.onclick = doRemove;
         row.appendChild(btn);
         body.appendChild(row);
@@ -4084,7 +4116,7 @@ TOOL_IMPL.qrgen = {
       const opts = el(`<div class="opts tamil">${fieldsHtml}<div class="field"><label>Size</label><select id="qSize"><option value="256">256 px</option><option value="400" selected>400 px</option><option value="600">600 px</option></select></div></div>`);
       body.appendChild(opts);
       const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn tamil">▦ QR உருவாக்கு</button>`);
+      const btn = el(`<button class="btn tamil">▦ QR Create</button>`);
       btn.onclick = doGenerate;
       row.appendChild(btn);
       body.appendChild(row);
@@ -4147,7 +4179,7 @@ TOOL_IMPL.imgconvert = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'JPG / PNG / WEBP',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'JPG / PNG / WEBP',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
@@ -4169,7 +4201,7 @@ TOOL_IMPL.imgconvert = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔁 மாற்று Download</button>`);
+        const btn = el(`<button class="btn tamil">🔁 Convert Download</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -4217,7 +4249,7 @@ TOOL_IMPL.imgcrop = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'JPG / PNG',
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'JPG / PNG',
         onAdd: async (fl)=>{
           file = fl[0];
           previewUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -4227,13 +4259,13 @@ TOOL_IMPL.imgcrop = {
         }});
       if(file && previewUrl){
         mountFileList(body, [file], ()=>{ file=null; previewUrl=null; paint(); });
-        body.appendChild(el(`<div class="note tamil">Crop செய்ய பெட்டியை இழு — வேண்டாம் எனில் முழு படத்தையும் அப்படியே Resize மட்டும் செய்யலாம்.</div>`));
+        body.appendChild(el(`<div class="note tamil">Crop do பெட்டியை இழு — வேண்டாம் எனில் முழு the imageயும் அப்படியே Resize மட்டும் can be done.</div>`));
         selector = mountRectSelector(body, previewUrl, {fx0:0.05, fy0:0.05, fx1:0.95, fy1:0.95});
         const opts = el(`
           <div class="opts tamil">
             <div class="field">
-              <label>வெளியீட்டு அகலம் (px) — காலியாக விட்டால் Crop Size அப்படியே</label>
-              <input type="number" id="icW" placeholder="எ.கா. 1080" min="10">
+              <label>வெளியீட்டு Width (px) — காலியாக விட்டால் Crop Size அப்படியே</label>
+              <input type="number" id="icW" placeholder="e.g.. 1080" min="10">
             </div>
           </div>
         `);
@@ -4264,7 +4296,7 @@ TOOL_IMPL.imgcrop = {
         const blob = await new Promise(res=> canvas.toBlob(res,'image/png'));
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-cropped.png');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Crop செய்யப்பட்ட படம் downloaded.');
+        mountResult(body, 'Crop completed படம் downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -4295,7 +4327,7 @@ TOOL_IMPL.pdfcrop = {
         mountFileList(body, [file], ()=>{ file=null; previewUrl=null; paint(); });
         selector = mountRectSelector(body, previewUrl, {fx0:0.06, fy0:0.06, fx1:0.94, fy1:0.94});
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📐 Crop செய்</button>`);
+        const btn = el(`<button class="btn tamil">📐 Crop Do</button>`);
         btn.onclick = doCrop;
         row.appendChild(btn);
         body.appendChild(row);
@@ -4309,7 +4341,7 @@ TOOL_IMPL.pdfcrop = {
         const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const pages = doc.getPages();
         pages.forEach((page,idx)=>{
-          prog.set(15 + (idx/pages.length)*70, `பக்கம் ${idx+1}/${pages.length}…`);
+          prog.set(15 + (idx/pages.length)*70, `page ${idx+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           const x = rect.fx0*width, w = (rect.fx1-rect.fx0)*width;
           const yTop = rect.fy0*height, yBot = rect.fy1*height;
@@ -4320,7 +4352,7 @@ TOOL_IMPL.pdfcrop = {
         const bytes = await doc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-cropped.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Crop செய்யப்பட்ட PDF downloaded.');
+        mountResult(body, 'Crop completed PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -4388,21 +4420,21 @@ TOOL_IMPL.txt2pdf = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">உரையை நேரடியாக தட்டச்சு செய்யலாம் அல்லது .txt ஃபைலை பதிவேற்றலாம்.</div>`));
-      mountUploader(body, { accept:'.txt,text/plain', label:'.txt ஃபைலை drag & drop or tap (விருப்பம்)', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">உரையை நேரடியாக தட்டச்சு can be done அல்லது .txt file பதிவேற்றலாம்.</div>`));
+      mountUploader(body, { accept:'.txt,text/plain', label:'.txt file drag & drop or tap (optional)', sublabel:'',
         onAdd: async (fl)=>{ text = await fl[0].text(); paint(); } });
-      const ta = el(`<textarea id="t2pText" rows="10" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; margin-top:12px;" placeholder="இங்கே உரையை தட்டச்சு செய்யவும்…">${text}</textarea>`);
+      const ta = el(`<textarea id="t2pText" rows="10" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; margin-top:12px;" placeholder="இங்கே உரையை தட்டச்சு please…">${text}</textarea>`);
       body.appendChild(ta);
       ta.addEventListener('input', (e)=> text = e.target.value);
       const opts = el(`
         <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>தலைப்பு (Title, விருப்பம்)</label><input type="text" id="t2pTitle" placeholder="எ.கா. என் குறிப்பு"></div>
+          <div class="field" style="grid-column:1/-1;"><label>தலைப்பு (Title, optional)</label><input type="text" id="t2pTitle" placeholder="e.g.. என் குறிப்பு"></div>
           <div class="field"><label>Font Size</label><input type="number" id="t2pSize" value="13" min="8" max="28"></div>
         </div>
       `);
       body.appendChild(opts);
       const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn tamil">📝 PDF ஆக்கு</button>`);
+      const btn = el(`<button class="btn tamil">📝 PDF Make</button>`);
       btn.onclick = doMake;
       row.appendChild(btn);
       body.appendChild(row);
@@ -4468,7 +4500,7 @@ TOOL_IMPL.imgcollage = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap (2 அல்லது அதற்கு மேல்)', sublabel:'',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap (2 அல்லது அதற்கு மேல்)', sublabel:'',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); }, (idx,dir)=>{
@@ -4489,25 +4521,25 @@ TOOL_IMPL.imgcollage = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🖇️ Collage உருவாக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🖇️ Collage Create</button>`);
         btn.onclick = doMake;
         row.appendChild(btn);
         body.appendChild(row);
       }
     }
     async function doMake(){
-      if(files.length<2){ mountResult(body,'குறைந்தது 2 படங்களையாவது சேர்க்கவும்.').style.background='#FDEDEC'; return; }
+      if(files.length<2){ mountResult(body,'குறைந்தது 2 the imagesயாவது add.').style.background='#FDEDEC'; return; }
       const cols = Math.max(1, Math.min(6, Number(body.querySelector('#clCols').value)||2));
       const gap = Math.max(0, Number(body.querySelector('#clGap').value)||10);
       const prog = mountProgress(body);
       try{
-        prog.set(10,'படங்களை Reading…');
+        prog.set(10,'the images Reading…');
         const imgs = [];
         for(let i=0;i<files.length;i++){
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(files[i]); });
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
           imgs.push(img);
-          prog.set(10 + (i/files.length)*40, `படிக்கிறது ${i+1}/${files.length}…`);
+          prog.set(10 + (i/files.length)*40, `Reading ${i+1}/${files.length}…`);
         }
         const rows = Math.ceil(imgs.length/cols);
         const cellW = 600, cellH = 600; // fixed cell box; images fit inside via 'contain'
@@ -4542,8 +4574,8 @@ TOOL_IMPL.exifremove = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">புகைப்படங்களில் மறைந்திருக்கும் GPS இருப்பிடம், கேமரா மாடல், தேதி/நேரம் போன்ற தனிப்பட்ட தகவலை (EXIF) நீக்கிவிட்டு சுத்தமான படத்தை தரும் — social media-ல் பகிர்வதற்கு முன் பாதுகாப்பானது.</div>`));
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'JPG / PNG',
+      body.appendChild(el(`<div class="note tamil">புகைப்படங்களில் மறைந்திருக்கும் GPS இருப்பிடம், கேமரா மாடல், தேதி/நேரம் போன்ற தனிப்பட்ட தகவலை (EXIF) நீக்கிவிட்டு சுத்தமான the image தரும் — social media-ல் பகிர்வதற்கு முன் பாதுகாப்பானது.</div>`));
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'JPG / PNG',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
@@ -4594,7 +4626,7 @@ TOOL_IMPL.colorpicker = {
     function paint(){
       body.innerHTML = '';
       body.appendChild(el(`<div class="note tamil">படத்தில் எங்கு வேண்டுமானாலும் தட்டு — அந்த இடத்தின் Color (HEX/RGB) கிடைக்கும். கீழே படத்தின் முக்கிய நிறங்களின் பேலட்டும் தானாக காட்டப்படும்.</div>`));
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -4679,8 +4711,8 @@ TOOL_IMPL.pdfnup = {
             <div class="field">
               <label>ஒரு தாளில் எத்தனை பக்கங்கள்</label>
               <select id="nupN">
-                <option value="2">2 பக்கங்கள் / தாள்</option>
-                <option value="4" selected>4 பக்கங்கள் / தாள்</option>
+                <option value="2">2 pages / sheet</option>
+                <option value="4" selected>4 pages / sheet</option>
               </select>
             </div>
           </div>
@@ -4738,12 +4770,12 @@ TOOL_IMPL.pdfsplitsize = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">பெரிய PDF-ஐ, நீங்கள் கொடுக்கும் கோப்பு Size வரம்புக்குள் (எ.கா. WhatsApp/Email attachment வரம்பு) பல சிறிய PDF-களாக பிரிக்கும்.</div>`));
+      body.appendChild(el(`<div class="note tamil">பெரிய PDF-ஐ, நீங்கள் கொடுக்கும் கோப்பு Size வரம்புக்குள் (e.g.. WhatsApp/Email attachment வரம்பு) பல சிறிய PDF-களாக பிரிக்கும்.</div>`));
       mountUploader(body, { accept:'application/pdf', label:'PDF-ஐ drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
-        body.appendChild(el(`<div class="note tamil">தற்போதைய Size: <b>${fmtBytes(file.size)}</b></div>`));
+        body.appendChild(el(`<div class="note tamil">Current Size: <b>${fmtBytes(file.size)}</b></div>`));
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -4784,7 +4816,7 @@ TOOL_IMPL.pdfsplitsize = {
           }
         }
         if(cur.length) parts.push(cur);
-        prog.set(30,'ஃபைல்களை உருவாக்குகிறது…');
+        prog.set(30,'ஃபைல்களை Generating…');
         const results = [];
         for(let i=0;i<parts.length;i++){
           prog.set(30 + (i/parts.length)*60, `பகுதி ${i+1}/${parts.length} Preparing…`);
@@ -4827,7 +4859,7 @@ TOOL_IMPL.videothumb = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -4876,18 +4908,18 @@ TOOL_IMPL.videocompress = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file = fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
-        body.appendChild(el(`<div class="note tamil">தற்போதைய Size: <b>${fmtBytes(file.size)}</b></div>`));
+        body.appendChild(el(`<div class="note tamil">Current Size: <b>${fmtBytes(file.size)}</b></div>`));
         if(AUTH_CONFIGURED){
           const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=2));
           const fastNote = el(`<div class="tamil" style="background:${fastAvailable?'#E8F8EF':'#FFF3E0'}; border:1px solid ${fastAvailable?'#B7E4C7':'#FFD699'}; border-radius:12px; padding:12px 14px; margin-top:12px; font-size:12.5px;"></div>`);
           if(fastAvailable){
             fastNote.innerHTML = `⚡ <b>Fast Server Mode கிடைக்கிறது</b> — Real ffmpeg server-ல் இயங்கும், browser-ஐ விட பல மடங்கு வேகமாக இருக்கும் (2 credits / ${isPro()?'இலவசம் Pro-க்கு':'ஒரு compress'}).<br><label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:700;"><input type="checkbox" id="vcFast" checked> Fast Server Mode பயன்படுத்து</label>`;
           } else if(!authState.session){
-            fastNote.innerHTML = `🐢 இப்போது browser-லேயே (மெதுவாக) Compress ஆகும். <a href="#" id="vcLoginLink" style="color:var(--brand-dark); font-weight:800;">Login</a> செய்தால் ⚡ Fast Server Mode (real ffmpeg) கிடைக்கும்.`;
+            fastNote.innerHTML = `🐢 இப்போது browser-லேயே (மெதுவாக) Compress ஆகும். <a href="#" id="vcLoginLink" style="color:var(--brand-dark); font-weight:800;">Login</a> because it was ⚡ Fast Server Mode (real ffmpeg) கிடைக்கும்.`;
           } else {
             fastNote.innerHTML = `🐢 Credits தீர்ந்துவிட்டது — browser-லேயே (மெதுவாக) Compress ஆகும். <a href="#" id="vcBuyLink" style="color:var(--brand-dark); font-weight:800;">மேலும் Credits வாங்க</a>.`;
           }
@@ -4908,7 +4940,7 @@ TOOL_IMPL.videocompress = {
               </select>
             </div>
             <div class="field">
-              <label>வேகம் (Browser Mode-க்கு மட்டும்)</label>
+              <label>Speed (Browser Mode-க்கு மட்டும்)</label>
               <select id="vcSpeed">
                 <option value="ultrafast">⚡ மிக வேகமாக (சிறிது பெரிய Size)</option>
                 <option value="veryfast" selected>வேகமாக (சமநிலை)</option>
@@ -4916,14 +4948,14 @@ TOOL_IMPL.videocompress = {
               </select>
             </div>
             <div class="field">
-              <label>அகலம் (px, விருப்பம்)</label>
-              <input type="number" id="vcW" placeholder="எ.கா. 1280 — காலியாக விடலாம்">
+              <label>அகலம் (px, optional)</label>
+              <input type="number" id="vcW" placeholder="e.g.. 1280 — காலியாக விடலாம்">
             </div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🗜️ Compress செய்</button>`);
+        const btn = el(`<button class="btn tamil">🗜️ Compress Do</button>`);
         btn.onclick = doCompress;
         row.appendChild(btn);
         body.appendChild(row);
@@ -4961,7 +4993,7 @@ TOOL_IMPL.videocompress = {
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-compressed.mp4');
         await refreshProfile();
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, `⚡ Fast Server Mode மூலம் Compress ஆனது — புதிய Size: ${fmtBytes(blob.size)} (முன்பு ${fmtBytes(file.size)})`);
+        mountResult(body, `⚡ Fast Server Mode மூலம் Compress ஆனது — புதிய Size: ${fmtBytes(blob.size)} (previously ${fmtBytes(file.size)})`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
     }
     async function doCompress(){
@@ -4975,21 +5007,21 @@ TOOL_IMPL.videocompress = {
         prog.set(5,'Loading video engine… (first time takes a bit longer)');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         ffmpegRef = ffmpeg;
-        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Compress செய்கிறது… '+Math.round(p*100)+'%'); };
+        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Compress ing… '+Math.round(p*100)+'%'); };
         ffmpeg.on('progress', progHandler);
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
         const args = ['-i','in.'+ext,'-c:v','libx264','-crf',crf,'-preset',speed,'-c:a','aac','-b:a','128k'];
         if(w>0) args.push('-vf', `scale=${w}:-2`);
         args.push('out.mp4');
-        prog.set(15,'Compress செய்கிறது…');
+        prog.set(15,'Compress ing…');
         await ffmpeg.exec(args);
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
         const blob = new Blob([data],{type:'video/mp4'});
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-compressed.mp4');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Compress ஆனது — புதிய Size: ${fmtBytes(blob.size)} (முன்பு ${fmtBytes(file.size)})`);
+        mountResult(body, `Compress ஆனது — புதிய Size: ${fmtBytes(blob.size)} (previously ${fmtBytes(file.size)})`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       finally{ if(ffmpegRef && progHandler){ try{ ffmpegRef.off('progress', progHandler); }catch(e){} } }
     }
@@ -5005,7 +5037,7 @@ TOOL_IMPL.videotogif = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -5014,13 +5046,13 @@ TOOL_IMPL.videotogif = {
           <div class="opts tamil">
             <div class="field"><label>தொடங்கும் நேரம் (mm:ss)</label><input type="text" id="vgStart" value="00:00"></div>
             <div class="field"><label>எத்தனை வினாடிகள்</label><input type="number" id="vgDur" value="3" min="1" max="15"></div>
-            <div class="field"><label>அகலம் (px)</label><input type="number" id="vgW" value="480" min="120" max="960"></div>
+            <div class="field"><label>Width (px)</label><input type="number" id="vgW" value="480" min="120" max="960"></div>
             <div class="field"><label>FPS</label><input type="number" id="vgFps" value="10" min="5" max="20"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🎞️ GIF ஆக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🎞️ GIF Make</button>`);
         btn.onclick = doGif;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5037,7 +5069,7 @@ TOOL_IMPL.videotogif = {
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
-        prog.set(20,'GIF உருவாக்குகிறது…');
+        prog.set(20,'GIF Generating…');
         const vf = `fps=${fps},scale=${w}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`;
         await ffmpeg.exec(['-ss', String(start), '-t', String(dur), '-i','in.'+ext, '-vf', vf, '-loop','0','out.gif']);
         prog.set(90,'Preparing…');
@@ -5058,7 +5090,7 @@ TOOL_IMPL.qrscan = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', label:'QR கோட் உள்ள படத்தை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', label:'QR கோட் உள்ள the image drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; doScan(); paint(); } });
       if(file) mountFileList(body, [file], ()=>{ file=null; paint(); });
     }
@@ -5091,7 +5123,7 @@ TOOL_IMPL.qrscan = {
           }
           body.appendChild(row);
         } else {
-          mountResult(body, 'இந்த படத்தில் QR கோட் கண்டறிய முடியவில்லை. தெளிவான, நேரடியான படத்தை முயற்சிக்கவும்.').style.background='#FDEDEC';
+          mountResult(body, 'இந்த படத்தில் QR கோட் கண்டறிய முடியவில்லை. தெளிவான, நேரடியான the image முயற்சிக்கவும்.').style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
@@ -5106,7 +5138,7 @@ TOOL_IMPL.imgwatermark = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
@@ -5116,13 +5148,13 @@ TOOL_IMPL.imgwatermark = {
             <div class="field"><label>Position</label>
               <select id="iwPos"><option value="br">Bottom-right</option><option value="bl">Bottom-left</option><option value="tr">Top-right</option><option value="tl">Top-left</option><option value="center">Center</option><option value="tile">முழுக்க (Tile)</option></select>
             </div>
-            <div class="field"><label>வெளிப்படைத்தன்மை %</label><input type="number" id="iwOpac" value="55" min="10" max="100"></div>
+            <div class="field"><label>Opacity %</label><input type="number" id="iwOpac" value="55" min="10" max="100"></div>
             <div class="field"><label>Font Size</label><input type="number" id="iwSize" value="28" min="10" max="120"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">💧 Watermark சேர்</button>`);
+        const btn = el(`<button class="btn tamil">💧 Watermark Add</button>`);
         btn.onclick = doWm;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5138,7 +5170,7 @@ TOOL_IMPL.imgwatermark = {
       try{
         const results = [];
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} — சேர்க்கிறது…`);
+          prog.set((i/files.length)*90, `${files[i].name} — Adding…`);
           const f = files[i];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
@@ -5180,7 +5212,7 @@ TOOL_IMPL.imgwatermark = {
           downloadBlob(await zip.generateAsync({type:'blob'}), 'watermarked-images.zip');
         }
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, `${results.length} படங்களில் Watermark சேர்க்கப்பட்டது.`);
+        mountResult(body, `${results.length} படங்களில் Watermark added.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -5196,8 +5228,8 @@ TOOL_IMPL.imgpassport = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">முகத்தை பெட்டிக்குள் வர வைத்து Crop செய் — நிலையான Passport/ID அளவில், நீங்கள் தேர்ந்தெடுக்கும் பின்னணி நிறத்துடன் தயார் செய்யப்படும்.</div>`));
-      mountUploader(body, { accept:'image/*', label:'முகப்படத்தை drag & drop or tap', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">முகத்தை பெட்டிக்குள் வர வைத்து Crop Do — நிலையான Passport/ID அளவில், நீங்கள் தேர்ந்தெடுக்கும் Background நிறத்துடன் தயார் will be done.</div>`));
+      mountUploader(body, { accept:'image/*', label:'முகப்the image drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0];
           previewUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -5213,7 +5245,7 @@ TOOL_IMPL.imgpassport = {
             <div class="field"><label>Size</label>
               <select id="ipSize"><option value="35x45">35×45mm (பொதுவான Passport)</option><option value="2x2in">2×2 inch (US Passport)</option></select>
             </div>
-            <div class="field"><label>பின்னணி Color</label>
+            <div class="field"><label>Background Color</label>
               <select id="ipBg"><option value="white">White</option><option value="lightblue">லைட் ப்ளூ</option><option value="red">Red</option><option value="none">மாற்றாதே (Crop மட்டும்)</option></select>
             </div>
             <div class="field-inline" style="align-self:end;"><input type="checkbox" id="ipSheet" checked><label for="ipSheet">4×6 அச்சு தாளில் பல படங்களாக அமை (Print Sheet)</label></div>
@@ -5221,7 +5253,7 @@ TOOL_IMPL.imgpassport = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🪪 தயார் செய்</button>`);
+        const btn = el(`<button class="btn tamil">🪪 தயார் Do</button>`);
         btn.onclick = doMake;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5234,7 +5266,7 @@ TOOL_IMPL.imgpassport = {
       const makeSheet = body.querySelector('#ipSheet').checked;
       const prog = mountProgress(body);
       try{
-        prog.set(10,'Crop செய்கிறது…');
+        prog.set(10,'Crop ing…');
         const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=previewUrl; });
         const sx = Math.round(rect.fx0*natW), sy = Math.round(rect.fy0*natH);
         const sw = Math.max(1,Math.round((rect.fx1-rect.fx0)*natW)), sh = Math.max(1,Math.round((rect.fy1-rect.fy0)*natH));
@@ -5246,7 +5278,7 @@ TOOL_IMPL.imgpassport = {
         cctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
 
         if(bg !== 'none'){
-          prog.set(30,'பின்னணியை Converting… (runs in the background)');
+          prog.set(30,'Backgroundயை Converting… (runs in the background)');
           const pad = Math.round(Math.min(outW,outH)*0.06);
           const cropImageData = cctx.getImageData(0,0,outW,outH);
           const maskResult = await runCvOp('grabcut', cropImageData, { x:pad, y:pad, w:outW-pad*2, h:outH-pad*2 });
@@ -5279,7 +5311,7 @@ TOOL_IMPL.imgpassport = {
           downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-passport.jpg');
         }
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Passport/ID புகைப்படம் தயார் செய்யப்பட்டு downloaded.');
+        mountResult(body, 'Passport/ID புகைப்படம் தயார் done,  downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -5301,12 +5333,12 @@ TOOL_IMPL.imgsketch = {
       });
       styleRow.addEventListener('click',(e)=>{ const b=e.target.closest('[data-m]'); if(!b) return; style=b.getAttribute('data-m'); paint(); });
       body.appendChild(styleRow);
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🖊️ மாற்று Download</button>`);
+        const btn = el(`<button class="btn tamil">🖊️ Convert Download</button>`);
         btn.onclick = doSketch;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5359,7 +5391,7 @@ TOOL_IMPL.readaloud = {
         return;
       }
       body.appendChild(el(`<div class="note tamil">.txt/.pdf upload அல்லது நேரடியாக உரையை ஒட்டவும் — பிறகு "படி" பொத்தானை தட்டவும்.</div>`));
-      mountUploader(body, { accept:'.txt,application/pdf,text/plain', label:'.txt அல்லது PDF drag & drop or tap (விருப்பம்)', sublabel:'',
+      mountUploader(body, { accept:'.txt,application/pdf,text/plain', label:'.txt அல்லது PDF drag & drop or tap (optional)', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0];
           isPdf = file.type==='application/pdf' || file.name.toLowerCase().endsWith('.pdf');
@@ -5391,7 +5423,7 @@ TOOL_IMPL.readaloud = {
               ${otherVoices.map((v,i)=>`<option value="o-${i}">${v.name} (${v.lang})</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>வேகம்</label><input type="range" id="raRate" min="0.5" max="1.8" step="0.1" value="1"></div>
+          <div class="field"><label>Speed</label><input type="range" id="raRate" min="0.5" max="1.8" step="0.1" value="1"></div>
         </div>
       `);
       body.appendChild(opts);
@@ -5431,7 +5463,7 @@ TOOL_IMPL.pdfimgwm = {
       mountUploader(body, { accept:'application/pdf', label:'PDF-ஐ drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{ pdfFile = fl[0]; pdfFile._buf = await readFileAsArrayBuffer(pdfFile); paint(); } });
       if(pdfFile) mountFileList(body, [pdfFile], ()=>{ pdfFile=null; paint(); });
-      mountUploader(body, { accept:'image/png,image/jpeg', label:'லோகோ/படத்தை drag & drop or tap', sublabel:'PNG (வெளிப்படையானது சிறந்தது) / JPG',
+      mountUploader(body, { accept:'image/png,image/jpeg', label:'லோகோ/the image drag & drop or tap', sublabel:'PNG (வெளிப்படையானது சிறந்தது) / JPG',
         onAdd: async (fl)=>{
           logoFile = fl[0];
           logoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(logoFile); });
@@ -5444,13 +5476,13 @@ TOOL_IMPL.pdfimgwm = {
             <div class="field"><label>Position</label>
               <select id="pwPos"><option value="br">Bottom-right</option><option value="bl">Bottom-left</option><option value="tr">Top-right</option><option value="tl">Top-left</option><option value="center">Center</option></select>
             </div>
-            <div class="field"><label>அகலம் (% பக்கம்)</label><input type="number" id="pwSize" value="20" min="5" max="80"></div>
-            <div class="field"><label>வெளிப்படைத்தன்மை %</label><input type="number" id="pwOpac" value="70" min="10" max="100"></div>
+            <div class="field"><label>அகலம் (% page)</label><input type="number" id="pwSize" value="20" min="5" max="80"></div>
+            <div class="field"><label>Opacity %</label><input type="number" id="pwOpac" value="70" min="10" max="100"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🖼️ சேர் & Download</button>`);
+        const btn = el(`<button class="btn tamil">🖼️ Add & Download</button>`);
         btn.onclick = doApply;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5470,7 +5502,7 @@ TOOL_IMPL.pdfimgwm = {
         const dims = embeddedImg.scale(1);
         const pages = doc.getPages();
         pages.forEach((page,idx)=>{
-          prog.set(10 + (idx/pages.length)*80, `பக்கம் ${idx+1}/${pages.length}…`);
+          prog.set(10 + (idx/pages.length)*80, `page ${idx+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           const w = width*sizePct, h = w*(dims.height/dims.width);
           let x,y;
@@ -5486,7 +5518,7 @@ TOOL_IMPL.pdfimgwm = {
         const bytes = await doc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), pdfFile.name.replace(/\.pdf$/i,'')+'-logo.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'லோகோ சேர்க்கப்பட்ட PDF downloaded.');
+        mountResult(body, 'லோகோ added PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -5500,7 +5532,7 @@ TOOL_IMPL.imgmeme = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -5512,7 +5544,7 @@ TOOL_IMPL.imgmeme = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">😄 Meme உருவாக்கு</button>`);
+        const btn = el(`<button class="btn tamil">😄 Meme Create</button>`);
         btn.onclick = doMeme;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5570,14 +5602,14 @@ TOOL_IMPL.videospeed = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
-              <label>வேகம்</label>
+              <label>Speed</label>
               <select id="vsSpeed">
                 <option value="0.5">0.5× (Slow‑motion)</option>
                 <option value="0.75">0.75×</option>
@@ -5591,7 +5623,7 @@ TOOL_IMPL.videospeed = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">⏩ வேகம் மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">⏩ Speed Convert</button>`);
         btn.onclick = doSpeed;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5605,7 +5637,7 @@ TOOL_IMPL.videospeed = {
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         ffmpegRef = ffmpeg;
-        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'வேகம் Converting… '+Math.round(p*100)+'%'); };
+        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Speed Converting… '+Math.round(p*100)+'%'); };
         ffmpeg.on('progress', progHandler);
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
@@ -5639,13 +5671,13 @@ TOOL_IMPL.videoreverse = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">குறிப்பு: Reverse செய்ய முழு வீடியோவும் frame-by-frame மறு-encode ஆக வேண்டும் என்பதால், நீண்ட வீடியோக்களுக்கு சிறிது நேரம் ஆகலாம் — குறுகிய Clips (10-20 வினாடிகள்) வேகமாக முடியும்.</div>`));
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">குறிப்பு: Reverse do முழு வீடியோவும் frame-by-frame மறு-encode ஆக வேண்டும் என்பதால், நீண்ட வீடியோக்களுக்கு சிறிது நேரம் ஆகலாம் — குறுகிய Clips (10-20 வினாடிகள்) வேகமாக முடியும்.</div>`));
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">◀️ Reverse செய்</button>`);
+        const btn = el(`<button class="btn tamil">◀️ Reverse Do</button>`);
         btn.onclick = doReverse;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5658,7 +5690,7 @@ TOOL_IMPL.videoreverse = {
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         ffmpegRef = ffmpeg;
-        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Reverse செய்கிறது… '+Math.round(p*100)+'%'); };
+        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Reverse ing… '+Math.round(p*100)+'%'); };
         ffmpeg.on('progress', progHandler);
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
@@ -5668,7 +5700,7 @@ TOOL_IMPL.videoreverse = {
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-reversed.mp4');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Reverse செய்யப்பட்ட வீடியோ downloaded.');
+        mountResult(body, 'Reverse completed வீடியோ downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       finally{ if(ffmpegRef && progHandler){ try{ ffmpegRef.off('progress', progHandler); }catch(e){} } }
     }
@@ -5684,7 +5716,7 @@ TOOL_IMPL.videorotate = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -5704,7 +5736,7 @@ TOOL_IMPL.videorotate = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔄 மாற்று</button>`);
+        const btn = el(`<button class="btn tamil">🔄 Convert</button>`);
         btn.onclick = doRotate;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5745,13 +5777,13 @@ TOOL_IMPL.videomute = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">வீடியோவை மறு-encode செய்யாமல் (stream copy) ஆடியோவை மட்டும் நீக்குவதால் — மிக வேகமாக முடியும்.</div>`));
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">the video மறு-encode without doing (stream copy) ஆடியோவை மட்டும் நீக்குவதால் — மிக வேகமாக முடியும்.</div>`));
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔇 Mute செய்</button>`);
+        const btn = el(`<button class="btn tamil">🔇 Mute Do</button>`);
         btn.onclick = doMute;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5785,7 +5817,7 @@ TOOL_IMPL.videomerge = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">ஒவ்வொரு வீடியோவின் சொந்த குரல்/ஆடியோவும் அப்படியே பாதுகாக்கப்பட்டு, எல்லா Clips-உம் ஒரே வரிசையில் இணைக்கப்படும். சிறந்த முடிவுகளுக்கு ஒரே வடிவம்/தரம் கொண்ட வீடியோக்களை (எ.கா. எல்லாம் MP4) சேர்க்கவும் — வேறு வடிவமாக இருந்தாலும் தானாக மாற்றி இணைக்கும். வரிசையை மாற்ற ↑↓ பொத்தான்களை பயன்படுத்தவும்.</div>`));
+      body.appendChild(el(`<div class="note tamil">ஒவ்வொரு வீடியோவின் சொந்த குரல்/ஆடியோவும் அப்படியே பாதுகாக்கப்பட்டு, எல்லா Clips-உம் ஒரே வரிசையில் இணைக்கப்படும். சிறந்த முடிவுகளுக்கு ஒரே வடிவம்/தரம் கொண்ட வீடியோக்களை (e.g.. எல்லாம் MP4) add — வேறு வடிவமாக இருந்தாலும் தானாக மாற்றி இணைக்கும். வரிசையை மாற்ற ↑↓ பொத்தான்களை பயன்படுத்தவும்.</div>`));
       mountUploader(body, { accept:'video/*', multiple:true, label:'வீடியோக்களை drag & drop or tap (வரிசைப்படி)', sublabel:'',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length>=1){
@@ -5795,7 +5827,7 @@ TOOL_IMPL.videomerge = {
         });
         if(files.length>=2){
           const row = el(`<div class="btn-row"></div>`);
-          const btn = el(`<button class="btn tamil">➕ இணை (Merge)</button>`);
+          const btn = el(`<button class="btn tamil">➕ Merge</button>`);
           btn.onclick = doMerge;
           row.appendChild(btn);
           body.appendChild(row);
@@ -5809,7 +5841,7 @@ TOOL_IMPL.videomerge = {
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         let listTxt = '';
         for(let i=0;i<files.length;i++){
-          prog.set(5 + (i/files.length)*50, `படிக்கிறது ${i+1}/${files.length}…`);
+          prog.set(5 + (i/files.length)*50, `Reading ${i+1}/${files.length}…`);
           const ext = (files[i].name.split('.').pop()||'mp4').toLowerCase();
           const name = `clip${i}.${ext}`;
           await ffmpeg.writeFile(name, await fetchFile(files[i]));
@@ -5822,7 +5854,7 @@ TOOL_IMPL.videomerge = {
           await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4']);
         }catch(e){
           // Fall back to re-encoding if the clips aren't compatible for a direct stream copy
-          prog.set(65,'நேரடி இணைப்பு முடியவில்லை — மறு-encode செய்கிறது…');
+          prog.set(65,'நேரடி இணைப்பு முடியவில்லை — மறு-encode ing…');
           await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
         }
         prog.set(92,'Preparing file…');
@@ -5843,13 +5875,13 @@ TOOL_IMPL.imgbatchresize = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'எத்தனை படங்கள் வேண்டுமானாலும் — ஒரே நேரத்தில் வேகமாக Size மாற்றும்',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'எத்தனை படங்கள் வேண்டுமானாலும் — ஒரே நேரத்தில் வேகமாக Size Convert',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
         const opts = el(`
           <div class="opts tamil">
-            <div class="field"><label>அதிகபட்ச அகலம் (px)</label><input type="number" id="brW" value="1600" min="100"></div>
+            <div class="field"><label>அதிகபட்ச Width (px)</label><input type="number" id="brW" value="1600" min="100"></div>
             <div class="field"><label>அதிகபட்ச உயரம் (px)</label><input type="number" id="brH" value="1600" min="100"></div>
             <div class="field-inline" style="align-self:end;"><input type="checkbox" id="brAspect" checked><label for="brAspect">Aspect ratio-ஐ பாதுகாக்கவும்</label></div>
           </div>
@@ -5911,7 +5943,7 @@ TOOL_IMPL.imgcompresskb = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
@@ -5925,7 +5957,7 @@ TOOL_IMPL.imgcompresskb = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🗜️ Compress செய்</button>`);
+        const btn = el(`<button class="btn tamil">🗜️ Compress Do</button>`);
         btn.onclick = doCompress;
         row.appendChild(btn);
         body.appendChild(row);
@@ -5962,7 +5994,7 @@ TOOL_IMPL.imgcompresskb = {
       try{
         const results = [];
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} — Compress செய்கிறது…`);
+          prog.set((i/files.length)*90, `${files[i].name} — Compress ing…`);
           const f = files[i];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
@@ -5998,14 +6030,14 @@ TOOL_IMPL.pdfheaderfooter = {
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const opts = el(`
           <div class="opts tamil">
-            <div class="field" style="grid-column:1/-1;"><label>Header உரை (மேல்)</label><input type="text" id="hfHeader" placeholder="எ.கா. நிறுவனத்தின் பெயர்"></div>
+            <div class="field" style="grid-column:1/-1;"><label>Header உரை (மேல்)</label><input type="text" id="hfHeader" placeholder="e.g.. நிறுவனத்தின் பெயர்"></div>
             <div class="field" style="grid-column:1/-1;"><label>Footer உரை (கீழ்) — {page} = பக்க எண், {total} = மொத்த பக்கங்கள்</label><input type="text" id="hfFooter" placeholder="Page {page} of {total}"></div>
             <div class="field"><label>Font Size</label><input type="number" id="hfSize" value="10" min="6" max="24"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📄 சேர் & Download</button>`);
+        const btn = el(`<button class="btn tamil">📄 Add & Download</button>`);
         btn.onclick = doApply;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6024,7 +6056,7 @@ TOOL_IMPL.pdfheaderfooter = {
         const font = await embedUnicodeFont(doc);
         const pages = doc.getPages();
         pages.forEach((page,idx)=>{
-          prog.set(10 + (idx/pages.length)*80, `பக்கம் ${idx+1}/${pages.length}…`);
+          prog.set(10 + (idx/pages.length)*80, `page ${idx+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           if(headerT.trim()){
             const txt = headerT.replace('{page}', idx+1).replace('{total}', pages.length);
@@ -6041,7 +6073,7 @@ TOOL_IMPL.pdfheaderfooter = {
         const bytes = await doc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-hf.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Header/Footer சேர்க்கப்பட்ட PDF downloaded.');
+        mountResult(body, 'Header/Footer added PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -6055,20 +6087,20 @@ TOOL_IMPL.imgborder = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'image/*', multiple:true, label:'படங்களை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'image/*', multiple:true, label:'the images drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ files = files.concat(fl); paint(); } });
       if(files.length){
         mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
         const opts = el(`
           <div class="opts tamil">
-            <div class="field"><label>Border அகலம் (px)</label><input type="number" id="ibW" value="24" min="0" max="200"></div>
+            <div class="field"><label>Border Width (px)</label><input type="number" id="ibW" value="24" min="0" max="200"></div>
             <div class="field"><label>Border Color</label><input type="color" id="ibColor" value="#ffffff" style="width:100%; height:38px; padding:2px; border-radius:8px; border:1px solid var(--line);"></div>
             <div class="field"><label>வட்டமான ஓரங்கள் (px)</label><input type="number" id="ibRadius" value="0" min="0" max="200"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🖼️ Border சேர் & Download</button>`);
+        const btn = el(`<button class="btn tamil">🖼️ Border Add & Download</button>`);
         btn.onclick = doBorder;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6082,7 +6114,7 @@ TOOL_IMPL.imgborder = {
       try{
         const results = [];
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} — Border சேர்க்கிறது…`);
+          prog.set((i/files.length)*90, `${files[i].name} — Border Adding…`);
           const f = files[i];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
@@ -6115,7 +6147,7 @@ TOOL_IMPL.imgborder = {
           downloadBlob(await zip.generateAsync({type:'blob'}), 'framed-images.zip');
         }
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, `${results.length} படங்களில் Border சேர்க்கப்பட்டது.`);
+        mountResult(body, `${results.length} படங்களில் Border added.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     function roundRectPath(ctx,x,y,w,h,r){
@@ -6145,14 +6177,14 @@ TOOL_IMPL.pdfblankpage = {
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
-              <label>எந்த பக்கத்திற்குப் பிறகு காலி பக்கங்களை சேர்க்க வேண்டும்? (காற்புள்ளியால் பிரிக்கவும், 0 = ஆரம்பத்தில்)</label>
-              <input type="text" id="bpPositions" placeholder="எ.கா. 0, 3, 5" value="0">
+              <label>எந்த பக்கத்திற்குப் பிறகு காலி பக்கங்களை add வேண்டும்? (காற்புள்ளியால் பிரிக்கவும், 0 = ஆரம்பத்தில்)</label>
+              <input type="text" id="bpPositions" placeholder="e.g.. 0, 3, 5" value="0">
             </div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">➕ காலி பக்கம் சேர்</button>`);
+        const btn = el(`<button class="btn tamil">➕ காலி page Add</button>`);
         btn.onclick = doInsert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6181,7 +6213,7 @@ TOOL_IMPL.pdfblankpage = {
         const bytes = await outDoc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-blank.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'காலி பக்கங்கள் சேர்க்கப்பட்ட PDF downloaded.');
+        mountResult(body, 'காலி பக்கங்கள் added PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -6195,7 +6227,7 @@ TOOL_IMPL.pdfredact = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil" style="background:#FFF3E0; border-color:#FFD699;">⚠️ இது "வாட்டர்மார்க் நீக்கு" கருவியை போல் அல்ல — இங்கே தேர்ந்தெடுக்கப்பட்ட பகுதி Black நிறத்தில் நிரந்தரமாக மறைக்கப்பட்டு, பக்கம் முழுவதும் படமாக மாற்றப்படும் (Flatten) — அதனால் அடியில் இருக்கும் உரையும் நீக்கப்பட்டு, யாராலும் Copy/Extract செய்ய முடியாது. (பக்கத்தின் தெளிவு சற்று குறையலாம்.)</div>`));
+      body.appendChild(el(`<div class="note tamil" style="background:#FFF3E0; border-color:#FFD699;">⚠️ இது "வாட்டர்மார்க் நீக்கு" கருவியை போல் அல்ல — இங்கே தேர்ந்தெடுக்கப்பட்ட பகுதி Black நிறத்தில் நிரந்தரமாக மறைக்கப்பட்டு, page முழுவதும் படமாக மாற்றப்படும் (Flatten) — அதனால் அடியில் இருக்கும் உரையும் நீக்கப்பட்டு, யாராலும் Copy/Extract do முடியாது. (பக்கத்தின் தெளிவு சற்று குறையலாம்.)</div>`));
       mountUploader(body, { accept:'application/pdf', label:'PDF-ஐ drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
@@ -6215,7 +6247,7 @@ TOOL_IMPL.pdfredact = {
         body.appendChild(selWrap);
         if(!selectors.length) addSelector();
         const addRow = el(`<div class="btn-row"></div>`);
-        const addBtn = el(`<button class="btn secondary tamil">➕ இன்னொரு பெட்டி சேர்</button>`);
+        const addBtn = el(`<button class="btn secondary tamil">➕ இன்னொரு பெட்டி Add</button>`);
         addBtn.onclick = ()=>{ addSelector(); };
         addRow.appendChild(addBtn);
         body.appendChild(addRow);
@@ -6241,7 +6273,7 @@ TOOL_IMPL.pdfredact = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const outDoc = await PDFDocument.create();
         for(let i=1;i<=pdfjsDoc.numPages;i++){
-          prog.set(10 + (i/pdfjsDoc.numPages)*75, `பக்கம் ${i}/${pdfjsDoc.numPages} — Flatten செய்கிறது…`);
+          prog.set(10 + (i/pdfjsDoc.numPages)*75, `page ${i}/${pdfjsDoc.numPages} — Flatten ing…`);
           const page = await pdfjsDoc.getPage(i);
           const viewport = page.getViewport({scale:2.2});
           const canvas = document.createElement('canvas'); canvas.width=viewport.width; canvas.height=viewport.height;
@@ -6359,7 +6391,7 @@ TOOL_IMPL.pdfstamp = {
                 <option value="custom">-- சொந்த உரை --</option>
               </select>
             </div>
-            <div class="field" style="grid-column:1/-1;"><label>சொந்த உரை (மேலே "custom" தேர்ந்தால்)</label><input type="text" id="psCustom" placeholder="எ.கா. VERIFIED"></div>
+            <div class="field" style="grid-column:1/-1;"><label>சொந்த உரை (மேலே "custom" தேர்ந்தால்)</label><input type="text" id="psCustom" placeholder="e.g.. VERIFIED"></div>
             <div class="field"><label>Color</label>
               <select id="psColor"><option value="red">Red</option><option value="green">Green</option><option value="blue">Blue</option><option value="gray">Gray</option></select>
             </div>
@@ -6368,7 +6400,7 @@ TOOL_IMPL.pdfstamp = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔖 ஸ்டாம்ப் பதிக்கவும்</button>`);
+        const btn = el(`<button class="btn tamil">🔖 ஸ்டாம்ப் stamp it</button>`);
         btn.onclick = doStamp;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6388,7 +6420,7 @@ TOOL_IMPL.pdfstamp = {
         const font = await embedUnicodeFont(doc);
         const pages = doc.getPages();
         pages.forEach((page,idx)=>{
-          prog.set(15 + (idx/pages.length)*75, `பக்கம் ${idx+1}/${pages.length}…`);
+          prog.set(15 + (idx/pages.length)*75, `page ${idx+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           const size = Math.min(width,height)/8;
           const tw = font.widthOfTextAtSize(text, size);
@@ -6618,8 +6650,8 @@ TOOL_IMPL.videosubtitle = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">ஒரு வரிக்கு ஒரு caption — வடிவம்: <b>mm:ss-mm:ss: உரை</b> (எ.கா. 00:00-00:04: வணக்கம்!)</div>`));
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">ஒரு வரிக்கு ஒரு caption — வடிவம்: <b>mm:ss-mm:ss: உரை</b> (e.g.. 00:00-00:04: Hello!)</div>`));
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -6627,13 +6659,13 @@ TOOL_IMPL.videosubtitle = {
           <div class="opts one tamil">
             <div class="field">
               <label>Captions</label>
-              <textarea id="vsCaps" rows="5" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;" placeholder="00:00-00:04: வணக்கம்!&#10;00:04-00:08: இது ஒரு Caption">00:00-00:04: வணக்கம்!</textarea>
+              <textarea id="vsCaps" rows="5" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;" placeholder="00:00-00:04: Hello!&#10;00:04-00:08: இது ஒரு Caption">00:00-00:04: Hello!</textarea>
             </div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">💬 Caption பதிக்கவும்</button>`);
+        const btn = el(`<button class="btn tamil">💬 Caption stamp it</button>`);
         btn.onclick = doBurn;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6680,14 +6712,14 @@ TOOL_IMPL.videowave = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">பாடல்/குரல் ஃபைலிலிருந்து அசைவூட்ட Waveform வீடியோ (background நிறத்துடன்) உருவாக்கும் — YouTube/Reels-க்கு பயன்படும்.</div>`));
+      body.appendChild(el(`<div class="note tamil">பாடல்/குரல் ஃபைலிலிருந்து அசைவூட்ட Waveform வீடியோ (background நிறத்துடன்) Create — YouTube/Reels-க்கு பயன்படும்.</div>`));
       mountUploader(body, { accept:'audio/*', label:'ஆடியோவை drag & drop or tap', sublabel:'MP3 / WAV / M4A',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const opts = el(`
           <div class="opts tamil">
-            <div class="field"><label>பின்னணி Color</label>
+            <div class="field"><label>Background Color</label>
               <select id="vwBg"><option value="black">Black</option><option value="0x1a1a2e">டார்க் ப்ளூ</option><option value="0x0b3d0b">டார்க் கிரீன்</option></select>
             </div>
             <div class="field"><label>Wave Color</label>
@@ -6697,7 +6729,7 @@ TOOL_IMPL.videowave = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🌊 Waveform வீடியோ உருவாக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🌊 Waveform வீடியோ Create</button>`);
         btn.onclick = doWave;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6712,12 +6744,12 @@ TOOL_IMPL.videowave = {
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         ffmpegRef = ffmpeg;
-        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'உருவாக்குகிறது… '+Math.round(p*100)+'%'); };
+        progHandler = ({progress})=>{ const p=Math.min(1,Math.max(0,progress||0)); prog.set(15+p*75, 'Generating… '+Math.round(p*100)+'%'); };
         ffmpeg.on('progress', progHandler);
         const ext = (file.name.split('.').pop()||'mp3').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
         const filter = `[0:a]showwaves=s=1280x360:mode=cline:colors=${fg}:rate=25[wave];color=c=${bg}:s=1280x360:rate=25[bgv];[bgv][wave]overlay=format=auto[outv]`;
-        prog.set(15,'உருவாக்குகிறது…');
+        prog.set(15,'Generating…');
         await ffmpeg.exec(['-i','in.'+ext,'-filter_complex',filter,'-map','[outv]','-map','0:a','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
         prog.set(92,'Preparing…');
         const data = await ffmpeg.readFile('out.mp4');
@@ -6739,7 +6771,7 @@ TOOL_IMPL.videoloop = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -6750,7 +6782,7 @@ TOOL_IMPL.videoloop = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔁 Loop செய் & Download</button>`);
+        const btn = el(`<button class="btn tamil">🔁 Loop Do & Download</button>`);
         btn.onclick = doLoop;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6767,7 +6799,7 @@ TOOL_IMPL.videoloop = {
         let listTxt = '';
         for(let i=0;i<n;i++) listTxt += `file 'in.${ext}'\n`;
         await ffmpeg.writeFile('list.txt', new TextEncoder().encode(listTxt));
-        prog.set(20,'Loop செய்கிறது…');
+        prog.set(20,'Loop ing…');
         try{
           await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4']);
         }catch(e){
@@ -6792,7 +6824,7 @@ TOOL_IMPL.videovolume = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'வீடியோவை drag & drop or tap', sublabel:'',
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -6804,7 +6836,7 @@ TOOL_IMPL.videovolume = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🔊 மாற்று & Download</button>`);
+        const btn = el(`<button class="btn tamil">🔊 Convert & Download</button>`);
         btn.onclick = doVolume;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6841,8 +6873,8 @@ TOOL_IMPL.imgsticker = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">பொருளை சுற்றி பெட்டி வரை — பின்னணி நீக்கப்பட்டு, White Border-உடன் Sticker போல தயார் செய்யப்படும்.</div>`));
-      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'',
+      body.appendChild(el(`<div class="note tamil">பொருளை சுற்றி பெட்டி வரை — Background நீக்கப்பட்டு, White Border-உடன் Sticker போல தயார் will be done.</div>`));
+      mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
@@ -6864,7 +6896,7 @@ TOOL_IMPL.imgsticker = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">🏷️ Sticker உருவாக்கு</button>`);
+        const btn = el(`<button class="btn tamil">🏷️ Sticker Create</button>`);
         btn.onclick = doSticker;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6912,12 +6944,12 @@ TOOL_IMPL.pdfqrstamp = {
             <div class="field"><label>Position</label>
               <select id="pqPos"><option value="br">Bottom-right</option><option value="bl">Bottom-left</option><option value="tr">Top-right</option><option value="tl">Top-left</option></select>
             </div>
-            <div class="field"><label>Size (% பக்கம்)</label><input type="number" id="pqSize" value="12" min="5" max="35"></div>
+            <div class="field"><label>Size (% page)</label><input type="number" id="pqSize" value="12" min="5" max="35"></div>
           </div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">▦ QR பதிக்கவும்</button>`);
+        const btn = el(`<button class="btn tamil">▦ QR stamp it</button>`);
         btn.onclick = doStamp;
         row.appendChild(btn);
         body.appendChild(row);
@@ -6948,7 +6980,7 @@ TOOL_IMPL.pdfqrstamp = {
         const embeddedQr = await doc.embedPng(qrPngBytes);
         const pages = doc.getPages();
         pages.forEach((page,idx)=>{
-          prog.set(30 + (idx/pages.length)*60, `பக்கம் ${idx+1}/${pages.length}…`);
+          prog.set(30 + (idx/pages.length)*60, `page ${idx+1}/${pages.length}…`);
           const {width,height} = page.getSize();
           const s = width*sizePct;
           const pad = width*0.03;
@@ -7202,7 +7234,7 @@ TOOL_IMPL.airesume = {
 };
 
 render();
-initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் செய்து credits/plan காட்டு
+initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் edு credits/plan காட்டு
 </script>
 </body>
 </html>
