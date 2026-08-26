@@ -61,7 +61,13 @@ app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
 app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 app.use(express.json());
 
-const upload = multer({ dest: os.tmpdir(), limits: { fileSize: 500 * 1024 * 1024 } });
+// Render's free tier gives this service only 512MB RAM. ffmpeg transcoding
+// memory usage scales with the video's resolution/bitrate, not just its file
+// size, but a hard cap on the INPUT file size is the simplest safety net
+// against an out-of-memory crash (which otherwise takes the whole server
+// down for everyone, not just the one oversized upload).
+const uploadVideo = multer({ dest: os.tmpdir(), limits: { fileSize: 60 * 1024 * 1024 } });   // 60MB — safe for this instance size
+const uploadImage = multer({ dest: os.tmpdir(), limits: { fileSize: 15 * 1024 * 1024 } });   // 15MB — plenty for photos/scanned pages sent to Gemini
 
 // ============================================================
 // Auth middleware — Supabase-ல் login செய்த user-ஐ சரிபார்க்கிறது
@@ -113,7 +119,7 @@ app.get('/api/pricing', async (req, res) => {
 // POST /api/video/compress — உண்மையான ffmpeg (native, WASM அல்ல) — வேகமானது
 // multipart/form-data: file, crf, preset, width(optional)
 // ============================================================
-app.post('/api/video/compress', creditLimiter, requireAuth, upload.single('file'), async (req, res) => {
+app.post('/api/video/compress', creditLimiter, requireAuth, uploadVideo.single('file'), async (req, res) => {
   const CREDIT_COST = 2; // இந்த tool-க்கு எத்தனை credits
   try {
     const allowed = await deductCredits(req.user.id, CREDIT_COST, 'videocompress');
@@ -203,7 +209,7 @@ app.post('/api/redeem', redeemLimiter, requireAuth, async (req, res) => {
 // clear "not configured" error instead of crashing.
 // body: multipart form — file (image), question (text)
 // ============================================================
-app.post('/api/ai/ask', creditLimiter, requireAuth, upload.single('file'), async (req, res) => {
+app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), async (req, res) => {
   const CREDIT_COST = 1;
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -384,6 +390,9 @@ app.use((req, res) => {
 });
 // Catch-all for any unhandled error anywhere above — same reasoning, JSON not HTML.
 app.use((err, req, res, next) => {
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'This file is too large for Fast Server Mode on this plan. Try Browser Mode instead (unlimited size, just slower), or ask the developer to upgrade the server\'s memory.' });
+  }
   console.error('Unhandled error:', err);
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
