@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>PDF Tools — Free, No Limits</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3752A6">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
   :root{
@@ -167,6 +171,7 @@ const TOOLS = [
   {id:'pdfhighlight', name:'Highlight Words in PDF', desc:'Search a word and highlight every match', icon:'🖍️', color:'#B7950B', cat:'pdf'},
   {id:'pdfimgwm', name:'Logo Watermark on PDF', desc:'Stamp your logo/image on every page', icon:'🖼️', color:'#4A235A', cat:'pdf'},
   {id:'pdfqrstamp', name:'Add QR to PDF', desc:'Stamp a QR code on every page', icon:'▦', color:'#1E7145', cat:'pdf'},
+  {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -7281,8 +7286,110 @@ TOOL_IMPL.airesume = {
   }
 };
 
+/* ===================== COMPARE PDFs (Redline) ===================== */
+TOOL_IMPL.pdfcompare = {
+  mount(container){
+    let fileA = null, fileB = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Upload the ORIGINAL and the REVISED version of a PDF — we'll show exactly what text was added, removed, or changed between them.</div>`));
+      const row = el(`<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>`);
+      const colA = el(`<div></div>`); const colB = el(`<div></div>`);
+      colA.appendChild(el(`<div style="font-weight:800; font-size:12.5px; margin-bottom:6px;">📄 Original</div>`));
+      colB.appendChild(el(`<div style="font-weight:800; font-size:12.5px; margin-bottom:6px;">📝 Revised</div>`));
+      mountUploader(colA, { accept:'application/pdf', label:'Drop original PDF', sublabel:'',
+        onAdd: async (fl)=>{ fileA = fl[0]; fileA._buf = await readFileAsArrayBuffer(fileA); paint(); } });
+      if(fileA) mountFileList(colA, [fileA], ()=>{ fileA=null; paint(); });
+      mountUploader(colB, { accept:'application/pdf', label:'Drop revised PDF', sublabel:'',
+        onAdd: async (fl)=>{ fileB = fl[0]; fileB._buf = await readFileAsArrayBuffer(fileB); paint(); } });
+      if(fileB) mountFileList(colB, [fileB], ()=>{ fileB=null; paint(); });
+      row.appendChild(colA); row.appendChild(colB);
+      body.appendChild(row);
+      if(fileA && fileB){
+        const btnRow = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn">📝 Compare</button>`);
+        btn.onclick = doCompare;
+        btnRow.appendChild(btn);
+        body.appendChild(btnRow);
+      }
+    }
+    async function extractWords(buf){
+      const pdfjsDoc = await loadPdfJs(buf);
+      let words = [];
+      for(let i=1;i<=pdfjsDoc.numPages;i++){
+        const page = await pdfjsDoc.getPage(i);
+        const content = await page.getTextContent();
+        const text = content.items.map(it=>it.str).join(' ');
+        words = words.concat(text.split(/\s+/).filter(Boolean));
+      }
+      return words;
+    }
+    // Classic word-level LCS diff via dynamic programming — fine for documents
+    // up to a few thousand words; larger documents are truncated with a note.
+    function diffWords(a, b){
+      const n = a.length, m = b.length;
+      const dp = Array.from({length:n+1}, ()=> new Uint32Array(m+1));
+      for(let i=n-1;i>=0;i--){
+        for(let j=m-1;j>=0;j--){
+          dp[i][j] = a[i]===b[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j], dp[i][j+1]);
+        }
+      }
+      const ops = [];
+      let i=0, j=0;
+      while(i<n && j<m){
+        if(a[i]===b[j]){ ops.push({type:'same', text:a[i]}); i++; j++; }
+        else if(dp[i+1][j] >= dp[i][j+1]){ ops.push({type:'del', text:a[i]}); i++; }
+        else { ops.push({type:'add', text:b[j]}); j++; }
+      }
+      while(i<n){ ops.push({type:'del', text:a[i]}); i++; }
+      while(j<m){ ops.push({type:'add', text:b[j]}); j++; }
+      return ops;
+    }
+    async function doCompare(){
+      const prog = mountProgress(body);
+      try{
+        prog.set(15,'Reading original…');
+        let wordsA = await extractWords(fileA._buf);
+        prog.set(45,'Reading revised…');
+        let wordsB = await extractWords(fileB._buf);
+        const CAP = 6000;
+        let truncated = false;
+        if(wordsA.length > CAP || wordsB.length > CAP){ wordsA = wordsA.slice(0,CAP); wordsB = wordsB.slice(0,CAP); truncated = true; }
+        prog.set(70,'Comparing…');
+        const ops = diffWords(wordsA, wordsB);
+        prog.set(100,'Done'); prog.remove();
+
+        const added = ops.filter(o=>o.type==='add').length;
+        const removed = ops.filter(o=>o.type==='del').length;
+        const summary = el(`<div class="note" style="background:#F0F4FF;">${added} word${added===1?'':'s'} added, ${removed} word${removed===1?'':'s'} removed.${truncated?' (Very long document — comparison truncated to the first '+CAP+' words per file.)':''}</div>`);
+        body.appendChild(summary);
+
+        const view = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:16px; max-height:420px; overflow-y:auto; background:#fff; font-size:14px; line-height:2; white-space:pre-wrap;"></div>`);
+        ops.forEach(o=>{
+          let span;
+          if(o.type==='same') span = document.createTextNode(o.text+' ');
+          else if(o.type==='add') span = el(`<span style="background:#D6F5E0; color:#1E7145; border-radius:3px; padding:1px 2px;">${escapeHtml(o.text)} </span>`);
+          else span = el(`<span style="background:#FDE0E0; color:#C0392B; text-decoration:line-through; border-radius:3px; padding:1px 2px;">${escapeHtml(o.text)} </span>`);
+          view.appendChild(span);
+        });
+        body.appendChild(view);
+
+        const legend = el(`<div class="note" style="margin-top:10px;"><span style="background:#D6F5E0; color:#1E7145; padding:1px 6px; border-radius:3px;">Added</span> &nbsp; <span style="background:#FDE0E0; color:#C0392B; text-decoration:line-through; padding:1px 6px; border-radius:3px;">Removed</span></div>`);
+        body.appendChild(legend);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
 render();
 initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் edு credits/plan காட்டு
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{}); // silently skip if sw.js isn't hosted alongside this file
+  });
+}
 </script>
 </body>
 </html>
