@@ -1,0 +1,15 @@
+{
+  "name": "PDF Tools — Free, No Limits",
+  "short_name": "PDF Tools",
+  "description": "67+ free PDF, Image, Video and AI tools — works offline for most tools, your files never leave your device.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F7FB",
+  "theme_color": "#3752A6",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
