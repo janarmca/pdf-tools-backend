@@ -1294,6 +1294,150 @@ function ensureOpenCv(){
   });
   return window.__cvReadyPromise;
 }
+/* ===================== Shared: OpenCV runs in a Web Worker (never blocks UI) =====
+   grabCut/inpaint/bilateralFilter etc. are genuinely CPU-heavy — running them on
+   the main thread freezes the whole page (Chrome's "Page Unresponsive" dialog)
+   for several seconds on anything but tiny images. Running the SAME opencv.js
+   inside a Worker keeps the UI (progress bar, buttons) fully responsive while
+   the computation happens in the background. ================================= */
+const CV_WORKER_SRC = `
+let cvReadyPromise = null;
+function ensureCv(){
+  if(!cvReadyPromise){
+    cvReadyPromise = new Promise((resolve, reject)=>{
+      self.Module = { onRuntimeInitialized(){ resolve(self.cv); } };
+      try{ importScripts('https://docs.opencv.org/4.8.0/opencv.js'); }
+      catch(e){ reject(e); }
+    });
+  }
+  return cvReadyPromise;
+}
+self.onmessage = async (e)=>{
+  const { id, op, width, height, data, params } = e.data;
+  let mats = [];
+  const track = (m)=>{ mats.push(m); return m; };
+  try{
+    const cv = await ensureCv();
+    const src = track(cv.matFromArray(height, width, cv.CV_8UC4, data));
+    let outData, outWidth = width, outHeight = height;
+
+    if(op === 'grabcut'){
+      const rgb = track(new cv.Mat()); cv.cvtColor(src, rgb, cv.COLOR_RGBA2RGB);
+      const mask = track(new cv.Mat.zeros(height, width, cv.CV_8UC1));
+      const bgd = track(new cv.Mat()); const fgd = track(new cv.Mat());
+      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 5, cv.GC_INIT_WITH_RECT);
+      outData = new Uint8Array(mask.rows*mask.cols);
+      outData.set(mask.data);
+    } else if(op === 'inpaint'){
+      const mask = track(cv.matFromArray(height, width, cv.CV_8UC1, params.maskData));
+      const dst = track(new cv.Mat());
+      cv.inpaint(src, mask, dst, 7, cv.INPAINT_TELEA);
+      outData = new Uint8ClampedArray(dst.data);
+    } else if(op === 'sketch'){
+      const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+      const inv = track(new cv.Mat()); cv.bitwise_not(gray, inv);
+      const blur = track(new cv.Mat()); cv.GaussianBlur(inv, blur, new cv.Size(21,21), 0);
+      const invBlur = track(new cv.Mat()); cv.bitwise_not(blur, invBlur);
+      const sk = track(new cv.Mat()); cv.divide(gray, invBlur, sk, 256);
+      const rgba = track(new cv.Mat()); cv.cvtColor(sk, rgba, cv.COLOR_GRAY2RGBA);
+      outData = new Uint8ClampedArray(rgba.data);
+    } else if(op === 'cartoon'){
+      const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+      const blur = track(new cv.Mat()); cv.medianBlur(gray, blur, 7);
+      const edges = track(new cv.Mat()); cv.adaptiveThreshold(blur, edges, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9);
+      const color = track(new cv.Mat()); cv.bilateralFilter(src, color, 9, 250, 250);
+      const edgesRgba = track(new cv.Mat()); cv.cvtColor(edges, edgesRgba, cv.COLOR_GRAY2RGBA);
+      const cartoon = track(new cv.Mat()); cv.bitwise_and(color, edgesRgba, cartoon);
+      outData = new Uint8ClampedArray(cartoon.data);
+    } else if(op === 'sticker'){
+      const rgb = track(new cv.Mat()); cv.cvtColor(src, rgb, cv.COLOR_RGBA2RGB);
+      const mask = track(new cv.Mat.zeros(height, width, cv.CV_8UC1));
+      const bgd = track(new cv.Mat()); const fgd = track(new cv.Mat());
+      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 5, cv.GC_INIT_WITH_RECT);
+      const alphaMat = track(new cv.Mat(height, width, cv.CV_8UC1, new cv.Scalar(0)));
+      for(let q=0;q<mask.rows*mask.cols;q++){ const v=mask.data[q]; if(v===1||v===3) alphaMat.data[q]=255; }
+      const dilated = track(new cv.Mat());
+      const k = Math.max(1, Math.round((params.borderPx||14)/2));
+      const kernel = track(cv.Mat.ones(k, k, cv.CV_8U));
+      cv.dilate(alphaMat, dilated, kernel);
+      outData = new Uint8ClampedArray(src.data); // start from the original RGBA pixels
+      for(let q=0, p=0; q<alphaMat.rows*alphaMat.cols; q++, p+=4){
+        const inObj = alphaMat.data[q] > 0, inRing = dilated.data[q] > 0;
+        if(inRing && !inObj){ outData[p]=255; outData[p+1]=255; outData[p+2]=255; outData[p+3]=255; } // white border ring
+        else if(!inObj && !inRing){ outData[p+3] = 0; } // fully outside — transparent
+      }
+    } else if(op === 'detectquad'){
+      const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+      cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
+      const edges = track(new cv.Mat()); cv.Canny(gray, edges, 50, 150);
+      const kernel = track(cv.Mat.ones(5,5, cv.CV_8U));
+      cv.dilate(edges, edges, kernel);
+      const contours = track(new cv.MatVector());
+      const hierarchy = track(new cv.Mat());
+      cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+      const imgArea = width*height;
+      let best = null, bestArea = 0;
+      for(let i=0;i<contours.size();i++){
+        const cnt = contours.get(i);
+        const peri = cv.arcLength(cnt, true);
+        const approx = new cv.Mat();
+        cv.approxPolyDP(cnt, approx, 0.02*peri, true);
+        if(approx.rows === 4){
+          const area = Math.abs(cv.contourArea(approx));
+          if(area > bestArea && area > imgArea*0.15){
+            bestArea = area;
+            const pts = [];
+            for(let j=0;j<4;j++) pts.push({x: approx.data32S[j*2], y: approx.data32S[j*2+1]});
+            best = pts;
+          }
+        }
+        approx.delete(); cnt.delete();
+      }
+      mats.forEach(m=>{ try{ m.delete(); }catch(e){} });
+      self.postMessage({ id, ok:true, quad: best });
+      return;
+    } else {
+      throw new Error('Unknown op: '+op);
+    }
+    mats.forEach(m=>{ try{ m.delete(); }catch(e){} });
+    self.postMessage({ id, ok:true, width: outWidth, height: outHeight, data: outData }, [outData.buffer]);
+  }catch(err){
+    mats.forEach(m=>{ try{ m.delete(); }catch(e){} });
+    self.postMessage({ id, ok:false, error: (err && err.message) || String(err) });
+  }
+};
+`;
+let __cvWorker = null, __cvMsgId = 0;
+const __cvPending = {};
+function ensureCvWorker(){
+  if(!__cvWorker){
+    const blob = new Blob([CV_WORKER_SRC], {type:'text/javascript'});
+    __cvWorker = new Worker(URL.createObjectURL(blob));
+    __cvWorker.onmessage = (e)=>{
+      const { id, ok, error, ...rest } = e.data;
+      const p = __cvPending[id]; delete __cvPending[id];
+      if(!p) return;
+      if(ok) p.resolve(rest); else p.reject(new Error(error));
+    };
+    __cvWorker.onerror = (e)=>{
+      Object.keys(__cvPending).forEach(id=>{ __cvPending[id].reject(new Error('AI worker crashed: '+e.message)); delete __cvPending[id]; });
+    };
+  }
+  return __cvWorker;
+}
+// Runs an OpenCV op in the background worker. imageData: {width,height,data:Uint8ClampedArray(RGBA)}.
+// Returns {width,height,data} — for 'grabcut', data is a single-channel mask (0/1/2/3 per pixel);
+// for the others, data is a full RGBA image the same size as the input.
+function runCvOp(op, imageData, params){
+  return new Promise((resolve, reject)=>{
+    const worker = ensureCvWorker();
+    const id = ++__cvMsgId;
+    __cvPending[id] = { resolve, reject };
+    const dataCopy = new Uint8Array(imageData.data); // copy so the transfer doesn't detach the caller's buffer
+    worker.postMessage({ id, op, width: imageData.width, height: imageData.height, data: dataCopy, params: params||{} }, [dataCopy.buffer]);
+  });
+}
+
 function orderQuadPoints(pts){
   const sum = pts.map(p=>p.x+p.y);
   const diff = pts.map(p=>p.x-p.y);
@@ -1306,43 +1450,12 @@ function orderQuadPoints(pts){
 // Returns 4 ordered {x,y} points (in the given canvas's pixel space) of the largest document-like
 // quadrilateral found, or null if none detected confidently. Never throws.
 async function autoDetectQuad(canvas){
-  let src,gray,edges,kernel,contours,hierarchy;
   try{
-    const cv = await ensureOpenCv();
-    src = cv.imread(canvas);
-    gray = new cv.Mat();
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-    cv.GaussianBlur(gray, gray, new cv.Size(5,5), 0);
-    edges = new cv.Mat();
-    cv.Canny(gray, edges, 50, 150);
-    kernel = cv.Mat.ones(5,5, cv.CV_8U);
-    cv.dilate(edges, edges, kernel);
-    contours = new cv.MatVector();
-    hierarchy = new cv.Mat();
-    cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
-    const imgArea = canvas.width*canvas.height;
-    let best = null, bestArea = 0;
-    for(let i=0;i<contours.size();i++){
-      const cnt = contours.get(i);
-      const peri = cv.arcLength(cnt, true);
-      const approx = new cv.Mat();
-      cv.approxPolyDP(cnt, approx, 0.02*peri, true);
-      if(approx.rows === 4){
-        const area = Math.abs(cv.contourArea(approx));
-        if(area > bestArea && area > imgArea*0.15){
-          bestArea = area;
-          const pts = [];
-          for(let j=0;j<4;j++) pts.push({x: approx.data32S[j*2], y: approx.data32S[j*2+1]});
-          best = pts;
-        }
-      }
-      approx.delete(); cnt.delete();
-    }
-    return best ? orderQuadPoints(best) : null;
+    const imageData = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);
+    const result = await runCvOp('detectquad', imageData, {});
+    return result.quad ? orderQuadPoints(result.quad) : null;
   }catch(e){
     return null;
-  }finally{
-    [src,gray,edges,kernel,contours,hierarchy].forEach(m=>{ try{ m && m.delete(); }catch(e){} });
   }
 }
 
@@ -2929,7 +3042,7 @@ TOOL_IMPL.camscan = {
       try{
         stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080} }, audio:false });
         window.__camStream = stream;
-        ensureOpenCv().catch(()=>{});
+        ensureCvWorker(); // pre-warm the background AI worker used for auto edge-detection after each capture
         view = 'camera'; paint();
       }catch(err){
         let msg = 'கேமராவை திறக்க முடியவில்லை: '+err.message;
@@ -3483,7 +3596,7 @@ TOOL_IMPL.vidsplit = {
 /* ===================== WATERMARK REMOVER ===================== */
 TOOL_IMPL.wmremove = {
   mount(container){
-    ensureOpenCv().catch(()=>{}); // pre-warm engine in background for speed
+    ensureCvWorker(); // pre-warm the background AI worker (used for the image-inpaint mode below)
     let kind = 'pdf';
     let file = null, previewUrl = null, pdfjsDoc = null, previewW=0, previewH=0;
     let selector = null;
@@ -3619,30 +3732,27 @@ TOOL_IMPL.wmremove = {
     async function doImageRemove(){
       if(!brush.hasPaint()){ mountResult(body,'முதலில் வாட்டர்மார்க் மேல் brush-ஆல் தடவி குறிக்கவும்.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
-      let src,mask,dst;
       try{
         prog.set(10,'Loading AI inpainting engine…');
-        const cv = await ensureOpenCv();
-        prog.set(40,'Processing…');
-        src = cv.imread(imgCanvas);
+        const ctx0 = imgCanvas.getContext('2d');
+        const srcImageData = ctx0.getImageData(0,0,imgCanvas.width,imgCanvas.height);
         const maskCanvas = brush.getMaskCanvas();
         const mCtx = maskCanvas.getContext('2d');
         const mData = mCtx.getImageData(0,0,maskCanvas.width,maskCanvas.height);
-        mask = new cv.Mat(maskCanvas.height, maskCanvas.width, cv.CV_8UC1);
+        const maskData = new Uint8Array(maskCanvas.width*maskCanvas.height);
         for(let p=0, q=0; p<mData.data.length; p+=4, q++){
-          mask.data[q] = mData.data[p+3] > 20 ? 255 : 0;
+          maskData[q] = mData.data[p+3] > 20 ? 255 : 0;
         }
-        dst = new cv.Mat();
-        cv.inpaint(src, mask, dst, 7, cv.INPAINT_TELEA);
-        cv.imshow(imgCanvas, dst);
+        prog.set(35,'Processing… (runs in the background, page stays responsive)');
+        const result = await runCvOp('inpaint', srcImageData, { maskData });
         prog.set(90,'Preparing…');
+        imgCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(result.data), result.width, result.height), 0, 0);
         const blob = await new Promise(res=> imgCanvas.toBlob(res, 'image/png'));
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nowm.png');
         prog.set(100,'Done'); prog.remove();
         brush.clear();
-        mountResult(body, 'வாட்டர்மார்க் நீக்கப்பட்ட படம் downloaded.');
+        mountResult(body, 'Watermark-removed image downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-      finally{ [src,mask,dst].forEach(m=>{ try{ m && m.delete(); }catch(e){} }); }
     }
     paint();
   }
@@ -3820,7 +3930,7 @@ TOOL_IMPL.imgenhance = {
 /* ===================== BACKGROUND REMOVER ===================== */
 TOOL_IMPL.bgremove = {
   mount(container){
-    ensureOpenCv().catch(()=>{}); // pre-warm engine in background for speed
+    ensureCvWorker(); // pre-warm the background AI worker so it's ready by the time the user clicks Remove
     let file = null, imgCanvas = null, selector = null, previewUrl = null;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
@@ -3852,41 +3962,32 @@ TOOL_IMPL.bgremove = {
     async function doRemove(){
       const rect = selector.getRect();
       const prog = mountProgress(body);
-      let src, mask, bgdModel, fgdModel;
       try{
         prog.set(10,'Loading AI engine…');
-        const cv = await ensureOpenCv();
-        prog.set(35,'Detecting subject…');
-        await new Promise(r=>setTimeout(r,10));
-        src = cv.imread(imgCanvas);
-        // grabCut needs a 3-channel image
-        const rgbMat = new cv.Mat(); cv.cvtColor(src, rgbMat, cv.COLOR_RGBA2RGB);
-        mask = new cv.Mat.zeros(imgCanvas.height, imgCanvas.width, cv.CV_8UC1);
-        bgdModel = new cv.Mat(); fgdModel = new cv.Mat();
         const x = Math.round(rect.fx0*imgCanvas.width), y = Math.round(rect.fy0*imgCanvas.height);
         const w = Math.max(2, Math.round((rect.fx1-rect.fx0)*imgCanvas.width));
         const h = Math.max(2, Math.round((rect.fy1-rect.fy0)*imgCanvas.height));
-        const cvRect = new cv.Rect(x,y,w,h);
-        cv.grabCut(rgbMat, mask, cvRect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT);
-        prog.set(75,'Making background transparent…');
+        const ctx0 = imgCanvas.getContext('2d');
+        const srcImageData = ctx0.getImageData(0,0,imgCanvas.width,imgCanvas.height);
+        prog.set(30,'Detecting subject… (runs in the background, page stays responsive)');
+        const maskResult = await runCvOp('grabcut', srcImageData, { x, y, w, h });
+        prog.set(80,'Making background transparent…');
         const outCanvas = document.createElement('canvas'); outCanvas.width=imgCanvas.width; outCanvas.height=imgCanvas.height;
         const octx = outCanvas.getContext('2d');
         octx.drawImage(imgCanvas,0,0);
         const outData = octx.getImageData(0,0,outCanvas.width,outCanvas.height);
-        for(let p=0, q=0; q<mask.rows*mask.cols; p+=4, q++){
-          const v = mask.data[q]; // 0=bg,1=fg,2=probable bg,3=probable fg
+        for(let p=0, q=0; q<maskResult.data.length; p+=4, q++){
+          const v = maskResult.data[q]; // 0=bg,1=fg,2=probable bg,3=probable fg
           const isFg = (v===1 || v===3);
           if(!isFg) outData.data[p+3] = 0;
         }
         octx.putImageData(outData,0,0);
-        rgbMat.delete();
         const blob = await new Promise(res=> outCanvas.toBlob(res,'image/png'));
         prog.set(95,'Preparing…');
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'பின்னணி நீக்கப்பட்ட PNG downloaded.');
+        mountResult(body, 'Background-removed PNG downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-      finally{ [src,mask,bgdModel,fgdModel].forEach(m=>{ try{ m && m.delete(); }catch(e){} }); }
     }
     paint();
   }
@@ -5032,7 +5133,7 @@ TOOL_IMPL.imgwatermark = {
 /* ===================== PASSPORT / ID PHOTO MAKER ===================== */
 TOOL_IMPL.imgpassport = {
   mount(container){
-    ensureOpenCv().catch(()=>{}); // pre-warm engine in background for speed
+    ensureCvWorker(); // pre-warm the background AI worker
     let file = null, previewUrl = null, selector = null, natW=0, natH=0;
     const SIZES = { '35x45':[35,45], '2x2in':[51,51], '3.5x4.5cm':[35,45] };
     const body = el(`<div></div>`); container.appendChild(body);
@@ -5075,13 +5176,11 @@ TOOL_IMPL.imgpassport = {
       const bg = body.querySelector('#ipBg').value;
       const makeSheet = body.querySelector('#ipSheet').checked;
       const prog = mountProgress(body);
-      let srcMat, rgbMat, mask, bgdModel, fgdModel;
       try{
         prog.set(10,'Crop செய்கிறது…');
         const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=previewUrl; });
         const sx = Math.round(rect.fx0*natW), sy = Math.round(rect.fy0*natH);
         const sw = Math.max(1,Math.round((rect.fx1-rect.fx0)*natW)), sh = Math.max(1,Math.round((rect.fy1-rect.fy0)*natH));
-        const mmPerPx = 0.264583; // for reference only; we just keep a fixed print-quality pixel size
         const outW = sizeKey==='2x2in' ? 600 : 413; // ~300dpi equivalents
         const outH = sizeKey==='2x2in' ? 600 : 531;
         const cropCanvas = document.createElement('canvas'); cropCanvas.width=outW; cropCanvas.height=outH;
@@ -5090,20 +5189,15 @@ TOOL_IMPL.imgpassport = {
         cctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
 
         if(bg !== 'none'){
-          prog.set(35,'பின்னணியை Converting…');
-          const cv = await ensureOpenCv();
-          srcMat = cv.imread(cropCanvas);
-          rgbMat = new cv.Mat(); cv.cvtColor(srcMat, rgbMat, cv.COLOR_RGBA2RGB);
-          mask = new cv.Mat.zeros(outH, outW, cv.CV_8UC1);
-          bgdModel = new cv.Mat(); fgdModel = new cv.Mat();
+          prog.set(30,'பின்னணியை Converting… (runs in the background)');
           const pad = Math.round(Math.min(outW,outH)*0.06);
-          const cvRect = new cv.Rect(pad, pad, outW-pad*2, outH-pad*2);
-          cv.grabCut(rgbMat, mask, cvRect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT);
+          const cropImageData = cctx.getImageData(0,0,outW,outH);
+          const maskResult = await runCvOp('grabcut', cropImageData, { x:pad, y:pad, w:outW-pad*2, h:outH-pad*2 });
           const colorMap = {white:[255,255,255], lightblue:[173,216,230], red:[200,40,40]};
           const [br,bgc,bb] = colorMap[bg]||colorMap.white;
           const outData = cctx.getImageData(0,0,outW,outH);
-          for(let p=0,q=0; q<mask.rows*mask.cols; p+=4,q++){
-            const v = mask.data[q];
+          for(let p=0,q=0; q<maskResult.data.length; p+=4,q++){
+            const v = maskResult.data[q];
             const isFg = (v===1||v===3);
             if(!isFg){ outData.data[p]=br; outData.data[p+1]=bgc; outData.data[p+2]=bb; outData.data[p+3]=255; }
           }
@@ -5130,7 +5224,6 @@ TOOL_IMPL.imgpassport = {
         prog.set(100,'Done'); prog.remove();
         mountResult(body, 'Passport/ID புகைப்படம் தயார் செய்யப்பட்டு downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-      finally{ [srcMat,rgbMat,mask,bgdModel,fgdModel].forEach(m=>{ try{ m && m.delete(); }catch(e){} }); }
     }
     paint();
   }
@@ -5139,7 +5232,7 @@ TOOL_IMPL.imgpassport = {
 /* ===================== IMAGE SKETCH / CARTOON EFFECT ===================== */
 TOOL_IMPL.imgsketch = {
   mount(container){
-    ensureOpenCv().catch(()=>{}); // pre-warm engine in background for speed
+    ensureCvWorker(); // pre-warm the background AI worker
     let file = null, style = 'pencil';
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
@@ -5164,46 +5257,27 @@ TOOL_IMPL.imgsketch = {
     }
     async function doSketch(){
       const prog = mountProgress(body);
-      let src,gray,inv,blur,sketch,edges,color,cartoon;
       try{
         prog.set(15,'Loading AI engine…');
-        const cv = await ensureOpenCv();
-        prog.set(35,'Converting…');
         const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
         const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
         const canvas = document.createElement('canvas');
         const maxDim = 1600;
         const scale = Math.min(1, maxDim/Math.max(img.naturalWidth,img.naturalHeight));
         canvas.width = Math.round(img.naturalWidth*scale); canvas.height = Math.round(img.naturalHeight*scale);
-        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-        src = cv.imread(canvas);
-        const outCanvas = document.createElement('canvas'); outCanvas.width=canvas.width; outCanvas.height=canvas.height;
-        if(style==='pencil'){
-          gray = new cv.Mat(); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-          inv = new cv.Mat(); cv.bitwise_not(gray, inv);
-          blur = new cv.Mat(); cv.GaussianBlur(inv, blur, new cv.Size(21,21), 0);
-          const invBlur = new cv.Mat(); cv.bitwise_not(blur, invBlur);
-          sketch = new cv.Mat(); cv.divide(gray, invBlur, sketch, 256);
-          cv.imshow(outCanvas, sketch);
-          invBlur.delete();
-        } else {
-          gray = new cv.Mat(); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-          blur = new cv.Mat(); cv.medianBlur(gray, blur, 7);
-          edges = new cv.Mat(); cv.adaptiveThreshold(blur, edges, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9);
-          color = new cv.Mat(); cv.bilateralFilter(src, color, 9, 250, 250);
-          cartoon = new cv.Mat();
-          const edgesRgba = new cv.Mat(); cv.cvtColor(edges, edgesRgba, cv.COLOR_GRAY2RGBA);
-          cv.bitwise_and(color, edgesRgba, cartoon);
-          cv.imshow(outCanvas, cartoon);
-          edgesRgba.delete();
-        }
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        const srcImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+        prog.set(35,'Converting… (runs in the background, page stays responsive)');
+        const result = await runCvOp(style==='pencil' ? 'sketch' : 'cartoon', srcImageData, {});
         prog.set(85,'Preparing…');
+        const outCanvas = document.createElement('canvas'); outCanvas.width=result.width; outCanvas.height=result.height;
+        outCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(result.data), result.width, result.height), 0, 0);
         const blob = await new Promise(res=> outCanvas.toBlob(res,'image/jpeg',0.95));
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-'+style+'.jpg');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'மாற்றப்பட்ட படம் downloaded.');
+        mountResult(body, 'Converted image downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-      finally{ [src,gray,inv,blur,sketch,edges,color,cartoon].forEach(m=>{ try{ m && m.delete(); }catch(e){} }); }
     }
     paint();
   }
@@ -6705,7 +6779,7 @@ TOOL_IMPL.videovolume = {
 /* ===================== STICKER CUTOUT ===================== */
 TOOL_IMPL.imgsticker = {
   mount(container){
-    ensureOpenCv().catch(()=>{}); // pre-warm engine in background for speed
+    ensureCvWorker(); // pre-warm the background AI worker
     let file = null, previewUrl = null, imgCanvas = null, selector = null;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
@@ -6743,48 +6817,22 @@ TOOL_IMPL.imgsticker = {
       const rect = selector.getRect();
       const borderPx = Number(body.querySelector('#stB').value)||14;
       const prog = mountProgress(body);
-      let src, rgbMat, mask, bgdModel, fgdModel, alphaMat, dilated, kernel;
       try{
         prog.set(15,'Loading AI engine…');
-        const cv = await ensureOpenCv();
-        prog.set(35,'Detecting subject…');
-        src = cv.imread(imgCanvas);
-        rgbMat = new cv.Mat(); cv.cvtColor(src, rgbMat, cv.COLOR_RGBA2RGB);
-        mask = new cv.Mat.zeros(imgCanvas.height, imgCanvas.width, cv.CV_8UC1);
-        bgdModel = new cv.Mat(); fgdModel = new cv.Mat();
         const x = Math.round(rect.fx0*imgCanvas.width), y = Math.round(rect.fy0*imgCanvas.height);
         const w = Math.max(2, Math.round((rect.fx1-rect.fx0)*imgCanvas.width));
         const h = Math.max(2, Math.round((rect.fy1-rect.fy0)*imgCanvas.height));
-        cv.grabCut(rgbMat, mask, new cv.Rect(x,y,w,h), bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT);
-        prog.set(65,'Building sticker border…');
-        alphaMat = new cv.Mat(imgCanvas.height, imgCanvas.width, cv.CV_8UC1, new cv.Scalar(0));
-        for(let q=0;q<mask.rows*mask.cols;q++){ const v=mask.data[q]; if(v===1||v===3) alphaMat.data[q]=255; }
-        dilated = new cv.Mat();
-        kernel = cv.Mat.ones(Math.max(1,Math.round(borderPx/2)), Math.max(1,Math.round(borderPx/2)), cv.CV_8U);
-        cv.dilate(alphaMat, dilated, kernel);
-        const outCanvas = document.createElement('canvas'); outCanvas.width=imgCanvas.width; outCanvas.height=imgCanvas.height;
-        const octx = outCanvas.getContext('2d');
-        octx.fillStyle = '#ffffff';
-        // paint white border where dilated mask is set but original alpha isn't (the "ring")
-        const ringImg = octx.createImageData(outCanvas.width, outCanvas.height);
-        for(let q=0, p=0; q<dilated.rows*dilated.cols; q++, p+=4){
-          if(dilated.data[q] > 0){ ringImg.data[p]=255; ringImg.data[p+1]=255; ringImg.data[p+2]=255; ringImg.data[p+3]=255; }
-        }
-        octx.putImageData(ringImg,0,0);
-        octx.drawImage(imgCanvas,0,0);
-        const finalData = octx.getImageData(0,0,outCanvas.width,outCanvas.height);
-        for(let q=0,p=0; q<alphaMat.rows*alphaMat.cols; q++, p+=4){
-          const inObj = alphaMat.data[q] > 0, inRing = dilated.data[q] > 0;
-          if(!inObj && !inRing) finalData.data[p+3] = 0;
-        }
-        octx.putImageData(finalData,0,0);
+        const srcImageData = imgCanvas.getContext('2d').getImageData(0,0,imgCanvas.width,imgCanvas.height);
+        prog.set(35,'Detecting subject & building border… (runs in the background)');
+        const result = await runCvOp('sticker', srcImageData, { x, y, w, h, borderPx });
         prog.set(90,'Preparing…');
+        const outCanvas = document.createElement('canvas'); outCanvas.width=result.width; outCanvas.height=result.height;
+        outCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(result.data), result.width, result.height), 0, 0);
         const blob = await new Promise(res=> outCanvas.toBlob(res,'image/png'));
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-sticker.png');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Sticker படம் (transparent PNG) downloaded.');
+        mountResult(body, 'Sticker image (transparent PNG) downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-      finally{ [src,rgbMat,mask,bgdModel,fgdModel,alphaMat,dilated,kernel].forEach(m=>{ try{ m && m.delete(); }catch(e){} }); }
     }
     paint();
   }
