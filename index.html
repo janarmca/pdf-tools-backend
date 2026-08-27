@@ -22,18 +22,14 @@
 
   .topbar{display:flex; align-items:center; justify-content:space-between; padding:20px 4px 16px;}
   .brand{display:flex; align-items:center; gap:10px;}
-  .brand-mark{width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--brand),var(--brand-dark)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(55,82,166,.28);}
-  .brand-name{font-weight:900; font-size:17.5px; letter-spacing:-0.3px;}
+  .brand-mark{width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--brand),var(--brand-dark)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px;}
+  .brand-name{font-weight:800; font-size:17px; letter-spacing:-0.2px;}
   .brand-tag{font-size:11px; color:var(--sub); font-weight:600;}
   .free-badge{background:var(--ok); color:white; font-size:11px; font-weight:800; padding:5px 11px; border-radius:20px; letter-spacing:.3px;}
 
-  .hero{padding:22px 26px 26px; margin-top:14px; border-radius:22px; background:linear-gradient(135deg, #EEF2FF 0%, #F6F7FB 55%, #FFF6ED 100%); border:1px solid var(--line); position:relative; overflow:hidden;}
-  .hero::before{content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle, rgba(55,82,166,.12), transparent 70%);}
-  .hero::after{content:''; position:absolute; bottom:-60px; left:-30px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, rgba(232,137,74,.12), transparent 70%);}
-  .hero h1{font-size:27px; font-weight:900; margin:0 0 8px; letter-spacing:-0.5px; position:relative; background:linear-gradient(90deg,var(--brand-dark),var(--brand)); -webkit-background-clip:text; background-clip:text; color:transparent;}
-  .hero p{color:var(--sub); font-size:14px; margin:0 0 14px; max-width:600px; line-height:1.6; position:relative;}
-  .hero-badges{display:flex; gap:8px; flex-wrap:wrap; position:relative;}
-  .hero-badge{background:rgba(255,255,255,.75); border:1px solid var(--line); border-radius:20px; padding:6px 13px; font-size:11.5px; font-weight:700; color:var(--ink); backdrop-filter:blur(4px);}
+  .hero{padding:6px 4px 26px;}
+  .hero h1{font-size:26px; font-weight:800; margin:0 0 6px; letter-spacing:-0.4px;}
+  .hero p{color:var(--sub); font-size:14px; margin:0; max-width:560px; line-height:1.5;}
 
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:14px; margin-top:8px;}
   .tool-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:flex; flex-direction:column; gap:10px; text-align:left;}
@@ -176,13 +172,6 @@ const TOOLS = [
   {id:'pdfimgwm', name:'Logo Watermark on PDF', desc:'Stamp your logo/image on every page', icon:'🖼️', color:'#4A235A', cat:'pdf'},
   {id:'pdfqrstamp', name:'Add QR to PDF', desc:'Stamp a QR code on every page', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
-  {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'business'},
-  {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
-  {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
-  {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business'},
-  {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
-  {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
-  {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -241,16 +230,10 @@ let state = { view:'home', tool:null };
 // ============================================================
 const APP_CONFIG = {
   SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_N6LTr070Y6IXwHMjH9aeUQ_-xDo8ARE',
-  BACKEND_URL: 'https://pdf-tools-backend-0uuo.onrender.com'
+  SUPABASE_ANON_KEY: 'sb_publishable_7l7gWeY_aFNsVR4zkbf1rw_u9vBT_3O',
+  BACKEND_URL: 'https://pdf-tools-backend-wxc0.onrender.com'
 };
 const AUTH_CONFIGURED = !APP_CONFIG.SUPABASE_URL.includes('YOUR-PROJECT');
-if(AUTH_CONFIGURED && !/^https?:\/\/.+/.test(APP_CONFIG.BACKEND_URL)){
-  console.error('APP_CONFIG.BACKEND_URL is missing or invalid — all backend/login/payment features will fail silently until this is set to your real Render URL.');
-  window.addEventListener('DOMContentLoaded', ()=>{
-    document.body.insertAdjacentHTML('afterbegin', `<div style="background:#C0392B; color:#fff; text-align:center; padding:10px; font-size:13px; font-weight:700;">⚠️ Backend not configured (APP_CONFIG.BACKEND_URL is empty) — Login, Payments and AI tools will not work. Fix this in the HTML file.</div>`);
-  });
-}
 
 // ============================================================
 // 🔐 AUTH & CREDITS — Supabase login, profile, credits balance
@@ -499,28 +482,6 @@ function el(html){
   t.innerHTML = html.trim();
   return t.content.firstElementChild;
 }
-// Converts a number to Indian-style words (Crore/Lakh/Thousand) — used by
-// the Payment Voucher and Purchase Order/Invoice tools.
-function numberToWordsINR(n){
-  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-  function two(n){ if(n<20) return ones[n]; return tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:''); }
-  function three(n){ if(n>99) return ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+two(n%100):''); return two(n); }
-  n = Math.round(n);
-  if(n===0) return 'Zero';
-  let parts=[]; const crore=Math.floor(n/10000000); n%=10000000; const lakh=Math.floor(n/100000); n%=100000; const thousand=Math.floor(n/1000); n%=1000;
-  if(crore) parts.push(three(crore)+' Crore');
-  if(lakh) parts.push(three(lakh)+' Lakh');
-  if(thousand) parts.push(three(thousand)+' Thousand');
-  if(n) parts.push(three(n));
-  return parts.join(' ');
-}
-// Remembers business details (company name/address/GSTIN) across visits so
-// repeat use of the accounting tools (PO, Invoice, Voucher) doesn't require
-// retyping the same "your business" info every single time.
-function saveBizProfile(data){ try{ localStorage.setItem('pdfToolsBizProfile', JSON.stringify(data)); }catch(e){} }
-function loadBizProfile(){ try{ return JSON.parse(localStorage.getItem('pdfToolsBizProfile')||'{}'); }catch(e){ return {}; } }
-
 function fmtBytes(b){
   if(b < 1024) return b + ' B';
   if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
@@ -569,10 +530,10 @@ function render(){
   const foot = el(`<footer>
     <div>Your files never leave your device — everything runs in your browser.</div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
-      <a href="terms.html" style="color:var(--sub);">Terms</a>
-      <a href="privacy.html" style="color:var(--sub);">Privacy</a>
-      <a href="refund.html" style="color:var(--sub);">Refund Policy</a>
-      <a href="contact.html" style="color:var(--sub);">Contact</a>
+      <a href="/terms.html" style="color:var(--sub);">Terms</a>
+      <a href="/privacy.html" style="color:var(--sub);">Privacy</a>
+      <a href="/refund.html" style="color:var(--sub);">Refund Policy</a>
+      <a href="/contact.html" style="color:var(--sub);">Contact</a>
     </div>
     <div style="margin-top:10px; font-weight:800; color:var(--ink); font-size:12.5px;">Developed by Janarthanan Thiyagarajan  &nbsp;·&nbsp; 📞 +91&nbsp;76676&nbsp;63922</div>
   </footer>`);
@@ -654,10 +615,10 @@ function renderSettingsPage(){
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
       ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown'); }catch(e){} maybeShowDiscoverModal(true); }],
-      ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
-      ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
-      ['📄 Terms of Service', ()=> window.open('terms.html','_blank')],
-      ['💳 Refund Policy', ()=> window.open('refund.html','_blank')],
+      ['📞 Contact Us', ()=> window.open('/contact.html','_blank')],
+      ['🔒 Privacy Policy', ()=> window.open('/privacy.html','_blank')],
+      ['📄 Terms of Service', ()=> window.open('/terms.html','_blank')],
+      ['💳 Refund Policy', ()=> window.open('/refund.html','_blank')],
     ];
     const supportBox = el(`<div style="border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:20px;"></div>`);
     supportLinks.forEach(([label,fn],i)=>{
@@ -798,19 +759,12 @@ function renderHero(){
   return el(`
     <div class="hero tamil">
       <h1>All PDF Tools — In One Place, Free</h1>
-      <p>📷 Camera Scanner, OCR (20+ languages), Merge/Split/Compress/Watermark/Sign, Word ⇄ PDF, Excel ⇄ PDF/Word, GST invoicing, accounting templates, and a full AI toolkit — no ads, no clutter. Your files stay on your device unless you choose Fast Server Mode.</p>
-      <div class="hero-badges">
-        <div class="hero-badge">🧰 ${TOOLS.length}+ tools</div>
-        <div class="hero-badge">🔒 Privacy-first</div>
-        <div class="hero-badge">🇮🇳 Tamil + English</div>
-        <div class="hero-badge">🤖 AI-powered</div>
-      </div>
+      <p>📷 Camera Scanner (multiple photos → one PDF, auto-crop), OCR (20+ languages), Merge/Split/Compress/Watermark/Sign, Word ⇄ PDF, Excel ⇄ PDF/Word, and a full AI toolkit — no ads, no clutter. Your files stay on your device unless you choose Fast Server Mode.</p>
     </div>
   `);
 }
 const CATEGORY_META = {
   pdf:   { label: 'PDF', icon:'📄', sub: 'Free — runs entirely in your browser' },
-  business: { label: 'Business', icon:'💼', sub: 'Free — GST, invoicing & accounting templates' },
   image: { label: 'Image', icon:'🖼️', sub: '⚡ Paid — sign in for credits-based fast processing' },
   video: { label: 'Video', icon:'🎬', sub: '⚡ Paid — sign in for credits-based fast processing' },
   ai:    { label: 'AI', icon:'🤖', sub: '⚡ Paid — powered by AI, one credit per use' },
@@ -824,9 +778,9 @@ function renderDashboardStrip(){
   const p = authState.profile;
   const wrap = el(`<div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;"></div>`);
   const statCard = (label, value, accent)=> el(`
-    <div style="flex:1; min-width:130px; background:linear-gradient(145deg,#fff,#fafbff); border:1px solid var(--line); border-radius:16px; padding:15px 17px; box-shadow:0 2px 8px rgba(20,30,60,.04);">
-      <div style="font-size:10.5px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.04em;">${label}</div>
-      <div style="font-size:19px; font-weight:900; color:${accent||'var(--ink)'}; margin-top:3px;">${value}</div>
+    <div style="flex:1; min-width:130px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px;">
+      <div style="font-size:10.5px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.03em;">${label}</div>
+      <div style="font-size:18px; font-weight:900; color:${accent||'var(--ink)'}; margin-top:2px;">${value}</div>
     </div>
   `);
   if(!p){ wrap.appendChild(statCard('Account','Loading…')); return wrap; }
@@ -896,7 +850,7 @@ function renderHomeBody(){
     holder.appendChild(popSection);
   }
 
-  const order = __activeCategory==='all' ? ['pdf','business','image','video','ai'] : [__activeCategory];
+  const order = __activeCategory==='all' ? ['pdf','image','video','ai'] : [__activeCategory];
   order.forEach(cat=>{
     const items = TOOLS.filter(t=>t.cat===cat);
     if(!items.length) return;
@@ -7423,771 +7377,6 @@ TOOL_IMPL.pdfcompare = {
 
         const legend = el(`<div class="note" style="margin-top:10px;"><span style="background:#D6F5E0; color:#1E7145; padding:1px 6px; border-radius:3px;">Added</span> &nbsp; <span style="background:#FDE0E0; color:#C0392B; text-decoration:line-through; padding:1px 6px; border-radius:3px;">Removed</span></div>`);
         body.appendChild(legend);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== GST INVOICE GENERATOR ===================== */
-TOOL_IMPL.gstinvoice = {
-  mount(container){
-    let items = [{ desc:'', hsn:'', qty:1, rate:0 }];
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Rule-based calculator (not tax advice) — enter your details, we compute CGST/SGST/IGST automatically and generate a clean GST invoice PDF. Please verify with your CA before filing.</div>`));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Seller (You)</div>`));
-      const sellerOpts = el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Business Name</label><input type="text" id="gstSellerName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstSellerAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="gstSellerGstin" autocomplete="off" placeholder="22AAAAA0000A1Z5"></div>
-          <div class="field"><label>State</label><input type="text" id="gstSellerState" autocomplete="off" placeholder="Tamil Nadu"></div>
-        </div>
-      `);
-      body.appendChild(sellerOpts);
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Buyer</div>`));
-      const buyerOpts = el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Business/Customer Name</label><input type="text" id="gstBuyerName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstBuyerAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN (optional)</label><input type="text" id="gstBuyerGstin" autocomplete="off"></div>
-          <div class="field"><label>State</label><input type="text" id="gstBuyerState" autocomplete="off" placeholder="Tamil Nadu"></div>
-        </div>
-      `);
-      body.appendChild(buyerOpts);
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Invoice Details</div>`));
-      const invOpts = el(`
-        <div class="opts tamil">
-          <div class="field"><label>Invoice Number</label><input type="text" id="gstInvNo" autocomplete="off" value="INV-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="gstInvDate" value="${new Date().toISOString().slice(0,10)}"></div>
-        </div>
-      `);
-      body.appendChild(invOpts);
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Items</div>`));
-      const itemsWrap = el(`<div></div>`);
-      items.forEach((it,idx)=>{
-        const row = el(`
-          <div style="display:grid; grid-template-columns:2fr 1fr 0.7fr 1fr auto; gap:6px; margin-bottom:8px; align-items:center;">
-            <input type="text" placeholder="Item description" data-f="desc" data-i="${idx}" value="${(it.desc||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="text" placeholder="HSN/SAC" data-f="hsn" data-i="${idx}" value="${(it.hsn||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Qty" data-f="qty" data-i="${idx}" value="${it.qty}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Rate ₹" data-f="rate" data-i="${idx}" value="${it.rate}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <button data-remove="${idx}" style="background:none; border:none; color:var(--warn); font-size:16px; cursor:pointer;">✕</button>
-          </div>
-        `);
-        itemsWrap.appendChild(row);
-      });
-      itemsWrap.addEventListener('input',(e)=>{
-        const f = e.target.getAttribute('data-f'), i = Number(e.target.getAttribute('data-i'));
-        if(f==null || i==null || isNaN(i)) return;
-        items[i][f] = (f==='qty'||f==='rate') ? Number(e.target.value)||0 : e.target.value;
-      });
-      itemsWrap.addEventListener('click',(e)=>{
-        const idx = e.target.getAttribute('data-remove');
-        if(idx==null) return;
-        items.splice(Number(idx),1);
-        if(!items.length) items.push({desc:'',hsn:'',qty:1,rate:0});
-        paint();
-      });
-      body.appendChild(itemsWrap);
-      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
-      addBtn.onclick = ()=>{ items.push({desc:'',hsn:'',qty:1,rate:0}); paint(); };
-      body.appendChild(addBtn);
-
-      const gstOpts = el(`
-        <div class="opts one tamil" style="margin-top:14px;">
-          <div class="field"><label>GST Rate</label>
-            <select id="gstRate"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select>
-          </div>
-        </div>
-      `);
-      body.appendChild(gstOpts);
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🧾 Generate Invoice PDF</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const seller = {
-        name: body.querySelector('#gstSellerName').value||'', addr: body.querySelector('#gstSellerAddr').value||'',
-        gstin: body.querySelector('#gstSellerGstin').value||'', state: (body.querySelector('#gstSellerState').value||'').trim().toLowerCase()
-      };
-      const buyer = {
-        name: body.querySelector('#gstBuyerName').value||'', addr: body.querySelector('#gstBuyerAddr').value||'',
-        gstin: body.querySelector('#gstBuyerGstin').value||'', state: (body.querySelector('#gstBuyerState').value||'').trim().toLowerCase()
-      };
-      const invNo = body.querySelector('#gstInvNo').value||'INV-001';
-      const invDate = body.querySelector('#gstInvDate').value||'';
-      const gstRate = Number(body.querySelector('#gstRate').value)||0;
-      const validItems = items.filter(it=> it.desc.trim() && it.qty>0);
-      if(!validItems.length){ mountResult(body,'குறைந்தது ஒரு item-ஐயாவது சரியா நிரப்பவும்.').style.background='#FDEDEC'; return; }
-
-      const prog = mountProgress(body);
-      try{
-        prog.set(20,'Calculating…');
-        const isIntraState = seller.state && buyer.state && seller.state===buyer.state;
-        const rows = validItems.map(it=>{
-          const amount = it.qty*it.rate;
-          return { ...it, amount };
-        });
-        const subtotal = rows.reduce((s,r)=>s+r.amount,0);
-        const cgst = isIntraState ? subtotal*gstRate/200 : 0;
-        const sgst = isIntraState ? subtotal*gstRate/200 : 0;
-        const igst = isIntraState ? 0 : subtotal*gstRate/100;
-        const grandTotal = subtotal+cgst+sgst+igst;
-
-        prog.set(40,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]); // A4
-        const {width,height} = page.getSize();
-        let y = height-50;
-        const drawText = (txt, x, yy, size=11, color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt), {x, y:yy, size, font, color});
-
-        drawText('TAX INVOICE', 50, y, 20, rgb(0.13,0.29,0.62)); y-=30;
-        drawText(seller.name, 50, y, 13); y-=16;
-        drawText(seller.addr, 50, y, 10, rgb(0.4,0.4,0.4)); y-=14;
-        drawText('GSTIN: '+seller.gstin, 50, y, 10); y-=14;
-        drawText('State: '+(body.querySelector('#gstSellerState').value||''), 50, y, 10); y-=24;
-
-        drawText('Invoice No: '+invNo, 350, y+68, 10);
-        drawText('Date: '+invDate, 350, y+52, 10);
-
-        drawText('Bill To:', 50, y, 11, rgb(0.13,0.29,0.62)); y-=16;
-        drawText(buyer.name, 50, y, 12); y-=15;
-        drawText(buyer.addr, 50, y, 10, rgb(0.4,0.4,0.4)); y-=14;
-        if(buyer.gstin) { drawText('GSTIN: '+buyer.gstin, 50, y, 10); y-=14; }
-        drawText('State: '+(body.querySelector('#gstBuyerState').value||''), 50, y, 10); y-=26;
-
-        page.drawLine({ start:{x:50,y}, end:{x:width-50,y}, thickness:1, color:rgb(0.8,0.8,0.8) }); y-=6;
-        const cols = [50, 260, 340, 400, 470];
-        ['Description','HSN/SAC','Qty','Rate','Amount'].forEach((h,i)=> drawText(h, cols[i], y-14, 10, rgb(0.4,0.4,0.4)));
-        y-=24;
-        page.drawLine({ start:{x:50,y:y+6}, end:{x:width-50,y:y+6}, thickness:1, color:rgb(0.85,0.85,0.85) });
-        rows.forEach(r=>{
-          if(y<120){ /* keep simple: single page, note in summary if truncated */ return; }
-          drawText(r.desc.slice(0,32), cols[0], y-10, 10);
-          drawText(r.hsn, cols[1], y-10, 10);
-          drawText(String(r.qty), cols[2], y-10, 10);
-          drawText('₹'+r.rate.toFixed(2), cols[3], y-10, 10);
-          drawText('₹'+r.amount.toFixed(2), cols[4], y-10, 10);
-          y-=22;
-        });
-        y-=14;
-        page.drawLine({ start:{x:300,y:y+10}, end:{x:width-50,y:y+10}, thickness:1, color:rgb(0.85,0.85,0.85) });
-        const totalsRow = (label, val)=>{ drawText(label, 350, y-4, 10.5); drawText('₹'+val.toFixed(2), 470, y-4, 10.5); y-=18; };
-        totalsRow('Subtotal', subtotal);
-        if(isIntraState){ totalsRow(`CGST (${gstRate/2}%)`, cgst); totalsRow(`SGST (${gstRate/2}%)`, sgst); }
-        else { totalsRow(`IGST (${gstRate}%)`, igst); }
-        page.drawLine({ start:{x:350,y:y+10}, end:{x:width-50,y:y+10}, thickness:1, color:rgb(0.6,0.6,0.6) });
-        drawText('Grand Total', 350, y-8, 12, rgb(0.13,0.29,0.62));
-        drawText('₹'+grandTotal.toFixed(2), 470, y-8, 12, rgb(0.13,0.29,0.62));
-
-        drawText('This is a computer-generated invoice. Please verify GST calculations with your CA.', 50, 40, 8, rgb(0.55,0.55,0.55));
-
-        prog.set(85,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `invoice-${invNo}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Invoice generated — Grand Total ₹${grandTotal.toFixed(2)} (${isIntraState?'CGST+SGST':'IGST'}).`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== OBITUARY / DEATH ANNOUNCEMENT CARD ===================== */
-TOOL_IMPL.obituary = {
-  mount(container){
-    let photoDataUrl = null;
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">A respectful, ready-to-share announcement card — in Tamil and English together. Downloads as an image, ready for WhatsApp.</div>`));
-
-      const photoRow = el(`<div style="text-align:center; margin-bottom:14px;"></div>`);
-      const photoPreview = el(`<div style="width:110px; height:110px; border-radius:50%; background:#eee; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--line);">${photoDataUrl?`<img src="${photoDataUrl}" style="width:100%; height:100%; object-fit:cover;">`:'<span style="font-size:28px;">🕊️</span>'}</div>`);
-      const photoInput = el(`<input type="file" accept="image/*" style="font-size:12px;">`);
-      photoInput.onchange = async (e)=>{
-        const f = e.target.files[0]; if(!f) return;
-        photoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
-        paint();
-      };
-      photoRow.appendChild(photoPreview); photoRow.appendChild(el(`<div style="font-size:11px; color:var(--sub); margin-bottom:6px;">Photo (optional)</div>`)); photoRow.appendChild(photoInput);
-      body.appendChild(photoRow);
-
-      const opts = el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>பெயர் (Name) — Tamil</label><input type="text" id="obNameTa" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Name — English</label><input type="text" id="obNameEn" autocomplete="off"></div>
-          <div class="field"><label>பிறந்த தேதி (Born)</label><input type="date" id="obBorn"></div>
-          <div class="field"><label>இறந்த தேதி (Passed away)</label><input type="date" id="obDied"></div>
-          <div class="field"><label>வயது (Age)</label><input type="number" id="obAge" min="0"></div>
-          <div class="field"><label>தீம் Design</label>
-            <select id="obTheme">
-              <option value="cream">Cream / Gold</option>
-              <option value="blue">Soft Blue</option>
-              <option value="white">Classic White</option>
-              <option value="traditional">🪔 Traditional Tamil (Kolam border)</option>
-              <option value="temple">🛕 Temple Maroon</option>
-              <option value="lotus">🪷 Lotus Green</option>
-            </select>
-          </div>
-          <div class="field" style="grid-column:1/-1;"><label>குடும்பத்தினர் (Family/Relatives, optional)</label><input type="text" id="obFamily" autocomplete="off" placeholder="S/o, D/o, Spouse of…"></div>
-          <div class="field" style="grid-column:1/-1;"><label>இறுதி சடங்கு விவரம் (Funeral details)</label><input type="text" id="obFuneral" autocomplete="off" placeholder="எ.கா. இன்று மாலை 4 மணிக்கு, ஊர் பொது சுடுகாடு"></div>
-        </div>
-      `);
-      body.appendChild(opts);
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🕊️ Card உருவாக்கு</button>`);
-      btn.onclick = doMake;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doMake(){
-      const nameTa = body.querySelector('#obNameTa').value||'';
-      const nameEn = body.querySelector('#obNameEn').value||'';
-      const born = body.querySelector('#obBorn').value||'';
-      const died = body.querySelector('#obDied').value||'';
-      const age = body.querySelector('#obAge').value||'';
-      const theme = body.querySelector('#obTheme').value;
-      const family = body.querySelector('#obFamily').value||'';
-      const funeral = body.querySelector('#obFuneral').value||'';
-      if(!nameEn.trim() && !nameTa.trim()){ mountResult(body,'பெயரை உள்ளிடவும்.').style.background='#FDEDEC'; return; }
-
-      const themes = {
-        cream: { bg:'#FBF3E3', accent:'#8C6D1F', line:'#D9C48E', style:'plain' },
-        blue:  { bg:'#EAF1F8', accent:'#2E5C8A', line:'#B9D2E8', style:'plain' },
-        white: { bg:'#FFFFFF', accent:'#3A3A3A', line:'#DADADA', style:'plain' },
-        traditional: { bg:'#FDF6E3', accent:'#7A1F1F', line:'#B8860B', style:'kolam' },
-        temple: { bg:'#F7EDEA', accent:'#7A1F1F', line:'#C9A227', style:'temple' },
-        lotus: { bg:'#F0F7F0', accent:'#2E5C3E', line:'#8FBF9F', style:'lotus' }
-      };
-      const t = themes[theme]||themes.cream;
-      const prog = mountProgress(body);
-      try{
-        prog.set(20,'Preparing card…');
-        const W=900, H=1200;
-        const SCALE = 2; // renders at 2x resolution for a crisp, WhatsApp/print-ready image
-        const canvas = document.createElement('canvas'); canvas.width=W*SCALE; canvas.height=H*SCALE;
-        const ctx = canvas.getContext('2d');
-        ctx.scale(SCALE, SCALE); // everything below is still drawn using the original W×H coordinate system
-        ctx.fillStyle = t.bg; ctx.fillRect(0,0,W,H);
-        ctx.strokeStyle = t.line; ctx.lineWidth = 6; ctx.strokeRect(24,24,W-48,H-48);
-        ctx.strokeStyle = t.accent; ctx.lineWidth = 1.5; ctx.strokeRect(40,40,W-80,H-80);
-
-        // Decorative elements for the traditional-style themes — kept simple
-        // (basic shapes only) so they render crisply and quickly on canvas.
-        if(t.style==='kolam'){
-          ctx.fillStyle = t.line;
-          const dotSpacing = 26, margin = 55;
-          for(let x=margin; x<=W-margin; x+=dotSpacing){
-            ctx.beginPath(); ctx.arc(x, margin, 3, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(x, H-margin, 3, 0, Math.PI*2); ctx.fill();
-          }
-          for(let y=margin; y<=H-margin; y+=dotSpacing){
-            ctx.beginPath(); ctx.arc(margin, y, 3, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(W-margin, y, 3, 0, Math.PI*2); ctx.fill();
-          }
-        } else if(t.style==='temple'){
-          ctx.strokeStyle = t.accent; ctx.fillStyle = t.line;
-          [[70,70],[W-70,70],[70,H-70],[W-70,H-70]].forEach(([cx,cy])=>{
-            ctx.beginPath(); ctx.moveTo(cx-18,cy); ctx.quadraticCurveTo(cx,cy-26,cx+18,cy); ctx.quadraticCurveTo(cx,cy+10,cx-18,cy); ctx.fill();
-          });
-        } else if(t.style==='lotus'){
-          const drawPetal = (cx,cy,rot)=>{
-            ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
-            ctx.fillStyle = t.line; ctx.beginPath();
-            ctx.moveTo(0,0); ctx.quadraticCurveTo(10,-18,0,-34); ctx.quadraticCurveTo(-10,-18,0,0); ctx.fill();
-            ctx.restore();
-          };
-          for(let i=0;i<8;i++) drawPetal(W/2, 78, (Math.PI*2/8)*i);
-          for(let i=0;i<8;i++) drawPetal(W/2, H-78, (Math.PI*2/8)*i);
-        }
-
-        ctx.textAlign='center'; ctx.fillStyle = t.accent;
-        ctx.font = '400 26px Georgia, serif';
-        ctx.fillText('இறையடி சேர்ந்தார் · In Loving Memory', W/2, 110);
-
-        if(photoDataUrl){
-          const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=photoDataUrl; });
-          const r = 150;
-          ctx.save();
-          ctx.beginPath(); ctx.arc(W/2, 270, r, 0, Math.PI*2); ctx.closePath(); ctx.clip();
-          const scale = Math.max((r*2)/img.naturalWidth, (r*2)/img.naturalHeight);
-          const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
-          ctx.drawImage(img, W/2-dw/2, 270-dh/2, dw, dh);
-          ctx.restore();
-          ctx.strokeStyle = t.accent; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(W/2,270,r,0,Math.PI*2); ctx.stroke();
-        }
-
-        let y = photoDataUrl ? 490 : 220;
-        ctx.fillStyle = '#20242B';
-        if(nameTa){ ctx.font = '700 42px "Noto Sans Tamil", sans-serif'; ctx.fillText(nameTa, W/2, y); y+=54; }
-        if(nameEn){ ctx.font = '700 34px Georgia, serif'; ctx.fillText(nameEn, W/2, y); y+=50; }
-        if(age){ ctx.font='400 22px Georgia, serif'; ctx.fillStyle=t.accent; ctx.fillText('வயது / Age: '+age, W/2, y); y+=40; }
-        if(born || died){
-          ctx.font='400 20px Georgia, serif'; ctx.fillStyle='#444';
-          const bd = born ? new Date(born).toLocaleDateString('en-IN') : '?';
-          const dd = died ? new Date(died).toLocaleDateString('en-IN') : '?';
-          ctx.fillText(`${bd}  —  ${dd}`, W/2, y); y+=46;
-        }
-        if(family){
-          ctx.font='400 20px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#333';
-          y+=10; ctx.fillText(family, W/2, y); y+=44;
-        }
-        // horizontal divider
-        ctx.strokeStyle = t.line; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.moveTo(W/2-160,y); ctx.lineTo(W/2+160,y); ctx.stroke();
-        y+=50;
-        ctx.font='italic 22px Georgia, serif'; ctx.fillStyle=t.accent;
-        ctx.fillText('"என்றென்றும் நினைவில்"', W/2, y); y+=30;
-        ctx.fillText('"Forever in our hearts"', W/2, y); y+=60;
-
-        if(funeral){
-          ctx.font='700 20px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#20242B';
-          ctx.fillText('இறுதி சடங்கு விவரம் / Funeral Details', W/2, y); y+=32;
-          ctx.font='400 19px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#444';
-          // wrap long text
-          const words = funeral.split(' '); let line=''; const maxW = W-160;
-          words.forEach(w=>{
-            const test = line?line+' '+w:w;
-            if(ctx.measureText(test).width > maxW && line){ ctx.fillText(line, W/2, y); y+=28; line=w; }
-            else line = test;
-          });
-          if(line) { ctx.fillText(line, W/2, y); y+=28; }
-        }
-
-        prog.set(80,'Preparing…');
-        const blob = await new Promise(res=> canvas.toBlob(res,'image/png'));
-        downloadBlob(blob, 'obituary-card.png');
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Card தயார் செய்யப்பட்டு downloaded — WhatsApp-ல் share பண்ணலாம்.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== SALARY SLIP GENERATOR ===================== */
-TOOL_IMPL.salaryslip = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Basic pay + allowances − deductions = Net Pay, calculated automatically.</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="ssCompany" autocomplete="off"></div>
-          <div class="field"><label>Employee Name</label><input type="text" id="ssName" autocomplete="off"></div>
-          <div class="field"><label>Employee ID</label><input type="text" id="ssEmpId" autocomplete="off"></div>
-          <div class="field"><label>Month</label><input type="month" id="ssMonth" value="${new Date().toISOString().slice(0,7)}"></div>
-          <div class="field"><label>Designation</label><input type="text" id="ssDesig" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Earnings</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field"><label>Basic Pay ₹</label><input type="number" id="ssBasic" value="0"></div>
-          <div class="field"><label>HRA ₹</label><input type="number" id="ssHra" value="0"></div>
-          <div class="field"><label>Other Allowances ₹</label><input type="number" id="ssAllow" value="0"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Deductions</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field"><label>PF ₹</label><input type="number" id="ssPf" value="0"></div>
-          <div class="field"><label>Professional Tax ₹</label><input type="number" id="ssPt" value="0"></div>
-          <div class="field"><label>TDS / Other ₹</label><input type="number" id="ssTds" value="0"></div>
-        </div>
-      `));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">💵 Generate Payslip</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const v = (id)=> Number(body.querySelector(id).value)||0;
-      const company = body.querySelector('#ssCompany').value||'';
-      const name = body.querySelector('#ssName').value||'';
-      const empId = body.querySelector('#ssEmpId').value||'';
-      const month = body.querySelector('#ssMonth').value||'';
-      const desig = body.querySelector('#ssDesig').value||'';
-      const basic=v('#ssBasic'), hra=v('#ssHra'), allow=v('#ssAllow');
-      const pf=v('#ssPf'), pt=v('#ssPt'), tds=v('#ssTds');
-      const grossEarnings = basic+hra+allow;
-      const totalDeductions = pf+pt+tds;
-      const netPay = grossEarnings-totalDeductions;
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 400]);
-        const {width} = page.getSize();
-        let y = 350;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        t(company||'Company Name', 50, y, 16, rgb(0.13,0.29,0.62)); y-=20;
-        t('Payslip for '+(month||''), 50, y, 11, rgb(0.4,0.4,0.4)); y-=26;
-        t('Employee: '+name, 50, y, 11); t('ID: '+empId, 320, y, 11); y-=16;
-        t('Designation: '+desig, 50, y, 11); y-=24;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=20;
-        t('EARNINGS', 50, y, 11, rgb(0.13,0.29,0.62)); t('DEDUCTIONS', 320, y, 11, rgb(0.13,0.29,0.62)); y-=18;
-        t('Basic Pay', 50, y); t('₹'+basic.toFixed(2), 220, y); t('PF', 320, y); t('₹'+pf.toFixed(2), 490, y); y-=16;
-        t('HRA', 50, y); t('₹'+hra.toFixed(2), 220, y); t('Professional Tax', 320, y); t('₹'+pt.toFixed(2), 490, y); y-=16;
-        t('Other Allowances', 50, y); t('₹'+allow.toFixed(2), 220, y); t('TDS/Other', 320, y); t('₹'+tds.toFixed(2), 490, y); y-=24;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=18;
-        t('Gross Earnings', 50, y, 11.5); t('₹'+grossEarnings.toFixed(2), 220, y, 11.5);
-        t('Total Deductions', 320, y, 11.5); t('₹'+totalDeductions.toFixed(2), 490, y, 11.5); y-=28;
-        t('NET PAY', 50, y, 14, rgb(0.1,0.45,0.2)); t('₹'+netPay.toFixed(2), 220, y, 14, rgb(0.1,0.45,0.2));
-        t('This is a computer-generated payslip.', 50, 30, 8, rgb(0.55,0.55,0.55));
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `payslip-${name||'employee'}-${month}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Payslip generated — Net Pay ₹${netPay.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== PAYMENT VOUCHER ===================== */
-TOOL_IMPL.paymentvoucher = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Company/Business Name</label><input type="text" id="pvCompany" autocomplete="off"></div>
-          <div class="field"><label>Voucher No.</label><input type="text" id="pvNo" autocomplete="off" value="PV-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="pvDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Paid To</label><input type="text" id="pvTo" autocomplete="off"></div>
-          <div class="field"><label>Amount ₹</label><input type="number" id="pvAmount" value="0"></div>
-          <div class="field"><label>Mode</label><select id="pvMode"><option>Cash</option><option>Bank Transfer</option><option>UPI</option><option>Cheque</option></select></div>
-          <div class="field" style="grid-column:1/-1;"><label>Towards / Purpose</label><input type="text" id="pvPurpose" autocomplete="off"></div>
-        </div>
-      `));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🧮 Generate Voucher</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const company = body.querySelector('#pvCompany').value||'';
-      const no = body.querySelector('#pvNo').value||'PV-001';
-      const date = body.querySelector('#pvDate').value||'';
-      const to = body.querySelector('#pvTo').value||'';
-      const amount = Number(body.querySelector('#pvAmount').value)||0;
-      const mode = body.querySelector('#pvMode').value;
-      const purpose = body.querySelector('#pvPurpose').value||'';
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 350]);
-        const {width} = page.getSize();
-        let y = 300;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        t(company||'Business Name', 50, y, 15, rgb(0.13,0.29,0.62)); y-=22;
-        t('PAYMENT VOUCHER', width/2-70, y, 14); y-=22;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=22;
-        t('Voucher No: '+no, 50, y); t('Date: '+date, 350, y); y-=22;
-        t('Paid To:', 50, y, 10.5, rgb(0.4,0.4,0.4)); y-=16;
-        t(to, 50, y, 12.5); y-=24;
-        t('Amount: ₹'+amount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2)); y-=18;
-        t('Amount in words: Rupees '+numberToWordsINR(amount)+' Only', 50, y, 10); y-=20;
-        t('Mode of Payment: '+mode, 50, y, 11); y-=20;
-        t('Towards: '+purpose, 50, y, 11); y-=50;
-        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        page.drawLine({start:{x:width-200,y},end:{x:width-50,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        t('Received by', 50, y-14, 9, rgb(0.5,0.5,0.5)); t('Authorized Signatory', width-200, y-14, 9, rgb(0.5,0.5,0.5));
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `voucher-${no}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Payment Voucher downloaded.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== PURCHASE ORDER GENERATOR ===================== */
-TOOL_IMPL.purchaseorder = {
-  mount(container){
-    let items = [{ desc:'', qty:1, rate:0, gst:18 }];
-    const saved = loadBizProfile();
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Your business details are remembered automatically — you only need to type them once.</div>`));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Your Business (Buyer)</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="poCompany" autocomplete="off" value="${(saved.company||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="poCompanyAddr" autocomplete="off" value="${(saved.companyAddr||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="poCompanyGstin" autocomplete="off" value="${(saved.companyGstin||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field"><label>Destination</label><input type="text" id="poDest" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Vendor / Supplier</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Vendor Name</label><input type="text" id="poVendor" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Vendor Address</label><input type="text" id="poVendorAddr" autocomplete="off"></div>
-          <div class="field"><label>Vendor GSTIN</label><input type="text" id="poVendorGstin" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Order Details</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field"><label>PO Number</label><input type="text" id="poNo" autocomplete="off" value="PO-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="poDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>Mode of Transport</label><input type="text" id="poMode" autocomplete="off" placeholder="By Road"></div>
-          <div class="field"><label>Terms of Payment</label><input type="text" id="poPayTerms" autocomplete="off" placeholder="15 Days"></div>
-          <div class="field"><label>Terms of Delivery</label><input type="text" id="poDelTerms" autocomplete="off" placeholder="Immediate"></div>
-          <div class="field"><label>Freight</label><select id="poFreight"><option>To Pay</option><option>Paid</option><option>Including</option></select></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Items</div>`));
-      const itemsWrap = el(`<div></div>`);
-      items.forEach((it,idx)=>{
-        itemsWrap.appendChild(el(`
-          <div style="display:grid; grid-template-columns:2fr 0.6fr 0.9fr 0.7fr auto; gap:6px; margin-bottom:8px;">
-            <input type="text" placeholder="Item / description" data-f="desc" data-i="${idx}" value="${(it.desc||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Qty" data-f="qty" data-i="${idx}" value="${it.qty}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Rate ₹" data-f="rate" data-i="${idx}" value="${it.rate}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="GST%" data-f="gst" data-i="${idx}" value="${it.gst}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <button data-remove="${idx}" style="background:none; border:none; color:var(--warn); font-size:16px; cursor:pointer;">✕</button>
-          </div>
-        `));
-      });
-      itemsWrap.addEventListener('input',(e)=>{
-        const f=e.target.getAttribute('data-f'), i=Number(e.target.getAttribute('data-i'));
-        if(f==null) return;
-        items[i][f] = (f==='desc') ? e.target.value : Number(e.target.value)||0;
-        updateLiveTotal();
-      });
-      itemsWrap.addEventListener('click',(e)=>{
-        const idx = e.target.getAttribute('data-remove'); if(idx==null) return;
-        items.splice(Number(idx),1); if(!items.length) items.push({desc:'',qty:1,rate:0,gst:18}); paint();
-      });
-      body.appendChild(itemsWrap);
-      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
-      addBtn.onclick = ()=>{ items.push({desc:'',qty:1,rate:0,gst:18}); paint(); };
-      body.appendChild(addBtn);
-
-      const liveTotal = el(`<div style="margin-top:14px; padding:14px 16px; background:#F0F4FF; border-radius:12px; font-weight:800; font-size:14px; text-align:right;"></div>`);
-      body.appendChild(liveTotal);
-      function updateLiveTotal(){
-        const subtotal = items.reduce((s,it)=>s+it.qty*it.rate,0);
-        const gstAmt = items.reduce((s,it)=>s+(it.qty*it.rate*it.gst/100),0);
-        liveTotal.textContent = `Subtotal ₹${subtotal.toFixed(2)}  +  GST ₹${gstAmt.toFixed(2)}  =  Grand Total ₹${(subtotal+gstAmt).toFixed(2)}`;
-      }
-      updateLiveTotal();
-
-      body.appendChild(el(`<div class="opts one tamil" style="margin-top:14px;"><div class="field" style="grid-column:1/-1;"><label>Special Instructions (one per line, optional)</label><textarea id="poInstr" rows="3" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:12.5px; font-family:inherit;" placeholder="Please send a copy of the original invoice to office…">Please send the copy of original invoice to office
-Please notify us immediately if you are unable to ship as specified</textarea></div></div>`));
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📦 Generate PO</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const company = body.querySelector('#poCompany').value||'';
-      const companyAddr = body.querySelector('#poCompanyAddr').value||'';
-      const companyGstin = body.querySelector('#poCompanyGstin').value||'';
-      const dest = body.querySelector('#poDest').value||'';
-      const vendor = body.querySelector('#poVendor').value||'';
-      const vendorAddr = body.querySelector('#poVendorAddr').value||'';
-      const vendorGstin = body.querySelector('#poVendorGstin').value||'';
-      const no = body.querySelector('#poNo').value||'PO-001';
-      const date = body.querySelector('#poDate').value||'';
-      const mode = body.querySelector('#poMode').value||'';
-      const payTerms = body.querySelector('#poPayTerms').value||'';
-      const delTerms = body.querySelector('#poDelTerms').value||'';
-      const freight = body.querySelector('#poFreight').value||'';
-      const instructions = (body.querySelector('#poInstr').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
-      const validItems = items.filter(it=>it.desc.trim() && it.qty>0);
-      if(!validItems.length){ mountResult(body,'குறைந்தது ஒரு item-ஐயாவது நிரப்பவும்.').style.background='#FDEDEC'; return; }
-
-      saveBizProfile({ company, companyAddr, companyGstin }); // remembered for next time
-
-      const prog = mountProgress(body);
-      try{
-        prog.set(20,'Calculating…');
-        const rows = validItems.map(it=>{ const amount=it.qty*it.rate; const gstAmt=amount*it.gst/100; return {...it, amount, gstAmt}; });
-        const subtotal = rows.reduce((s,r)=>s+r.amount,0);
-        const totalGst = rows.reduce((s,r)=>s+r.gstAmt,0);
-        const cgst = totalGst/2, sgst = totalGst/2;
-        const grandTotal = subtotal+totalGst;
-
-        prog.set(40,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]); // A4
-        const {width} = page.getSize();
-        let y = 800;
-        const t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        const line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
-
-        t('PURCHASE ORDER', 40, y, 20, rgb(0.13,0.29,0.62)); y-=10;
-        t('PO No: '+no, 400, y+10, 10); t('Date: '+date, 400, y-6, 10); y-=22;
-        line(y); y-=18;
-
-        t('Buyer', 40, y, 9, rgb(0.5,0.5,0.5)); t('Supplier', 310, y, 9, rgb(0.5,0.5,0.5)); y-=14;
-        t(company||'—', 40, y, 12); t(vendor||'—', 310, y, 12); y-=14;
-        t(companyAddr, 40, y, 9, rgb(0.4,0.4,0.4)); t(vendorAddr, 310, y, 9, rgb(0.4,0.4,0.4)); y-=13;
-        t('GSTIN: '+companyGstin, 40, y, 9); t('GSTIN: '+vendorGstin, 310, y, 9); y-=22;
-
-        t('Destination: '+dest, 40, y, 9); t('Mode of Transport: '+mode, 310, y, 9); y-=14;
-        t('Terms of Payment: '+payTerms, 40, y, 9); t('Terms of Delivery: '+delTerms, 310, y, 9); y-=14;
-        t('Freight: '+freight, 40, y, 9); y-=20;
-        line(y); y-=18;
-
-        const cols=[40,270,330,390,450,510];
-        ['SL','Description','Qty','Rate','GST%','Amount'].forEach((h,i)=> t(h, cols[i], y, 9, rgb(0.5,0.5,0.5)));
-        y-=8; line(y); y-=16;
-        rows.forEach((r,i)=>{
-          if(y<160) return; // keep to one page for simplicity
-          t(String(i+1), cols[0], y, 9.5); t(r.desc.slice(0,34), cols[1], y, 9.5);
-          t(String(r.qty), cols[2], y, 9.5); t('₹'+r.rate.toFixed(2), cols[3], y, 9.5);
-          t(r.gst+'%', cols[4], y, 9.5); t('₹'+r.amount.toFixed(2), cols[5], y, 9.5);
-          y-=18;
-        });
-        y-=6; line(y); y-=18;
-
-        t('Subtotal', 400, y, 10); t('₹'+subtotal.toFixed(2), 500, y, 10); y-=15;
-        t('CGST', 400, y, 10); t('₹'+cgst.toFixed(2), 500, y, 10); y-=15;
-        t('SGST', 400, y, 10); t('₹'+sgst.toFixed(2), 500, y, 10); y-=15;
-        line(y, rgb(0.6,0.6,0.6)); y-=16;
-        t('Grand Total', 400, y, 12, rgb(0.13,0.29,0.62)); t('₹'+grandTotal.toFixed(2), 500, y, 12, rgb(0.13,0.29,0.62)); y-=20;
-        t('Amount in Words: Rupees '+numberToWordsINR(grandTotal)+' Only', 40, y, 9, rgb(0.4,0.4,0.4)); y-=26;
-
-        if(instructions.length){
-          t('Special Instructions:', 40, y, 10, rgb(0.13,0.29,0.62)); y-=14;
-          instructions.forEach((ins,i)=>{ t((i+1)+'. '+ins.slice(0,90), 40, y, 8.5, rgb(0.4,0.4,0.4)); y-=13; });
-          y-=10;
-        }
-        y = Math.max(y, 70);
-        line(y+30);
-        ['Prepared By','Checked By','Authorized Signatory'].forEach((lbl,i)=>{
-          t(lbl, 40+i*180, y+10, 8.5, rgb(0.5,0.5,0.5));
-        });
-
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `purchase-order-${no}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `PO generated — Grand Total ₹${grandTotal.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== EXPENSE TRACKER TEMPLATE (Excel) ===================== */
-TOOL_IMPL.expensetracker = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Downloads a ready-to-use Excel — categories, monthly columns, and totals already set up with formulas.</div>`));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📊 Download Expense Tracker</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const prog = mountProgress(body);
-      try{
-        prog.set(40,'Building template…');
-        const categories = ['Rent','Salaries','Utilities','Supplies','Travel','Marketing','Maintenance','Miscellaneous'];
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const header = ['Category', ...months, 'Total'];
-        const aoa = [header];
-        categories.forEach((cat, r)=>{
-          const row = [cat, ...months.map(()=>0)];
-          const rowNum = r+2; // account for header row
-          const firstCol = 'B', lastCol = 'M';
-          row.push({ f: `SUM(${firstCol}${rowNum}:${lastCol}${rowNum})` });
-          aoa.push(row);
-        });
-        const totalRow = ['TOTAL'];
-        for(let c=0;c<12;c++){
-          const colLetter = String.fromCharCode(66+c); // B..M
-          totalRow.push({ f: `SUM(${colLetter}2:${colLetter}${categories.length+1})` });
-        }
-        totalRow.push({ f: `SUM(N2:N${categories.length+1})` });
-        aoa.push(totalRow);
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws['!cols'] = [{wch:16}, ...Array(12).fill({wch:9}), {wch:12}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Expense Tracker');
-        prog.set(90,'Preparing…');
-        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'expense-tracker.xlsx');
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Expense Tracker (.xlsx) downloaded — fill in your numbers, totals calculate automatically.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* ===================== PETTY CASH BOOK TEMPLATE (Excel) ===================== */
-TOOL_IMPL.pettycash = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Downloads an Excel petty cash register — every row's Balance auto-calculates from the row above it.</div>`));
-      const opts = el(`<div class="opts one tamil"><div class="field"><label>Opening Balance ₹</label><input type="number" id="pcOpen" value="0"></div><div class="field"><label>எத்தனை entry rows வேணும்</label><input type="number" id="pcRows" value="40" min="10" max="200"></div></div>`);
-      body.appendChild(opts);
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🪙 Download Petty Cash Book</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const opening = Number(body.querySelector('#pcOpen').value)||0;
-      const numRows = Math.max(10, Math.min(200, Number(body.querySelector('#pcRows').value)||40));
-      const prog = mountProgress(body);
-      try{
-        prog.set(40,'Building template…');
-        const aoa = [['Date','Description','Received (₹)','Paid (₹)','Balance (₹)']];
-        aoa.push(['', 'Opening Balance', '', '', opening]);
-        for(let i=0;i<numRows;i++){
-          const rowNum = i+3; // header=1, opening=2, entries start at 3
-          aoa.push(['', '', '', '', { f: `E${rowNum-1}+C${rowNum}-D${rowNum}` }]);
-        }
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws['!cols'] = [{wch:12},{wch:28},{wch:14},{wch:14},{wch:14}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Petty Cash');
-        prog.set(90,'Preparing…');
-        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'petty-cash-book.xlsx');
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Petty Cash Book (.xlsx) downloaded — Balance column updates itself as you fill entries.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
