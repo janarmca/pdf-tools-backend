@@ -22,14 +22,18 @@
 
   .topbar{display:flex; align-items:center; justify-content:space-between; padding:20px 4px 16px;}
   .brand{display:flex; align-items:center; gap:10px;}
-  .brand-mark{width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--brand),var(--brand-dark)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px;}
-  .brand-name{font-weight:800; font-size:17px; letter-spacing:-0.2px;}
+  .brand-mark{width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--brand),var(--brand-dark)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(55,82,166,.28);}
+  .brand-name{font-weight:900; font-size:17.5px; letter-spacing:-0.3px;}
   .brand-tag{font-size:11px; color:var(--sub); font-weight:600;}
   .free-badge{background:var(--ok); color:white; font-size:11px; font-weight:800; padding:5px 11px; border-radius:20px; letter-spacing:.3px;}
 
-  .hero{padding:6px 4px 26px;}
-  .hero h1{font-size:26px; font-weight:800; margin:0 0 6px; letter-spacing:-0.4px;}
-  .hero p{color:var(--sub); font-size:14px; margin:0; max-width:560px; line-height:1.5;}
+  .hero{padding:22px 26px 26px; margin-top:14px; border-radius:22px; background:linear-gradient(135deg, #EEF2FF 0%, #F6F7FB 55%, #FFF6ED 100%); border:1px solid var(--line); position:relative; overflow:hidden;}
+  .hero::before{content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle, rgba(55,82,166,.12), transparent 70%);}
+  .hero::after{content:''; position:absolute; bottom:-60px; left:-30px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, rgba(232,137,74,.12), transparent 70%);}
+  .hero h1{font-size:27px; font-weight:900; margin:0 0 8px; letter-spacing:-0.5px; position:relative; background:linear-gradient(90deg,var(--brand-dark),var(--brand)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero p{color:var(--sub); font-size:14px; margin:0 0 14px; max-width:600px; line-height:1.6; position:relative;}
+  .hero-badges{display:flex; gap:8px; flex-wrap:wrap; position:relative;}
+  .hero-badge{background:rgba(255,255,255,.75); border:1px solid var(--line); border-radius:20px; padding:6px 13px; font-size:11.5px; font-weight:700; color:var(--ink); backdrop-filter:blur(4px);}
 
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:14px; margin-top:8px;}
   .tool-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:flex; flex-direction:column; gap:10px; text-align:left;}
@@ -174,6 +178,11 @@ const TOOLS = [
   {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
   {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'pdf'},
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
+  {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'pdf'},
+  {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'pdf'},
+  {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'pdf'},
+  {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'pdf'},
+  {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'pdf'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -767,7 +776,13 @@ function renderHero(){
   return el(`
     <div class="hero tamil">
       <h1>All PDF Tools — In One Place, Free</h1>
-      <p>📷 Camera Scanner (multiple photos → one PDF, auto-crop), OCR (20+ languages), Merge/Split/Compress/Watermark/Sign, Word ⇄ PDF, Excel ⇄ PDF/Word, and a full AI toolkit — no ads, no clutter. Your files stay on your device unless you choose Fast Server Mode.</p>
+      <p>📷 Camera Scanner, OCR (20+ languages), Merge/Split/Compress/Watermark/Sign, Word ⇄ PDF, Excel ⇄ PDF/Word, GST invoicing, accounting templates, and a full AI toolkit — no ads, no clutter. Your files stay on your device unless you choose Fast Server Mode.</p>
+      <div class="hero-badges">
+        <div class="hero-badge">🧰 ${TOOLS.length}+ tools</div>
+        <div class="hero-badge">🔒 Privacy-first</div>
+        <div class="hero-badge">🇮🇳 Tamil + English</div>
+        <div class="hero-badge">🤖 AI-powered</div>
+      </div>
     </div>
   `);
 }
@@ -786,9 +801,9 @@ function renderDashboardStrip(){
   const p = authState.profile;
   const wrap = el(`<div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;"></div>`);
   const statCard = (label, value, accent)=> el(`
-    <div style="flex:1; min-width:130px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px;">
-      <div style="font-size:10.5px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.03em;">${label}</div>
-      <div style="font-size:18px; font-weight:900; color:${accent||'var(--ink)'}; margin-top:2px;">${value}</div>
+    <div style="flex:1; min-width:130px; background:linear-gradient(145deg,#fff,#fafbff); border:1px solid var(--line); border-radius:16px; padding:15px 17px; box-shadow:0 2px 8px rgba(20,30,60,.04);">
+      <div style="font-size:10.5px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.04em;">${label}</div>
+      <div style="font-size:19px; font-weight:900; color:${accent||'var(--ink)'}; margin-top:3px;">${value}</div>
     </div>
   `);
   if(!p){ wrap.appendChild(statCard('Account','Loading…')); return wrap; }
@@ -7693,6 +7708,357 @@ TOOL_IMPL.obituary = {
         downloadBlob(blob, 'obituary-card.png');
         prog.set(100,'Done'); prog.remove();
         mountResult(body, 'Card தயார் செய்யப்பட்டு downloaded — WhatsApp-ல் share பண்ணலாம்.');
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== SALARY SLIP GENERATOR ===================== */
+TOOL_IMPL.salaryslip = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Basic pay + allowances − deductions = Net Pay, calculated automatically.</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="ssCompany" autocomplete="off"></div>
+          <div class="field"><label>Employee Name</label><input type="text" id="ssName" autocomplete="off"></div>
+          <div class="field"><label>Employee ID</label><input type="text" id="ssEmpId" autocomplete="off"></div>
+          <div class="field"><label>Month</label><input type="month" id="ssMonth" value="${new Date().toISOString().slice(0,7)}"></div>
+          <div class="field"><label>Designation</label><input type="text" id="ssDesig" autocomplete="off"></div>
+        </div>
+      `));
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Earnings</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>Basic Pay ₹</label><input type="number" id="ssBasic" value="0"></div>
+          <div class="field"><label>HRA ₹</label><input type="number" id="ssHra" value="0"></div>
+          <div class="field"><label>Other Allowances ₹</label><input type="number" id="ssAllow" value="0"></div>
+        </div>
+      `));
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Deductions</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>PF ₹</label><input type="number" id="ssPf" value="0"></div>
+          <div class="field"><label>Professional Tax ₹</label><input type="number" id="ssPt" value="0"></div>
+          <div class="field"><label>TDS / Other ₹</label><input type="number" id="ssTds" value="0"></div>
+        </div>
+      `));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">💵 Generate Payslip</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      const v = (id)=> Number(body.querySelector(id).value)||0;
+      const company = body.querySelector('#ssCompany').value||'';
+      const name = body.querySelector('#ssName').value||'';
+      const empId = body.querySelector('#ssEmpId').value||'';
+      const month = body.querySelector('#ssMonth').value||'';
+      const desig = body.querySelector('#ssDesig').value||'';
+      const basic=v('#ssBasic'), hra=v('#ssHra'), allow=v('#ssAllow');
+      const pf=v('#ssPf'), pt=v('#ssPt'), tds=v('#ssTds');
+      const grossEarnings = basic+hra+allow;
+      const totalDeductions = pf+pt+tds;
+      const netPay = grossEarnings-totalDeductions;
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 400]);
+        const {width} = page.getSize();
+        let y = 350;
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        t(company||'Company Name', 50, y, 16, rgb(0.13,0.29,0.62)); y-=20;
+        t('Payslip for '+(month||''), 50, y, 11, rgb(0.4,0.4,0.4)); y-=26;
+        t('Employee: '+name, 50, y, 11); t('ID: '+empId, 320, y, 11); y-=16;
+        t('Designation: '+desig, 50, y, 11); y-=24;
+        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=20;
+        t('EARNINGS', 50, y, 11, rgb(0.13,0.29,0.62)); t('DEDUCTIONS', 320, y, 11, rgb(0.13,0.29,0.62)); y-=18;
+        t('Basic Pay', 50, y); t('₹'+basic.toFixed(2), 220, y); t('PF', 320, y); t('₹'+pf.toFixed(2), 490, y); y-=16;
+        t('HRA', 50, y); t('₹'+hra.toFixed(2), 220, y); t('Professional Tax', 320, y); t('₹'+pt.toFixed(2), 490, y); y-=16;
+        t('Other Allowances', 50, y); t('₹'+allow.toFixed(2), 220, y); t('TDS/Other', 320, y); t('₹'+tds.toFixed(2), 490, y); y-=24;
+        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=18;
+        t('Gross Earnings', 50, y, 11.5); t('₹'+grossEarnings.toFixed(2), 220, y, 11.5);
+        t('Total Deductions', 320, y, 11.5); t('₹'+totalDeductions.toFixed(2), 490, y, 11.5); y-=28;
+        t('NET PAY', 50, y, 14, rgb(0.1,0.45,0.2)); t('₹'+netPay.toFixed(2), 220, y, 14, rgb(0.1,0.45,0.2));
+        t('This is a computer-generated payslip.', 50, 30, 8, rgb(0.55,0.55,0.55));
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `payslip-${name||'employee'}-${month}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Payslip generated — Net Pay ₹${netPay.toFixed(2)}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== PAYMENT VOUCHER ===================== */
+TOOL_IMPL.paymentvoucher = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Company/Business Name</label><input type="text" id="pvCompany" autocomplete="off"></div>
+          <div class="field"><label>Voucher No.</label><input type="text" id="pvNo" autocomplete="off" value="PV-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="pvDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Paid To</label><input type="text" id="pvTo" autocomplete="off"></div>
+          <div class="field"><label>Amount ₹</label><input type="number" id="pvAmount" value="0"></div>
+          <div class="field"><label>Mode</label><select id="pvMode"><option>Cash</option><option>Bank Transfer</option><option>UPI</option><option>Cheque</option></select></div>
+          <div class="field" style="grid-column:1/-1;"><label>Towards / Purpose</label><input type="text" id="pvPurpose" autocomplete="off"></div>
+        </div>
+      `));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🧮 Generate Voucher</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    function numberToWordsINR(n){
+      const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+      const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+      function two(n){ if(n<20) return ones[n]; return tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:''); }
+      function three(n){ if(n>99) return ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+two(n%100):''); return two(n); }
+      n = Math.round(n);
+      if(n===0) return 'Zero';
+      let parts=[]; const crore=Math.floor(n/10000000); n%=10000000; const lakh=Math.floor(n/100000); n%=100000; const thousand=Math.floor(n/1000); n%=1000;
+      if(crore) parts.push(three(crore)+' Crore');
+      if(lakh) parts.push(three(lakh)+' Lakh');
+      if(thousand) parts.push(three(thousand)+' Thousand');
+      if(n) parts.push(three(n));
+      return parts.join(' ');
+    }
+    async function doGenerate(){
+      const company = body.querySelector('#pvCompany').value||'';
+      const no = body.querySelector('#pvNo').value||'PV-001';
+      const date = body.querySelector('#pvDate').value||'';
+      const to = body.querySelector('#pvTo').value||'';
+      const amount = Number(body.querySelector('#pvAmount').value)||0;
+      const mode = body.querySelector('#pvMode').value;
+      const purpose = body.querySelector('#pvPurpose').value||'';
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 350]);
+        const {width} = page.getSize();
+        let y = 300;
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        t(company||'Business Name', 50, y, 15, rgb(0.13,0.29,0.62)); y-=22;
+        t('PAYMENT VOUCHER', width/2-70, y, 14); y-=22;
+        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=22;
+        t('Voucher No: '+no, 50, y); t('Date: '+date, 350, y); y-=22;
+        t('Paid To:', 50, y, 10.5, rgb(0.4,0.4,0.4)); y-=16;
+        t(to, 50, y, 12.5); y-=24;
+        t('Amount: ₹'+amount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2)); y-=18;
+        t('Amount in words: Rupees '+numberToWordsINR(amount)+' Only', 50, y, 10); y-=20;
+        t('Mode of Payment: '+mode, 50, y, 11); y-=20;
+        t('Towards: '+purpose, 50, y, 11); y-=50;
+        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
+        page.drawLine({start:{x:width-200,y},end:{x:width-50,y},thickness:1,color:rgb(0.6,0.6,0.6)});
+        t('Received by', 50, y-14, 9, rgb(0.5,0.5,0.5)); t('Authorized Signatory', width-200, y-14, 9, rgb(0.5,0.5,0.5));
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `voucher-${no}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'Payment Voucher downloaded.');
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== PURCHASE ORDER GENERATOR ===================== */
+TOOL_IMPL.purchaseorder = {
+  mount(container){
+    let items = [{ desc:'', qty:1, rate:0 }];
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Your Company (Buyer)</label><input type="text" id="poCompany" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Vendor / Supplier Name</label><input type="text" id="poVendor" autocomplete="off"></div>
+          <div class="field"><label>PO Number</label><input type="text" id="poNo" autocomplete="off" value="PO-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="poDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Delivery Address</label><input type="text" id="poAddr" autocomplete="off"></div>
+        </div>
+      `));
+      const itemsWrap = el(`<div></div>`);
+      items.forEach((it,idx)=>{
+        itemsWrap.appendChild(el(`
+          <div style="display:grid; grid-template-columns:2fr 0.7fr 1fr auto; gap:6px; margin-bottom:8px;">
+            <input type="text" placeholder="Item / description" data-f="desc" data-i="${idx}" value="${(it.desc||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <input type="number" placeholder="Qty" data-f="qty" data-i="${idx}" value="${it.qty}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <input type="number" placeholder="Rate ₹" data-f="rate" data-i="${idx}" value="${it.rate}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <button data-remove="${idx}" style="background:none; border:none; color:var(--warn); font-size:16px; cursor:pointer;">✕</button>
+          </div>
+        `));
+      });
+      itemsWrap.addEventListener('input',(e)=>{
+        const f=e.target.getAttribute('data-f'), i=Number(e.target.getAttribute('data-i'));
+        if(f==null) return;
+        items[i][f] = (f==='qty'||f==='rate') ? Number(e.target.value)||0 : e.target.value;
+      });
+      itemsWrap.addEventListener('click',(e)=>{
+        const idx = e.target.getAttribute('data-remove'); if(idx==null) return;
+        items.splice(Number(idx),1); if(!items.length) items.push({desc:'',qty:1,rate:0}); paint();
+      });
+      body.appendChild(itemsWrap);
+      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
+      addBtn.onclick = ()=>{ items.push({desc:'',qty:1,rate:0}); paint(); };
+      body.appendChild(addBtn);
+      body.appendChild(el(`<div class="opts one tamil" style="margin-top:14px;"><div class="field" style="grid-column:1/-1;"><label>Terms & Notes</label><input type="text" id="poTerms" autocomplete="off" placeholder="e.g. Payment within 30 days of delivery"></div></div>`));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📦 Generate PO</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      const company = body.querySelector('#poCompany').value||'';
+      const vendor = body.querySelector('#poVendor').value||'';
+      const no = body.querySelector('#poNo').value||'PO-001';
+      const date = body.querySelector('#poDate').value||'';
+      const addr = body.querySelector('#poAddr').value||'';
+      const terms = body.querySelector('#poTerms').value||'';
+      const validItems = items.filter(it=>it.desc.trim() && it.qty>0);
+      if(!validItems.length){ mountResult(body,'குறைந்தது ஒரு item-ஐயாவது நிரப்பவும்.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 700]);
+        const {width} = page.getSize();
+        let y = 650;
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        t(company||'Your Company', 50, y, 16, rgb(0.13,0.29,0.62)); y-=20;
+        t('PURCHASE ORDER', 50, y, 12, rgb(0.4,0.4,0.4)); t('PO No: '+no, 350, y, 11); y-=16;
+        t('Date: '+date, 350, y, 11); y-=26;
+        t('Vendor: '+vendor, 50, y, 12); y-=16;
+        t('Deliver to: '+addr, 50, y, 10, rgb(0.4,0.4,0.4)); y-=26;
+        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=6;
+        const cols=[50,320,400,470];
+        ['Item','Qty','Rate','Amount'].forEach((h,i)=> t(h, cols[i], y-14, 10, rgb(0.4,0.4,0.4)));
+        y-=24;
+        page.drawLine({start:{x:50,y:y+6},end:{x:width-50,y:y+6},thickness:1,color:rgb(0.85,0.85,0.85)});
+        let total=0;
+        validItems.forEach(it=>{
+          const amt = it.qty*it.rate; total+=amt;
+          t(it.desc.slice(0,38), cols[0], y-10, 10); t(String(it.qty), cols[1], y-10, 10);
+          t('₹'+it.rate.toFixed(2), cols[2], y-10, 10); t('₹'+amt.toFixed(2), cols[3], y-10, 10);
+          y-=20;
+        });
+        y-=10;
+        page.drawLine({start:{x:350,y:y+10},end:{x:width-50,y:y+10},thickness:1,color:rgb(0.6,0.6,0.6)});
+        t('Total', 350, y-6, 12, rgb(0.13,0.29,0.62)); t('₹'+total.toFixed(2), 470, y-6, 12, rgb(0.13,0.29,0.62)); y-=40;
+        if(terms){ t('Terms: '+terms, 50, y, 10, rgb(0.4,0.4,0.4)); }
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `purchase-order-${no}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `PO generated — Total ₹${total.toFixed(2)}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== EXPENSE TRACKER TEMPLATE (Excel) ===================== */
+TOOL_IMPL.expensetracker = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Downloads a ready-to-use Excel — categories, monthly columns, and totals already set up with formulas.</div>`));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📊 Download Expense Tracker</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      const prog = mountProgress(body);
+      try{
+        prog.set(40,'Building template…');
+        const categories = ['Rent','Salaries','Utilities','Supplies','Travel','Marketing','Maintenance','Miscellaneous'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const header = ['Category', ...months, 'Total'];
+        const aoa = [header];
+        categories.forEach((cat, r)=>{
+          const row = [cat, ...months.map(()=>0)];
+          const rowNum = r+2; // account for header row
+          const firstCol = 'B', lastCol = 'M';
+          row.push({ f: `SUM(${firstCol}${rowNum}:${lastCol}${rowNum})` });
+          aoa.push(row);
+        });
+        const totalRow = ['TOTAL'];
+        for(let c=0;c<12;c++){
+          const colLetter = String.fromCharCode(66+c); // B..M
+          totalRow.push({ f: `SUM(${colLetter}2:${colLetter}${categories.length+1})` });
+        }
+        totalRow.push({ f: `SUM(N2:N${categories.length+1})` });
+        aoa.push(totalRow);
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        ws['!cols'] = [{wch:16}, ...Array(12).fill({wch:9}), {wch:12}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Expense Tracker');
+        prog.set(90,'Preparing…');
+        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'expense-tracker.xlsx');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'Expense Tracker (.xlsx) downloaded — fill in your numbers, totals calculate automatically.');
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== PETTY CASH BOOK TEMPLATE (Excel) ===================== */
+TOOL_IMPL.pettycash = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Downloads an Excel petty cash register — every row's Balance auto-calculates from the row above it.</div>`));
+      const opts = el(`<div class="opts one tamil"><div class="field"><label>Opening Balance ₹</label><input type="number" id="pcOpen" value="0"></div><div class="field"><label>எத்தனை entry rows வேணும்</label><input type="number" id="pcRows" value="40" min="10" max="200"></div></div>`);
+      body.appendChild(opts);
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🪙 Download Petty Cash Book</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      const opening = Number(body.querySelector('#pcOpen').value)||0;
+      const numRows = Math.max(10, Math.min(200, Number(body.querySelector('#pcRows').value)||40));
+      const prog = mountProgress(body);
+      try{
+        prog.set(40,'Building template…');
+        const aoa = [['Date','Description','Received (₹)','Paid (₹)','Balance (₹)']];
+        aoa.push(['', 'Opening Balance', '', '', opening]);
+        for(let i=0;i<numRows;i++){
+          const rowNum = i+3; // header=1, opening=2, entries start at 3
+          aoa.push(['', '', '', '', { f: `E${rowNum-1}+C${rowNum}-D${rowNum}` }]);
+        }
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        ws['!cols'] = [{wch:12},{wch:28},{wch:14},{wch:14},{wch:14}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Petty Cash');
+        prog.set(90,'Preparing…');
+        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'petty-cash-book.xlsx');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'Petty Cash Book (.xlsx) downloaded — Balance column updates itself as you fill entries.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
