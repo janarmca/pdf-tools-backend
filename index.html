@@ -172,6 +172,8 @@ const TOOLS = [
   {id:'pdfimgwm', name:'Logo Watermark on PDF', desc:'Stamp your logo/image on every page', icon:'🖼️', color:'#4A235A', cat:'pdf'},
   {id:'pdfqrstamp', name:'Add QR to PDF', desc:'Stamp a QR code on every page', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
+  {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'pdf'},
+  {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -230,8 +232,8 @@ let state = { view:'home', tool:null };
 // ============================================================
 const APP_CONFIG = {
   SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphc2Fya2F5c2prY2x6d3ZkZHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2MzAwOTIsImV4cCI6MjEwMzIwNjA5Mn0.79BH0ARndXKWpq_YziGYFCQFPplDegNvWHrDv4h3Rgw',
-  BACKEND_URL: 'https://pdf-tools-backend-0uuo.onrender.com'
+  SUPABASE_ANON_KEY: 'sb_publishable_7l7gWeY_aFNsVR4zkbf1rw_u9vBT_3O',
+  BACKEND_URL: 'https://pdf-tools-backend-wxc0.onrender.com'
 };
 const AUTH_CONFIGURED = !APP_CONFIG.SUPABASE_URL.includes('YOUR-PROJECT');
 
@@ -7377,6 +7379,314 @@ TOOL_IMPL.pdfcompare = {
 
         const legend = el(`<div class="note" style="margin-top:10px;"><span style="background:#D6F5E0; color:#1E7145; padding:1px 6px; border-radius:3px;">Added</span> &nbsp; <span style="background:#FDE0E0; color:#C0392B; text-decoration:line-through; padding:1px 6px; border-radius:3px;">Removed</span></div>`);
         body.appendChild(legend);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== GST INVOICE GENERATOR ===================== */
+TOOL_IMPL.gstinvoice = {
+  mount(container){
+    let items = [{ desc:'', hsn:'', qty:1, rate:0 }];
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Rule-based calculator (not tax advice) — enter your details, we compute CGST/SGST/IGST automatically and generate a clean GST invoice PDF. Please verify with your CA before filing.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Seller (You)</div>`));
+      const sellerOpts = el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Business Name</label><input type="text" id="gstSellerName" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstSellerAddr" autocomplete="off"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="gstSellerGstin" autocomplete="off" placeholder="22AAAAA0000A1Z5"></div>
+          <div class="field"><label>State</label><input type="text" id="gstSellerState" autocomplete="off" placeholder="Tamil Nadu"></div>
+        </div>
+      `);
+      body.appendChild(sellerOpts);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Buyer</div>`));
+      const buyerOpts = el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Business/Customer Name</label><input type="text" id="gstBuyerName" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstBuyerAddr" autocomplete="off"></div>
+          <div class="field"><label>GSTIN (optional)</label><input type="text" id="gstBuyerGstin" autocomplete="off"></div>
+          <div class="field"><label>State</label><input type="text" id="gstBuyerState" autocomplete="off" placeholder="Tamil Nadu"></div>
+        </div>
+      `);
+      body.appendChild(buyerOpts);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Invoice Details</div>`));
+      const invOpts = el(`
+        <div class="opts tamil">
+          <div class="field"><label>Invoice Number</label><input type="text" id="gstInvNo" autocomplete="off" value="INV-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="gstInvDate" value="${new Date().toISOString().slice(0,10)}"></div>
+        </div>
+      `);
+      body.appendChild(invOpts);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Items</div>`));
+      const itemsWrap = el(`<div></div>`);
+      items.forEach((it,idx)=>{
+        const row = el(`
+          <div style="display:grid; grid-template-columns:2fr 1fr 0.7fr 1fr auto; gap:6px; margin-bottom:8px; align-items:center;">
+            <input type="text" placeholder="Item description" data-f="desc" data-i="${idx}" value="${(it.desc||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <input type="text" placeholder="HSN/SAC" data-f="hsn" data-i="${idx}" value="${(it.hsn||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <input type="number" placeholder="Qty" data-f="qty" data-i="${idx}" value="${it.qty}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <input type="number" placeholder="Rate ₹" data-f="rate" data-i="${idx}" value="${it.rate}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <button data-remove="${idx}" style="background:none; border:none; color:var(--warn); font-size:16px; cursor:pointer;">✕</button>
+          </div>
+        `);
+        itemsWrap.appendChild(row);
+      });
+      itemsWrap.addEventListener('input',(e)=>{
+        const f = e.target.getAttribute('data-f'), i = Number(e.target.getAttribute('data-i'));
+        if(f==null || i==null || isNaN(i)) return;
+        items[i][f] = (f==='qty'||f==='rate') ? Number(e.target.value)||0 : e.target.value;
+      });
+      itemsWrap.addEventListener('click',(e)=>{
+        const idx = e.target.getAttribute('data-remove');
+        if(idx==null) return;
+        items.splice(Number(idx),1);
+        if(!items.length) items.push({desc:'',hsn:'',qty:1,rate:0});
+        paint();
+      });
+      body.appendChild(itemsWrap);
+      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
+      addBtn.onclick = ()=>{ items.push({desc:'',hsn:'',qty:1,rate:0}); paint(); };
+      body.appendChild(addBtn);
+
+      const gstOpts = el(`
+        <div class="opts one tamil" style="margin-top:14px;">
+          <div class="field"><label>GST Rate</label>
+            <select id="gstRate"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select>
+          </div>
+        </div>
+      `);
+      body.appendChild(gstOpts);
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🧾 Generate Invoice PDF</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      const seller = {
+        name: body.querySelector('#gstSellerName').value||'', addr: body.querySelector('#gstSellerAddr').value||'',
+        gstin: body.querySelector('#gstSellerGstin').value||'', state: (body.querySelector('#gstSellerState').value||'').trim().toLowerCase()
+      };
+      const buyer = {
+        name: body.querySelector('#gstBuyerName').value||'', addr: body.querySelector('#gstBuyerAddr').value||'',
+        gstin: body.querySelector('#gstBuyerGstin').value||'', state: (body.querySelector('#gstBuyerState').value||'').trim().toLowerCase()
+      };
+      const invNo = body.querySelector('#gstInvNo').value||'INV-001';
+      const invDate = body.querySelector('#gstInvDate').value||'';
+      const gstRate = Number(body.querySelector('#gstRate').value)||0;
+      const validItems = items.filter(it=> it.desc.trim() && it.qty>0);
+      if(!validItems.length){ mountResult(body,'குறைந்தது ஒரு item-ஐயாவது சரியா நிரப்பவும்.').style.background='#FDEDEC'; return; }
+
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Calculating…');
+        const isIntraState = seller.state && buyer.state && seller.state===buyer.state;
+        const rows = validItems.map(it=>{
+          const amount = it.qty*it.rate;
+          return { ...it, amount };
+        });
+        const subtotal = rows.reduce((s,r)=>s+r.amount,0);
+        const cgst = isIntraState ? subtotal*gstRate/200 : 0;
+        const sgst = isIntraState ? subtotal*gstRate/200 : 0;
+        const igst = isIntraState ? 0 : subtotal*gstRate/100;
+        const grandTotal = subtotal+cgst+sgst+igst;
+
+        prog.set(40,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 841.89]); // A4
+        const {width,height} = page.getSize();
+        let y = height-50;
+        const drawText = (txt, x, yy, size=11, color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt), {x, y:yy, size, font, color});
+
+        drawText('TAX INVOICE', 50, y, 20, rgb(0.13,0.29,0.62)); y-=30;
+        drawText(seller.name, 50, y, 13); y-=16;
+        drawText(seller.addr, 50, y, 10, rgb(0.4,0.4,0.4)); y-=14;
+        drawText('GSTIN: '+seller.gstin, 50, y, 10); y-=14;
+        drawText('State: '+(body.querySelector('#gstSellerState').value||''), 50, y, 10); y-=24;
+
+        drawText('Invoice No: '+invNo, 350, y+68, 10);
+        drawText('Date: '+invDate, 350, y+52, 10);
+
+        drawText('Bill To:', 50, y, 11, rgb(0.13,0.29,0.62)); y-=16;
+        drawText(buyer.name, 50, y, 12); y-=15;
+        drawText(buyer.addr, 50, y, 10, rgb(0.4,0.4,0.4)); y-=14;
+        if(buyer.gstin) { drawText('GSTIN: '+buyer.gstin, 50, y, 10); y-=14; }
+        drawText('State: '+(body.querySelector('#gstBuyerState').value||''), 50, y, 10); y-=26;
+
+        page.drawLine({ start:{x:50,y}, end:{x:width-50,y}, thickness:1, color:rgb(0.8,0.8,0.8) }); y-=6;
+        const cols = [50, 260, 340, 400, 470];
+        ['Description','HSN/SAC','Qty','Rate','Amount'].forEach((h,i)=> drawText(h, cols[i], y-14, 10, rgb(0.4,0.4,0.4)));
+        y-=24;
+        page.drawLine({ start:{x:50,y:y+6}, end:{x:width-50,y:y+6}, thickness:1, color:rgb(0.85,0.85,0.85) });
+        rows.forEach(r=>{
+          if(y<120){ /* keep simple: single page, note in summary if truncated */ return; }
+          drawText(r.desc.slice(0,32), cols[0], y-10, 10);
+          drawText(r.hsn, cols[1], y-10, 10);
+          drawText(String(r.qty), cols[2], y-10, 10);
+          drawText('₹'+r.rate.toFixed(2), cols[3], y-10, 10);
+          drawText('₹'+r.amount.toFixed(2), cols[4], y-10, 10);
+          y-=22;
+        });
+        y-=14;
+        page.drawLine({ start:{x:300,y:y+10}, end:{x:width-50,y:y+10}, thickness:1, color:rgb(0.85,0.85,0.85) });
+        const totalsRow = (label, val)=>{ drawText(label, 350, y-4, 10.5); drawText('₹'+val.toFixed(2), 470, y-4, 10.5); y-=18; };
+        totalsRow('Subtotal', subtotal);
+        if(isIntraState){ totalsRow(`CGST (${gstRate/2}%)`, cgst); totalsRow(`SGST (${gstRate/2}%)`, sgst); }
+        else { totalsRow(`IGST (${gstRate}%)`, igst); }
+        page.drawLine({ start:{x:350,y:y+10}, end:{x:width-50,y:y+10}, thickness:1, color:rgb(0.6,0.6,0.6) });
+        drawText('Grand Total', 350, y-8, 12, rgb(0.13,0.29,0.62));
+        drawText('₹'+grandTotal.toFixed(2), 470, y-8, 12, rgb(0.13,0.29,0.62));
+
+        drawText('This is a computer-generated invoice. Please verify GST calculations with your CA.', 50, 40, 8, rgb(0.55,0.55,0.55));
+
+        prog.set(85,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `invoice-${invNo}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Invoice generated — Grand Total ₹${grandTotal.toFixed(2)} (${isIntraState?'CGST+SGST':'IGST'}).`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== OBITUARY / DEATH ANNOUNCEMENT CARD ===================== */
+TOOL_IMPL.obituary = {
+  mount(container){
+    let photoDataUrl = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">A respectful, ready-to-share announcement card — in Tamil and English together. Downloads as an image, ready for WhatsApp.</div>`));
+
+      const photoRow = el(`<div style="text-align:center; margin-bottom:14px;"></div>`);
+      const photoPreview = el(`<div style="width:110px; height:110px; border-radius:50%; background:#eee; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--line);">${photoDataUrl?`<img src="${photoDataUrl}" style="width:100%; height:100%; object-fit:cover;">`:'<span style="font-size:28px;">🕊️</span>'}</div>`);
+      const photoInput = el(`<input type="file" accept="image/*" style="font-size:12px;">`);
+      photoInput.onchange = async (e)=>{
+        const f = e.target.files[0]; if(!f) return;
+        photoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+        paint();
+      };
+      photoRow.appendChild(photoPreview); photoRow.appendChild(el(`<div style="font-size:11px; color:var(--sub); margin-bottom:6px;">Photo (optional)</div>`)); photoRow.appendChild(photoInput);
+      body.appendChild(photoRow);
+
+      const opts = el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>பெயர் (Name) — Tamil</label><input type="text" id="obNameTa" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Name — English</label><input type="text" id="obNameEn" autocomplete="off"></div>
+          <div class="field"><label>பிறந்த தேதி (Born)</label><input type="date" id="obBorn"></div>
+          <div class="field"><label>இறந்த தேதி (Passed away)</label><input type="date" id="obDied"></div>
+          <div class="field"><label>வயது (Age)</label><input type="number" id="obAge" min="0"></div>
+          <div class="field"><label>தீம் Color</label>
+            <select id="obTheme"><option value="cream">Cream / Gold</option><option value="blue">Soft Blue</option><option value="white">Classic White</option></select>
+          </div>
+          <div class="field" style="grid-column:1/-1;"><label>குடும்பத்தினர் (Family/Relatives, optional)</label><input type="text" id="obFamily" autocomplete="off" placeholder="S/o, D/o, Spouse of…"></div>
+          <div class="field" style="grid-column:1/-1;"><label>இறுதி சடங்கு விவரம் (Funeral details)</label><input type="text" id="obFuneral" autocomplete="off" placeholder="எ.கா. இன்று மாலை 4 மணிக்கு, ஊர் பொது சுடுகாடு"></div>
+        </div>
+      `);
+      body.appendChild(opts);
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🕊️ Card உருவாக்கு</button>`);
+      btn.onclick = doMake;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doMake(){
+      const nameTa = body.querySelector('#obNameTa').value||'';
+      const nameEn = body.querySelector('#obNameEn').value||'';
+      const born = body.querySelector('#obBorn').value||'';
+      const died = body.querySelector('#obDied').value||'';
+      const age = body.querySelector('#obAge').value||'';
+      const theme = body.querySelector('#obTheme').value;
+      const family = body.querySelector('#obFamily').value||'';
+      const funeral = body.querySelector('#obFuneral').value||'';
+      if(!nameEn.trim() && !nameTa.trim()){ mountResult(body,'பெயரை உள்ளிடவும்.').style.background='#FDEDEC'; return; }
+
+      const themes = {
+        cream: { bg:'#FBF3E3', accent:'#8C6D1F', line:'#D9C48E' },
+        blue:  { bg:'#EAF1F8', accent:'#2E5C8A', line:'#B9D2E8' },
+        white: { bg:'#FFFFFF', accent:'#3A3A3A', line:'#DADADA' }
+      };
+      const t = themes[theme]||themes.cream;
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Preparing card…');
+        const W=900, H=1200;
+        const canvas = document.createElement('canvas'); canvas.width=W; canvas.height=H;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = t.bg; ctx.fillRect(0,0,W,H);
+        ctx.strokeStyle = t.line; ctx.lineWidth = 6; ctx.strokeRect(24,24,W-48,H-48);
+        ctx.strokeStyle = t.accent; ctx.lineWidth = 1.5; ctx.strokeRect(40,40,W-80,H-80);
+
+        ctx.textAlign='center'; ctx.fillStyle = t.accent;
+        ctx.font = '400 26px Georgia, serif';
+        ctx.fillText('இறையடி சேர்ந்தார் · In Loving Memory', W/2, 110);
+
+        if(photoDataUrl){
+          const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=photoDataUrl; });
+          const r = 130;
+          ctx.save();
+          ctx.beginPath(); ctx.arc(W/2, 260, r, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+          const scale = Math.max((r*2)/img.naturalWidth, (r*2)/img.naturalHeight);
+          const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
+          ctx.drawImage(img, W/2-dw/2, 260-dh/2, dw, dh);
+          ctx.restore();
+          ctx.strokeStyle = t.accent; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(W/2,260,r,0,Math.PI*2); ctx.stroke();
+        }
+
+        let y = photoDataUrl ? 470 : 220;
+        ctx.fillStyle = '#20242B';
+        if(nameTa){ ctx.font = '700 42px "Noto Sans Tamil", sans-serif'; ctx.fillText(nameTa, W/2, y); y+=54; }
+        if(nameEn){ ctx.font = '700 34px Georgia, serif'; ctx.fillText(nameEn, W/2, y); y+=50; }
+        if(age){ ctx.font='400 22px Georgia, serif'; ctx.fillStyle=t.accent; ctx.fillText('வயது / Age: '+age, W/2, y); y+=40; }
+        if(born || died){
+          ctx.font='400 20px Georgia, serif'; ctx.fillStyle='#444';
+          const bd = born ? new Date(born).toLocaleDateString('en-IN') : '?';
+          const dd = died ? new Date(died).toLocaleDateString('en-IN') : '?';
+          ctx.fillText(`${bd}  —  ${dd}`, W/2, y); y+=46;
+        }
+        if(family){
+          ctx.font='400 20px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#333';
+          y+=10; ctx.fillText(family, W/2, y); y+=44;
+        }
+        // horizontal divider
+        ctx.strokeStyle = t.line; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(W/2-160,y); ctx.lineTo(W/2+160,y); ctx.stroke();
+        y+=50;
+        ctx.font='italic 22px Georgia, serif'; ctx.fillStyle=t.accent;
+        ctx.fillText('"என்றென்றும் நினைவில்"', W/2, y); y+=30;
+        ctx.fillText('"Forever in our hearts"', W/2, y); y+=60;
+
+        if(funeral){
+          ctx.font='700 20px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#20242B';
+          ctx.fillText('இறுதி சடங்கு விவரம் / Funeral Details', W/2, y); y+=32;
+          ctx.font='400 19px "Noto Sans Tamil", sans-serif'; ctx.fillStyle='#444';
+          // wrap long text
+          const words = funeral.split(' '); let line=''; const maxW = W-160;
+          words.forEach(w=>{
+            const test = line?line+' '+w:w;
+            if(ctx.measureText(test).width > maxW && line){ ctx.fillText(line, W/2, y); y+=28; line=w; }
+            else line = test;
+          });
+          if(line) { ctx.fillText(line, W/2, y); y+=28; }
+        }
+
+        prog.set(80,'Preparing…');
+        const blob = await new Promise(res=> canvas.toBlob(res,'image/png'));
+        downloadBlob(blob, 'obituary-card.png');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'Card தயார் செய்யப்பட்டு downloaded — WhatsApp-ல் share பண்ணலாம்.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
