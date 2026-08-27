@@ -232,10 +232,16 @@ let state = { view:'home', tool:null };
 // ============================================================
 const APP_CONFIG = {
   SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_N6LTr070Y6IXwHMjH9aeUQ_-xDo8ARE',
-  BACKEND_URL: ''
+  SUPABASE_ANON_KEY: 'sb_publishable_7l7gWeY_aFNsVR4zkbf1rw_u9vBT_3O',
+  BACKEND_URL: 'https://pdf-tools-backend-0uuo.onrender.com'
 };
 const AUTH_CONFIGURED = !APP_CONFIG.SUPABASE_URL.includes('YOUR-PROJECT');
+if(AUTH_CONFIGURED && !/^https?:\/\/.+/.test(APP_CONFIG.BACKEND_URL)){
+  console.error('APP_CONFIG.BACKEND_URL is missing or invalid — all backend/login/payment features will fail silently until this is set to your real Render URL.');
+  window.addEventListener('DOMContentLoaded', ()=>{
+    document.body.insertAdjacentHTML('afterbegin', `<div style="background:#C0392B; color:#fff; text-align:center; padding:10px; font-size:13px; font-weight:700;">⚠️ Backend not configured (APP_CONFIG.BACKEND_URL is empty) — Login, Payments and AI tools will not work. Fix this in the HTML file.</div>`);
+  });
+}
 
 // ============================================================
 // 🔐 AUTH & CREDITS — Supabase login, profile, credits balance
