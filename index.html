@@ -547,10 +547,10 @@ function render(){
   const foot = el(`<footer>
     <div>Your files never leave your device — everything runs in your browser.</div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
-      <a href="/terms.html" style="color:var(--sub);">Terms</a>
-      <a href="/privacy.html" style="color:var(--sub);">Privacy</a>
-      <a href="/refund.html" style="color:var(--sub);">Refund Policy</a>
-      <a href="/contact.html" style="color:var(--sub);">Contact</a>
+      <a href="terms.html" style="color:var(--sub);">Terms</a>
+      <a href="privacy.html" style="color:var(--sub);">Privacy</a>
+      <a href="refund.html" style="color:var(--sub);">Refund Policy</a>
+      <a href="contact.html" style="color:var(--sub);">Contact</a>
     </div>
     <div style="margin-top:10px; font-weight:800; color:var(--ink); font-size:12.5px;">Developed by Janarthanan Thiyagarajan  &nbsp;·&nbsp; 📞 +91&nbsp;76676&nbsp;63922</div>
   </footer>`);
@@ -632,10 +632,10 @@ function renderSettingsPage(){
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
       ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown'); }catch(e){} maybeShowDiscoverModal(true); }],
-      ['📞 Contact Us', ()=> window.open('/contact.html','_blank')],
-      ['🔒 Privacy Policy', ()=> window.open('/privacy.html','_blank')],
-      ['📄 Terms of Service', ()=> window.open('/terms.html','_blank')],
-      ['💳 Refund Policy', ()=> window.open('/refund.html','_blank')],
+      ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
+      ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
+      ['📄 Terms of Service', ()=> window.open('terms.html','_blank')],
+      ['💳 Refund Policy', ()=> window.open('refund.html','_blank')],
     ];
     const supportBox = el(`<div style="border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:20px;"></div>`);
     supportLinks.forEach(([label,fn],i)=>{
@@ -7644,8 +7644,10 @@ TOOL_IMPL.obituary = {
       try{
         prog.set(20,'Preparing card…');
         const W=900, H=1200;
-        const canvas = document.createElement('canvas'); canvas.width=W; canvas.height=H;
+        const SCALE = 2; // renders at 2x resolution for a crisp, WhatsApp/print-ready image
+        const canvas = document.createElement('canvas'); canvas.width=W*SCALE; canvas.height=H*SCALE;
         const ctx = canvas.getContext('2d');
+        ctx.scale(SCALE, SCALE); // everything below is still drawn using the original W×H coordinate system
         ctx.fillStyle = t.bg; ctx.fillRect(0,0,W,H);
         ctx.strokeStyle = t.line; ctx.lineWidth = 6; ctx.strokeRect(24,24,W-48,H-48);
         ctx.strokeStyle = t.accent; ctx.lineWidth = 1.5; ctx.strokeRect(40,40,W-80,H-80);
@@ -7656,17 +7658,17 @@ TOOL_IMPL.obituary = {
 
         if(photoDataUrl){
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=photoDataUrl; });
-          const r = 130;
+          const r = 150;
           ctx.save();
-          ctx.beginPath(); ctx.arc(W/2, 260, r, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+          ctx.beginPath(); ctx.arc(W/2, 270, r, 0, Math.PI*2); ctx.closePath(); ctx.clip();
           const scale = Math.max((r*2)/img.naturalWidth, (r*2)/img.naturalHeight);
           const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
-          ctx.drawImage(img, W/2-dw/2, 260-dh/2, dw, dh);
+          ctx.drawImage(img, W/2-dw/2, 270-dh/2, dw, dh);
           ctx.restore();
-          ctx.strokeStyle = t.accent; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(W/2,260,r,0,Math.PI*2); ctx.stroke();
+          ctx.strokeStyle = t.accent; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(W/2,270,r,0,Math.PI*2); ctx.stroke();
         }
 
-        let y = photoDataUrl ? 470 : 220;
+        let y = photoDataUrl ? 490 : 220;
         ctx.fillStyle = '#20242B';
         if(nameTa){ ctx.font = '700 42px "Noto Sans Tamil", sans-serif'; ctx.fillText(nameTa, W/2, y); y+=54; }
         if(nameEn){ ctx.font = '700 34px Georgia, serif'; ctx.fillText(nameEn, W/2, y); y+=50; }
