@@ -691,10 +691,12 @@ function maybeShowDiscoverModal(forceShow){
   try{ localStorage.setItem('pdfToolsDiscoverShown','1'); }catch(e){}
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
   const cards = [
-    ['✨ NEW', '67+ tools, all in one place', 'PDF, image, and video tools — merge, split, compress, OCR, watermark, and much more.', '🧰'],
-    ['⚡ FAST', 'Sign in for Fast Server Mode', 'Video/Image/OCR tools run on a real server when you\'re signed in — faster than your phone.', '🚀'],
-    ['🤖 AI', 'Ask AI about your document', 'Upload a receipt, bill, or ID and ask questions — get answers pulled straight from it.', '💬'],
-    ['🔒 PRIVATE', 'Your files stay yours', 'Most tools run fully in your browser — nothing is uploaded unless you choose Fast Mode.', '🛡️'],
+    ['✨ NEW', '82+ tools, all in one place', 'PDF, Image, Video, Business/GST, and Education — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
+    ['🤖 AI', '7 AI tools that read your documents', 'Ask AI About Document, Summarize, Translate, Handwriting to Text, Receipt to Excel, Resume Review, and AI-powered OCR.', '💬'],
+    ['🪄 UPGRADED', 'remove.bg-quality background removal', 'A real AI model now powers Remove Background — plus background colour/photo swap and a manual touch-up brush.', '🎨'],
+    ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Salary Slip, Payment Voucher, Purchase Order, Expense Tracker, Petty Cash Book — all free.', '🧾'],
+    ['🎓 EDUCATION', 'Number Jungle learning game', 'A free Math and Science quiz game for Grades 1-12, bilingual Tamil and English, with XP and badges.', '🦜'],
+    ['🔒 PRIVATE', 'Most tools stay on your device', 'PDF, Image, and Business tools run fully in your browser — only AI tools and Fast Server Mode reach our server.', '🛡️'],
   ];
   const card = el(`
     <div style="background:#fff; border-radius:20px; padding:26px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; position:relative;">
@@ -1799,7 +1801,7 @@ function mountRectSelector(container, imgSrc, initRect){
       apply();
     });
   });
-  return { el: wrap, getRect(){ return { fx0:Math.min(rect.fx0,rect.fx1), fy0:Math.min(rect.fy0,rect.fy1), fx1:Math.max(rect.fx0,rect.fx1), fy1:Math.max(rect.fy0,rect.fy1) }; } };
+  return { el: wrap, getRect(){ return { fx0:Math.min(rect.fx0,rect.fx1), fy0:Math.min(rect.fy0,rect.fy1), fx1:Math.max(rect.fx0,rect.fx1), fy1:Math.max(rect.fy0,rect.fy1) }; }, setRect(r){ rect = {fx0:r.fx0, fy0:r.fy0, fx1:r.fx1, fy1:r.fy1}; apply(); } };
 }
 
 /* ===================== Shared: brush-paint mask over a canvas (for inpainting) ===================== */
@@ -1964,6 +1966,7 @@ async function mountThumbTool(container, mode){
       const thumb = el(`
         <div class="thumb ${removed.has(pageIdx)?'removed':''}" data-pos="${pos}" style="position:relative;">
           <span class="tnum">${pos+1}</span>
+          <button data-zoom="${pageIdx}" title="Zoom in" style="position:absolute; top:6px; right:6px; z-index:2; width:28px; height:28px; border-radius:50%; border:none; background:rgba(0,0,0,.55); color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🔍</button>
           <img src="${dataUrl}" style="transform:rotate(${rot}deg); ${removed.has(pageIdx)?'opacity:.35;':''}">
           <div class="tctrl"></div>
         </div>
@@ -1996,7 +1999,10 @@ async function mountThumbTool(container, mode){
     });
     grid.addEventListener('click', (e)=>{
       const t = e.target;
-      if(t.matches('[data-left]')){
+      if(t.matches('[data-zoom]')){
+        const idx = Number(t.getAttribute('data-zoom'));
+        openZoomLightbox(idx);
+      } else if(t.matches('[data-left]')){
         const pos = Number(t.getAttribute('data-left'));
         if(pos>0){ const tmp=order[pos]; order[pos]=order[pos-1]; order[pos-1]=tmp; paintThumbs(); }
       } else if(t.matches('[data-right]')){
@@ -2008,6 +2014,19 @@ async function mountThumbTool(container, mode){
         paintThumbs();
       }
     });
+    async function openZoomLightbox(pageIdx){
+      const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:300; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
+      overlay.appendChild(el(`<div style="color:#fff; position:absolute; top:16px; right:20px; font-size:26px; cursor:pointer;">✕</div>`));
+      overlay.querySelector('div').onclick = ()=> overlay.remove();
+      overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+      const loadingText = el(`<div style="color:#fff; font-size:14px;">Loading high-res preview…</div>`);
+      overlay.appendChild(loadingText);
+      document.body.appendChild(overlay);
+      const hiResUrl = await renderThumbDataUrl(pdfjsDoc, pageIdx+1, 2.5); // sharper, larger render for zoom view
+      loadingText.remove();
+      const rot = rotations[pageIdx] || 0;
+      overlay.appendChild(el(`<img src="${hiResUrl}" style="max-width:100%; max-height:90vh; transform:rotate(${rot}deg); box-shadow:0 10px 40px rgba(0,0,0,.5); border-radius:6px;">`));
+    }
 
     const row = el(`<div class="btn-row"></div>`);
     let label2 = mode==='remove' ? '🗑️ Delete & Download' : mode==='organize' ? '🔀 Reorder & Download' : '🔄 Rotate & Download';
@@ -3846,7 +3865,7 @@ TOOL_IMPL.wmremove = {
       body.appendChild(kindRow);
 
       if(kind==='pdf'){
-        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">முத்திரை/வாட்டர்மார்க் இருக்கும் இடத்தை பெட்டியால் குறி — அது எல்லா பக்கங்களிலும் ஒரே இடத்தில் மறைக்கப்படும். (குறிப்பு: அந்த பகுதியில் உண்மையான உரை/படம் இருந்தால் அதுவும் மறையும் — வாட்டர்மார்க் மட்டும் இருக்கும் இடத்தையே தேர்ந்தெடுக்கவும்.)</div>`));
+        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">முத்திரை/வாட்டர்மார்க் இருக்கும் இடத்தை பெட்டியால் குறி — அது எல்லா பக்கங்களிலும் ஒரே இடத்தில் மறைக்கப்படும். <b>⚠️ Diagonal, முழு page-ஐயும் cover செய்யும் watermark ("CONFIDENTIAL" போன்றவை) இருந்தால்</b>, கீழே "முழு Page-ஐயும் Cover செய்" பொத்தானை பயன்படுத்தவும் — ஆனால் அது page-ல் உள்ள மற்ற உரை/table-ஐயும் மறைத்துவிடும் (page-ல் வேறு content இல்லாத நேரத்தில் மட்டும் பயன்படுத்தவும்).</div>`));
         mountUploader(body, { accept:'application/pdf', label:'PDF-ஐ drag & drop or tap', sublabel:'',
           onAdd: async (fl)=>{
             file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
@@ -3880,9 +3899,11 @@ TOOL_IMPL.wmremove = {
             `);
             body.appendChild(opts);
             const row = el(`<div class="btn-row"></div>`);
+            const wholePageBtn = el(`<button class="btn secondary tamil" style="padding:8px 14px; font-size:12.5px;">🖹 முழு Page-ஐயும் Cover செய்</button>`);
+            wholePageBtn.onclick = ()=> selector.setRect({fx0:0.02, fy0:0.02, fx1:0.98, fy1:0.98});
             const btn = el(`<button class="btn tamil">🧽 நீக்கு</button>`);
             btn.onclick = doPdfRemove;
-            row.appendChild(btn);
+            row.appendChild(wholePageBtn); row.appendChild(btn);
             body.appendChild(row);
           }
         }
@@ -4152,7 +4173,13 @@ TOOL_IMPL.imgenhance = {
           downloadBlob(zipBlob, 'enhanced-images.zip');
         }
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, `${results.length} படங்கள் தெளிவூட்டப்பட்டு downloaded.`);
+        mountResult(body, `${results.length} படங்கள் தெளிவூட்டப்பட்டு downloaded. Preview below:`);
+        const previewGrid = el(`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; margin-top:10px;"></div>`);
+        results.forEach(r=>{
+          const url = URL.createObjectURL(r.blob);
+          previewGrid.appendChild(el(`<img src="${url}" style="width:100%; border-radius:10px; border:1px solid var(--line); display:block;">`));
+        });
+        body.appendChild(previewGrid);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -5571,13 +5598,15 @@ TOOL_IMPL.imgpassport = {
       try{
         prog.set(10,'Crop ing…');
         const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=previewUrl; });
-        const sx = Math.round(rect.fx0*natW), sy = Math.round(rect.fy0*natH);
-        const sw = Math.max(1,Math.round((rect.fx1-rect.fx0)*natW)), sh = Math.max(1,Math.round((rect.fy1-rect.fy0)*natH));
+        const sx = Math.max(0, Math.round(rect.fx0*natW)), sy = Math.max(0, Math.round(rect.fy0*natH));
+        const sw = Math.min(natW-sx, Math.max(1,Math.round((rect.fx1-rect.fx0)*natW)));
+        const sh = Math.min(natH-sy, Math.max(1,Math.round((rect.fy1-rect.fy0)*natH)));
         const outW = sizeKey==='2x2in' ? 600 : 413; // ~300dpi equivalents
         const outH = sizeKey==='2x2in' ? 600 : 531;
         const cropCanvas = document.createElement('canvas'); cropCanvas.width=outW; cropCanvas.height=outH;
         const cctx = cropCanvas.getContext('2d', { willReadFrequently: true });
         cctx.imageSmoothingEnabled=true; cctx.imageSmoothingQuality='high';
+        cctx.fillStyle = '#ffffff'; cctx.fillRect(0,0,outW,outH); // fixes: any transparent gap exports as black in JPEG otherwise
         cctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
 
         if(bg !== 'none'){
