@@ -1371,10 +1371,22 @@ function ensureCv(){
   if(!cvReadyPromise){
     console.log('[cvWorker-internal] starting importScripts for opencv.js…');
     cvReadyPromise = new Promise((resolve, reject)=>{
-      self.Module = { onRuntimeInitialized(){ console.log('[cvWorker-internal] onRuntimeInitialized fired — cv is ready'); resolve(self.cv); } };
+      self.Module = { onRuntimeInitialized(){ console.log('[cvWorker-internal] Module.onRuntimeInitialized fired — cv is ready'); resolve(self.cv); } };
       try{
         importScripts('https://cdn.jsdelivr.net/npm/@techstark/opencv-js@5.0.0-release.1/dist/opencv.js');
-        console.log('[cvWorker-internal] importScripts() call returned (script executed, waiting for WASM runtime init…)');
+        console.log('[cvWorker-internal] importScripts() returned; self.cv is', typeof self.cv, (self.cv && typeof self.cv.then==='function')?'(a Promise)':(self.cv && self.cv.Mat)?'(already ready)':'(not ready yet, waiting for onRuntimeInitialized…)');
+        // This build's export style varies: some versions resolve self.cv as
+        // a Promise directly, some set it up ready immediately, and only
+        // the classic official build relies solely on Module.onRuntimeInitialized.
+        // Handle all three so we don't hang forever waiting for a callback
+        // that this particular build may never call.
+        if(self.cv && typeof self.cv.then === 'function'){
+          self.cv.then((cv)=>{ console.log('[cvWorker-internal] self.cv Promise resolved'); self.cv = cv; resolve(cv); }, reject);
+        } else if(self.cv && self.cv.Mat){
+          console.log('[cvWorker-internal] self.cv already fully ready');
+          resolve(self.cv);
+        }
+        // else: rely on Module.onRuntimeInitialized above, which will fire later.
       }
       catch(e){ console.log('[cvWorker-internal] importScripts THREW:', e && e.message); reject(e); }
     });
