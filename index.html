@@ -5193,6 +5193,7 @@ TOOL_IMPL.videothumb = {
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vtFast');
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b></div>`));
         const opts = el(`
           <div class="opts one tamil">
@@ -5213,6 +5214,14 @@ TOOL_IMPL.videothumb = {
     async function doThumb(){
       const t = Math.max(0, Math.min(duration||0, parseTimeToSec(body.querySelector('#vtTime').value)));
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vtFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'thumbnail', {atSeconds: t}, prog, file.name.replace(/\.[^.]+$/,'')+'-thumb.jpg');
+          mountResult(body, `⚡ Fast Server Mode மூலம் Thumbnail தயார். Preview:`);
+          body.appendChild(el(`<img src="${URL.createObjectURL(blob)}" style="max-width:100%; margin-top:10px; border-radius:10px; border:1px solid var(--line);">`));
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(10,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
@@ -5221,9 +5230,11 @@ TOOL_IMPL.videothumb = {
         prog.set(50,'பிரேம் எடுக்கிறது…');
         await ffmpeg.exec(['-ss', String(t), '-i','in.'+ext, '-frames:v','1','-q:v','2','out.jpg']);
         const data = await ffmpeg.readFile('out.jpg');
-        downloadBlob(new Blob([data],{type:'image/jpeg'}), file.name.replace(/\.[^.]+$/,'')+'-thumb.jpg');
+        const blob = new Blob([data],{type:'image/jpeg'});
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-thumb.jpg');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Thumbnail படம் downloaded.');
+        mountResult(body, 'Thumbnail படம் downloaded. Preview:');
+        body.appendChild(el(`<img src="${URL.createObjectURL(blob)}" style="max-width:100%; margin-top:10px; border-radius:10px; border:1px solid var(--line);">`));
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -5231,6 +5242,58 @@ TOOL_IMPL.videothumb = {
 };
 
 /* ===================== VIDEO COMPRESS ===================== */
+// Shared "Fast Server Mode" UI + server call for video tools — lets each
+// tool offer real native-ffmpeg processing on the backend as an alternative
+// to the slower/less reliable ffmpeg.wasm-in-browser path, without repeating
+// this logic in every single tool.
+function mountFastServerNote(body, creditCost, checkboxId){
+  if(!AUTH_CONFIGURED) return null;
+  const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=creditCost));
+  const fastNote = el(`<div class="tamil" style="background:${fastAvailable?'#E8F8EF':'#FFF3E0'}; border:1px solid ${fastAvailable?'#B7E4C7':'#FFD699'}; border-radius:12px; padding:12px 14px; margin-top:12px; font-size:12.5px;"></div>`);
+  if(fastAvailable){
+    fastNote.innerHTML = `⚡ <b>Fast Server Mode கிடைக்கிறது</b> — Real ffmpeg server-ல் இயங்கும், browser-ஐ விட வேகமாக இருக்கும் (${creditCost} credit${creditCost>1?'s':''}${isPro()?' — Pro-க்கு இலவசம்':''}).<br><label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:700;"><input type="checkbox" id="${checkboxId}" checked> Fast Server Mode பயன்படுத்து</label>`;
+  } else if(!authState.session){
+    fastNote.innerHTML = `🐢 இப்போது browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_login" style="color:var(--brand-dark); font-weight:800;">Login</a> செய்தால் ⚡ Fast Server Mode கிடைக்கும்.`;
+  } else {
+    fastNote.innerHTML = `🐢 Credits தீர்ந்துவிட்டது — browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_buy" style="color:var(--brand-dark); font-weight:800;">மேலும் Credits வாங்க</a>.`;
+  }
+  body.appendChild(fastNote);
+  const loginLink = fastNote.querySelector('#'+checkboxId+'_login');
+  if(loginLink) loginLink.onclick = (e)=>{ e.preventDefault(); mountAuthModal(); };
+  const buyLink = fastNote.querySelector('#'+checkboxId+'_buy');
+  if(buyLink) buyLink.onclick = (e)=>{ e.preventDefault(); mountPricingModal(); };
+  return fastNote;
+}
+function isFastModeChecked(checkboxId){
+  const cb = document.getElementById(checkboxId);
+  return !!(cb && cb.checked);
+}
+async function callVideoProcessServer(file, op, params, prog, downloadName){
+  prog.set(10,'⚡ Server-க்கு அனுப்புகிறது…');
+  const form = new FormData();
+  form.append('file', file);
+  form.append('op', op);
+  form.append('params', JSON.stringify(params||{}));
+  const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/video/process', {
+    method:'POST',
+    headers: { Authorization: 'Bearer ' + authState.session.access_token },
+    body: form
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    let errMsg;
+    try{ errMsg = JSON.parse(errText).error; }
+    catch(e){ errMsg = 'The server is starting up (this can take up to a minute) — please wait a moment and try again.'; }
+    throw new Error(errMsg || 'Server error');
+  }
+  prog.set(80,'Downloading…');
+  const blob = await res.blob();
+  downloadBlob(blob, downloadName);
+  await refreshProfile();
+  prog.set(100,'Done'); prog.remove();
+  return blob;
+}
+
 TOOL_IMPL.videocompress = {
   mount(container){
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
@@ -5371,6 +5434,7 @@ TOOL_IMPL.videotogif = {
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vgFastCB');
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b> — 10 வினாடிகளுக்கு மேல் எடுத்தால் GIF பெரிதாக இருக்கும்.</div>`));
         const opts = el(`
           <div class="opts tamil">
@@ -5394,6 +5458,13 @@ TOOL_IMPL.videotogif = {
       const w = Math.max(120, Number(body.querySelector('#vgW').value)||480);
       const fps = Math.max(5, Math.min(20, Number(body.querySelector('#vgFps').value)||10));
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vgFastCB')){
+        try{
+          const blob = await callVideoProcessServer(file, 'togif', {startSec:start, durationSec:dur, width:w, fps}, prog, file.name.replace(/\.[^.]+$/,'')+'.gif');
+          mountResult(body, `⚡ Fast Server Mode மூலம் GIF தயார்.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
@@ -5944,6 +6015,7 @@ TOOL_IMPL.videospeed = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vsFast');
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -5970,6 +6042,13 @@ TOOL_IMPL.videospeed = {
     async function doSpeed(){
       const speed = Number(body.querySelector('#vsSpeed').value)||1;
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vsFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'speed', {factor: speed}, prog, file.name.replace(/\.[^.]+$/,'')+`-${speed}x.mp4`);
+          mountResult(body, `⚡ Fast Server Mode மூலம் ${speed}× வேகத்தில் மாற்றப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       let progHandler=null, ffmpegRef=null;
       try{
         prog.set(5,'Loading video engine…');
@@ -6014,6 +6093,7 @@ TOOL_IMPL.videoreverse = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vrevFast');
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">◀️ Reverse Do</button>`);
         btn.onclick = doReverse;
@@ -6023,6 +6103,13 @@ TOOL_IMPL.videoreverse = {
     }
     async function doReverse(){
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vrevFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'reverse', {}, prog, file.name.replace(/\.[^.]+$/,'')+'-reversed.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் Reverse ஆனது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       let progHandler=null, ffmpegRef=null;
       try{
         prog.set(5,'Loading video engine…');
@@ -6058,6 +6145,7 @@ TOOL_IMPL.videorotate = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vrFast');
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -6082,8 +6170,16 @@ TOOL_IMPL.videorotate = {
     }
     async function doRotate(){
       const op = body.querySelector('#vrOp').value;
-      const vfMap = { '90cw':'transpose=1', '90ccw':'transpose=2', '180':'transpose=1,transpose=1', 'hflip':'hflip', 'vflip':'vflip' };
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vrFast')){
+        try{
+          const degreesMap = { '90cw':90, '90ccw':270, '180':180, 'hflip':'flipH', 'vflip':'flipV' };
+          const blob = await callVideoProcessServer(file, 'rotate', {degrees: degreesMap[op]}, prog, file.name.replace(/\.[^.]+$/,'')+'-rotated.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் மாற்றப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
+      const vfMap = { '90cw':'transpose=1', '90ccw':'transpose=2', '180':'transpose=1,transpose=1', 'hflip':'hflip', 'vflip':'vflip' };
       let progHandler=null, ffmpegRef=null;
       try{
         prog.set(5,'Loading video engine…');
@@ -6120,6 +6216,7 @@ TOOL_IMPL.videomute = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vmFast');
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">🔇 Mute Do</button>`);
         btn.onclick = doMute;
@@ -6129,6 +6226,13 @@ TOOL_IMPL.videomute = {
     }
     async function doMute(){
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vmFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'mute', {}, prog, file.name.replace(/\.[^.]+$/,'')+'-muted.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் ஆடியோ நீக்கப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(10,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
@@ -7118,6 +7222,7 @@ TOOL_IMPL.videoloop = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vlFast');
         const opts = el(`
           <div class="opts one tamil">
             <div class="field"><label>எத்தனை முறை மீண்டும் இயக்க வேண்டும்</label><input type="number" id="vlN" value="3" min="2" max="20"></div>
@@ -7134,6 +7239,13 @@ TOOL_IMPL.videoloop = {
     async function doLoop(){
       const n = Math.max(2, Math.min(20, Number(body.querySelector('#vlN').value)||3));
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vlFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'loop', {times: n}, prog, file.name.replace(/\.[^.]+$/,'')+`-loop${n}x.mp4`);
+          mountResult(body, `⚡ Fast Server Mode மூலம் ${n} முறை Loop ஆனது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
@@ -7171,9 +7283,10 @@ TOOL_IMPL.videovolume = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vvFast');
         const opts = el(`
           <div class="opts tamil">
-            <div class="field-inline"><input type="checkbox" id="vvNorm"><label for="vvNorm">தானாக சத்தத்தை சமன்படுத்து (Normalize)</label></div>
+            <div class="field-inline"><input type="checkbox" id="vvNorm"><label for="vvNorm">தானாக சத்தத்தை சமன்படுத்து (Normalize — Fast Server Mode-க்கு கிடைக்காது)</label></div>
             <div class="field"><label>கைமுறை சத்தம் (%, Normalize தேர்ந்தெடுக்கவில்லை எனில்)</label><input type="number" id="vvVol" value="150" min="0" max="400"></div>
           </div>
         `);
@@ -7189,6 +7302,13 @@ TOOL_IMPL.videovolume = {
       const norm = body.querySelector('#vvNorm').checked;
       const vol = Number(body.querySelector('#vvVol').value)/100||1.5;
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && !norm && isFastModeChecked('vvFast')){
+        try{
+          const blob = await callVideoProcessServer(file, 'volume', {level: vol}, prog, file.name.replace(/\.[^.]+$/,'')+'-volume.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் சத்தம் மாற்றப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
