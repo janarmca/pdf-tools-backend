@@ -184,6 +184,10 @@ const TOOLS = [
   {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
   {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
+  {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
+  {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
+  {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
+  {id:'barcollection', name:'Bar Collection Register', desc:'Table sitting charges & cash collection log', icon:'🍷', color:'#8B5A2B', cat:'business'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -1663,10 +1667,10 @@ function ensureFFmpeg(){
     try{
       indicator = el(`<div style="position:fixed; left:0; right:0; bottom:0; background:#20242B; color:#fff; font-size:12.5px; font-weight:700; padding:10px 16px; text-align:center; z-index:500;">⏳ Loading video engine (first time only, ~25MB)… <span id="__ffLoadPct">0%</span></div>`);
       document.body.appendChild(indicator);
-      await loadScriptOnce('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
+      await loadScriptOnce('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
       const { FFmpeg } = window.FFmpegWASM;
       const ffmpeg = new FFmpeg();
-      const base = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
       const pctEl = indicator.querySelector('#__ffLoadPct');
       await ffmpeg.load({
         coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
@@ -1675,7 +1679,7 @@ function ensureFFmpeg(){
         // raw cross-origin Worker, which fails with "cannot be accessed from origin
         // 'null'" on pages without a real http(s) origin. Routing it through a blob
         // that just importScripts()'s the real file fixes it (see comment above).
-        classWorkerURL: crossOriginWorkerBlobURL('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js')
+        classWorkerURL: crossOriginWorkerBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js')
       });
       indicator.remove();
       return { ffmpeg, fetchFile };
@@ -3559,9 +3563,8 @@ TOOL_IMPL.pdfgray = {
 /* ===================== VIDEO + VOICE ===================== */
 TOOL_IMPL.vidvoice = {
   mount(container){
-    let mode = 'replace'; // replace | extract | record
-    let videoFile = null, audioFile = null;
-    let recStream = null, recorder = null, recChunks = [], recording = false, recSeconds = 0, recTimer = null;
+    let mode = 'replace'; // replace | extract
+    let videoFile = null, audioFile = null, videoUrl = null, audioUrl = null;
     const body = el(`<div></div>`); container.appendChild(body);
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
 
@@ -3569,13 +3572,12 @@ TOOL_IMPL.vidvoice = {
       body.innerHTML = '';
       body.appendChild(el(`<div class="note tamil" style="background:#EAF2FF; border-color:#BBD6FF;">பல வீடியோ Clips-ஐ (ஒவ்வொன்றும் தன் சொந்த குரலுடன்) ஒன்றாக இணைக்க வேண்டுமா? முகப்பில் உள்ள <b>"வீடியோ Merge"</b> தனி கருவியை பயன்படுத்தவும் — அது இதற்கே சிறப்பாக வடிவமைக்கப்பட்டது.</div>`));
       const modeRow = el(`<div class="filter-row tamil"></div>`);
-      [['replace','🔁 குரல் Convert/கலக்க'],['extract','🎧 ஆடியோ எடு'],['record','🎥 வீடியோ+மைக் பதிவு']].forEach(([m,label])=>{
+      [['replace','🔁 குரல் Convert/கலக்க'],['extract','🎧 ஆடியோ எடு']].forEach(([m,label])=>{
         const chip = el(`<button class="filter-chip ${mode===m?'active':''}" data-mode="${m}">${label}</button>`);
         modeRow.appendChild(chip);
       });
       modeRow.addEventListener('click', (e)=>{
         const b = e.target.closest('[data-mode]'); if(!b) return;
-        stopRecording(true);
         mode = b.getAttribute('data-mode'); paint();
       });
       body.appendChild(modeRow);
@@ -3583,16 +3585,32 @@ TOOL_IMPL.vidvoice = {
       if(mode === 'replace'){
         body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">ஒரு the videoயும் ஒரு ஆடியோ/குரல் fileயும் தேர்ந்தெடு — வீடியோவின் ஆடியோவை புதிய குரலால் மாற்றலாம் அல்லது இரண்டையும் கலக்கலாம்.</div>`));
         mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'MP4 / MOV / WEBM',
-          onAdd:(fl)=>{ videoFile = fl[0]; paint(); } });
-        if(videoFile) mountFileList(body, [videoFile], ()=>{ videoFile=null; paint(); });
+          onAdd:(fl)=>{ videoFile = fl[0]; videoUrl = URL.createObjectURL(videoFile); paint(); } });
+        if(videoFile){
+          mountFileList(body, [videoFile], ()=>{ videoFile=null; videoUrl=null; paint(); });
+          body.appendChild(el(`<video src="${videoUrl}" controls style="width:100%; border-radius:10px; margin:6px 0 12px; background:#000;"></video>`));
+        }
         mountUploader(body, { accept:'audio/*', label:'குரல்/ஆடியோவை drag & drop or tap', sublabel:'MP3 / WAV / M4A / AAC',
-          onAdd:(fl)=>{ audioFile = fl[0]; paint(); } });
-        if(audioFile) mountFileList(body, [audioFile], ()=>{ audioFile=null; paint(); });
+          onAdd:(fl)=>{ audioFile = fl[0]; audioUrl = URL.createObjectURL(audioFile); paint(); } });
+        if(audioFile){
+          mountFileList(body, [audioFile], ()=>{ audioFile=null; audioUrl=null; paint(); });
+          body.appendChild(el(`<audio src="${audioUrl}" controls style="width:100%; margin:6px 0 12px;"></audio>`));
+        }
         if(videoFile && audioFile){
           mountFastServerNote(body, 2, 'vvFastR');
           const opts = el(`
-            <div class="opts one tamil">
-              <div class="field-inline"><input type="checkbox" id="vvMix"><label for="vvMix">மூல வீடியோவின் ஆடியோவுடன் புதிய குரலையும் கலக்கவும் (Mix) — தேர்ந்தெடுக்கவில்லை எனில் முழுவதுமாக மாற்றப்படும்</label></div>
+            <div class="opts tamil">
+              <div class="field">
+                <label>வீடியோவில் எந்த நேரத்தில் இருந்து புதிய குரல் தொடங்க வேண்டும் (mm:ss)</label>
+                <input type="text" id="vvStart" value="00:00" placeholder="00:00">
+              </div>
+              <div class="field" style="grid-column:1/-1;">
+                <label>மூல வீடியோவின் voice-ஐ என்ன செய்யணும்?</label>
+                <select id="vvMode">
+                  <option value="replace">முழுவதுமாக நீக்கிவிட்டு புதியதை மட்டும் வை (Replace)</option>
+                  <option value="mix">இரண்டையும் சேர்த்து கலக்கு (Mix)</option>
+                </select>
+              </div>
             </div>
           `);
           body.appendChild(opts);
@@ -3605,9 +3623,10 @@ TOOL_IMPL.vidvoice = {
       } else if(mode === 'extract'){
         body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">வீடியோவிலிருந்து ஆடியோவை (குரல்/பாடல்) தனியாக MP3 ஆக பிரித்தெடுக்கும்.</div>`));
         mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
-          onAdd:(fl)=>{ videoFile = fl[0]; paint(); } });
+          onAdd:(fl)=>{ videoFile = fl[0]; videoUrl = URL.createObjectURL(videoFile); paint(); } });
         if(videoFile){
-          mountFileList(body, [videoFile], ()=>{ videoFile=null; paint(); });
+          mountFileList(body, [videoFile], ()=>{ videoFile=null; videoUrl=null; paint(); });
+          body.appendChild(el(`<video src="${videoUrl}" controls style="width:100%; border-radius:10px; margin:6px 0 12px; background:#000;"></video>`));
           mountFastServerNote(body, 1, 'vvFastE');
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">🎧 ஆடியோ எடு (MP3)</button>`);
@@ -3615,85 +3634,16 @@ TOOL_IMPL.vidvoice = {
           row.appendChild(btn);
           body.appendChild(row);
         }
-      } else if(mode === 'record'){
-        body.appendChild(el(`<div class="note tamil" style="margin-top:14px;">கேமரா + மைக்கை பயன்படுத்தி வீடியோவும் குரலும் ஒன்றாக பதிவு can be done. பதிவு browser-க்குள்ளேயே நடக்கும்.</div>`));
-        const vwrap = el(`<div class="scan-video-wrap"><video id="vvLive" autoplay playsinline muted></video></div>`);
-        body.appendChild(vwrap);
-        const badge = el(`<div class="tamil" style="text-align:center;margin-top:10px;font-weight:800;font-size:13px;color:${recording?'var(--warn)':'var(--sub)'};">${recording? '🔴 பதிவாகிறது… '+fmtTime(recSeconds) : 'கேமராவைத் திற பதிவு do'}</div>`);
-        body.appendChild(badge);
-        const row = el(`<div class="btn-row tamil" style="justify-content:center;"></div>`);
-        if(!recStream){
-          const bOpen = el(`<button class="btn">📷 Open Camera</button>`);
-          bOpen.onclick = openRecCamera;
-          row.appendChild(bOpen);
-        } else if(!recording){
-          const bStart = el(`<button class="btn accent">⏺️ பதிவு தொடங்கு</button>`);
-          bStart.onclick = startRecording;
-          const bClose = el(`<button class="btn secondary">✕ Close</button>`);
-          bClose.onclick = ()=>{ stopRecording(true); paint(); };
-          row.appendChild(bStart); row.appendChild(bClose);
-        } else {
-          const bStop = el(`<button class="btn" style="background:var(--warn);">⏹️ பதிவை நிறுத்து</button>`);
-          bStop.onclick = ()=> stopRecording(false);
-          row.appendChild(bStop);
-        }
-        body.appendChild(row);
-        if(recStream){
-          const v = body.querySelector('#vvLive');
-          v.srcObject = recStream; v.play().catch(()=>{});
-        }
-        if(window.__vvLastRecording){
-          const rb = el(`<div class="result-box tamil"><div class="ri">✅</div><div class="rtext">பதிவு தயார் — கீழே பதிவிறக்கம் can be done.</div></div>`);
-          body.appendChild(rb);
-          const dRow = el(`<div class="btn-row"></div>`);
-          const dBtn = el(`<button class="btn tamil">⬇️ Download (.webm)</button>`);
-          dBtn.onclick = ()=> downloadBlob(window.__vvLastRecording, 'recording-'+Date.now()+'.webm');
-          dRow.appendChild(dBtn);
-          body.appendChild(dRow);
-        }
       }
-    }
-
-    async function openRecCamera(){
-      if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
-        mountResult(body,'⚠️ This browser cannot access the camera/mic.').style.background='#FDEDEC';
-        return;
-      }
-      try{
-        recStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:{ideal:'environment'}}, audio:true });
-        window.__camStream = recStream;
-        paint();
-      }catch(err){
-        mountResult(body,'கேமரா/மைக் அனுமதி தேவை: '+err.message).style.background='#FDEDEC';
-      }
-    }
-    function startRecording(){
-      recChunks = []; window.__vvLastRecording = null;
-      const mime = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
-      recorder = new MediaRecorder(recStream, mime?{mimeType:mime}:undefined);
-      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) recChunks.push(e.data); };
-      recorder.onstop = ()=>{
-        window.__vvLastRecording = new Blob(recChunks, {type:'video/webm'});
-        paint();
-      };
-      recorder.start(250);
-      recording = true; recSeconds = 0;
-      recTimer = setInterval(()=>{ recSeconds++; const b = body.querySelector('.scan-video-wrap + div'); if(b) b.textContent = '🔴 பதிவாகிறது… '+fmtTime(recSeconds); }, 1000);
-      paint();
-    }
-    function stopRecording(discardStream){
-      if(recTimer){ clearInterval(recTimer); recTimer=null; }
-      if(recorder && recording){ try{ recorder.stop(); }catch(e){} }
-      recording = false;
-      if(discardStream && recStream){ try{ recStream.getTracks().forEach(t=>t.stop()); }catch(e){} recStream=null; window.__camStream=null; }
     }
 
     async function doReplace(){
-      const mix = body.querySelector('#vvMix') && body.querySelector('#vvMix').checked;
+      const mix = body.querySelector('#vvMode').value === 'mix';
+      const startSec = parseTimeToSec(body.querySelector('#vvStart').value) || 0;
       const prog = mountProgress(body);
       if(AUTH_CONFIGURED && isFastModeChecked('vvFastR')){
         try{
-          const blob = await callVideoProcessMultiServer([videoFile, audioFile], 'voicereplace', {mix}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
+          const blob = await callVideoProcessMultiServer([videoFile, audioFile], 'voicereplace', {mix, startSec}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
           mountResult(body, `⚡ Fast Server Mode மூலம் குரல் இணைக்கப்பட்டது.`);
         }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
         return;
@@ -3710,15 +3660,18 @@ TOOL_IMPL.vidvoice = {
         await ffmpeg.writeFile('in_v.'+vExt, await fetchFile(videoFile));
         await ffmpeg.writeFile('in_a.'+aExt, await fetchFile(audioFile));
         prog.set(20,'Merging…');
+        // adelay pushes the new voice track to start at the chosen point in the
+        // video timeline, instead of always starting from 0:00.
+        const delayMs = Math.round(startSec*1000);
+        const delayedAudio = delayMs>0 ? `adelay=${delayMs}|${delayMs},` : '';
         // Always re-encode (rather than "-c:v copy") — stream-copying a webm/mkv video
         // straight into an .mp4 container fails whenever the source codec isn't natively
-        // mp4-compatible (e.g. a video recorded with this app's own camera tool, which
-        // saves as .webm/VP8). Re-encoding to h264+aac guarantees a playable result
-        // regardless of the input format, at the cost of a little extra time.
+        // mp4-compatible. Re-encoding to h264+aac guarantees a playable result regardless
+        // of the input format, at the cost of a little extra time.
         if(mix){
-          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-filter_complex','[0:a][1:a]amix=inputs=2:duration=shortest:dropout_transition=2[aout]','-map','0:v:0','-map','[aout]','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
+          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`,'-map','0:v:0','-map','[aout]','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
         } else {
-          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-map','0:v:0','-map','1:a:0','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
+          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1]`,'-map','0:v:0','-map','[a1]','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
         }
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
@@ -3775,6 +3728,7 @@ TOOL_IMPL.vidsplit = {
         } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b></div>`));
         const modeRow = el(`<div class="filter-row tamil"></div>`);
         [['equal','🔢 சம பாகங்கள்'],['range','⏱️ நேரம் குறிப்பிட்டு வெட்டு']].forEach(([m,label])=>{
@@ -5347,6 +5301,7 @@ TOOL_IMPL.videocompress = {
         onAdd:(fl)=>{ file = fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         body.appendChild(el(`<div class="note tamil">Current Size: <b>${fmtBytes(file.size)}</b></div>`));
         if(AUTH_CONFIGURED){
           const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=2));
@@ -6057,6 +6012,7 @@ TOOL_IMPL.videospeed = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vsFast');
         const opts = el(`
           <div class="opts one tamil">
@@ -6135,6 +6091,7 @@ TOOL_IMPL.videoreverse = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vrevFast');
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">◀️ Reverse Do</button>`);
@@ -6187,6 +6144,7 @@ TOOL_IMPL.videorotate = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vrFast');
         const opts = el(`
           <div class="opts one tamil">
@@ -6258,6 +6216,7 @@ TOOL_IMPL.videomute = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vmFast');
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">🔇 Mute Do</button>`);
@@ -6309,6 +6268,11 @@ TOOL_IMPL.videomerge = {
           const ni = idx+dir; if(ni<0||ni>=files.length) return;
           [files[idx],files[ni]] = [files[ni],files[idx]]; paint();
         });
+        const previewGrid = el(`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin:8px 0 10px;"></div>`);
+        files.forEach((f,i)=>{
+          previewGrid.appendChild(el(`<div><video src="${URL.createObjectURL(f)}" controls style="width:100%; border-radius:8px; background:#000; display:block;"></video><div class="tamil" style="font-size:10.5px; color:var(--sub); text-align:center; margin-top:2px;">#${i+1}</div></div>`));
+        });
+        body.appendChild(previewGrid);
         if(files.length>=2){
           mountFastServerNote(body, 2, 'vmergeFast');
           const row = el(`<div class="btn-row"></div>`);
@@ -7226,6 +7190,7 @@ TOOL_IMPL.videowave = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<audio src="${URL.createObjectURL(file)}" controls style="width:100%; margin:6px 0 10px;"></audio>`));
         mountFastServerNote(body, 1, 'vwFast');
         const opts = el(`
           <div class="opts tamil">
@@ -7292,6 +7257,7 @@ TOOL_IMPL.videoloop = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vlFast');
         const opts = el(`
           <div class="opts one tamil">
@@ -7353,11 +7319,12 @@ TOOL_IMPL.videovolume = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vvFast');
         const opts = el(`
           <div class="opts tamil">
             <div class="field-inline"><input type="checkbox" id="vvNorm"><label for="vvNorm">தானாக சத்தத்தை சமன்படுத்து (Normalize — Fast Server Mode-க்கு கிடைக்காது)</label></div>
-            <div class="field"><label>கைமுறை சத்தம் (%, Normalize தேர்ந்தெடுக்கவில்லை எனில்)</label><input type="number" id="vvVol" value="150" min="0" max="400"></div>
+            <div class="field"><label>கைமுறை சத்தம் (%, Normalize தேர்ந்தெடுக்கவில்லை எனில் — 150% = 1.5x உரக்க, 50% = பாதி மென்மையாக)</label><input type="number" id="vvVol" value="150" min="0" max="400"></div>
           </div>
         `);
         body.appendChild(opts);
@@ -7370,12 +7337,18 @@ TOOL_IMPL.videovolume = {
     }
     async function doVolume(){
       const norm = body.querySelector('#vvNorm').checked;
-      const vol = Number(body.querySelector('#vvVol').value)/100||1.5;
+      const volPct = Number(body.querySelector('#vvVol').value)||150;
+      const vol = volPct/100;
       const prog = mountProgress(body);
+      const showResult = (blob, msg)=>{
+        mountResult(body, msg);
+        body.appendChild(el(`<div class="note tamil" style="margin-top:8px;">🔊 Volume பரிசோதிக்க — headphones/speaker-ஐ ஆன் பண்ணி கீழே இருக்கும் video-வை play பண்ணி பாருங்க (${norm?'Normalize செய்யப்பட்டது':volPct+'% — original-ஐ விட '+(volPct>100?'உரக்க':'மென்மையாக')}):</div>`));
+        body.appendChild(el(`<video src="${URL.createObjectURL(blob)}" controls style="width:100%; border-radius:10px; margin-top:6px; background:#000;"></video>`));
+      };
       if(AUTH_CONFIGURED && !norm && isFastModeChecked('vvFast')){
         try{
           const blob = await callVideoProcessServer(file, 'volume', {level: vol}, prog, file.name.replace(/\.[^.]+$/,'')+'-volume.mp4');
-          mountResult(body, `⚡ Fast Server Mode மூலம் சத்தம் மாற்றப்பட்டது.`);
+          showResult(blob, `⚡ Fast Server Mode மூலம் சத்தம் மாற்றப்பட்டது.`);
         }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
         return;
       }
@@ -7389,9 +7362,10 @@ TOOL_IMPL.videovolume = {
         await ffmpeg.exec(['-i','in.'+ext,'-af',af,'-c:v','copy','out.mp4']);
         prog.set(92,'Preparing…');
         const data = await ffmpeg.readFile('out.mp4');
-        downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-volume.mp4');
+        const blob = new Blob([data],{type:'video/mp4'});
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-volume.mp4');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'சத்தம் மாற்றப்பட்ட வீடியோ downloaded.');
+        showResult(blob, 'சத்தம் மாற்றப்பட்ட வீடியோ downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -8763,6 +8737,24 @@ TOOL_IMPL.numberjungle = {
   }
 };
 
+/* ===================== EMBEDDED BUSINESS TOOLS (each is a standalone
+   app loaded via iframe — isolated so their own JS/CSS can never collide
+   with this file's code. Each file must be uploaded alongside index.html
+   on GitHub for these to load. ============================= */
+function mountEmbeddedTool(container, filename, title){
+  const wrap = el(`<div style="margin:-4px -4px 0;"></div>`);
+  const frame = el(`<iframe src="${filename}" title="${title}" style="width:100%; height:82vh; min-height:600px; border:none; border-radius:14px; display:block; background:#fff;" loading="lazy"></iframe>`);
+  frame.onerror = ()=>{
+    wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Couldn't load this tool — make sure "${filename}" is uploaded in the same folder as this app on GitHub.</div>`;
+  };
+  wrap.appendChild(frame);
+  container.appendChild(wrap);
+}
+TOOL_IMPL.billquotation = { mount(container){ mountEmbeddedTool(container, 'bill-quotation-maker.html', 'Bill / Quotation Maker'); } };
+TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
+TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
+TOOL_IMPL.barcollection = { mount(container){ mountEmbeddedTool(container, 'bar-collection-register.html', 'Bar Collection Register'); } };
+
 render();
 initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் edு credits/plan காட்டு
 if('serviceWorker' in navigator){
@@ -8772,4 +8764,4 @@ if('serviceWorker' in navigator){
 }
 </script>
 </body>
-</html>.
+</html>
