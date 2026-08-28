@@ -150,6 +150,91 @@ app.post('/api/video/compress', creditLimiter, requireAuth, uploadVideo.single('
 });
 
 // ============================================================
+// POST /api/video/process — Fast Server Mode for the simpler, single-file
+// video operations (mute, rotate, speed, reverse, volume, loop, gif,
+// thumbnail). Native server-side ffmpeg is far faster than ffmpeg.wasm in
+// the browser, especially on phones. body: multipart file + op + params
+// (JSON string). Multi-file (merge) and complex-overlay (subtitles, voice
+// replace, waveform) operations are NOT here yet — those need more involved
+// param handling and are planned for a follow-up.
+// ============================================================
+const VIDEO_OP_CREDIT_COST = { mute: 1, rotate: 1, speed: 1, reverse: 1, volume: 1, loop: 1, togif: 1, thumbnail: 1 };
+app.post('/api/video/process', creditLimiter, requireAuth, uploadVideo.single('file'), async (req, res) => {
+  const op = req.body.op;
+  const CREDIT_COST = VIDEO_OP_CREDIT_COST[op];
+  if (!CREDIT_COST) return res.status(400).json({ error: `Unknown or unsupported operation: ${op}` });
+  let params = {};
+  try { params = JSON.parse(req.body.params || '{}'); } catch (e) { /* use defaults */ }
+
+  try {
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
+    if (!allowed) return res.status(402).json({ error: 'போதுமான credits இல்லை — மேலும் வாங்கவும் (Not enough credits)' });
+
+    const inputPath = req.file.path;
+    let ext = 'mp4', downloadName = op + '.mp4';
+    if (op === 'togif') { ext = 'gif'; downloadName = 'video.gif'; }
+    if (op === 'thumbnail') { ext = 'jpg'; downloadName = 'thumbnail.jpg'; }
+    const outputPath = path.join(os.tmpdir(), crypto.randomUUID() + '.' + ext);
+
+    await new Promise((resolve, reject) => {
+      let cmd = ffmpeg(inputPath);
+      switch (op) {
+        case 'mute':
+          cmd = cmd.noAudio().videoCodec('copy');
+          break;
+        case 'rotate': {
+          // params.degrees: 90 | 180 | 270 | 'flipH' | 'flipV'
+          const d = params.degrees;
+          const filterMap = { 90: 'transpose=1', 180: 'transpose=1,transpose=1', 270: 'transpose=2', flipH: 'hflip', flipV: 'vflip' };
+          cmd = cmd.videoFilters(filterMap[d] || 'transpose=1');
+          break;
+        }
+        case 'speed': {
+          const factor = Math.max(0.25, Math.min(4, Number(params.factor) || 1));
+          cmd = cmd.videoFilters(`setpts=${(1 / factor).toFixed(4)}*PTS`)
+                   .audioFilters(`atempo=${Math.max(0.5, Math.min(2, factor)).toFixed(4)}`);
+          break;
+        }
+        case 'reverse':
+          cmd = cmd.videoFilters('reverse').audioFilters('areverse');
+          break;
+        case 'volume': {
+          const vol = Math.max(0, Math.min(5, Number(params.level) || 1));
+          cmd = cmd.audioFilters(`volume=${vol}`);
+          break;
+        }
+        case 'loop': {
+          const times = Math.max(1, Math.min(20, parseInt(params.times) || 2));
+          cmd = cmd.inputOptions(['-stream_loop', String(times - 1)]).outputOptions(['-c', 'copy']);
+          break;
+        }
+        case 'togif': {
+          const w = Math.max(120, Math.min(960, parseInt(params.width) || 480));
+          const fps = Math.max(5, Math.min(20, parseInt(params.fps) || 10));
+          if (params.startSec !== undefined) cmd = cmd.seekInput(Math.max(0, Number(params.startSec) || 0));
+          if (params.durationSec) cmd = cmd.duration(Math.max(1, Math.min(15, Number(params.durationSec))));
+          cmd = cmd.outputOptions(['-vf', `fps=${fps},scale=${w}:-1:flags=lanczos`, '-loop', '0']);
+          break;
+        }
+        case 'thumbnail': {
+          const atSec = Math.max(0, Number(params.atSeconds) || 1);
+          cmd = cmd.seekInput(atSec).frames(1);
+          break;
+        }
+      }
+      cmd.on('end', resolve).on('error', reject).save(outputPath);
+    });
+
+    res.download(outputPath, downloadName, () => {
+      fs.unlink(inputPath, () => {});
+      fs.unlink(outputPath, () => {});
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
 // POST /api/credits/use — Generic credit-deduction gate.
 // Most Image/OCR/some Video tools still process the file entirely in the
 // browser (fast enough there, no need to re-upload the file to a server).
