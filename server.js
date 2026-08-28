@@ -235,6 +235,100 @@ app.post('/api/video/process', creditLimiter, requireAuth, uploadVideo.single('f
 });
 
 // ============================================================
+// POST /api/video/process-multi — Fast Server Mode for operations needing
+// more than one file or more complex parameters: merging several clips,
+// replacing/extracting a voice track, burning in timed captions, and
+// generating a waveform video from audio. body: multipart files[] (1-20) +
+// op + params (JSON string, e.g. captions array or colours).
+// ============================================================
+const VIDEO_MULTI_OP_CREDIT_COST = { merge: 2, voicereplace: 2, voiceextract: 1, subtitle: 2, waveform: 1 };
+function escDrawtextServer(s) {
+  return String(s).replace(/\\/g, '\\\\\\\\').replace(/:/g, '\\:').replace(/'/g, '\u2019');
+}
+app.post('/api/video/process-multi', creditLimiter, requireAuth, uploadVideo.array('files', 20), async (req, res) => {
+  const op = req.body.op;
+  const CREDIT_COST = VIDEO_MULTI_OP_CREDIT_COST[op];
+  if (!CREDIT_COST) return res.status(400).json({ error: `Unknown or unsupported operation: ${op}` });
+  let params = {};
+  try { params = JSON.parse(req.body.params || '{}'); } catch (e) { /* use defaults */ }
+  const files = req.files || [];
+  const cleanupPaths = files.map(f => f.path);
+
+  try {
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
+    if (!allowed) return res.status(402).json({ error: 'போதுமான credits இல்லை — மேலும் வாங்கவும் (Not enough credits)' });
+
+    let ext = 'mp4', downloadName = op + '.mp4';
+    if (op === 'voiceextract') { ext = 'mp3'; downloadName = 'audio.mp3'; }
+    const outputPath = path.join(os.tmpdir(), crypto.randomUUID() + '.' + ext);
+    cleanupPaths.push(outputPath);
+
+    if (op === 'merge') {
+      if (files.length < 2) throw new Error('Merge needs at least 2 video files.');
+      const listPath = path.join(os.tmpdir(), crypto.randomUUID() + '.txt');
+      const listContent = files.map(f => `file '${f.path.replace(/'/g, "'\\''")}'`).join('\n');
+      fs.writeFileSync(listPath, listContent);
+      cleanupPaths.push(listPath);
+      await new Promise((resolve, reject) => {
+        // Try the fast stream-copy path first; fall back to re-encoding if the clips
+        // aren't compatible for a direct concat (mismatched codecs/containers).
+        ffmpeg().input(listPath).inputOptions(['-f', 'concat', '-safe', '0'])
+          .outputOptions(['-c', 'copy']).on('end', resolve).on('error', () => {
+            ffmpeg().input(listPath).inputOptions(['-f', 'concat', '-safe', '0'])
+              .videoCodec('libx264').outputOptions(['-preset', 'veryfast']).audioCodec('aac')
+              .on('end', resolve).on('error', reject).save(outputPath);
+          }).save(outputPath);
+      });
+    } else if (op === 'voicereplace') {
+      if (files.length !== 2) throw new Error('Voice replace needs exactly 2 files: video, then audio.');
+      const [videoPath, audioPath] = [files[0].path, files[1].path];
+      const mix = params.mix === true;
+      await new Promise((resolve, reject) => {
+        const cmd = ffmpeg().input(videoPath).input(audioPath);
+        if (mix) {
+          cmd.complexFilter(['[0:a][1:a]amix=inputs=2:duration=shortest:dropout_transition=2[aout]'])
+             .outputOptions(['-map', '0:v:0', '-map', '[aout]']);
+        } else {
+          cmd.outputOptions(['-map', '0:v:0', '-map', '1:a:0']);
+        }
+        cmd.videoCodec('libx264').outputOptions(['-preset', 'veryfast']).audioCodec('aac')
+           .outputOptions(['-shortest']).on('end', resolve).on('error', reject).save(outputPath);
+      });
+    } else if (op === 'voiceextract') {
+      await new Promise((resolve, reject) => {
+        ffmpeg(files[0].path).noVideo().audioFrequency(44100).audioChannels(2).audioBitrate('192k')
+          .on('end', resolve).on('error', reject).save(outputPath);
+      });
+    } else if (op === 'subtitle') {
+      const captions = Array.isArray(params.captions) ? params.captions : [];
+      if (!captions.length) throw new Error('No captions provided.');
+      const filters = captions.map(c =>
+        `drawtext=text='${escDrawtextServer(c.text)}':fontsize=32:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-th-40:enable='between(t,${Number(c.start) || 0},${Number(c.end) || 0})'`
+      ).join(',');
+      await new Promise((resolve, reject) => {
+        ffmpeg(files[0].path).videoFilters(filters).outputOptions(['-c:a', 'copy'])
+          .on('end', resolve).on('error', reject).save(outputPath);
+      });
+    } else if (op === 'waveform') {
+      const bg = params.bg || 'black', fg = params.fg || 'white';
+      const filter = `[0:a]showwaves=s=1280x360:mode=cline:colors=${fg}:rate=25[wave];color=c=${bg}:s=1280x360:rate=25[bgv];[bgv][wave]overlay=format=auto[outv]`;
+      await new Promise((resolve, reject) => {
+        ffmpeg(files[0].path).complexFilter([filter]).outputOptions(['-map', '[outv]', '-map', '0:a', '-shortest'])
+          .videoCodec('libx264').outputOptions(['-preset', 'veryfast']).audioCodec('aac')
+          .on('end', resolve).on('error', reject).save(outputPath);
+      });
+    }
+
+    res.download(outputPath, downloadName, () => {
+      cleanupPaths.forEach(p => fs.unlink(p, () => {}));
+    });
+  } catch (e) {
+    cleanupPaths.forEach(p => fs.unlink(p, () => {}));
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
 // POST /api/credits/use — Generic credit-deduction gate.
 // Most Image/OCR/some Video tools still process the file entirely in the
 // browser (fast enough there, no need to re-upload the file to a server).
