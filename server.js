@@ -283,16 +283,19 @@ app.post('/api/video/process-multi', creditLimiter, requireAuth, uploadVideo.arr
       if (files.length !== 2) throw new Error('Voice replace needs exactly 2 files: video, then audio.');
       const [videoPath, audioPath] = [files[0].path, files[1].path];
       const mix = params.mix === true;
+      const delayMs = Math.max(0, Math.round((Number(params.startSec) || 0) * 1000));
+      const delayedAudio = delayMs > 0 ? `adelay=${delayMs}|${delayMs},` : '';
       await new Promise((resolve, reject) => {
         const cmd = ffmpeg().input(videoPath).input(audioPath);
         if (mix) {
-          cmd.complexFilter(['[0:a][1:a]amix=inputs=2:duration=shortest:dropout_transition=2[aout]'])
+          cmd.complexFilter([`[1:a]${delayedAudio}apad[a1]`, '[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]'])
              .outputOptions(['-map', '0:v:0', '-map', '[aout]']);
         } else {
-          cmd.outputOptions(['-map', '0:v:0', '-map', '1:a:0']);
+          cmd.complexFilter([`[1:a]${delayedAudio}apad[a1]`])
+             .outputOptions(['-map', '0:v:0', '-map', '[a1]', '-shortest']);
         }
         cmd.videoCodec('libx264').outputOptions(['-preset', 'veryfast']).audioCodec('aac')
-           .outputOptions(['-shortest']).on('end', resolve).on('error', reject).save(outputPath);
+           .on('end', resolve).on('error', reject).save(outputPath);
       });
     } else if (op === 'voiceextract') {
       await new Promise((resolve, reject) => {
