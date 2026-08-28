@@ -485,7 +485,7 @@ async function startCheckout(planId, btn){
             })
           });
           if(result.error) throw new Error(result.error);
-          await refreshProfile(); render();
+          await refreshProfile(); updateCreditsBadgeInline();
           showToast('✅ Payment successful! Credits have been added.', 'success');
         }catch(e){
           mountCriticalNotice(
