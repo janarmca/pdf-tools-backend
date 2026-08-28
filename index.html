@@ -1502,7 +1502,7 @@ const __cvPending = {};
 function ensureCvWorker(){
   if(!__cvWorker){
     const blob = new Blob([CV_WORKER_SRC], {type:'text/javascript'});
-    __cvWorker = new Worker(URL.createObjectURL(blob));
+    __cvWorker = new Worker(URL.createObjectURL(blob), { type: 'classic' });
     __cvWorker.onmessage = (e)=>{
       const { id, ok, error, ...rest } = e.data;
       const p = __cvPending[id]; delete __cvPending[id];
@@ -4050,7 +4050,7 @@ TOOL_IMPL.imgenhance = {
           postMessage({id:m.id, buffer:cur.buffer}, [cur.buffer]);
         };
       `;
-      const worker = new Worker(URL.createObjectURL(new Blob([src], {type:'text/javascript'})));
+      const worker = new Worker(URL.createObjectURL(new Blob([src], {type:'text/javascript'})), { type: 'classic' });
       window.__enhanceWorker = worker;
       return worker;
     }
