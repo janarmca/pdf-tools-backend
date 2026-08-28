@@ -1410,10 +1410,12 @@ self.onmessage = async (e)=>{
       outData = new Uint8Array(mask.rows*mask.cols);
       outData.set(mask.data);
     } else if(op === 'inpaint'){
+      const rgb = track(new cv.Mat()); cv.cvtColor(src, rgb, cv.COLOR_RGBA2RGB);
       const mask = track(cv.matFromArray(height, width, cv.CV_8UC1, params.maskData));
-      const dst = track(new cv.Mat());
-      cv.inpaint(src, mask, dst, 7, cv.INPAINT_TELEA);
-      outData = new Uint8ClampedArray(dst.data);
+      const dstRgb = track(new cv.Mat());
+      cv.inpaint(rgb, mask, dstRgb, 7, cv.INPAINT_TELEA);
+      const dstRgba = track(new cv.Mat()); cv.cvtColor(dstRgb, dstRgba, cv.COLOR_RGB2RGBA);
+      outData = new Uint8ClampedArray(dstRgba.data);
     } else if(op === 'sketch'){
       const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
       const inv = track(new cv.Mat()); cv.bitwise_not(gray, inv);
@@ -4223,10 +4225,72 @@ TOOL_IMPL.bgremove = {
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
         prog.set(100,'Done'); prog.remove();
         console.log('[bgremove] done, showing preview');
-        const resultUrl = URL.createObjectURL(blob);
-        mountResult(body, 'Background removed — downloaded. Preview below (checkered = transparent):');
-        body.appendChild(el(`<div style="margin-top:10px; border:1px solid var(--line); border-radius:10px; padding:8px; background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;"><img src="${resultUrl}" style="max-width:100%; display:block;"></div>`));
+        mountResult(body, 'Background removed — downloaded. If it cut off part of the subject, use Touch-up below to fix it by hand.');
+        mountTouchUp(outCanvas);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    // Lets the person manually correct the automatic result — "Restore" brings
+    // back parts that were wrongly cut off (e.g. shoulders/clothing), "Erase"
+    // removes any background the algorithm missed. This matters because
+    // grabCut is a rough automatic guess, not pixel-perfect — for a person's
+    // photo, keeping the WHOLE subject intact is more important than trusting
+    // the algorithm blindly, so giving direct manual control is the reliable fix.
+    function mountTouchUp(resultCanvas){
+      const wrap = el(`<div style="margin-top:14px; border:1px solid var(--line); border-radius:14px; padding:14px;"></div>`);
+      wrap.appendChild(el(`<div style="font-weight:800; font-size:13px; margin-bottom:4px;">🖌️ Touch-up (optional)</div>`));
+      wrap.appendChild(el(`<div style="font-size:12px; color:var(--sub); margin-bottom:10px;">Paint over any area to fix it — choose a mode below first.</div>`));
+      const modeRow = el(`<div style="display:flex; gap:8px; margin-bottom:10px;"></div>`);
+      let mode = 'restore';
+      const restoreBtn = el(`<button style="flex:1; padding:9px; border-radius:10px; border:2px solid #1E7145; background:#1E7145; color:#fff; font-weight:700; font-size:12.5px; cursor:pointer;">➕ Restore (bring back)</button>`);
+      const eraseBtn = el(`<button style="flex:1; padding:9px; border-radius:10px; border:2px solid var(--line); background:#fff; color:#333; font-weight:700; font-size:12.5px; cursor:pointer;">➖ Erase (remove more)</button>`);
+      restoreBtn.onclick = ()=>{ mode='restore'; restoreBtn.style.background='#1E7145'; restoreBtn.style.color='#fff'; eraseBtn.style.background='#fff'; eraseBtn.style.color='#333'; };
+      eraseBtn.onclick = ()=>{ mode='erase'; eraseBtn.style.background='#C0392B'; eraseBtn.style.borderColor='#C0392B'; eraseBtn.style.color='#fff'; restoreBtn.style.background='#fff'; restoreBtn.style.borderColor='var(--line)'; restoreBtn.style.color='#333'; };
+      modeRow.appendChild(restoreBtn); modeRow.appendChild(eraseBtn);
+      wrap.appendChild(modeRow);
+
+      const previewCanvas = document.createElement('canvas');
+      previewCanvas.width = resultCanvas.width; previewCanvas.height = resultCanvas.height;
+      const pctx = previewCanvas.getContext('2d');
+      const checkerCanvas = document.createElement('canvas');
+      checkerCanvas.width = resultCanvas.width; checkerCanvas.height = resultCanvas.height;
+      // We ALSO need the ORIGINAL (pre-transparency) pixels so "Restore" has real
+      // colour to bring back, not just transparency-turned-opaque black.
+      const origData = imgCanvas.getContext('2d').getImageData(0,0,imgCanvas.width,imgCanvas.height);
+      function redrawPreview(){
+        pctx.fillStyle='#eee'; pctx.fillRect(0,0,previewCanvas.width,previewCanvas.height);
+        for(let y=0;y<previewCanvas.height;y+=20) for(let x=0;x<previewCanvas.width;x+=20) if(((x/20)+(y/20))%2===0){ pctx.fillStyle='#ddd'; pctx.fillRect(x,y,20,20); }
+        pctx.drawImage(resultCanvas,0,0);
+      }
+      redrawPreview();
+      const brushUI = mountBrushMask(wrap, previewCanvas, 22);
+      const applyRow = el(`<div class="btn-row" style="margin-top:10px;"></div>`);
+      const applyBtn = el(`<button class="btn secondary" style="padding:8px 16px; font-size:12.5px;">Apply Touch-up</button>`);
+      const dlBtn = el(`<button class="btn" style="padding:8px 16px; font-size:12.5px;">⬇️ Download Fixed Version</button>`);
+      applyBtn.onclick = ()=>{
+        if(!brushUI.hasPaint()) return;
+        const maskData = brushUI.getMaskCanvas().getContext('2d').getImageData(0,0,resultCanvas.width,resultCanvas.height);
+        const resCtx = resultCanvas.getContext('2d', { willReadFrequently:true });
+        const resData = resCtx.getImageData(0,0,resultCanvas.width,resultCanvas.height);
+        for(let p=0; p<maskData.data.length; p+=4){
+          if(maskData.data[p+3] > 20){ // painted here
+            if(mode==='restore'){
+              resData.data[p]=origData.data[p]; resData.data[p+1]=origData.data[p+1]; resData.data[p+2]=origData.data[p+2]; resData.data[p+3]=255;
+            } else {
+              resData.data[p+3]=0;
+            }
+          }
+        }
+        resCtx.putImageData(resData,0,0);
+        brushUI.clear();
+        redrawPreview();
+      };
+      dlBtn.onclick = async ()=>{
+        const blob = await new Promise(res=> resultCanvas.toBlob(res,'image/png'));
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg-fixed.png');
+      };
+      applyRow.appendChild(applyBtn); applyRow.appendChild(dlBtn);
+      wrap.appendChild(applyRow);
+      body.appendChild(wrap);
     }
     paint();
   }
