@@ -4162,19 +4162,18 @@ TOOL_IMPL.imgenhance = {
 /* ===================== BACKGROUND REMOVER ===================== */
 TOOL_IMPL.bgremove = {
   mount(container){
-    ensureCvWorker(); // pre-warm the background AI worker so it's ready by the time the user clicks Remove
     let file = null, imgCanvas = null, selector = null, previewUrl = null;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">பொருளை (subject) சுற்றி பெட்டி வரை — அதற்கு வெளியே உள்ள Background தானாக வெளிப்படையாக்கப்படும் (transparent PNG).</div>`));
+      body.appendChild(el(`<div class="note tamil">AI தானாகவே subject-ஐ கண்டறிந்து Background-ஐ transparent ஆக்கும் (remove.bg-quality). முடிந்தால் subject-ஐ மட்டும் சுற்றி பெட்டி வரையவும் — துல்லியத்தை மேலும் மேம்படுத்தும்.</div>`));
       mountUploader(body, { accept:'image/*', label:'the image drag & drop or tap', sublabel:'JPG / PNG',
         onAdd: async (fl)=>{
           file = fl[0];
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
           const img = new Image();
           await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
-          const scale = Math.min(1, 900/img.naturalWidth);
+          const scale = Math.min(1, 1400/img.naturalWidth); // higher res than before — the AI model handles detail well
           imgCanvas = document.createElement('canvas');
           imgCanvas.width = Math.round(img.naturalWidth*scale); imgCanvas.height = Math.round(img.naturalHeight*scale);
           imgCanvas.getContext('2d').drawImage(img,0,0,imgCanvas.width,imgCanvas.height);
@@ -4183,7 +4182,7 @@ TOOL_IMPL.bgremove = {
         }});
       if(file && previewUrl){
         mountFileList(body, [file], ()=>{ file=null; imgCanvas=null; previewUrl=null; paint(); });
-        selector = mountRectSelector(body, previewUrl, {fx0:0.08, fy0:0.08, fx1:0.92, fy1:0.92});
+        selector = mountRectSelector(body, previewUrl, {fx0:0.05, fy0:0.05, fx1:0.95, fy1:0.95});
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">🪄 Background நீக்கு</button>`);
         btn.onclick = doRemove;
@@ -4192,42 +4191,65 @@ TOOL_IMPL.bgremove = {
       }
     }
     async function doRemove(){
-      console.log('[bgremove] doRemove started');
-      const rect = selector.getRect();
+      console.log('[bgremove] doRemove started (AI-model path)');
       const prog = mountProgress(body);
       try{
-        prog.set(10,'Loading AI engine…');
-        const x = Math.round(rect.fx0*imgCanvas.width), y = Math.round(rect.fy0*imgCanvas.height);
-        const w = Math.max(2, Math.round((rect.fx1-rect.fx0)*imgCanvas.width));
-        const h = Math.max(2, Math.round((rect.fy1-rect.fy0)*imgCanvas.height));
-        const ctx0 = imgCanvas.getContext('2d', { willReadFrequently: true });
-        const srcImageData = ctx0.getImageData(0,0,imgCanvas.width,imgCanvas.height);
-        console.log('[bgremove] got imageData', srcImageData.width, srcImageData.height, 'rect', {x,y,w,h});
-        prog.set(30,'Detecting subject… (runs in the background, page stays responsive)');
-        console.log('[bgremove] calling runCvOp(grabcut)…');
-        const maskResult = await runCvOp('grabcut', srcImageData, { x, y, w, h });
-        console.log('[bgremove] runCvOp resolved, mask length =', maskResult && maskResult.data && maskResult.data.length);
-        prog.set(80,'Making background transparent…');
-        const outCanvas = document.createElement('canvas'); outCanvas.width=imgCanvas.width; outCanvas.height=imgCanvas.height;
-        const octx = outCanvas.getContext('2d', { willReadFrequently: true });
-        octx.drawImage(imgCanvas,0,0);
-        const outData = octx.getImageData(0,0,outCanvas.width,outCanvas.height);
-        for(let p=0, q=0; q<maskResult.data.length; p+=4, q++){
-          const v = maskResult.data[q]; // 0=bg,1=fg,2=probable bg,3=probable fg
-          const isFg = (v===1 || v===3);
-          if(!isFg) outData.data[p+3] = 0;
-        }
-        octx.putImageData(outData,0,0);
-        console.log('[bgremove] compositing done, creating blob…');
-        const blob = await new Promise(res=> outCanvas.toBlob(res,'image/png'));
-        console.log('[bgremove] blob created, size =', blob && blob.size);
+        prog.set(10,'Loading AI model… (first use downloads ~15-40MB, cached after)');
+        const blobIn = await new Promise(res=> imgCanvas.toBlob(res,'image/png'));
+        console.log('[bgremove] importing @imgly/background-removal…');
+        const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
+        const removeBackground = mod.default || mod.removeBackground;
+        prog.set(30,'AI detecting subject… (first run is slower, please wait)');
+        console.log('[bgremove] calling removeBackground()…');
+        const outBlob = await removeBackground(blobIn, {
+          progress: (key, current, total)=>{
+            if(total) prog.set(30 + Math.round((current/total)*55), 'Loading AI model… '+Math.round((current/total)*100)+'%');
+          }
+        });
+        console.log('[bgremove] AI removeBackground resolved, size=', outBlob && outBlob.size);
         prog.set(95,'Preparing…');
-        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
+        downloadBlob(outBlob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
         prog.set(100,'Done'); prog.remove();
         console.log('[bgremove] done, showing preview');
-        mountResult(body, 'Background removed — downloaded. If it cut off part of the subject, use Touch-up below to fix it by hand.');
-        mountTouchUp(outCanvas);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+        const resultUrl = URL.createObjectURL(outBlob);
+        mountResult(body, 'Background removed (AI) — downloaded. Preview below (checkered = transparent):');
+        body.appendChild(el(`<div style="margin-top:10px; border:1px solid var(--line); border-radius:10px; padding:8px; background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;"><img src="${resultUrl}" style="max-width:100%; display:block;"></div>`));
+      }catch(aiErr){
+        console.warn('[bgremove] AI model failed, falling back to classical method:', aiErr && aiErr.message);
+        // Fall back to the OpenCV grabCut approach so the tool still produces
+        // SOMETHING useful even if the AI model can't load (e.g. no internet
+        // for the model download, or a browser that can't run it).
+        try{
+          const rect = selector.getRect();
+          prog.set(10,'AI model unavailable — using backup method…');
+          const x = Math.round(rect.fx0*imgCanvas.width), y = Math.round(rect.fy0*imgCanvas.height);
+          const w = Math.max(2, Math.round((rect.fx1-rect.fx0)*imgCanvas.width));
+          const h = Math.max(2, Math.round((rect.fy1-rect.fy0)*imgCanvas.height));
+          const ctx0 = imgCanvas.getContext('2d', { willReadFrequently: true });
+          const srcImageData = ctx0.getImageData(0,0,imgCanvas.width,imgCanvas.height);
+          prog.set(30,'Detecting subject… (backup method, runs in the background)');
+          const maskResult = await runCvOp('grabcut', srcImageData, { x, y, w, h });
+          prog.set(80,'Making background transparent…');
+          const outCanvas = document.createElement('canvas'); outCanvas.width=imgCanvas.width; outCanvas.height=imgCanvas.height;
+          const octx = outCanvas.getContext('2d', { willReadFrequently: true });
+          octx.drawImage(imgCanvas,0,0);
+          const outData = octx.getImageData(0,0,outCanvas.width,outCanvas.height);
+          for(let p=0, q=0; q<maskResult.data.length; p+=4, q++){
+            const v = maskResult.data[q];
+            const isFg = (v===1 || v===3);
+            if(!isFg) outData.data[p+3] = 0;
+          }
+          octx.putImageData(outData,0,0);
+          const blob = await new Promise(res=> outCanvas.toBlob(res,'image/png'));
+          downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
+          prog.set(100,'Done'); prog.remove();
+          mountResult(body, 'AI model unavailable, so we used a backup method — quality may be lower. Downloaded below. Use Touch-up to fix any rough edges.').style.background='#FFF3E0';
+          mountTouchUp(outCanvas);
+        }catch(fallbackErr){
+          prog.remove();
+          mountResult(body, 'Error: '+fallbackErr.message).style.background='#FDEDEC';
+        }
+      }
     }
     // Lets the person manually correct the automatic result — "Restore" brings
     // back parts that were wrongly cut off (e.g. shoulders/clothing), "Erase"
