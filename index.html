@@ -318,6 +318,13 @@ async function initAuth(){
   if(authState.session) await refreshProfile();
   sb.auth.onAuthStateChange(async (event, session)=>{
     authState.session = session;
+    // Supabase silently refreshes the session token in the background every
+    // so often ('TOKEN_REFRESHED') — that must NOT trigger a full re-render,
+    // or anyone actively using a tool (an uploaded file, an in-progress AI
+    // call, a half-filled form) would suddenly get reset back to the empty
+    // starting screen with no warning and no error. Only actual sign-in/out
+    // events should rebuild the page.
+    if(event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
     if(session) await refreshProfile(); else authState.profile = null;
     render();
   });
