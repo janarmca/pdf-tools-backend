@@ -1508,16 +1508,20 @@ let __cvWorker = null, __cvMsgId = 0;
 const __cvPending = {};
 function ensureCvWorker(){
   if(!__cvWorker){
+    console.log('[cvWorker] creating worker…');
     const blob = new Blob([CV_WORKER_SRC], {type:'text/javascript'});
     __cvWorker = new Worker(URL.createObjectURL(blob), { type: 'classic' });
     __cvWorker.onmessage = (e)=>{
       const { id, ok, error, ...rest } = e.data;
+      console.log('[cvWorker] message received for id', id, 'ok=', ok, error?('error: '+error):'');
       const p = __cvPending[id]; delete __cvPending[id];
       if(!p) return;
+      clearTimeout(p.timeoutHandle);
       if(ok) p.resolve(rest); else p.reject(new Error(error));
     };
     __cvWorker.onerror = (e)=>{
-      Object.keys(__cvPending).forEach(id=>{ __cvPending[id].reject(new Error('AI worker crashed: '+e.message)); delete __cvPending[id]; });
+      console.error('[cvWorker] worker onerror fired:', e.message, e);
+      Object.keys(__cvPending).forEach(id=>{ clearTimeout(__cvPending[id].timeoutHandle); __cvPending[id].reject(new Error('AI worker crashed: '+e.message)); delete __cvPending[id]; });
     };
   }
   return __cvWorker;
@@ -1529,8 +1533,19 @@ function runCvOp(op, imageData, params){
   return new Promise((resolve, reject)=>{
     const worker = ensureCvWorker();
     const id = ++__cvMsgId;
-    __cvPending[id] = { resolve, reject };
+    // OpenCV.js is a genuinely large (5-10MB) library the worker has to
+    // download+compile on its FIRST use — on a slow connection this can take
+    // a while. Without a timeout, if that download ever silently stalls
+    // (network hiccup, blocked request, etc.) the whole operation would just
+    // hang forever with no error and no result, looking exactly like
+    // "nothing happens". This guarantees a clear message instead.
+    const timeoutHandle = setTimeout(()=>{
+      delete __cvPending[id];
+      reject(new Error('The AI engine is taking too long to load (it\'s a large ~8MB library on first use). Please check your internet connection and try again.'));
+    }, 60000);
+    __cvPending[id] = { resolve, reject, timeoutHandle };
     const dataCopy = new Uint8Array(imageData.data); // copy so the transfer doesn't detach the caller's buffer
+    console.log('[runCvOp] posting message, op=', op, 'id=', id, 'size=', imageData.width+'x'+imageData.height);
     worker.postMessage({ id, op, width: imageData.width, height: imageData.height, data: dataCopy, params: params||{} }, [dataCopy.buffer]);
   });
 }
@@ -4159,6 +4174,7 @@ TOOL_IMPL.bgremove = {
       }
     }
     async function doRemove(){
+      console.log('[bgremove] doRemove started');
       const rect = selector.getRect();
       const prog = mountProgress(body);
       try{
@@ -4168,8 +4184,11 @@ TOOL_IMPL.bgremove = {
         const h = Math.max(2, Math.round((rect.fy1-rect.fy0)*imgCanvas.height));
         const ctx0 = imgCanvas.getContext('2d', { willReadFrequently: true });
         const srcImageData = ctx0.getImageData(0,0,imgCanvas.width,imgCanvas.height);
+        console.log('[bgremove] got imageData', srcImageData.width, srcImageData.height, 'rect', {x,y,w,h});
         prog.set(30,'Detecting subject… (runs in the background, page stays responsive)');
+        console.log('[bgremove] calling runCvOp(grabcut)…');
         const maskResult = await runCvOp('grabcut', srcImageData, { x, y, w, h });
+        console.log('[bgremove] runCvOp resolved, mask length =', maskResult && maskResult.data && maskResult.data.length);
         prog.set(80,'Making background transparent…');
         const outCanvas = document.createElement('canvas'); outCanvas.width=imgCanvas.width; outCanvas.height=imgCanvas.height;
         const octx = outCanvas.getContext('2d', { willReadFrequently: true });
@@ -4181,10 +4200,13 @@ TOOL_IMPL.bgremove = {
           if(!isFg) outData.data[p+3] = 0;
         }
         octx.putImageData(outData,0,0);
+        console.log('[bgremove] compositing done, creating blob…');
         const blob = await new Promise(res=> outCanvas.toBlob(res,'image/png'));
+        console.log('[bgremove] blob created, size =', blob && blob.size);
         prog.set(95,'Preparing…');
         downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-nobg.png');
         prog.set(100,'Done'); prog.remove();
+        console.log('[bgremove] done, showing preview');
         const resultUrl = URL.createObjectURL(blob);
         mountResult(body, 'Background removed — downloaded. Preview below (checkered = transparent):');
         body.appendChild(el(`<div style="margin-top:10px; border:1px solid var(--line); border-radius:10px; padding:8px; background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;"><img src="${resultUrl}" style="max-width:100%; display:block;"></div>`));
