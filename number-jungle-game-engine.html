@@ -207,6 +207,13 @@ function bandForGrade(g){
   if(g<=10) return '9-10';
   return '11-12';
 }
+// Grades 1-5 get their OWN individual badge each (so Grade 1 and Grade 3
+// completing the same "band" don't look identical) — this is the actual fix
+// for badges feeling broken/unrewarding for the 1-5 age group specifically.
+// Grades 6-12 keep the original band grouping.
+function progressKey(grade){
+  return grade<=5 ? String(grade) : bandForGrade(grade);
+}
 
 /* ================= MATH PROCEDURAL GENERATOR ================= */
 function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -226,13 +233,17 @@ const REAL_LIFE_TA = {
   addition: ['🍬 கடையில் இரண்டு பொருள் வாங்கும்போது, மொத்த விலை கணக்கிட Addition பயன்படும்.', '💰 உங்கள் பணத்தையும் தோழியின் பணத்தையும் சேர்த்தால் மொத்தம் எவ்வளவு என்று Addition சொல்லும்.'],
   subtraction: ['🛒 கடைக்காரரிடம் பணம் கொடுத்தபின், மீதி (change) கணக்கிட Subtraction பயன்படும்.', '🍎 உங்களிடம் இருந்த பழங்களில் சிலவற்றை தந்தால், மீதி எத்தனை என Subtraction சொல்லும்.'],
   multiplication: ['🍪 3 பாக்கெட், ஒவ்வொன்றிலும் 5 biscuits இருந்தால், மொத்தம் எத்தனை என Multiplication வேகமாக சொல்லும்.', '🚌 பேருந்தில் 4 வரிசை, ஒவ்வொரு வரிசையிலும் 6 இருக்கைகள் இருந்தால், மொத்த இருக்கைகளை Multiplication கணக்கிடும்.'],
-  variable: ['🧩 காணாமல் போன எண்ணை கண்டுபிடிப்பது ஒரு புதிர் போன்றது — இதுவே பெரிய குழந்தைகள் படிக்கும் Algebra-வின் முதல் படி!', '🔍 "?" என்பது ஒரு மறைந்திருக்கும் எண் — அதை கண்டுபிடிப்பதே Variable-ஐ புரிந்துகொள்வது.']
+  variable: ['🧩 காணாமல் போன எண்ணை கண்டுபிடிப்பது ஒரு புதிர் போன்றது — இதுவே பெரிய குழந்தைகள் படிக்கும் Algebra-வின் முதல் படி!', '🔍 "?" என்பது ஒரு மறைந்திருக்கும் எண் — அதை கண்டுபிடிப்பதே Variable-ஐ புரிந்துகொள்வது.'],
+  fraction: ['🍕 பீட்சாவை 4 சம பாகங்களாக வெட்டி, 1 பாகம் சாப்பிட்டால் — நீங்கள் சாப்பிட்டது 1/4 (ஒரு நான்கில் ஒன்று)!', '🍫 சாக்லேட் பட்டியை நண்பர்களுடன் பங்கு போடும்போது Fraction பயன்படும்.'],
+  lcm: ['🚦 இரண்டு பேருந்துகள் வெவ்வேறு நேரங்களில் திரும்பி வந்தால், இருவரும் ஒரே நேரத்தில் வருவது எப்போது என்பதை LCM கண்டுபிடிக்கும்!', '🎵 இரண்டு பாடல்களின் தாளம் எப்போது ஒன்றாக மீண்டும் தொடங்கும் என்பதை LCM போன்ற கணக்கு சொல்லும்.']
 };
 const REAL_LIFE_EN = {
   addition: ['🍬 When you buy two things at a shop, Addition tells you the total price to pay.', '💰 Adding your money and your friend\'s money together tells you how much you have combined.'],
   subtraction: ['🛒 After paying the shopkeeper, Subtraction tells you how much change you get back.', '🍎 If you give away some of your fruits, Subtraction tells you how many are left.'],
   multiplication: ['🍪 3 packets with 5 biscuits each — Multiplication quickly tells you the total, instead of counting one by one.', '🚌 4 rows of 6 seats on a bus — Multiplication tells you the total seats fast.'],
-  variable: ['🧩 Finding a missing number is like solving a puzzle — it\'s the very first step towards Algebra that older kids learn!', '🔍 The "?" is a hidden number — figuring it out is exactly what a "variable" is used for.']
+  variable: ['🧩 Finding a missing number is like solving a puzzle — it\'s the very first step towards Algebra that older kids learn!', '🔍 The "?" is a hidden number — figuring it out is exactly what a "variable" is used for.'],
+  fraction: ['🍕 Cut a pizza into 4 equal slices and eat 1 — you ate 1/4 (one out of four) of it!', '🍫 Sharing a chocolate bar fairly with friends is exactly what fractions help with.'],
+  lcm: ['🚦 If two buses return at different time gaps, LCM tells you when they\'ll both arrive together again!', '🎵 LCM-style thinking tells you when two repeating patterns (like song beats) line up again.']
 };
 function pick(arr){ return arr[rnd(0,arr.length-1)]; }
 
@@ -256,19 +267,52 @@ function genGrade1to5Question(grade, topic){
     return { q:`${a} × ${b} = ?`, options: makeOptions(correct,[correct+a,correct-a,correct+b]), correct:String(correct), context: pick(R.multiplication), topic:'multiplication' };
   }
   // 'variable' — gentle "find the missing number" introduction to algebra
-  const isAdd = Math.random()<0.5;
-  const a = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
-  const missing = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
-  const total = isAdd ? a+missing : a+missing; // present as "a + ? = total" either way for simplicity
-  const q = isAdd ? `${a} + ? = ${total}` : `${total} − ? = ${a}`;
-  return { q, options: makeOptions(missing,[missing+1,missing-1,missing+3]), correct:String(missing), context: pick(R.variable), topic:'variable' };
+  if(topic==='variable'){
+    const isAdd = Math.random()<0.5;
+    const a = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
+    const missing = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
+    const total = a+missing;
+    const q = isAdd ? `${a} + ? = ${total}` : `${total} − ? = ${a}`;
+    return { q, options: makeOptions(missing,[missing+1,missing-1,missing+3]), correct:String(missing), context: pick(R.variable), topic:'variable' };
+  }
+  if(topic==='fraction'){
+    // Visual "what fraction is shaded" style — the emoji row itself is the
+    // "image" here, so kids can literally count and see the fraction.
+    if(Math.random()<0.5){
+      const denom = mid ? 4 : (hard ? rnd(3,5) : 4);
+      const num = rnd(1,denom-1);
+      const visual = '🟢'.repeat(num) + '⚪'.repeat(denom-num);
+      const correct = `${num}/${denom}`;
+      const distractors = [`${denom-num}/${denom}`, `${num}/${denom+1}`, `${Math.min(num+1,denom)}/${denom}`];
+      return { q:`${visual}<br>${lang==='ta'?'எத்தனை பங்கு பச்சை நிறத்தில் உள்ளது?':'What fraction is green?'}`, options: shuffle([...new Set([correct,...distractors])]).slice(0,4), correct, context: pick(R.fraction), topic:'fraction' };
+    } else {
+      const parts = mid ? 2 : (Math.random()<0.5?2:4);
+      const eachPart = rnd(2, hard?12:6);
+      const total = eachPart*parts;
+      const correct = eachPart;
+      const label = parts===2 ? '½' : '¼';
+      return { q:`${label} ${lang==='ta'?'இதன்':'of'} ${total} = ?`, options: makeOptions(correct,[correct+1,correct-1,total]), correct:String(correct), context: pick(R.fraction), topic:'fraction' };
+    }
+  }
+  if(topic==='lcm'){
+    const pairs = [[2,3],[2,4],[3,4],[2,5],[4,6],[3,6],[2,6],[2,8]];
+    const [a,b] = pairs[rnd(0,pairs.length-1)];
+    const gcd=(x,y)=> y===0?x:gcd(y,x%y);
+    const correct = (a*b)/gcd(a,b);
+    return { q:`LCM ${lang==='ta'?'of':'of'} ${a}, ${b} = ?`, options: makeOptions(correct,[a*b, correct+a, correct>b?correct-b:correct+b]), correct:String(correct), context: pick(R.lcm), topic:'lcm' };
+  }
 }
 
 function genMathQuestion(band, grade, qIndex){
-  // Grades 1-5 (bands 1-3 and 4-6 for grades ≤5): guarantee every 5-question
-  // session covers all 4 basics — 2 questions get skipped→cycled if grade 6 lands in '4-6' band.
+  // Grades 1-5: guarantee full basics coverage every session. The topic POOL
+  // grows with grade — 1-2 stays to the pure basics, 3 introduces Fractions,
+  // 4-5 add LCM too — so older kids in this range genuinely get more advanced
+  // content, not just bigger numbers of the same 3 sums.
   if(grade && grade<=5){
-    const topics = ['addition','subtraction','multiplication','variable','addition'];
+    let topics;
+    if(grade<=2) topics = ['addition','subtraction','multiplication','variable','addition'];
+    else if(grade===3) topics = ['addition','subtraction','multiplication','fraction','variable'];
+    else topics = ['addition','multiplication','fraction','lcm','variable'];
     return genGrade1to5Question(grade, topics[qIndex % topics.length]);
   }
   if(band==='1-3'){
@@ -485,7 +529,7 @@ function renderQuestion(){
   }).join('');
 
   const q = sessionQs[sessionIdx];
-  const topicLabels = { addition:{en:'➕ Addition',ta:'➕ கூட்டல்'}, subtraction:{en:'➖ Subtraction',ta:'➖ கழித்தல்'}, multiplication:{en:'✖️ Multiplication',ta:'✖️ பெருக்கல்'}, variable:{en:'🧩 Mystery Number',ta:'🧩 மறைந்த எண்'} };
+  const topicLabels = { addition:{en:'➕ Addition',ta:'➕ கூட்டல்'}, subtraction:{en:'➖ Subtraction',ta:'➖ கழித்தல்'}, multiplication:{en:'✖️ Multiplication',ta:'✖️ பெருக்கல்'}, variable:{en:'🧩 Mystery Number',ta:'🧩 மறைந்த எண்'}, fraction:{en:'🍕 Fractions',ta:'🍕 பின்னங்கள்'}, lcm:{en:'🔢 LCM',ta:'🔢 மீச்சிறு பொது மடங்கு'} };
   const topicTag = q.topic ? `<div style="display:inline-block; background:rgba(255,182,39,0.18); color:#FFB627; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; margin-bottom:8px;">${topicLabels[q.topic][lang]}</div>` : '';
   document.getElementById('playArea').innerHTML = `
     <div class="q-card">
@@ -536,11 +580,12 @@ function finishSession(){
   addXP(earnedXP);
 
   let newBadge=false;
+  const pKey = progressKey(currentGrade);
   if(sessionCorrect>=4){
     if(!state.completedBands[currentSubject]) state.completedBands[currentSubject]=[];
-    if(!state.completedBands[currentSubject].includes(currentBand)){
-      state.completedBands[currentSubject].push(currentBand);
-      const badgeId = `${currentSubject}_${currentBand}`;
+    if(!state.completedBands[currentSubject].includes(pKey)){
+      state.completedBands[currentSubject].push(pKey);
+      const badgeId = `${currentSubject}_${pKey}`;
       if(!state.badges.includes(badgeId)){ state.badges.push(badgeId); newBadge=true; }
     }
   }
@@ -576,8 +621,8 @@ function selectSubject(subjectId){
   document.getElementById('gradeSelH').textContent = `${subj.icon} ${lang==='en'?subj.en:subj.ta} — ${T[lang].gradeSelH}`;
   let html='';
   for(let g=1; g<=12; g++){
-    const band = bandForGrade(g);
-    const done = state.completedBands[subjectId] && state.completedBands[subjectId].includes(band);
+    const pKey = progressKey(g);
+    const done = state.completedBands[subjectId] && state.completedBands[subjectId].includes(pKey);
     html += `<div class="card ${done?'done':''}" onclick="startSession('${subjectId}',${g})">
       <div class="ic">${g}</div>
       <div class="t1">${lang==='en'?'Grade':'கிரேடு'} ${g}</div>
@@ -591,7 +636,14 @@ function selectSubject(subjectId){
 function renderBadges(){
   let html='';
   SUBJECTS.forEach(s=>{
-    ['1-3','4-6','7-8','9-10','11-12'].forEach(band=>{
+    ['1','2','3','4','5'].forEach(gradeKey=>{
+      const earned = state.badges.includes(`${s.id}_${gradeKey}`);
+      html += `<div class="badge ${earned?'':'empty'}">
+        <div class="bic">${earned ? s.icon : '🔒'}</div>
+        <div class="bt">${lang==='en'?s.en:s.ta}<br>${lang==='en'?'Grade':'கிரேடு'} ${gradeKey}</div>
+      </div>`;
+    });
+    ['4-6','7-8','9-10','11-12'].forEach(band=>{
       const earned = state.badges.includes(`${s.id}_${band}`);
       html += `<div class="badge ${earned?'':'empty'}">
         <div class="bic">${earned ? s.icon : '🔒'}</div>
