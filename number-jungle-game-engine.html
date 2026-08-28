@@ -95,6 +95,31 @@
     <h2 id="homeH" style="text-align:center; color:#FFB627;"></h2>
     <p id="homeP" style="text-align:center; color:#bbb; font-size:12px;"></p>
     <div class="grid" id="homeGrid"></div>
+    <h3 style="text-align:center; color:#FFB627; margin-top:22px; font-size:14px;">🎮 Special Games</h3>
+    <div class="grid">
+      <div class="card" onclick="openMathKingdom()" style="background:linear-gradient(135deg,#3a2e1a,#5c4620); border:1px solid #C9A227;">
+        <div class="ic">🏰</div>
+        <div class="t1">Math Kingdom</div>
+        <div style="font-size:10px; color:#D9C48E;">Grade 3-5</div>
+      </div>
+      <div class="card" onclick="openShapeExplorer()" style="background:linear-gradient(135deg,#1a2e3a,#20465c); border:1px solid #4FC3F7;">
+        <div class="ic">🔺</div>
+        <div class="t1">Shape Explorer</div>
+        <div style="font-size:10px; color:#9FD8F5;">Grade 3-6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATH KINGDOM -->
+  <div class="panel" id="mathKingdom">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
+    <div id="mkArea"></div>
+  </div>
+
+  <!-- SHAPE EXPLORER -->
+  <div class="panel" id="shapeExplorer">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
+    <div id="seArea"></div>
   </div>
 
   <!-- GRADE SELECT -->
@@ -747,6 +772,214 @@ function showPanel(id){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   const b=document.getElementById('nav_'+id); if(b) b.classList.add('active');
   if(id==='badges') renderBadges();
+}
+
+/* ================= MATH KINGDOM (Grade 3-5 themed game) ================= */
+let mkGrade=3, mkQs=[], mkIdx=0, mkCoins=0, mkCorrect=0;
+function openMathKingdom(){
+  document.getElementById('mkArea').innerHTML = `
+    <h2 style="text-align:center; color:#FFB627;">🏰 Math Kingdom</h2>
+    <p style="text-align:center; color:#D9C48E; font-size:12px;">${lang==='ta'?'ராஜாவாக, உங்கள் இராஜ்ஜியத்தை நிர்வகிக்கவும்!':'Rule your kingdom by solving royal maths problems!'}</p>
+    <div class="grid">
+      ${[3,4,5].map(g=>`<div class="card" onclick="startMathKingdom(${g})"><div class="ic">${g}</div><div class="t1">${lang==='ta'?'கிரேடு':'Grade'} ${g}</div></div>`).join('')}
+    </div>`;
+  showPanel('mathKingdom');
+}
+function mkQuestion(topic, grade){
+  const easy = grade<=3;
+  if(topic==='addition'){
+    const a=easy?rnd(10,50):rnd(30,100), b=easy?rnd(10,50):rnd(30,100);
+    return { icon:'💰', title: lang==='ta'?'கிராம வருவாய்':'Village Revenue',
+      q: lang==='ta'?`இரண்டு கிராமங்கள் வரியாக ${a} மற்றும் ${b} நாணயங்கள் தந்தன. மொத்தம் எவ்வளவு?`:`Two villages paid ${a} and ${b} coins in tax. What is the total?`,
+      correct:a+b, options: makeOptions(a+b,[a+b+5,a+b-5,Math.abs(a-b)]) };
+  }
+  if(topic==='subtraction'){
+    const budget=rnd(60,200), spent=rnd(10,budget-15);
+    return { icon:'🌉', title: lang==='ta'?'பாலம் கட்ட செலவு':'Bridge Construction',
+      q: lang==='ta'?`பாலம் கட்ட ${budget} நாணயங்கள் ஒதுக்கப்பட்டது. ${spent} நாணயங்கள் செலவானது. மீதி?`:`${budget} coins were allotted for a bridge. ${spent} coins were spent. How much is left?`,
+      correct:budget-spent, options: makeOptions(budget-spent,[budget-spent+5,budget-spent-5,spent]) };
+  }
+  if(topic==='multiplication'){
+    const platoons=easy?rnd(2,6):rnd(4,10), each=easy?rnd(2,6):rnd(5,12);
+    return { icon:'⚔️', title: lang==='ta'?'வீரர்களின் எண்ணிக்கை':'Number of Soldiers',
+      q: lang==='ta'?`படையில் ${platoons} பிரிவுகள், ஒவ்வொன்றிலும் ${each} வீரர்கள். மொத்த வீரர்கள்?`:`The army has ${platoons} platoons with ${each} soldiers each. Total soldiers?`,
+      correct:platoons*each, options: makeOptions(platoons*each,[platoons+each,platoons*each+platoons,platoons*each-each]) };
+  }
+  // division
+  const people=rnd(3,8), each=rnd(2,10), total=people*each;
+  return { icon:'🍞', title: lang==='ta'?'உணவு பகிர்வு':'Food Distribution',
+    q: lang==='ta'?`${total} ரொட்டிகளை ${people} குடும்பங்களுக்கு சமமாக பகிர்கிறார். ஒவ்வொருவருக்கும் எத்தனை?`:`${total} loaves are shared equally among ${people} families. How many does each get?`,
+    correct:each, options: makeOptions(each,[each+1,each-1,people]) };
+}
+function startMathKingdom(grade){
+  mkGrade=grade; mkIdx=0; mkCoins=0; mkCorrect=0;
+  mkQs = ['addition','subtraction','multiplication','division'].map(t=>mkQuestion(t,grade));
+  renderMKQuestion();
+}
+function renderMKQuestion(){
+  const q = mkQs[mkIdx];
+  document.getElementById('mkArea').innerHTML = `
+    <div style="text-align:center; margin-bottom:6px; color:#FFD98A; font-weight:700;">🪙 ${mkCoins} ${lang==='ta'?'நாணயங்கள்':'Coins'} · ${mkIdx+1}/4</div>
+    <div class="q-card" style="background:linear-gradient(135deg,#2b2010,#3a2e1a); border:1px solid #C9A227;">
+      <div style="font-size:28px; text-align:center;">${q.icon}</div>
+      <div style="text-align:center; color:#FFB627; font-weight:800; font-size:13px; margin-bottom:6px;">${q.title}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.options.map(o=>`<button class="opt" onclick="answerMK('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>
+      <div id="mkFeedback" style="margin-top:10px; font-size:12.5px; min-height:18px;"></div>
+    </div>`;
+}
+function answerMK(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = mkQs[mkIdx];
+  const isCorrect = String(opt)===String(q.correct);
+  if(isCorrect){ mkCoins += 20; mkCorrect++; }
+  document.querySelectorAll('#mkArea .opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent==String(q.correct)) b.classList.add('correct');
+    else if(b.textContent===opt && !isCorrect) b.classList.add('wrong');
+  });
+  document.getElementById('mkFeedback').innerHTML = isCorrect
+    ? `<span style="color:#2ECC71; font-weight:700;">${lang==='ta'?'🎉 அருமை! +20 நாணயங்கள்!':'🎉 Great! +20 coins!'}</span>`
+    : `<span style="color:#FFB627; font-weight:700;">${lang==='ta'?'பரவாயில்லை, சரியான பதில் இது:':'That\'s okay, here\'s the answer:'} ${q.correct}</span>`;
+  setTimeout(()=>{
+    mkIdx++;
+    if(mkIdx<mkQs.length) renderMKQuestion();
+    else finishMathKingdom();
+  }, 1600);
+}
+function finishMathKingdom(){
+  addXP(mkCorrect*10);
+  document.getElementById('mkArea').innerHTML = `
+    <div class="box" style="text-align:center; background:linear-gradient(135deg,#2b2010,#3a2e1a); border:1px solid #C9A227;">
+      <h2 style="color:#FFB627;">👑 ${lang==='ta'?'இராஜ்ஜியம் பாதுகாக்கப்பட்டது!':'Kingdom Secured!'}</h2>
+      <p style="color:#FFD98A; font-size:15px;">🪙 ${mkCoins} ${lang==='ta'?'நாணயங்கள் சம்பாதித்தீர்கள்':'coins earned'} (${mkCorrect}/4 ${lang==='ta'?'சரி':'correct'})</p>
+      <div class="box" style="margin-top:14px; background:rgba(255,182,39,.08); text-align:left;">
+        <b style="color:#FFB627;">🤔 ${lang==='ta'?'யோசித்துப் பாருங்கள்':'Think about this'}:</b>
+        <p style="margin-top:6px; font-size:13px;">${lang==='ta'?'வரி அதிகமானால் மக்கள் என்ன நினைப்பார்கள்? ராஜா அதிக வரி வாங்கினால் என்ன நடக்கும்? சமநிலையான வரி எப்படி இருக்க வேண்டும்?':'If taxes are too high, how might people feel? What could happen if the King charges too much? What does a "fair" tax amount look like?'}</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="startMathKingdom(${mkGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
+        <button class="btn btn-out" onclick="openMathKingdom()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
+      </div>
+    </div>`;
+}
+
+/* ================= SHAPE EXPLORER (Grade 3-6 themed game) ================= */
+let seGrade=3, seQs=[], seIdx=0, seCorrect=0;
+const SHAPE_BANK_TA = [
+  {emoji:'🍕', obj:'பீட்சா', shape:'வட்டம்', opts:['வட்டம்','சதுரம்','முக்கோணம்','செவ்வகம்']},
+  {emoji:'📱', obj:'மொபைல் ஃபோன்', shape:'செவ்வகம்', opts:['செவ்வகம்','வட்டம்','முக்கோணம்','நட்சத்திரம்']},
+  {emoji:'🚩', obj:'கொடி', shape:'முக்கோணம்', opts:['முக்கோணம்','வட்டம்','சதுரம்','அறுகோணம்']},
+  {emoji:'🎲', obj:'பகடை', shape:'கனசதுரம் (Cube)', opts:['கனசதுரம் (Cube)','கோளம்','உருளை','கூம்பு']},
+  {emoji:'⚽', obj:'பந்து', shape:'கோளம் (Sphere)', opts:['கோளம் (Sphere)','கனசதுரம்','உருளை','கூம்பு']},
+  {emoji:'🥫', obj:'டப்பா', shape:'உருளை (Cylinder)', opts:['உருளை (Cylinder)','கோளம்','கூம்பு','கனசதுரம்']},
+  {emoji:'🍦', obj:'ஐஸ்கிரீம் கோன்', shape:'கூம்பு (Cone)', opts:['கூம்பு (Cone)','உருளை','கோளம்','கனசதுரம்']},
+  {emoji:'📚', obj:'புத்தகம்', shape:'செவ்வகம்', opts:['செவ்வகம்','வட்டம்','முக்கோணம்','நட்சத்திரம்']},
+];
+const SHAPE_BANK_EN = [
+  {emoji:'🍕', obj:'Pizza', shape:'Circle', opts:['Circle','Square','Triangle','Rectangle']},
+  {emoji:'📱', obj:'Mobile Phone', shape:'Rectangle', opts:['Rectangle','Circle','Triangle','Star']},
+  {emoji:'🚩', obj:'Flag', shape:'Triangle', opts:['Triangle','Circle','Square','Hexagon']},
+  {emoji:'🎲', obj:'Dice', shape:'Cube', opts:['Cube','Sphere','Cylinder','Cone']},
+  {emoji:'⚽', obj:'Ball', shape:'Sphere', opts:['Sphere','Cube','Cylinder','Cone']},
+  {emoji:'🥫', obj:'Tin Can', shape:'Cylinder', opts:['Cylinder','Sphere','Cone','Cube']},
+  {emoji:'🍦', obj:'Ice Cream Cone', shape:'Cone', opts:['Cone','Cylinder','Sphere','Cube']},
+  {emoji:'📚', obj:'Book', shape:'Rectangle', opts:['Rectangle','Circle','Triangle','Star']},
+];
+function openShapeExplorer(){
+  document.getElementById('seArea').innerHTML = `
+    <h2 style="text-align:center; color:#4FC3F7;">🔺 Shape Explorer</h2>
+    <p style="text-align:center; color:#9FD8F5; font-size:12px;">${lang==='ta'?'உங்கள் சுற்றியுள்ள பொருட்களின் வடிவங்களைக் கண்டறியுங்கள்!':'Discover the shapes hiding in everyday objects!'}</p>
+    <div class="grid">
+      ${[3,4,5,6].map(g=>`<div class="card" onclick="startShapeExplorer(${g})"><div class="ic">${g}</div><div class="t1">${lang==='ta'?'கிரேடு':'Grade'} ${g}</div></div>`).join('')}
+    </div>`;
+  showPanel('shapeExplorer');
+}
+function startShapeExplorer(grade){
+  seGrade=grade; seIdx=0; seCorrect=0;
+  const bank = shuffle([...(lang==='ta'?SHAPE_BANK_TA:SHAPE_BANK_EN)]);
+  seQs = bank.slice(0,5);
+  renderSEQuestion();
+}
+function renderSEQuestion(){
+  const q = seQs[seIdx];
+  document.getElementById('seArea').innerHTML = `
+    <div style="text-align:center; margin-bottom:6px; color:#9FD8F5; font-weight:700;">${seIdx+1}/${seQs.length}</div>
+    <div class="q-card" style="background:linear-gradient(135deg,#132436,#1a3548); border:1px solid #4FC3F7;">
+      <div style="font-size:56px; text-align:center;">${q.emoji}</div>
+      <div class="q-text" style="text-align:center;">${lang==='ta'?`இது ஒரு ${q.obj} — இதன் வடிவம் என்ன?`:`This is a ${q.obj} — what shape is it?`}</div>
+      <div class="opts">${shuffle([...q.opts]).map(o=>`<button class="opt" onclick="answerSE('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>
+      <div id="seFeedback" style="margin-top:10px; font-size:12.5px; min-height:18px;"></div>
+    </div>`;
+}
+function answerSE(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = seQs[seIdx];
+  const isCorrect = opt===q.shape;
+  if(isCorrect) seCorrect++;
+  document.querySelectorAll('#seArea .opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===q.shape) b.classList.add('correct');
+    else if(b.textContent===opt && !isCorrect) b.classList.add('wrong');
+  });
+  document.getElementById('seFeedback').innerHTML = isCorrect
+    ? `<span style="color:#2ECC71; font-weight:700;">🌟 ${lang==='ta'?'சரி!':'Correct!'}</span>`
+    : `<span style="color:#FFB627; font-weight:700;">${lang==='ta'?'சரியான பதில்:':'Correct answer:'} ${q.shape}</span>`;
+  setTimeout(()=>{
+    seIdx++;
+    if(seIdx<seQs.length) renderSEQuestion();
+    else startSEDragActivity();
+  }, 1400);
+}
+// A genuine drag-and-drop activity: drag each shape name onto the matching
+// object — simpler than a full Tangram puzzle-piece system, but real,
+// working drag interaction (not just multiple-choice), matching the spec's
+// "hands-on" spirit for this game specifically.
+let seDragMatched = 0, seDragTotal = 0;
+function startSEDragActivity(){
+  const bank = shuffle([...(lang==='ta'?SHAPE_BANK_TA:SHAPE_BANK_EN)]).slice(0,4);
+  seDragTotal = bank.length; seDragMatched = 0;
+  const labels = shuffle(bank.map(b=>b.shape));
+  document.getElementById('seArea').innerHTML = `
+    <h3 style="text-align:center; color:#4FC3F7;">🧩 ${lang==='ta'?'வடிவத்தை பொருளுடன் இணைக்கவும் (இழுத்து விடவும்)':'Drag each shape name onto its matching object'}</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:14px 0;">
+      ${bank.map((b,i)=>`<div class="se-target" data-shape="${b.shape}" style="width:76px; height:76px; border:2px dashed #4FC3F7; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:28px;" ondragover="event.preventDefault()" ondrop="seDrop(event,'${b.shape.replace(/'/g,"\\'")}')"><div>${b.emoji}</div></div>`).join('')}
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+      ${labels.map(l=>`<div draggable="true" ondragstart="event.dataTransfer.setData('text',this.textContent)" class="opt" style="cursor:grab; padding:8px 14px;">${l}</div>`).join('')}
+    </div>
+    <div id="seDragFeedback" style="text-align:center; margin-top:12px; font-size:13px; min-height:18px;"></div>`;
+}
+function seDrop(ev, correctShape){
+  ev.preventDefault();
+  const dragged = ev.dataTransfer.getData('text');
+  const target = ev.currentTarget;
+  if(dragged===correctShape){
+    target.style.background = 'rgba(46,204,113,.25)';
+    target.style.borderColor = '#2ECC71';
+    target.setAttribute('data-solved','1');
+    seDragMatched++;
+    document.getElementById('seDragFeedback').innerHTML = `<span style="color:#2ECC71;">✓ ${lang==='ta'?'சரி!':'Matched!'}</span>`;
+    if(seDragMatched>=seDragTotal) setTimeout(finishShapeExplorer, 900);
+  } else {
+    document.getElementById('seDragFeedback').innerHTML = `<span style="color:#FFB627;">${lang==='ta'?'இது சரியில்லை, மறுபடியும் முயற்சிக்கவும்':'Not quite, try again'}</span>`;
+  }
+}
+function finishShapeExplorer(){
+  addXP(seCorrect*10 + 20);
+  document.getElementById('seArea').innerHTML = `
+    <div class="box" style="text-align:center; background:linear-gradient(135deg,#132436,#1a3548); border:1px solid #4FC3F7;">
+      <h2 style="color:#4FC3F7;">🎉 ${lang==='ta'?'வடிவ நிபுணர்!':'Shape Expert!'}</h2>
+      <p style="color:#9FD8F5; font-size:15px;">${seCorrect}/${seQs.length} ${lang==='ta'?'சரியான அடையாளம்':'shapes identified'} + 🧩 ${lang==='ta'?'இணைப்பு செயல்பாடு முடிந்தது':'Matching activity done'}</p>
+      <div class="box" style="margin-top:14px; background:rgba(79,195,247,.08); text-align:left;">
+        <b style="color:#4FC3F7;">🤔 ${lang==='ta'?'யோசித்துப் பாருங்கள்':'Think about this'}:</b>
+        <p style="margin-top:6px; font-size:13px;">${lang==='ta'?'சக்கரம் ஏன் எப்போதும் வட்ட வடிவில் இருக்கிறது? சதுர சக்கரம் இருந்தால் என்ன நடக்கும்?':'Why is a wheel always a circle? What would happen if a wheel were square instead?'}</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="startShapeExplorer(${seGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
+        <button class="btn btn-out" onclick="openShapeExplorer()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
+      </div>
+    </div>`;
 }
 
 function selectSubject(subjectId){
