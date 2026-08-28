@@ -1342,7 +1342,7 @@ function ensureOpenCv(){
   if(window.__cvReadyPromise) return window.__cvReadyPromise;
   window.__cvReadyPromise = new Promise((resolve, reject)=>{
     const script = document.createElement('script');
-    script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
+    script.src = 'https://cdn.jsdelivr.net/npm/@techstark/opencv-js@5.0.0-release.1/dist/opencv.js';
     script.async = true;
     script.onload = async ()=>{
       try{
@@ -1369,10 +1369,14 @@ const CV_WORKER_SRC = `
 let cvReadyPromise = null;
 function ensureCv(){
   if(!cvReadyPromise){
+    console.log('[cvWorker-internal] starting importScripts for opencv.js…');
     cvReadyPromise = new Promise((resolve, reject)=>{
-      self.Module = { onRuntimeInitialized(){ resolve(self.cv); } };
-      try{ importScripts('https://docs.opencv.org/4.8.0/opencv.js'); }
-      catch(e){ reject(e); }
+      self.Module = { onRuntimeInitialized(){ console.log('[cvWorker-internal] onRuntimeInitialized fired — cv is ready'); resolve(self.cv); } };
+      try{
+        importScripts('https://cdn.jsdelivr.net/npm/@techstark/opencv-js@5.0.0-release.1/dist/opencv.js');
+        console.log('[cvWorker-internal] importScripts() call returned (script executed, waiting for WASM runtime init…)');
+      }
+      catch(e){ console.log('[cvWorker-internal] importScripts THREW:', e && e.message); reject(e); }
     });
   }
   return cvReadyPromise;
