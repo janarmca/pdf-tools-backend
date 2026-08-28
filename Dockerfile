@@ -2,7 +2,7 @@
 # Unlike Render (which has ffmpeg pre-available), Cloud Run builds a container
 # from scratch — so we install ffmpeg explicitly here.
 
-FROM node:20-slim
+FROM node:22-slim
 
 # ffmpeg for video compression, ca-certificates for HTTPS calls to Supabase/Razorpay/Gemini
 RUN apt-get update && \
@@ -11,13 +11,15 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
+# Copy only what's needed to install dependencies first (better build caching).
+# Not using a package-lock.json wildcard here — some Cloud Build environments
+# handle that glob pattern inconsistently, so we copy package.json alone and
+# let npm resolve versions fresh (safer/more portable across build systems).
+COPY package.json ./
+RUN npm install --omit=dev && npm cache clean --force
 
 COPY . .
 
-# Cloud Run injects PORT automatically (usually 8080) — server.js already
-# reads process.env.PORT, so nothing else to configure here.
 ENV NODE_ENV=production
 EXPOSE 8080
 
