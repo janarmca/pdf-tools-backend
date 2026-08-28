@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>பணியாளர் வருகைப் பதிவேடு — HR Attendance Register</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>html,body,#root{height:100%;margin:0;}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  // window.storage polyfill — the real one only exists inside Claude.ai artifacts.
+  // Here we back it with localStorage so the tool keeps working standalone once
+  // deployed. "shared" is accepted for API compatibility but stored the same way
+  // (there is no multi-user backend for this embedded tool).
+  window.storage = {
+    async get(key, shared){
+      try{ const v = localStorage.getItem('hrreg_'+key); return v==null ? null : {key, value:v, shared: !!shared}; }
+      catch(e){ throw e; }
+    },
+    async set(key, value, shared){
+      localStorage.setItem('hrreg_'+key, value);
+      return {key, value, shared: !!shared};
+    },
+    async delete(key, shared){
+      localStorage.removeItem('hrreg_'+key);
+      return {key, deleted:true, shared: !!shared};
+    },
+    async list(prefix, shared){
+      const keys = Object.keys(localStorage).filter(k=>k.startsWith('hrreg_'+(prefix||''))).map(k=>k.replace('hrreg_',''));
+      return {keys, prefix, shared: !!shared};
+    }
+  };
+  // "xlsx" dynamic import shim — the component does `await import("xlsx")`; the
+  // library is already loaded globally above via the CDN script tag, so we just
+  // hand that back instead of trying to resolve a real ES module import.
+  window.__moduleShims = { xlsx: XLSX };
+  const _origImport = window.import;
+</script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+// lucide-react isn't available without a bundler here, so these are small
+// emoji-based stand-ins with the same {size, color} prop shape used in the
+// original component — no changes needed to the JSX below.
+function makeIcon(glyph){
+  return function Icon({size=16, color, style}){
+    return React.createElement('span', {style:{fontSize:size, lineHeight:1, display:'inline-block', color, ...(style||{})}}, glyph);
+  };
+}
+const Users = makeIcon('👥');
+const CalendarCheck = makeIcon('📅');
+const BarChart3 = makeIcon('📊');
+const Plus = makeIcon('➕');
+const Trash2 = makeIcon('🗑️');
+const Download = makeIcon('⬇️');
+const Stamp = makeIcon('🔖');
+const Phone = makeIcon('📞');
+const Briefcase = makeIcon('💼');
+const CalendarDays = makeIcon('📆');
+const X = makeIcon('✕');
+const Check = makeIcon('✓');
+// The component does `const XLSX = await import("xlsx")` — patch the global
+// import() the browser provides isn't overridable, so instead we rewrite that
+// one call site by exposing the already-loaded library under the same name.
+async function importShim(name){ if(name==='xlsx') return window.XLSX; throw new Error('Unknown module: '+name); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ---------------------------------------------------------
+   பணியாளர் வருகைப் பதிவேடு — Employee Attendance Register
+   Design language: a physical muster-roll / ledger book.
+   Ink-navy on aged paper, brass rules, rubber-stamp actions.
+--------------------------------------------------------- */
+
+const STATUS = {
+  P: { label: "வந்தார்", short: "P", color: "#3F6B4F", bg: "#E3EBE2" },
+  A: { label: "வரவில்லை", short: "A", color: "#B23A2E", bg: "#F3E1DC" },
+  H: { label: "அரை நாள்", short: "H", color: "#C08A28", bg: "#F3E7CC" },
+  L: { label: "விடுமுறை", short: "L", color: "#3A5A8C", bg: "#DEE6F0" },
+};
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const pad = (n) => String(n).padStart(2, "0");
+const monthKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+const TAMIL_MONTHS = [
+  "ஜனவரி", "பிப்ரவரி", "மார்ச்", "ஏப்ரல்", "மே", "ஜூன்",
+  "ஜூலை", "ஆகஸ்ட்", "செப்டம்பர்", "அக்டோபர்", "நவம்பர்", "டிசம்பர்",
+];
+const TAMIL_WEEKDAYS = ["ஞா", "தி", "செ", "பு", "வி", "வெ", "ச"];
+
+async function storageGet(key, fallback) {
+  try {
+    const res = await window.storage.get(key, true);
+    return res ? JSON.parse(res.value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+async function storageSet(key, value) {
+  try {
+    await window.storage.set(key, JSON.stringify(value), true);
+  } catch (e) {
+    console.error("storage set failed", e);
+  }
+}
+
+export default function App() {
+  const [tab, setTab] = useState("employees");
+  const [employees, setEmployees] = useState([]);
+  const [attendance, setAttendance] = useState({}); // key: `${empId}|${date}` -> status
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(todayISO());
+  const [viewMonth, setViewMonth] = useState(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const emp = await storageGet("employees", []);
+      const att = await storageGet("attendance", {});
+      setEmployees(emp);
+      setAttendance(att);
+      setLoading(false);
+    })();
+  }, []);
+
+  const flash = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 1800);
+  };
+
+  const addEmployee = async (emp) => {
+    const next = [...employees, { ...emp, id: uid(), joinDate: todayISO() }];
+    setEmployees(next);
+    await storageSet("employees", next);
+    setShowAddForm(false);
+    flash("பணியாளர் சேர்க்கப்பட்டார்");
+  };
+
+  const removeEmployee = async (id) => {
+    const next = employees.filter((e) => e.id !== id);
+    setEmployees(next);
+    await storageSet("employees", next);
+    flash("பணியாளர் நீக்கப்பட்டார்");
+  };
+
+  const stamp = async (empId, date, status) => {
+    const key = `${empId}|${date}`;
+    const next = { ...attendance };
+    if (next[key] === status) {
+      delete next[key]; // tap again to clear the stamp
+    } else {
+      next[key] = status;
+    }
+    setAttendance(next);
+    await storageSet("attendance", next);
+  };
+
+  const monthDays = daysInMonth(viewMonth.year, viewMonth.month);
+
+  const monthStats = useMemo(() => {
+    const stats = {};
+    employees.forEach((e) => {
+      let p = 0, a = 0, h = 0, l = 0;
+      for (let d = 1; d <= monthDays; d++) {
+        const date = `${viewMonth.year}-${pad(viewMonth.month + 1)}-${pad(d)}`;
+        const s = attendance[`${e.id}|${date}`];
+        if (s === "P") p++;
+        else if (s === "A") a++;
+        else if (s === "H") h++;
+        else if (s === "L") l++;
+      }
+      stats[e.id] = { p, a, h, l };
+    });
+    return stats;
+  }, [employees, attendance, viewMonth, monthDays]);
+
+  const exportXLSX = useCallback(async () => {
+    const XLSX = await importShim("xlsx");
+    const rows = [];
+    const header = ["பணியாளர் பெயர்", "பணி", ...Array.from({ length: monthDays }, (_, i) => i + 1), "வந்தார்", "வரவில்லை", "அரை நாள்", "விடுமுறை"];
+    rows.push(header);
+    employees.forEach((e) => {
+      const row = [e.name, e.role];
+      for (let d = 1; d <= monthDays; d++) {
+        const date = `${viewMonth.year}-${pad(viewMonth.month + 1)}-${pad(d)}`;
+        row.push(attendance[`${e.id}|${date}`] || "");
+      }
+      const s = monthStats[e.id] || { p: 0, a: 0, h: 0, l: 0 };
+      row.push(s.p, s.a, s.h, s.l);
+      rows.push(row);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "வருகைப்பதிவு");
+    const monthLabel = `${TAMIL_MONTHS[viewMonth.month]}_${viewMonth.year}`;
+    XLSX.writeFile(wb, `வருகை_பதிவேடு_${monthLabel}.xlsx`);
+    flash("எக்செல் கோப்பு பதிவிறக்கம் ஆனது");
+  }, [employees, attendance, monthDays, viewMonth, monthStats]);
+
+  if (loading) {
+    return (
+      <div style={styles.loadingWrap}>
+        <FontImport />
+        <div style={styles.loadingText}>பதிவேடு திறக்கப்படுகிறது…</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.app}>
+      <FontImport />
+      <Header />
+
+      <nav style={styles.tabRow}>
+        <TabBtn active={tab === "employees"} onClick={() => setTab("employees")} icon={<Users size={16} />} label="பணியாளர்கள்" />
+        <TabBtn active={tab === "attendance"} onClick={() => setTab("attendance")} icon={<CalendarCheck size={16} />} label="இன்றைய வருகை" />
+        <TabBtn active={tab === "report"} onClick={() => setTab("report")} icon={<BarChart3 size={16} />} label="மாத அறிக்கை" />
+      </nav>
+
+      <main style={styles.main}>
+        {tab === "employees" && (
+          <EmployeesTab
+            employees={employees}
+            onAdd={() => setShowAddForm(true)}
+            onRemove={removeEmployee}
+          />
+        )}
+
+        {tab === "attendance" && (
+          <AttendanceTab
+            employees={employees}
+            attendance={attendance}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            stamp={stamp}
+          />
+        )}
+
+        {tab === "report" && (
+          <ReportTab
+            employees={employees}
+            attendance={attendance}
+            viewMonth={viewMonth}
+            setViewMonth={setViewMonth}
+            monthDays={monthDays}
+            monthStats={monthStats}
+            onExport={exportXLSX}
+          />
+        )}
+      </main>
+
+      {showAddForm && (
+        <AddEmployeeModal onClose={() => setShowAddForm(false)} onSave={addEmployee} />
+      )}
+
+      {toast && <div style={styles.toast}>{toast}</div>}
+
+      <footer style={styles.footer}>
+        இந்தத் தரவு இந்தப் பதிவேட்டை பயன்படுத்தும் அனைவருக்கும் பகிரப்படும் — சிறு நிறுவனக் குழுவுடன் பயன்படுத்த ஏற்றது.
+      </footer>
+    </div>
+  );
+}
+
+/* ---------------- Sub-components ---------------- */
+
+function FontImport() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Bitter:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
+      * { box-sizing: border-box; }
+      ::selection { background: #C08A28; color: #EFE6D3; }
+      button { font-family: inherit; cursor: pointer; }
+      input, select { font-family: inherit; }
+    `}</style>
+  );
+}
+
+function Header() {
+  return (
+    <header style={styles.header}>
+      <div style={styles.headerStampCircle}>
+        <Stamp size={22} color="#EFE6D3" />
+      </div>
+      <div>
+        <div style={styles.eyebrow}>சிறு நிறுவன மனித வள கருவி</div>
+        <h1 style={styles.title}>பணியாளர் வருகைப் பதிவேடு</h1>
+      </div>
+    </header>
+  );
+}
+
+function TabBtn({ active, onClick, icon, label }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        ...styles.tabBtn,
+        ...(active ? styles.tabBtnActive : {}),
+      }}
+    >
+      {icon}
+      <span style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{label}</span>
+    </button>
+  );
+}
+
+function EmployeesTab({ employees, onAdd, onRemove }) {
+  return (
+    <div>
+      <div style={styles.sectionHeadRow}>
+        <h2 style={styles.sectionHead}>பணியாளர் பட்டியல் <span style={styles.countBadge}>{employees.length}</span></h2>
+        <button style={styles.primaryBtn} onClick={onAdd}>
+          <Plus size={16} /> புதிய பணியாளர்
+        </button>
+      </div>
+
+      {employees.length === 0 ? (
+        <EmptyState
+          text="இன்னும் பணியாளர்கள் யாரும் சேர்க்கப்படவில்லை."
+          sub="'புதிய பணியாளர்' பொத்தானை அழுத்தி பதிவைத் தொடங்குங்கள்."
+        />
+      ) : (
+        <div style={styles.cardGrid}>
+          {employees.map((e) => (
+            <div key={e.id} style={styles.empCard}>
+              <div style={styles.empCardTop}>
+                <div style={styles.avatarCircle}>{e.name?.[0] || "?"}</div>
+                <button style={styles.iconBtn} onClick={() => onRemove(e.id)} title="நீக்கு">
+                  <Trash2 size={15} color="#B23A2E" />
+                </button>
+              </div>
+              <div style={styles.empName}>{e.name}</div>
+              <div style={styles.empMetaRow}>
+                <Briefcase size={13} color="#7A6F5C" />
+                <span>{e.role || "—"}</span>
+              </div>
+              {e.phone && (
+                <div style={styles.empMetaRow}>
+                  <Phone size={13} color="#7A6F5C" />
+                  <span>{e.phone}</span>
+                </div>
+              )}
+              <div style={styles.empMetaRow}>
+                <CalendarDays size={13} color="#7A6F5C" />
+                <span>சேர்ந்த நாள்: {e.joinDate}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddEmployeeModal({ onClose, onSave }) {
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [phone, setPhone] = useState("");
+
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHead}>
+          <h3 style={styles.modalTitle}>புதிய பணியாளரைச் சேர்க்க</h3>
+          <button style={styles.iconBtn} onClick={onClose}><X size={18} /></button>
+        </div>
+        <label style={styles.label}>பெயர்</label>
+        <input style={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="எ.கா. முருகன்" autoFocus />
+        <label style={styles.label}>பணி</label>
+        <input style={styles.input} value={role} onChange={(e) => setRole(e.target.value)} placeholder="எ.கா. விற்பனையாளர்" />
+        <label style={styles.label}>தொலைபேசி எண்</label>
+        <input style={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="எ.கா. 98765 43210" />
+        <button
+          style={{ ...styles.primaryBtn, width: "100%", justifyContent: "center", marginTop: 16 }}
+          disabled={!name.trim()}
+          onClick={() => name.trim() && onSave({ name: name.trim(), role: role.trim(), phone: phone.trim() })}
+        >
+          <Check size={16} /> சேர்க்க
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AttendanceTab({ employees, attendance, selectedDate, setSelectedDate, stamp }) {
+  return (
+    <div>
+      <div style={styles.sectionHeadRow}>
+        <h2 style={styles.sectionHead}>இன்றைய வருகைப் பதிவு</h2>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          style={styles.dateInput}
+        />
+      </div>
+
+      {employees.length === 0 ? (
+        <EmptyState text="முதலில் 'பணியாளர்கள்' தாவலில் பணியாளர்களைச் சேர்க்கவும்." />
+      ) : (
+        <div style={styles.attList}>
+          {employees.map((e) => {
+            const key = `${e.id}|${selectedDate}`;
+            const current = attendance[key];
+            return (
+              <div key={e.id} style={styles.attRow}>
+                <div style={styles.attName}>
+                  <div style={styles.avatarCircleSm}>{e.name?.[0] || "?"}</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{e.name}</div>
+                    <div style={styles.attRole}>{e.role || "—"}</div>
+                  </div>
+                </div>
+                <div style={styles.stampRow}>
+                  {Object.entries(STATUS).map(([code, s]) => (
+                    <button
+                      key={code}
+                      onClick={() => stamp(e.id, selectedDate, code)}
+                      title={s.label}
+                      style={{
+                        ...styles.stampBtn,
+                        borderColor: s.color,
+                        color: current === code ? "#EFE6D3" : s.color,
+                        background: current === code ? s.color : "transparent",
+                        transform: current === code ? "rotate(-3deg) scale(1.05)" : "none",
+                      }}
+                    >
+                      {s.short}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div style={styles.legendRow}>
+        {Object.values(STATUS).map((s) => (
+          <div key={s.short} style={styles.legendItem}>
+            <span style={{ ...styles.legendDot, background: s.color }} />
+            {s.short} — {s.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReportTab({ employees, attendance, viewMonth, setViewMonth, monthDays, monthStats, onExport }) {
+  const changeMonth = (delta) => {
+    let { year, month } = viewMonth;
+    month += delta;
+    if (month < 0) { month = 11; year -= 1; }
+    if (month > 11) { month = 0; year += 1; }
+    setViewMonth({ year, month });
+  };
+
+  return (
+    <div>
+      <div style={styles.sectionHeadRow}>
+        <h2 style={styles.sectionHead}>மாத வருகை அறிக்கை</h2>
+        <button style={styles.primaryBtn} onClick={onExport} disabled={employees.length === 0}>
+          <Download size={16} /> Excel பதிவிறக்கம்
+        </button>
+      </div>
+
+      <div style={styles.monthNav}>
+        <button style={styles.navBtn} onClick={() => changeMonth(-1)}>‹</button>
+        <div style={styles.monthLabel}>{TAMIL_MONTHS[viewMonth.month]} {viewMonth.year}</div>
+        <button style={styles.navBtn} onClick={() => changeMonth(1)}>›</button>
+      </div>
+
+      {employees.length === 0 ? (
+        <EmptyState text="பணியாளர்கள் இல்லை — அறிக்கை காட்ட முடியாது." />
+      ) : (
+        <div style={styles.tableScroll}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={{ ...styles.th, ...styles.thSticky, textAlign: "left" }}>பணியாளர்</th>
+                {Array.from({ length: monthDays }, (_, i) => i + 1).map((d) => (
+                  <th key={d} style={styles.th}>{d}</th>
+                ))}
+                <th style={styles.th}>P</th>
+                <th style={styles.th}>A</th>
+                <th style={styles.th}>H</th>
+                <th style={styles.th}>L</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.map((e) => {
+                const s = monthStats[e.id] || { p: 0, a: 0, h: 0, l: 0 };
+                return (
+                  <tr key={e.id}>
+                    <td style={{ ...styles.td, ...styles.tdSticky, textAlign: "left", fontWeight: 600 }}>{e.name}</td>
+                    {Array.from({ length: monthDays }, (_, i) => i + 1).map((d) => {
+                      const date = `${viewMonth.year}-${pad(viewMonth.month + 1)}-${pad(d)}`;
+                      const st = attendance[`${e.id}|${date}`];
+                      const conf = st ? STATUS[st] : null;
+                      return (
+                        <td key={d} style={{
+                          ...styles.td,
+                          background: conf ? conf.bg : "transparent",
+                          color: conf ? conf.color : "#B9AF9A",
+                          fontWeight: conf ? 700 : 400,
+                        }}>
+                          {conf ? conf.short : "·"}
+                        </td>
+                      );
+                    })}
+                    <td style={{ ...styles.td, color: STATUS.P.color, fontWeight: 700 }}>{s.p}</td>
+                    <td style={{ ...styles.td, color: STATUS.A.color, fontWeight: 700 }}>{s.a}</td>
+                    <td style={{ ...styles.td, color: STATUS.H.color, fontWeight: 700 }}>{s.h}</td>
+                    <td style={{ ...styles.td, color: STATUS.L.color, fontWeight: 700 }}>{s.l}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ text, sub }) {
+  return (
+    <div style={styles.empty}>
+      <Stamp size={28} color="#C9BFA8" />
+      <div style={styles.emptyText}>{text}</div>
+      {sub && <div style={styles.emptySub}>{sub}</div>}
+    </div>
+  );
+}
+
+/* ---------------- Styles ---------------- */
+
+const styles = {
+  app: {
+    fontFamily: "'IBM Plex Sans', 'Noto Sans Tamil', sans-serif",
+    background: "#EFE6D3",
+    minHeight: "100%",
+    color: "#1F2A44",
+    padding: "0 0 40px 0",
+    backgroundImage:
+      "repeating-linear-gradient(0deg, rgba(31,42,68,0.035) 0px, rgba(31,42,68,0.035) 1px, transparent 1px, transparent 34px)",
+  },
+  loadingWrap: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    height: "300px", background: "#EFE6D3", fontFamily: "'Noto Sans Tamil', sans-serif",
+  },
+  loadingText: { color: "#7A6F5C" },
+  header: {
+    display: "flex", alignItems: "center", gap: 14,
+    padding: "26px 24px 20px 24px",
+    borderBottom: "3px double #C08A28",
+  },
+  headerStampCircle: {
+    width: 46, height: 46, borderRadius: "50%", background: "#1F2A44",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0, boxShadow: "0 2px 0 rgba(31,42,68,0.3)",
+  },
+  eyebrow: {
+    fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.12em",
+    color: "#C08A28", textTransform: "uppercase", marginBottom: 2,
+  },
+  title: {
+    fontFamily: "'Noto Sans Tamil', 'Bitter', serif", fontWeight: 700,
+    fontSize: 24, margin: 0, color: "#1F2A44",
+  },
+  tabRow: {
+    display: "flex", gap: 6, padding: "16px 24px 0 24px", flexWrap: "wrap",
+  },
+  tabBtn: {
+    display: "flex", alignItems: "center", gap: 7,
+    background: "transparent", border: "2px solid transparent",
+    borderBottom: "2px solid #D8CDB2",
+    padding: "9px 16px", fontSize: 14, color: "#7A6F5C", fontWeight: 500,
+  },
+  tabBtnActive: {
+    color: "#1F2A44", borderBottom: "2px solid #1F2A44", fontWeight: 700,
+  },
+  main: { padding: "22px 24px 10px 24px" },
+  sectionHeadRow: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    flexWrap: "wrap", gap: 10, marginBottom: 18,
+  },
+  sectionHead: {
+    fontFamily: "'Noto Sans Tamil', 'Bitter', serif", fontSize: 18, fontWeight: 700,
+    margin: 0, display: "flex", alignItems: "center", gap: 8,
+  },
+  countBadge: {
+    fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, background: "#1F2A44",
+    color: "#EFE6D3", borderRadius: 20, padding: "2px 9px",
+  },
+  primaryBtn: {
+    display: "flex", alignItems: "center", gap: 7,
+    background: "#1F2A44", color: "#EFE6D3", border: "none",
+    borderRadius: 6, padding: "10px 16px", fontSize: 13.5, fontWeight: 600,
+  },
+  cardGrid: {
+    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14,
+  },
+  empCard: {
+    background: "#F8F2E4", border: "1px solid #DED2B4", borderRadius: 10,
+    padding: 16, position: "relative",
+  },
+  empCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 },
+  avatarCircle: {
+    width: 38, height: 38, borderRadius: "50%", background: "#C08A28",
+    color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: 700, fontFamily: "'Noto Sans Tamil', sans-serif",
+  },
+  avatarCircleSm: {
+    width: 30, height: 30, borderRadius: "50%", background: "#C08A28",
+    color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: 700, fontSize: 13, flexShrink: 0,
+  },
+  iconBtn: { background: "transparent", border: "none", padding: 4 },
+  empName: { fontWeight: 700, fontSize: 15.5, marginBottom: 6 },
+  empMetaRow: { display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#5C5340", marginTop: 3 },
+  modalOverlay: {
+    position: "fixed", inset: 0, background: "rgba(31,42,68,0.45)",
+    display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50,
+  },
+  modal: {
+    background: "#F8F2E4", borderRadius: 12, padding: 22, width: 340, maxWidth: "100%",
+    border: "1px solid #DED2B4",
+  },
+  modalHead: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
+  modalTitle: { fontFamily: "'Noto Sans Tamil', serif", fontSize: 16, fontWeight: 700, margin: 0 },
+  label: { display: "block", fontSize: 12, color: "#7A6F5C", marginTop: 10, marginBottom: 4, fontWeight: 600 },
+  input: {
+    width: "100%", padding: "9px 11px", borderRadius: 6, border: "1.5px solid #DED2B4",
+    background: "#fff", fontSize: 14, color: "#1F2A44",
+  },
+  dateInput: {
+    padding: "9px 11px", borderRadius: 6, border: "1.5px solid #DED2B4",
+    background: "#fff", fontSize: 13.5, fontFamily: "'IBM Plex Mono', monospace",
+  },
+  attList: { display: "flex", flexDirection: "column", gap: 8 },
+  attRow: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    background: "#F8F2E4", border: "1px solid #DED2B4", borderRadius: 8, padding: "10px 14px",
+    flexWrap: "wrap", gap: 10,
+  },
+  attName: { display: "flex", alignItems: "center", gap: 10 },
+  attRole: { fontSize: 12, color: "#7A6F5C" },
+  stampRow: { display: "flex", gap: 8 },
+  stampBtn: {
+    width: 38, height: 38, borderRadius: "50%", border: "2px solid",
+    background: "transparent", fontWeight: 800, fontSize: 13,
+    fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.12s ease",
+  },
+  legendRow: { display: "flex", gap: 16, flexWrap: "wrap", marginTop: 18, fontSize: 12, color: "#5C5340" },
+  legendItem: { display: "flex", alignItems: "center", gap: 6 },
+  legendDot: { width: 10, height: 10, borderRadius: "50%", display: "inline-block" },
+  monthNav: { display: "flex", alignItems: "center", gap: 14, marginBottom: 16 },
+  navBtn: {
+    width: 30, height: 30, borderRadius: "50%", border: "1.5px solid #C08A28",
+    background: "transparent", color: "#C08A28", fontSize: 16, fontWeight: 700,
+  },
+  monthLabel: { fontFamily: "'Noto Sans Tamil', serif", fontWeight: 700, fontSize: 15.5 },
+  tableScroll: { overflowX: "auto", border: "1px solid #DED2B4", borderRadius: 8 },
+  table: { borderCollapse: "collapse", width: "100%", fontSize: 12 },
+  th: {
+    padding: "8px 6px", borderBottom: "2px solid #1F2A44", background: "#E4D8B9",
+    fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, color: "#1F2A44",
+    position: "sticky", top: 0,
+  },
+  thSticky: { left: 0, zIndex: 2, background: "#E4D8B9", minWidth: 110 },
+  td: {
+    padding: "7px 6px", textAlign: "center", borderBottom: "1px solid #EAE0C8",
+    fontFamily: "'IBM Plex Mono', monospace",
+  },
+  tdSticky: { left: 0, position: "sticky", background: "#F8F2E4", zIndex: 1 },
+  empty: {
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+    padding: "50px 20px", color: "#9C9178", textAlign: "center",
+  },
+  emptyText: { fontSize: 14.5, fontWeight: 600, color: "#7A6F5C" },
+  emptySub: { fontSize: 12.5 },
+  toast: {
+    position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)",
+    background: "#1F2A44", color: "#EFE6D3", padding: "10px 18px", borderRadius: 8,
+    fontSize: 13, fontFamily: "'Noto Sans Tamil', sans-serif", boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+  },
+  footer: {
+    textAlign: "center", fontSize: 11, color: "#9C9178", marginTop: 30, padding: "0 24px",
+  },
+};
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

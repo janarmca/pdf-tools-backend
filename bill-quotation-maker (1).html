@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Bill · GST · Real-time · ₹</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #f2f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      margin: 0;
+    }
+    .card {
+      max-width: 540px;
+      width: 100%;
+      background: white;
+      border-radius: 36px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+      padding: 24px 18px 28px;
+      transition: all 0.2s;
+    }
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 650;
+      letter-spacing: -0.5px;
+      color: #0b1b33;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    h1 span {
+      background: #eef2ff;
+      color: #2563eb;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 40px;
+      margin-left: 6px;
+    }
+    .section-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #1e293b;
+      letter-spacing: 0.3px;
+      margin: 18px 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title i {
+      font-style: normal;
+      background: #e9edf4;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      color: #475569;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .input-group {
+      margin-bottom: 10px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 3px;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      background: white;
+      transition: 0.15s;
+      outline: none;
+      font-weight: 500;
+      color: #0f172a;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .input-group input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    .input-group input[type="number"]::-webkit-outer-spin-button,
+    .input-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .inline-flex {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .inline-flex .input-group {
+      flex: 1;
+      min-width: 80px;
+    }
+    .item-card {
+      background: #fafcff;
+      border-radius: 20px;
+      padding: 10px 12px 6px 12px;
+      margin-bottom: 10px;
+      border: 1px solid #eef2f6;
+    }
+    .item-card .inline-flex {
+      margin-bottom: 2px;
+    }
+    .item-card .input-group {
+      margin-bottom: 4px;
+    }
+    .item-card .input-group.amount-display {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+    }
+    .item-card .input-group.amount-display .amount-box {
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #0b1b33;
+      width: 100%;
+      text-align: right;
+      border: 1.5px solid #e2e8f0;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .bill-preview {
+      background: #f8fafc;
+      border-radius: 24px;
+      padding: 16px 14px;
+      margin: 16px 0 14px;
+      border: 1px solid #e9edf4;
+    }
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #dce2ec;
+      font-size: 0.9rem;
+    }
+    .bill-row:last-child {
+      border-bottom: none;
+    }
+    .bill-row .label {
+      color: #334155;
+      font-weight: 500;
+    }
+    .bill-row .value {
+      font-weight: 600;
+      color: #0b1b33;
+      text-align: right;
+    }
+    .bill-row.total {
+      border-top: 2px solid #cbd5e1;
+      border-bottom: none;
+      margin-top: 6px;
+      padding-top: 12px;
+      font-size: 1.1rem;
+    }
+    .bill-row.total .value {
+      color: #0f2b4b;
+      font-size: 1.2rem;
+    }
+    .action-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 18px;
+      border: none;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #1e293b;
+      transition: all 0.2s ease;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .btn-primary {
+      background: #0b1b33;
+      color: white;
+      box-shadow: 0 6px 14px rgba(11, 27, 51, 0.12);
+    }
+    .btn-primary:active { transform: scale(0.97); background: #1a2f4e; }
+    .btn-whatsapp {
+      background: #25D366;
+      color: white;
+      box-shadow: 0 6px 14px rgba(37, 211, 102, 0.2);
+    }
+    .btn-whatsapp:active { transform: scale(0.97); background: #1da85c; }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #dce2ec;
+    }
+    .btn-outline:active { background: #f1f5f9; }
+    .btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+    .share-note {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 6px 14px;
+      border-radius: 40px;
+      display: inline-block;
+      align-self: center;
+      margin-top: 4px;
+    }
+    .flex-center { display: flex; justify-content: center; }
+    hr { border: none; border-top: 1.5px solid #e9edf4; margin: 12px 0 6px; }
+    .watermark {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .brand-footer {
+      margin-top: 18px;
+      padding: 14px 10px 4px;
+      text-align: center;
+      border-top: 1px solid #e9edf4;
+      color: #334155;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 0.72rem;
+    }
+    .brand-footer strong {
+      font-size: 1rem;
+      letter-spacing: 1.2px;
+      color: #0b1b33;
+    }
+    .brand-footer span:last-child {
+      color: #64748b;
+      font-size: 0.68rem;
+    }
+    @media (max-width: 430px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .item-card .inline-flex { display: grid; grid-template-columns: 1fr 1fr; }
+      .item-card .inline-flex > div:first-child { grid-column: 1 / -1; }
+      .item-card .amount-display { grid-column: 1 / -1; }
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; border-radius: 0; max-width: none; }
+      .action-bar, .share-note, .watermark, #updateBillBtn { display: none !important; }
+    }
+
+    .protected-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      margin-left:6px; padding:4px 9px; border-radius:30px;
+      background:#eef2ff; color:#334155; font-size:.62rem; font-weight:700;
+      letter-spacing:.2px;
+    }
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="card" id="app">
+  <h1>
+    🧾 Bill <span>GST · ₹</span>
+  </h1>
+
+  <div class="section-title">📄 Document <i>bill · quotation</i></div>
+  <div class="grid-2">
+    <div class="input-group">
+      <label>Document Type</label>
+      <select id="documentTypeSelect">
+        <option value="BILL">Bill / Invoice</option>
+        <option value="QUOTATION">Quotation</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Number</label>
+      <input type="text" id="documentNoInput" placeholder="Auto generated">
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="input-group">
+      <label>Date</label>
+      <input type="date" id="documentDateInput">
+    </div>
+    <div class="input-group" id="validUntilGroup">
+      <label>Valid Until</label>
+      <input type="date" id="validUntilInput">
+    </div>
+  </div>
+
+  <!-- Seller & Buyer with Address -->
+  <div class="section-title">🏢 Parties <i>seller · buyer</i></div>
+  <div class="grid-2">
+    <div class="input-group">
+      <label>Seller (Name)</label>
+      <input type="text" id="sellerInput" value="ABC Traders" placeholder="Seller name">
+    </div>
+    <div class="input-group">
+      <label>Buyer (Name)</label>
+      <input type="text" id="buyerInput" value="XYZ Retail" placeholder="Buyer name">
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="input-group">
+      <label>Seller Address</label>
+      <input type="text" id="sellerAddrInput" value="Mumbai, Maharashtra" placeholder="Address">
+    </div>
+    <div class="input-group">
+      <label>Buyer Address</label>
+      <input type="text" id="buyerAddrInput" value="Delhi, India" placeholder="Address">
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="input-group">
+      <label>GST (Seller)</label>
+      <input type="text" id="gstSellerInput" value="22AAAAA1234A1Z5" placeholder="GSTIN">
+    </div>
+    <div class="input-group">
+      <label>GST (Buyer)</label>
+      <input type="text" id="gstBuyerInput" value="33BBBBB5678B1Z6" placeholder="GSTIN">
+    </div>
+  </div>
+
+  <!-- 3 Items with auto-amount -->
+  <div class="section-title">📦 Items <i>qty × price = amount</i></div>
+  
+  <div class="item-card" id="item1">
+    <div class="inline-flex">
+      <div class="input-group" style="flex:2">
+        <label>Item 1</label>
+        <input type="text" id="item1Input" value="Office Chair" placeholder="Item name">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Qty</label>
+        <input type="number" id="qty1Input" value="2" min="1" step="1">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Price (₹)</label>
+        <input type="number" id="price1Input" value="4999.00" min="0" step="0.01">
+      </div>
+      <div class="input-group amount-display" style="flex:1.2">
+        <label>Amount</label>
+        <div class="amount-box" id="amount1Display">₹ 9,998.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item-card" id="item2">
+    <div class="inline-flex">
+      <div class="input-group" style="flex:2">
+        <label>Item 2</label>
+        <input type="text" id="item2Input" value="Wireless Mouse" placeholder="Item name">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Qty</label>
+        <input type="number" id="qty2Input" value="3" min="1" step="1">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Price (₹)</label>
+        <input type="number" id="price2Input" value="799.00" min="0" step="0.01">
+      </div>
+      <div class="input-group amount-display" style="flex:1.2">
+        <label>Amount</label>
+        <div class="amount-box" id="amount2Display">₹ 2,397.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item-card" id="item3">
+    <div class="inline-flex">
+      <div class="input-group" style="flex:2">
+        <label>Item 3</label>
+        <input type="text" id="item3Input" value="USB-C Cable" placeholder="Item name">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Qty</label>
+        <input type="number" id="qty3Input" value="5" min="1" step="1">
+      </div>
+      <div class="input-group" style="flex:1">
+        <label>Price (₹)</label>
+        <input type="number" id="price3Input" value="299.00" min="0" step="0.01">
+      </div>
+      <div class="input-group amount-display" style="flex:1.2">
+        <label>Amount</label>
+        <div class="amount-box" id="amount3Display">₹ 1,495.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GST Type selector + Update button -->
+  <div class="grid-2" style="margin-top: 6px;">
+    <div class="input-group">
+      <label>GST Type</label>
+      <select id="gstTypeSelect">
+        <option value="0.18">GST 18% (Standard)</option>
+        <option value="0.12">GST 12%</option>
+        <option value="0.05">GST 5%</option>
+        <option value="0.28">GST 28%</option>
+        <option value="0.00">GST 0%</option>
+      </select>
+    </div>
+    <div class="input-group" style="display:flex; align-items:flex-end; justify-content:flex-end;">
+      <button class="btn btn-outline" id="updateBillBtn" style="padding:10px 16px; width:auto; font-size:0.85rem;">
+        🔄 Update
+      </button>
+    </div>
+  </div>
+
+  <div class="input-group" id="notesGroup">
+    <label>Notes / Terms</label>
+    <input type="text" id="notesInput" value="Thank you for your business." placeholder="Notes or terms">
+  </div>
+
+  <!-- Bill Preview -->
+  <div class="bill-preview" id="billPreview">
+    <div class="bill-row"><span class="label">Document</span><span class="value" id="documentTypeDisplay">BILL / INVOICE</span></div>
+    <div class="bill-row"><span class="label">Number</span><span class="value" id="documentNoDisplay">—</span></div>
+    <div class="bill-row"><span class="label">Date</span><span class="value" id="documentDateDisplay">—</span></div>
+    <div class="bill-row" id="validUntilRow"><span class="label">Valid Until</span><span class="value" id="validUntilDisplay">—</span></div>
+    <div class="bill-row"><span class="label">Seller</span><span class="value" id="sellerDisplay">ABC Traders</span></div>
+    <div class="bill-row"><span class="label">Seller Address</span><span class="value" id="sellerAddrDisplay">Mumbai, Maharashtra</span></div>
+    <div class="bill-row"><span class="label">Buyer</span><span class="value" id="buyerDisplay">XYZ Retail</span></div>
+    <div class="bill-row"><span class="label">Buyer Address</span><span class="value" id="buyerAddrDisplay">Delhi, India</span></div>
+    <div class="bill-row"><span class="label">GST (Seller)</span><span class="value" id="gstSellerDisplay">22AAAAA1234A1Z5</span></div>
+    <div class="bill-row"><span class="label">GST (Buyer)</span><span class="value" id="gstBuyerDisplay">33BBBBB5678B1Z6</span></div>
+    <div class="bill-row" style="border-top:1px solid #dce2ec; margin-top:4px; padding-top:8px;">
+      <span class="label">Items</span>
+      <span class="value" id="itemsSummaryDisplay">Chair(2), Mouse(3), Cable(5)</span>
+    </div>
+    <div class="bill-row"><span class="label">Subtotal</span><span class="value" id="subtotalDisplay">₹ 13,793.00</span></div>
+    <div class="bill-row"><span class="label">GST (<span id="gstLabelDisplay">18%</span>)</span><span class="value" id="gstAmountDisplay">₹ 2,482.74</span></div>
+    <div class="bill-row total"><span class="label">Total (incl. GST)</span><span class="value" id="totalDisplay">₹ 16,275.74</span></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-bar">
+    <button class="btn btn-whatsapp" id="whatsappShareBtn">
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12.032 21.965c-2.007 0-3.884-.62-5.453-1.677l-4.194 1.285 1.38-4.1C3.07 16.12 2.568 14.6 2.568 13.01c0-5.222 4.242-9.465 9.464-9.465 5.22 0 9.464 4.243 9.464 9.465s-4.243 9.465-9.464 9.465zm0-17.93c-4.67 0-8.464 3.795-8.464 8.465 0 1.646.47 3.26 1.36 4.65l-.89 2.646 2.724-.835c1.354.755 2.92 1.17 4.548 1.17 4.67 0 8.464-3.795 8.464-8.465s-3.795-8.465-8.464-8.465zm4.61 6.35c-.24-.24-.63-.24-.87 0l-2.78 2.78c-.24.24-.63.24-.87 0l-1.39-1.39c-.24-.24-.63-.24-.87 0l-1.39 1.39c-.24.24-.24.63 0 .87l2.78 2.78c.24.24.63.24.87 0l2.78-2.78c.24-.24.24-.63 0-.87z"/></svg>
+      Share via WhatsApp
+    </button>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-primary" id="downloadPdfBtn">📄 Download PDF</button>
+    <button class="btn btn-primary" id="sharePdfBtn">📤 Share PDF</button>
+    <button class="btn" id="downloadExcelBtn">📊 Download Excel</button>
+  </div>
+  <div class="flex-center">
+    <span class="share-note" id="shareNote">↻ tap WhatsApp to send bill</span>
+  </div>
+  <hr>
+  <div class="brand-footer">
+    <strong>JAMTARIS</strong>
+    <span>Intelligent Business Operating System</span><span class="protected-badge">🔒 Protected</span>
+    <span>Janarthanan Thiyagarajan · 7667663922 · janarmca@gmail.com</span>
+  </div>
+  <div class="watermark">JAMTARIS · Protected application · ₹ INR · real-time GST</div>
+</div>
+
+<script>
+  /*
+   * JAMTARIS APPLICATION PROTECTION
+   * Client-side HTML cannot be made literally uneditable: anyone who receives
+   * an HTML file can inspect/copy/modify it. This layer adds deterrence and
+   * runtime tamper detection for normal users.
+   */
+  (function() {
+    const originalTitle = document.title;
+    const protectionMessage = 'This JAMTARIS document is protected. Please use the official application instead of modifying the HTML.';
+    let blocked = false;
+
+    function protectUI() {
+      document.addEventListener('contextmenu', e => e.preventDefault(), {capture:true});
+      document.addEventListener('dragstart', e => e.preventDefault(), {capture:true});
+      document.addEventListener('selectstart', e => {
+        const tag = (e.target && e.target.tagName) || '';
+        if (!['INPUT','TEXTAREA','SELECT'].includes(tag)) e.preventDefault();
+      }, {capture:true});
+
+      document.addEventListener('keydown', e => {
+        const k = String(e.key || '').toLowerCase();
+        if (
+          k === 'f12' ||
+          (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(k)) ||
+          (e.ctrlKey && ['u','s'].includes(k))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert(protectionMessage);
+        }
+      }, {capture:true});
+
+      document.title = originalTitle;
+    }
+
+    // Detect removal of the main application container while the app is running.
+    const observer = new MutationObserver(() => {
+      if (blocked) return;
+      const app = document.getElementById('app');
+      if (!app) {
+        blocked = true;
+        document.body.innerHTML =
+          '<div style="font-family:system-ui;text-align:center;padding:50px">' +
+          '<h2>🔒 JAMTARIS Protected</h2><p>' + protectionMessage + '</p></div>';
+      }
+    });
+
+    if (document.body) {
+      protectUI();
+      observer.observe(document.body, {childList:true, subtree:true});
+    } else {
+      window.addEventListener('DOMContentLoaded', () => {
+        protectUI();
+        observer.observe(document.body, {childList:true, subtree:true});
+      }, {once:true});
+    }
+  })();
+
+  (function() {
+    const sellerInput = document.getElementById('sellerInput');
+    const buyerInput = document.getElementById('buyerInput');
+    const sellerAddrInput = document.getElementById('sellerAddrInput');
+    const buyerAddrInput = document.getElementById('buyerAddrInput');
+    const gstSellerInput = document.getElementById('gstSellerInput');
+    const gstBuyerInput = document.getElementById('gstBuyerInput');
+    const gstTypeSelect = document.getElementById('gstTypeSelect');
+    const documentTypeSelect = document.getElementById('documentTypeSelect');
+    const documentNoInput = document.getElementById('documentNoInput');
+    const documentDateInput = document.getElementById('documentDateInput');
+    const validUntilInput = document.getElementById('validUntilInput');
+    const notesInput = document.getElementById('notesInput');
+
+    const itemInputs = [1,2,3].map(i => document.getElementById(`item${i}Input`));
+    const qtyInputs = [1,2,3].map(i => document.getElementById(`qty${i}Input`));
+    const priceInputs = [1,2,3].map(i => document.getElementById(`price${i}Input`));
+    const amountDisplays = [1,2,3].map(i => document.getElementById(`amount${i}Display`));
+
+    const sellerDisplay = document.getElementById('sellerDisplay');
+    const buyerDisplay = document.getElementById('buyerDisplay');
+    const sellerAddrDisplay = document.getElementById('sellerAddrDisplay');
+    const buyerAddrDisplay = document.getElementById('buyerAddrDisplay');
+    const gstSellerDisplay = document.getElementById('gstSellerDisplay');
+    const gstBuyerDisplay = document.getElementById('gstBuyerDisplay');
+    const itemsSummaryDisplay = document.getElementById('itemsSummaryDisplay');
+    const subtotalDisplay = document.getElementById('subtotalDisplay');
+    const gstAmountDisplay = document.getElementById('gstAmountDisplay');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const gstLabelDisplay = document.getElementById('gstLabelDisplay');
+    const shareNote = document.getElementById('shareNote');
+    const documentTypeDisplay = document.getElementById('documentTypeDisplay');
+    const documentNoDisplay = document.getElementById('documentNoDisplay');
+    const documentDateDisplay = document.getElementById('documentDateDisplay');
+    const validUntilDisplay = document.getElementById('validUntilDisplay');
+    const validUntilRow = document.getElementById('validUntilRow');
+
+    const CURRENCY = '₹ ';
+
+    function fmt(value) {
+      return CURRENCY + Number(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    function dateText(v) {
+      if (!v) return '—';
+      const d = new Date(v + 'T00:00:00');
+      return isNaN(d) ? v : d.toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'numeric'});
+    }
+    function todayISO() {
+      const d = new Date();
+      const off = d.getTimezoneOffset();
+      return new Date(d.getTime() - off*60000).toISOString().slice(0,10);
+    }
+    function generateNo(type) {
+      const prefix = type === 'QUOTATION' ? 'QT' : 'INV';
+      const key = `jamtaris_${prefix}_counter`;
+      let n = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+      localStorage.setItem(key, String(n));
+      return `${prefix}-${new Date().getFullYear()}-${String(n).padStart(4,'0')}`;
+    }
+    function getGstRate() { return parseFloat(gstTypeSelect.value) || 0; }
+
+    function updateBill() {
+      const seller = sellerInput.value.trim() || 'Seller';
+      const buyer = buyerInput.value.trim() || 'Buyer';
+      const sellerAddr = sellerAddrInput.value.trim() || 'Address';
+      const buyerAddr = buyerAddrInput.value.trim() || 'Address';
+      const gstSeller = gstSellerInput.value.trim() || 'GSTIN';
+      const gstBuyer = gstBuyerInput.value.trim() || 'GSTIN';
+
+      const type = documentTypeSelect.value;
+      const docNo = documentNoInput.value.trim() || '—';
+      const docDate = documentDateInput.value;
+      const validUntil = validUntilInput.value;
+
+      let items = [], subtotal = 0;
+      for (let i = 0; i < 3; i++) {
+        const name = itemInputs[i].value.trim() || `Item ${i+1}`;
+        let qty = parseInt(qtyInputs[i].value, 10);
+        if (isNaN(qty) || qty < 1) qty = 1;
+        qtyInputs[i].value = qty;
+        let price = parseFloat(priceInputs[i].value);
+        if (isNaN(price) || price < 0) price = 0;
+        priceInputs[i].value = price.toFixed(2);
+        const amount = qty * price;
+        subtotal += amount;
+        items.push({name, qty, price, amount});
+        amountDisplays[i].textContent = fmt(amount);
+      }
+
+      const gstRate = getGstRate();
+      const gstAmount = subtotal * gstRate;
+      const total = subtotal + gstAmount;
+
+      sellerDisplay.textContent = seller;
+      buyerDisplay.textContent = buyer;
+      sellerAddrDisplay.textContent = sellerAddr;
+      buyerAddrDisplay.textContent = buyerAddr;
+      gstSellerDisplay.textContent = gstSeller;
+      gstBuyerDisplay.textContent = gstBuyer;
+      itemsSummaryDisplay.textContent = items.map(it => `${it.name}(${it.qty})`).join(', ');
+      subtotalDisplay.textContent = fmt(subtotal);
+      gstAmountDisplay.textContent = fmt(gstAmount);
+      totalDisplay.textContent = fmt(total);
+      gstLabelDisplay.textContent = (gstRate * 100).toFixed(0) + '%';
+
+      documentTypeDisplay.textContent = type === 'QUOTATION' ? 'QUOTATION' : 'BILL / INVOICE';
+      documentNoDisplay.textContent = docNo;
+      documentDateDisplay.textContent = dateText(docDate);
+      validUntilDisplay.textContent = dateText(validUntil);
+      validUntilRow.style.display = type === 'QUOTATION' ? 'flex' : 'none';
+
+      window._billData = {
+        type, docNo, docDate, validUntil, seller, buyer, sellerAddr, buyerAddr,
+        gstSeller, gstBuyer, items, subtotal, gstAmount, total, gstRate,
+        notes: notesInput.value.trim() || ''
+      };
+    }
+
+    function buildWhatsAppMessage() {
+      updateBill();
+      const d = window._billData;
+      const title = d.type === 'QUOTATION' ? 'QUOTATION' : 'BILL (GST)';
+      const lines = [
+        `🧾 *${title}*`,
+        `🔢 No: ${d.docNo}`,
+        `📅 Date: ${dateText(d.docDate)}`,
+        d.type === 'QUOTATION' ? `⏳ Valid Until: ${dateText(d.validUntil)}` : null,
+        `👤 Seller: ${d.seller} (${d.sellerAddr})`,
+        `👥 Buyer: ${d.buyer} (${d.buyerAddr})`,
+        `🏷️ GST Seller: ${d.gstSeller}`,
+        `🏷️ GST Buyer: ${d.gstBuyer}`,
+        `📦 Items:`,
+        ...d.items.map((it,i) => `   ${i+1}. ${it.name} × ${it.qty} = ${fmt(it.amount)}`),
+        `📊 Subtotal: ${fmt(d.subtotal)}`,
+        `🧾 GST (${(d.gstRate*100).toFixed(0)}%): ${fmt(d.gstAmount)}`,
+        `💰 *Total: ${fmt(d.total)}*`,
+        d.notes ? `📝 ${d.notes}` : null,
+        `—`,
+        `*JAMTARIS*`,
+        `Janarthanan Thiyagarajan`,
+        `📱 7667663922`,
+        `✉️ janarmca@gmail.com`
+      ].filter(Boolean);
+      return lines.join('\n');
+    }
+
+    function shareViaWhatsApp() {
+      const url = `https://wa.me/?text=${encodeURIComponent(buildWhatsAppMessage())}`;
+      window.open(url, '_blank');
+      shareNote.textContent = '✓ WhatsApp opened · share the document!';
+      setTimeout(() => shareNote.textContent = '↻ tap an option to share or download', 4500);
+    }
+
+    function buildPrintableDocument() {
+      updateBill();
+      const d = window._billData;
+      const title = d.type === 'QUOTATION' ? 'QUOTATION' : 'BILL / INVOICE';
+      const itemRows = d.items.map((it,i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td>${escapeHtml(it.name)}</td>
+          <td>${it.qty}</td>
+          <td>${fmt(it.price)}</td>
+          <td>${fmt(it.amount)}</td>
+        </tr>`).join('');
+
+      return `<!doctype html>
+<html><head><meta charset="utf-8"><title>${title} ${escapeHtml(d.docNo)}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#172033}
+.page{width:210mm;min-height:297mm;margin:0 auto;padding:16mm 15mm;position:relative}
+.header{display:flex;justify-content:space-between;border-bottom:2px solid #172033;padding-bottom:8mm}
+.brand{font-size:24px;font-weight:800;letter-spacing:2px}.sub{font-size:10px;color:#64748b;margin-top:3px}
+.title{text-align:right;font-size:20px;font-weight:800}.meta{font-size:10px;margin-top:3px;color:#475569}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:10mm 0}
+.box{border:1px solid #dce2ec;border-radius:8px;padding:5mm}.box h3{font-size:10px;margin:0 0 4mm}.box div{font-size:10px;margin:2px 0}
+table{width:100%;border-collapse:collapse;font-size:10px}th{background:#f1f5f9;text-align:left}th,td{padding:3mm;border-bottom:1px solid #e2e8f0}td:nth-child(1){width:10mm}td:nth-child(3){width:15mm}td:nth-child(4),td:nth-child(5){text-align:right}
+.summary{margin-left:auto;width:75mm;margin-top:8mm;font-size:10px}.sum{display:flex;justify-content:space-between;padding:2mm 0}.total{border-top:2px solid #172033;font-size:14px;font-weight:800;padding-top:4mm}
+.notes{margin-top:10mm;font-size:10px}.footer{position:absolute;bottom:12mm;left:15mm;right:15mm;border-top:1px solid #dce2ec;padding-top:4mm;font-size:9px}
+.watermark{position:absolute;top:125mm;left:25mm;font-size:52px;font-weight:800;color:#edf0f4;transform:rotate(-35deg);z-index:0}
+.content{position:relative;z-index:1}
+@media print{body{background:#fff}.page{margin:0;box-shadow:none}}
+</style></head><body>
+<div class="page"><div class="watermark">JAMTARIS</div><div class="content">
+<div class="header"><div><div class="brand">JAMTARIS</div><div class="sub">Intelligent Business Operating System</div></div>
+<div><div class="title">${title}</div><div class="meta">No: ${escapeHtml(d.docNo)}</div><div class="meta">Date: ${escapeHtml(dateText(d.docDate))}</div>
+${d.type === 'QUOTATION' ? `<div class="meta">Valid Until: ${escapeHtml(dateText(d.validUntil))}</div>` : ''}</div></div>
+<div class="parties"><div class="box"><h3>SELLER</h3><div><b>${escapeHtml(d.seller)}</b></div><div>${escapeHtml(d.sellerAddr)}</div><div>GSTIN: ${escapeHtml(d.gstSeller)}</div></div>
+<div class="box"><h3>BUYER</h3><div><b>${escapeHtml(d.buyer)}</b></div><div>${escapeHtml(d.buyerAddr)}</div><div>GSTIN: ${escapeHtml(d.gstBuyer)}</div></div></div>
+<table><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead><tbody>${itemRows}</tbody></table>
+<div class="summary"><div class="sum"><span>Subtotal</span><b>${fmt(d.subtotal)}</b></div><div class="sum"><span>GST ${(d.gstRate*100).toFixed(0)}%</span><b>${fmt(d.gstAmount)}</b></div><div class="sum total"><span>TOTAL</span><span>${fmt(d.total)}</span></div></div>
+${d.notes ? `<div class="notes"><b>Notes / Terms:</b><br>${escapeHtml(d.notes)}</div>` : ''}
+</div><div class="footer"><b>JAMTARIS</b><br>Janarthanan Thiyagarajan · 7667663922 · janarmca@gmail.com</div></div>
+</body></html>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function openPrintWindow() {
+      const w = window.open('', '_blank');
+      if (!w) {
+        alert('Popup is blocked. Please allow pop-ups for this page, then tap PDF again.');
+        return null;
+      }
+      w.document.open();
+      w.document.write(buildPrintableDocument());
+      w.document.close();
+      return w;
+    }
+
+    function downloadPdf() {
+      // Most reliable mobile-browser method: native Print -> Save as PDF.
+      const w = openPrintWindow();
+      if (!w) return;
+      setTimeout(() => {
+        try {
+          w.focus();
+          w.print();
+          shareNote.textContent = '✓ Print dialog opened · choose Save as PDF';
+        } catch (e) {
+          shareNote.textContent = '✓ Document opened · use browser Print → Save as PDF';
+        }
+      }, 500);
+    }
+
+    async function sharePdf() {
+      // Use native Web Share when the browser supports sharing files.
+      // Otherwise open the print/save flow instead of silently failing.
+      updateBill();
+      const d = window._billData;
+      const printable = buildPrintableDocument();
+      const blob = new Blob([printable], {type:'text/html'});
+      const file = new File([blob], `${d.type === 'QUOTATION' ? 'Quotation' : 'Bill'}-${d.docNo}.html`, {type:'text/html'});
+
+      try {
+        if (navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) {
+          await navigator.share({
+            title: `${d.type === 'QUOTATION' ? 'Quotation' : 'Bill'} ${d.docNo}`,
+            text: 'JAMTARIS document'
+          });
+          shareNote.textContent = '✓ Share menu opened';
+          return;
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+
+      // Fallback: open printable document so user can Save as PDF and share it.
+      const w = openPrintWindow();
+      if (!w) return;
+      setTimeout(() => {
+        try { w.focus(); w.print(); } catch(e) {}
+        shareNote.textContent = '✓ Choose Save as PDF, then share the PDF';
+      }, 500);
+    }
+
+    function downloadExcel() {
+      updateBill();
+      if (!window.XLSX) {
+        alert('Excel engine could not load. Please check your internet connection and try again.');
+        return;
+      }
+      const d = window._billData;
+      const rows = [
+        ['JAMTARIS'],
+        ['Intelligent Business Operating System'],
+        [d.type === 'QUOTATION' ? 'QUOTATION' : 'BILL / INVOICE', d.docNo],
+        ['Date', dateText(d.docDate)],
+        ...(d.type === 'QUOTATION' ? [['Valid Until', dateText(d.validUntil)]] : []),
+        [],
+        ['Seller', d.seller],
+        ['Seller Address', d.sellerAddr],
+        ['Seller GSTIN', d.gstSeller],
+        ['Buyer', d.buyer],
+        ['Buyer Address', d.buyerAddr],
+        ['Buyer GSTIN', d.gstBuyer],
+        [],
+        ['S.No','Item','Qty','Price','Amount'],
+        ...d.items.map((it,i)=>[i+1,it.name,it.qty,it.price,it.amount]),
+        [],
+        ['Subtotal','','','',d.subtotal],
+        [`GST ${(d.gstRate*100).toFixed(0)}%`,'','','',d.gstAmount],
+        ['TOTAL','','','',d.total],
+        [],
+        ['Notes / Terms', d.notes],
+        [],
+        ['Contact','Janarthanan Thiyagarajan'],
+        ['Phone','7667663922'],
+        ['Email','janarmca@gmail.com']
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:22},{wch:42},{wch:12},{wch:16},{wch:18}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, d.type === 'QUOTATION' ? 'Quotation' : 'Bill');
+      XLSX.writeFile(wb, `${d.type === 'QUOTATION' ? 'Quotation' : 'Bill'}-${d.docNo}.xlsx`);
+      shareNote.textContent = '✓ Excel downloaded';
+    }
+
+    document.getElementById('updateBillBtn').addEventListener('click', e => {
+      e.preventDefault(); updateBill(); shareNote.textContent='✓ Document updated';
+      setTimeout(()=>shareNote.textContent='↻ tap an option to share or download',2000);
+    });
+    document.getElementById('whatsappShareBtn').addEventListener('click', e => { e.preventDefault(); shareViaWhatsApp(); });
+    document.getElementById('downloadPdfBtn').addEventListener('click', e => { e.preventDefault(); downloadPdf(); });
+    document.getElementById('sharePdfBtn').addEventListener('click', e => { e.preventDefault(); sharePdf(); });
+    document.getElementById('downloadExcelBtn').addEventListener('click', e => { e.preventDefault(); downloadExcel(); });
+
+    documentTypeSelect.addEventListener('change', () => {
+      if (!documentNoInput.value.trim() || documentNoInput.dataset.type !== documentTypeSelect.value) {
+        documentNoInput.value = generateNo(documentTypeSelect.value);
+        documentNoInput.dataset.type = documentTypeSelect.value;
+      }
+      updateBill();
+    });
+
+    const allInputs = [
+      sellerInput,buyerInput,sellerAddrInput,buyerAddrInput,gstSellerInput,gstBuyerInput,
+      gstTypeSelect,documentNoInput,documentDateInput,validUntilInput,notesInput,
+      ...itemInputs,...qtyInputs,...priceInputs
+    ];
+    allInputs.forEach(input => {
+      input.addEventListener('input', updateBill);
+      input.addEventListener('change', updateBill);
+    });
+
+    priceInputs.forEach(inp => inp.addEventListener('blur', () => {
+      let val=parseFloat(inp.value); if(isNaN(val)||val<0) val=0;
+      inp.value=val.toFixed(2); updateBill();
+    }));
+    qtyInputs.forEach(inp => inp.addEventListener('blur', () => {
+      let val=parseInt(inp.value,10); if(isNaN(val)||val<1) val=1;
+      inp.value=val; updateBill();
+    }));
+
+    window.addEventListener('load', () => {
+      if (!documentDateInput.value) documentDateInput.value = todayISO();
+      if (!validUntilInput.value) {
+        const d = new Date(); d.setDate(d.getDate()+15);
+        const off=d.getTimezoneOffset();
+        validUntilInput.value=new Date(d.getTime()-off*60000).toISOString().slice(0,10);
+      }
+      if (!documentNoInput.value) {
+        documentNoInput.value=generateNo(documentTypeSelect.value);
+        documentNoInput.dataset.type=documentTypeSelect.value;
+      }
+      updateBill();
+      shareNote.textContent='↻ tap an option to share or download';
+    });
+  })();
+</script>
+</body>
+</html>
