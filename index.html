@@ -1406,7 +1406,7 @@ self.onmessage = async (e)=>{
       const rgb = track(new cv.Mat()); cv.cvtColor(src, rgb, cv.COLOR_RGBA2RGB);
       const mask = track(new cv.Mat.zeros(height, width, cv.CV_8UC1));
       const bgd = track(new cv.Mat()); const fgd = track(new cv.Mat());
-      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 5, cv.GC_INIT_WITH_RECT);
+      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 10, cv.GC_INIT_WITH_RECT);
       outData = new Uint8Array(mask.rows*mask.cols);
       outData.set(mask.data);
     } else if(op === 'inpaint'){
@@ -1434,7 +1434,7 @@ self.onmessage = async (e)=>{
       const rgb = track(new cv.Mat()); cv.cvtColor(src, rgb, cv.COLOR_RGBA2RGB);
       const mask = track(new cv.Mat.zeros(height, width, cv.CV_8UC1));
       const bgd = track(new cv.Mat()); const fgd = track(new cv.Mat());
-      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 5, cv.GC_INIT_WITH_RECT);
+      cv.grabCut(rgb, mask, new cv.Rect(params.x, params.y, params.w, params.h), bgd, fgd, 10, cv.GC_INIT_WITH_RECT);
       const alphaMat = track(new cv.Mat(height, width, cv.CV_8UC1, new cv.Scalar(0)));
       for(let q=0;q<mask.rows*mask.cols;q++){ const v=mask.data[q]; if(v===1||v===3) alphaMat.data[q]=255; }
       const dilated = track(new cv.Mat());
