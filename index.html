@@ -176,6 +176,7 @@ const TOOLS = [
   {id:'pdfimgwm', name:'Logo Watermark on PDF', desc:'Stamp your logo/image on every page', icon:'🖼️', color:'#4A235A', cat:'pdf'},
   {id:'pdfqrstamp', name:'Add QR to PDF', desc:'Stamp a QR code on every page', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
+  {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'business'},
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
@@ -814,6 +815,7 @@ const CATEGORY_META = {
   image: { label: 'Image', icon:'🖼️', sub: '⚡ Paid — sign in for credits-based fast processing' },
   video: { label: 'Video', icon:'🎬', sub: '⚡ Paid — sign in for credits-based fast processing' },
   ai:    { label: 'AI', icon:'🤖', sub: '⚡ Paid — powered by AI, one credit per use' },
+  education: { label: 'Education', icon:'🎓', sub: 'Free — learning games for Grades 1-12' },
 };
 const POPULAR_TOOL_IDS = ['merge','compress','pdf2word','askai','videocompress','bgremove','ocr','aitranslate'];
 let __activeCategory = 'all';
@@ -896,7 +898,7 @@ function renderHomeBody(){
     holder.appendChild(popSection);
   }
 
-  const order = __activeCategory==='all' ? ['pdf','business','image','video','ai'] : [__activeCategory];
+  const order = __activeCategory==='all' ? ['pdf','business','image','video','ai','education'] : [__activeCategory];
   order.forEach(cat=>{
     const items = TOOLS.filter(t=>t.cat===cat);
     if(!items.length) return;
@@ -8331,6 +8333,24 @@ TOOL_IMPL.pettycash = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
+  }
+};
+
+/* ===================== NUMBER JUNGLE — LEARNING GAME (embedded via iframe) =====
+   This is a full standalone app (its own HTML/CSS/JS) built separately — it's
+   loaded in an isolated iframe rather than merged into this file's code, so
+   its global functions/variables (showPanel, state, lang, etc.) can never
+   collide with anything in this 8000+ line app. The file must be uploaded
+   alongside index.html (same folder) on GitHub for this to load. ============= */
+TOOL_IMPL.numberjungle = {
+  mount(container){
+    const wrap = el(`<div style="margin:-4px -4px 0;"></div>`);
+    const frame = el(`<iframe src="number-jungle-game-engine.html" title="Number Jungle" style="width:100%; height:78vh; min-height:560px; border:none; border-radius:14px; display:block; background:#0f2027;" loading="lazy"></iframe>`);
+    frame.onerror = ()=>{
+      wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Couldn't load the game — make sure "number-jungle-game-engine.html" is uploaded in the same folder as this app on GitHub.</div>`;
+    };
+    wrap.appendChild(frame);
+    container.appendChild(wrap);
   }
 };
 
