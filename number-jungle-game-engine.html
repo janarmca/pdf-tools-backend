@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>எண் காடு | Number Jungle — Game Engine Edition (Grade 1-12)</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#fff; min-height:100vh;}
+  .ta{font-family:'Noto Sans Tamil',sans-serif;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+  #app{max-width:1100px; margin:0 auto; padding:14px;}
+
+  header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    background:rgba(255,255,255,0.06); border:2px solid #FFB627; border-radius:16px; padding:12px; margin-bottom:12px;}
+  .logo{font-size:20px; font-weight:800; color:#FFB627;}
+  .lang-btn{background:#FFB627; color:#000; border:none; padding:7px 12px; border-radius:8px; font-weight:700; cursor:pointer; font-size:11px;}
+
+  .stat-strip{display:flex; gap:6px; flex-wrap:wrap; font-size:11px;}
+  .stat{background:rgba(255,182,39,0.15); border:1px solid #FFB627; color:#FFB627; padding:5px 9px; border-radius:6px; font-weight:700;}
+  .xpbar-wrap{width:100%; background:rgba(255,255,255,0.08); border-radius:6px; height:8px; margin-top:6px; overflow:hidden;}
+  .xpbar-fill{height:100%; background:linear-gradient(90deg,#FFB627,#FF6B35); transition:width .3s;}
+
+  .nav{display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;}
+  .nav button{background:rgba(255,255,255,0.08); border:1px solid rgba(255,182,39,0.4); color:#fff; padding:7px 11px;
+    border-radius:8px; font-size:11px; font-weight:600; cursor:pointer;}
+  .nav button.active, .nav button:hover{background:#FFB627; color:#000;}
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .3s;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:12px 0;}
+  .card{background:rgba(255,255,255,0.06); border:2px solid rgba(255,182,39,0.35); border-radius:14px; padding:12px;
+    cursor:pointer; transition:.25s; text-align:center;}
+  .card:hover{transform:translateY(-4px); border-color:#FFB627; box-shadow:0 10px 22px rgba(0,0,0,.3);}
+  .card .ic{font-size:26px; margin-bottom:4px;}
+  .card .t1{font-weight:700; font-size:12px; color:#FFB627;}
+  .card .t2{font-size:10px; color:#bbb; margin-top:2px;}
+  .card.locked{opacity:.45; cursor:not-allowed;}
+  .card.done{border-color:#2ECC71;}
+  .card .chk{font-size:10px; color:#2ECC71; margin-top:3px;}
+
+  .box{background:rgba(255,255,255,0.05); border:1px solid rgba(255,182,39,0.3); border-radius:12px; padding:14px; margin:10px 0;}
+  .box h3{color:#FFB627; margin:0 0 6px; font-size:15px;}
+  .box p{font-size:12px; line-height:1.6; color:#ddd; margin:5px 0;}
+
+  .q-card{background:rgba(255,255,255,0.06); border-radius:10px; padding:14px; margin:10px 0;}
+  .q-text{font-size:15px; margin-bottom:10px; font-weight:600;}
+  .opts{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  @media(max-width:480px){.opts{grid-template-columns:1fr;}}
+  .opt{background:rgba(255,255,255,0.08); border:2px solid rgba(255,182,39,0.3); color:#fff; padding:10px; border-radius:8px; cursor:pointer; font-size:13px;}
+  .opt.correct{background:rgba(46,204,113,0.35); border-color:#2ECC71;}
+  .opt.wrong{background:rgba(231,76,60,0.35); border-color:#E74C3C;}
+  .opt:disabled{cursor:default;}
+  .progress-dots{display:flex; gap:5px; margin-bottom:10px;}
+  .dot{width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.2);}
+  .dot.filled{background:#FFB627;}
+  .dot.right{background:#2ECC71;}
+  .dot.wrong-dot{background:#E74C3C;}
+
+  .btn{background:#FFB627; color:#000; border:none; padding:9px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:12px;}
+  .btn-out{background:transparent; border:2px solid #FFB627; color:#FFB627;}
+
+  .badge-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; margin:10px 0;}
+  .badge{background:rgba(255,182,39,0.12); border:1px solid #FFB627; border-radius:10px; padding:8px; text-align:center;}
+  .badge .bic{font-size:22px;}
+  .badge .bt{font-size:9px; color:#FFB627; margin-top:2px;}
+  .badge.empty{opacity:.25;}
+
+  footer{text-align:center; color:#777; font-size:10px; margin-top:18px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div style="flex:1; min-width:180px;">
+      <div class="logo">🦜 <span id="titleTxt">Number Jungle — Game Engine</span></div>
+      <div class="xpbar-wrap"><div class="xpbar-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat">🏆 <span id="levelTxt">Lv.1</span></div>
+      <div class="stat">⭐ <span id="xpTxt">0</span> XP</div>
+      <div class="stat">🔥 <span id="streakTxt">0</span></div>
+      <div class="stat">🎖️ <span id="badgeCount">0</span></div>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()"><span id="langLabel">தமிழ் / English</span></button>
+  </header>
+
+  <div class="nav" id="navBar"></div>
+
+  <!-- HOME -->
+  <div class="panel active" id="home">
+    <h2 id="homeH" style="text-align:center; color:#FFB627;"></h2>
+    <p id="homeP" style="text-align:center; color:#bbb; font-size:12px;"></p>
+    <div class="grid" id="homeGrid"></div>
+  </div>
+
+  <!-- GRADE SELECT -->
+  <div class="panel" id="gradeSelect">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← <span id="backTxt">Back</span></button>
+    <h2 id="gradeSelH" style="color:#FFB627;"></h2>
+    <div class="grid" id="gradeGrid"></div>
+  </div>
+
+  <!-- PLAY (quiz session) -->
+  <div class="panel" id="play">
+    <button class="btn btn-out" onclick="showPanel('gradeSelect')" style="margin-bottom:10px;">← <span id="backTxt2">Back</span></button>
+    <div class="progress-dots" id="progressDots"></div>
+    <div id="playArea"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="panel" id="results">
+    <div id="resultsArea" style="text-align:center;"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="panel" id="badges">
+    <h2 id="badgesH" style="color:#FFB627;"></h2>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <!-- CODING -->
+  <div class="panel" id="coding">
+    <h2 id="codeH" style="color:#FFB627;">🖥️ Coding Corner</h2>
+    <div class="box">
+      <textarea id="codeArea" style="width:100%; min-height:110px; background:#111; color:#0f0; border:1px solid #FFB627; border-radius:8px; padding:10px; font-family:monospace; font-size:12px;">print("Hello, Future Scientist!")
+name = "Kavi"
+print("My name is", name)</textarea>
+      <button class="btn" style="margin-top:8px;" onclick="runCode()">▶ Run</button>
+      <div id="codeOut" style="background:#000; padding:10px; margin-top:8px; border-radius:6px; font-family:monospace; font-size:12px; color:#0f0; min-height:30px;">Output...</div>
+    </div>
+  </div>
+
+  <!-- CYBER -->
+  <div class="panel" id="cyber">
+    <h2 id="cyberH" style="color:#FFB627;">🛡️ Cyber Safety Detective</h2>
+    <div class="box"><p><b>✅</b> Never share your password with anyone — not even friends!</p></div>
+    <div class="box"><p><b>⚠️</b> "You won a prize! Click here!" messages are usually phishing tricks.</p></div>
+    <div class="box"><p><b>🔍</b> Ethical hackers are hired to test companies' own security — like a doctor doing a checkup before you get sick!</p></div>
+  </div>
+
+  <!-- FUTURE TECH -->
+  <div class="panel" id="futuretech">
+    <h2 id="futH" style="color:#FFB627;">🚀 New Technology Explorer</h2>
+    <div class="box"><h3>🤖 AI</h3><p>Computers that learn from examples — used in translation, medicine, and recommendations.</p></div>
+    <div class="box"><h3>🛰️ Space</h3><p>JWST telescope shows galaxies formed billions of years ago.</p></div>
+    <div class="box"><h3>⚛️ Quantum</h3><p>Quantum computers can explore many possibilities at once.</p></div>
+    <div class="box"><h3>🧬 Gene Editing</h3><p>CRISPR lets scientists fix tiny errors inside DNA to cure diseases.</p></div>
+  </div>
+
+  <!-- THINKING -->
+  <div class="panel" id="thinking">
+    <h2 id="thinkH" style="color:#FFB627;">🔬 Think Like a Scientist</h2>
+    <div class="box"><h3>1. Get Curious</h3><p>Ask WHY, not just WHAT.</p></div>
+    <div class="box"><h3>2. Guess, then Test</h3><p>Being wrong teaches you something new.</p></div>
+    <div class="box"><h3>3. Ask Who It Helps</h3><p>Good science helps people fairly.</p></div>
+    <div class="box"><h3>4. Share Ideas</h3><p>Real scientists let others check their work.</p></div>
+  </div>
+
+  <footer>🦜 Number Jungle — Free Forever • Grades 1-12 • English + Tamil</footer>
+</div>
+
+<script>
+/* ================= STATE ================= */
+let lang='en';
+let state = { xp:0, streak:0, badges:[], completedBands:{} };
+
+function loadState(){
+  const s = localStorage.getItem('nj_full_v1');
+  if(s) state = JSON.parse(s);
+  lang = localStorage.getItem('nj_lang') || 'en';
+}
+function saveState(){
+  localStorage.setItem('nj_full_v1', JSON.stringify(state));
+  localStorage.setItem('nj_lang', lang);
+}
+function toggleLang(){ lang = lang==='en' ? 'ta' : 'en'; saveState(); renderAll(); }
+
+/* ================= TRANSLATIONS ================= */
+const T = {
+en:{ title:'Number Jungle — Game Engine', homeH:'Choose Your Subject 🎮', homeP:'Pick a subject, choose your grade, and play to earn XP + Badges!',
+  gradeSelH:'Choose Grade (1-12)', back:'Back', badgesH:'🎖️ Your Badge Wall',
+  nav:['🏠 Home','🎖️ Badges','🖥️ Coding','🛡️ Cyber Safety','🚀 New Tech','🔬 Think Like Scientist'],
+  levelNames:['Beginner','Explorer','Learner','Achiever','Scholar','Champion','Genius','Master','Legend'] },
+ta:{ title:'எண் காடு — கேம் இன்ஜின்', homeH:'உங்கள் பாடத்தை தேர்ந்தெடுங்கள் 🎮', homeP:'ஒரு பாடத்தை தேர்ந்தெடுத்து, கிரேடை தேர்ந்தெடுத்து, விளையாடி XP + பேட்ஜ்கள் வெல்லுங்கள்!',
+  gradeSelH:'கிரேடைத் தேர்ந்தெடுங்கள் (1-12)', back:'திரும்பு', badgesH:'🎖️ உங்கள் பேட்ஜ் சுவர்',
+  nav:['🏠 முகப்பு','🎖️ பேட்ஜ்கள்','🖥️ கோடிங்','🛡️ இணைய பாதுகாப்பு','🚀 புதிய தொழில்நுட்பம்','🔬 விஞ்ஞானி சிந்தனை'],
+  levelNames:['தொடக்கநிலை','ஆய்வாளர்','கற்பவர்','சாதனையாளர்','அறிஞர்','வீரர்','மேதை','மாஸ்டர்','புராணம்'] }
+};
+
+const SUBJECTS = [
+  {id:'maths', icon:'🔢', en:'Mathematics', ta:'கணிதம்', procedural:true},
+  {id:'tamil', icon:'📖', en:'Tamil', ta:'தமிழ்'},
+  {id:'english', icon:'🔤', en:'English', ta:'ஆங்கிலம்'},
+  {id:'science', icon:'🔬', en:'Science', ta:'அறிவியல்'},
+  {id:'social', icon:'🌍', en:'Social Studies', ta:'சமூக அறிவியல்'},
+  {id:'computer', icon:'💻', en:'Computer Science', ta:'கணினி அறிவியல்'}
+];
+
+function bandForGrade(g){
+  if(g<=3) return '1-3';
+  if(g<=6) return '4-6';
+  if(g<=8) return '7-8';
+  if(g<=10) return '9-10';
+  return '11-12';
+}
+
+/* ================= MATH PROCEDURAL GENERATOR ================= */
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
+function makeOptions(correct, distractors){
+  let opts = [correct, ...distractors];
+  opts = [...new Set(opts)];
+  while(opts.length < 4) opts.push(correct + rnd(3,9)*(Math.random()<0.5?-1:1));
+  return shuffle(opts.slice(0,4).map(String));
+}
+
+// Grades 1-5: real-life "why this matters" line shown with the question, and
+// topics are cycled so EVERY session covers Addition + Subtraction +
+// Multiplication + a gentle "missing number" intro to variables — not just
+// one topic repeated. Numbers scale up gently with grade (1-2 → 3 → 4-5).
+const REAL_LIFE_TA = {
+  addition: ['🍬 கடையில் இரண்டு பொருள் வாங்கும்போது, மொத்த விலை கணக்கிட Addition பயன்படும்.', '💰 உங்கள் பணத்தையும் தோழியின் பணத்தையும் சேர்த்தால் மொத்தம் எவ்வளவு என்று Addition சொல்லும்.'],
+  subtraction: ['🛒 கடைக்காரரிடம் பணம் கொடுத்தபின், மீதி (change) கணக்கிட Subtraction பயன்படும்.', '🍎 உங்களிடம் இருந்த பழங்களில் சிலவற்றை தந்தால், மீதி எத்தனை என Subtraction சொல்லும்.'],
+  multiplication: ['🍪 3 பாக்கெட், ஒவ்வொன்றிலும் 5 biscuits இருந்தால், மொத்தம் எத்தனை என Multiplication வேகமாக சொல்லும்.', '🚌 பேருந்தில் 4 வரிசை, ஒவ்வொரு வரிசையிலும் 6 இருக்கைகள் இருந்தால், மொத்த இருக்கைகளை Multiplication கணக்கிடும்.'],
+  variable: ['🧩 காணாமல் போன எண்ணை கண்டுபிடிப்பது ஒரு புதிர் போன்றது — இதுவே பெரிய குழந்தைகள் படிக்கும் Algebra-வின் முதல் படி!', '🔍 "?" என்பது ஒரு மறைந்திருக்கும் எண் — அதை கண்டுபிடிப்பதே Variable-ஐ புரிந்துகொள்வது.']
+};
+const REAL_LIFE_EN = {
+  addition: ['🍬 When you buy two things at a shop, Addition tells you the total price to pay.', '💰 Adding your money and your friend\'s money together tells you how much you have combined.'],
+  subtraction: ['🛒 After paying the shopkeeper, Subtraction tells you how much change you get back.', '🍎 If you give away some of your fruits, Subtraction tells you how many are left.'],
+  multiplication: ['🍪 3 packets with 5 biscuits each — Multiplication quickly tells you the total, instead of counting one by one.', '🚌 4 rows of 6 seats on a bus — Multiplication tells you the total seats fast.'],
+  variable: ['🧩 Finding a missing number is like solving a puzzle — it\'s the very first step towards Algebra that older kids learn!', '🔍 The "?" is a hidden number — figuring it out is exactly what a "variable" is used for.']
+};
+function pick(arr){ return arr[rnd(0,arr.length-1)]; }
+
+function genGrade1to5Question(grade, topic){
+  const easy = grade<=2, mid = grade===3, hard = grade>=4;
+  const R = (lang==='ta') ? REAL_LIFE_TA : REAL_LIFE_EN;
+  if(topic==='addition'){
+    const a = easy?rnd(1,10):mid?rnd(5,25):rnd(10,60), b = easy?rnd(1,10):mid?rnd(5,20):rnd(10,50);
+    const correct = a+b;
+    return { q:`${a} + ${b} = ?`, options: makeOptions(correct,[correct+1,correct-1,correct+10]), correct:String(correct), context: pick(R.addition), topic:'addition' };
+  }
+  if(topic==='subtraction'){
+    let a = easy?rnd(2,15):mid?rnd(10,40):rnd(20,90), b = easy?rnd(1,a):mid?rnd(1,a):rnd(1,a);
+    if(b>a){ const t=a; a=b; b=t; }
+    const correct = a-b;
+    return { q:`${a} − ${b} = ?`, options: makeOptions(correct,[correct+1,correct-1,correct+5]), correct:String(correct), context: pick(R.subtraction), topic:'subtraction' };
+  }
+  if(topic==='multiplication'){
+    const a = easy?rnd(1,5):mid?rnd(2,8):rnd(2,12), b = easy?rnd(1,5):mid?rnd(2,8):rnd(2,10);
+    const correct = a*b;
+    return { q:`${a} × ${b} = ?`, options: makeOptions(correct,[correct+a,correct-a,correct+b]), correct:String(correct), context: pick(R.multiplication), topic:'multiplication' };
+  }
+  // 'variable' — gentle "find the missing number" introduction to algebra
+  const isAdd = Math.random()<0.5;
+  const a = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
+  const missing = easy?rnd(1,8):mid?rnd(2,15):rnd(5,25);
+  const total = isAdd ? a+missing : a+missing; // present as "a + ? = total" either way for simplicity
+  const q = isAdd ? `${a} + ? = ${total}` : `${total} − ? = ${a}`;
+  return { q, options: makeOptions(missing,[missing+1,missing-1,missing+3]), correct:String(missing), context: pick(R.variable), topic:'variable' };
+}
+
+function genMathQuestion(band, grade, qIndex){
+  // Grades 1-5 (bands 1-3 and 4-6 for grades ≤5): guarantee every 5-question
+  // session covers all 4 basics — 2 questions get skipped→cycled if grade 6 lands in '4-6' band.
+  if(grade && grade<=5){
+    const topics = ['addition','subtraction','multiplication','variable','addition'];
+    return genGrade1to5Question(grade, topics[qIndex % topics.length]);
+  }
+  if(band==='1-3'){
+    const a=rnd(1,15), b=rnd(1,10);
+    const op = Math.random()<0.5 ? '+' : '-';
+    const x = op==='+' ? a : Math.max(a,b);
+    const y = op==='+' ? b : Math.min(a,b);
+    const correct = op==='+' ? x+y : x-y;
+    return { q:`${x} ${op} ${y} = ?`, options: makeOptions(correct,[correct+1,correct-1,correct+2]), correct:String(correct) };
+  }
+  if(band==='4-6'){
+    if(Math.random()<0.5){
+      const a=rnd(2,12), b=rnd(2,12);
+      const correct=a*b;
+      return { q:`${a} × ${b} = ?`, options: makeOptions(correct,[correct+a,correct-a,correct+b]), correct:String(correct) };
+    } else {
+      const b=rnd(2,10), k=rnd(2,10), a=b*k;
+      return { q:`${a} ÷ ${b} = ?`, options: makeOptions(k,[k+1,k-1,k+2]), correct:String(k) };
+    }
+  }
+  if(band==='7-8'){
+    if(Math.random()<0.5){
+      const a=rnd(2,15), b=rnd(20,50);
+      const correct = b-a;
+      return { q:`x + ${a} = ${b}. Find x.`, options: makeOptions(correct,[correct+2,correct-2,b]), correct:String(correct) };
+    } else {
+      const pct = [10,20,25,50][rnd(0,3)];
+      const base = rnd(2,10)*10;
+      const correct = pct*base/100;
+      return { q:`What is ${pct}% of ${base}?`, options: makeOptions(correct,[correct+5,correct-5,base]), correct:String(correct) };
+    }
+  }
+  if(band==='9-10'){
+    if(Math.random()<0.5){
+      const squares=[4,9,16,25,36,49,64,81,100];
+      const s = squares[rnd(0,squares.length-1)];
+      const correct = Math.sqrt(s);
+      return { q:`x² = ${s}. Find positive x.`, options: makeOptions(correct,[correct+1,correct-1,s]), correct:String(correct) };
+    } else {
+      const a=rnd(30,80), b=rnd(20,70-((a>70)?10:0));
+      const correct = 180-a-b;
+      return { q:`Two angles of a triangle are ${a}° and ${b}°. Find the third angle.`, options: makeOptions(correct,[correct+5,correct-5,180-a]), correct:String(correct) };
+    }
+  }
+  // 11-12
+  if(Math.random()<0.5){
+    const n = rnd(2,5);
+    const correct = `${n}x^${n-1}`;
+    const distract = [`${n-1}x^${n}`, `x^${n}`, `${n}x^${n}`];
+    return { q:`Find d/dx (x^${n})`, options: shuffle([correct,...distract]), correct:correct };
+  } else {
+    const total = 6;
+    const fav = rnd(1,4);
+    function gcd(a,b){return b===0?a:gcd(b,a%b);}
+    const g = gcd(fav,total);
+    const correct = `${fav/g}/${total/g}`;
+    return { q:`A fair die is rolled. What is P(rolling a number ≤ ${fav})?`, options: shuffle([correct, `${fav}/${total}`==correct?`${fav+1}/${total}`:`${fav}/${total}`, `1/2`, `${total-fav}/${total}`].filter((v,i,a)=>a.indexOf(v)===i).slice(0,4)), correct:correct };
+  }
+}
+
+/* ================= CURATED BANKS (other subjects) ================= */
+const BANKS = {
+tamil:{
+ '1-3': [
+   {q_en:'Which is a vowel letter (uyir ezhuthu)?', q_ta:'இது உயிர் எழுத்து எது?', opts:['அ','க','ம','ல்'], correct:0},
+   {q_en:'Which is a consonant letter (mei ezhuthu)?', q_ta:'இது மெய் எழுத்து எது?', opts:['க்','அ','இ','உ'], correct:0},
+   {q_en:'How many uyir ezhuthukal (vowels) are there in Tamil?', q_ta:'தமிழில் உயிர் எழுத்துக்கள் எத்தனை?', opts:['12','16','18','23'], correct:0},
+   {q_en:"Which of these means 'water'?", q_ta:"'தண்ணீர்' என்பதன் பொருள் என்ன?", opts:['Water','Fire','Air','Earth'], correct:0},
+   {q_en:'Which is a colour word?', q_ta:'இது நிறத்தைக் குறிக்கும் சொல் எது?', opts:['சிவப்பு','ஓடு','நடந்தான்','மேசை'], correct:0},
+   {q_en:'Which word means "mother"?', q_ta:"'அம்மா' குறிக்கும் பொருள்?", opts:['Mother','Father','Sister','Brother'], correct:0},
+ ],
+ '4-6': [
+   {q_en:'Which is a noun (peyarchol)?', q_ta:'இதில் எது பெயர்ச்சொல்?', opts:['மரம்','ஓடு','அழகாக','வேகமாக'], correct:0},
+   {q_en:'Which is an adjective (payarppeyar)?', q_ta:'இதில் எது பண்புச்சொல்?', opts:['அழகான','ஓடினான்','மரம்','நான்'], correct:0},
+   {q_en:'How many uyirmei ezhuthukal are there in Tamil?', q_ta:'தமிழில் உயிர்மெய் எழுத்துக்கள் எத்தனை?', opts:['216','247','12','18'], correct:0},
+   {q_en:"Complete: வானம் __ நிறத்தில் இருக்கிறது", q_ta:"வானம் __ நிறத்தில் இருக்கிறது", opts:['நீலம்','சிவப்பு','மஞ்சள்','பச்சை'], correct:0},
+   {q_en:"Which word means 'friend'?", q_ta:"'நண்பன்' குறிக்கும் பொருள்?", opts:['Friend','Enemy','Teacher','Student'], correct:0},
+   {q_en:'Which is a Tamil month name?', q_ta:'இது தமிழ் மாதப் பெயர் எது?', opts:['ஆவணி','January','March','May'], correct:0},
+ ],
+ '7-8': [{q_en:"In 'நான் பள்ளிக்குச் சென்றேன்', which word is the verb?", q_ta:"'நான் பள்ளிக்குச் சென்றேன்' இதில் வினைச்சொல் எது?", opts:['நான்','பள்ளிக்கு','சென்றேன்','இல்லை'], correct:2}],
+ '9-10': [{q_en:'Who wrote the Thirukkural?', q_ta:'திருக்குறள் எழுதியவர் யார்?', opts:['திருவள்ளுவர்','கம்பர்','இளங்கோ','பாரதியார்'], correct:0}],
+ '11-12': [{q_en:"'Agananuru' belongs to which type of literature?", q_ta:"'அகநானூறு' எந்த வகை இலக்கியம்?", opts:['சங்க இலக்கியம்','நவீன இலக்கியம்','காப்பியம்','நாடகம்'], correct:0}]
+},
+english:{
+ '1-3': [
+   {q_en:'Choose the correct spelling', q_ta:'சரியான எழுத்துப் பிழையற்ற வார்த்தையைத் தேர்ந்தெடு', opts:['Cat','Kat','Catt','Cet'], correct:0},
+   {q_en:'Which is a fruit?', q_ta:'இது ஒரு பழம் எது?', opts:['Apple','Chair','Car','Book'], correct:0},
+   {q_en:'Which is an animal?', q_ta:'இது ஒரு விலங்கு எது?', opts:['Dog','Table','Pencil','Cup'], correct:0},
+   {q_en:'What is the opposite of "Big"?', q_ta:"'Big' இதற்கு எதிர்ச்சொல்?", opts:['Small','Tall','Fast','Loud'], correct:0},
+   {q_en:'How many letters are in the English alphabet?', q_ta:'ஆங்கில எழுத்துக்கள் எத்தனை?', opts:['26','24','30','20'], correct:0},
+   {q_en:'Which word rhymes with "cat"?', q_ta:"'cat' உடன் ஓசை ஒத்த சொல் எது?", opts:['Hat','Dog','Sun','Pen'], correct:0},
+ ],
+ '4-6': [
+   {q_en:'Which word is a verb?', q_ta:'இதில் எது வினைச்சொல்?', opts:['Run','Table','Blue','Happy'], correct:0},
+   {q_en:'What is the plural of "Child"?', q_ta:"'Child' இதன் பன்மை?", opts:['Children','Childs','Childes','Child'], correct:0},
+   {q_en:'Which is the correct past tense of "Go"?', q_ta:"'Go' இதன் இறந்த காலம்?", opts:['Went','Goed','Gone','Going'], correct:0},
+   {q_en:'What is the opposite of "Happy"?', q_ta:"'Happy' இதற்கு எதிர்ச்சொல்?", opts:['Sad','Glad','Fast','Loud'], correct:0},
+   {q_en:'Which sentence is correct?', q_ta:'சரியான வாக்கியம் எது?', opts:['She is my sister','She am my sister','She are my sister','She be my sister'], correct:0},
+   {q_en:'Which word means "very big"?', q_ta:"'மிகப் பெரிய' எனப் பொருள்படும் சொல்?", opts:['Huge','Tiny','Small','Little'], correct:0},
+ ],
+ '7-8': [{q_en:"Choose the grammatically correct sentence", q_ta:'இலக்கண ரீதியாக சரியான வாக்கியத்தைத் தேர்ந்தெடு', opts:['She go to school','She goes to school','She going school','She gone school'], correct:1}],
+ '9-10': [{q_en:"What is a synonym for 'Happy'?", q_ta:"'Happy' என்பதற்கு இணைச்சொல் எது?", opts:['Joyful','Sad','Angry','Tired'], correct:0}],
+ '11-12': [{q_en:"Identify the figure of speech: 'The wind whispered'", q_ta:"'The wind whispered' இதில் அணி எது?", opts:['Personification','Simile','Metaphor','Hyperbole'], correct:0}]
+},
+science:{
+ '1-3': [
+   {q_en:'Which of these is a living thing?', q_ta:'இதில் எது உயிருள்ளது?', opts:['Tree','Rock','Chair','Book'], correct:0},
+   {q_en:'What do plants need to grow?', q_ta:'தாவரங்கள் வளர எது தேவை?', opts:['Water and sunlight','Only darkness','Only sand','Nothing'], correct:0},
+   {q_en:'Which of these can fly?', q_ta:'இதில் எது பறக்க முடியும்?', opts:['Bird','Fish','Dog','Cow'], correct:0},
+   {q_en:'How many senses do humans have?', q_ta:'மனிதர்களுக்கு எத்தனை புலன்கள்?', opts:['5','3','7','2'], correct:0},
+   {q_en:'Which season is the hottest?', q_ta:'எந்த பருவம் மிகவும் வெப்பமானது?', opts:['Summer','Winter','Rainy','None'], correct:0},
+   {q_en:'What do we breathe in to stay alive?', q_ta:'உயிர் வாழ நாம் எதை சுவாசிக்கிறோம்?', opts:['Oxygen','Smoke','Water','Sand'], correct:0},
+ ],
+ '4-6': [
+   {q_en:'Which organ pumps blood?', q_ta:'இரத்தத்தை பம்ப் செய்யும் உறுப்பு எது?', opts:['Heart','Lungs','Stomach','Brain'], correct:0},
+   {q_en:'What is H2O commonly known as?', q_ta:'H2O பொதுவாக எவ்வாறு அழைக்கப்படுகிறது?', opts:['Water','Air','Sugar','Salt'], correct:0},
+   {q_en:'Which planet is known as the Red Planet?', q_ta:'சிவப்பு கிரகம் என அழைக்கப்படும் கிரகம் எது?', opts:['Mars','Earth','Venus','Jupiter'], correct:0},
+   {q_en:'Which part of the plant absorbs water from soil?', q_ta:'தாவரத்தின் எந்த பகுதி மண்ணிலிருந்து நீரை உறிஞ்சும்?', opts:['Root','Leaf','Flower','Stem'], correct:0},
+   {q_en:'What force pulls objects towards the Earth?', q_ta:'பொருட்களை பூமியை நோக்கி இழுக்கும் விசை எது?', opts:['Gravity','Magnetism','Friction','Light'], correct:0},
+   {q_en:'How many bones are in the adult human body?', q_ta:'வளர்ந்த மனித உடலில் எத்தனை எலும்புகள்?', opts:['206','150','300','100'], correct:0},
+ ],
+ '7-8': [{q_en:'What gas do plants absorb for photosynthesis?', q_ta:'ஒளிச்சேர்க்கைக்கு தாவரங்கள் எந்த வாயுவை உறிஞ்சும்?', opts:['CO2','O2','N2','H2'], correct:0}],
+ '9-10': [{q_en:"Newton's second law formula?", q_ta:'நியூட்டனின் இரண்டாம் விதி சூத்திரம்?', opts:['F=ma','E=mc²','V=IR','PV=nRT'], correct:0}],
+ '11-12': [{q_en:'DNA stands for?', q_ta:'DNA என்பதன் விரிவாக்கம்?', opts:['Deoxyribonucleic acid','Dynamic Nuclear Acid','Dual Nitrogen Atom','Direct Nucleus Access'], correct:0}]
+},
+social:{
+ '1-3': [
+   {q_en:'Which is a mode of transport?', q_ta:'இது போக்குவரத்து வகை எது?', opts:['Bus','Table','Pen','Cloud'], correct:0},
+   {q_en:'Who takes care of us when we are sick?', q_ta:'நாம் நோய்வாய்ப்படும்போது நம்மை கவனிப்பவர் யார்?', opts:['Doctor','Driver','Farmer','Cook'], correct:0},
+   {q_en:'Which of these is a festival?', q_ta:'இது ஒரு பண்டிகை எது?', opts:['Pongal','Monday','School','Bus'], correct:0},
+   {q_en:'Who grows the food we eat?', q_ta:'நாம் உண்ணும் உணவை பயிரிடுபவர் யார்?', opts:['Farmer','Doctor','Teacher','Driver'], correct:0},
+   {q_en:'Which is our national bird?', q_ta:'நமது தேசிய பறவை எது?', opts:['Peacock','Crow','Sparrow','Eagle'], correct:0},
+   {q_en:'Which of these helps put out fires?', q_ta:'தீயை அணைக்க உதவுபவர் யார்?', opts:['Firefighter','Farmer','Postman','Tailor'], correct:0},
+ ],
+ '4-6': [
+   {q_en:'Capital of India?', q_ta:'இந்தியாவின் தலைநகரம்?', opts:['New Delhi','Mumbai','Chennai','Kolkata'], correct:0},
+   {q_en:'Which is the capital of Tamil Nadu?', q_ta:'தமிழ்நாட்டின் தலைநகரம் எது?', opts:['Chennai','Madurai','Coimbatore','Salem'], correct:0},
+   {q_en:'How many states does India have?', q_ta:'இந்தியாவில் எத்தனை மாநிலங்கள் உள்ளன?', opts:['28','20','35','15'], correct:0},
+   {q_en:'Who was the first Prime Minister of India?', q_ta:'இந்தியாவின் முதல் பிரதமர் யார்?', opts:['Jawaharlal Nehru','Mahatma Gandhi','Sardar Patel','Rajendra Prasad'], correct:0},
+   {q_en:'Which river is called the "Ganga of the South"?', q_ta:'"தென்னக கங்கை" என அழைக்கப்படும் ஆறு எது?', opts:['Kaveri','Vaigai','Tamiraparani','Palar'], correct:0},
+   {q_en:'What is the national flower of India?', q_ta:'இந்தியாவின் தேசிய மலர் எது?', opts:['Lotus','Rose','Jasmine','Sunflower'], correct:0},
+ ],
+ '7-8': [{q_en:'Who is called Father of the Nation in India?', q_ta:'இந்தியாவின் தேசபிதா என அழைக்கப்படுபவர் யார்?', opts:['Mahatma Gandhi','Nehru','Bose','Patel'], correct:0}],
+ '9-10': [{q_en:'What does GDP stand for?', q_ta:'GDP என்பதன் விரிவாக்கம்?', opts:['Gross Domestic Product','General Development Plan','Global Data Point','Gross Data Product'], correct:0}],
+ '11-12': [{q_en:'Which body governs international trade rules?', q_ta:'சர்வதேச வர்த்தக விதிகளை நிர்வகிக்கும் அமைப்பு எது?', opts:['WTO','UNESCO','WHO','IMF'], correct:0}]
+},
+computer:{
+ '1-3': [
+   {q_en:'What do we use to type?', q_ta:'தட்டச்சு செய்ய நாம் எதைப் பயன்படுத்துகிறோம்?', opts:['Keyboard','Spoon','Ball','Shoe'], correct:0},
+   {q_en:'What do we use to click on the screen?', q_ta:'திரையில் கிளிக் செய்ய நாம் எதைப் பயன்படுத்துகிறோம்?', opts:['Mouse','Spoon','Book','Fan'], correct:0},
+   {q_en:'What do we call the picture screen of a computer?', q_ta:'கணினியின் திரையை என்ன என்று அழைப்போம்?', opts:['Monitor','Speaker','Printer','Keyboard'], correct:0},
+   {q_en:'Which of these is a computer?', q_ta:'இது ஒரு கணினி எது?', opts:['Laptop','Table','Chair','Fan'], correct:0},
+   {q_en:'What do we use to print documents?', q_ta:'ஆவணங்களை அச்சிட நாம் எதைப் பயன்படுத்துகிறோம்?', opts:['Printer','Mouse','Keyboard','Monitor'], correct:0},
+   {q_en:'Which of these lets us hear sound from a computer?', q_ta:'கணினியிலிருந்து சத்தத்தை கேட்க உதவுவது எது?', opts:['Speaker','Mouse','Keyboard','Monitor'], correct:0},
+ ],
+ '4-6': [
+   {q_en:'What does CPU stand for?', q_ta:'CPU என்பதன் விரிவாக்கம்?', opts:['Central Processing Unit','Computer Print Unit','Central Program Unit','Central Print Unit'], correct:0},
+   {q_en:'Which of these stores files permanently?', q_ta:'இதில் எது கோப்புகளை நிரந்தரமாக சேமிக்கும்?', opts:['Hard Disk','RAM','Monitor','Mouse'], correct:0},
+   {q_en:'What is the full form of "www"?', q_ta:'"www" இன் முழு வடிவம் என்ன?', opts:['World Wide Web','World Wide Wire','Wide World Web','World Web Wire'], correct:0},
+   {q_en:'Which of these is an input device?', q_ta:'இதில் எது input device?', opts:['Keyboard','Monitor','Printer','Speaker'], correct:0},
+   {q_en:'What do we call a set of instructions given to a computer?', q_ta:'கணினிக்கு கொடுக்கப்படும் அறிவுறுத்தல்களை என்ன என்பர்?', opts:['Program','Mouse','File','Folder'], correct:0},
+   {q_en:'Which of these is used to browse the internet?', q_ta:'இணையத்தை உலாவ இதில் எது பயன்படுகிறது?', opts:['Browser','Printer','Speaker','Mouse'], correct:0},
+ ],
+ '7-8': [{q_en:'Which language is used for styling web pages?', q_ta:'வலைப்பக்கங்களை அலங்கரிக்க பயன்படும் மொழி எது?', opts:['CSS','HTML','Python','SQL'], correct:0}],
+ '9-10': [{q_en:'What does AI stand for?', q_ta:'AI என்பதன் விரிவாக்கம்?', opts:['Artificial Intelligence','Automated Interface','Advanced Internet','Applied Information'], correct:0}],
+ '11-12': [{q_en:'Which is a type of machine learning?', q_ta:'இது இயந்திர கற்றல் வகை எது?', opts:['Supervised Learning','Random Cooking','Manual Sorting','Static Typing'], correct:0}]
+}
+};
+
+/* ================= GAME ENGINE ================= */
+function levelFromXP(xp){
+  const lvl = Math.floor(xp/50)+1;
+  const names = T[lang].levelNames;
+  const nameIdx = Math.min(Math.floor((lvl-1)/2), names.length-1);
+  return { lvl, name: names[nameIdx] };
+}
+
+function addXP(amount){
+  state.xp += amount;
+  saveState();
+}
+
+let currentSubject=null, currentGrade=null, currentBand=null;
+let sessionQs=[], sessionIdx=0, sessionCorrect=0;
+
+function startSession(subjectId, grade){
+  currentSubject = subjectId;
+  currentGrade = grade;
+  currentBand = bandForGrade(grade);
+  sessionQs=[]; sessionIdx=0; sessionCorrect=0;
+
+  const subj = SUBJECTS.find(s=>s.id===subjectId);
+  if(subj.procedural){
+    for(let i=0;i<5;i++) sessionQs.push(genMathQuestion(currentBand, grade, i));
+  } else {
+    const bank = BANKS[subjectId][currentBand] || [];
+    const order = shuffle(bank.map((_,i)=>i)); // pull DIFFERENT items instead of wrapping the same one repeatedly on small banks
+    for(let i=0;i<5;i++){
+      const item = bank[order[i % order.length]];
+      sessionQs.push({ q: lang==='en'?item.q_en:item.q_ta, options: item.opts, correct: item.opts[item.correct] });
+    }
+  }
+  showPanel('play');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const dotsEl = document.getElementById('progressDots');
+  dotsEl.innerHTML = sessionQs.map((_,i)=>{
+    let cls='dot';
+    if(i<sessionIdx) cls += sessionAnswers[i] ? ' right' : ' wrong-dot';
+    else if(i===sessionIdx) cls += ' filled';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  const q = sessionQs[sessionIdx];
+  const topicLabels = { addition:{en:'➕ Addition',ta:'➕ கூட்டல்'}, subtraction:{en:'➖ Subtraction',ta:'➖ கழித்தல்'}, multiplication:{en:'✖️ Multiplication',ta:'✖️ பெருக்கல்'}, variable:{en:'🧩 Mystery Number',ta:'🧩 மறைந்த எண்'} };
+  const topicTag = q.topic ? `<div style="display:inline-block; background:rgba(255,182,39,0.18); color:#FFB627; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; margin-bottom:8px;">${topicLabels[q.topic][lang]}</div>` : '';
+  document.getElementById('playArea').innerHTML = `
+    <div class="q-card">
+      ${topicTag}
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.options.map((o,i)=>`<button class="opt" onclick="answerQ('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>
+      <div id="contextLine" style="margin-top:12px; font-size:12.5px; color:#FFD98A; min-height:18px;"></div>
+    </div>`;
+}
+
+let sessionAnswers=[];
+const ENCOURAGE_EN = ['🌟 Great job!','🎉 You got it!','💪 Nice work!','🏆 Superb!','✨ Well done!'];
+const ENCOURAGE_TA = ['🌟 அருமை!','🎉 சரியாக சொன்னீர்கள்!','💪 நல்ல முயற்சி!','🏆 சிறப்பு!','✨ மிகச் சிறப்பு!'];
+const TRY_AGAIN_EN = ['💡 Almost! Here\'s the answer:','📚 Good try — learn and move on:','🌱 That\'s okay, keep learning:'];
+const TRY_AGAIN_TA = ['💡 கிட்டத்தட்ட சரி! இதோ பதில்:','📚 நல்ல முயற்சி — கற்றுக்கொள்வோம்:','🌱 பரவாயில்லை, தொடர்ந்து கற்போம்:'];
+function answerQ(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = sessionQs[sessionIdx];
+  const isCorrect = (opt === q.correct);
+  sessionAnswers[sessionIdx] = isCorrect;
+
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent === q.correct) b.classList.add('correct');
+    else if(b.textContent === opt && !isCorrect) b.classList.add('wrong');
+  });
+
+  if(isCorrect){ sessionCorrect++; state.streak++; } else { state.streak=0; }
+  saveState();
+
+  const ctxEl = document.getElementById('contextLine');
+  if(ctxEl){
+    const feedback = isCorrect ? pick(lang==='en'?ENCOURAGE_EN:ENCOURAGE_TA) : pick(lang==='en'?TRY_AGAIN_EN:TRY_AGAIN_TA);
+    ctxEl.innerHTML = `<div style="font-weight:700; color:${isCorrect?'#2ECC71':'#FFB627'};">${feedback}</div>${q.context ? `<div style="margin-top:4px;">${q.context}</div>` : ''}`;
+  }
+
+  // Longer pause when there's a real-life context line worth reading, so it
+  // isn't just flashed and gone — this is where the actual learning happens.
+  setTimeout(()=>{
+    sessionIdx++;
+    if(sessionIdx < sessionQs.length) renderQuestion();
+    else finishSession();
+  }, q.context ? 2600 : 900);
+}
+
+function finishSession(){
+  const earnedXP = sessionCorrect*10;
+  addXP(earnedXP);
+
+  let newBadge=false;
+  if(sessionCorrect>=4){
+    if(!state.completedBands[currentSubject]) state.completedBands[currentSubject]=[];
+    if(!state.completedBands[currentSubject].includes(currentBand)){
+      state.completedBands[currentSubject].push(currentBand);
+      const badgeId = `${currentSubject}_${currentBand}`;
+      if(!state.badges.includes(badgeId)){ state.badges.push(badgeId); newBadge=true; }
+    }
+  }
+  saveState();
+
+  const subj = SUBJECTS.find(s=>s.id===currentSubject);
+  document.getElementById('resultsArea').innerHTML = `
+    <div class="box">
+      <h2 style="color:#FFB627;">${sessionCorrect>=4 ? '🎉' : '💪'} ${sessionCorrect}/5 ${lang==='en'?'Correct':'சரியானவை'}</h2>
+      <p>+${earnedXP} XP ${lang==='en'?'earned!':'கிடைத்தது!'}</p>
+      ${newBadge ? `<p style="color:#2ECC71;">🎖️ ${lang==='en'?'New Badge Unlocked!':'புதிய பேட்ஜ் திறக்கப்பட்டது!'}</p>` : ''}
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
+        <button class="btn" onclick="startSession('${currentSubject}',${currentGrade})">🔄 ${lang==='en'?'Play Again':'மீண்டும் விளையாடு'}</button>
+        <button class="btn btn-out" onclick="selectSubject('${currentSubject}')">${lang==='en'?'Change Grade':'கிரேடை மாற்று'}</button>
+        <button class="btn btn-out" onclick="showPanel('home')">${lang==='en'?'Home':'முகப்பு'}</button>
+      </div>
+    </div>`;
+  showPanel('results');
+}
+
+/* ================= NAVIGATION / RENDER ================= */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  const b=document.getElementById('nav_'+id); if(b) b.classList.add('active');
+  if(id==='badges') renderBadges();
+}
+
+function selectSubject(subjectId){
+  currentSubject = subjectId;
+  const subj = SUBJECTS.find(s=>s.id===subjectId);
+  document.getElementById('gradeSelH').textContent = `${subj.icon} ${lang==='en'?subj.en:subj.ta} — ${T[lang].gradeSelH}`;
+  let html='';
+  for(let g=1; g<=12; g++){
+    const band = bandForGrade(g);
+    const done = state.completedBands[subjectId] && state.completedBands[subjectId].includes(band);
+    html += `<div class="card ${done?'done':''}" onclick="startSession('${subjectId}',${g})">
+      <div class="ic">${g}</div>
+      <div class="t1">${lang==='en'?'Grade':'கிரேடு'} ${g}</div>
+      ${done?`<div class="chk">✓ ${lang==='en'?'Done':'முடிந்தது'}</div>`:''}
+    </div>`;
+  }
+  document.getElementById('gradeGrid').innerHTML = html;
+  showPanel('gradeSelect');
+}
+
+function renderBadges(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    ['1-3','4-6','7-8','9-10','11-12'].forEach(band=>{
+      const earned = state.badges.includes(`${s.id}_${band}`);
+      html += `<div class="badge ${earned?'':'empty'}">
+        <div class="bic">${earned ? s.icon : '🔒'}</div>
+        <div class="bt">${lang==='en'?s.en:s.ta}<br>${band}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('badgeGrid').innerHTML = html;
+}
+
+function renderAll(){
+  document.getElementById('titleTxt').textContent = T[lang].title;
+  document.getElementById('homeH').textContent = T[lang].homeH;
+  document.getElementById('homeP').textContent = T[lang].homeP;
+  document.getElementById('badgesH').textContent = T[lang].badgesH;
+  document.getElementById('backTxt').textContent = T[lang].back;
+  document.getElementById('backTxt2').textContent = T[lang].back;
+
+  const { lvl, name } = levelFromXP(state.xp);
+  document.getElementById('levelTxt').textContent = `Lv.${lvl} ${name}`;
+  document.getElementById('xpTxt').textContent = state.xp;
+  document.getElementById('streakTxt').textContent = state.streak;
+  document.getElementById('badgeCount').textContent = state.badges.length;
+  document.getElementById('xpFill').style.width = Math.min(100, (state.xp % 50) / 50 * 100) + '%';
+
+  const navIds=['home','badges','coding','cyber','futuretech','thinking'];
+  document.getElementById('navBar').innerHTML = T[lang].nav.map((label,i)=>
+    `<button onclick="showPanel('${navIds[i]}')" class="${i===0?'active':''}" id="nav_${navIds[i]}">${label}</button>`
+  ).join('');
+
+  document.getElementById('homeGrid').innerHTML = SUBJECTS.map(s=>{
+    const completedCount = state.completedBands[s.id] ? state.completedBands[s.id].length : 0;
+    return `<div class="card" onclick="selectSubject('${s.id}')">
+      <div class="ic">${s.icon}</div>
+      <div class="t1">${lang==='en'?s.en:s.ta}</div>
+      <div class="t2">${completedCount}/5 ${lang==='en'?'bands done':'முடிந்தது'}</div>
+    </div>`;
+  }).join('');
+}
+
+function runCode(){
+  const code = document.getElementById('codeArea').value;
+  const out = document.getElementById('codeOut');
+  let lines = code.split('\n'), result=[], vars={};
+  try{
+    lines.forEach(line=>{
+      line=line.trim();
+      let m = line.match(/^print\((.*)\)$/);
+      if(m){
+        let args = m[1].split(',').map(a=>a.trim());
+        let parts = args.map(a=>{ a=a.replace(/^["']|["']$/g,''); return vars[a]!==undefined?vars[a]:a; });
+        result.push(parts.join(' '));
+      }
+      let vm = line.match(/^(\w+)\s*=\s*["'](.*)["']$/);
+      if(vm) vars[vm[1]]=vm[2];
+    });
+    out.textContent = result.length ? result.join('\n') : '(no output)';
+  }catch(e){ out.textContent = 'Error: '+e.message; }
+}
+
+/* ================= INIT ================= */
+loadState();
+renderAll();
+</script>
+</body>
+</html>
