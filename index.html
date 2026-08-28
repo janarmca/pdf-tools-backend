@@ -3589,6 +3589,7 @@ TOOL_IMPL.vidvoice = {
           onAdd:(fl)=>{ audioFile = fl[0]; paint(); } });
         if(audioFile) mountFileList(body, [audioFile], ()=>{ audioFile=null; paint(); });
         if(videoFile && audioFile){
+          mountFastServerNote(body, 2, 'vvFastR');
           const opts = el(`
             <div class="opts one tamil">
               <div class="field-inline"><input type="checkbox" id="vvMix"><label for="vvMix">மூல வீடியோவின் ஆடியோவுடன் புதிய குரலையும் கலக்கவும் (Mix) — தேர்ந்தெடுக்கவில்லை எனில் முழுவதுமாக மாற்றப்படும்</label></div>
@@ -3607,6 +3608,7 @@ TOOL_IMPL.vidvoice = {
           onAdd:(fl)=>{ videoFile = fl[0]; paint(); } });
         if(videoFile){
           mountFileList(body, [videoFile], ()=>{ videoFile=null; paint(); });
+          mountFastServerNote(body, 1, 'vvFastE');
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">🎧 ஆடியோ எடு (MP3)</button>`);
           btn.onclick = doExtract;
@@ -3689,6 +3691,13 @@ TOOL_IMPL.vidvoice = {
     async function doReplace(){
       const mix = body.querySelector('#vvMix') && body.querySelector('#vvMix').checked;
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vvFastR')){
+        try{
+          const blob = await callVideoProcessMultiServer([videoFile, audioFile], 'voicereplace', {mix}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் குரல் இணைக்கப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       let progHandler = null, ffmpegRef = null;
       try{
         prog.set(5,'Loading video engine… (first time takes a bit longer)');
@@ -3721,6 +3730,13 @@ TOOL_IMPL.vidvoice = {
     }
     async function doExtract(){
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vvFastE')){
+        try{
+          const blob = await callVideoProcessMultiServer([videoFile], 'voiceextract', {}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'.mp3');
+          mountResult(body, `⚡ Fast Server Mode மூலம் ஆடியோ பிரித்தெடுக்கப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       let progHandler = null, ffmpegRef = null;
       try{
         prog.set(5,'Loading video engine…');
@@ -5294,6 +5310,32 @@ async function callVideoProcessServer(file, op, params, prog, downloadName){
   return blob;
 }
 
+async function callVideoProcessMultiServer(files, op, params, prog, downloadName){
+  prog.set(10,'⚡ Server-க்கு அனுப்புகிறது…');
+  const form = new FormData();
+  files.forEach(f=> form.append('files', f));
+  form.append('op', op);
+  form.append('params', JSON.stringify(params||{}));
+  const res = await fetch(APP_CONFIG.BACKEND_URL + '/api/video/process-multi', {
+    method:'POST',
+    headers: { Authorization: 'Bearer ' + authState.session.access_token },
+    body: form
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    let errMsg;
+    try{ errMsg = JSON.parse(errText).error; }
+    catch(e){ errMsg = 'The server is starting up (this can take up to a minute) — please wait a moment and try again.'; }
+    throw new Error(errMsg || 'Server error');
+  }
+  prog.set(80,'Downloading…');
+  const blob = await res.blob();
+  downloadBlob(blob, downloadName);
+  await refreshProfile();
+  prog.set(100,'Done'); prog.remove();
+  return blob;
+}
+
 TOOL_IMPL.videocompress = {
   mount(container){
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
@@ -6268,6 +6310,7 @@ TOOL_IMPL.videomerge = {
           [files[idx],files[ni]] = [files[ni],files[idx]]; paint();
         });
         if(files.length>=2){
+          mountFastServerNote(body, 2, 'vmergeFast');
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">➕ Merge</button>`);
           btn.onclick = doMerge;
@@ -6278,6 +6321,13 @@ TOOL_IMPL.videomerge = {
     }
     async function doMerge(){
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vmergeFast')){
+        try{
+          const blob = await callVideoProcessMultiServer(files, 'merge', {}, prog, 'merged.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் ${files.length} வீடியோக்கள் இணைக்கப்பட்டன.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
@@ -7102,6 +7152,7 @@ TOOL_IMPL.videosubtitle = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 2, 'vsubFast');
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -7121,23 +7172,34 @@ TOOL_IMPL.videosubtitle = {
     function escDrawtext(s){
       return s.replace(/\\/g,'\\\\\\\\').replace(/:/g,'\\:').replace(/'/g,"\u2019");
     }
-    async function doBurn(){
+    function parseCaptionLines(){
       const lines = (body.querySelector('#vsCaps').value||'').split('\n').map(l=>l.trim()).filter(Boolean);
-      if(!lines.length){ mountResult(body,'குறைந்தது ஒரு caption வரி எழுதவும்.').style.background='#FDEDEC'; return; }
+      const parsed = [];
+      lines.forEach(line=>{
+        const m = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)-(\d{1,2}:\d{2}(?::\d{2})?):\s*(.+)$/);
+        if(m) parsed.push({ start: parseTimeToSec(m[1]), end: parseTimeToSec(m[2]), text: m[3] });
+      });
+      return parsed;
+    }
+    async function doBurn(){
+      const captions = parseCaptionLines();
+      if(!captions.length){ mountResult(body,'Caption வரிகளின் வடிவம் சரியில்லை (mm:ss-mm:ss: உரை).').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vsubFast')){
+        try{
+          const blob = await callVideoProcessMultiServer([file], 'subtitle', {captions}, prog, file.name.replace(/\.[^.]+$/,'')+'-captioned.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் Caption பதிக்கப்பட்டது.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
-        const filters = [];
-        lines.forEach(line=>{
-          const m = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)-(\d{1,2}:\d{2}(?::\d{2})?):\s*(.+)$/);
-          if(!m) return;
-          const s = parseTimeToSec(m[1]), e = parseTimeToSec(m[2]), txt = escDrawtext(m[3]);
-          filters.push(`drawtext=text='${txt}':fontsize=32:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-th-40:enable='between(t,${s},${e})'`);
-        });
-        if(!filters.length){ prog.remove(); mountResult(body,'Caption வரிகளின் வடிவம் சரியில்லை (mm:ss-mm:ss: உரை).').style.background='#FDEDEC'; return; }
+        const filters = captions.map(c=>
+          `drawtext=text='${escDrawtext(c.text)}':fontsize=32:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-th-40:enable='between(t,${c.start},${c.end})'`
+        );
         prog.set(20,'Caption பதிக்கிறது…');
         await ffmpeg.exec(['-i','in.'+ext,'-vf', filters.join(','), '-c:a','copy','out.mp4']);
         prog.set(90,'Preparing…');
@@ -7164,6 +7226,7 @@ TOOL_IMPL.videowave = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        mountFastServerNote(body, 1, 'vwFast');
         const opts = el(`
           <div class="opts tamil">
             <div class="field"><label>Background Color</label>
@@ -7186,6 +7249,13 @@ TOOL_IMPL.videowave = {
       const bg = body.querySelector('#vwBg').value;
       const fg = body.querySelector('#vwFg').value;
       const prog = mountProgress(body);
+      if(AUTH_CONFIGURED && isFastModeChecked('vwFast')){
+        try{
+          const blob = await callVideoProcessMultiServer([file], 'waveform', {bg, fg}, prog, file.name.replace(/\.[^.]+$/,'')+'-waveform.mp4');
+          mountResult(body, `⚡ Fast Server Mode மூலம் Waveform வீடியோ தயார்.`);
+        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
+        return;
+      }
       let progHandler=null, ffmpegRef=null;
       try{
         prog.set(5,'Loading video engine…');
@@ -8702,4 +8772,4 @@ if('serviceWorker' in navigator){
 }
 </script>
 </body>
-</html>
+</html>.
