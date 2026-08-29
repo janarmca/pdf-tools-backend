@@ -272,6 +272,40 @@ const REAL_LIFE_EN = {
 };
 function pick(arr){ return arr[rnd(0,arr.length-1)]; }
 
+/* ================= SOUND EFFECTS (Web Audio API, no files needed) =================
+   Kids notice a game more when correct/wrong answers actually feel different —
+   a soft "tick" on click, a bright chime on correct, a short buzz on wrong,
+   and a little ascending fanfare when a whole game/session finishes. */
+let __audioCtx = null;
+function getAudioCtx(){
+  if(!__audioCtx){
+    try{ __audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; }
+  }
+  // Browsers suspend audio contexts until a user gesture — since this is only
+  // ever called from click/drag handlers, resuming here is always safe.
+  if(__audioCtx.state === 'suspended') __audioCtx.resume().catch(()=>{});
+  return __audioCtx;
+}
+function playTone(freq, duration, type, startDelay, gainLevel){
+  const ctx = getAudioCtx(); if(!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  const t0 = ctx.currentTime + (startDelay||0);
+  gain.gain.setValueAtTime(gainLevel||0.12, t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + duration);
+}
+function sndTick(){ playTone(700, 0.05, 'square', 0, 0.06); }
+function sndCorrect(){ playTone(523.25, 0.12, 'sine', 0, 0.12); playTone(783.99, 0.18, 'sine', 0.09, 0.12); } // C5 then G5 — a bright little "ding-ding"
+function sndWrong(){ playTone(180, 0.22, 'sawtooth', 0, 0.08); }
+function sndFanfare(){
+  // A short ascending run — C5 D5 E5 G5 C6 — plays when a full game/session finishes.
+  [523.25,587.33,659.25,783.99,1046.5].forEach((f,i)=> playTone(f, 0.22, 'triangle', i*0.11, 0.11));
+}
+
 function genGrade1to5Question(grade, topic){
   const easy = grade<=2, mid = grade===3, hard = grade>=4;
   const R = (lang==='ta') ? REAL_LIFE_TA : REAL_LIFE_EN;
@@ -682,6 +716,7 @@ function renderQuestion(){
     </div>`;
 }
 function showHint(){
+  sndTick();
   const q = sessionQs[sessionIdx];
   sessionHintUsed[sessionIdx] = true;
   const el = document.getElementById('hintLine');
@@ -702,6 +737,7 @@ function answerQ(encOpt){
   const q = sessionQs[sessionIdx];
   const isCorrect = (opt === q.correct);
   sessionAnswers[sessionIdx] = isCorrect;
+  isCorrect ? sndCorrect() : sndWrong();
 
   document.querySelectorAll('.opt').forEach(b=>{
     b.disabled=true;
@@ -735,6 +771,7 @@ function answerQ(encOpt){
 }
 
 function finishSession(){
+  sndFanfare();
   const earnedXP = Math.max(0, sessionPoints); // floor at 0 — a rough session shouldn't leave a kid with negative XP
   addXP(earnedXP);
 
@@ -832,6 +869,7 @@ function answerMK(encOpt){
   const opt = decodeURIComponent(encOpt);
   const q = mkQs[mkIdx];
   const isCorrect = String(opt)===String(q.correct);
+  isCorrect ? sndCorrect() : sndWrong();
   if(isCorrect){ mkCoins += 20; mkCorrect++; }
   document.querySelectorAll('#mkArea .opt').forEach(b=>{
     b.disabled=true;
@@ -848,6 +886,7 @@ function answerMK(encOpt){
   }, 1600);
 }
 function finishMathKingdom(){
+  sndFanfare();
   addXP(mkCorrect*10);
   document.getElementById('mkArea').innerHTML = `
     <div class="box" style="text-align:center; background:linear-gradient(135deg,#2b2010,#3a2e1a); border:1px solid #C9A227;">
@@ -916,6 +955,7 @@ function answerSE(encOpt){
   const opt = decodeURIComponent(encOpt);
   const q = seQs[seIdx];
   const isCorrect = opt===q.shape;
+  isCorrect ? sndCorrect() : sndWrong();
   if(isCorrect) seCorrect++;
   document.querySelectorAll('#seArea .opt').forEach(b=>{
     b.disabled=true;
@@ -955,6 +995,7 @@ function seDrop(ev, correctShape){
   const dragged = ev.dataTransfer.getData('text');
   const target = ev.currentTarget;
   if(dragged===correctShape){
+    sndCorrect();
     target.style.background = 'rgba(46,204,113,.25)';
     target.style.borderColor = '#2ECC71';
     target.setAttribute('data-solved','1');
@@ -962,10 +1003,12 @@ function seDrop(ev, correctShape){
     document.getElementById('seDragFeedback').innerHTML = `<span style="color:#2ECC71;">✓ ${lang==='ta'?'சரி!':'Matched!'}</span>`;
     if(seDragMatched>=seDragTotal) setTimeout(finishShapeExplorer, 900);
   } else {
+    sndWrong();
     document.getElementById('seDragFeedback').innerHTML = `<span style="color:#FFB627;">${lang==='ta'?'இது சரியில்லை, மறுபடியும் முயற்சிக்கவும்':'Not quite, try again'}</span>`;
   }
 }
 function finishShapeExplorer(){
+  sndFanfare();
   addXP(seCorrect*10 + 20);
   document.getElementById('seArea').innerHTML = `
     <div class="box" style="text-align:center; background:linear-gradient(135deg,#132436,#1a3548); border:1px solid #4FC3F7;">
