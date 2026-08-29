@@ -107,6 +107,21 @@
         <div class="t1">Shape Explorer</div>
         <div style="font-size:10px; color:#9FD8F5;">Grade 3-6</div>
       </div>
+      <div class="card" onclick="openMarketMaths()" style="background:linear-gradient(135deg,#1a3a2a,#206c3a); border:1px solid #4CD964;">
+        <div class="ic">🛒</div>
+        <div class="t1">Market Maths</div>
+        <div style="font-size:10px; color:#A8F0BC;">Grade 4-7</div>
+      </div>
+      <div class="card" onclick="openFractionJourney()" style="background:linear-gradient(135deg,#3a1a2e,#6c2050); border:1px solid #E066B8;">
+        <div class="ic">🍕</div>
+        <div class="t1">Fraction Journey</div>
+        <div style="font-size:10px; color:#F0B8E0;">Grade 5-7</div>
+      </div>
+      <div class="card" onclick="openAlgebraIsland()" style="background:linear-gradient(135deg,#1a2e2e,#205050); border:1px solid #4FD9C4;">
+        <div class="ic">🏝️</div>
+        <div class="t1">Algebra Island</div>
+        <div style="font-size:10px; color:#A8F0E4;">Grade 6-8</div>
+      </div>
     </div>
   </div>
 
@@ -120,6 +135,24 @@
   <div class="panel" id="shapeExplorer">
     <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
     <div id="seArea"></div>
+  </div>
+
+  <!-- MARKET MATHS -->
+  <div class="panel" id="marketMaths">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
+    <div id="mmArea"></div>
+  </div>
+
+  <!-- FRACTION JOURNEY -->
+  <div class="panel" id="fractionJourney">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
+    <div id="fjArea"></div>
+  </div>
+
+  <!-- ALGEBRA ISLAND -->
+  <div class="panel" id="algebraIsland">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← Back</button>
+    <div id="aiArea"></div>
   </div>
 
   <!-- GRADE SELECT -->
@@ -145,6 +178,8 @@
   <div class="panel" id="badges">
     <h2 id="badgesH" style="color:#FFB627;"></h2>
     <div class="badge-grid" id="badgeGrid"></div>
+    <h3 style="text-align:center; color:#FFB627; margin-top:22px; font-size:14px;">🎮 Special Games Badges</h3>
+    <div class="badge-grid" id="gamesBadgeGrid"></div>
   </div>
 
   <!-- CODING -->
@@ -811,6 +846,15 @@ function showPanel(id){
   if(id==='badges') renderBadges();
 }
 
+// Shared badge-award helper for the 5 Special Games — one badge per grade
+// played (these are short 4-question sessions, so completion itself is the
+// bar, not a perfect score — matches how approachable these games are meant
+// to feel for the grade range each targets).
+function awardGameBadge(gameId, grade){
+  const badgeId = `${gameId}_${grade}`;
+  if(!state.badges.includes(badgeId)){ state.badges.push(badgeId); saveState(); }
+}
+
 /* ================= MATH KINGDOM (Grade 3-5 themed game) ================= */
 let mkGrade=3, mkQs=[], mkIdx=0, mkCoins=0, mkCorrect=0;
 function openMathKingdom(){
@@ -887,6 +931,7 @@ function answerMK(encOpt){
 }
 function finishMathKingdom(){
   sndFanfare();
+  awardGameBadge('mathkingdom', mkGrade);
   addXP(mkCorrect*10);
   document.getElementById('mkArea').innerHTML = `
     <div class="box" style="text-align:center; background:linear-gradient(135deg,#2b2010,#3a2e1a); border:1px solid #C9A227;">
@@ -1009,6 +1054,7 @@ function seDrop(ev, correctShape){
 }
 function finishShapeExplorer(){
   sndFanfare();
+  awardGameBadge('shapeexplorer', seGrade);
   addXP(seCorrect*10 + 20);
   document.getElementById('seArea').innerHTML = `
     <div class="box" style="text-align:center; background:linear-gradient(135deg,#132436,#1a3548); border:1px solid #4FC3F7;">
@@ -1021,6 +1067,313 @@ function finishShapeExplorer(){
       <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
         <button class="btn" onclick="startShapeExplorer(${seGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
         <button class="btn btn-out" onclick="openShapeExplorer()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
+      </div>
+    </div>`;
+}
+
+/* ================= MARKET MATHS (Grade 4-7 themed game) ================= */
+let mmGrade=4, mmQs=[], mmIdx=0, mmCash=0, mmCorrect=0;
+function openMarketMaths(){
+  document.getElementById('mmArea').innerHTML = `
+    <h2 style="text-align:center; color:#4CD964;">🛒 Market Maths</h2>
+    <p style="text-align:center; color:#A8F0BC; font-size:12px;">${lang==='ta'?'உங்கள் சொந்த கடையை நடத்துங்கள்!':'Run your own shop and master money maths!'}</p>
+    <div class="grid">
+      ${[4,5,6,7].map(g=>`<div class="card" onclick="startMarketMaths(${g})"><div class="ic">${g}</div><div class="t1">${lang==='ta'?'கிரேடு':'Grade'} ${g}</div></div>`).join('')}
+    </div>`;
+  showPanel('marketMaths');
+}
+const MM_ITEMS = ['🍅','🥔','🧅','🍎','👕','📓','🧴','🍞'];
+function mmQuestion(topic, grade){
+  const item = pick(MM_ITEMS);
+  const easy = grade<=5;
+  if(topic==='discount'){
+    const price = rnd(easy?4:8,20)*10;
+    const pct = pick(easy?[10,20,25,50]:[10,15,20,25,30,50]);
+    const correct = price - Math.round(price*pct/100);
+    return { icon:item, title: lang==='ta'?'தள்ளுபடி விலை':'Discounted Price',
+      q: lang==='ta'?`விலை ₹${price}, ${pct}% தள்ளுபடி. இறுதி விலை என்ன?`:`Price is ₹${price}, with ${pct}% discount. What's the final price?`,
+      correct, options: makeOptions(correct,[correct+10,correct-10,price-pct]) };
+  }
+  if(topic==='profit'){
+    const cost = rnd(easy?4:8,20)*10;
+    const pct = pick([10,20,25,50]);
+    const sell = cost + Math.round(cost*pct/100);
+    return { icon:item, title: lang==='ta'?'இலாபம் கண்டுபிடி':'Find the Profit %',
+      q: lang==='ta'?`கொள்முதல் விலை ₹${cost}, விற்பனை விலை ₹${sell}. இலாப சதவீதம் என்ன?`:`Cost price ₹${cost}, sold for ₹${sell}. What is the profit %?`,
+      correct:pct, options: makeOptions(pct,[pct+5,pct-5,10]) };
+  }
+  if(topic==='gst'){
+    const price = rnd(easy?4:8,20)*10;
+    const gstRate = pick([5,12,18]);
+    const correct = price + Math.round(price*gstRate/100);
+    return { icon:item, title: lang==='ta'?'GST சேர்த்த விலை':'Price with GST',
+      q: lang==='ta'?`விலை ₹${price}, ${gstRate}% GST சேர்த்தால் மொத்தம் எவ்வளவு?`:`Price is ₹${price}, plus ${gstRate}% GST. What's the total?`,
+      correct, options: makeOptions(correct,[correct+gstRate,correct-gstRate,price]) };
+  }
+  // change
+  const price = rnd(easy?4:8,18)*10 + pick([0,5]);
+  const given = price + pick([10,20,50,100]);
+  const correct = given - price;
+  return { icon:'💵', title: lang==='ta'?'மீதி பணம்':'Change to Return',
+    q: lang==='ta'?`பொருள் விலை ₹${price}. வாடிக்கையாளர் ₹${given} கொடுத்தார். மீதி எவ்வளவு?`:`Item costs ₹${price}. Customer paid ₹${given}. How much change?`,
+    correct, options: makeOptions(correct,[correct+10,correct-10,price]) };
+}
+function startMarketMaths(grade){
+  mmGrade=grade; mmIdx=0; mmCash=0; mmCorrect=0;
+  const topics = grade<=5 ? ['discount','change','discount','gst'] : ['discount','profit','gst','change'];
+  mmQs = topics.map(t=>mmQuestion(t,grade));
+  renderMMQuestion();
+}
+function renderMMQuestion(){
+  const q = mmQs[mmIdx];
+  document.getElementById('mmArea').innerHTML = `
+    <div style="text-align:center; margin-bottom:6px; color:#A8F0BC; font-weight:700;">💵 ₹${mmCash} · ${mmIdx+1}/4</div>
+    <div class="q-card" style="background:linear-gradient(135deg,#102a18,#1a3a22); border:1px solid #4CD964;">
+      <div style="font-size:28px; text-align:center;">${q.icon}</div>
+      <div style="text-align:center; color:#4CD964; font-weight:800; font-size:13px; margin-bottom:6px;">${q.title}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.options.map(o=>`<button class="opt" onclick="answerMM('${encodeURIComponent(o)}')">₹${o}</button>`).join('')}</div>
+      <div id="mmFeedback" style="margin-top:10px; font-size:12.5px; min-height:18px;"></div>
+    </div>`;
+}
+function answerMM(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = mmQs[mmIdx];
+  const isCorrect = String(opt)===String(q.correct);
+  isCorrect ? sndCorrect() : sndWrong();
+  if(isCorrect){ mmCash += 25; mmCorrect++; }
+  document.querySelectorAll('#mmArea .opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent==='₹'+q.correct) b.classList.add('correct');
+    else if(b.textContent==='₹'+opt && !isCorrect) b.classList.add('wrong');
+  });
+  document.getElementById('mmFeedback').innerHTML = isCorrect
+    ? `<span style="color:#2ECC71; font-weight:700;">${lang==='ta'?'🎉 அருமை! +₹25!':'🎉 Great! +₹25!'}</span>`
+    : `<span style="color:#FFB627; font-weight:700;">${lang==='ta'?'சரியான பதில்:':'Correct answer:'} ₹${q.correct}</span>`;
+  setTimeout(()=>{
+    mmIdx++;
+    if(mmIdx<mmQs.length) renderMMQuestion();
+    else finishMarketMaths();
+  }, 1600);
+}
+function finishMarketMaths(){
+  sndFanfare();
+  awardGameBadge('marketmaths', mmGrade);
+  addXP(mmCorrect*10);
+  document.getElementById('mmArea').innerHTML = `
+    <div class="box" style="text-align:center; background:linear-gradient(135deg,#102a18,#1a3a22); border:1px solid #4CD964;">
+      <h2 style="color:#4CD964;">🏪 ${lang==='ta'?'கடை நாள் முடிந்தது!':'Shop Day Complete!'}</h2>
+      <p style="color:#A8F0BC; font-size:15px;">💵 ₹${mmCash} ${lang==='ta'?'சம்பாதித்தீர்கள்':'earned'} (${mmCorrect}/4 ${lang==='ta'?'சரி':'correct'})</p>
+      <div class="box" style="margin-top:14px; background:rgba(76,217,100,.08); text-align:left;">
+        <b style="color:#4CD964;">🤔 ${lang==='ta'?'யோசித்துப் பாருங்கள்':'Think about this'}:</b>
+        <p style="margin-top:6px; font-size:13px;">${lang==='ta'?'அதிக இலாபம் வைத்தால் வாடிக்கையாளர்கள் வருவார்களா? இல்லை என்றால் கடை மூடப்படுமா? சரியான விலை எப்படி தீர்மானிக்கலாம்?':'If a shop charges too much profit, will customers still come? What happens if they stop coming? How should a fair price be decided?'}</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="startMarketMaths(${mmGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
+        <button class="btn btn-out" onclick="openMarketMaths()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
+      </div>
+    </div>`;
+}
+
+/* ================= FRACTION JOURNEY (Grade 5-7 themed game) ================= */
+let fjGrade=5, fjQs=[], fjIdx=0, fjDistance=0, fjCorrect=0;
+function openFractionJourney(){
+  document.getElementById('fjArea').innerHTML = `
+    <h2 style="text-align:center; color:#E066B8;">🍕 Fraction Journey</h2>
+    <p style="text-align:center; color:#F0B8E0; font-size:12px;">${lang==='ta'?'பயணத்தில் பின்னங்களை தீர்க்கவும்!':'Solve fractions along a real journey!'}</p>
+    <div class="grid">
+      ${[5,6,7].map(g=>`<div class="card" onclick="startFractionJourney(${g})"><div class="ic">${g}</div><div class="t1">${lang==='ta'?'கிரேடு':'Grade'} ${g}</div></div>`).join('')}
+    </div>`;
+  showPanel('fractionJourney');
+}
+function gcdFn(a,b){ return b===0?a:gcdFn(b,a%b); }
+function fjQuestion(topic, grade){
+  const easy = grade<=5;
+  if(topic==='addsame'){
+    const den = pick([4,5,8]);
+    const n1 = rnd(1,den-2), n2 = rnd(1,den-n1-1);
+    return { icon:'🚶', title: lang==='ta'?'நடந்த தூரம்':'Distance Walked',
+      q: lang==='ta'?`காலையில் ${n1}/${den} கி.மீ, மாலையில் ${n2}/${den} கி.மீ நடந்தீர்கள். மொத்தம் எவ்வளவு?`:`You walked ${n1}/${den} km in the morning and ${n2}/${den} km in the evening. Total distance?`,
+      correct:`${n1+n2}/${den}`, options: shuffle([`${n1+n2}/${den}`,`${n1+n2+1}/${den}`,`${n1+n2}/${den+1}`,`${Math.abs(n1-n2)}/${den}`]) };
+  }
+  if(topic==='adddiff'){
+    const pairs = [[1,2,1,4,3,4],[1,2,1,3,5,6],[1,4,1,2,3,4],[2,3,1,3,1,1]];
+    const [n1,d1,n2,d2,cn,cd] = pick(pairs);
+    return { icon:'⛽', title: lang==='ta'?'எரிபொருள் பயன்பாடு':'Fuel Used',
+      q: lang==='ta'?`${n1}/${d1} லிட்டர் மற்றும் ${n2}/${d2} லிட்டர் எரிபொருள் பயன்படுத்தினீர்கள். மொத்தம் எவ்வளவு?`:`You used ${n1}/${d1} litre and ${n2}/${d2} litre of fuel. What's the total?`,
+      correct: cd===1?`${cn}`:`${cn}/${cd}`, options: shuffle([cd===1?`${cn}`:`${cn}/${cd}`, `${n1+n2}/${d1+d2}`, `${cn+1}/${cd}`, `1/2`]) };
+  }
+  if(topic==='decimal'){
+    const fracs = [[1,2,'0.5'],[1,4,'0.25'],[3,4,'0.75'],[1,5,'0.2'],[3,5,'0.6'],[1,10,'0.1']];
+    const [n,d,dec] = pick(fracs);
+    return { icon:'🍕', title: lang==='ta'?'தசமமாக மாற்று':'Convert to Decimal',
+      q: lang==='ta'?`${n}/${d} -ஐ தசமமாக (decimal) எழுதினால்?`:`Write ${n}/${d} as a decimal.`,
+      correct:dec, options: shuffle([dec, (parseFloat(dec)+0.1).toFixed(2).replace(/0$/,''), (parseFloat(dec)-0.1).toFixed(2).replace(/0$/,''), '1.0']) };
+  }
+  // subtract (pizza remaining)
+  const den = pick([4,6,8]);
+  const total = den, eaten = rnd(1,den-1);
+  const g = gcdFn(den-eaten, den);
+  const rn = (den-eaten)/g, rd = den/g;
+  return { icon:'🍕', title: lang==='ta'?'மீதமுள்ள பீட்சா':'Pizza Remaining',
+    q: lang==='ta'?`பீட்சா ${den} துண்டுகளாக உள்ளது. ${eaten} துண்டுகள் சாப்பிட்டீர்கள். மீதி எவ்வளவு பங்கு?`:`A pizza has ${den} slices. You ate ${eaten} slices. What fraction is left?`,
+    correct:`${rn}/${rd}`, options: shuffle([`${rn}/${rd}`,`${eaten}/${den}`,`${rn+1}/${rd}`,`${rn}/${den}`]) };
+}
+function startFractionJourney(grade){
+  fjGrade=grade; fjIdx=0; fjDistance=0; fjCorrect=0;
+  const topics = grade<=5 ? ['addsame','subtract','decimal','addsame'] : ['addsame','adddiff','decimal','subtract'];
+  fjQs = topics.map(t=>fjQuestion(t,grade));
+  renderFJQuestion();
+}
+function renderFJQuestion(){
+  const q = fjQs[fjIdx];
+  document.getElementById('fjArea').innerHTML = `
+    <div style="text-align:center; margin-bottom:6px; color:#F0B8E0; font-weight:700;">🗺️ ${fjDistance} km · ${fjIdx+1}/4</div>
+    <div class="q-card" style="background:linear-gradient(135deg,#2a1024,#3a1a32); border:1px solid #E066B8;">
+      <div style="font-size:28px; text-align:center;">${q.icon}</div>
+      <div style="text-align:center; color:#E066B8; font-weight:800; font-size:13px; margin-bottom:6px;">${q.title}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.options.map(o=>`<button class="opt" onclick="answerFJ('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>
+      <div id="fjFeedback" style="margin-top:10px; font-size:12.5px; min-height:18px;"></div>
+    </div>`;
+}
+function answerFJ(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = fjQs[fjIdx];
+  const isCorrect = opt===q.correct;
+  isCorrect ? sndCorrect() : sndWrong();
+  if(isCorrect){ fjDistance += 5; fjCorrect++; }
+  document.querySelectorAll('#fjArea .opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===q.correct) b.classList.add('correct');
+    else if(b.textContent===opt && !isCorrect) b.classList.add('wrong');
+  });
+  document.getElementById('fjFeedback').innerHTML = isCorrect
+    ? `<span style="color:#2ECC71; font-weight:700;">${lang==='ta'?'🎉 அருமை! +5 கி.மீ முன்னேறினீர்!':'🎉 Great! +5 km forward!'}</span>`
+    : `<span style="color:#FFB627; font-weight:700;">${lang==='ta'?'சரியான பதில்:':'Correct answer:'} ${q.correct}</span>`;
+  setTimeout(()=>{
+    fjIdx++;
+    if(fjIdx<fjQs.length) renderFJQuestion();
+    else finishFractionJourney();
+  }, 1600);
+}
+function finishFractionJourney(){
+  sndFanfare();
+  awardGameBadge('fractionjourney', fjGrade);
+  addXP(fjCorrect*10);
+  document.getElementById('fjArea').innerHTML = `
+    <div class="box" style="text-align:center; background:linear-gradient(135deg,#2a1024,#3a1a32); border:1px solid #E066B8;">
+      <h2 style="color:#E066B8;">🏁 ${lang==='ta'?'பயணம் முடிந்தது!':'Journey Complete!'}</h2>
+      <p style="color:#F0B8E0; font-size:15px;">🗺️ ${fjDistance} km ${lang==='ta'?'பயணித்தீர்கள்':'travelled'} (${fjCorrect}/4 ${lang==='ta'?'சரி':'correct'})</p>
+      <div class="box" style="margin-top:14px; background:rgba(224,102,184,.08); text-align:left;">
+        <b style="color:#E066B8;">🤔 ${lang==='ta'?'யோசித்துப் பாருங்கள்':'Think about this'}:</b>
+        <p style="margin-top:6px; font-size:13px;">${lang==='ta'?'1/2 மற்றும் 1/4-ஐ கூட்டி 3/4 ஆக்குவது எப்படி? இதை தசமத்தில் எழுதினால் என்ன?':'How do you add 1/2 and 1/4 to get 3/4? What would that be written as a decimal?'}</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="startFractionJourney(${fjGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
+        <button class="btn btn-out" onclick="openFractionJourney()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
+      </div>
+    </div>`;
+}
+
+/* ================= ALGEBRA ISLAND (Grade 6-8 themed game) ================= */
+let aiGrade=6, aiQs=[], aiIdx=0, aiTreasure=0, aiCorrect=0;
+function openAlgebraIsland(){
+  document.getElementById('aiArea').innerHTML = `
+    <h2 style="text-align:center; color:#4FD9C4;">🏝️ Algebra Island</h2>
+    <p style="text-align:center; color:#A8F0E4; font-size:12px;">${lang==='ta'?'மறைந்திருக்கும் "x"-ஐ கண்டுபிடியுங்கள்!':'Find the hidden "x" to unlock treasure!'}</p>
+    <div class="grid">
+      ${[6,7,8].map(g=>`<div class="card" onclick="startAlgebraIsland(${g})"><div class="ic">${g}</div><div class="t1">${lang==='ta'?'கிரேடு':'Grade'} ${g}</div></div>`).join('')}
+    </div>`;
+  showPanel('algebraIsland');
+}
+function aiQuestion(topic, grade){
+  const easy = grade<=6;
+  if(topic==='add'){
+    const x = rnd(easy?1:5,easy?15:30), a = rnd(1,20);
+    const b = x+a;
+    return { icon:'🌴', title: lang==='ta'?'பழ மரங்கள்':'Fruit Trees',
+      q: `x + ${a} = ${b}. ${lang==='ta'?'x என்ன?':'Find x.'}`,
+      correct:x, options: makeOptions(x,[x+1,x-1,a]) };
+  }
+  if(topic==='subtract'){
+    const x = rnd(easy?5:10,easy?25:40), a = rnd(1,15);
+    const b = x-a;
+    return { icon:'🥥', title: lang==='ta'?'தேங்காய் எண்ணிக்கை':'Coconut Count',
+      q: `x − ${a} = ${b}. ${lang==='ta'?'x என்ன?':'Find x.'}`,
+      correct:x, options: makeOptions(x,[x+1,x-1,b]) };
+  }
+  if(topic==='multiply'){
+    const x = rnd(2,easy?10:15), a = rnd(2,easy?6:10);
+    const b = x*a;
+    return { icon:'💎', title: lang==='ta'?'ரத்தினக் கற்கள்':'Gems Found',
+      q: `${a}x = ${b}. ${lang==='ta'?'x என்ன?':'Find x.'}`,
+      correct:x, options: makeOptions(x,[x+1,x-1,a]) };
+  }
+  // check-substitution (balance check)
+  const x = rnd(2,15), a = rnd(1,15);
+  const total = x+a;
+  const wrongX = x + pick([1,-1,2,-2]);
+  const isBalanced = Math.random()<0.5;
+  const shownX = isBalanced ? x : wrongX;
+  return { icon:'⚖️', title: lang==='ta'?'சமநிலை சோதனை':'Balance Check',
+    q: lang==='ta'?`x + ${a} = ${total}. x = ${shownX} வைத்தால், சமன்பாடு சமநிலையில் இருக்குமா?`:`x + ${a} = ${total}. If x = ${shownX}, is the equation balanced?`,
+    correct: isBalanced ? (lang==='ta'?'ஆம்':'Yes') : (lang==='ta'?'இல்லை':'No'),
+    options: shuffle([lang==='ta'?'ஆம்':'Yes', lang==='ta'?'இல்லை':'No']) };
+}
+function startAlgebraIsland(grade){
+  aiGrade=grade; aiIdx=0; aiTreasure=0; aiCorrect=0;
+  const topics = grade<=6 ? ['add','subtract','add','check'] : ['add','subtract','multiply','check'];
+  aiQs = topics.map(t=>aiQuestion(t,grade));
+  renderAIQuestion();
+}
+function renderAIQuestion(){
+  const q = aiQs[aiIdx];
+  document.getElementById('aiArea').innerHTML = `
+    <div style="text-align:center; margin-bottom:6px; color:#A8F0E4; font-weight:700;">💎 ${aiTreasure} · ${aiIdx+1}/4</div>
+    <div class="q-card" style="background:linear-gradient(135deg,#0f2a26,#1a4038); border:1px solid #4FD9C4;">
+      <div style="font-size:28px; text-align:center;">${q.icon}</div>
+      <div style="text-align:center; color:#4FD9C4; font-weight:800; font-size:13px; margin-bottom:6px;">${q.title}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.options.map(o=>`<button class="opt" onclick="answerAI('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div>
+      <div id="aiFeedback" style="margin-top:10px; font-size:12.5px; min-height:18px;"></div>
+    </div>`;
+}
+function answerAI(encOpt){
+  const opt = decodeURIComponent(encOpt);
+  const q = aiQs[aiIdx];
+  const isCorrect = String(opt)===String(q.correct);
+  isCorrect ? sndCorrect() : sndWrong();
+  if(isCorrect){ aiTreasure += 30; aiCorrect++; }
+  document.querySelectorAll('#aiArea .opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent==String(q.correct)) b.classList.add('correct');
+    else if(b.textContent===opt && !isCorrect) b.classList.add('wrong');
+  });
+  document.getElementById('aiFeedback').innerHTML = isCorrect
+    ? `<span style="color:#2ECC71; font-weight:700;">${lang==='ta'?'🎉 அருமை! +30 💎!':'🎉 Great! +30 gems!'}</span>`
+    : `<span style="color:#FFB627; font-weight:700;">${lang==='ta'?'சரியான பதில்:':'Correct answer:'} ${q.correct}</span>`;
+  setTimeout(()=>{
+    aiIdx++;
+    if(aiIdx<aiQs.length) renderAIQuestion();
+    else finishAlgebraIsland();
+  }, 1600);
+}
+function finishAlgebraIsland(){
+  sndFanfare();
+  awardGameBadge('algebraisland', aiGrade);
+  addXP(aiCorrect*10);
+  document.getElementById('aiArea').innerHTML = `
+    <div class="box" style="text-align:center; background:linear-gradient(135deg,#0f2a26,#1a4038); border:1px solid #4FD9C4;">
+      <h2 style="color:#4FD9C4;">🗝️ ${lang==='ta'?'புதையல் திறக்கப்பட்டது!':'Treasure Unlocked!'}</h2>
+      <p style="color:#A8F0E4; font-size:15px;">💎 ${aiTreasure} ${lang==='ta'?'gems சேகரித்தீர்கள்':'gems collected'} (${aiCorrect}/4 ${lang==='ta'?'சரி':'correct'})</p>
+      <div class="box" style="margin-top:14px; background:rgba(79,217,196,.08); text-align:left;">
+        <b style="color:#4FD9C4;">🤔 ${lang==='ta'?'யோசித்துப் பாருங்கள்':'Think about this'}:</b>
+        <p style="margin-top:6px; font-size:13px;">${lang==='ta'?'"x" என்பது ஏன் ஒரு "மறைந்த எண்" என அழைக்கப்படுகிறது? அதே சமன்பாட்டில் "x"-க்கு பதிலா வேறு எழுத்து வைத்தால் என்ன மாறும்?':'Why is "x" called a "hidden number"? What would change if you used a different letter instead of "x" in the same equation?'}</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="startAlgebraIsland(${aiGrade})">🔄 ${lang==='ta'?'மீண்டும்':'Play Again'}</button>
+        <button class="btn btn-out" onclick="openAlgebraIsland()">${lang==='ta'?'கிரேடு மாற்று':'Change Grade'}</button>
       </div>
     </div>`;
 }
@@ -1062,6 +1415,29 @@ function renderBadges(){
     });
   });
   document.getElementById('badgeGrid').innerHTML = html;
+
+  // Special Games get their own badge row, separate from the subject/grade
+  // grid — each game awards ONE badge per grade played (not tied to a
+  // perfect score, since these are shorter 4-question sessions).
+  const games = [
+    {id:'mathkingdom', icon:'🏰', en:'Math Kingdom', ta:'கணித சாம்ராஜ்யம்', grades:[3,4,5]},
+    {id:'shapeexplorer', icon:'🔺', en:'Shape Explorer', ta:'வடிவ வேடிக்கை', grades:[3,4,5,6]},
+    {id:'marketmaths', icon:'🛒', en:'Market Maths', ta:'சந்தைக் கணக்கு', grades:[4,5,6,7]},
+    {id:'fractionjourney', icon:'🍕', en:'Fraction Journey', ta:'பின்னப் பயணம்', grades:[5,6,7]},
+    {id:'algebraisland', icon:'🏝️', en:'Algebra Island', ta:'இயற்கணித தீவு', grades:[6,7,8]},
+  ];
+  let gamesHtml = '';
+  games.forEach(g=>{
+    g.grades.forEach(gr=>{
+      const earned = state.badges.includes(`${g.id}_${gr}`);
+      gamesHtml += `<div class="badge ${earned?'':'empty'}">
+        <div class="bic">${earned ? g.icon : '🔒'}</div>
+        <div class="bt">${lang==='en'?g.en:g.ta}<br>${lang==='en'?'Grade':'கிரேடு'} ${gr}</div>
+      </div>`;
+    });
+  });
+  const gamesSection = document.getElementById('gamesBadgeGrid');
+  if(gamesSection) gamesSection.innerHTML = gamesHtml;
 }
 
 function renderAll(){
