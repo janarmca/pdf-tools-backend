@@ -1,246 +1,593 @@
-<!doctype html><html lang="ta"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ஜாம்தாரிஸ் ஜோதிடம்+</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#102033;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.app{max-width:1100px;margin:auto;padding:16px}.card{background:#fff;border:1px solid #e5eaf1;border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 8px 30px #0b1b3310}.brand{font-weight:900;letter-spacing:1.6px;color:#17345f}h1{margin:4px 0;font-size:1.4rem}.sub,.small{color:#64748b;font-size:.8rem}.section{font-weight:800;margin-bottom:12px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}label{display:block;font-size:.7rem;font-weight:800;color:#475569;margin-bottom:5px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid #d8e0eb;border-radius:13px;font:inherit;background:#fff}textarea{min-height:100px;resize:vertical}.row{display:flex;gap:10px;flex-wrap:wrap}.btn{flex:1;min-width:160px;padding:12px 15px;border:0;border-radius:14px;font-weight:800;cursor:pointer;background:#e9eef6;color:#172b46}.primary{background:#102b4c;color:#fff}.gold{background:#8b6a22;color:#fff}.notice{padding:12px;border-radius:13px;background:#f1f5f9;color:#475569;font-size:.82rem}.warning{background:#fff7e6;color:#7b5200}.success{background:#eefaf2;color:#166534}.result{white-space:pre-wrap;line-height:1.55;background:#fbfcfe;border:1px solid #e6ebf2;border-radius:16px;padding:15px;min-height:90px}.chart{max-width:560px;margin:auto;aspect-ratio:1;border:2px solid #172b46;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr)}.cell{border:1px solid #172b46;padding:6px;font-size:.7rem}.cell strong{display:block;color:#66758a;font-size:.65rem}.center{grid-column:2/4;grid-row:2/4;display:flex;align-items:center;justify-content:center;text-align:center;background:#f7f9fc;font-weight:800}.footer{text-align:center;color:#64748b;font-size:.72rem;padding:15px}.langbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.langbar select{max-width:300px}.lang-note{font-size:.72rem;color:#64748b}@media(max-width:700px){.grid,.grid3{grid-template-columns:1fr}}</style>
-</head><body><div class="app">
+<!doctype html>
+<html lang="ta">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ஜாம்தாரிஸ் ஜோதிடம்+</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            color: #102033;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif
+        }
+        .app {
+            max-width: 1100px;
+            margin: auto;
+            padding: 16px
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #e5eaf1;
+            border-radius: 22px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 30px #0b1b3310
+        }
+        .brand {
+            font-weight: 900;
+            letter-spacing: 1.6px;
+            color: #17345f
+        }
+        h1 {
+            margin: 4px 0;
+            font-size: 1.4rem
+        }
+        .sub,
+        .small {
+            color: #64748b;
+            font-size: .8rem
+        }
+        .section {
+            font-weight: 800;
+            margin-bottom: 12px
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px
+        }
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px
+        }
+        label {
+            display: block;
+            font-size: .7rem;
+            font-weight: 800;
+            color: #475569;
+            margin-bottom: 5px
+        }
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d8e0eb;
+            border-radius: 13px;
+            font: inherit;
+            background: #fff
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        .btn {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px 15px;
+            border: 0;
+            border-radius: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            background: #e9eef6;
+            color: #172b46
+        }
+        .primary {
+            background: #102b4c;
+            color: #fff
+        }
+        .gold {
+            background: #8b6a22;
+            color: #fff
+        }
+        .notice {
+            padding: 12px;
+            border-radius: 13px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: .82rem
+        }
+        .warning {
+            background: #fff7e6;
+            color: #7b5200
+        }
+        .success {
+            background: #eefaf2;
+            color: #166534
+        }
+        .result {
+            white-space: pre-wrap;
+            line-height: 1.55;
+            background: #fbfcfe;
+            border: 1px solid #e6ebf2;
+            border-radius: 16px;
+            padding: 15px;
+            min-height: 90px
+        }
+        .chart {
+            max-width: 560px;
+            margin: auto;
+            aspect-ratio: 1;
+            border: 2px solid #172b46;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr)
+        }
+        .cell {
+            border: 1px solid #172b46;
+            padding: 6px;
+            font-size: .7rem
+        }
+        .cell strong {
+            display: block;
+            color: #66758a;
+            font-size: .65rem
+        }
+        .center {
+            grid-column: 2/4;
+            grid-row: 2/4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #f7f9fc;
+            font-weight: 800
+        }
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: .72rem;
+            padding: 15px
+        }
+        .langbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+        .langbar select {
+            max-width: 300px
+        }
+        .lang-note {
+            font-size: .72rem;
+            color: #64748b
+        }
+        @media(max-width:700px) {
+            .grid,
+            .grid3 {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
 
-<div class="card">
-  <div class="brand">ஜாம்தாரிஸ்</div>
-  <h1>ஜோதிடம்+ — முழுமையான வேத ஜோதிடம்</h1>
-  <div class="sub">பிறப்பு ஜாதகம் · ராசி · நவாம்சம் · தசா · வரலாறு · மண மகன்-மகள் பொருத்தம் · ஆராய்ச்சி-அடிப்படையிலான பதில்கள்</div>
-  <div class="langbar" style="margin-top:10px">
-    <label style="margin:0; font-weight:600;">🌐 மொழி</label>
-    <select id="jamtLang">
-      <option value="ta" selected>தமிழ் (Tamil)</option>
-      <option value="en">English</option>
-      <option value="hi">हिन्दी (Hindi)</option>
-      <option value="te">తెలుగు (Telugu)</option>
-      <option value="kn">ಕನ್ನಡ (Kannada)</option>
-      <option value="ml">മലയാളം (Malayalam)</option>
-    </select>
-    <span class="lang-note">கணிப்புகள் & AI பதில்கள் இந்த மொழியில் வரும்.</span>
-  </div>
-</div>
+        <div class="card">
+            <div class="brand">ஜாம்தாரிஸ்</div>
+            <h1>ஜோதிடம்+ — முழுமையான வேத ஜோதிடம்</h1>
+            <div class="sub">பிறப்பு ஜாதகம் · ராசி · நவாம்சம் · தசா · வரலாறு · மண மகன்-மகள் பொருத்தம் · ஆராய்ச்சி-அடிப்படையிலான பதில்கள்</div>
+            <div class="langbar" style="margin-top:10px">
+                <label style="margin:0; font-weight:600;">🌐 மொழி</label>
+                <select id="jamtLang">
+                    <option value="ta" selected>தமிழ் (Tamil)</option>
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                    <option value="ml">മലയാളം (Malayalam)</option>
+                </select>
+                <span class="lang-note">கணிப்புகள் & AI பதில்கள் இந்த மொழியில் வரும்.</span>
+            </div>
+        </div>
 
-<div class="card">
-  <div class="section">🔐 துல்லியம்-முதன்மை கணிப்பு</div>
-  <div class="notice warning">ஜாம்தாரிஸ் கிரக நிலைகளை கற்பனையாக உருவாக்காது. இறுதி வானியல் கணக்கீடுகள் கட்டமைக்கப்பட்ட Swiss Ephemeris backend-லிருந்து மட்டுமே வரும். கணக்கீடு கிடைக்காவிட்டால் அல்லது சரிபார்க்கப்படாவிட்டால், இந்த கருவி யூகிக்க மறுக்கும்.</div>
-  <div class="grid" style="margin-top:12px">
-    <div><label>கணக்கீடு API</label><input id="calcEndpoint" value="/api/astrology/calculate"></div>
-    <div><label>AI பகுப்பாய்வு API</label><input id="claudeEndpoint" value="/api/claude/analyze"></div>
-  </div>
-  <div class="small" style="margin-top:8px">API key-ஐ உங்கள் server/Supabase Edge Function-ல் மட்டும் வையுங்கள். இந்த HTML-ல் ஒருபோதும் காட்ட வேண்டாம்.</div>
-</div>
+        <div class="card">
+            <div class="section">🔐 துல்லியம்-முதன்மை கணிப்பு</div>
+            <div class="notice warning">ஜாம்தாரிஸ் கிரக நிலைகளை கற்பனையாக உருவாக்காது. இறுதி வானியல் கணக்கீடுகள் கட்டமைக்கப்பட்ட Swiss Ephemeris backend-லிருந்து மட்டுமே வரும். கணக்கீடு கிடைக்காவிட்டால் அல்லது சரிபார்க்கப்படாவிட்டால், இந்த கருவி யூகிக்க மறுக்கும்.</div>
+            <div class="grid" style="margin-top:12px">
+                <div><label>கணக்கீடு API</label><input id="calcEndpoint" value="/api/astrology/calculate"></div>
+                <div><label>AI பகுப்பாய்வு API</label><input id="claudeEndpoint" value="/api/claude/analyze"></div>
+            </div>
+            <div class="small" style="margin-top:8px">API key-ஐ உங்கள் server/Supabase Edge Function-ல் மட்டும் வையுங்கள். இந்த HTML-ல் ஒருபோதும் காட்ட வேண்டாம்.</div>
+        </div>
 
-<div class="card">
-  <div class="section">👤 பிறப்பு விவரங்கள்</div>
-  <div class="grid3">
-    <div><label>பெயர்</label><input id="name"></div>
-    <div><label>பிறந்த தேதி</label><input id="dob" type="date"></div>
-    <div><label>சரியான பிறப்பு நேரம்</label><input id="tob" type="time" step="1"></div>
-  </div>
-  <div class="grid" style="margin-top:12px">
-    <div><label>பிறந்த இடம்</label><input id="place" placeholder="ஊர், மாநிலம், நாடு (எ.கா: சென்னை, தமிழ்நாடு)"></div>
-    <div><label>ஆயத்தொலைவுகள் (Coordinates)</label><div style="display:flex; gap:6px;"><input id="coords" placeholder="ஊர் பெயர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="findCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍 கண்டுபிடி</button></div><div id="coordsStatus" class="small" style="margin-top:4px;"></div></div>
-  </div>
-  <div class="grid3" style="margin-top:12px">
-    <div><label>நேர மண்டலம்</label><input id="timezone" placeholder="Asia/Kolkata"></div>
-    <div><label>ராசி முறை</label><select id="zodiac"><option value="sidereal">Sidereal / நிரயணம்</option><option value="tropical">Tropical / சாயனம்</option></select></div>
-    <div><label>அயனாம்சம்</label><select id="ayan"><option value="lahiri">Lahiri (லாஹிரி)</option><option value="krishnamurti">Krishnamurti (KP)</option><option value="raman">Raman</option></select></div>
-  </div>
-  <div class="row" style="margin-top:14px">
-    <button class="btn primary" id="calculate">✨ துல்லியமான ஜாதகம் கணக்கிடு</button>
-    <button class="btn" id="clear">🔄 அழி</button>
-  </div>
-  <div id="calcStatus" class="notice" style="margin-top:12px">இன்னும் ஜாதகம் கணக்கிடப்படவில்லை.</div>
-</div>
+        <div class="card">
+            <div class="section">👤 பிறப்பு விவரங்கள்</div>
+            <div class="grid3">
+                <div><label>பெயர்</label><input id="name"></div>
+                <div><label>பிறந்த தேதி</label><input id="dob" type="date"></div>
+                <div><label>சரியான பிறப்பு நேரம்</label><input id="tob" type="time" step="1"></div>
+            </div>
+            <div class="grid" style="margin-top:12px">
+                <div><label>பிறந்த இடம்</label><input id="place" placeholder="ஊர், மாநிலம், நாடு (எ.கா: சென்னை, தமிழ்நாடு)"></div>
+                <div><label>ஆயத்தொலைவுகள் (Coordinates)</label>
+                    <div style="display:flex; gap:6px;"><input id="coords" placeholder="ஊர் பெயர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="findCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍 கண்டுபிடி</button></div>
+                    <div id="coordsStatus" class="small" style="margin-top:4px;"></div>
+                </div>
+            </div>
+            <div class="grid3" style="margin-top:12px">
+                <div><label>நேர மண்டலம்</label><input id="timezone" placeholder="Asia/Kolkata"></div>
+                <div><label>ராசி முறை</label><select id="zodiac"><option value="sidereal">Sidereal / நிரயணம்</option><option value="tropical">Tropical / சாயனம்</option></select></div>
+                <div><label>அயனாம்சம்</label><select id="ayan"><option value="lahiri">Lahiri (லாஹிரி)</option><option value="krishnamurti">Krishnamurti (KP)</option><option value="raman">Raman</option></select></div>
+            </div>
+            <div class="row" style="margin-top:14px">
+                <button class="btn primary" id="calculate">✨ துல்லியமான ஜாதகம் கணக்கிடு</button>
+                <button class="btn" id="clear">🔄 அழி</button>
+            </div>
+            <div id="calcStatus" class="notice" style="margin-top:12px">இன்னும் ஜாதகம் கணக்கிடப்படவில்லை.</div>
+        </div>
 
-<div class="card">
-  <div class="section">🪐 ராசி சக்கரம்</div>
-  <div class="chart" id="rasiChart">
-    <div class="cell" data-sign="Pisces"><strong>மீனம்</strong><span></span></div>
-    <div class="cell" data-sign="Aries"><strong>மேஷம்</strong><span></span></div>
-    <div class="cell" data-sign="Taurus"><strong>ரிஷபம்</strong><span></span></div>
-    <div class="cell" data-sign="Gemini"><strong>மிதுனம்</strong><span></span></div>
-    <div class="cell" data-sign="Aquarius"><strong>கும்பம்</strong><span></span></div>
-    <div class="cell center">லக்னம் / ராசி<br><span id="chartCenter">காத்திருக்கிறது</span></div>
-    <div class="cell" data-sign="Cancer"><strong>கடகம்</strong><span></span></div>
-    <div class="cell" data-sign="Capricorn"><strong>மகரம்</strong><span></span></div>
-    <div class="cell" data-sign="Leo"><strong>சிம்மம்</strong><span></span></div>
-    <div class="cell" data-sign="Sagittarius"><strong>தனுசு</strong><span></span></div>
-    <div class="cell" data-sign="Scorpio"><strong>விருச்சிகம்</strong><span></span></div>
-    <div class="cell" data-sign="Libra"><strong>துலாம்</strong><span></span></div>
-  </div>
-  <div class="small" style="margin-top:10px">கிரக நிலைகள் சரிபார்க்கப்பட்ட கணக்கீடு API-லிருந்து மட்டுமே தோன்றும்.</div>
-</div>
+        <div class="card">
+            <div class="section">🪐 ராசி சக்கரம்</div>
+            <div class="chart" id="rasiChart">
+                <div class="cell" data-sign="Pisces"><strong>மீனம்</strong><span></span></div>
+                <div class="cell" data-sign="Aries"><strong>மேஷம்</strong><span></span></div>
+                <div class="cell" data-sign="Taurus"><strong>ரிஷபம்</strong><span></span></div>
+                <div class="cell" data-sign="Gemini"><strong>மிதுனம்</strong><span></span></div>
+                <div class="cell" data-sign="Aquarius"><strong>கும்பம்</strong><span></span></div>
+                <div class="cell center">லக்னம் / ராசி<br><span id="chartCenter">காத்திருக்கிறது</span></div>
+                <div class="cell" data-sign="Cancer"><strong>கடகம்</strong><span></span></div>
+                <div class="cell" data-sign="Capricorn"><strong>மகரம்</strong><span></span></div>
+                <div class="cell" data-sign="Leo"><strong>சிம்மம்</strong><span></span></div>
+                <div class="cell" data-sign="Sagittarius"><strong>தனுசு</strong><span></span></div>
+                <div class="cell" data-sign="Scorpio"><strong>விருச்சிகம்</strong><span></span></div>
+                <div class="cell" data-sign="Libra"><strong>துலாம்</strong><span></span></div>
+            </div>
+            <div class="small" style="margin-top:10px">கிரக நிலைகள் சரிபார்க்கப்பட்ட கணக்கீடு API-லிருந்து மட்டுமே தோன்றும்.</div>
+        </div>
 
-<div class="card">
-  <div class="section">📚 முழுமையான ஜோதிட வரலாறு+</div>
-  <div class="grid3">
-    <div><label>பிறப்பு ஜாதகம்</label><input value="D1 ராசி" disabled></div>
-    <div><label>பிரிவு சக்கரங்கள்</label><input value="D1–D60" disabled></div>
-    <div><label>தசா</label><input value="விம்சோத்தரி + பிற முறைகள்" disabled></div>
-  </div>
-  <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
-</div>
+        <div class="card">
+            <div class="section">📚 முழுமையான ஜோதிட வரலாறு+</div>
+            <div class="grid3">
+                <div><label>பிறப்பு ஜாதகம்</label><input value="D1 ராசி" disabled></div>
+                <div><label>பிரிவு சக்கரங்கள்</label><input value="D1–D60" disabled></div>
+                <div><label>தசா</label><input value="விம்சோத்தரி + பிற முறைகள்" disabled></div>
+            </div>
+            <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
+        </div>
 
-<div class="card">
-  <div class="section">💍 மண மகன் & மகள் பொருத்தம்+</div>
-  <div class="grid3">
-    <div><label>நபர் A — பெயர்</label><input id="paName"></div>
-    <div><label>பிறந்த தேதி</label><input id="paDob" type="date"></div>
-    <div><label>பிறந்த நேரம்</label><input id="paTob" type="time" step="1"></div>
-  </div>
-  <div><label>பிறந்த ஊர்</label><input id="paPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
-  <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label><div style="display:flex; gap:6px;"><input id="paCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="paFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div></div>
-  <hr style="margin:14px 0;border:none;border-top:1px solid #e6ebf2">
-  <div class="grid3">
-    <div><label>நபர் B — பெயர்</label><input id="pbName"></div>
-    <div><label>பிறந்த தேதி</label><input id="pbDob" type="date"></div>
-    <div><label>பிறந்த நேரம்</label><input id="pbTob" type="time" step="1"></div>
-  </div>
-  <div><label>பிறந்த ஊர்</label><input id="pbPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
-  <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label><div style="display:flex; gap:6px;"><input id="pbCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="pbFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div></div>
-  <button class="btn gold" id="match" style="margin-top:12px">💫 பொருத்தம் கணக்கிடு</button>
-  <div id="matchResult" class="result" style="margin-top:12px">இன்னும் பொருத்தம் கணக்கிடப்படவில்லை.</div>
-</div>
+        <div class="card">
+            <div class="section">💍 மண மகன் & மகள் பொருத்தம்+</div>
+            <div class="grid3">
+                <div><label>நபர் A — பெயர்</label><input id="paName"></div>
+                <div><label>பிறந்த தேதி</label><input id="paDob" type="date"></div>
+                <div><label>பிறந்த நேரம்</label><input id="paTob" type="time" step="1"></div>
+            </div>
+            <div><label>பிறந்த ஊர்</label><input id="paPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
+            <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label>
+                <div style="display:flex; gap:6px;"><input id="paCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="paFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div>
+            </div>
+            <hr style="margin:14px 0;border:none;border-top:1px solid #e6ebf2">
+            <div class="grid3">
+                <div><label>நபர் B — பெயர்</label><input id="pbName"></div>
+                <div><label>பிறந்த தேதி</label><input id="pbDob" type="date"></div>
+                <div><label>பிறந்த நேரம்</label><input id="pbTob" type="time" step="1"></div>
+            </div>
+            <div><label>பிறந்த ஊர்</label><input id="pbPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
+            <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label>
+                <div style="display:flex; gap:6px;"><input id="pbCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="pbFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div>
+            </div>
+            <button class="btn gold" id="match" style="margin-top:12px">💫 பொருத்தம் கணக்கிடு</button>
+            <div id="matchResult" class="result" style="margin-top:12px">இன்னும் பொருத்தம் கணக்கிடப்படவில்லை.</div>
+        </div>
 
-<div class="card">
-  <div class="section">🤖 ஜோதிடம்+/AI-இடம் கேளுங்கள்</div>
-  <div class="notice">🟢 <b>ஒரு-கேள்வி கொள்கை:</b> ஒரு இலவச கோரிக்கை = ஒரு தெளிவான கேள்வி. ஒரே சமர்ப்பிப்பில் பல கேள்விகள் நிராகரிக்கப்பட்டு, ஒன்றை தேர்ந்தெடுக்கச் சொல்லப்படும். AI சரிபார்க்கப்பட்ட ஜாதக தரவையும் ஆராய்ச்சி சூழலையும் பயன்படுத்த வேண்டும், உண்மைகளை கற்பனை செய்யக் கூடாது.</div>
-  <textarea id="question" style="margin-top:12px" placeholder="உதாரணம்: இந்த இரு ஜாதகங்களுக்கும் திருமணம் நல்லதா?"></textarea>
-  <button class="btn primary" id="ask" style="margin-top:10px">🙏 ஒரு கேள்வி கேளுங்கள்</button>
-  <div id="answer" class="result" style="margin-top:12px">இன்னும் பதில் இல்லை.</div>
-</div>
+        <div class="card">
+            <div class="section">🤖 ஜோதிடம்+/AI-இடம் கேளுங்கள்</div>
+            <div class="notice">🟢 <b>ஒரு-கேள்வி கொள்கை:</b> ஒரு இலவச கோரிக்கை = ஒரு தெளிவான கேள்வி. ஒரே சமர்ப்பிப்பில் பல கேள்விகள் நிராகரிக்கப்பட்டு, ஒன்றை தேர்ந்தெடுக்கச் சொல்லப்படும். AI சரிபார்க்கப்பட்ட ஜாதக தரவையும் ஆராய்ச்சி சூழலையும் பயன்படுத்த வேண்டும், உண்மைகளை கற்பனை செய்யக் கூடாது.</div>
+            <textarea id="question" style="margin-top:12px" placeholder="உதாரணம்: இந்த இரு ஜாதகங்களுக்கும் திருமணம் நல்லதா?"></textarea>
+            <button class="btn primary" id="ask" style="margin-top:10px">🙏 ஒரு கேள்வி கேளுங்கள்</button>
+            <div id="answer" class="result" style="margin-top:12px">இன்னும் பதில் இல்லை.</div>
+        </div>
 
-<div class="card">
-  <div class="section">🛡️ ஜாம்தாரிஸ் உண்மைத் தன்மை விதிகள்</div>
-  <div class="notice success"><b>கற்பனை இல்லை.</b> வானியல் கணக்கீடுகள், ஜாதக நிலைகள், தசா தேதிகள் மற்றும் பொருத்த தரவுகள் கணக்கீடு engine-லிருந்து மட்டுமே வர வேண்டும். AI விளக்குகிறது, ஆராய்கிறது; அது ephemeris மதிப்புகளை உருவாக்காது. ஆதாரம் போதுமானதாக இல்லையெனில், பதில் அதைத் தெளிவாகக் கூற வேண்டும்.</div>
-  <ul class="small" style="line-height:1.7">
-    <li>துல்லியத்திற்கு சரியான பிறப்பு நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.</li>
-    <li>ஒவ்வொரு கணக்கீடும் ராசி முறை மற்றும் அயனாம்சத்தை பதிவு செய்யும்.</li>
-    <li>திருமண பதில்கள் விளக்கங்கள் மட்டுமே, உத்தரவாதங்கள் அல்ல.</li>
-    <li>வரலாற்று/ஆராய்ச்சி கூற்றுகளுக்கு ஆதாரங்கள் இணைக்கப்பட வேண்டும்.</li>
-  </ul>
-</div>
+        <div class="card">
+            <div class="section">🛡️ ஜாம்தாரிஸ் உண்மைத் தன்மை விதிகள்</div>
+            <div class="notice success"><b>கற்பனை இல்லை.</b> வானியல் கணக்கீடுகள், ஜாதக நிலைகள், தசா தேதிகள் மற்றும் பொருத்த தரவுகள் கணக்கீடு engine-லிருந்து மட்டுமே வர வேண்டும். AI விளக்குகிறது, ஆராய்கிறது; அது ephemeris மதிப்புகளை உருவாக்காது. ஆதாரம் போதுமானதாக இல்லையெனில், பதில் அதைத் தெளிவாகக் கூற வேண்டும்.</div>
+            <ul class="small" style="line-height:1.7">
+                <li>துல்லியத்திற்கு சரியான பிறப்பு நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.</li>
+                <li>ஒவ்வொரு கணக்கீடும் ராசி முறை மற்றும் அயனாம்சத்தை பதிவு செய்யும்.</li>
+                <li>திருமண பதில்கள் விளக்கங்கள் மட்டுமே, உத்தரவாதங்கள் அல்ல.</li>
+                <li>வரலாற்று/ஆராய்ச்சி கூற்றுகளுக்கு ஆதாரங்கள் இணைக்கப்பட வேண்டும்.</li>
+            </ul>
+        </div>
 
-<div class="footer"><b>ஜாம்தாரிஸ்</b> · Intelligent Business Operating System · ஜோதிடம்+<br>ஜனார்த்தனன் தியாகராஜன் · 7667663922 · janarmca@gmail.com</div>
-</div>
-<script>(function(){
-window.JAMTARIS_LANGUAGE='ta';
-document.addEventListener('DOMContentLoaded',()=>{ const sel=document.getElementById('jamtLang'); if(sel) sel.onchange=()=>{ window.JAMTARIS_LANGUAGE=sel.value; }; });
-const $=id=>document.getElementById(id);
-// Free geocoding via OpenStreetMap Nominatim — no API key needed, works for
-// any city/town worldwide. Manual coordinate entry still works as a fallback
-// if a place isn't found (e.g. a very small village not in OSM's database).
-async function geocodePlace(placeName){
-  const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(placeName);
-  const r = await fetch(url, { headers: { 'Accept-Language': 'ta,en' } });
-  if(!r.ok) throw new Error('Geocoding service unavailable');
-  const results = await r.json();
-  if(!results.length) throw new Error('இந்த ஊர் கிடைக்கவில்லை — சரியாக எழுதி மீண்டும் முயற்சிக்கவும்.');
-  return { lat: parseFloat(results[0].lat), lon: parseFloat(results[0].lon), display: results[0].display_name };
-}
-// Timezone auto-fill: India has exactly ONE timezone (Asia/Kolkata) regardless
-// of where in the country you are, so for Indian coordinates this is 100%
-// reliable with zero external dependency. For places outside India, we try
-// a free keyless timezone lookup as a best-effort convenience — if that
-// service is ever unavailable, the field is simply left for manual entry.
-function isInIndia(lat, lon){
-  return lat >= 6 && lat <= 37.5 && lon >= 68 && lon <= 97.5;
-}
-async function fillTimezone(lat, lon, timezoneFieldId){
-  const tzField = $(timezoneFieldId);
-  if(!tzField) return;
-  if(isInIndia(lat, lon)){ tzField.value = 'Asia/Kolkata'; return; }
-  try{
-    const r = await fetch(`https://api.latlng.work/v1/timezone?lat=${lat}&lng=${lon}`);
-    if(!r.ok) return; // leave for manual entry — no error shown, this is a best-effort convenience only
-    const data = await r.json();
-    if(data && data.timezone) tzField.value = data.timezone;
-  }catch(e){ /* silently leave for manual entry */ }
-}
-function wireFindCoords(btnId, placeId, coordsId, statusId, timezoneFieldId){
-  const btn = $(btnId);
-  if(!btn) return;
-  btn.onclick = async ()=>{
-    const place = $(placeId).value.trim();
-    const statusEl = statusId ? $(statusId) : null;
-    if(!place){ if(statusEl) statusEl.textContent='முதலில் ஊர் பெயரை எழுதவும்.'; return; }
-    btn.disabled = true; const origText = btn.textContent; btn.textContent = '…';
-    if(statusEl){ statusEl.textContent = 'தேடுகிறது…'; statusEl.style.color = '#64748b'; }
-    try{
-      const { lat, lon, display } = await geocodePlace(place);
-      $(coordsId).value = lat.toFixed(4) + ', ' + lon.toFixed(4);
-      if(timezoneFieldId) await fillTimezone(lat, lon, timezoneFieldId);
-      if(statusEl){ statusEl.textContent = '✓ ' + display; statusEl.style.color = '#166534'; }
-    }catch(e){
-      if(statusEl){ statusEl.textContent = e.message; statusEl.style.color = '#7b5200'; }
-      else alert(e.message);
-    }finally{ btn.disabled = false; btn.textContent = origText; }
-  };
-}
-wireFindCoords('findCoords', 'place', 'coords', 'coordsStatus', 'timezone');
-wireFindCoords('paFindCoords', 'paPlace', 'paCoords', null, null);
-wireFindCoords('pbFindCoords', 'pbPlace', 'pbCoords', null, null);
-function payload(){
-  return {
-    name:$('name').value.trim(), dateOfBirth:$('dob').value, timeOfBirth:$('tob').value,
-    birthPlace:$('place').value.trim(), coordinates:$('coords').value.trim(), timezone:$('timezone').value.trim(),
-    zodiac:$('zodiac').value, ayanamsa:$('ayan').value,
-    requestedCharts:['D1','D9','D10','D12','D16','D20','D24','D27','D30','D40','D45','D60'],
-    requestedDasha:['Vimshottari'], accuracyMode:'strict-no-guessing',
-    outputLanguage: window.JAMTARIS_LANGUAGE || 'ta', unicodeSupport:true
-  };
-}
-function valid(p){ return (!p.dateOfBirth||!p.timeOfBirth||!p.birthPlace||!p.coordinates||!p.timezone) ? 'பிறந்த தேதி, சரியான நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.' : ''; }
-async function post(url,body){
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const t=await r.text(); let d; try{ d=JSON.parse(t); }catch{ d={message:t}; }
-  if(!r.ok) throw Error(d.error||d.message||('Server error '+r.status));
-  return d;
-}
-function render(d){
-  const c=d.rasi||d.rasiChart||{};
-  document.querySelectorAll('[data-sign]').forEach(x=> x.querySelector('span').textContent = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||''));
-  $('chartCenter').textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
-  $('history').textContent = JSON.stringify(d.history||d,null,2);
-}
-$('calculate').onclick=async()=>{
-  const p=payload(), e=valid(p);
-  if(e){ $('calcStatus').className='notice warning'; $('calcStatus').textContent=e; return; }
-  $('calcStatus').textContent='சரிபார்க்கப்பட்ட வானியல் engine மூலம் கணக்கிடுகிறது…';
-  try{
-    const d=await post($('calcEndpoint').value.trim(), p);
-    if(d.verified===false||d.accuracyStatus==='unverified') throw Error('கணக்கீடு சரிபார்க்கப்படவில்லை. ஜாதகம் காட்டப்படவில்லை.');
-    render(d);
-    $('calcStatus').className='notice success'; $('calcStatus').textContent='✓ சரிபார்க்கப்பட்ட கணக்கீடு பெறப்பட்டது.';
-  }catch(x){ $('calcStatus').className='notice warning'; $('calcStatus').textContent='கணக்கீடு கிடைக்கவில்லை: '+x.message; }
-};
-$('match').onclick=async()=>{
-  const pA={name:$('paName').value.trim(),dob:$('paDob').value,tob:$('paTob').value,coords:$('paCoords').value.trim()};
-  const pB={name:$('pbName').value.trim(),dob:$('pbDob').value,tob:$('pbTob').value,coords:$('pbCoords').value.trim()};
-  if(!pA.dob||!pA.tob||!pA.coords||!pB.dob||!pB.tob||!pB.coords){ $('matchResult').textContent='இருவருக்கும் முழுமையான தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.'; return; }
-  $('matchResult').textContent='சரிபார்க்கப்பட்ட வானியல் engine மூலம் பொருத்தம் கணக்கிடுகிறது…';
-  try{
-    const d=await post($('calcEndpoint').value.trim(), {mode:'compatibility', personA:pA, personB:pB, ayanamsa:$('ayan').value, accuracyMode:'strict-no-guessing', outputLanguage: window.JAMTARIS_LANGUAGE||'ta'});
-    if(d.verified===false||d.accuracyStatus==='unverified') throw Error('பொருத்தம் சரிபார்க்கப்படவில்லை.');
-    $('matchResult').textContent = JSON.stringify(d,null,2);
-  }catch(x){ $('matchResult').textContent='பொருத்தம் கிடைக்கவில்லை: '+x.message; }
-};
-$('ask').onclick=async()=>{
-  const q=$('question').value.trim();
-  if(!q){ $('answer').textContent='தயவுசெய்து ஒரு தெளிவான கேள்வியை எழுதுங்கள்.'; return; }
-  if((q.match(/\?/g)||[]).length>1 || /\b(and also|another question|multiple questions|plus|as well as)\b/i.test(q)){
-    $('answer').textContent='ஒரு நேரத்தில் ஒரே ஒரு தெளிவான கேள்வி மட்டும் கேளுங்கள். மிக முக்கியமான ஒரு கேள்வியை தேர்ந்தெடுத்து மீண்டும் சமர்ப்பிக்கவும்.';
-    return;
-  }
-  $('answer').textContent='சரிபார்க்கப்பட்ட தகவலை AI-க்கு அனுப்புகிறது…';
-  try{
-    const d=await post($('claudeEndpoint').value.trim(), {
-      question:q, chartContext:payload(),
-      rules:{ oneQuestion:true, noFabrication:true, citeResearch:true, useCalculatedPositionsOnly:true, uncertaintyRequired:true, distinguishAstrologyFromFact:true }
-    });
-    $('answer').textContent = d.answer || d.message || JSON.stringify(d,null,2);
-  }catch(x){ $('answer').textContent='பதில் கிடைக்கவில்லை: '+x.message; }
-};
-$('clear').onclick=()=>location.reload();
-})();</script>
-</body></html>
+        <div class="footer"><b>ஜாம்தாரிஸ்</b> · Intelligent Business Operating System · ஜோதிடம்+<br>ஜனார்த்தனன் தியாகராஜன் · 7667663922 · janarmca@gmail.com</div>
+    </div>
+    <script>
+        (function() {
+            window.JAMTARIS_LANGUAGE = 'ta';
+
+            // DOM ready handler
+            document.addEventListener('DOMContentLoaded', function() {
+                var sel = document.getElementById('jamtLang');
+                if (sel) {
+                    sel.onchange = function() {
+                        window.JAMTARIS_LANGUAGE = sel.value;
+                    };
+                }
+            });
+
+            var $ = function(id) {
+                return document.getElementById(id);
+            };
+
+            // Free geocoding via OpenStreetMap Nominatim
+            async function geocodePlace(placeName) {
+                var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(placeName);
+                var r = await fetch(url, {
+                    headers: {
+                        'Accept-Language': 'ta,en'
+                    }
+                });
+                if (!r.ok) throw new Error('Geocoding service unavailable');
+                var results = await r.json();
+                if (!results.length) throw new Error('இந்த ஊர் கிடைக்கவில்லை — சரியாக எழுதி மீண்டும் முயற்சிக்கவும்.');
+                return {
+                    lat: parseFloat(results[0].lat),
+                    lon: parseFloat(results[0].lon),
+                    display: results[0].display_name
+                };
+            }
+
+            function isInIndia(lat, lon) {
+                return lat >= 6 && lat <= 37.5 && lon >= 68 && lon <= 97.5;
+            }
+
+            async function fillTimezone(lat, lon, timezoneFieldId) {
+                var tzField = $(timezoneFieldId);
+                if (!tzField) return;
+                if (isInIndia(lat, lon)) {
+                    tzField.value = 'Asia/Kolkata';
+                    return;
+                }
+                try {
+                    var r = await fetch('https://api.latlng.work/v1/timezone?lat=' + lat + '&lng=' + lon);
+                    if (!r.ok) return;
+                    var data = await r.json();
+                    if (data && data.timezone) tzField.value = data.timezone;
+                } catch (e) {
+                    // silently leave for manual entry
+                }
+            }
+
+            function wireFindCoords(btnId, placeId, coordsId, statusId, timezoneFieldId) {
+                var btn = $(btnId);
+                if (!btn) return;
+                btn.onclick = async function() {
+                    var place = $(placeId).value.trim();
+                    var statusEl = statusId ? $(statusId) : null;
+                    if (!place) {
+                        if (statusEl) statusEl.textContent = 'முதலில் ஊர் பெயரை எழுதவும்.';
+                        return;
+                    }
+                    btn.disabled = true;
+                    var origText = btn.textContent;
+                    btn.textContent = '…';
+                    if (statusEl) {
+                        statusEl.textContent = 'தேடுகிறது…';
+                        statusEl.style.color = '#64748b';
+                    }
+                    try {
+                        var result = await geocodePlace(place);
+                        $(coordsId).value = result.lat.toFixed(4) + ', ' + result.lon.toFixed(4);
+                        if (timezoneFieldId) await fillTimezone(result.lat, result.lon, timezoneFieldId);
+                        if (statusEl) {
+                            statusEl.textContent = '✓ ' + result.display;
+                            statusEl.style.color = '#166534';
+                        }
+                    } catch (e) {
+                        if (statusEl) {
+                            statusEl.textContent = e.message;
+                            statusEl.style.color = '#7b5200';
+                        } else {
+                            alert(e.message);
+                        }
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = origText;
+                    }
+                };
+            }
+
+            wireFindCoords('findCoords', 'place', 'coords', 'coordsStatus', 'timezone');
+            wireFindCoords('paFindCoords', 'paPlace', 'paCoords', null, null);
+            wireFindCoords('pbFindCoords', 'pbPlace', 'pbCoords', null, null);
+
+            function payload() {
+                return {
+                    name: $('name').value.trim(),
+                    dateOfBirth: $('dob').value,
+                    timeOfBirth: $('tob').value,
+                    birthPlace: $('place').value.trim(),
+                    coordinates: $('coords').value.trim(),
+                    timezone: $('timezone').value.trim(),
+                    zodiac: $('zodiac').value,
+                    ayanamsa: $('ayan').value,
+                    requestedCharts: ['D1', 'D9', 'D10', 'D12', 'D16', 'D20', 'D24', 'D27', 'D30', 'D40', 'D45', 'D60'],
+                    requestedDasha: ['Vimshottari'],
+                    accuracyMode: 'strict-no-guessing',
+                    outputLanguage: window.JAMTARIS_LANGUAGE || 'ta',
+                    unicodeSupport: true
+                };
+            }
+
+            function valid(p) {
+                if (!p.dateOfBirth || !p.timeOfBirth || !p.birthPlace || !p.coordinates || !p.timezone) {
+                    return 'பிறந்த தேதி, சரியான நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.';
+                }
+                return '';
+            }
+
+            async function post(url, body) {
+                var r = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                var t = await r.text();
+                var d;
+                try {
+                    d = JSON.parse(t);
+                } catch {
+                    d = {
+                        message: t
+                    };
+                }
+                if (!r.ok) throw new Error(d.error || d.message || ('Server error ' + r.status));
+                return d;
+            }
+
+            function render(d) {
+                var c = d.rasi || d.rasiChart || {};
+                var cells = document.querySelectorAll('[data-sign]');
+                for (var i = 0; i < cells.length; i++) {
+                    var cell = cells[i];
+                    var span = cell.querySelector('span');
+                    var val = c[cell.dataset.sign];
+                    span.textContent = Array.isArray(val) ? val.join(' · ') : String(val || '');
+                }
+                var centerEl = $('chartCenter');
+                if (centerEl) centerEl.textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
+                var historyEl = $('history');
+                if (historyEl) historyEl.textContent = JSON.stringify(d.history || d, null, 2);
+            }
+
+            // Calculate button
+            var calcBtn = $('calculate');
+            if (calcBtn) {
+                calcBtn.onclick = async function() {
+                    var p = payload();
+                    var e = valid(p);
+                    var statusEl = $('calcStatus');
+                    if (e) {
+                        statusEl.className = 'notice warning';
+                        statusEl.textContent = e;
+                        return;
+                    }
+                    statusEl.textContent = 'சரிபார்க்கப்பட்ட வானியல் engine மூலம் கணக்கிடுகிறது…';
+                    try {
+                        var d = await post($('calcEndpoint').value.trim(), p);
+                        if (d.verified === false || d.accuracyStatus === 'unverified') {
+                            throw new Error('கணக்கீடு சரிபார்க்கப்படவில்லை. ஜாதகம் காட்டப்படவில்லை.');
+                        }
+                        render(d);
+                        statusEl.className = 'notice success';
+                        statusEl.textContent = '✓ சரிபார்க்கப்பட்ட கணக்கீடு பெறப்பட்டது.';
+                    } catch (x) {
+                        statusEl.className = 'notice warning';
+                        statusEl.textContent = 'கணக்கீடு கிடைக்கவில்லை: ' + x.message;
+                    }
+                };
+            }
+
+            // Match button
+            var matchBtn = $('match');
+            if (matchBtn) {
+                matchBtn.onclick = async function() {
+                    var pA = {
+                        name: $('paName').value.trim(),
+                        dob: $('paDob').value,
+                        tob: $('paTob').value,
+                        coords: $('paCoords').value.trim()
+                    };
+                    var pB = {
+                        name: $('pbName').value.trim(),
+                        dob: $('pbDob').value,
+                        tob: $('pbTob').value,
+                        coords: $('pbCoords').value.trim()
+                    };
+                    var matchResult = $('matchResult');
+                    if (!pA.dob || !pA.tob || !pA.coords || !pB.dob || !pB.tob || !pB.coords) {
+                        matchResult.textContent = 'இருவருக்கும் முழுமையான தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.';
+                        return;
+                    }
+                    matchResult.textContent = 'சரிபார்க்கப்பட்ட வானியல் engine மூலம் பொருத்தம் கணக்கிடுகிறது…';
+                    try {
+                        var d = await post($('calcEndpoint').value.trim(), {
+                            mode: 'compatibility',
+                            personA: pA,
+                            personB: pB,
+                            ayanamsa: $('ayan').value,
+                            accuracyMode: 'strict-no-guessing',
+                            outputLanguage: window.JAMTARIS_LANGUAGE || 'ta'
+                        });
+                        if (d.verified === false || d.accuracyStatus === 'unverified') {
+                            throw new Error('பொருத்தம் சரிபார்க்கப்படவில்லை.');
+                        }
+                        matchResult.textContent = JSON.stringify(d, null, 2);
+                    } catch (x) {
+                        matchResult.textContent = 'பொருத்தம் கிடைக்கவில்லை: ' + x.message;
+                    }
+                };
+            }
+
+            // Ask button
+            var askBtn = $('ask');
+            if (askBtn) {
+                askBtn.onclick = async function() {
+                    var q = $('question').value.trim();
+                    var answerEl = $('answer');
+                    if (!q) {
+                        answerEl.textContent = 'தயவுசெய்து ஒரு தெளிவான கேள்வியை எழுதுங்கள்.';
+                        return;
+                    }
+                    var questionMarks = (q.match(/\?/g) || []).length;
+                    var multiQuestionPattern = /\b(and also|another question|multiple questions|plus|as well as)\b/i;
+                    if (questionMarks > 1 || multiQuestionPattern.test(q)) {
+                        answerEl.textContent = 'ஒரு நேரத்தில் ஒரே ஒரு தெளிவான கேள்வி மட்டும் கேளுங்கள். மிக முக்கியமான ஒரு கேள்வியை தேர்ந்தெடுத்து மீண்டும் சமர்ப்பிக்கவும்.';
+                        return;
+                    }
+                    answerEl.textContent = 'சரிபார்க்கப்பட்ட தகவலை AI-க்கு அனுப்புகிறது…';
+                    try {
+                        var d = await post($('claudeEndpoint').value.trim(), {
+                            question: q,
+                            chartContext: payload(),
+                            rules: {
+                                oneQuestion: true,
+                                noFabrication: true,
+                                citeResearch: true,
+                                useCalculatedPositionsOnly: true,
+                                uncertaintyRequired: true,
+                                distinguishAstrologyFromFact: true
+                            }
+                        });
+                        answerEl.textContent = d.answer || d.message || JSON.stringify(d, null, 2);
+                    } catch (x) {
+                        answerEl.textContent = 'பதில் கிடைக்கவில்லை: ' + x.message;
+                    }
+                };
+            }
+
+            // Clear button
+            var clearBtn = $('clear');
+            if (clearBtn) {
+                clearBtn.onclick = function() {
+                    location.reload();
+                };
+            }
+
+        })();
+    </script>
+</body>
+</html>
