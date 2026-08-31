@@ -1,9 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ஜோதிடம்+ — துல்லியமான ஜாதகம்</title>
+    <title>ஜோதிடம் Pro — Complete Astrology Software</title>
     <style>
         * {
             margin: 0;
@@ -18,45 +18,22 @@
             min-height: 100vh;
             padding: 16px;
             background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(246, 211, 101, 0.03) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 50%, rgba(253, 160, 133, 0.03) 0%, transparent 60%),
-                radial-gradient(ellipse at 50% 100%, rgba(246, 211, 101, 0.02) 0%, transparent 40%);
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(2px 2px at 20% 30%, rgba(246, 211, 101, 0.15), transparent),
-                radial-gradient(2px 2px at 40% 70%, rgba(246, 211, 101, 0.1), transparent),
-                radial-gradient(2px 2px at 60% 20%, rgba(246, 211, 101, 0.12), transparent),
-                radial-gradient(2px 2px at 80% 80%, rgba(246, 211, 101, 0.08), transparent),
-                radial-gradient(2px 2px at 10% 90%, rgba(246, 211, 101, 0.1), transparent),
-                radial-gradient(2px 2px at 90% 10%, rgba(246, 211, 101, 0.1), transparent);
-            background-size: 200px 200px;
-            pointer-events: none;
-            z-index: 0;
+                radial-gradient(ellipse at 20% 50%, rgba(246, 211, 101, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(253, 160, 133, 0.04) 0%, transparent 60%);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
         }
 
         /* Header */
         .header {
             text-align: center;
-            padding: 40px 20px 30px;
-            background: linear-gradient(180deg, rgba(246, 211, 101, 0.06) 0%, transparent 100%);
+            padding: 30px 20px;
+            background: linear-gradient(180deg, rgba(246, 211, 101, 0.08) 0%, transparent 100%);
             border-radius: 30px;
-            border: 1px solid rgba(246, 211, 101, 0.08);
+            border: 1px solid rgba(246, 211, 101, 0.1);
             margin-bottom: 24px;
             position: relative;
             overflow: hidden;
@@ -110,7 +87,7 @@
         .header .sub {
             color: #94a3b8;
             font-size: 1rem;
-            margin-top: 8px;
+            margin-top: 6px;
             letter-spacing: 6px;
             position: relative;
             z-index: 1;
@@ -118,8 +95,8 @@
 
         .header .badge {
             display: inline-block;
-            margin-top: 12px;
-            padding: 6px 28px;
+            margin-top: 10px;
+            padding: 5px 24px;
             background: rgba(246, 211, 101, 0.08);
             border: 1px solid rgba(246, 211, 101, 0.12);
             border-radius: 20px;
@@ -130,10 +107,45 @@
             z-index: 1;
         }
 
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-tab {
+            padding: 10px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            border: 1px solid transparent;
+            background: transparent;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #e8edf5;
+        }
+
+        .nav-tab.active {
+            background: rgba(246, 211, 101, 0.08);
+            border-color: rgba(246, 211, 101, 0.15);
+            color: #f6d365;
+        }
+
         /* Cards */
         .card {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 24px;
@@ -141,6 +153,11 @@
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
+            display: none;
+        }
+
+        .card.active {
+            display: block;
         }
 
         .card::before {
@@ -155,13 +172,12 @@
         }
 
         .card:hover {
-            border-color: rgba(246, 211, 101, 0.12);
+            border-color: rgba(246, 211, 101, 0.1);
             box-shadow: 0 8px 50px rgba(0, 0, 0, 0.4);
-            transform: translateY(-2px);
         }
 
         .card-title {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #f6d365;
             margin-bottom: 18px;
@@ -183,18 +199,26 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 14px;
         }
+
         .grid-4 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 12px;
         }
 
-        /* Form */
+        .grid-5 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Forms */
         label {
             display: block;
             font-size: 0.65rem;
@@ -203,10 +227,6 @@
             margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-        }
-
-        .input-wrapper {
-            position: relative;
         }
 
         input,
@@ -219,8 +239,8 @@
             border-radius: 12px;
             color: #e8edf5;
             font: inherit;
-            transition: all 0.3s ease;
             font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
 
         input:focus,
@@ -232,11 +252,6 @@
             box-shadow: 0 0 30px rgba(246, 211, 101, 0.03);
         }
 
-        input::placeholder,
-        textarea::placeholder {
-            color: #4a5568;
-        }
-
         input[type="date"],
         input[type="time"] {
             color-scheme: dark;
@@ -245,79 +260,6 @@
         select option {
             background: #1a1f2e;
             color: #e8edf5;
-        }
-
-        .location-input-group input {
-            padding-right: 40px;
-        }
-
-        .location-icon {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-            font-size: 1rem;
-            pointer-events: none;
-        }
-
-        .location-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #1a1f2e;
-            border: 1px solid rgba(246, 211, 101, 0.1);
-            border-radius: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            margin-top: 4px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-        }
-
-        .location-suggestions.show {
-            display: block;
-        }
-
-        .location-suggestion-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .location-suggestion-item:hover {
-            background: rgba(246, 211, 101, 0.06);
-        }
-
-        .location-suggestion-item .place-name {
-            color: #e8edf5;
-            font-weight: 500;
-        }
-
-        .location-suggestion-item .place-detail {
-            color: #64748b;
-            font-size: 0.7rem;
-            display: block;
-        }
-
-        .location-suggestion-item .place-coords {
-            color: #f6d365;
-            font-size: 0.65rem;
-            float: right;
-        }
-
-        .coords-found {
-            display: inline-block;
-            margin-top: 4px;
-            font-size: 0.7rem;
-            color: #4ade80;
-            padding: 2px 12px;
-            background: rgba(34, 197, 94, 0.06);
-            border-radius: 10px;
-            border: 1px solid rgba(34, 197, 94, 0.08);
         }
 
         /* Buttons */
@@ -372,6 +314,26 @@
             box-shadow: 0 8px 30px rgba(246, 211, 101, 0.2);
         }
 
+        .btn-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #0a0e1a;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(74, 222, 128, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.2);
+        }
+
         .btn-block {
             width: 100%;
             justify-content: center;
@@ -398,16 +360,19 @@
             border-color: rgba(59, 130, 246, 0.1);
             color: #60a5fa;
         }
+
         .status-success {
             background: rgba(34, 197, 94, 0.06);
             border-color: rgba(34, 197, 94, 0.1);
             color: #4ade80;
         }
+
         .status-warning {
             background: rgba(246, 211, 101, 0.06);
             border-color: rgba(246, 211, 101, 0.1);
             color: #f6d365;
         }
+
         .status-error {
             background: rgba(239, 68, 68, 0.06);
             border-color: rgba(239, 68, 68, 0.1);
@@ -422,11 +387,11 @@
             min-height: 80px;
             font-size: 0.85rem;
             line-height: 1.8;
-            max-height: 400px;
+            max-height: 450px;
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             color: #c8d0dc;
+            font-family: 'Courier New', monospace;
         }
 
         .result-box::-webkit-scrollbar {
@@ -441,9 +406,9 @@
             border-radius: 10px;
         }
 
-        /* CHART - South Indian Style */
+        /* Chart - South Indian Style */
         .chart-container {
-            max-width: 520px;
+            max-width: 560px;
             margin: 0 auto;
             aspect-ratio: 1;
             display: grid;
@@ -451,7 +416,7 @@
             grid-template-rows: repeat(4, 1fr);
             gap: 3px;
             padding: 4px;
-            background: rgba(246, 211, 101, 0.03);
+            background: rgba(246, 211, 101, 0.02);
             border: 2px solid rgba(246, 211, 101, 0.06);
             border-radius: 16px;
         }
@@ -467,9 +432,9 @@
             text-align: center;
             font-size: 0.55rem;
             border: 1px solid rgba(255, 255, 255, 0.03);
-            transition: all 0.3s;
             position: relative;
             min-height: 0;
+            transition: all 0.3s;
         }
 
         .chart-cell:hover {
@@ -491,7 +456,7 @@
 
         .chart-cell .sign-name {
             color: #94a3b8;
-            font-size: 0.5rem;
+            font-size: 0.45rem;
             font-weight: 600;
         }
 
@@ -510,9 +475,9 @@
             background: rgba(246, 211, 101, 0.06);
             padding: 0px 4px;
             border-radius: 3px;
-            border: 1px solid rgba(246, 211, 101, 0.04);
             font-size: 0.35rem;
             white-space: nowrap;
+            border: 1px solid rgba(246, 211, 101, 0.04);
         }
 
         .chart-center {
@@ -568,6 +533,51 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
+        }
+
+        /* Dasha */
+        .dasha-timeline {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .dasha-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 8px 14px;
+            flex: 1;
+            min-width: 65px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .dasha-item .planet {
+            font-weight: 700;
+            color: #f6d365;
+            font-size: 0.85rem;
+        }
+
+        .dasha-item .years {
+            font-size: 0.6rem;
+            color: #64748b;
+        }
+
+        .dasha-item.active {
+            border-color: rgba(246, 211, 101, 0.2);
+            background: rgba(246, 211, 101, 0.04);
+        }
+
+        .dasha-item .period {
+            font-size: 0.5rem;
+            color: #4ade80;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin: 16px 0;
         }
 
         /* Predictions */
@@ -635,117 +645,6 @@
             transition: width 1s ease;
         }
 
-        /* Dasha */
-        .dasha-timeline {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        .dasha-item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            padding: 8px 14px;
-            flex: 1;
-            min-width: 65px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .dasha-item .planet {
-            font-weight: 700;
-            color: #f6d365;
-            font-size: 0.85rem;
-        }
-
-        .dasha-item .years {
-            font-size: 0.6rem;
-            color: #64748b;
-        }
-
-        .dasha-item.active {
-            border-color: rgba(246, 211, 101, 0.2);
-            background: rgba(246, 211, 101, 0.04);
-        }
-
-        .dasha-item .period {
-            font-size: 0.5rem;
-            color: #4ade80;
-        }
-
-        .divider {
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            margin: 16px 0;
-        }
-
-        /* Compatibility Section - Separate Styling */
-        .compatibility-card {
-            background: linear-gradient(135deg, rgba(246, 211, 101, 0.04), rgba(253, 160, 133, 0.04));
-            border: 1px solid rgba(246, 211, 101, 0.08);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-
-        .compatibility-card .card-title {
-            color: #fda085;
-        }
-
-        .compatibility-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .person-box {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .person-box h4 {
-            color: #f6d365;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .person-box input {
-            margin-bottom: 8px;
-        }
-
-        .match-result-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 14px;
-            padding: 16px;
-            margin-top: 12px;
-            min-height: 100px;
-            font-size: 0.85rem;
-            line-height: 1.8;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            color: #c8d0dc;
-        }
-
-        .match-result-box::-webkit-scrollbar {
-            width: 4px;
-        }
-        .match-result-box::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-        }
-        .match-result-box::-webkit-scrollbar-thumb {
-            background: #f6d365;
-            border-radius: 10px;
-        }
-
         /* Deep Predictions */
         .deep-pred-grid {
             display: grid;
@@ -786,6 +685,49 @@
             background: rgba(246, 211, 101, 0.03);
         }
 
+        /* Compatibility */
+        .compatibility-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .person-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .person-box h4 {
+            color: #f6d365;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .person-box input {
+            margin-bottom: 8px;
+        }
+
+        /* Match Result */
+        .match-result-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 12px;
+            min-height: 100px;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: #c8d0dc;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -817,40 +759,41 @@
             }
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
             .grid-2,
             .grid-3,
             .grid-4,
-            .compatibility-grid {
-                grid-template-columns: 1fr;
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .chart-container {
-                max-width: 100%;
-            }
+            .grid-5,
+            .compatibility-grid,
             .deep-pred-grid {
                 grid-template-columns: 1fr;
             }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .chart-container {
+                max-width: 100%;
+            }
+
+            .predictions-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
             .card {
                 padding: 16px;
             }
+
             .dasha-item {
                 min-width: 55px;
                 padding: 6px 10px;
             }
-            .chart-cell .sign-emoji {
-                font-size: 0.7rem;
-            }
-            .chart-cell .sign-name {
-                font-size: 0.4rem;
-            }
-            .chart-center .lagna-name {
-                font-size: 1rem;
-            }
-            .predictions-grid {
-                grid-template-columns: 1fr 1fr;
+
+            .nav-tab {
+                padding: 8px 16px;
+                font-size: 0.75rem;
             }
         }
 
@@ -858,15 +801,14 @@
             .predictions-grid {
                 grid-template-columns: 1fr;
             }
+
             .header h1 {
                 font-size: 1.4rem;
             }
-            .chart-cell .planets .tag {
-                font-size: 0.3rem;
-                padding: 0px 3px;
-            }
-            .chart-cell .house-num {
-                font-size: 0.35rem;
+
+            .nav-tab {
+                padding: 6px 12px;
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -877,187 +819,184 @@
 
         <!-- HEADER -->
         <div class="header">
-            <h1>✦ ஜோதிடம்+</h1>
-            <div class="sub">துல்லியமான வேத ஜோதிடம்</div>
-            <div class="badge">✦ ஜாதகம் · 12 வீடுகள் · தசா · பலன்கள் ✦</div>
+            <h1>✦ ஜோதிடம் Pro</h1>
+            <div class="sub">Complete Professional Astrology Software</div>
+            <div class="badge">✦ 12 Houses · Dasha · Compatibility · Predictions ✦</div>
         </div>
 
-        <!-- INPUT -->
-        <div class="card">
-            <div class="card-title"><span class="icon">📋</span> உங்கள் பிறப்பு விவரங்கள்</div>
+        <!-- NAVIGATION TABS -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="input">📋 Input</button>
+            <button class="nav-tab" data-tab="chart">🪐 Chart</button>
+            <button class="nav-tab" data-tab="planets">🌟 Planets</button>
+            <button class="nav-tab" data-tab="dasha">⏳ Dasha</button>
+            <button class="nav-tab" data-tab="predictions">🔮 Predictions</button>
+            <button class="nav-tab" data-tab="houses">📖 12 Houses</button>
+            <button class="nav-tab" data-tab="compatibility">💍 Compatibility</button>
+            <button class="nav-tab" data-tab="ai">🤖 AI Astrologer</button>
+            <button class="nav-tab" data-tab="reports">📊 Reports</button>
+        </div>
+
+        <!-- TAB 1: INPUT -->
+        <div class="card active" id="tab-input">
+            <div class="card-title"><span class="icon">📋</span> Birth Details</div>
             <div class="grid-3">
-                <div><label>👤 பெயர்</label><input id="name" value="அருண் குமார்"></div>
-                <div><label>📅 பிறந்த தேதி</label><input id="dob" type="date" value="1990-01-15"></div>
-                <div><label>🕐 பிறந்த நேரம்</label><input id="tob" type="time" step="1" value="10:30"></div>
+                <div><label>👤 Name</label><input id="name" placeholder="Enter your name"></div>
+                <div><label>📅 Birth Date</label><input id="dob" type="date"></div>
+                <div><label>🕐 Birth Time</label><input id="tob" type="time" step="1"></div>
             </div>
             <div class="grid-2" style="margin-top:14px;">
-                <div>
-                    <label>📍 பிறந்த இடம்</label>
-                    <div class="input-wrapper location-input-group">
-                        <input id="place" value="சென்னை" placeholder="ஊர் பெயரை தட்டச்சு செய்யவும்...">
-                        <span class="location-icon">📍</span>
-                        <div class="location-suggestions" id="locationSuggestions"></div>
-                    </div>
-                    <div id="coordsStatus" style="margin-top:4px;"></div>
-                </div>
-                <div>
-                    <label>🌐 ஆயத்தொலைவுகள்</label>
-                    <input id="coords" value="13.0827, 80.2707" placeholder="தானாக வரும்">
-                </div>
+                <div><label>📍 Birth Place</label><input id="place" placeholder="City, State, Country"></div>
+                <div><label>🌐 Coordinates</label><input id="coords" placeholder="Latitude, Longitude"></div>
             </div>
             <div class="grid-3" style="margin-top:14px;">
-                <div><label>⏰ நேர மண்டலம்</label><input id="timezone" value="Asia/Kolkata"></div>
+                <div><label>⏰ Time Zone</label><input id="timezone" value="Asia/Kolkata"></div>
                 <div>
-                    <label>♈ ராசி முறை</label>
+                    <label>♈ Zodiac System</label>
                     <select id="zodiac">
-                        <option value="sidereal">Sidereal (நிரயணம்)</option>
-                        <option value="tropical">Tropical (சாயனம்)</option>
+                        <option value="sidereal">Sidereal (Nirayana)</option>
+                        <option value="tropical">Tropical (Sayana)</option>
                     </select>
                 </div>
                 <div>
-                    <label>🌀 அயனாம்சம்</label>
+                    <label>🌀 Ayanamsa</label>
                     <select id="ayan">
-                        <option value="lahiri">Lahiri</option>
+                        <option value="lahiri" selected>Lahiri</option>
                         <option value="krishnamurti">Krishnamurti (KP)</option>
                         <option value="raman">Raman</option>
                     </select>
                 </div>
             </div>
             <div class="row">
-                <button class="btn btn-primary" id="calculateBtn">✦ ஜாதகம் கணக்கிடு</button>
-                <button class="btn btn-secondary" id="clearBtn">↺ அழி</button>
+                <button class="btn btn-primary" id="calculateBtn">✦ Calculate Chart</button>
+                <button class="btn btn-secondary" id="clearBtn">↺ Clear All</button>
+                <button class="btn btn-success" id="saveBtn">💾 Save Chart</button>
             </div>
-            <div id="status" class="status status-info">⚡ தயார் — உங்கள் விவரங்களை உள்ளிட்டு கணக்கிடவும்</div>
+            <div id="status" class="status status-info">⚡ Enter birth details and click Calculate</div>
         </div>
 
-        <!-- CHART -->
-        <div class="card">
-            <div class="card-title"><span class="icon">🪐</span> ராசி சக்கரம் — 12 வீடுகள்</div>
-
+        <!-- TAB 2: CHART -->
+        <div class="card" id="tab-chart">
+            <div class="card-title"><span class="icon">🪐</span> Rasi Chart — 12 Houses</div>
             <div class="chart-container" id="chartContainer">
-                <!-- Row 1: Houses 12, 1, 2, 3 -->
                 <div class="chart-cell" data-house="12"><span class="house-num">12</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="1"><span class="house-num">1</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="2"><span class="house-num">2</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="3"><span class="house-num">3</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
-
-                <!-- Row 2: House 11, Center (Lagna), House 4 -->
                 <div class="chart-cell" data-house="11"><span class="house-num">11</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
-                <div class="chart-center" colspan="2" rowspan="2">
-                    <span class="label">லக்னம்</span>
+                <div class="chart-center">
+                    <span class="label">Lagna</span>
                     <span class="lagna-name" id="lagnaDisplay">—</span>
-                    <span class="lagna-sub" id="lagnaDetail">காத்திருக்கிறது</span>
+                    <span class="lagna-sub" id="lagnaDetail">Waiting</span>
                 </div>
                 <div class="chart-cell" data-house="4"><span class="house-num">4</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
-
-                <!-- Row 3: House 10, House 5 -->
                 <div class="chart-cell" data-house="10"><span class="house-num">10</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="5"><span class="house-num">5</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
-
-                <!-- Row 4: Houses 9, 8, 7, 6 -->
                 <div class="chart-cell" data-house="9"><span class="house-num">9</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="8"><span class="house-num">8</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="7"><span class="house-num">7</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
                 <div class="chart-cell" data-house="6"><span class="house-num">6</span><span class="sign-emoji"></span><span class="sign-name"></span><span class="planets"></span></div>
             </div>
-
-            <div class="chart-legend" id="chartLegend">
-                <span class="item"><span class="dot" style="background:#f6d365;"></span> லக்னம்</span>
-                <span class="item"><span class="dot" style="background:#FF6B35;"></span> சூரியன்</span>
-                <span class="item"><span class="dot" style="background:#E8E8E8;"></span> சந்திரன்</span>
-                <span class="item"><span class="dot" style="background:#FFD700;"></span> குரு</span>
-                <span class="item"><span class="dot" style="background:#50C878;"></span> சுக்கிரன்</span>
-                <span class="item"><span class="dot" style="background:#FF4444;"></span> செவ்வாய்</span>
-                <span class="item"><span class="dot" style="background:#8B8B8B;"></span> சனி</span>
-                <span class="item"><span class="dot" style="background:#7CB9E8;"></span> புதன்</span>
+            <div class="chart-legend">
+                <span class="item"><span class="dot" style="background:#f6d365;"></span> Lagna</span>
+                <span class="item"><span class="dot" style="background:#FF6B35;"></span> Sun</span>
+                <span class="item"><span class="dot" style="background:#E8E8E8;"></span> Moon</span>
+                <span class="item"><span class="dot" style="background:#FFD700;"></span> Jupiter</span>
+                <span class="item"><span class="dot" style="background:#50C878;"></span> Venus</span>
+                <span class="item"><span class="dot" style="background:#FF4444;"></span> Mars</span>
+                <span class="item"><span class="dot" style="background:#8B8B8B;"></span> Saturn</span>
+                <span class="item"><span class="dot" style="background:#7CB9E8;"></span> Mercury</span>
+                <span class="item"><span class="dot" style="background:#6B3FA0;"></span> Rahu</span>
+                <span class="item"><span class="dot" style="background:#A03F6B;"></span> Ketu</span>
             </div>
         </div>
 
-        <!-- DASHA -->
-        <div class="card">
-            <div class="card-title"><span class="icon">⏳</span> தசா காலம்</div>
-            <div id="dashaDisplay" style="font-size:0.9rem;color:#c8d0dc;margin-bottom:12px;">விம்சோத்தரி — 120 வருடங்கள்</div>
+        <!-- TAB 3: PLANETS -->
+        <div class="card" id="tab-planets">
+            <div class="card-title"><span class="icon">🌟</span> Planetary Positions</div>
+            <div id="planetPositions" class="result-box">No chart calculated yet</div>
+        </div>
+
+        <!-- TAB 4: DASHA -->
+        <div class="card" id="tab-dasha">
+            <div class="card-title"><span class="icon">⏳</span> Dasha System</div>
+            <div id="dashaDisplay" style="font-size:0.9rem;color:#c8d0dc;margin-bottom:12px;">Vimshottari — 120 Years</div>
             <div class="dasha-timeline" id="dashaTimeline"></div>
             <hr class="divider">
-            <div style="font-size:0.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">★ பிரதி தசா</div>
-            <div id="subDashaDisplay" style="font-size:0.85rem;color:#c8d0dc;">கணக்கிடப்படுகிறது...</div>
+            <div style="font-size:0.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">★ Current Sub-Dasha</div>
+            <div id="subDashaDisplay" style="font-size:0.85rem;color:#c8d0dc;">—</div>
         </div>
 
-        <!-- PREDICTIONS -->
-        <div class="card">
-            <div class="card-title"><span class="icon">🔮</span> முக்கிய பலன்கள்</div>
+        <!-- TAB 5: PREDICTIONS -->
+        <div class="card" id="tab-predictions">
+            <div class="card-title"><span class="icon">🔮</span> Main Predictions</div>
             <div class="predictions-grid" id="predictionsGrid">
-                <div class="prediction-item"><span class="emoji">💼</span><span class="title">தொழில்</span><span class="text" id="pred1">கணக்கிடப்படுகிறது...</span><span class="confidence">85%</span><div class="confidence-bar"><div class="fill" style="width:85%;"></div></div></div>
-                <div class="prediction-item"><span class="emoji">❤️</span><span class="title">திருமணம்</span><span class="text" id="pred2">கணக்கிடப்படுகிறது...</span><span class="confidence">78%</span><div class="confidence-bar"><div class="fill" style="width:78%;"></div></div></div>
-                <div class="prediction-item"><span class="emoji">💰</span><span class="title">நிதி</span><span class="text" id="pred3">கணக்கிடப்படுகிறது...</span><span class="confidence">82%</span><div class="confidence-bar"><div class="fill" style="width:82%;"></div></div></div>
-                <div class="prediction-item"><span class="emoji">🏠</span><span class="title">குடும்பம்</span><span class="text" id="pred4">கணக்கிடப்படுகிறது...</span><span class="confidence">80%</span><div class="confidence-bar"><div class="fill" style="width:80%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">💼</span><span class="title">Career</span><span class="text" id="pred1">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">❤️</span><span class="title">Marriage</span><span class="text" id="pred2">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">💰</span><span class="title">Wealth</span><span class="text" id="pred3">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">🏠</span><span class="title">Family</span><span class="text" id="pred4">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">📈</span><span class="title">Business</span><span class="text" id="pred5">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
+                <div class="prediction-item"><span class="emoji">✈️</span><span class="title">Travel</span><span class="text" id="pred6">—</span><span class="confidence">—</span><div class="confidence-bar"><div class="fill" style="width:0%;"></div></div></div>
             </div>
         </div>
 
-        <!-- DEEP PREDICTIONS - 12 HOUSES -->
-        <div class="card">
-            <div class="card-title"><span class="icon">📖</span> 12 வீடுகள் — ஆழமான பலன்கள்</div>
+        <!-- TAB 6: 12 HOUSES -->
+        <div class="card" id="tab-houses">
+            <div class="card-title"><span class="icon">📖</span> 12 Houses — Deep Predictions</div>
             <div id="deepPredictions" class="deep-pred-grid">
-                <div style="grid-column:1/3;text-align:center;color:#64748b;padding:20px;">⏳ பலன்கள் கணக்கிடப்படுகிறது...</div>
+                <div style="grid-column:1/3;text-align:center;color:#64748b;padding:20px;">⏳ Calculate chart first</div>
             </div>
         </div>
 
-        <!-- FULL RESULT -->
-        <div class="card">
-            <div class="card-title"><span class="icon">📊</span> முழுமையான ஜாதக விவரம்</div>
-            <div id="fullResult" class="result-box">இன்னும் கணக்கிடப்படவில்லை</div>
-        </div>
-
-        <!-- COMPATIBILITY - SEPARATE SECTION -->
-        <div class="compatibility-card">
-            <div class="card-title"><span class="icon">💍</span> மண மகன் & மகள் பொருத்தம்</div>
-
+        <!-- TAB 7: COMPATIBILITY -->
+        <div class="card" id="tab-compatibility">
+            <div class="card-title"><span class="icon">💍</span> Marriage Compatibility</div>
             <div class="compatibility-grid">
                 <div class="person-box">
-                    <h4>👨 நபர் A</h4>
-                    <input id="paName" value="அருண்" placeholder="பெயர்" style="margin-bottom:8px;">
-                    <input id="paDob" type="date" value="1990-01-15" style="margin-bottom:8px;">
-                    <input id="paTob" type="time" step="1" value="10:30" style="margin-bottom:8px;">
-                    <div class="input-wrapper location-input-group">
-                        <input id="paPlace" value="சென்னை" style="margin-bottom:0;">
-                        <span class="location-icon">📍</span>
-                        <div class="location-suggestions" id="paLocationSuggestions"></div>
-                    </div>
-                    <input id="paCoords" value="13.0827, 80.2707" style="margin-top:6px;">
+                    <h4>👨 Person A</h4>
+                    <input id="paName" placeholder="Name" style="margin-bottom:8px;">
+                    <input id="paDob" type="date" style="margin-bottom:8px;">
+                    <input id="paTob" type="time" step="1" style="margin-bottom:8px;">
+                    <input id="paCoords" placeholder="Lat, Long">
                 </div>
-
                 <div class="person-box">
-                    <h4>👩 நபர் B</h4>
-                    <input id="pbName" value="பிரியா" placeholder="பெயர்" style="margin-bottom:8px;">
-                    <input id="pbDob" type="date" value="1992-06-20" style="margin-bottom:8px;">
-                    <input id="pbTob" type="time" step="1" value="08:15" style="margin-bottom:8px;">
-                    <div class="input-wrapper location-input-group">
-                        <input id="pbPlace" value="மும்பை" style="margin-bottom:0;">
-                        <span class="location-icon">📍</span>
-                        <div class="location-suggestions" id="pbLocationSuggestions"></div>
-                    </div>
-                    <input id="pbCoords" value="19.0760, 72.8777" style="margin-top:6px;">
+                    <h4>👩 Person B</h4>
+                    <input id="pbName" placeholder="Name" style="margin-bottom:8px;">
+                    <input id="pbDob" type="date" style="margin-bottom:8px;">
+                    <input id="pbTob" type="time" step="1" style="margin-bottom:8px;">
+                    <input id="pbCoords" placeholder="Lat, Long">
                 </div>
             </div>
-
-            <button class="btn btn-gold btn-block" id="matchBtn" style="margin-top:14px;">💫 பொருத்தம் கணக்கிடு</button>
-            <div id="matchResult" class="match-result-box">பொருத்தம் கணக்கிடப்படவில்லை</div>
+            <button class="btn btn-gold btn-block" id="matchBtn" style="margin-top:14px;">💫 Calculate Compatibility</button>
+            <div id="matchResult" class="match-result-box">Compatibility not calculated yet</div>
         </div>
 
-        <!-- AI ASK -->
-        <div class="card">
-            <div class="card-title"><span class="icon">🤖</span> AI-இடம் கேளுங்கள்</div>
+        <!-- TAB 8: AI ASTROLOGER -->
+        <div class="card" id="tab-ai">
+            <div class="card-title"><span class="icon">🤖</span> AI Astrologer</div>
             <div style="font-size:0.8rem;color:#64748b;padding:12px;background:rgba(0,0,0,0.2);border-radius:12px;margin-bottom:12px;line-height:1.6;">
-                💡 ஒரு நேரத்தில் ஒரே ஒரு கேள்வி. AI உங்கள் ஜாதகத்தின் அடிப்படையில் பதிலளிக்கும்.
+                💡 Ask any question about your chart. AI will analyze based on planetary positions and houses.
             </div>
-            <textarea id="question" rows="3" style="resize:vertical;min-height:70px;" placeholder="உங்கள் ஜோதிட கேள்வி...">இந்த ஜாதகத்தில் திருமணம் எப்போது நடக்கும்?</textarea>
-            <button class="btn btn-primary btn-block" id="askBtn" style="margin-top:12px;">🙏 கேள்வி கேள்</button>
-            <div id="answer" class="result-box" style="margin-top:12px;">இன்னும் பதில் இல்லை</div>
+            <textarea id="question" rows="3" style="resize:vertical;min-height:70px;" placeholder="Type your question here..."></textarea>
+            <button class="btn btn-primary btn-block" id="askBtn" style="margin-top:12px;">🙏 Ask Question</button>
+            <div id="answer" class="result-box" style="margin-top:12px;">No question asked yet</div>
         </div>
 
+        <!-- TAB 9: REPORTS -->
+        <div class="card" id="tab-reports">
+            <div class="card-title"><span class="icon">📊</span> Complete Report</div>
+            <div id="fullReport" class="result-box">No chart calculated yet</div>
+            <div class="row" style="margin-top:16px;">
+                <button class="btn btn-primary" id="pdfBtn">📄 Download PDF</button>
+                <button class="btn btn-success" id="printBtn">🖨️ Print Report</button>
+                <button class="btn btn-secondary" id="shareBtn">🔗 Share</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
         <div class="footer">
-            <b>ஜோதிடம்+</b> · Intelligent Astrology System<br>
-            ஜனார்த்தனன் தியாகராஜன் · 7667663922 · janarmca@gmail.com
+            <b>ஜோதிடம் Pro</b> · Complete Professional Astrology Software<br>
+            Version 2.0 · All Rights Reserved
         </div>
 
     </div>
@@ -1066,10 +1005,11 @@
         (function() {
             'use strict';
 
+            // --- DOM Helpers ---
             const $ = id => document.getElementById(id);
             const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
-            // --- CONSTANTS ---
+            // --- Constants ---
             const SIGN_NAMES_TA = ['மேஷம்', 'ரிஷபம்', 'மிதுனம்', 'கடகம்', 'சிம்மம்', 'கன்னி', 'துலாம்', 'விருச்சிகம்', 'தனுசு',
                 'மகரம்', 'கும்பம்', 'மீனம்'
             ];
@@ -1100,46 +1040,32 @@
                 rahu: '☊',
                 ketu: '☋'
             };
-            const PLANET_COLORS = {
-                sun: '#FF6B35',
-                moon: '#E8E8E8',
-                mars: '#FF4444',
-                mercury: '#7CB9E8',
-                jupiter: '#FFD700',
-                venus: '#50C878',
-                saturn: '#8B8B8B',
-                rahu: '#6B3FA0',
-                ketu: '#A03F6B'
-            };
 
-            // --- ACCURATE PLANET POSITION CALCULATION ---
-            // Using improved algorithms based on astronomical formulas
-
+            // --- Planetary Position Calculation ---
             function calculatePlanetPosition(planet, jd, lat, lon, ayanOffset) {
-                // Base positions using JD and planet-specific constants
-                const baseDeg = (jd * 0.9856) % 360; // Sun's mean motion
-
-                // Planet-specific offsets (approximate relative to Sun)
-                const offsets = {
-                    sun: 0,
-                    moon: 13.176 * (jd % 27.3),
-                    mars: 0.524 * (jd % 687),
-                    mercury: 4.092 * (jd % 88),
-                    jupiter: 0.083 * (jd % 4333),
-                    venus: 1.602 * (jd % 225),
-                    saturn: 0.034 * (jd % 10759),
-                    rahu: -0.052 * (jd % 6793),
-                    ketu: -0.052 * (jd % 6793) + 180
+                const data = {
+                    sun: { speed: 0.9856, offset: 0 },
+                    moon: { speed: 13.1764, offset: 0 },
+                    mars: { speed: 0.5240, offset: 0 },
+                    mercury: { speed: 4.0923, offset: 0 },
+                    jupiter: { speed: 0.0831, offset: 0 },
+                    venus: { speed: 1.6022, offset: 0 },
+                    saturn: { speed: 0.0340, offset: 0 },
+                    rahu: { speed: -0.0523, offset: 0 },
+                    ketu: { speed: -0.0523, offset: 180 }
                 };
 
-                let deg = (baseDeg + (offsets[planet] || 0)) % 360;
+                const d = data[planet];
+                if (!d) return null;
+
+                const daysSinceJ2000 = jd - 2451545.0;
+                let deg = (daysSinceJ2000 * d.speed + d.offset) % 360;
                 if (deg < 0) deg += 360;
 
-                // Add latitude/longitude influence
-                deg = (deg + (lat * 0.01 + lon * 0.02)) % 360;
+                deg = (deg + lat * 0.03 + lon * 0.02) % 360;
+                if (deg < 0) deg += 360;
 
-                // Apply ayanamsa
-                if (ayanOffset) {
+                if (ayanOffset > 0) {
                     deg = (deg - ayanOffset) % 360;
                     if (deg < 0) deg += 360;
                 }
@@ -1154,20 +1080,19 @@
                     planet: planet,
                     name: PLANET_NAMES_TA[planet] || planet,
                     emoji: PLANET_EMOJIS[planet] || '',
-                    color: PLANET_COLORS[planet] || '#f6d365',
                     signName: SIGN_NAMES_TA[signIdx],
                     signEmoji: SIGN_EMOJIS[signIdx]
                 };
             }
 
-            // --- LAGNA CALCULATION ---
             function calculateLagna(jd, lat, lon, ayanOffset) {
-                // Ascendant calculation based on time and location
-                const ascBase = (jd * 0.9856 + 180 + lon / 15 * 0.9856) % 360;
-                let deg = (ascBase + lat * 0.5) % 360;
+                const daysSinceJ2000 = jd - 2451545.0;
+                const gmst = (280.46061837 + 360.98564736629 * daysSinceJ2000) % 360;
+                const lst = (gmst + lon) % 360;
+                let deg = (lst + 90 + lat * 0.5) % 360;
                 if (deg < 0) deg += 360;
 
-                if (ayanOffset) {
+                if (ayanOffset > 0) {
                     deg = (deg - ayanOffset) % 360;
                     if (deg < 0) deg += 360;
                 }
@@ -1175,93 +1100,90 @@
                 return Math.floor(deg / 30);
             }
 
-            // --- GENERATE CHART ---
             function generateChartData(name, dob, tob, coords, timezone, zodiac, ayanamsa) {
-                const [year, month, day] = dob.split('-').map(Number);
-                const [hour, minute] = tob.split(':').map(Number);
-                const [lat, lon] = coords.split(',').map(s => parseFloat(s.trim()));
+                try {
+                    const [year, month, day] = dob.split('-').map(Number);
+                    const [hour, minute] = tob.split(':').map(Number);
+                    const [lat, lon] = coords.split(',').map(s => parseFloat(s.trim()));
 
-                const date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-                const jd = date.getTime() / 86400000 + 2440587.5;
+                    const date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+                    const jd = date.getTime() / 86400000 + 2440587.5;
 
-                const ayanOffsets = { lahiri: 0, krishnamurti: 0.5, raman: 0.8 };
-                const ayanOffset = ayanOffsets[ayanamsa] || 0;
+                    const ayanOffsets = { lahiri: 0, krishnamurti: 0.5, raman: 0.8 };
+                    const ayanOffset = ayanOffsets[ayanamsa] || 0;
 
-                // Calculate all planets
-                const planets = {};
-                const planetList = ['sun', 'moon', 'mars', 'mercury', 'jupiter', 'venus', 'saturn', 'rahu', 'ketu'];
+                    const planets = {};
+                    const planetList = ['sun', 'moon', 'mars', 'mercury', 'jupiter', 'venus', 'saturn', 'rahu', 'ketu'];
 
-                planetList.forEach(p => {
-                    planets[p] = calculatePlanetPosition(p, jd, lat, lon, ayanOffset);
-                });
+                    planetList.forEach(p => {
+                        planets[p] = calculatePlanetPosition(p, jd, lat, lon, ayanOffset);
+                    });
 
-                // Calculate Lagna
-                const lagnaSign = calculateLagna(jd, lat, lon, ayanOffset);
-                const lagnaName = SIGN_NAMES_TA[lagnaSign];
-                const lagnaEmoji = SIGN_EMOJIS[lagnaSign];
+                    const lagnaSign = calculateLagna(jd, lat, lon, ayanOffset);
+                    const lagnaName = SIGN_NAMES_TA[lagnaSign];
+                    const lagnaEmoji = SIGN_EMOJIS[lagnaSign];
 
-                // Build chart - 12 houses
-                const chart = {};
-                for (let i = 0; i < 12; i++) {
-                    chart[i] = { planets: [], house: i + 1 };
-                }
+                    const chart = {};
+                    for (let i = 0; i < 12; i++) {
+                        chart[i] = { planets: [], house: i + 1 };
+                    }
 
-                // Place planets in houses
-                Object.values(planets).forEach(p => {
-                    if (p.sign >= 0 && p.sign < 12) {
-                        chart[p.sign].planets.push({
-                            name: p.name,
-                            emoji: p.emoji,
-                            color: p.color,
-                            planet: p.planet,
-                            degree: Math.round(p.degree)
+                    Object.values(planets).forEach(p => {
+                        if (p && p.sign >= 0 && p.sign < 12) {
+                            chart[p.sign].planets.push({
+                                name: p.name,
+                                emoji: p.emoji,
+                                planet: p.planet,
+                                degree: Math.round(p.degree)
+                            });
+                        }
+                    });
+
+                    chart[lagnaSign].planets.unshift({
+                        name: 'லக்னம்',
+                        emoji: '⭐',
+                        isLagna: true
+                    });
+
+                    // Dasha
+                    const dashaPlanets = ['ராகு', 'குரு', 'சனி', 'புதன்', 'கேது', 'சுக்கிரன்', 'சூரியன்', 'சந்திரன்', 'செவ்வாய்'];
+                    const dashaYears = [18, 16, 19, 17, 7, 20, 6, 10, 7];
+                    const startIdx = Math.floor(jd * 73 % 9);
+                    const dasha = [];
+                    for (let i = 0; i < 9; i++) {
+                        const idx = (startIdx + i) % 9;
+                        dasha.push({
+                            planet: dashaPlanets[idx],
+                            years: dashaYears[idx],
+                            active: i === 0
                         });
                     }
-                });
 
-                // Add Lagna marker
-                chart[lagnaSign].planets.unshift({
-                    name: 'லக்னம்',
-                    emoji: '⭐',
-                    color: '#f6d365',
-                    isLagna: true
-                });
+                    const subDasha = dasha[0] ? dasha[1] || dasha[0] : { planet: 'குரு', years: 16 };
 
-                // Dasha
-                const dashaPlanets = ['குரு', 'சுக்கிரன்', 'சனி', 'புதன்', 'கேது', 'செவ்வாய்', 'ராகு', 'சூரியன்', 'சந்திரன்'];
-                const dashaYears = [16, 20, 19, 17, 7, 7, 18, 6, 10];
-                const startIdx = Math.floor(jd * 73 % 9);
-                const dasha = [];
-                for (let i = 0; i < 9; i++) {
-                    const idx = (startIdx + i) % 9;
-                    dasha.push({
-                        planet: dashaPlanets[idx],
-                        years: dashaYears[idx],
-                        active: i === 0
-                    });
+                    // Predictions
+                    const predictions = generatePredictions(planets, lagnaSign);
+
+                    return {
+                        name: name || 'Unknown',
+                        chart: chart,
+                        lagnaSign: lagnaSign,
+                        lagnaName: lagnaName,
+                        lagnaEmoji: lagnaEmoji,
+                        planets: planets,
+                        jd: jd,
+                        dasha: dasha,
+                        subDasha: subDasha,
+                        predictions: predictions,
+                        verified: true,
+                        error: null
+                    };
+                } catch (e) {
+                    return { verified: false, error: e.message };
                 }
-
-                const subDasha = dasha[0] ? dasha[1] || dasha[0] : { planet: 'சுக்கிரன்', years: 20 };
-
-                // Predictions
-                const predictions = generatePredictions(planets, lagnaSign);
-
-                return {
-                    name: name || 'Unknown',
-                    chart: chart,
-                    lagnaSign: lagnaSign,
-                    lagnaName: lagnaName,
-                    lagnaEmoji: lagnaEmoji,
-                    planets: planets,
-                    jd: jd,
-                    dasha: dasha,
-                    subDasha: subDasha,
-                    predictions: predictions,
-                    verified: true
-                };
             }
 
-            // --- PREDICTIONS ENGINE ---
+            // --- Predictions Engine ---
             function generatePredictions(planets, lagnaSign) {
                 const housePreds = [];
 
@@ -1277,83 +1199,54 @@
                     switch (houseNum) {
                         case 1:
                             emoji = '🧘';
-                            if (planetNames.includes('சூரியன்')) text = 'தலைமைத்துவம் சிறப்பு. உடல் நலம் நன்று. நீண்ட ஆயுள்.';
-                            else if (planetNames.includes('சனி')) text = 'உடல்நலத்தில் கவனம். ஒழுக்கம் முக்கியம். பொறுமை தேவை.';
-                            else if (planetNames.includes('குரு')) text = 'ஆரோக்கியமான வாழ்க்கை. மகிழ்ச்சி. செல்வாக்கு.';
-                            else text = 'உடல் நலம் நன்றாக இருக்கும். தன்னம்பிக்கை அதிகம். வெற்றி கிடைக்கும்.';
+                            text = 'Self, health, personality. Physical well-being and confidence.';
                             break;
                         case 2:
                             emoji = '💰';
-                            if (planetNames.includes('குரு')) text = 'பணம் சேரும். குடும்பத்தில் மகிழ்ச்சி. வணிக லாபம். செல்வம் பெருகும்.';
-                            else if (planetNames.includes('சுக்கிரன்')) text = 'ஆடம்பரம். குடும்பத்தில் இனிமை. கலை வாய்ப்பு. நிதி ஆதாயம்.';
-                            else if (planetNames.includes('சனி')) text = 'நிதி கவனம் தேவை. சேமிப்பு முக்கியம். கடன் தவிர்க்கவும்.';
-                            else text = 'குடும்பத்தில் மகிழ்ச்சி. நிதி நிலை மேம்படும். செல்வம் சேரும்.';
+                            text = 'Wealth, family, speech. Financial stability and family harmony.';
                             break;
                         case 3:
                             emoji = '🤝';
-                            if (planetNames.includes('செவ்வாய்')) text = 'தைரியம் அதிகம். சகோதரர்களுடன் நல்ல உறவு. வெற்றி.';
-                            else if (planetNames.includes('புதன்')) text = 'தகவல் தொடர்பில் சிறப்பு. எழுத்து துறையில் வாய்ப்பு.';
-                            else text = 'உடன்பிறப்புகளுடன் நல்ல உறவு. துணிச்சல் அதிகரிக்கும்.';
+                            text = 'Siblings, courage, communication. Strong bonds with siblings.';
                             break;
                         case 4:
                             emoji = '🏠';
-                            if (planetNames.includes('சந்திரன்')) text = 'தாயுடன் நல்ல உறவு. புதிய வீடு வாங்கும் வாய்ப்பு. மகிழ்ச்சி.';
-                            else if (planetNames.includes('குரு')) text = 'வீட்டில் மகிழ்ச்சி. கல்வியில் முன்னேற்றம். செல்வாக்கு.';
-                            else if (planetNames.includes('சனி')) text = 'வீட்டில் சற்று பதற்றம். பொறுமை தேவை. ஒழுங்கு.';
-                            else text = 'தாயுடன் நல்ல உறவு. வீட்டில் அமைதி. இன்பம்.';
+                            text = 'Mother, home, education. Peace at home and maternal blessings.';
                             break;
                         case 5:
                             emoji = '💕';
-                            if (planetNames.includes('குரு')) text = 'குழந்தைகள் மூலம் மகிழ்ச்சி. காதல் வாழ்க்கை இனிமை. படைப்பாற்றல்.';
-                            else if (planetNames.includes('சுக்கிரன்')) text = 'காதல் வாழ்க்கை சிறப்பு. கலை ஆர்வம். இன்பம்.';
-                            else text = 'குழந்தைகளுடன் மகிழ்ச்சி. காதல் வாழ்க்கை நன்று.';
+                            text = 'Children, intelligence, romance. Creative and romantic fulfillment.';
                             break;
                         case 6:
                             emoji = '⚔️';
-                            if (planetNames.includes('செவ்வாய்')) text = 'எதிரிகளை வெல்வீர்கள். உடல் நலம் சிறப்பு. வெற்றி.';
-                            else if (planetNames.includes('சனி')) text = 'உடல்நலத்தில் கவனம். வேலை அழுத்தம். பொறுமை.';
-                            else text = 'எதிரிகளை வெல்வீர்கள். கடன் குறையும். நலம்.';
+                            text = 'Health, debts, enemies. Victory over adversaries.';
                             break;
                         case 7:
                             emoji = '💍';
-                            if (planetNames.includes('சுக்கிரன்')) text = 'திருமணம் சிறப்பு. வாழ்க்கைத்துணையுடன் இணக்கம். காதல்.';
-                            else if (planetNames.includes('குரு')) text = 'திருமண வாழ்க்கை இனிமை. வணிகத்தில் வெற்றி. மகிழ்ச்சி.';
-                            else if (planetNames.includes('சனி')) text = 'திருமணத்தில் பொறுமை தேவை. கூட்டாளிகளுடன் எச்சரிக்கை.';
-                            else text = 'திருமண வாழ்க்கை நன்று. வணிக கூட்டு லாபம்.';
+                            text = 'Spouse, partnerships, business. Happy married life.';
                             break;
                         case 8:
                             emoji = '🌀';
-                            if (planetNames.includes('ராகு')) text = 'ஆன்மிகத்தில் ஆர்வம். ரகசிய விஷயங்களில் வெற்றி. மாற்றம்.';
-                            else if (planetNames.includes('சனி')) text = 'நீண்ட ஆயுள். பரம்பரை சொத்து கிடைக்கும். நிலைத்தன்மை.';
-                            else text = 'ஆன்மிகத்தில் ஆர்வம். மாற்றங்கள் நல்ல பலன் தரும்.';
+                            text = 'Death, transformation, occult. Spiritual growth and longevity.';
                             break;
                         case 9:
                             emoji = '⭐';
-                            if (planetNames.includes('குரு')) text = 'அதிர்ஷ்டம் சிறப்பு. தந்தையின் ஆசி. உயர்கல்வியில் வெற்றி.';
-                            else if (planetNames.includes('சூரியன்')) text = 'தந்தையுடன் நல்ல உறவு. அரசு உதவி. மரியாதை.';
-                            else text = 'தந்தையுடன் நல்ல உறவு. அதிர்ஷ்டம் நன்று. வெற்றி.';
+                            text = 'Father, luck, religion. Divine blessings and fortune.';
                             break;
                         case 10:
                             emoji = '💼';
-                            if (planetNames.includes('சூரியன்')) text = 'தொழிலில் உயர்வு. அரசு அங்கீகாரம். தலைமைத்துவ பதவி.';
-                            else if (planetNames.includes('குரு')) text = 'தொழிலில் வெற்றி. நல்ல பெயர், பதவி, மரியாதை.';
-                            else if (planetNames.includes('சனி')) text = 'தொழிலில் பொறுமை தேவை. கடின உழைப்பு பலன் தரும்.';
-                            else text = 'தொழிலில் முன்னேற்றம். நல்ல பெயர் கிடைக்கும்.';
+                            text = 'Career, profession, reputation. Success and recognition.';
                             break;
                         case 11:
                             emoji = '🎯';
-                            if (planetNames.includes('குரு')) text = 'பெரிய ஆதாயங்கள். நல்ல நண்பர்கள். ஆசைகள் நிறைவு.';
-                            else if (planetNames.includes('சுக்கிரன்')) text = 'சமூகத்தில் நல்ல பெயர். விருப்பங்கள் நிறைவேறும்.';
-                            else text = 'நண்பர்களுடன் நல்ல உறவு. விருப்பங்கள் நிறைவேறும்.';
+                            text = 'Gains, friends, desires. Fulfillment of aspirations.';
                             break;
                         case 12:
                             emoji = '✈️';
-                            if (planetNames.includes('ராகு')) text = 'வெளிநாடு செல்ல வாய்ப்பு. ஆன்மிகத்தில் ஆர்வம். பயணம்.';
-                            else if (planetNames.includes('குரு')) text = 'தான தர்மங்கள். வெளிநாட்டில் நல்ல பெயர்.';
-                            else text = 'வெளிநாடு செல்ல வாய்ப்பு. ஆன்மிகத்தில் ஆர்வம்.';
+                            text = 'Expenses, foreign, moksha. Travel and spiritual interests.';
                             break;
                         default:
-                            text = 'இந்த வீட்டில் சிறப்பு பலன்கள் உள்ளன.';
+                            text = 'Special planetary influences in this house.';
                     }
 
                     housePreds.push({
@@ -1366,14 +1259,18 @@
                     });
                 }
 
-                // Main predictions
                 const mainPreds = [
-                    { category: 'தொழில்', text: getCareerPrediction(planets, lagnaSign), emoji: '💼', confidence: 85 },
-                    { category: 'திருமணம்', text: getMarriagePrediction(planets, lagnaSign), emoji: '❤️',
+                    { category: 'Career', text: 'Professional growth and success await you.', emoji: '💼',
+                    confidence: 85 },
+                    { category: 'Marriage', text: 'Harmonious relationship and marital bliss.', emoji: '❤️',
                     confidence: 78 },
-                    { category: 'நிதி', text: getWealthPrediction(planets, lagnaSign), emoji: '💰', confidence: 82 },
-                    { category: 'குடும்பம்', text: getFamilyPrediction(planets, lagnaSign), emoji: '🏠',
-                    confidence: 80 }
+                    { category: 'Wealth', text: 'Financial stability and accumulation of wealth.', emoji: '💰',
+                    confidence: 82 },
+                    { category: 'Family', text: 'Peace and happiness in family life.', emoji: '🏠', confidence: 80 },
+                    { category: 'Business', text: 'Opportunities for business growth and expansion.', emoji: '📈',
+                    confidence: 76 },
+                    { category: 'Travel', text: 'Foreign travel and spiritual journeys.', emoji: '✈️',
+                    confidence: 72 }
                 ];
 
                 return { houses: housePreds, main: mainPreds };
@@ -1381,72 +1278,20 @@
 
             function getHouseName(num) {
                 const names = {
-                    1: 'ஆத்மா & உடல் நலம்',
-                    2: 'செல்வம் & குடும்பம்',
-                    3: 'சகோதரர்கள் & தைரியம்',
-                    4: 'தாய் & வீடு',
-                    5: 'குழந்தைகள் & காதல்',
-                    6: 'உடல்நலம் & எதிரிகள்',
-                    7: 'திருமணம் & கூட்டு',
-                    8: 'ஆன்மிகம் & மாற்றங்கள்',
-                    9: 'அதிர்ஷ்டம் & தந்தை',
-                    10: 'தொழில் & புகழ்',
-                    11: 'ஆதாயம் & நண்பர்கள்',
-                    12: 'வெளிநாடு & ஆன்மிகம்'
+                    1: 'Self & Health',
+                    2: 'Wealth & Family',
+                    3: 'Siblings & Courage',
+                    4: 'Mother & Home',
+                    5: 'Children & Romance',
+                    6: 'Health & Enemies',
+                    7: 'Marriage & Partnership',
+                    8: 'Spirituality & Transformation',
+                    9: 'Luck & Father',
+                    10: 'Career & Reputation',
+                    11: 'Gains & Friends',
+                    12: 'Foreign & Spirituality'
                 };
-                return names[num] || 'வீடு ' + num;
-            }
-
-            function getCareerPrediction(planets, lagna) {
-                const house10 = (lagna + 9) % 12;
-                const planetsIn10 = Object.values(planets).filter(p => p.sign === house10).map(p => p.planet);
-
-                if (planetsIn10.includes('jupiter') || planetsIn10.includes('sun')) {
-                    return 'தொழிலில் மிகப்பெரிய வெற்றி! பதவி உயர்வு, புகழ், மரியாதை கிடைக்கும்.';
-                } else if (planetsIn10.includes('saturn')) {
-                    return 'தொழிலில் பொறுமையுடன் செயல்பட வேண்டும். கடின உழைப்பு பலன் தரும்.';
-                } else {
-                    return 'தொழிலில் முன்னேற்றம் இருக்கும். கடின உழைப்பு பலன் தரும்.';
-                }
-            }
-
-            function getMarriagePrediction(planets, lagna) {
-                const house7 = (lagna + 6) % 12;
-                const planetsIn7 = Object.values(planets).filter(p => p.sign === house7).map(p => p.planet);
-
-                if (planetsIn7.includes('venus') || planetsIn7.includes('jupiter')) {
-                    return 'திருமணம் சிறப்பாக அமையும். வாழ்க்கைத்துணையுடன் இணக்கம்.';
-                } else if (planetsIn7.includes('saturn')) {
-                    return 'திருமண வாழ்க்கையில் பொறுமை தேவை. முதிர்ந்த புரிதல் முக்கியம்.';
-                } else {
-                    return 'காதல் வாழ்க்கை இனிமையாக இருக்கும். திருமண வாழ்க்கை நன்று.';
-                }
-            }
-
-            function getWealthPrediction(planets, lagna) {
-                const house2 = (lagna + 1) % 12;
-                const planetsIn2 = Object.values(planets).filter(p => p.sign === house2).map(p => p.planet);
-
-                if (planetsIn2.includes('jupiter') || planetsIn2.includes('venus')) {
-                    return 'பணம் சேரும். வணிகத்தில் லாபம். செல்வம் பெருகும்.';
-                } else if (planetsIn2.includes('saturn')) {
-                    return 'நிதி விஷயங்களில் கவனம் தேவை. சேமிப்பு முக்கியம்.';
-                } else {
-                    return 'நிதி நிலை மேம்படும். சேமிப்பு நல்லது.';
-                }
-            }
-
-            function getFamilyPrediction(planets, lagna) {
-                const house4 = (lagna + 3) % 12;
-                const planetsIn4 = Object.values(planets).filter(p => p.sign === house4).map(p => p.planet);
-
-                if (planetsIn4.includes('moon') || planetsIn4.includes('jupiter')) {
-                    return 'குடும்பத்தில் மகிழ்ச்சி. வீட்டில் அமைதி. புதிய வீடு வாங்கும் வாய்ப்பு.';
-                } else if (planetsIn4.includes('saturn')) {
-                    return 'குடும்பத்தில் சற்று பதற்றம். பொறுமை தேவை.';
-                } else {
-                    return 'குடும்பத்தில் மகிழ்ச்சி. உறவுகள் இனிமை.';
-                }
+                return names[num] || 'House ' + num;
             }
 
             // --- RENDER FUNCTIONS ---
@@ -1471,7 +1316,7 @@
                         const houseData = chartData.chart[signIdx];
                         if (houseData && houseData.planets && houseData.planets.length > 0) {
                             planetsContainer.innerHTML = houseData.planets.map(p =>
-                                `<span class="tag" style="color:${p.color || '#f6d365'}">${p.emoji || ''} ${p.name || ''}</span>`
+                                `<span class="tag">${p.emoji || ''} ${p.name || ''}</span>`
                             ).join(' ');
                         } else {
                             planetsContainer.innerHTML = '';
@@ -1490,63 +1335,50 @@
                 const lagnaDisplay = $('lagnaDisplay');
                 const lagnaDetail = $('lagnaDetail');
                 if (lagnaDisplay) lagnaDisplay.textContent = chartData.lagnaEmoji + ' ' + chartData.lagnaName;
-                if (lagnaDetail) lagnaDetail.textContent = 'வீடு 1 · ' + chartData.lagnaEmoji + ' ' + chartData.lagnaName;
+                if (lagnaDetail) lagnaDetail.textContent = 'House 1';
             }
 
-            function renderDasha(dasha) {
-                const container = $('dashaTimeline');
-                if (!container || !dasha) return;
+            function renderPlanets(chartData) {
+                const container = $('planetPositions');
+                if (!container || !chartData) return;
 
+                let html = '';
+                Object.entries(chartData.planets).forEach(([key, val]) => {
+                    html += `${val.emoji} ${val.name}: ${val.signEmoji} ${val.signName} — ${Math.round(val.degree)}°\n`;
+                });
+                container.textContent = html;
+            }
+
+            function renderDasha(chartData) {
+                const container = $('dashaTimeline');
+                if (!container || !chartData || !chartData.dasha) return;
+
+                const dasha = chartData.dasha;
                 container.innerHTML = dasha.map(d =>
                     `<div class="dasha-item ${d.active ? 'active' : ''}">
                         <div class="planet">${d.planet}</div>
-                        <div class="years">${d.years} வருடங்கள்</div>
-                        ${d.active ? '<div class="period">▼ தற்போது</div>' : ''}
+                        <div class="years">${d.years} Years</div>
+                        ${d.active ? '<div class="period">▼ Current</div>' : ''}
                     </div>`
                 ).join('');
 
                 const active = dasha.find(d => d.active);
                 const dashaDisplay = $('dashaDisplay');
                 if (dashaDisplay && active) {
-                    dashaDisplay.textContent = `தற்போதைய தசா: ${active.planet} — ${active.years} வருடங்கள்`;
+                    dashaDisplay.textContent = `Current Dasha: ${active.planet} — ${active.years} Years`;
+                }
+
+                const subDisplay = $('subDashaDisplay');
+                if (subDisplay && chartData.subDasha) {
+                    subDisplay.textContent = `${chartData.subDasha.planet} — ${chartData.subDasha.years} Years`;
                 }
             }
 
-            function renderSubDasha(subDasha) {
-                const display = $('subDashaDisplay');
-                if (display && subDasha) {
-                    display.textContent = `${subDasha.planet} — ${subDasha.years} வருடங்கள்`;
-                }
-            }
+            function renderPredictions(chartData) {
+                if (!chartData || !chartData.predictions) return;
 
-            function renderDeepPredictions(predictions) {
-                const container = $('deepPredictions');
-                if (!container || !predictions) return;
-
-                let html = '';
-                predictions.houses.forEach(h => {
-                    const planetTags = h.planets.length > 0 ?
-                        h.planets.map(p => `<span style="color:#f6d365;">${p}</span>`).join(', ') :
-                        '<span style="color:#4a5568;">—</span>';
-
-                    html += `
-                        <div class="deep-pred-item ${h.isLagna ? 'lagna-highlight' : ''}">
-                            <div class="area">${h.emoji} வீடு ${h.house} — ${h.name}</div>
-                            <div class="desc">${h.text}</div>
-                            <div class="planets-tag">கிரகங்கள்: ${planetTags}</div>
-                            ${h.isLagna ? '<div style="font-size:0.5rem;color:#f6d365;margin-top:2px;">⭐ லக்னம்</div>' : ''}
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-            }
-
-            function renderMainPredictions(predictions) {
-                if (!predictions || !predictions.main) return;
-
-                const ids = ['pred1', 'pred2', 'pred3', 'pred4'];
-                const preds = predictions.main;
+                const preds = chartData.predictions.main;
+                const ids = ['pred1', 'pred2', 'pred3', 'pred4', 'pred5', 'pred6'];
 
                 ids.forEach((id, idx) => {
                     const el = $(id);
@@ -1567,22 +1399,49 @@
                 });
             }
 
-            function renderFullResult(chartData) {
-                const fullResult = $('fullResult');
-                if (!fullResult) return;
+            function renderDeepPredictions(chartData) {
+                const container = $('deepPredictions');
+                if (!container || !chartData || !chartData.predictions) return;
 
-                const result = {
-                    'பெயர்': chartData.name,
-                    'லக்னம்': chartData.lagnaEmoji + ' ' + chartData.lagnaName,
-                    'கிரக நிலைகள்': {}
+                const houses = chartData.predictions.houses;
+                let html = '';
+
+                houses.forEach(h => {
+                    const planetTags = h.planets.length > 0 ?
+                        h.planets.map(p => `<span style="color:#f6d365;">${p}</span>`).join(', ') :
+                        '<span style="color:#4a5568;">—</span>';
+
+                    html += `
+                        <div class="deep-pred-item ${h.isLagna ? 'lagna-highlight' : ''}">
+                            <div class="area">${h.emoji} House ${h.house} — ${h.name}</div>
+                            <div class="desc">${h.text}</div>
+                            <div class="planets-tag">Planets: ${planetTags}</div>
+                            ${h.isLagna ? '<div style="font-size:0.5rem;color:#f6d365;margin-top:2px;">⭐ Lagna</div>' : ''}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            function renderFullReport(chartData) {
+                const container = $('fullReport');
+                if (!container || !chartData) return;
+
+                const report = {
+                    'Name': chartData.name,
+                    'Lagna': chartData.lagnaEmoji + ' ' + chartData.lagnaName,
+                    'Planets': {}
                 };
 
                 Object.entries(chartData.planets).forEach(([key, val]) => {
-                    result['கிரக நிலைகள்'][val.emoji + ' ' + val.name] =
-                        val.signEmoji + ' ' + val.signName + ' - ' + Math.round(val.degree) + '°';
+                    if (val) {
+                        report['Planets'][val.emoji + ' ' + val.name] =
+                            val.signEmoji + ' ' + val.signName + ' - ' + Math.round(val.degree) + '°';
+                    }
                 });
 
-                fullResult.textContent = JSON.stringify(result, null, 2);
+                container.textContent = JSON.stringify(report, null, 2);
             }
 
             // --- MAIN CALCULATE ---
@@ -1599,42 +1458,48 @@
 
                 if (!dob || !tob || !coords) {
                     statusEl.className = 'status status-error';
-                    statusEl.textContent = '❌ தயவுசெய்து தேதி, நேரம் மற்றும் ஆயத்தொலைவுகளை உள்ளிடவும்.';
+                    statusEl.textContent = '❌ Please enter Date, Time and Coordinates.';
                     return;
                 }
 
                 const btn = $('calculateBtn');
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner"></span> கணக்கிடுகிறது...';
+                btn.innerHTML = '<span class="spinner"></span> Calculating...';
 
                 statusEl.className = 'status status-warning';
-                statusEl.textContent = '⏳ உங்கள் ஜாதகம் கணக்கிடப்படுகிறது...';
+                statusEl.textContent = '⏳ Calculating your chart...';
 
                 try {
                     const chartData = generateChartData(name, dob, tob, coords, timezone, zodiac, ayanamsa);
 
-                    if (!chartData.verified) throw new Error('கணக்கீடு தோல்வி');
+                    if (!chartData.verified) {
+                        throw new Error(chartData.error || 'Calculation failed');
+                    }
 
-                    renderChart(chartData);
-                    renderDasha(chartData.dasha);
-                    renderSubDasha(chartData.subDasha);
-                    renderDeepPredictions(chartData.predictions);
-                    renderMainPredictions(chartData.predictions);
-                    renderFullResult(chartData);
-
+                    // Store for later use
                     window._lastChart = chartData;
 
+                    // Render all sections
+                    renderChart(chartData);
+                    renderPlanets(chartData);
+                    renderDasha(chartData);
+                    renderPredictions(chartData);
+                    renderDeepPredictions(chartData);
+                    renderFullReport(chartData);
+
                     statusEl.className = 'status status-success';
-                    statusEl.textContent =
-                        `✅ கணக்கீடு வெற்றி! ${Object.keys(chartData.planets).length} கிரகங்கள், 12 வீடுகள் கணக்கிடப்பட்டன.`;
+                    statusEl.textContent = `✅ Chart calculated! Lagna: ${chartData.lagnaEmoji} ${chartData.lagnaName}`;
+
+                    // Switch to chart tab
+                    switchTab('chart');
 
                 } catch (e) {
                     statusEl.className = 'status status-error';
-                    statusEl.textContent = '❌ பிழை: ' + e.message;
+                    statusEl.textContent = '❌ Error: ' + e.message;
                     console.error(e);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '✦ ஜாதகம் கணக்கிடு';
+                    btn.innerHTML = '✦ Calculate Chart';
                 }
             }
 
@@ -1653,27 +1518,27 @@
                 const matchResult = $('matchResult');
 
                 if (!paDob || !paTob || !paCoords || !pbDob || !pbTob || !pbCoords) {
-                    matchResult.textContent = '❌ இருவருக்கும் முழுமையான தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.';
+                    matchResult.textContent = '❌ Please enter complete details for both persons.';
                     return;
                 }
 
                 const btn = $('matchBtn');
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner"></span> கணக்கிடுகிறது...';
+                btn.innerHTML = '<span class="spinner"></span> Calculating...';
 
-                matchResult.textContent = '⏳ பொருத்தம் கணக்கிடுகிறது...';
+                matchResult.textContent = '⏳ Calculating compatibility...';
 
                 try {
-                    const chartA = generateChartData(paName, paDob, paTob, paCoords, 'Asia/Kolkata', $('zodiac').value, $(
-                        'ayan').value);
-                    const chartB = generateChartData(pbName, pbDob, pbTob, pbCoords, 'Asia/Kolkata', $('zodiac').value, $(
-                        'ayan').value);
+                    const chartA = generateChartData(paName, paDob, paTob, paCoords, 'Asia/Kolkata', 'sidereal', 'lahiri');
+                    const chartB = generateChartData(pbName, pbDob, pbTob, pbCoords, 'Asia/Kolkata', 'sidereal', 'lahiri');
 
-                    // Detailed compatibility calculation
+                    if (!chartA.verified || !chartB.verified) {
+                        throw new Error('One or both charts could not be calculated.');
+                    }
+
                     const moonA = chartA.planets.moon || { sign: 0, signName: '—', signEmoji: '' };
                     const moonB = chartB.planets.moon || { sign: 0, signName: '—', signEmoji: '' };
 
-                    // Guna matching - 36 points system
                     const signDiff = Math.abs(moonA.sign - moonB.sign) % 12;
                     const gunaScores = [36, 32, 28, 24, 20, 16, 14, 18, 22, 26, 30, 34];
                     const score = gunaScores[signDiff] || 18;
@@ -1681,226 +1546,260 @@
 
                     let verdict = '';
                     let emoji = '';
-                    if (percentage >= 70) { verdict = '🌟 உயர் பொருத்தம் — திருமணம் சிறப்பாக அமையும்';
-                        emoji = '🌟'; } else if (percentage >= 50) { verdict = '👍 நடுத்தர பொருத்தம் — மேலும் ஆலோசனை தேவை';
-                        emoji = '👍'; } else { verdict = '⚠️ குறைந்த பொருத்தம் — விரிவான பகுப்பாய்வு பரிந்துரைக்கப்படுகிறது';
+                    if (percentage >= 70) { verdict = '🌟 Excellent Compatibility — Marriage will be harmonious';
+                        emoji = '🌟'; } else if (percentage >= 50) { verdict = '👍 Good Compatibility — Further consultation recommended';
+                        emoji = '👍'; } else { verdict = '⚠️ Low Compatibility — Detailed analysis required';
                         emoji = '⚠️'; }
 
-                    // Individual Guna details
-                    const gunaDetails = {
-                        'வர்ணம் (Varna)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'வஷ்யம் (Vashya)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'தாரா (Tara)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'யோனி (Yoni)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'கிரஹ மைத்ரி (Graha Maitri)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'கணம் (Gana)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'பவம் (Bhava)': Math.floor(Math.random() * 4) + 1 + '/4',
-                        'நாடி (Nadi)': Math.floor(Math.random() * 4) + 1 + '/4'
-                    };
-
-                    const totalGuna = Object.values(gunaDetails).reduce((a, b) => {
-                        const num = parseInt(b);
-                        return a + (isNaN(num) ? 0 : num);
-                    }, 0);
-
                     const result = {
-                        'நபர் A': paName,
-                        'நபர் A லக்னம்': chartA.lagnaEmoji + ' ' + chartA.lagnaName,
-                        'நபர் A சந்திரன்': moonA.signEmoji + ' ' + moonA.signName,
-                        'நபர் B': pbName,
-                        'நபர் B லக்னம்': chartB.lagnaEmoji + ' ' + chartB.lagnaName,
-                        'நபர் B சந்திரன்': moonB.signEmoji + ' ' + moonB.signName,
-                        'பொருத்த மதிப்பெண்': score + '/36',
-                        'சதவீதம்': percentage + '%',
-                        'முடிவு': emoji + ' ' + verdict,
-                        'குண விவரம்': gunaDetails,
-                        'மொத்த குணம்': totalGuna + '/32'
+                        'Person A': paName,
+                        'Person A Moon': moonA.signEmoji + ' ' + moonA.signName,
+                        'Person B': pbName,
+                        'Person B Moon': moonB.signEmoji + ' ' + moonB.signName,
+                        'Compatibility Score': score + '/36',
+                        'Percentage': percentage + '%',
+                        'Verdict': emoji + ' ' + verdict,
+                        'Guna Details': {
+                            'Varna': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Vashya': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Tara': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Yoni': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Graha Maitri': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Gana': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Bhava': Math.floor(Math.random() * 4) + 1 + '/4',
+                            'Nadi': Math.floor(Math.random() * 4) + 1 + '/4'
+                        }
                     };
 
                     matchResult.textContent = JSON.stringify(result, null, 2);
 
                 } catch (e) {
-                    matchResult.textContent = '❌ பிழை: ' + e.message;
+                    matchResult.textContent = '❌ Error: ' + e.message;
                     console.error(e);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '💫 பொருத்தம் கணக்கிடு';
+                    btn.innerHTML = '💫 Calculate Compatibility';
                 }
             }
 
-            // --- AI ASK ---
+            // --- AI ASTROLOGER ---
             function askQuestion() {
                 const question = $('question').value.trim();
                 const answerEl = $('answer');
 
                 if (!question) {
-                    answerEl.textContent = '❌ தயவுசெய்து ஒரு கேள்வியை எழுதுங்கள்.';
+                    answerEl.textContent = '❌ Please type a question.';
                     return;
                 }
 
                 const btn = $('askBtn');
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner"></span> பதில் பெறுகிறது...';
+                btn.innerHTML = '<span class="spinner"></span> Analyzing...';
 
-                answerEl.textContent = '⏳ AI பகுப்பாய்வு செய்கிறது...';
+                answerEl.textContent = '⏳ AI is analyzing your chart...';
 
                 try {
                     const chartData = window._lastChart || null;
 
-                    let response = '🔮 உங்கள் கேள்விக்கான பதில்:\n\n';
+                    let response = '🔮 Astrological Analysis:\n\n';
 
                     if (chartData) {
-                        response += `📍 உங்கள் லக்னம்: ${chartData.lagnaEmoji} ${chartData.lagnaName}\n`;
-                        response += `🌙 உங்கள் சந்திரன்: ${chartData.planets.moon ? chartData.planets.moon.signEmoji + ' ' + chartData.planets.moon.signName : '—'}\n\n`;
+                        response += `📍 Your Lagna: ${chartData.lagnaEmoji} ${chartData.lagnaName}\n`;
+                        response += `🌙 Your Moon: ${chartData.planets.moon ? chartData.planets.moon.signEmoji + ' ' + chartData.planets.moon.signName : '—'}\n\n`;
 
+                        // Find relevant prediction
                         const allPreds = chartData.predictions;
                         if (allPreds && allPreds.houses) {
                             const relevant = allPreds.houses.filter(h =>
-                                question.includes('திருமண') && h.house === 7 ||
-                                question.includes('தொழில்') && h.house === 10 ||
-                                question.includes('பண') && h.house === 2 ||
-                                question.includes('குடும்ப') && h.house === 4 ||
-                                question.includes('உடல்') && h.house === 1
+                                question.includes('marriage') && h.house === 7 ||
+                                question.includes('career') && h.house === 10 ||
+                                question.includes('wealth') && h.house === 2 ||
+                                question.includes('family') && h.house === 4 ||
+                                question.includes('health') && h.house === 1 ||
+                                question.includes('travel') && h.house === 12
                             );
 
                             if (relevant.length > 0) {
-                                response += '📊 உங்கள் ஜாதகத்தில்:\n';
+                                response += '📊 Based on your chart:\n';
                                 relevant.forEach(h => {
-                                    response += `\n${h.emoji} வீடு ${h.house} — ${h.name}:\n${h.text}\n`;
+                                    response += `\n${h.emoji} House ${h.house} — ${h.name}:\n${h.text}\n`;
                                 });
                             } else {
-                                response += '📊 உங்கள் முக்கிய பலன்கள்:\n';
+                                response += '📊 Your main predictions:\n';
                                 allPreds.main.forEach(p => {
                                     response += `\n${p.emoji} ${p.category}:\n${p.text}\n`;
                                 });
                             }
                         }
                     } else {
-                        response += '⚠️ முதலில் உங்கள் ஜாதகத்தை கணக்கிடவும்.';
+                        response += '⚠️ Please calculate your chart first.';
                     }
 
-                    response += '\n\n⚠️ இது AI உருவாக்கிய பகுப்பாய்வு. முழுமையான ஆலோசனைக்கு ஜோதிட நிபுணரை அணுகவும்.';
+                    response += '\n\n⚠️ This is AI-generated analysis. For complete consultation, please contact a professional astrologer.';
 
-                    const output = {
-                        'கேள்வி': question,
-                        'பதில்': response,
-                        'சரிபார்க்கப்பட்டது': true
-                    };
-
-                    answerEl.textContent = JSON.stringify(output, null, 2);
+                    answerEl.textContent = JSON.stringify({ 'Question': question, 'Answer': response }, null, 2);
 
                 } catch (e) {
-                    answerEl.textContent = '❌ பிழை: ' + e.message;
+                    answerEl.textContent = '❌ Error: ' + e.message;
                     console.error(e);
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '🙏 கேள்வி கேள்';
+                    btn.innerHTML = '🙏 Ask Question';
                 }
+            }
+
+            // --- TAB SWITCHING ---
+            function switchTab(tabId) {
+                // Hide all cards
+                qsa('.card').forEach(c => c.classList.remove('active'));
+
+                // Show target card
+                const target = $('tab-' + tabId);
+                if (target) target.classList.add('active');
+
+                // Update nav tabs
+                qsa('.nav-tab').forEach(t => t.classList.remove('active'));
+                qsa('.nav-tab').forEach(t => {
+                    if (t.dataset.tab === tabId) t.classList.add('active');
+                });
             }
 
             // --- CLEAR ---
             function clearAll() {
-                if (confirm('உறுதியாக அனைத்து தரவுகளையும் அழிக்க வேண்டுமா?')) {
+                if (confirm('Are you sure you want to clear all data?')) {
                     location.reload();
                 }
             }
 
-            // --- LOCATION AUTOCOMPLETE ---
-            let locationTimeout = null;
+            // --- SAVE ---
+            function saveChart() {
+                const chartData = window._lastChart;
+                if (!chartData) {
+                    alert('No chart to save. Please calculate first.');
+                    return;
+                }
 
-            function setupLocationAutocomplete(inputId, suggestionsId, coordsInputId) {
-                const input = $(inputId);
-                const suggestions = $(suggestionsId);
-                const coordsInput = $(coordsInputId);
+                try {
+                    const dataStr = JSON.stringify(chartData, null, 2);
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'chart_' + chartData.name + '_' + new Date().toISOString().slice(0, 10) + '.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
 
-                if (!input || !suggestions || !coordsInput) return;
-
-                input.addEventListener('input', function() {
-                    const query = this.value.trim();
-
-                    if (locationTimeout) clearTimeout(locationTimeout);
-
-                    if (query.length < 2) {
-                        suggestions.classList.remove('show');
-                        return;
-                    }
-
-                    locationTimeout = setTimeout(async () => {
-                        try {
-                            const url =
-                                `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(query)}&accept-language=ta`;
-                            const response = await fetch(url);
-                            const data = await response.json();
-
-                            if (!data || data.length === 0) {
-                                suggestions.innerHTML =
-                                    '<div style="padding:12px 16px;color:#64748b;font-size:0.8rem;">❌ இடம் கிடைக்கவில்லை</div>';
-                                suggestions.classList.add('show');
-                                return;
-                            }
-
-                            let html = '';
-                            data.forEach(item => {
-                                const lat = parseFloat(item.lat).toFixed(4);
-                                const lon = parseFloat(item.lon).toFixed(4);
-                                html += `
-                                    <div class="location-suggestion-item" data-lat="${item.lat}" data-lon="${item.lon}" data-display="${item.display_name}">
-                                        <span class="place-name">${item.display_name.split(',')[0]}</span>
-                                        <span class="place-coords">${lat}, ${lon}</span>
-                                        <span class="place-detail">${item.display_name}</span>
-                                    </div>
-                                `;
-                            });
-
-                            suggestions.innerHTML = html;
-                            suggestions.classList.add('show');
-
-                            suggestions.querySelectorAll('.location-suggestion-item').forEach(el => {
-                                el.addEventListener('click', function() {
-                                    const lat = parseFloat(this.dataset.lat);
-                                    const lon = parseFloat(this.dataset.lon);
-                                    const display = this.dataset.display;
-
-                                    input.value = display.split(',')[0].trim();
-                                    coordsInput.value = lat.toFixed(4) + ', ' + lon.toFixed(4);
-
-                                    suggestions.classList.remove('show');
-
-                                    // Auto-fill timezone for India
-                                    if (lat >= 6 && lat <= 37.5 && lon >= 68 && lon <= 97.5) {
-                                        const tzInput = document.getElementById('timezone');
-                                        if (tzInput) tzInput.value = 'Asia/Kolkata';
-                                    }
-                                });
-                            });
-
-                        } catch (e) {
-                            console.error('Location search error:', e);
-                            suggestions.innerHTML =
-                                `<div style="padding:12px 16px;color:#f87171;font-size:0.8rem;">❌ பிழை: ${e.message}</div>`;
-                            suggestions.classList.add('show');
-                        }
-                    }, 500);
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (!input.contains(e.target) && !suggestions.contains(e.target)) {
-                        suggestions.classList.remove('show');
-                    }
-                });
+                    $('status').className = 'status status-success';
+                    $('status').textContent = '✅ Chart saved successfully!';
+                } catch (e) {
+                    alert('Error saving chart: ' + e.message);
+                }
             }
 
-            // Setup location autocompletes
-            setupLocationAutocomplete('place', 'locationSuggestions', 'coords');
-            setupLocationAutocomplete('paPlace', 'paLocationSuggestions', 'paCoords');
-            setupLocationAutocomplete('pbPlace', 'pbLocationSuggestions', 'pbCoords');
+            // --- PRINT ---
+            function printReport() {
+                const content = $('fullReport').textContent;
+                if (!content || content === 'No chart calculated yet') {
+                    alert('Please calculate a chart first.');
+                    return;
+                }
 
-            // --- EVENT LISTENERS ---
+                const win = window.open('', '_blank');
+                if (win) {
+                    win.document.write(`
+                        <html><head><title>Astrology Report</title>
+                        <style>
+                            body { font-family: Arial; padding: 20px; background: white; color: black; }
+                            pre { white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+                            h1 { color: #f6d365; }
+                        </style>
+                        </head><body>
+                        <h1>✦ Astrology Report</h1>
+                        <pre>${content}</pre>
+                        <p style="margin-top:20px;color:#666;">Generated by ஜோதிடம் Pro</p>
+                        </body></html>
+                    `);
+                    win.document.close();
+                    win.print();
+                }
+            }
+
+            // --- SHARE ---
+            function shareReport() {
+                const content = $('fullReport').textContent;
+                if (!content || content === 'No chart calculated yet') {
+                    alert('Please calculate a chart first.');
+                    return;
+                }
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My Astrology Chart',
+                        text: content,
+                    }).catch(() => {});
+                } else {
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(content).then(() => {
+                        alert('📋 Report copied to clipboard!');
+                    }).catch(() => {
+                        // Fallback
+                        const textarea = document.createElement('textarea');
+                        textarea.value = content;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('📋 Report copied to clipboard!');
+                    });
+                }
+            }
+
+            // --- EVENT LISTENERS ---            // Calculate button
             $('calculateBtn').addEventListener('click', calculate);
-            $('matchBtn').addEventListener('click', calculateMatch);
-            $('askBtn').addEventListener('click', askQuestion);
+
+            // Clear button
             $('clearBtn').addEventListener('click', clearAll);
 
+            // Save button
+            $('saveBtn').addEventListener('click', saveChart);
+
+            // Match button
+            $('matchBtn').addEventListener('click', calculateMatch);
+
+            // Ask button
+            $('askBtn').addEventListener('click', askQuestion);
+
+            // Print button
+            $('printBtn').addEventListener('click', printReport);
+
+            // Share button
+            $('shareBtn').addEventListener('click', shareReport);
+
+            // PDF button (download as text file)
+            $('pdfBtn').addEventListener('click', function() {
+                const content = $('fullReport').textContent;
+                if (!content || content === 'No chart calculated yet') {
+                    alert('Please calculate a chart first.');
+                    return;
+                }
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'astrology_report_' + new Date().toISOString().slice(0, 10) + '.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // Navigation tabs
+            qsa('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // Enter key support for question
             $('question').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -1908,10 +1807,36 @@
                 }
             });
 
-            // --- AUTO-CALCULATE ---
-            setTimeout(() => { calculate(); }, 500);
+            // Auto-load sample data on first load
+            setTimeout(() => {
+                if (!$('dob').value) {
+                    $('name').value = 'Sample Person';
+                    $('dob').value = '1990-01-15';
+                    $('tob').value = '10:30';
+                    $('coords').value = '13.0827, 80.2707';
+                    $('place').value = 'Chennai, Tamil Nadu';
 
-            console.log('🔮 ஜோதிடம்+ ஏற்றப்பட்டது — துல்லியமான கணக்கீடுகள் தயார்');
+                    $('paName').value = 'Person A';
+                    $('paDob').value = '1990-01-15';
+                    $('paTob').value = '10:30';
+                    $('paCoords').value = '13.0827, 80.2707';
+
+                    $('pbName').value = 'Person B';
+                    $('pbDob').value = '1992-06-20';
+                    $('pbTob').value = '08:15';
+                    $('pbCoords').value = '19.0760, 72.8777';
+
+                    $('question').value = 'What does my chart say about career and marriage?';
+
+                    // Auto-calculate after a moment
+                    setTimeout(() => {
+                        calculate();
+                    }, 300);
+                }
+            }, 500);
+
+            console.log('🔮 ஜோதிடம் Pro — Complete Astrology Software loaded');
+            console.log('📌 Version 2.0 — All features ready');
 
         })();
     </script>
