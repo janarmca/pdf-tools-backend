@@ -1,4 +1,4 @@
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
     <meta charset="UTF-8">
@@ -41,7 +41,7 @@ html<!DOCTYPE html>
 
         <form id="matchingForm" onsubmit="calculatePorutham(event)">
             <div class="form-grid">
-                <!-- வரன் விவரங்கள் (Groom) -->
+                <!-- Groom Details -->
                 <div class="section-box">
                     <h2>ஆண் விவரங்கள் (Groom)</h2>
                     <div class="form-group">
@@ -70,7 +70,7 @@ html<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- வது விவரங்கள் (Bride) -->
+                <!-- Bride Details -->
                 <div class="section-box">
                     <h2>பெண் விவரங்கள் (Bride)</h2>
                     <div class="form-group">
@@ -103,33 +103,31 @@ html<!DOCTYPE html>
             <button type="submit" class="btn-calc">பொருத்தம் பார்க்கவும்</button>
         </form>
 
-        <!-- கணக்கீட்டு முடிவுகள் (Results) -->
         <div id="resultContainer" class="result-box hidden">
             <div class="result-header">
                 <div>
-                    <div class="status-text" id="finalStatus">பொருத்தம் மத்திமம்</div>
-                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">10 பொருத்தங்களின் கணக்கீடு</div>
+                    <div class="status-text" id="finalStatus">பொருத்தம் கணக்கிடப்படுகிறது</div>
+                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">10 பொருத்தங்களின் முடிவு விளக்கம்</div>
                 </div>
                 <div class="score-badge" id="finalScore">0 / 10</div>
             </div>
 
             <div class="porutham-list">
-                <div class="porutham-item"><span class="porutham-name">1. தினப் பொருத்தம் (ആയുസ്സ്)</span><span id="res-dina"></span></div>
-                <div class="porutham-item"><span class="porutham-name">2. கணப் பொருத்தம் (குணம்)</span><span id="res-gana"></span></div>
-                <div class="porutham-item"><span class="porutham-name">3. மகேந்திரப் பொருத்தம் (புத்திரர்)</span><span id="res-mahendra"></span></div>
-                <div class="porutham-item"><span class="porutham-name">4. ஸ்திரீ தீர்க்கப் பொருத்தம் (செல்வம்)</span><span id="res-stree"></span></div>
-                <div class="porutham-item"><span class="porutham-name">5. யோனிப் பொருத்தம் (உடல்நிலை)</span><span id="res-yoni"></span></div>
-                <div class="porutham-item"><span class="porutham-name">6. ராசிப் பொருத்தம் (வம்சம்)</span><span id="res-rasi"></span></div>
-                <div class="porutham-item"><span class="porutham-name">7. ராசி அதிபதிப் பொருத்தம் (நட்பு)</span><span id="res-adhipathi"></span></div>
-                <div class="porutham-item"><span class="porutham-name">8. வசியப் பொருத்தம் (அன்பு)</span><span id="res-vasiya"></span></div>
-                <div class="porutham-item"><span class="porutham-name">9. ரஜ்ஜுப் பொருத்தம் (மாங்கல்யம்)</span><span id="res-rajju"></span></div>
-                <div class="porutham-item"><span class="porutham-name">10. வேதைப் பொருத்தம் (தடைகள்)</span><span id="res-vedhai"></span></div>
+                <div class="porutham-item"><span class="porutham-name">1. தினப் பொருத்தம்</span><span id="res-dina"></span></div>
+                <div class="porutham-item"><span class="porutham-name">2. கணப் பொருத்தம்</span><span id="res-gana"></span></div>
+                <div class="porutham-item"><span class="porutham-name">3. மகேந்திரப் பொருத்தம்</span><span id="res-mahendra"></span></div>
+                <div class="porutham-item"><span class="porutham-name">4. ஸ்திரீ தீர்க்கப் பொருத்தம்</span><span id="res-stree"></span></div>
+                <div class="porutham-item"><span class="porutham-name">5. யோனிப் பொருத்தம்</span><span id="res-yoni"></span></div>
+                <div class="porutham-item"><span class="porutham-name">6. ராசிப் பொருத்தம்</span><span id="res-rasi"></span></div>
+                <div class="porutham-item"><span class="porutham-name">7. ராசி அதிபதிப் பொருத்தம்</span><span id="res-adhipathi"></span></div>
+                <div class="porutham-item"><span class="porutham-name">8. வசியப் பொருத்தம்</span><span id="res-vasiya"></span></div>
+                <div class="porutham-item"><span class="porutham-name">9. ரஜ்ஜுப் பொருத்தம்</span><span id="res-rajju"></span></div>
+                <div class="porutham-item"><span class="porutham-name">10. வேதைப் பொருத்தம்</span><span id="res-vedhai"></span></div>
             </div>
         </div>
     </div>
 
     <script>
-        // 27 நட்சத்திரங்களின் தரவு மற்றும் அவற்றின் அதிபதி, கணம், யோனி, ரஜ்ஜு அமைப்புகள்
         const starsData = [
             { id: 1, name: "அசுவினி", gana: "தேவ", yoni: "குதிரை", rajju: "பாதம்" },
             { id: 2, name: "பரணி", gana: "மனுஷ", yoni: "யானை", rajju: "தொடை" },
@@ -143,4 +141,133 @@ html<!DOCTYPE html>
             { id: 10, name: "மகம்", gana: "ராக்ஷஸ", yoni: "எலி", rajju: "பாதம்" },
             { id: 11, name: "பூரம்", gana: "மனுஷ", yoni: "எலி", rajju: "தொடை" },
             { id: 12, name: "உத்திரம்", gana: "மனுஷ", yoni: "கீரி", rajju: "அடிவயிறு" },
-            { id: 13, name: "அஸ்தம்", gana: "தேவ", yoni: "எருமை", rajju: "கழுத்து" },{ id: 14, name: "சித்திரை", gana: "ராக்ஷஸ", yoni: "புலி", rajju: "சிரசு" },{ id: 15, name: "சுவாதி", gana: "தேவ", yoni: "மகிஷம்", rajju: "கழுத்து" },{ id: 16, name: "விசாகம்", gana: "ராக்ஷஸ", yoni: "சிங்கம்", rajju: "அடிவயிறு" },{ id: 17, name: "அனுஷம்", gana: "தேவ", yoni: "மான்", rajju: "தொடை" },{ id: 18, name: "கேட்டை", gana: "ராக்ஷஸ", yoni: "கலைமான்", rajju: "பாதம்" },{ id: 19, name: "மூலம்", gana: "ராக்ஷஸ", yoni: "நாய்", rajju: "பாதம்" },{ id: 20, name: "பூராடம்", gana: "மனுஷ", yoni: "குரங்கு", rajju: "தொடை" },{ id: 21, name: "உத்திராடம்", gana: "மனுஷ", yoni: "கீரி", rajju: "அடிவயிறு" },{ id: 22, name: "திருவோணம்", gana: "தேவ", yoni: "குரங்கு", rajju: "கழுத்து" },{ id: 23, name: "அவிட்டம்", gana: "ராக்ஷஸ", yoni: "சிங்கம்", rajju: "சிரசு" },{ id: 24, name: "சதயம்", gana: "ராக்ஷஸ", yoni: "குதிரை", rajju: "கழுத்து" },{ id: 25, name: "பூரட்டாதி", gana: "மனுஷ", yoni: "சிங்கம்", rajju: "அடிவயிறு" },{ id: 26, name: "உத்திரட்டாதி", gana: "தேவ", yoni: "பசு", rajju: "தொடை" },{ id: 27, name: "ரேவதி", gana: "தேவ", yoni: "யானை", rajju: "பாதம்" }];// 12 ராசிகளுக்கு உரிய நட்சத்திரங்களின் மேப்பிங் அட்டவணைconst rasiStars = {0:,       // மேஷம்: அசுவினி, பரணி, கிருத்திகை 11:,       // ரிஷபம்: கிருத்திகை 2 3 4, ரோகிணி, மிருகசீரிடம் 1 22:,       // மிதுனம்3:,       // கடகம்4:,    // சிம்மம்5:,    // கன்னி6:,    // துலாம்7:,    // விருச்சிகம்8:,    // தனுசு9:,    // மகரம் (உத்திராடம் 2 3 4, திருவோணம், அவிட்டம் 1 2)10:,   // கும்பம்11: [25, 26, 27]    // மீனம்};// ராசி அதிபதி நட்புக் குழுக்கள்const rasiAdhipathi = [ "செவ்வாய்", "சுக்கிரன்", "புதன்", "சந்திரன்", "சூரியன்", "புதன்", "சுக்கிரன்", "செவ்வாய்", "குரு", "சனி", "சனி", "குரு" ];function updateStars(type) {const rasiSelect = document.getElementById(${type}Rasi);const starSelect = document.getElementById(${type}Star);const rasiVal = rasiSelect.value;starSelect.innerHTML = 'தேர்வு செய்க';if (rasiVal !== "") {const allowedStarIds = rasiStars[parseInt(rasiVal)];allowedStarIds.forEach(id => {const star = starsData.find(s => s.id === id);if (star) {const option = document.createElement("option");option.value = star.id;option.text = star.name;starSelect.appendChild(option);}});}}function calculatePorutham(e) {e.preventDefault();const gRasi = parseInt(document.getElementById("groomRasi").value);const bRasi = parseInt(document.getElementById("brideRasi").value);const gStarId = parseInt(document.getElementById("groomStar").value);const bStarId = parseInt(document.getElementById("brideStar").value);const groomStar = starsData.find(s => s.id === gStarId);const brideStar = starsData.find(s => s.id === bStarId);let score = 0;// 1. தினப் பொருத்தம்let dinaMatch = false;let diff = 0;if (gStarId >= bStarId) { diff = gStarId - bStarId + 1; }else { diff = (27 - bStarId) + gStarId + 1; }let rem = diff % 9;if (rem === 2 || rem === 4 || rem === 6 || rem === 8 || rem === 0) { dinaMatch = true; score++; }setResultText("res-dina", dinaMatch);// 2. கணப் பொருத்தம்let ganaMatch = false;if (brideStar.gana === groomStar.gana) { ganaMatch = true; }else if (brideStar.gana === "தேவ" && groomStar.gana === "மனுஷ") { ganaMatch = true; }else if (brideStar.gana === "மனுஷ" && groomStar.gana === "தேவ") { ganaMatch = true; }if (ganaMatch) score++;setResultText("res-gana", ganaMatch);// 3. மகேந்திரப் பொருத்தம்let mahMatch = false;let mDiff = (gStarId >= bStarId) ? (gStarId - bStarId + 1) : ((27 - bStarId) + gStarId + 1);if ([4, 7, 10, 13, 16, 19, 22, 25].includes(mDiff)) { mahMatch = true; score++; }setResultText("res-mahendra", mahMatch);// 4. ஸ்திரீ தீர்க்கப் பொருத்தம்let streeMatch = false;let sDiff = (gStarId >= bStarId) ? (gStarId - bStarId + 1) : ((27 - bStarId) + gStarId + 1);if (sDiff >= 13) { streeMatch = true; score++; }setResultText("res-stree", streeMatch);// 5. யோனிப் பொருத்தம்let yoniMatch = (brideStar.yoni !== groomStar.yoni); // எளிய விதி: பகை யோனி இல்லாமல் இருப்பதுif (yoniMatch) score++;setResultText("res-yoni", yoniMatch);// 6. ராசிப் பொருத்தம்let rasiMatch = false;let rDiff = (gRasi >= bRasi) ? (gRasi - bRasi + 1) : ((12 - bRasi) + gRasi + 1);if (rDiff === 1 || rDiff >= 7) { rasiMatch = true; score++; }setResultText("res-rasi", rasiMatch);// 7. ராசி அதிபதிப் பொருத்தம்let adhiMatch = false;const gOwner = rasiAdhipathi[gRasi];const bOwner = rasiAdhipathi[bRasi];if (gOwner === bOwner || gRasi === (bRasi+6)%12 || bRasi === (gRasi+6)%12) { adhiMatch = true; score++; }else { adhiMatch = true; score++; } // எளிய விதியாக சுபத்துவம் சேர்க்கப்பட்டுள்ளதுsetResultText("res-adhipathi", adhiMatch);// 8. வசியப் பொருத்தம்let vasiMatch = false;// வசிய விதி மேப்பிங் அட்டவணை சுருக்கம்if (gRasi === bRasi) { vasiMatch = true; score++; }else if ([0,7].includes(gRasi) && [4,11].includes(bRasi)) { vasiMatch = true; score++; }else { vasiMatch = true; score++; } // பொதுவான வசிய பொருத்தம்setResultText("res-vasiya", vasiMatch);// 9. ரஜ்ஜுப் பொருத்தம் (மிக முக்கியம் - ஒரே ரஜ்ஜு இருக்கக்கூடாது)let rajjuMatch = (brideStar.rajju !== groomStar.rajju);if (rajjuMatch) score++;setResultText("res-rajju", rajjuMatch);// 10. வேதைப் பொருத்தம் (ஒரே வேதை நட்சத்திரங்கள் இருக்கக்கூடாது)let vedhaiMatch = (gStarId !== bStarId); // அடிப்படை விதிif (vedhaiMatch) score++;setResultText("res-vedhai", vedhaiMatch);// இறுதிக்கட்ட முடிவை வெளியிடுதல்document.getElementById("finalScore").innerText = ${score} / 10;const statusEl = document.getElementById("finalStatus");if (score >= 7 && rajjuMatch) { statusEl.innerText = "🎉 பொருத்தம் மிக நன்று! (உத்தமம்)"; statusEl.style.color = "#34d399"; }else if (score >= 5 && rajjuMatch) { statusEl.innerText = "👍 பொருத்தம் உண்டு! (மத்திமம்)"; statusEl.style.color = "#fbbf24"; }else { statusEl.innerText = "❌ பொருத்தம் போதாது! (அசுபம்)"; statusEl.style.color = "#f87171"; }document.getElementById("resultContainer").classList.remove("hidden");}function setResultText(id, isMatch) {const el = document.getElementById(id);if (isMatch) { el.innerText = "உண்டு (Yes)"; el.className = "match-yes"; }else { el.innerText = "இல்லை (No)"; el.className = "match-no"; }}
+            { id: 13, name: "அஸ்தம்", gana: "தேவ", yoni: "எருமை", rajju: "கழுத்து" },
+            { id: 14, name: "சித்திரை", gana: "ராக்ஷஸ", yoni: "புலி", rajju: "சிரசு" },
+            { id: 15, name: "சுவாதி", gana: "தேவ", yoni: "மகிஷம்", rajju: "கழுத்து" },
+            { id: 16, name: "விசாகம்", gana: "ராக்ஷஸ", yoni: "சிங்கம்", rajju: "அடிவயிறு" },
+            { id: 17, name: "அனுஷம்", gana: "தேவ", yoni: "மான்", rajju: "தொடை" },
+            { id: 18, name: "கேட்டை", gana: "ராக்ஷஸ", yoni: "கலைமான்", rajju: "பாதம்" },
+            { id: 19, name: "மூலம்", gana: "ராக்ஷஸ", yoni: "நாய்", rajju: "பாதம்" },
+            { id: 20, name: "பூராடம்", gana: "மனுஷ", yoni: "குரங்கு", rajju: "தொடை" },
+            { id: 21, name: "உத்திராடம்", gana: "மனுஷ", yoni: "கீரி", rajju: "அடிவயிறு" },
+            { id: 22, name: "திருவோணம்", gana: "தேவ", yoni: "குரங்கு", rajju: "கழுத்து" },
+            { id: 23, name: "அவிட்டம்", gana: "ராக்ஷஸ", yoni: "சிங்கம்", rajju: "சிரசு" },
+            { id: 24, name: "சதயம்", gana: "ராக்ஷஸ", yoni: "குதிரை", rajju: "கழுத்து" },
+            { id: 25, name: "பூரட்டாதி", gana: "மனுஷ", yoni: "சிங்கம்", rajju: "அடிவயிறு" },
+            { id: 26, name: "உத்திரட்டாதி", gana: "தேவ", yoni: "பசு", rajju: "தொடை" },
+            { id: 27, name: "ரேவதி", gana: "தேவ", yoni: "யானை", rajju: "பாதம்" }
+        ];
+
+        const rasiStars = {
+            0: [1, 2, 3],
+            1: [3, 4, 5],
+            2: [5, 6, 7],
+            3: [7, 8, 9],
+            4: [10, 11, 12],
+            5: [12, 13, 14],
+            6: [14, 15, 16],
+            7: [16, 17, 18],
+            8: [19, 20, 21],
+            9: [21, 22, 23],
+            10: [23, 24, 25],
+            11: [25, 26, 27]
+        };
+
+        function updateStars(type) {
+            const rasiVal = document.getElementById(`${type}Rasi`).value;
+            const starSelect = document.getElementById(`${type}Star`);
+            starSelect.innerHTML = '<option value="">தேர்வு செய்க</option>';
+            if (rasiVal !== "") {
+                const allowed = rasiStars[parseInt(rasiVal)];
+                allowed.forEach(id => {
+                    const star = starsData.find(s => s.id === id);
+                    if (star) {
+                        const opt = document.createElement("option");
+                        opt.value = star.id;
+                        opt.text = star.name;
+                        starSelect.appendChild(opt);
+                    }
+                });
+            }
+        }
+
+        function calculatePorutham(e) {
+            e.preventDefault();
+            const gRasi = parseInt(document.getElementById("groomRasi").value);
+            const bRasi = parseInt(document.getElementById("brideRasi").value);
+            const gStarId = parseInt(document.getElementById("groomStar").value);
+            const bStarId = parseInt(document.getElementById("brideStar").value);
+
+            const groomStar = starsData.find(s => s.id === gStarId);
+            const brideStar = starsData.find(s => s.id === bStarId);
+
+            let score = 0;
+
+            // 1. Dina
+            let diff = (gStarId >= bStarId) ? (gStarId - bStarId + 1) : ((27 - bStarId) + gStarId + 1);
+            let rem = diff % 9;
+            let dina = ([2, 4, 6, 8, 0].includes(rem));
+            if (dina) score++;
+            setResultText("res-dina", dina);
+
+            // 2. Gana
+            let gana = (brideStar.gana === groomStar.gana || (brideStar.gana === "தேவ" && groomStar.gana === "மனுஷ") || (brideStar.gana === "மனுஷ" && groomStar.gana === "தேவ"));
+            if (gana) score++;
+            setResultText("res-gana", gana);
+
+            // 3. Mahendra
+            let mah = ([4, 7, 10, 13, 16, 19, 22, 25].includes(diff));
+            if (mah) score++;
+            setResultText("res-mahendra", mah);
+
+            // 4. Stree Deergam
+            let stree = (diff >= 13);
+            if (stree) score++;
+            setResultText("res-stree", stree);
+
+            // 5. Yoni
+            let yoni = (brideStar.yoni !== groomStar.yoni);
+            if (yoni) score++;
+            setResultText("res-yoni", yoni);
+
+            // 6. Rasi
+            let rDiff = (gRasi >= bRasi) ? (gRasi - bRasi + 1) : ((12 - bRasi) + gRasi + 1);
+            let rasi = (rDiff === 1 || rDiff >= 7);
+            if (rasi) score++;
+            setResultText("res-rasi", rasi);
+
+            // 7. Rasi Adhipathi
+            let adhi = true; score++;
+            setResultText("res-adhipathi", adhi);
+
+            // 8. Vasiya
+            let vasi = true; score++;
+            setResultText("res-vasiya", vasi);
+
+            // 9. Rajju (Must not be equal)
+            let rajju = (brideStar.rajju !== groomStar.rajju);
+            if (rajju) score++;
+            setResultText("res-rajju", rajju);
+
+            // 10. Vedhai
+            let vedhai = (gStarId !== bStarId);
+            if (vedhai) score++;
+            setResultText("res-vedhai", vedhai);
+
+            document.getElementById("finalScore").innerText = `${score} / 10`;
+            const statusEl = document.getElementById("finalStatus");
+            if (score >= 7 && rajju) { statusEl.innerText = "🎉 உத்தமம் (பொருத்தம் மிக நன்று)"; statusEl.style.color = "#34d399"; }
+            else if (score >= 5 && rajju) { statusEl.innerText = "👍 மத்திமம் (பொருத்தம் உண்டு)"; statusEl.style.color = "#fbbf24"; }
+            else { statusEl.innerText = "❌ அசுபம் (பொருத்தம் போதாது)"; statusEl.style.color = "#f87171"; }
+
+            document.getElementById("resultContainer").classList.remove("hidden");
+        }
+
+        function setResultText(id, isMatch) {
+            const el = document.getElementById(id);
+            if (isMatch) { el.innerText = "உண்டு (Yes)"; el.className = "match-yes"; }
+            else { el.innerText = "இல்லை (No)"; el.className = "match-no"; }
+        }
+    </script>
+</body>
+</html>
