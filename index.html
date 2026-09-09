@@ -8742,12 +8742,22 @@ TOOL_IMPL.numberjungle = {
    app loaded via iframe — isolated so their own JS/CSS can never collide
    with this file's code. Each file must be uploaded alongside index.html
    on GitHub for these to load. ============================= */
-function mountEmbeddedTool(container, filename, title){
+function mountEmbeddedTool(container, filename, title, needsAuth){
   const wrap = el(`<div style="margin:-4px -4px 0;"></div>`);
   const frame = el(`<iframe src="${filename}" title="${title}" style="width:100%; height:82vh; min-height:600px; border:none; border-radius:14px; display:block; background:#fff;" loading="lazy"></iframe>`);
   frame.onerror = ()=>{
     wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Couldn't load this tool — make sure "${filename}" is uploaded in the same folder as this app on GitHub.</div>`;
   };
+  if(needsAuth){
+    // This embedded tool calls credit-gated backend endpoints — it can't see
+    // this page's Supabase session on its own (iframes are sandboxed), so we
+    // hand it the current access token via postMessage once it's loaded, and
+    // again whenever the session refreshes.
+    frame.onload = ()=>{
+      const token = authState.session && authState.session.access_token;
+      if(token) frame.contentWindow.postMessage({ type:'jamtaris-auth', token }, '*');
+    };
+  }
   wrap.appendChild(frame);
   container.appendChild(wrap);
 }
@@ -8755,7 +8765,7 @@ TOOL_IMPL.billquotation = { mount(container){ mountEmbeddedTool(container, 'bill
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.barcollection = { mount(container){ mountEmbeddedTool(container, 'bar-collection-register.html', 'Bar Collection Register'); } };
-TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+'); } };
+TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 
 render();
 initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் edு credits/plan காட்டு
