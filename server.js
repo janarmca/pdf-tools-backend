@@ -592,11 +592,32 @@ async function astrologerCall(path, body) {
   if (!r.ok) throw new Error(data.error || data.message || ('Astrologer API error ' + r.status));
   return data;
 }
-function toSubject(dateStr, timeStr, coordsStr, name) {
+function toSubject(dateStr, timeStr, coordsStr, name, timezone) {
   const [y, m, d] = String(dateStr).split('-').map(Number);
   const [hh, mm] = String(timeStr || '12:00').split(':').map(Number);
   const [lat, lng] = String(coordsStr || '').split(',').map(s => parseFloat(s.trim()));
-  return { year: y, month: m, day: d, hour: hh || 12, minute: mm || 0, longitude: lng, latitude: lat, name: name || 'Subject', zodiac_type: 'Sidereal', sidereal_mode: 'LAHIRI' };
+  return {
+    name: name || 'Subject', year: y, month: m, day: d, hour: hh || 12, minute: mm || 0,
+    longitude: lng, latitude: lat,
+    timezone: timezone || 'Asia/Kolkata', // required by the API — defaults to IST since that's this app's primary audience
+    zodiac_type: 'Sidereal', sidereal_mode: 'LAHIRI'
+  };
+}
+// Groups the API's per-planet response (sun.sign, moon.sign, ...) into the
+// per-ZODIAC-SIGN shape astrology-plus.html's Rasi chart expects
+// (rasi['Aries'] = ['Sun','Mars'] etc.) — the two shapes don't match natively.
+const SIGN_NAME_MAP = { Ari:'Aries', Tau:'Taurus', Gem:'Gemini', Can:'Cancer', Leo:'Leo', Vir:'Virgo', Lib:'Libra', Sco:'Scorpio', Sag:'Sagittarius', Cap:'Capricorn', Aqu:'Aquarius', Pis:'Pisces' };
+function buildRasiFromSubject(subject) {
+  const rasi = {};
+  const planetKeys = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'];
+  planetKeys.forEach(pk => {
+    const p = subject && subject[pk];
+    if (!p || !p.sign) return;
+    const signName = SIGN_NAME_MAP[p.sign] || p.sign;
+    if (!rasi[signName]) rasi[signName] = [];
+    rasi[signName].push(pk.charAt(0).toUpperCase() + pk.slice(1) + (p.retrograde ? ' (R)' : ''));
+  });
+  return rasi;
 }
 app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res) => {
   try {
@@ -606,17 +627,18 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
       if (!pA || !pB || !pA.dob || !pA.tob || !pA.coords || !pB.dob || !pB.tob || !pB.coords) {
         return res.status(400).json({ error: 'Both people need complete date, time and coordinates.', verified: false });
       }
-      const data = await astrologerCall('/api/v5/synastry-chart', {
-        first_subject: toSubject(pA.dob, pA.tob, pA.coords, pA.name || 'Person A'),
-        second_subject: toSubject(pB.dob, pB.tob, pB.coords, pB.name || 'Person B')
+      const data = await astrologerCall('/api/v5/chart-data/synastry', {
+        first_subject: toSubject(pA.dob, pA.tob, pA.coords, pA.name || 'Person A', pA.timezone),
+        second_subject: toSubject(pB.dob, pB.tob, pB.coords, pB.name || 'Person B', pB.timezone)
       });
       return res.json({ ...data, verified: true });
     }
     if (!b.dateOfBirth || !b.timeOfBirth || !b.coordinates) {
       return res.status(400).json({ error: 'Date, time and coordinates are required.', verified: false });
     }
-    const data = await astrologerCall('/api/v5/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name) });
-    res.json({ ...data, verified: true, rasi: data.data && data.data.planets, lagna: data.data && data.data.houses && data.data.houses.ascendant });
+    const data = await astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name, b.timezone) });
+    const subject = data.subject || (data.data && data.data.subject) || data.data || data;
+    res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign) });
   } catch (e) {
     res.status(502).json({ error: e.message, verified: false, accuracyStatus: 'unverified' });
   }
