@@ -19,15 +19,7 @@
   </div>
 </div>
 
-<div class="card">
-  <div class="section">🔐 துல்லியம்-முதன்மை கணிப்பு</div>
-  <div class="notice warning">ஜாம்தாரிஸ் கிரக நிலைகளை கற்பனையாக உருவாக்காது. இறுதி வானியல் கணக்கீடுகள் கட்டமைக்கப்பட்ட Swiss Ephemeris backend-லிருந்து மட்டுமே வரும். கணக்கீடு கிடைக்காவிட்டால் அல்லது சரிபார்க்கப்படாவிட்டால், இந்த கருவி யூகிக்க மறுக்கும்.</div>
-  <div class="grid" style="margin-top:12px">
-    <div><label>கணக்கீடு API</label><input id="calcEndpoint" value="https://all-in-one-tools-22743935825.asia-south1.run.app/api/astrology/calculate"></div>
-    <div><label>AI பகுப்பாய்வு API</label><input id="claudeEndpoint" value="https://all-in-one-tools-22743935825.asia-south1.run.app/api/claude/analyze"></div>
-  </div>
-  <div class="small" style="margin-top:8px">API key-ஐ உங்கள் server/Supabase Edge Function-ல் மட்டும் வையுங்கள். இந்த HTML-ல் ஒருபோதும் காட்ட வேண்டாம்.</div>
-</div>
+
 
 <div class="card">
   <div class="section">👤 பிறப்பு விவரங்கள்</div>
@@ -81,26 +73,6 @@
   <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
 </div>
 
-<div class="card">
-  <div class="section">💍 மண மகன் & மகள் பொருத்தம்+</div>
-  <div class="grid3">
-    <div><label>நபர் A — பெயர்</label><input id="paName"></div>
-    <div><label>பிறந்த தேதி</label><input id="paDob" type="date"></div>
-    <div><label>பிறந்த நேரம்</label><input id="paTob" type="time" step="1"></div>
-  </div>
-  <div><label>பிறந்த ஊர்</label><input id="paPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
-  <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label><div style="display:flex; gap:6px;"><input id="paCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="paFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div></div>
-  <hr style="margin:14px 0;border:none;border-top:1px solid #e6ebf2">
-  <div class="grid3">
-    <div><label>நபர் B — பெயர்</label><input id="pbName"></div>
-    <div><label>பிறந்த தேதி</label><input id="pbDob" type="date"></div>
-    <div><label>பிறந்த நேரம்</label><input id="pbTob" type="time" step="1"></div>
-  </div>
-  <div><label>பிறந்த ஊர்</label><input id="pbPlace" placeholder="ஊர் பெயர்" style="margin-top:8px"></div>
-  <div><label>ஆயத்தொலைவுகள் (Lat, Long)</label><div style="display:flex; gap:6px;"><input id="pbCoords" placeholder="மேலே ஊர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="pbFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div></div>
-  <button class="btn gold" id="match" style="margin-top:12px">💫 பொருத்தம் கணக்கிடு</button>
-  <div id="matchResult" class="result" style="margin-top:12px">இன்னும் பொருத்தம் கணக்கிடப்படவில்லை.</div>
-</div>
 
 <div class="card">
   <div class="section">🤖 ஜோதிடம்+/AI-இடம் கேளுங்கள்</div>
@@ -127,6 +99,8 @@
 window.JAMTARIS_LANGUAGE='ta';
 document.addEventListener('DOMContentLoaded',()=>{ const sel=document.getElementById('jamtLang'); if(sel) sel.onchange=()=>{ window.JAMTARIS_LANGUAGE=sel.value; }; });
 const $=id=>document.getElementById(id);
+const CALC_ENDPOINT = 'https://all-in-one-tools-22743935825.asia-south1.run.app/api/astrology/calculate';
+const CLAUDE_ENDPOINT = 'https://all-in-one-tools-22743935825.asia-south1.run.app/api/claude/analyze';
 // Free geocoding via OpenStreetMap Nominatim — no API key needed, works for
 // any city/town worldwide. Manual coordinate entry still works as a fallback
 // if a place isn't found (e.g. a very small village not in OSM's database).
@@ -213,8 +187,6 @@ function wireFindCoords(btnId, placeId, coordsId, statusId, timezoneFieldId){
 }
 wireFindCoords('findCoords', 'place', 'coords', 'coordsStatus', 'timezone');
 wirePlaceAutocomplete('place', 'placeSuggestions', 'coords', 'timezone', 'coordsStatus');
-wireFindCoords('paFindCoords', 'paPlace', 'paCoords', null, null);
-wireFindCoords('pbFindCoords', 'pbPlace', 'pbCoords', null, null);
 function payload(){
   return {
     name:$('name').value.trim(), dateOfBirth:$('dob').value, timeOfBirth:$('tob').value,
@@ -250,22 +222,11 @@ $('calculate').onclick=async()=>{
   if(e){ $('calcStatus').className='notice warning'; $('calcStatus').textContent=e; return; }
   $('calcStatus').textContent='சரிபார்க்கப்பட்ட வானியல் engine மூலம் கணக்கிடுகிறது…';
   try{
-    const d=await post($('calcEndpoint').value.trim(), p);
+    const d=await post(CALC_ENDPOINT, p);
     if(d.verified===false||d.accuracyStatus==='unverified') throw Error('கணக்கீடு சரிபார்க்கப்படவில்லை. ஜாதகம் காட்டப்படவில்லை.');
     render(d);
     $('calcStatus').className='notice success'; $('calcStatus').textContent='✓ சரிபார்க்கப்பட்ட கணக்கீடு பெறப்பட்டது.';
   }catch(x){ $('calcStatus').className='notice warning'; $('calcStatus').textContent='கணக்கீடு கிடைக்கவில்லை: '+x.message; }
-};
-$('match').onclick=async()=>{
-  const pA={name:$('paName').value.trim(),dob:$('paDob').value,tob:$('paTob').value,coords:$('paCoords').value.trim()};
-  const pB={name:$('pbName').value.trim(),dob:$('pbDob').value,tob:$('pbTob').value,coords:$('pbCoords').value.trim()};
-  if(!pA.dob||!pA.tob||!pA.coords||!pB.dob||!pB.tob||!pB.coords){ $('matchResult').textContent='இருவருக்கும் முழுமையான தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.'; return; }
-  $('matchResult').textContent='சரிபார்க்கப்பட்ட வானியல் engine மூலம் பொருத்தம் கணக்கிடுகிறது…';
-  try{
-    const d=await post($('calcEndpoint').value.trim(), {mode:'compatibility', personA:pA, personB:pB, ayanamsa:$('ayan').value, accuracyMode:'strict-no-guessing', outputLanguage: window.JAMTARIS_LANGUAGE||'ta'});
-    if(d.verified===false||d.accuracyStatus==='unverified') throw Error('பொருத்தம் சரிபார்க்கப்படவில்லை.');
-    $('matchResult').textContent = JSON.stringify(d,null,2);
-  }catch(x){ $('matchResult').textContent='பொருத்தம் கிடைக்கவில்லை: '+x.message; }
 };
 $('ask').onclick=async()=>{
   const q=$('question').value.trim();
@@ -276,7 +237,7 @@ $('ask').onclick=async()=>{
   }
   $('answer').textContent='சரிபார்க்கப்பட்ட தகவலை AI-க்கு அனுப்புகிறது…';
   try{
-    const d=await post($('claudeEndpoint').value.trim(), {
+    const d=await post(CLAUDE_ENDPOINT, {
       question:q, chartContext:payload(),
       rules:{ oneQuestion:true, noFabrication:true, citeResearch:true, useCalculatedPositionsOnly:true, uncertaintyRequired:true, distinguishAstrologyFromFact:true }
     });
