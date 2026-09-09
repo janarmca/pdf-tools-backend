@@ -72,11 +72,11 @@
   <div class="section">📚 முழுமையான ஜோதிட வரலாறு+</div>
   <div class="grid">
     <div><label>பிறப்பு ஜாதகம் (செயல்படுகிறது ✓)</label><input value="D1 ராசி — Sun/Moon/Lagna/9 கிரகங்கள்" disabled></div>
-    <div><label>தசா (செயல்படுகிறது ✓)</label><input value="விம்சோத்தரி (Vimshottari) — உண்மையான கணிதம்" disabled></div>
+    <div><label>Transit (செயல்படுகிறது ✓)</label><input value="Real-time — astrologer.p.rapidapi.com" disabled></div>
   </div>
   <div class="small" style="margin-top:8px">குறிப்பு: பிரிவு சக்கரங்கள் (D9, D10 etc.) இன்னும் இணைக்கப்படவில்லை.</div>
   <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
-  <div id="dashaTable" style="margin-top:14px;"></div>
+  <div id="transitTable" style="margin-top:14px;"></div>
   <div id="navamsaTable"></div>
 </div>
 
@@ -200,7 +200,7 @@ function payload(){
     birthPlace:$('place').value.trim(), coordinates:$('coords').value.trim(), timezone:$('timezone').value.trim(),
     zodiac:$('zodiac').value, ayanamsa:$('ayan').value,
     requestedCharts:['D1','D9','D10','D12','D16','D20','D24','D27','D30','D40','D45','D60'],
-    requestedDasha:['Vimshottari'], accuracyMode:'strict-no-guessing',
+    accuracyMode:'strict-no-guessing',
     outputLanguage: window.JAMTARIS_LANGUAGE || 'ta', unicodeSupport:true
   };
 }
@@ -252,19 +252,11 @@ function render(d){
         Object.entries(d.navamsa).map(([sign,planets])=>`<b>${sign}:</b> ${toTamilPlanetList(planets)}`).join('<br>') + `</div>`;
     } else navBox.innerHTML = '';
   }
-  const dashaBox = $('dashaTable');
-  if(d.dasha && Array.isArray(d.dasha) && dashaBox){
-    const rows = d.dasha.map((p,i)=>
-      `<tr style="${i===0?'font-weight:800; background:#f1f5f9;':''}"><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.lord_ta} (${p.lord})</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.start}</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.end}</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.years} ஆண்டுகள்</td></tr>`
-    ).join('');
-    dashaBox.innerHTML = `
-      <div style="font-weight:800; margin-bottom:8px;">🪐 விம்சோத்தரி தசா (Vimshottari Dasha) — முதல் வரிசை = தற்போதைய காலம்</div>
-      <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:.8rem;">
-        <thead><tr style="background:#eef2f7; text-align:left;"><th style="padding:6px 10px;">கிரகம்</th><th style="padding:6px 10px;">தொடக்கம்</th><th style="padding:6px 10px;">முடிவு</th><th style="padding:6px 10px;">காலம்</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`;
-  } else if(dashaBox){
-    dashaBox.innerHTML = '';
+  const transitBox = $('transitTable');
+  if(transitBox){
+    if(d.transit){
+      transitBox.innerHTML = `<div style="font-weight:800; margin:14px 0 8px;">🌐 தற்போதைய கிரக நிலைகள் (Transit — இப்போதைய தேதி)</div><div class="notice" style="font-size:.8rem;">${d.transit}</div>`;
+    } else transitBox.innerHTML = '';
   }
 }
 $('calculate').onclick=async()=>{
@@ -291,7 +283,7 @@ $('ask').onclick=async()=>{
   }
   $('answer').textContent='சரிபார்க்கப்பட்ட தகவலை AI-க்கு அனுப்புகிறது…';
   try{
-    const ctx = { ...payload(), chartSummaryForAI: window.__lastChartResult.chartSummaryForAI, rasi: window.__lastChartResult.rasi, lagna: window.__lastChartResult.lagna, nakshatra: window.__lastChartResult.nakshatra, dasha: window.__lastChartResult.dasha };
+    const ctx = { ...payload(), chartSummaryForAI: window.__lastChartResult.chartSummaryForAI, rasi: window.__lastChartResult.rasi, lagna: window.__lastChartResult.lagna, nakshatra: window.__lastChartResult.nakshatra, transit: window.__lastChartResult.transit };
     const d=await post(CLAUDE_ENDPOINT, {
       question:q, chartContext:ctx,
       rules:{ oneQuestion:true, noFabrication:true, citeResearch:true, useCalculatedPositionsOnly:true, uncertaintyRequired:true, distinguishAstrologyFromFact:true }
