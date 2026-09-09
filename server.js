@@ -637,6 +637,62 @@ function buildRasiFromSubject(subject) {
   return rasi;
 }
 // ============================================================
+// NAKSHATRA — the 27 lunar mansions, each spanning exactly 360/27° of the
+// zodiac. Computed the same deterministic way as the Dasha lord above, from
+// the real Moon position — classical, well-documented Vedic astrology math.
+// ============================================================
+const NAKSHATRAS = [
+  {en:'Ashwini',ta:'அஸ்வினி'},{en:'Bharani',ta:'பரணி'},{en:'Krittika',ta:'கார்த்திகை'},
+  {en:'Rohini',ta:'ரோகிணி'},{en:'Mrigashira',ta:'மிருகசீரிடம்'},{en:'Ardra',ta:'திருவாதிரை'},
+  {en:'Punarvasu',ta:'புனர்பூசம்'},{en:'Pushya',ta:'பூசம்'},{en:'Ashlesha',ta:'ஆயில்யம்'},
+  {en:'Magha',ta:'மகம்'},{en:'Purva Phalguni',ta:'பூரம்'},{en:'Uttara Phalguni',ta:'உத்திரம்'},
+  {en:'Hasta',ta:'அஸ்தம்'},{en:'Chitra',ta:'சித்திரை'},{en:'Swati',ta:'சுவாதி'},
+  {en:'Vishakha',ta:'விசாகம்'},{en:'Anuradha',ta:'அனுஷம்'},{en:'Jyeshtha',ta:'கேட்டை'},
+  {en:'Mula',ta:'மூலம்'},{en:'Purva Ashadha',ta:'பூராடம்'},{en:'Uttara Ashadha',ta:'உத்திராடம்'},
+  {en:'Shravana',ta:'திருவோணம்'},{en:'Dhanishta',ta:'அவிட்டம்'},{en:'Shatabhisha',ta:'சதயம்'},
+  {en:'Purva Bhadrapada',ta:'பூரட்டாதி'},{en:'Uttara Bhadrapada',ta:'உத்திரட்டாதி'},{en:'Revati',ta:'ரேவதி'}
+];
+function calcNakshatra(moonAbsPos) {
+  const NAK_SPAN = 360 / 27;
+  const idx = Math.floor(moonAbsPos / NAK_SPAN) % 27;
+  const pada = Math.floor((moonAbsPos % NAK_SPAN) / (NAK_SPAN / 4)) + 1; // each Nakshatra has 4 padas (quarters)
+  return { ...NAKSHATRAS[idx], pada };
+}
+// Planet names in Tamil, for showing inside the chart grid instead of English
+const PLANET_NAMES_TA = { Sun:'சூரியன்', Moon:'சந்திரன்', Mercury:'புதன்', Venus:'சுக்கிரன்', Mars:'செவ்வாய்', Jupiter:'குரு', Saturn:'சனி', Uranus:'யுரேனஸ்', Neptune:'நெப்டியூன்', Pluto:'புளூட்டோ' };
+// ============================================================
+// NAVAMSA (D9) — classical divisional chart: each 30° sign is split into 9
+// parts of 3°20' each. Movable signs start the count from themselves, fixed
+// signs from the 9th sign onward, dual/mutable signs from the 5th sign
+// onward — then the navamsa cycles through consecutive signs. Deterministic
+// formula, same math every Vedic astrology text uses.
+const SIGNS_ORDER = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const MOVABLE = ['Aries','Cancer','Libra','Capricorn'], FIXED = ['Taurus','Leo','Scorpio','Aquarius'];
+function calcNavamsaSign(signName, degreeInSign) {
+  const signIdx = SIGNS_ORDER.indexOf(signName);
+  if (signIdx === -1) return null;
+  const navaIdx = Math.floor(degreeInSign / (30/9)); // 0-8
+  let startIdx;
+  if (MOVABLE.includes(signName)) startIdx = signIdx;
+  else if (FIXED.includes(signName)) startIdx = (signIdx + 8) % 12;
+  else startIdx = (signIdx + 4) % 12; // dual/mutable
+  return SIGNS_ORDER[(startIdx + navaIdx) % 12];
+}
+function buildNavamsaFromSubject(subject) {
+  const navamsa = {};
+  const planetKeys = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'];
+  planetKeys.forEach(pk => {
+    const p = subject && subject[pk];
+    if (!p || !p.sign || !Number.isFinite(p.position)) return;
+    const signName = SIGN_NAME_MAP[p.sign] || p.sign;
+    const navaSign = calcNavamsaSign(signName, p.position); // p.position is degrees WITHIN the sign (0-30)
+    if (!navaSign) return;
+    if (!navamsa[navaSign]) navamsa[navaSign] = [];
+    navamsa[navaSign].push(pk.charAt(0).toUpperCase() + pk.slice(1));
+  });
+  return navamsa;
+}
+// ============================================================
 // VIMSHOTTARI DASHA — a deterministic, well-documented Vedic astrology
 // algorithm computed from the REAL Moon position already returned by the
 // verified chart calculation above (subject.moon.abs_pos). This is genuine
@@ -697,7 +753,24 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
     const dasha = (subject && subject.moon && Number.isFinite(subject.moon.abs_pos))
       ? calcVimshottariDasha(subject.moon.abs_pos, b.dateOfBirth, 9)
       : null;
-    res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign), dasha });
+    const nakshatra = (subject && subject.moon && Number.isFinite(subject.moon.abs_pos))
+      ? calcNakshatra(subject.moon.abs_pos)
+      : null;
+    const rasi = buildRasiFromSubject(subject);
+    const lagna = subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign);
+    const navamsa = buildNavamsaFromSubject(subject);
+    // A compact, plain-language summary of the REAL calculated chart — this is
+    // what gets fed to the AI interpretation step, so its answers reference
+    // actual planetary placements instead of staying generic.
+    const planetSummary = ['sun','moon','mercury','venus','mars','jupiter','saturn'].map(pk => {
+      const p = subject && subject[pk];
+      if (!p || !p.sign) return null;
+      return `${pk.charAt(0).toUpperCase()+pk.slice(1)} in ${SIGN_NAME_MAP[p.sign]||p.sign} (${p.house||''}${p.retrograde?', retrograde':''})`;
+    }).filter(Boolean).join('; ');
+    res.json({
+      ...data, verified: true, rasi, lagna, dasha, nakshatra, navamsa,
+      chartSummaryForAI: `Lagna (Ascendant): ${lagna}. Moon Nakshatra: ${nakshatra ? nakshatra.en+' pada '+nakshatra.pada : 'unknown'}. Current/upcoming Dasha periods: ${dasha ? dasha.slice(0,3).map(d=>d.lord+' ('+d.start+' to '+d.end+')').join(', ') : 'unknown'}. Planets: ${planetSummary}.`
+    });
   } catch (e) {
     res.status(502).json({ error: e.message, verified: false, accuracyStatus: 'unverified' });
   }
@@ -711,7 +784,8 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
     const b = req.body || {};
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
     const lang = (b.chartContext && b.chartContext.outputLanguage) || 'en';
-    const prompt = `You are an astrology assistant. Using ONLY the verified chart data below (never invent planetary positions), answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. Be clear that this is an interpretation, not a guarantee.\n\nVerified chart data:\n${JSON.stringify(b.chartContext)}\n\nQuestion: ${b.question}`;
+    const summaryLine = (b.chartContext && b.chartContext.chartSummaryForAI) ? `\n\nCalculated chart summary: ${b.chartContext.chartSummaryForAI}` : '';
+    const prompt = `You are a Vedic astrology assistant. Using ONLY the verified, calculated chart data below (never invent planetary positions), give a substantive, specific reading that references the actual Lagna, Nakshatra, planet placements, and current Dasha period shown below — do not give a vague generic answer. Answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. End with a brief note that this is an interpretation, not a guarantee.\n\nVerified chart data (raw):\n${JSON.stringify(b.chartContext)}${summaryLine}\n\nQuestion: ${b.question}`;
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
