@@ -212,18 +212,21 @@ async function post(url,body){
   return d;
 }
 function render(d){
-  console.log('[astro] render() called with d.rasi =', d.rasi, 'd.lagna =', d.lagna);
   const c=d.rasi||d.rasiChart||{};
-  const cells = document.querySelectorAll('[data-sign]');
-  console.log('[astro] found', cells.length, 'chart cells with data-sign');
-  cells.forEach(x=>{
+  document.querySelectorAll('[data-sign]').forEach(x=>{
     const span = x.querySelector('span');
-    const val = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||'');
-    console.log('[astro] sign', x.dataset.sign, '-> span found:', !!span, '-> value:', val);
-    if(span) span.textContent = val;
+    if(span) span.textContent = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||'');
   });
   $('chartCenter').textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
-  $('history').textContent = JSON.stringify(d.history||d,null,2);
+  const subj = (d.chart_data && d.chart_data.subject) || {};
+  const summary = [
+    `☀️ Sun: ${subj.sun ? subj.sun.sign : '—'}`,
+    `🌙 Moon: ${subj.moon ? subj.moon.sign : '—'}`,
+    `⬆️ Lagna: ${d.lagna || '—'}`,
+    `📅 Ayanamsa (Lahiri): ${subj.ayanamsa_value ? subj.ayanamsa_value.toFixed(2)+'°' : '—'}`,
+    `🏠 House system: ${subj.houses_system_name || '—'}`,
+  ].join('\n');
+  $('history').textContent = summary;
 }
 $('calculate').onclick=async()=>{
   const p=payload(), e=valid(p);
