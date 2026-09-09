@@ -212,8 +212,16 @@ async function post(url,body){
   return d;
 }
 function render(d){
+  console.log('[astro] render() called with d.rasi =', d.rasi, 'd.lagna =', d.lagna);
   const c=d.rasi||d.rasiChart||{};
-  document.querySelectorAll('[data-sign]').forEach(x=> x.querySelector('span').textContent = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||''));
+  const cells = document.querySelectorAll('[data-sign]');
+  console.log('[astro] found', cells.length, 'chart cells with data-sign');
+  cells.forEach(x=>{
+    const span = x.querySelector('span');
+    const val = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||'');
+    console.log('[astro] sign', x.dataset.sign, '-> span found:', !!span, '-> value:', val);
+    if(span) span.textContent = val;
+  });
   $('chartCenter').textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
   $('history').textContent = JSON.stringify(d.history||d,null,2);
 }
