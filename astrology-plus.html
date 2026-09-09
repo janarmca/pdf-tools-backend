@@ -70,12 +70,13 @@
 
 <div class="card">
   <div class="section">📚 முழுமையான ஜோதிட வரலாறு+</div>
-  <div class="grid3">
-    <div><label>பிறப்பு ஜாதகம்</label><input value="D1 ராசி" disabled></div>
-    <div><label>பிரிவு சக்கரங்கள்</label><input value="D1–D60" disabled></div>
-    <div><label>தசா</label><input value="விம்சோத்தரி + பிற முறைகள்" disabled></div>
+  <div class="grid">
+    <div><label>பிறப்பு ஜாதகம் (செயல்படுகிறது ✓)</label><input value="D1 ராசி — Sun/Moon/Lagna/9 கிரகங்கள்" disabled></div>
+    <div><label>தசா (செயல்படுகிறது ✓)</label><input value="விம்சோத்தரி (Vimshottari) — உண்மையான கணிதம்" disabled></div>
   </div>
+  <div class="small" style="margin-top:8px">குறிப்பு: பிரிவு சக்கரங்கள் (D9, D10 etc.) இன்னும் இணைக்கப்படவில்லை.</div>
   <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
+  <div id="dashaTable" style="margin-top:14px;"></div>
 </div>
 
 
@@ -232,6 +233,20 @@ function render(d){
     `🏠 House system: ${subj.houses_system_name || '—'}`,
   ].join('\n');
   $('history').textContent = summary;
+  const dashaBox = $('dashaTable');
+  if(d.dasha && Array.isArray(d.dasha) && dashaBox){
+    const rows = d.dasha.map((p,i)=>
+      `<tr style="${i===0?'font-weight:800; background:#f1f5f9;':''}"><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.lord_ta} (${p.lord})</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.start}</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.end}</td><td style="padding:6px 10px; border-bottom:1px solid #e6ebf2;">${p.years} ஆண்டுகள்</td></tr>`
+    ).join('');
+    dashaBox.innerHTML = `
+      <div style="font-weight:800; margin-bottom:8px;">🪐 விம்சோத்தரி தசா (Vimshottari Dasha) — முதல் வரிசை = தற்போதைய காலம்</div>
+      <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:.8rem;">
+        <thead><tr style="background:#eef2f7; text-align:left;"><th style="padding:6px 10px;">கிரகம்</th><th style="padding:6px 10px;">தொடக்கம்</th><th style="padding:6px 10px;">முடிவு</th><th style="padding:6px 10px;">காலம்</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  } else if(dashaBox){
+    dashaBox.innerHTML = '';
+  }
 }
 $('calculate').onclick=async()=>{
   const p=payload(), e=valid(p);
