@@ -23,8 +23,8 @@
   <div class="section">🔐 துல்லியம்-முதன்மை கணிப்பு</div>
   <div class="notice warning">ஜாம்தாரிஸ் கிரக நிலைகளை கற்பனையாக உருவாக்காது. இறுதி வானியல் கணக்கீடுகள் கட்டமைக்கப்பட்ட Swiss Ephemeris backend-லிருந்து மட்டுமே வரும். கணக்கீடு கிடைக்காவிட்டால் அல்லது சரிபார்க்கப்படாவிட்டால், இந்த கருவி யூகிக்க மறுக்கும்.</div>
   <div class="grid" style="margin-top:12px">
-    <div><label>கணக்கீடு API</label><input id="calcEndpoint" value="/api/astrology/calculate"></div>
-    <div><label>AI பகுப்பாய்வு API</label><input id="claudeEndpoint" value="/api/claude/analyze"></div>
+    <div><label>கணக்கீடு API</label><input id="calcEndpoint" value="https://all-in-one-tools-22743935825.asia-south1.run.app/api/astrology/calculate"></div>
+    <div><label>AI பகுப்பாய்வு API</label><input id="claudeEndpoint" value="https://all-in-one-tools-22743935825.asia-south1.run.app/api/claude/analyze"></div>
   </div>
   <div class="small" style="margin-top:8px">API key-ஐ உங்கள் server/Supabase Edge Function-ல் மட்டும் வையுங்கள். இந்த HTML-ல் ஒருபோதும் காட்ட வேண்டாம்.</div>
 </div>
@@ -37,7 +37,7 @@
     <div><label>சரியான பிறப்பு நேரம்</label><input id="tob" type="time" step="1"></div>
   </div>
   <div class="grid" style="margin-top:12px">
-    <div><label>பிறந்த இடம்</label><input id="place" placeholder="ஊர், மாநிலம், நாடு (எ.கா: சென்னை, தமிழ்நாடு)"></div>
+    <div style="position:relative;"><label>பிறந்த இடம்</label><input id="place" placeholder="ஊர், மாநிலம், நாடு (எ.கா: சென்னை, தமிழ்நாடு)" autocomplete="off"><div id="placeSuggestions" style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #d8e0eb; border-radius:10px; margin-top:4px; max-height:180px; overflow-y:auto; z-index:20; display:none; box-shadow:0 8px 20px rgba(0,0,0,.12);"></div></div>
     <div><label>ஆயத்தொலைவுகள் (Coordinates)</label><div style="display:flex; gap:6px;"><input id="coords" placeholder="ஊர் பெயர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="findCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍 கண்டுபிடி</button></div><div id="coordsStatus" class="small" style="margin-top:4px;"></div></div>
   </div>
   <div class="grid3" style="margin-top:12px">
@@ -138,6 +138,40 @@ async function geocodePlace(placeName){
   if(!results.length) throw new Error('இந்த ஊர் கிடைக்கவில்லை — சரியாக எழுதி மீண்டும் முயற்சிக்கவும்.');
   return { lat: parseFloat(results[0].lat), lon: parseFloat(results[0].lon), display: results[0].display_name };
 }
+// Live "type and see suggestions" search — debounced so it doesn't fire a
+// network request on every keystroke, just once typing pauses briefly.
+function wirePlaceAutocomplete(inputId, suggestBoxId, coordsId, timezoneFieldId, statusId){
+  const input = $(inputId), box = $(suggestBoxId);
+  if(!input || !box) return;
+  let debounceTimer = null;
+  input.addEventListener('input', ()=>{
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+    if(q.length < 3){ box.style.display='none'; return; }
+    debounceTimer = setTimeout(async ()=>{
+      try{
+        const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(q);
+        const r = await fetch(url, { headers: { 'Accept-Language': 'ta,en' } });
+        const results = await r.json();
+        if(!results.length){ box.style.display='none'; return; }
+        box.innerHTML = results.map((res,i)=>`<div data-idx="${i}" style="padding:9px 12px; cursor:pointer; font-size:12.5px; border-bottom:1px solid #f1f5f9;">${res.display_name}</div>`).join('');
+        box.style.display='block';
+        box.querySelectorAll('[data-idx]').forEach(el=>{
+          el.onclick = async ()=>{
+            const res = results[Number(el.dataset.idx)];
+            input.value = res.display_name;
+            box.style.display='none';
+            const lat = parseFloat(res.lat), lon = parseFloat(res.lon);
+            if(coordsId) $(coordsId).value = lat.toFixed(4) + ', ' + lon.toFixed(4);
+            if(timezoneFieldId) await fillTimezone(lat, lon, timezoneFieldId);
+            if(statusId){ $(statusId).textContent = '✓ ' + res.display_name; $(statusId).style.color = '#166534'; }
+          };
+        });
+      }catch(e){ box.style.display='none'; }
+    }, 400);
+  });
+  document.addEventListener('click', (e)=>{ if(e.target!==input && !box.contains(e.target)) box.style.display='none'; });
+}
 // Timezone auto-fill: India has exactly ONE timezone (Asia/Kolkata) regardless
 // of where in the country you are, so for Indian coordinates this is 100%
 // reliable with zero external dependency. For places outside India, we try
@@ -178,6 +212,7 @@ function wireFindCoords(btnId, placeId, coordsId, statusId, timezoneFieldId){
   };
 }
 wireFindCoords('findCoords', 'place', 'coords', 'coordsStatus', 'timezone');
+wirePlaceAutocomplete('place', 'placeSuggestions', 'coords', 'timezone', 'coordsStatus');
 wireFindCoords('paFindCoords', 'paPlace', 'paCoords', null, null);
 wireFindCoords('pbFindCoords', 'pbPlace', 'pbCoords', null, null);
 function payload(){
@@ -191,9 +226,16 @@ function payload(){
   };
 }
 function valid(p){ return (!p.dateOfBirth||!p.timeOfBirth||!p.birthPlace||!p.coordinates||!p.timezone) ? 'பிறந்த தேதி, சரியான நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.' : ''; }
+let __authToken = null;
+window.addEventListener('message', (e)=>{
+  if(e.data && e.data.type==='jamtaris-auth' && e.data.token) __authToken = e.data.token;
+});
 async function post(url,body){
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const headers = {'Content-Type':'application/json'};
+  if(__authToken) headers['Authorization'] = 'Bearer ' + __authToken;
+  const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
   const t=await r.text(); let d; try{ d=JSON.parse(t); }catch{ d={message:t}; }
+  if(r.status===401) throw Error('இந்த tool-ஐ பயன்படுத்த, முதலில் Login செய்யவும் (முகப்பு பக்கத்தில்).');
   if(!r.ok) throw Error(d.error||d.message||('Server error '+r.status));
   return d;
 }
