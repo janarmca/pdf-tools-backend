@@ -589,7 +589,20 @@ async function astrologerCall(path, body) {
   });
   const text = await r.text();
   let data; try { data = JSON.parse(text); } catch { data = { message: text }; }
-  if (!r.ok) throw new Error(data.error || data.message || ('Astrologer API error ' + r.status));
+  if (!r.ok) {
+    // FastAPI validation errors (422) come back as {"detail":[{"loc":[...],"msg":"...","type":"..."}]}
+    // — surfacing this instead of a generic message tells us EXACTLY which
+    // field is wrong, instead of guessing.
+    let detailMsg = data.error || data.message;
+    if (Array.isArray(data.detail)) {
+      detailMsg = data.detail.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join(' | ');
+    } else if (typeof data.detail === 'string') {
+      detailMsg = data.detail;
+    }
+    console.error('[astrologerCall] request body was:', JSON.stringify(body));
+    console.error('[astrologerCall] error response:', text);
+    throw new Error(detailMsg || ('Astrologer API error ' + r.status));
+  }
   return data;
 }
 function toSubject(dateStr, timeStr, coordsStr, name, timezone) {
@@ -597,7 +610,8 @@ function toSubject(dateStr, timeStr, coordsStr, name, timezone) {
   const [hh, mm] = String(timeStr || '12:00').split(':').map(Number);
   const [lat, lng] = String(coordsStr || '').split(',').map(s => parseFloat(s.trim()));
   return {
-    name: name || 'Subject', year: y, month: m, day: d, hour: hh || 12, minute: mm || 0,
+    name: name || 'Subject', year: y, month: m, day: d,
+    hour: Number.isFinite(hh) ? hh : 12, minute: Number.isFinite(mm) ? mm : 0,
     longitude: lng, latitude: lat,
     timezone: timezone || 'Asia/Kolkata', // required by the API — defaults to IST since that's this app's primary audience
     zodiac_type: 'Sidereal', sidereal_mode: 'LAHIRI'
