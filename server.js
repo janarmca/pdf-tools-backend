@@ -594,7 +594,9 @@ async function astrologerCall(path, body) {
     // — surfacing this instead of a generic message tells us EXACTLY which
     // field is wrong, instead of guessing.
     let detailMsg = data.error || data.message;
-    if (Array.isArray(data.detail)) {
+    if (Array.isArray(data.errors)) {
+      detailMsg = data.errors.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join(' | ');
+    } else if (Array.isArray(data.detail)) {
       detailMsg = data.detail.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join(' | ');
     } else if (typeof data.detail === 'string') {
       detailMsg = data.detail;
@@ -605,7 +607,7 @@ async function astrologerCall(path, body) {
   }
   return data;
 }
-function toSubject(dateStr, timeStr, coordsStr, name, timezone) {
+function toSubject(dateStr, timeStr, coordsStr, name, timezone, city) {
   const [y, m, d] = String(dateStr).split('-').map(Number);
   const [hh, mm] = String(timeStr || '12:00').split(':').map(Number);
   const [lat, lng] = String(coordsStr || '').split(',').map(s => parseFloat(s.trim()));
@@ -613,6 +615,7 @@ function toSubject(dateStr, timeStr, coordsStr, name, timezone) {
     name: name || 'Subject', year: y, month: m, day: d,
     hour: Number.isFinite(hh) ? hh : 12, minute: Number.isFinite(mm) ? mm : 0,
     longitude: lng, latitude: lat,
+    city: city || 'Unknown', // required by the API even when explicit coordinates are given
     timezone: timezone || 'Asia/Kolkata', // required by the API — defaults to IST since that's this app's primary audience
     zodiac_type: 'Sidereal', sidereal_mode: 'LAHIRI'
   };
@@ -650,7 +653,7 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
     if (!b.dateOfBirth || !b.timeOfBirth || !b.coordinates) {
       return res.status(400).json({ error: 'Date, time and coordinates are required.', verified: false });
     }
-    const data = await astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name, b.timezone) });
+    const data = await astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name, b.timezone, b.birthPlace) });
     const subject = data.subject || (data.data && data.data.subject) || data.data || data;
     res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign) });
   } catch (e) {
