@@ -654,7 +654,7 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
       return res.status(400).json({ error: 'Date, time and coordinates are required.', verified: false });
     }
     const data = await astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name, b.timezone, b.birthPlace) });
-    const subject = data.subject || (data.data && data.data.subject) || data.data || data;
+    const subject = (data.chart_data && data.chart_data.subject) || data.subject || (data.data && data.data.subject) || data.data || data;
     res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign) });
   } catch (e) {
     res.status(502).json({ error: e.message, verified: false, accuracyStatus: 'unverified' });
