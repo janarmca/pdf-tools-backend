@@ -478,6 +478,12 @@ async function startCheckout(planId, btn){
       key: order.keyId, amount: order.amount, currency: order.currency,
       name: 'PDF Tools', description: 'Credits / Plan',
       order_id: order.orderId,
+      // UPI payments on mobile hand off to a separate app (GPay/PhonePe/etc.)
+      // and then redirect the browser back afterwards — without an explicit
+      // callback_url, that redirect can land on a URL the hosting platform
+      // doesn't recognise (404). Pointing it at the site root, which this
+      // single-page app always serves correctly, fixes that.
+      callback_url: window.location.origin + '/',
       handler: async function(response){
         try{
           const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/payment/verify', {
@@ -8768,7 +8774,31 @@ TOOL_IMPL.barcollection = { mount(container){ mountEmbeddedTool(container, 'bar-
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 
 render();
-initAuth().then(()=> render()); // login session இருந்தால் மீண்டும் render் edு credits/plan காட்டு
+initAuth().then(async ()=>{
+  render();
+  // Catches UPI/other redirect-based Razorpay payments — these complete via
+  // callback_url (browser navigates back with payment details as query
+  // params) instead of the normal in-page handler() callback, so we check
+  // for that here once on load and verify+credit it the same way.
+  const params = new URLSearchParams(window.location.search);
+  const rpPaymentId = params.get('razorpay_payment_id');
+  const rpOrderId = params.get('razorpay_order_id');
+  const rpSignature = params.get('razorpay_signature');
+  if(rpPaymentId && rpOrderId && rpSignature && authState.session){
+    try{
+      const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/payment/verify', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+authState.session.access_token },
+        body: JSON.stringify({ razorpay_order_id: rpOrderId, razorpay_payment_id: rpPaymentId, razorpay_signature: rpSignature })
+      });
+      if(!result.error){ await refreshProfile(); updateCreditsBadgeInline(); showToast('✅ Payment successful! Credits have been added.', 'success'); }
+    }catch(e){ /* silently ignore — if this was a stale/duplicate URL revisit, nothing should happen twice */ }
+    finally{
+      // Clean the payment params out of the URL so refreshing the page doesn't re-trigger this
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+});
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{}); // silently skip if sw.js isn't hosted alongside this file
