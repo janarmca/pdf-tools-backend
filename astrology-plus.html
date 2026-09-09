@@ -77,6 +77,7 @@
   <div class="small" style="margin-top:8px">குறிப்பு: பிரிவு சக்கரங்கள் (D9, D10 etc.) இன்னும் இணைக்கப்படவில்லை.</div>
   <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
   <div id="dashaTable" style="margin-top:14px;"></div>
+  <div id="navamsaTable"></div>
 </div>
 
 
@@ -217,11 +218,21 @@ async function post(url,body){
   if(!r.ok) throw Error(d.error||d.message||('Server error '+r.status));
   return d;
 }
+const PLANET_NAMES_TA = { Sun:'சூரியன்', Moon:'சந்திரன்', Mercury:'புதன்', Venus:'சுக்கிரன்', Mars:'செவ்வாய்', Jupiter:'குரு', Saturn:'சனி', Uranus:'யுரேனஸ்', Neptune:'நெப்டியூன்', Pluto:'புளூட்டோ' };
+function toTamilPlanetList(names){
+  // names look like "Sun" or "Saturn (R)" — translate the planet part, keep the (R) retrograde marker
+  return names.map(n=>{
+    const m = n.match(/^(\w+)(.*)$/);
+    if(!m) return n;
+    return (PLANET_NAMES_TA[m[1]] || m[1]) + m[2];
+  }).join(' · ');
+}
 function render(d){
+  window.__lastChartResult = d; // so "Ask AI" below can reference the REAL calculated chart, not just birth inputs
   const c=d.rasi||d.rasiChart||{};
   document.querySelectorAll('[data-sign]').forEach(x=>{
     const span = x.querySelector('span');
-    if(span) span.textContent = Array.isArray(c[x.dataset.sign]) ? c[x.dataset.sign].join(' · ') : String(c[x.dataset.sign]||'');
+    if(span) span.textContent = Array.isArray(c[x.dataset.sign]) ? toTamilPlanetList(c[x.dataset.sign]) : String(c[x.dataset.sign]||'');
   });
   $('chartCenter').textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
   const subj = (d.chart_data && d.chart_data.subject) || {};
@@ -229,10 +240,18 @@ function render(d){
     `☀️ Sun: ${subj.sun ? subj.sun.sign : '—'}`,
     `🌙 Moon: ${subj.moon ? subj.moon.sign : '—'}`,
     `⬆️ Lagna: ${d.lagna || '—'}`,
+    `⭐ நக்ஷத்திரம்: ${d.nakshatra ? d.nakshatra.ta+' ('+d.nakshatra.en+') பாதம் '+d.nakshatra.pada : '—'}`,
     `📅 Ayanamsa (Lahiri): ${subj.ayanamsa_value ? subj.ayanamsa_value.toFixed(2)+'°' : '—'}`,
     `🏠 House system: ${subj.houses_system_name || '—'}`,
   ].join('\n');
   $('history').textContent = summary;
+  const navBox = $('navamsaTable');
+  if(navBox){
+    if(d.navamsa && Object.keys(d.navamsa).length){
+      navBox.innerHTML = `<div style="font-weight:800; margin:14px 0 8px;">🔯 நவாம்சம் (D9)</div><div style="font-size:.8rem; line-height:1.8;">` +
+        Object.entries(d.navamsa).map(([sign,planets])=>`<b>${sign}:</b> ${toTamilPlanetList(planets)}`).join('<br>') + `</div>`;
+    } else navBox.innerHTML = '';
+  }
   const dashaBox = $('dashaTable');
   if(d.dasha && Array.isArray(d.dasha) && dashaBox){
     const rows = d.dasha.map((p,i)=>
@@ -266,10 +285,15 @@ $('ask').onclick=async()=>{
     $('answer').textContent='ஒரு நேரத்தில் ஒரே ஒரு தெளிவான கேள்வி மட்டும் கேளுங்கள். மிக முக்கியமான ஒரு கேள்வியை தேர்ந்தெடுத்து மீண்டும் சமர்ப்பிக்கவும்.';
     return;
   }
+  if(!window.__lastChartResult){
+    $('answer').textContent = 'முதலில் மேலே "✨ துல்லியமான ஜாதகம் கணக்கிடு" பொத்தானை அழுத்தி ஜாதகத்தை கணக்கிடவும், அப்புறம் கேள்வி கேளுங்கள்.';
+    return;
+  }
   $('answer').textContent='சரிபார்க்கப்பட்ட தகவலை AI-க்கு அனுப்புகிறது…';
   try{
+    const ctx = { ...payload(), chartSummaryForAI: window.__lastChartResult.chartSummaryForAI, rasi: window.__lastChartResult.rasi, lagna: window.__lastChartResult.lagna, nakshatra: window.__lastChartResult.nakshatra, dasha: window.__lastChartResult.dasha };
     const d=await post(CLAUDE_ENDPOINT, {
-      question:q, chartContext:payload(),
+      question:q, chartContext:ctx,
       rules:{ oneQuestion:true, noFabrication:true, citeResearch:true, useCalculatedPositionsOnly:true, uncertaintyRequired:true, distinguishAstrologyFromFact:true }
     });
     $('answer').textContent = d.answer || d.message || JSON.stringify(d,null,2);
