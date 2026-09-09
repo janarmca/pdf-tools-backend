@@ -636,6 +636,45 @@ function buildRasiFromSubject(subject) {
   });
   return rasi;
 }
+// ============================================================
+// VIMSHOTTARI DASHA — a deterministic, well-documented Vedic astrology
+// algorithm computed from the REAL Moon position already returned by the
+// verified chart calculation above (subject.moon.abs_pos). This is genuine
+// astronomical math, not an LLM guess: the 27 lunar Nakshatras each span
+// exactly 360/27 degrees, each is ruled by one of 9 fixed "Dasha lords" in a
+// repeating cycle, and each lord governs a fixed number of years in a
+// 120-year cycle. Given the Moon's real degree position, both the starting
+// lord and the exact remaining balance of that first period are fully
+// determined — nothing here is invented or estimated.
+const DASHA_LORDS = ['Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury'];
+const DASHA_YEARS = { Ketu:7, Venus:20, Sun:6, Moon:10, Mars:7, Rahu:18, Jupiter:16, Saturn:19, Mercury:17 };
+const DASHA_LORDS_TA = { Ketu:'கேது', Venus:'சுக்கிரன்', Sun:'சூரியன்', Moon:'சந்திரன்', Mars:'செவ்வாய்', Rahu:'ராகு', Jupiter:'குரு', Saturn:'சனி', Mercury:'புதன்' };
+function calcVimshottariDasha(moonAbsPos, birthDateISO, cycles) {
+  const NAK_SPAN = 360 / 27; // 13.333...° per Nakshatra
+  const nakIndex = Math.floor(moonAbsPos / NAK_SPAN); // 0-26
+  const fractionElapsed = (moonAbsPos % NAK_SPAN) / NAK_SPAN; // 0-1 within that Nakshatra
+  const startLordIndex = nakIndex % 9; // the 9-lord cycle repeats 3x across 27 nakshatras
+  const birthDate = new Date(birthDateISO);
+  const periods = [];
+  let cursor = new Date(birthDate);
+  // First period: only the BALANCE remains (birth didn't happen at the exact start of that lord's period)
+  const firstLord = DASHA_LORDS[startLordIndex];
+  const firstYears = DASHA_YEARS[firstLord] * (1 - fractionElapsed);
+  let periodEnd = new Date(cursor.getTime() + firstYears * 365.25 * 86400000);
+  periods.push({ lord: firstLord, lord_ta: DASHA_LORDS_TA[firstLord], start: cursor.toISOString().slice(0,10), end: periodEnd.toISOString().slice(0,10), years: Math.round(firstYears*100)/100 });
+  cursor = periodEnd;
+  // Subsequent full periods follow the fixed lord cycle in order
+  const totalPeriods = (cycles || 8) + 1;
+  for (let i = 1; i < totalPeriods; i++) {
+    const lord = DASHA_LORDS[(startLordIndex + i) % 9];
+    const years = DASHA_YEARS[lord];
+    periodEnd = new Date(cursor.getTime() + years * 365.25 * 86400000);
+    periods.push({ lord, lord_ta: DASHA_LORDS_TA[lord], start: cursor.toISOString().slice(0,10), end: periodEnd.toISOString().slice(0,10), years });
+    cursor = periodEnd;
+  }
+  return periods;
+}
+
 app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res) => {
   try {
     const b = req.body || {};
@@ -655,7 +694,10 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
     }
     const data = await astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(b.dateOfBirth, b.timeOfBirth, b.coordinates, b.name, b.timezone, b.birthPlace) });
     const subject = (data.chart_data && data.chart_data.subject) || data.subject || (data.data && data.data.subject) || data.data || data;
-    res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign) });
+    const dasha = (subject && subject.moon && Number.isFinite(subject.moon.abs_pos))
+      ? calcVimshottariDasha(subject.moon.abs_pos, b.dateOfBirth, 9)
+      : null;
+    res.json({ ...data, verified: true, rasi: buildRasiFromSubject(subject), lagna: subject && subject.ascendant && (SIGN_NAME_MAP[subject.ascendant.sign] || subject.ascendant.sign), dasha });
   } catch (e) {
     res.status(502).json({ error: e.message, verified: false, accuracyStatus: 'unverified' });
   }
