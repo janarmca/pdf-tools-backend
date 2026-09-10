@@ -254,7 +254,12 @@ let state = { view:'home', tool:null };
 // backend/README.md-ல் இவற்றை எப்படி பெறுவது என்ற வழிமுறை உள்ளது.
 // ============================================================
 const APP_CONFIG = {
-  SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
+  // Routed through a Cloudflare Worker proxy on our own domain instead of
+  // hitting supabase.co directly — confirmed via mobile-data-vs-WiFi testing
+  // that some ISPs/WiFi networks block *.supabase.co specifically (causing
+  // ERR_CONNECTION_CLOSED on every auth request). Our own domain isn't
+  // blocked, so the proxy forwards to real Supabase from there instead.
+  SUPABASE_URL: 'https://api.pdftoolsindia.dpdns.org',
   SUPABASE_ANON_KEY: 'sb_publishable_N6LTr070Y6IXwHMjH9aeUQ_-xDo8ARE',
   BACKEND_URL: 'https://all-in-one-tools-22743935825.asia-south1.run.app'
 };
@@ -7886,6 +7891,29 @@ TOOL_IMPL.pdfcompare = {
 TOOL_IMPL.gstinvoice = {
   mount(container){
     let items = [{ desc:'', hsn:'', qty:1, rate:0 }];
+    // Seller/Buyer/Invoice fields need their own persisted state too — paint()
+    // rebuilds the whole form (including these fields) every time an item is
+    // added/removed, so without this, whatever the user typed here was wiped
+    // out the moment they touched the item list below.
+    let formState = { sellerName:'', sellerAddr:'', sellerGstin:'', sellerState:'',
+      buyerName:'', buyerAddr:'', buyerGstin:'', buyerState:'',
+      invNo:'INV-001', invDate: new Date().toISOString().slice(0,10) };
+    const esc = (s)=> String(s||'').replace(/"/g,'&quot;');
+    // Reads whatever is currently in the DOM fields into formState, right
+    // before a repaint destroys those DOM nodes.
+    function captureFormState(){
+      const g = (id)=> body.querySelector(id);
+      if(g('#gstSellerName')) formState.sellerName = g('#gstSellerName').value;
+      if(g('#gstSellerAddr')) formState.sellerAddr = g('#gstSellerAddr').value;
+      if(g('#gstSellerGstin')) formState.sellerGstin = g('#gstSellerGstin').value;
+      if(g('#gstSellerState')) formState.sellerState = g('#gstSellerState').value;
+      if(g('#gstBuyerName')) formState.buyerName = g('#gstBuyerName').value;
+      if(g('#gstBuyerAddr')) formState.buyerAddr = g('#gstBuyerAddr').value;
+      if(g('#gstBuyerGstin')) formState.buyerGstin = g('#gstBuyerGstin').value;
+      if(g('#gstBuyerState')) formState.buyerState = g('#gstBuyerState').value;
+      if(g('#gstInvNo')) formState.invNo = g('#gstInvNo').value;
+      if(g('#gstInvDate')) formState.invDate = g('#gstInvDate').value;
+    }
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
@@ -7894,10 +7922,10 @@ TOOL_IMPL.gstinvoice = {
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Seller (You)</div>`));
       const sellerOpts = el(`
         <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Business Name</label><input type="text" id="gstSellerName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstSellerAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="gstSellerGstin" autocomplete="off" placeholder="22AAAAA0000A1Z5"></div>
-          <div class="field"><label>State</label><input type="text" id="gstSellerState" autocomplete="off" placeholder="Tamil Nadu"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Business Name</label><input type="text" id="gstSellerName" autocomplete="off" value="${esc(formState.sellerName)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstSellerAddr" autocomplete="off" value="${esc(formState.sellerAddr)}"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="gstSellerGstin" autocomplete="off" placeholder="22AAAAA0000A1Z5" value="${esc(formState.sellerGstin)}"></div>
+          <div class="field"><label>State</label><input type="text" id="gstSellerState" autocomplete="off" placeholder="Tamil Nadu" value="${esc(formState.sellerState)}"></div>
         </div>
       `);
       body.appendChild(sellerOpts);
@@ -7905,10 +7933,10 @@ TOOL_IMPL.gstinvoice = {
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Buyer</div>`));
       const buyerOpts = el(`
         <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Business/Customer Name</label><input type="text" id="gstBuyerName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstBuyerAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN (optional)</label><input type="text" id="gstBuyerGstin" autocomplete="off"></div>
-          <div class="field"><label>State</label><input type="text" id="gstBuyerState" autocomplete="off" placeholder="Tamil Nadu"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Business/Customer Name</label><input type="text" id="gstBuyerName" autocomplete="off" value="${esc(formState.buyerName)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="gstBuyerAddr" autocomplete="off" value="${esc(formState.buyerAddr)}"></div>
+          <div class="field"><label>GSTIN (optional)</label><input type="text" id="gstBuyerGstin" autocomplete="off" value="${esc(formState.buyerGstin)}"></div>
+          <div class="field"><label>State</label><input type="text" id="gstBuyerState" autocomplete="off" placeholder="Tamil Nadu" value="${esc(formState.buyerState)}"></div>
         </div>
       `);
       body.appendChild(buyerOpts);
@@ -7916,11 +7944,16 @@ TOOL_IMPL.gstinvoice = {
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Invoice Details</div>`));
       const invOpts = el(`
         <div class="opts tamil">
-          <div class="field"><label>Invoice Number</label><input type="text" id="gstInvNo" autocomplete="off" value="INV-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="gstInvDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Invoice Number</label><input type="text" id="gstInvNo" autocomplete="off" value="${esc(formState.invNo)}"></div>
+          <div class="field"><label>Date</label><input type="date" id="gstInvDate" value="${esc(formState.invDate)}"></div>
         </div>
       `);
       body.appendChild(invOpts);
+      // Live-capture as the user types, so the values are always current in
+      // formState even before an Add/Remove item repaint happens.
+      sellerOpts.addEventListener('input', captureFormState);
+      buyerOpts.addEventListener('input', captureFormState);
+      invOpts.addEventListener('input', captureFormState);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Items</div>`));
       const itemsWrap = el(`<div></div>`);
@@ -7944,13 +7977,14 @@ TOOL_IMPL.gstinvoice = {
       itemsWrap.addEventListener('click',(e)=>{
         const idx = e.target.getAttribute('data-remove');
         if(idx==null) return;
+        captureFormState();
         items.splice(Number(idx),1);
         if(!items.length) items.push({desc:'',hsn:'',qty:1,rate:0});
         paint();
       });
       body.appendChild(itemsWrap);
       const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
-      addBtn.onclick = ()=>{ items.push({desc:'',hsn:'',qty:1,rate:0}); paint(); };
+      addBtn.onclick = ()=>{ captureFormState(); items.push({desc:'',hsn:'',qty:1,rate:0}); paint(); };
       body.appendChild(addBtn);
 
       const gstOpts = el(`
