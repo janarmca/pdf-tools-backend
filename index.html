@@ -44,6 +44,17 @@
   .hero-badge{background:rgba(255,255,255,.75); border:1px solid var(--line); border-radius:20px; padding:6px 13px; font-size:11.5px; font-weight:700; color:var(--ink); backdrop-filter:blur(4px);}
 
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:14px; margin-top:8px;}
+  @media (max-width:480px){
+    /* Was showing 1 tool per row on phones — 185px minimum column width
+       doesn't leave room for 2 columns once the page's 16px side padding
+       and 14px gap are subtracted from a typical ~375-390px phone screen.
+       No media queries existed anywhere in this app before this fix. */
+    .grid{grid-template-columns:repeat(2, 1fr); gap:10px;}
+    .tool-card{padding:14px 10px; gap:6px;}
+    .tool-icon{width:40px; height:40px; font-size:19px;}
+    .tool-name{font-size:13.5px;}
+    .tool-desc{font-size:11px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  }
   .tool-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:flex; flex-direction:column; gap:10px; text-align:left;}
   .tool-card:hover{transform:translateY(-2px); box-shadow:0 8px 20px rgba(20,30,60,.08);}
   .tool-card:active{transform:translateY(0);}
@@ -192,6 +203,7 @@ const TOOLS = [
   {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
   {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
+  {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
@@ -205,14 +217,14 @@ const TOOLS = [
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
-  {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:2},
+  {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
   {id:'imgcrop', name:'Crop / Resize Image', desc:'Crop a region or change size', icon:'✂️', color:'#D35400', cat:'image', cost:0},
   {id:'imgcollage', name:'Image Collage', desc:'Combine multiple photos into one grid', icon:'🖇️', color:'#B5482A', cat:'image', cost:0},
   {id:'exifremove', name:'Strip Photo Privacy Data', desc:'Remove GPS/camera info (EXIF)', icon:'🛡️', color:'#1F6F78', cat:'image', cost:0},
   {id:'colorpicker', name:'Color Picker', desc:'Pick a color from an image + build a palette', icon:'🎨', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgwatermark', name:'Watermark an Image', desc:'Stamp text/logo onto a photo', icon:'💧', color:'#2980B9', cat:'image', cost:0},
-  {id:'imgpassport', name:'Passport / ID Photo', desc:'Standard size + background + 4-up print sheet', icon:'🪪', color:'#5B2C6F', cat:'image', cost:1},
+  {id:'imgpassport', name:'Passport / ID Photo', desc:'Standard size + background + 4-up print sheet', icon:'🪪', color:'#5B2C6F', cat:'image', cost:0},
   {id:'imgsketch', name:'Image → Sketch', desc:'Pencil sketch / cartoon effect', icon:'🖊️', color:'#6E2C00', cat:'image', cost:0},
   {id:'imgmeme', name:'Meme Maker', desc:'Add top/bottom captions to make a meme', icon:'😄', color:'#CA6F1E', cat:'image', cost:0},
   {id:'imgbatchresize', name:'Batch Resize Images', desc:'Resize many images to one size at once', icon:'📐', color:'#7D3C98', cat:'image', cost:0},
@@ -221,20 +233,20 @@ const TOOLS = [
   {id:'imgsticker', name:'Sticker Cutout', desc:'Cut out a subject with a white sticker border', icon:'🏷️', color:'#B03A2E', cat:'image', cost:0},
 
   // ---- Video Tools (Paid) ----
-  {id:'vidvoice', name:'Video + Voice', desc:'Add/replace voice, extract audio, record video+mic', icon:'🎙️', color:'#7B3FA0', cat:'video', cost:2},
-  {id:'vidsplit', name:'Split Video', desc:'Cut into equal parts or a chosen time range', icon:'🎬', color:'#B5482A', cat:'video', cost:2},
-  {id:'videothumb', name:'Video Thumbnail', desc:'Grab a frame at a chosen time as an image', icon:'🖼️', color:'#2E6F5E', cat:'video', cost:1},
-  {id:'videocompress', name:'Compress Video', desc:'Shrink the file size', icon:'🗜️', color:'#8C4A2F', cat:'video', cost:2},
-  {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:2},
-  {id:'videospeed', name:'Change Video Speed', desc:'Slow‑motion / fast‑forward', icon:'⏩', color:'#1F618D', cat:'video', cost:2},
-  {id:'videoreverse', name:'Reverse Video', desc:'Play the video backwards', icon:'◀️', color:'#6C3483', cat:'video', cost:2},
-  {id:'videorotate', name:'Rotate / Flip Video', desc:'Rotate 90°/180° or mirror flip', icon:'🔄', color:'#B03A2E', cat:'video', cost:1},
-  {id:'videomute', name:'Mute Video', desc:'Strip audio fast (no re-encode)', icon:'🔇', color:'#616A6B', cat:'video', cost:1},
-  {id:'videomerge', name:'Merge Videos', desc:'Combine multiple video clips into one', icon:'➕', color:'#117A65', cat:'video', cost:2},
-  {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:2},
-  {id:'videowave', name:'Audio → Waveform Video', desc:'Turn a song/voice into an animated waveform video', icon:'🌊', color:'#0E6655', cat:'video', cost:2},
-  {id:'videoloop', name:'Loop Video', desc:'Repeat a video multiple times', icon:'🔁', color:'#6C3483', cat:'video', cost:1},
-  {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:1},
+  {id:'vidvoice', name:'Video + Voice', desc:'Add/replace voice, extract audio, record video+mic', icon:'🎙️', color:'#7B3FA0', cat:'video', cost:0},
+  {id:'vidsplit', name:'Split Video', desc:'Cut into equal parts or a chosen time range', icon:'🎬', color:'#B5482A', cat:'video', cost:0},
+  {id:'videothumb', name:'Video Thumbnail', desc:'Grab a frame at a chosen time as an image', icon:'🖼️', color:'#2E6F5E', cat:'video', cost:0},
+  {id:'videocompress', name:'Compress Video', desc:'Shrink the file size', icon:'🗜️', color:'#8C4A2F', cat:'video', cost:0},
+  {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:0},
+  {id:'videospeed', name:'Change Video Speed', desc:'Slow‑motion / fast‑forward', icon:'⏩', color:'#1F618D', cat:'video', cost:0},
+  {id:'videoreverse', name:'Reverse Video', desc:'Play the video backwards', icon:'◀️', color:'#6C3483', cat:'video', cost:0},
+  {id:'videorotate', name:'Rotate / Flip Video', desc:'Rotate 90°/180° or mirror flip', icon:'🔄', color:'#B03A2E', cat:'video', cost:0},
+  {id:'videomute', name:'Mute Video', desc:'Strip audio fast (no re-encode)', icon:'🔇', color:'#616A6B', cat:'video', cost:0},
+  {id:'videomerge', name:'Merge Videos', desc:'Combine multiple video clips into one', icon:'➕', color:'#117A65', cat:'video', cost:0},
+  {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:0},
+  {id:'videowave', name:'Audio → Waveform Video', desc:'Turn a song/voice into an animated waveform video', icon:'🌊', color:'#0E6655', cat:'video', cost:0},
+  {id:'videoloop', name:'Loop Video', desc:'Repeat a video multiple times', icon:'🔁', color:'#6C3483', cat:'video', cost:0},
+  {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:0},
 
   // ---- AI / OCR Tools (Paid) ----
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:1},
@@ -946,7 +958,7 @@ function renderHero(){
   return el(`
     <div class="hero tamil">
       <h1>All PDF Tools — In One Place, Free</h1>
-      <p>📷 Camera Scanner, OCR (20+ languages), Merge/Split/Compress/Watermark/Sign, Word ⇄ PDF, Excel ⇄ PDF/Word, GST invoicing, accounting templates, and a full AI toolkit — no ads, no clutter. Your files stay on your device unless you choose Fast Server Mode.</p>
+      <p>Merge, compress, convert, translate, and more — one clean toolkit for documents, images, and video. Your files stay on your device unless you choose Fast Server Mode.</p>
       <div class="hero-badges">
         <div class="hero-badge">🧰 ${TOOLS.length}+ tools</div>
         <div class="hero-badge">🔒 Privacy-first</div>
@@ -3671,7 +3683,9 @@ TOOL_IMPL.imgcompress = {
           let w = img.naturalWidth, h = img.naturalHeight;
           if(maxW>0 && w>maxW){ h = Math.round(h*(maxW/w)); w = maxW; }
           const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
-          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h); // fixes: any transparent gap exports as black in JPEG otherwise
+          ctx.drawImage(img,0,0,w,h);
           const blob = await new Promise(res=> canvas.toBlob(res,'image/jpeg', quality));
           results.push({name: f.name.replace(/\.[^.]+$/,'')+'.jpg', blob, before:f.size, after:blob.size});
         }
@@ -4322,6 +4336,7 @@ TOOL_IMPL.imgenhance = {
           const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
           const ctx = canvas.getContext('2d');
           ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h); // fixes: any transparent gap exports as black in JPEG otherwise
           ctx.drawImage(img,0,0,w,h);
           await yieldFrame();
           let imgData = ctx.getImageData(0,0,w,h);
@@ -4618,8 +4633,13 @@ TOOL_IMPL.qrgen = {
     function buildPayload(){
       if(mode==='text') return body.querySelector('#qText').value || '';
       if(mode==='wifi'){
-        const ssid = body.querySelector('#qSsid').value||'';
-        const pass = body.querySelector('#qPass').value||'';
+        // WIFI QR spec requires escaping \, ;, ,, and : within field values —
+        // without this, a password containing e.g. a semicolon would
+        // prematurely terminate that field and produce a malformed QR code
+        // that scans to the wrong (or broken) credentials.
+        const escWifi = (s)=> String(s||'').replace(/([\\;,:])/g, '\\$1');
+        const ssid = escWifi(body.querySelector('#qSsid').value||'');
+        const pass = escWifi(body.querySelector('#qPass').value||'');
         const sec = body.querySelector('#qSec').value;
         return `WIFI:T:${sec};S:${ssid};P:${pass};;`;
       }
@@ -5782,6 +5802,7 @@ TOOL_IMPL.imgwatermark = {
           const img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
           const canvas = document.createElement('canvas'); canvas.width=img.naturalWidth; canvas.height=img.naturalHeight;
           const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); // fixes: any transparent gap exports as black in JPEG otherwise
           ctx.drawImage(img,0,0);
           ctx.font = `bold ${size}px sans-serif`;
           ctx.fillStyle = `rgba(255,255,255,${opac})`;
@@ -6181,7 +6202,7 @@ TOOL_IMPL.imgmeme = {
         ctx.fillStyle = '#fff';
         ctx.strokeStyle = '#000';
         ctx.lineWidth = fontSize/14;
-        function wrapAndDraw(str, y){
+        function wrapAndDraw(str, y, anchor){
           const words = str.toUpperCase().split(' ');
           let lines = [], cur='';
           words.forEach(w=>{
@@ -6189,14 +6210,18 @@ TOOL_IMPL.imgmeme = {
             if(ctx.measureText(test).width > canvas.width*0.92 && cur){ lines.push(cur); cur=w; } else cur=test;
           });
           if(cur) lines.push(cur);
+          // For a bottom-anchored caption, start high enough that the LAST
+          // line lands at y (not the first) — otherwise a 3+ line caption's
+          // later lines would be drawn past the canvas edge and get cut off.
+          const startY = anchor==='bottom' ? y - (lines.length-1)*fontSize*1.1 : y;
           lines.forEach((line,i)=>{
-            const ly = y + i*fontSize*1.1;
+            const ly = startY + i*fontSize*1.1;
             ctx.strokeText(line, canvas.width/2, ly);
             ctx.fillText(line, canvas.width/2, ly);
           });
         }
-        if(top) wrapAndDraw(top, fontSize*1.1);
-        if(bottom) wrapAndDraw(bottom, canvas.height - fontSize*1.3);
+        if(top) wrapAndDraw(top, fontSize*1.1, 'top');
+        if(bottom) wrapAndDraw(bottom, canvas.height - fontSize*1.3, 'bottom');
         prog.set(85,'Preparing…');
         const blob = await new Promise(res=> canvas.toBlob(res,'image/jpeg',0.95));
         downloadBlob(blob, 'meme.jpg');
@@ -7755,6 +7780,26 @@ function mountAiUploadTool(container, config){
     card.style.position='relative';
     card.appendChild(copyBtn);
     answerHolder.appendChild(card);
+    // Download row — lets the user pick their own filename before saving,
+    // instead of only offering Copy with no way to save a file at all.
+    const baseName = (file && file.name ? file.name.replace(/\.[^.]+$/,'') : (config.toolId || 'result'));
+    const downloadRow = el(`
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+        <input type="text" id="aiDownloadName" value="${escapeHtml(baseName)}-result" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
+        <span style="font-size:13px; color:var(--sub);">.txt</span>
+        <button id="aiDownloadBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download</button>
+      </div>
+    `);
+    answerHolder.appendChild(downloadRow);
+    downloadRow.querySelector('#aiDownloadBtn').onclick = ()=>{
+      const name = (downloadRow.querySelector('#aiDownloadName').value.trim() || 'result') + '.txt';
+      const blob = new Blob([answerText], {type:'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    };
   }
   async function doAsk(){
     if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
@@ -7917,17 +7962,24 @@ TOOL_IMPL.aireceipt = {
           </div>
         `);
         answerHolder.appendChild(summary);
-        const dlBtn = el(`<button class="btn" style="margin-top:12px;">⬇️ Download as Excel</button>`);
-        dlBtn.onclick = ()=>{
+        const downloadRow = el(`
+          <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+            <input type="text" id="receiptDownloadName" value="${escapeHtml((data.vendor||'receipt').replace(/[^a-zA-Z0-9 -]/g,'').trim() || 'receipt')}-data" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
+            <span style="font-size:13px; color:var(--sub);">.xlsx</span>
+            <button id="receiptDlBtn" class="btn" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download Excel</button>
+          </div>
+        `);
+        downloadRow.querySelector('#receiptDlBtn').onclick = ()=>{
+          const name = (downloadRow.querySelector('#receiptDownloadName').value.trim() || 'receipt-data') + '.xlsx';
           const wb = XLSX.utils.book_new();
           const rows = [['Vendor','Date','Currency','Total Amount'], [data.vendor||'', data.date||'', data.currency||'', data.total_amount||'']];
           if((data.items||[]).length){ rows.push([]); rows.push(['Item','Price']); (data.items||[]).forEach(it=> rows.push([it.name||'', it.price||''])); }
           const ws = XLSX.utils.aoa_to_sheet(rows);
           XLSX.utils.book_append_sheet(wb, ws, 'Receipt');
           const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-          downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'receipt-data.xlsx');
+          downloadBlob(new Blob([out],{type:'application/octet-stream'}), name);
         };
-        answerHolder.appendChild(dlBtn);
+        answerHolder.appendChild(downloadRow);
       }
     });
   }
@@ -8665,6 +8717,117 @@ TOOL_IMPL.salaryslip = {
 };
 
 /* ===================== PAYMENT VOUCHER ===================== */
+/* ===================== LEAVE APPLICATION LETTER ===================== */
+TOOL_IMPL.leaveletter = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Fill your details — get a properly formatted leave application letter as a downloadable PDF.</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="llCompany" autocomplete="off"></div>
+          <div class="field"><label>Your Name</label><input type="text" id="llName" autocomplete="off"></div>
+          <div class="field"><label>Designation</label><input type="text" id="llDesig" autocomplete="off"></div>
+          <div class="field"><label>Department</label><input type="text" id="llDept" autocomplete="off"></div>
+          <div class="field"><label>Employee ID (optional)</label><input type="text" id="llEmpId" autocomplete="off"></div>
+          <div class="field"><label>Leave Type</label><select id="llType"><option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Maternity Leave</option><option>Paternity Leave</option><option>Unpaid Leave</option><option>Other</option></select></div>
+          <div class="field"><label>From Date</label><input type="date" id="llFrom"></div>
+          <div class="field"><label>To Date</label><input type="date" id="llTo"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Addressed To (Manager/HR Name)</label><input type="text" id="llManager" placeholder="e.g. Mr. Ravi Kumar, HR Manager" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Reason</label><textarea id="llReason" placeholder="Briefly describe the reason for leave..."></textarea></div>
+        </div>
+      `));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📝 Generate Letter</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    function countLeaveDays(fromStr, toStr){
+      if(!fromStr || !toStr) return 0;
+      const from = new Date(fromStr), to = new Date(toStr);
+      const diff = Math.round((to - from) / 86400000) + 1; // inclusive of both start and end date
+      return diff > 0 ? diff : 0;
+    }
+    // Same word-wrapping approach used elsewhere in this app (e.g. txt2pdf) —
+    // measures actual text width per line instead of a fixed character
+    // count, and returns how many lines it used so the caller can correctly
+    // advance the Y position (avoiding the "next section overlaps" class of
+    // bug found and fixed in other tools this session).
+    function wrapText(font, text, size, maxWidth){
+      const words = String(text||'').split(/\s+/).filter(Boolean);
+      const lines = []; let cur = '';
+      words.forEach(w=>{
+        const test = cur ? cur+' '+w : w;
+        if(font.widthOfTextAtSize(test, size) > maxWidth && cur){ lines.push(cur); cur = w; } else cur = test;
+      });
+      if(cur) lines.push(cur);
+      return lines.length ? lines : [''];
+    }
+    async function doGenerate(){
+      const company = body.querySelector('#llCompany').value||'';
+      const name = body.querySelector('#llName').value||'';
+      const desig = body.querySelector('#llDesig').value||'';
+      const dept = body.querySelector('#llDept').value||'';
+      const empId = body.querySelector('#llEmpId').value||'';
+      const leaveType = body.querySelector('#llType').value;
+      const fromDate = body.querySelector('#llFrom').value;
+      const toDate = body.querySelector('#llTo').value;
+      const manager = body.querySelector('#llManager').value||'Sir/Madam';
+      const reason = body.querySelector('#llReason').value||'';
+      if(!name.trim() || !fromDate || !toDate){ mountResult(body, 'Please fill your name, From Date and To Date.').style.background='#FDEDEC'; return; }
+      const days = countLeaveDays(fromDate, toDate);
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        let page = doc.addPage([595.28, 841.89]); // A4
+        let {width, height} = page.getSize();
+        let y = height - 60;
+        let t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const todayStr = new Date().toISOString().slice(0,10);
+
+        if(company) { t(company, 50, y, 14, rgb(0.13,0.29,0.62)); y -= 30; } else { y -= 10; }
+        t('Date: ' + todayStr, 50, y, 10.5); y -= 30;
+        t('To,', 50, y, 11); y -= 16;
+        t(manager, 50, y, 11); y -= 16;
+        if(company) { t(company, 50, y, 11); y -= 16; }
+        y -= 14;
+        t('Subject: Application for ' + leaveType, 50, y, 11.5, rgb(0.13,0.29,0.62)); y -= 30;
+        t('Dear ' + (manager.split(',')[0] || 'Sir/Madam') + ',', 50, y, 11); y -= 26;
+
+        const bodyText = `I am writing to formally request ${leaveType.toLowerCase()} from ${fromDate} to ${toDate} (${days} day${days===1?'':'s'}), due to the following reason: ${reason || '[reason not specified]'}. I kindly request you to grant me leave for the above-mentioned period. I will ensure that my pending work is handed over appropriately before my leave begins. Please let me know if any further information or documentation is required.`;
+        const bodyLines = wrapText(font, bodyText, 11, width - 100);
+        bodyLines.forEach(line=>{
+          if(y < 120){ // extra-long reason text gets a fresh page instead of silently running off — same fix pattern as the GST invoice / purchase order pagination fix earlier this session
+            page = doc.addPage([595.28, 841.89]);
+            ({width, height} = page.getSize());
+            y = height - 60;
+            t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+          }
+          t(line, 50, y, 11); y -= 17;
+        });
+        y -= 20;
+        t('Thank you for your consideration.', 50, y, 11); y -= 40;
+        t('Yours sincerely,', 50, y, 11); y -= 40;
+        t(name, 50, y, 12, rgb(0.1,0.1,0.1)); y -= 15;
+        if(desig) { t(desig, 50, y, 10.5, rgb(0.4,0.4,0.4)); y -= 14; }
+        if(dept) { t(dept, 50, y, 10.5, rgb(0.4,0.4,0.4)); y -= 14; }
+        if(empId) { t('Employee ID: ' + empId, 50, y, 10.5, rgb(0.4,0.4,0.4)); }
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `leave-application-${name.replace(/\s+/g,'-')||'letter'}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Leave application letter ready (${days} day${days===1?'':'s'} — ${fromDate} to ${toDate}).`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
 TOOL_IMPL.paymentvoucher = {
   mount(container){
     const body = el(`<div></div>`); container.appendChild(body);
