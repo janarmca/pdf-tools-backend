@@ -3423,7 +3423,7 @@ TOOL_IMPL.camscan = {
         bCam.onclick = openCamera;
         const bGal = el(`<button class="btn secondary">🖼️ கேலரியிலிருந்து Add</button>`);
         const galInput = el(`<input type="file" accept="image/*" multiple style="display:none;">`);
-        bGal.onclick = ()=> galInput.click();
+        bGal.onclick = ()=>{ ensureCvWorker(); galInput.click(); }; // pre-warm while the user picks their photo — was only happening on the camera path before, leaving gallery uploads to eat the full OpenCV load time later
         galInput.addEventListener('change', async ()=>{
           const files = Array.from(galInput.files||[]);
           for(const f of files){
