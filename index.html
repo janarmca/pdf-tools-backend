@@ -254,12 +254,11 @@ let state = { view:'home', tool:null };
 // backend/README.md-ல் இவற்றை எப்படி பெறுவது என்ற வழிமுறை உள்ளது.
 // ============================================================
 const APP_CONFIG = {
-  // Routed through a Cloudflare Worker proxy on our own domain instead of
-  // hitting supabase.co directly — confirmed via mobile-data-vs-WiFi testing
-  // that some ISPs/WiFi networks block *.supabase.co specifically (causing
-  // ERR_CONNECTION_CLOSED on every auth request). Our own domain isn't
-  // blocked, so the proxy forwards to real Supabase from there instead.
-  SUPABASE_URL: 'https://api.pdftoolsindia.dpdns.org',
+  // NOTE: Cloudflare Worker proxy setup was not completed successfully, so
+  // reverted to the direct Supabase URL to restore working functionality.
+  // If the WiFi-ISP-blocking issue returns, the proxy approach can be
+  // retried once the Worker is set up correctly (see conversation history).
+  SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_N6LTr070Y6IXwHMjH9aeUQ_-xDo8ARE',
   BACKEND_URL: 'https://all-in-one-tools-22743935825.asia-south1.run.app'
 };
