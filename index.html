@@ -969,12 +969,12 @@ function renderHero(){
   `);
 }
 const CATEGORY_META = {
-  pdf:   { label: 'PDF', icon:'📄', sub: 'Free — runs entirely in your browser' },
-  business: { label: 'Business', icon:'💼', sub: 'Free — GST, invoicing & accounting templates' },
-  image: { label: 'Image', icon:'🖼️', sub: '⚡ Paid — sign in for credits-based fast processing' },
-  video: { label: 'Video', icon:'🎬', sub: '⚡ Paid — sign in for credits-based fast processing' },
-  ai:    { label: 'AI', icon:'🤖', sub: '⚡ Paid — powered by AI, one credit per use' },
-  education: { label: 'Education', icon:'🎓', sub: 'Free — learning games for Grades 1-12' },
+  pdf:   { label: 'PDF', icon:'📄', sub: 'Runs entirely in your browser', isFree: true },
+  business: { label: 'Business', icon:'💼', sub: 'GST, invoicing & accounting templates', isFree: true },
+  image: { label: 'Image', icon:'🖼️', sub: 'Runs entirely in your browser', isFree: true },
+  video: { label: 'Video', icon:'🎬', sub: 'Free — optional paid Fast Server upgrade', isFree: true },
+  ai:    { label: 'AI', icon:'🤖', sub: 'Powered by AI — 1 credit per use', isFree: false },
+  education: { label: 'Education', icon:'🎓', sub: 'Learning games for Grades 1-12', isFree: true },
 };
 const POPULAR_TOOL_IDS = ['merge','compress','pdf2word','askai','videocompress','bgremove','ocr','aitranslate'];
 let __activeCategory = 'all';
@@ -1007,11 +1007,16 @@ function renderSearchBar(){
 }
 
 function renderCategoryTabs(){
-  const cats = [['all','All','🗂️'], ...Object.keys(CATEGORY_META).map(k=>[k, CATEGORY_META[k].label, CATEGORY_META[k].icon])];
-  const wrap = el(`<div style="display:flex; gap:8px; margin-top:16px; overflow-x:auto; padding-bottom:4px;"></div>`);
-  cats.forEach(([key,label,icon])=>{
+  const cats = [['all','All','🗂️',true], ...Object.keys(CATEGORY_META).map(k=>[k, CATEGORY_META[k].label, CATEGORY_META[k].icon, CATEGORY_META[k].isFree])];
+  const wrap = el(`<div style="display:flex; gap:10px; margin-top:16px; overflow-x:auto; padding:2px 2px 8px;"></div>`);
+  cats.forEach(([key,label,icon,isFree])=>{
     const active = __activeCategory===key;
-    const tab = el(`<button style="flex-shrink:0; padding:9px 16px; border-radius:12px; border:1.5px solid ${active?'var(--brand-dark)':'var(--line)'}; background:${active?'var(--brand-dark)':'#fff'}; color:${active?'#fff':'var(--ink)'}; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;">${icon} ${label}</button>`);
+    const tab = el(`
+      <button style="flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 18px; border-radius:14px; border:1.5px solid ${active?'var(--brand-dark)':'var(--line)'}; background:${active?'var(--brand-dark)':'#fff'}; box-shadow:${active?'0 4px 12px rgba(40,64,127,.25)':'0 1px 3px rgba(20,30,60,.05)'}; cursor:pointer; white-space:nowrap;">
+        <span style="font-size:13px; font-weight:700; color:${active?'#fff':'var(--ink)'};">${icon} ${label}</span>
+        ${key!=='all' ? `<span style="font-size:9.5px; font-weight:700; color:${active?'rgba(255,255,255,.85)':(isFree?'#1E8E5A':'#B8860B')};">${isFree?'Free':'⚡ Paid'}</span>` : ''}
+      </button>
+    `);
     tab.onclick = ()=>{ __activeCategory = key; renderHomeBody(); };
     wrap.appendChild(tab);
   });
