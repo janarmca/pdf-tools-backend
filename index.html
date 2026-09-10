@@ -249,14 +249,15 @@ const TOOLS = [
   {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:0},
 
   // ---- AI / OCR Tools (Paid) ----
-  {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:1},
-  {id:'ocr', name:'Image → Text (OCR)', desc:'20+ languages — correct font rendering', icon:'🔎', color:'#1F6F78', cat:'ai', cost:1},
+  {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
+  {id:'ocr', name:'Image → Text (OCR)', desc:'20+ languages — correct font rendering', icon:'🔎', color:'#1F6F78', cat:'ai', cost:0},
   {id:'askai', name:'Ask AI About Document', desc:'Upload any document and ask questions about it', icon:'💬', color:'#0E6655', cat:'ai', cost:1},
   {id:'aisummarize', name:'AI Summarize', desc:'Long document → short, clear summary in seconds', icon:'📋', color:'#1F618D', cat:'ai', cost:1},
   {id:'aitranslate', name:'AI Translate Document', desc:'Read a document in any language, get it in yours', icon:'🌐', color:'#117A65', cat:'ai', cost:1},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
   {id:'aireceipt', name:'Receipt/Invoice → Excel', desc:'Snap a bill, get vendor/date/amount in a spreadsheet', icon:'🧾', color:'#B7950B', cat:'ai', cost:1},
   {id:'airesume', name:'AI Resume Reviewer', desc:'Upload your CV, get honest feedback to improve it', icon:'📄', color:'#C0392B', cat:'ai', cost:1},
+  {id:'aiexcelcompare', name:'AI Compare Excel Files', desc:'Upload up to 10 spreadsheets, ask a question — AI compares across all of them', icon:'📊', color:'#1F618D', cat:'ai', cost:1},
 ];
 
 let state = { view:'home', tool:null };
@@ -8002,6 +8003,121 @@ TOOL_IMPL.airesume = {
         return 'You are an expert career coach and resume reviewer. Review this resume/CV and give: 1) Overall impression (2-3 sentences), 2) Top 3 strengths, 3) Top 3 specific areas to improve, 4) One concrete rewrite suggestion for the summary/objective section. Be honest, specific, and constructive — avoid generic advice.';
       }
     });
+  }
+};
+
+/* ===================== AI COMPARE EXCEL FILES ===================== */
+TOOL_IMPL.aiexcelcompare = {
+  mount(container){
+    const MAX_FILES = 10;
+    const MAX_ROWS_PER_SHEET = 300; // keeps the AI prompt a sane size even for large spreadsheets
+    let files = [];
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Upload up to ${MAX_FILES} spreadsheets (.xlsx/.xls/.csv), then ask a question — the AI compares data across all of them and answers using only what's actually in your files.</div>`));
+      mountUploader(body, {
+        accept:'.xlsx,.xls,.csv', multiple:true,
+        label:'Drop Excel/CSV files', sublabel:`Up to ${MAX_FILES} files`,
+        onAdd:(fl)=>{
+          const accepted = fl.filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
+          const room = MAX_FILES - files.length;
+          files.push(...accepted.slice(0, Math.max(0,room)));
+          if(accepted.length > room){
+            mountResult(body, `Only ${MAX_FILES} files allowed — added the first ${Math.max(0,room)}, the rest were skipped.`).style.background='#FFF3E0';
+          }
+          if(fl.length > accepted.length){
+            mountResult(body, 'Some files were skipped — only .xlsx, .xls and .csv are supported.').style.background='#FDEDEC';
+          }
+          paint();
+        }
+      });
+      if(files.length){
+        mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
+        body.appendChild(el(`
+          <div class="field" style="margin-top:14px;">
+            <label>Your Question</label>
+            <textarea id="excQuestion" placeholder="e.g. Which file has the highest total revenue? Compare the 'Sales' column across all files and tell me the trend."></textarea>
+          </div>
+        `));
+        const row = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn">📊 Compare & Answer</button>`);
+        btn.onclick = doCompare;
+        row.appendChild(btn);
+        body.appendChild(row);
+        body.appendChild(el(`<div id="excAnswerHolder"></div>`));
+      }
+    }
+    // Extracts a readable text summary of a workbook — every sheet, header
+    // row + up to MAX_ROWS_PER_SHEET data rows as CSV-like text. Long sheets
+    // are truncated with a clear note rather than silently cut off, matching
+    // the pagination-honesty fix pattern used elsewhere in this app.
+    function summarizeWorkbook(filename, buf){
+      const wb = XLSX.read(buf, {type:'array'});
+      let out = `\n=== File: ${filename} ===\n`;
+      wb.SheetNames.forEach(sheetName=>{
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false});
+        out += `-- Sheet: ${sheetName} (${rows.length} rows total) --\n`;
+        const shown = rows.slice(0, MAX_ROWS_PER_SHEET);
+        shown.forEach(r=> out += r.map(c=> c===undefined||c===null ? '' : String(c)).join(', ') + '\n');
+        if(rows.length > MAX_ROWS_PER_SHEET) out += `[...truncated, ${rows.length - MAX_ROWS_PER_SHEET} more rows not shown...]\n`;
+      });
+      return out;
+    }
+    async function doCompare(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
+      const question = body.querySelector('#excQuestion').value.trim();
+      if(!question){ mountResult(body,'Please type a question.').style.background='#FDEDEC'; return; }
+      const answerHolder = body.querySelector('#excAnswerHolder');
+      answerHolder.innerHTML = '';
+      const prog = mountProgress(body);
+      try{
+        prog.set(10, 'Reading your spreadsheets…');
+        let combinedData = '';
+        for(let i=0;i<files.length;i++){
+          prog.set(10 + (i/files.length)*40, `Reading ${files[i].name}…`);
+          const buf = await files[i].arrayBuffer();
+          combinedData += summarizeWorkbook(files[i].name, buf);
+        }
+        const fullPrompt = `You are analyzing ${files.length} spreadsheet file(s) for a user. Use ONLY the data shown below — never invent numbers that aren't present. When comparing across files, clearly state which file(s) each part of your answer comes from. If the data needed to answer isn't present, say so plainly instead of guessing.\n${combinedData}\nQuestion: ${question}`;
+        prog.set(55, 'Comparing files…');
+        const form = new FormData();
+        form.append('question', fullPrompt);
+        form.append('toolId', 'aiexcelcompare');
+        // No 'file' field attached — the backend's /api/ai/ask treats the
+        // file as optional and sends this as a pure-text request to Gemini.
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+        });
+        prog.set(90,'Thinking…');
+        if(result.error) throw new Error(result.error);
+        prog.set(100,'Done'); prog.remove();
+        const card = el(`<div style="position:relative; margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(result.answer)}</div>`);
+        const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
+        copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(result.answer).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
+        card.appendChild(copyBtn);
+        answerHolder.appendChild(card);
+        const downloadRow = el(`
+          <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+            <input type="text" id="excDownloadName" value="excel-comparison-result" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
+            <span style="font-size:13px; color:var(--sub);">.txt</span>
+            <button id="excDownloadBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download</button>
+          </div>
+        `);
+        answerHolder.appendChild(downloadRow);
+        downloadRow.querySelector('#excDownloadBtn').onclick = ()=>{
+          const name = (downloadRow.querySelector('#excDownloadName').value.trim() || 'result') + '.txt';
+          const blob = new Blob([result.answer], {type:'text/plain;charset=utf-8'});
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+        };
+        updateCreditsBadgeInline();
+        refreshProfile();
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
+    }
+    paint();
   }
 };
 
