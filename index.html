@@ -209,7 +209,7 @@ const TOOLS = [
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
   {id:'barcollection', name:'Bar Collection Register', desc:'Table sitting charges & cash collection log', icon:'🍷', color:'#8B5A2B', cat:'business'},
-  {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business'},
+  {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
@@ -8957,50 +8957,74 @@ TOOL_IMPL.quotepo = {
     let docType = 'Quotation';
     const body = el(`<div></div>`); container.appendChild(body);
     const esc = (s)=> String(s||'').replace(/"/g,'&quot;');
+    // Same fix as gstinvoice's Seller/Buyer-clearing bug: paint() rebuilds the
+    // WHOLE form (including every text field) every time an item is added or
+    // removed, so without this persisted state, whatever was typed above the
+    // items table got wiped out the moment the item list changed.
+    let formState = { fromName:'', fromAddr:'', fromGstin:'', fromPan:'', fromMobile:'', fromEmail:'',
+      toName:'', toAddr:'', toGstin:'', toMobile:'',
+      docNo:'', docDate: new Date().toISOString().slice(0,10), expiry:'',
+      bankName:'', bankBranch:'', bankAcc:'', bankIfsc:'', upi:'',
+      terms:'We declare that this document shows the actual price and all particulars are true and correct.\nGoods once sold will not be taken back.\nAll disputes are subject to local jurisdiction.',
+      signatory:'' };
+    function captureFormState(){
+      const g = (id)=> body.querySelector(id);
+      const map = { fromName:'#qpFromName', fromAddr:'#qpFromAddr', fromGstin:'#qpFromGstin', fromPan:'#qpFromPan', fromMobile:'#qpFromMobile', fromEmail:'#qpFromEmail',
+        toName:'#qpToName', toAddr:'#qpToAddr', toGstin:'#qpToGstin', toMobile:'#qpToMobile',
+        docNo:'#qpDocNo', docDate:'#qpDocDate', expiry:'#qpExpiry',
+        bankName:'#qpBankName', bankBranch:'#qpBankBranch', bankAcc:'#qpBankAcc', bankIfsc:'#qpBankIfsc', upi:'#qpUpi',
+        terms:'#qpTerms', signatory:'#qpSignatory' };
+      Object.entries(map).forEach(([key,sel])=>{ const elm = g(sel); if(elm) formState[key] = elm.value; });
+    }
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Fill in your details once — download as PDF, Excel, or Word, all in the same professional layout with an HSN/SAC tax summary, bank details, and terms.</div>`));
+      body.appendChild(el(`<div class="note">Fill in your details once — download as PDF, Excel, or Word, share on WhatsApp, or print directly.</div>`));
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Document Type</div>`));
       const typeRow = el(`<div class="filter-row"></div>`);
-      ['Quotation','Performa Invoice','Purchase Order'].forEach(dt=>{
+      ['Quotation','Performa Invoice','Tax Invoice','Purchase Order'].forEach(dt=>{
         const chip = el(`<button class="filter-chip ${docType===dt?'active':''}">${dt}</button>`);
-        chip.onclick = ()=>{ docType = dt; paint(); };
+        chip.onclick = ()=>{ captureFormState(); docType = dt; paint(); };
         typeRow.appendChild(chip);
       });
       body.appendChild(typeRow);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">${docType==='Purchase Order' ? 'Buyer (You)' : 'Seller (You)'}</div>`));
-      body.appendChild(el(`
+      const fromOpts = el(`
         <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="qpFromName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpFromAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="qpFromGstin" autocomplete="off"></div>
-          <div class="field"><label>PAN</label><input type="text" id="qpFromPan" autocomplete="off"></div>
-          <div class="field"><label>Mobile</label><input type="text" id="qpFromMobile" autocomplete="off"></div>
-          <div class="field"><label>Email</label><input type="email" id="qpFromEmail" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="qpFromName" autocomplete="off" value="${esc(formState.fromName)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpFromAddr" autocomplete="off" value="${esc(formState.fromAddr)}"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="qpFromGstin" autocomplete="off" value="${esc(formState.fromGstin)}"></div>
+          <div class="field"><label>PAN</label><input type="text" id="qpFromPan" autocomplete="off" value="${esc(formState.fromPan)}"></div>
+          <div class="field"><label>Mobile</label><input type="text" id="qpFromMobile" autocomplete="off" value="${esc(formState.fromMobile)}"></div>
+          <div class="field"><label>Email</label><input type="email" id="qpFromEmail" autocomplete="off" value="${esc(formState.fromEmail)}"></div>
         </div>
-      `));
+      `);
+      body.appendChild(fromOpts);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">${docType==='Purchase Order' ? 'Supplier' : 'Bill To'}</div>`));
-      body.appendChild(el(`
+      const toOpts = el(`
         <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Name</label><input type="text" id="qpToName" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpToAddr" autocomplete="off"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="qpToGstin" autocomplete="off"></div>
-          <div class="field"><label>Mobile</label><input type="text" id="qpToMobile" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Name</label><input type="text" id="qpToName" autocomplete="off" value="${esc(formState.toName)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpToAddr" autocomplete="off" value="${esc(formState.toAddr)}"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="qpToGstin" autocomplete="off" value="${esc(formState.toGstin)}"></div>
+          <div class="field"><label>Mobile</label><input type="text" id="qpToMobile" autocomplete="off" value="${esc(formState.toMobile)}"></div>
         </div>
-      `));
+      `);
+      body.appendChild(toOpts);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Document Details</div>`));
-      body.appendChild(el(`
+      const docOpts = el(`
         <div class="opts tamil">
-          <div class="field"><label>${docType} No.</label><input type="text" id="qpDocNo" value="${docType.slice(0,2).toUpperCase()}-001" autocomplete="off"></div>
-          <div class="field"><label>Date</label><input type="date" id="qpDocDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>${docType==='Purchase Order'?'Delivery Due':'Valid Until'}</label><input type="date" id="qpExpiry"></div>
+          <div class="field"><label>${docType} No.</label><input type="text" id="qpDocNo" value="${esc(formState.docNo || (docType.slice(0,2).toUpperCase()+'-001'))}" autocomplete="off"></div>
+          <div class="field"><label>Date</label><input type="date" id="qpDocDate" value="${esc(formState.docDate)}"></div>
+          <div class="field"><label>${docType==='Purchase Order'?'Delivery Due':'Valid Until'}</label><input type="date" id="qpExpiry" value="${esc(formState.expiry)}"></div>
         </div>
-      `));
+      `);
+      body.appendChild(docOpts);
+      // Live-capture as the user types, so formState is always current even before an Add/Remove item repaint
+      [fromOpts, toOpts, docOpts].forEach(sec=> sec.addEventListener('input', captureFormState));
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Items</div>`));
       const itemsWrap = el(`<div></div>`);
@@ -9034,47 +9058,104 @@ TOOL_IMPL.quotepo = {
         });
       });
       itemsWrap.querySelectorAll('button[data-remove]').forEach(btn=>{
-        btn.onclick = ()=>{ items.splice(Number(btn.getAttribute('data-idx')),1); paint(); };
+        btn.onclick = ()=>{ captureFormState(); items.splice(Number(btn.getAttribute('data-idx')),1); paint(); };
       });
       const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add item</button>`);
-      addBtn.onclick = ()=>{ items.push({desc:'',hsn:'',qty:1,unit:'PCS',rate:0,gst:18}); paint(); };
+      addBtn.onclick = ()=>{ captureFormState(); items.push({desc:'',hsn:'',qty:1,unit:'PCS',rate:0,gst:18}); paint(); };
       body.appendChild(addBtn);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Bank Details (optional)</div>`));
-      body.appendChild(el(`
+      const bankOpts = el(`
         <div class="opts tamil">
-          <div class="field"><label>Account Name</label><input type="text" id="qpBankName" autocomplete="off"></div>
-          <div class="field"><label>Bank</label><input type="text" id="qpBankBranch" autocomplete="off"></div>
-          <div class="field"><label>Account No.</label><input type="text" id="qpBankAcc" autocomplete="off"></div>
-          <div class="field"><label>IFSC Code</label><input type="text" id="qpBankIfsc" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>UPI ID (optional)</label><input type="text" id="qpUpi" placeholder="yourname@bank" autocomplete="off"></div>
+          <div class="field"><label>Account Name</label><input type="text" id="qpBankName" autocomplete="off" value="${esc(formState.bankName)}"></div>
+          <div class="field"><label>Bank</label><input type="text" id="qpBankBranch" autocomplete="off" value="${esc(formState.bankBranch)}"></div>
+          <div class="field"><label>Account No.</label><input type="text" id="qpBankAcc" autocomplete="off" value="${esc(formState.bankAcc)}"></div>
+          <div class="field"><label>IFSC Code</label><input type="text" id="qpBankIfsc" autocomplete="off" value="${esc(formState.bankIfsc)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>UPI ID (optional)</label><input type="text" id="qpUpi" placeholder="yourname@bank" autocomplete="off" value="${esc(formState.upi)}"></div>
         </div>
-      `));
+      `);
+      body.appendChild(bankOpts);
 
-      body.appendChild(el(`
+      const termsSec = el(`
         <div class="field" style="margin-top:14px;">
           <label>Terms & Conditions (one per line)</label>
-          <textarea id="qpTerms" rows="4">We declare that this document shows the actual price and all particulars are true and correct.
-Goods once sold will not be taken back.
-All disputes are subject to local jurisdiction.</textarea>
+          <textarea id="qpTerms" rows="4">${esc(formState.terms)}</textarea>
         </div>
-      `));
-      body.appendChild(el(`
+      `);
+      body.appendChild(termsSec);
+      const signSec = el(`
         <div class="field" style="margin-top:10px;">
           <label>Authorized Signatory Name</label>
-          <input type="text" id="qpSignatory" autocomplete="off">
+          <input type="text" id="qpSignatory" autocomplete="off" value="${esc(formState.signatory)}">
         </div>
-      `));
+      `);
+      body.appendChild(signSec);
+      [bankOpts, termsSec, signSec].forEach(sec=> sec.addEventListener('input', captureFormState));
 
       const row = el(`<div class="btn-row" style="margin-top:18px; flex-wrap:wrap;"></div>`);
-      const bPdf = el(`<button class="btn">📄 Download PDF</button>`);
-      const bXls = el(`<button class="btn secondary">📊 Download Excel</button>`);
-      const bDoc = el(`<button class="btn secondary">📝 Download Word</button>`);
+      const bPdf = el(`<button class="btn">📄 PDF</button>`);
+      const bXls = el(`<button class="btn secondary">📊 Excel</button>`);
+      const bDoc = el(`<button class="btn secondary">📝 Word</button>`);
+      const bPrint = el(`<button class="btn secondary">🖨️ Print</button>`);
+      const bWhatsapp = el(`<button class="btn secondary">💬 WhatsApp</button>`);
       bPdf.onclick = ()=> generate('pdf');
       bXls.onclick = ()=> generate('excel');
       bDoc.onclick = ()=> generate('word');
-      row.appendChild(bPdf); row.appendChild(bXls); row.appendChild(bDoc);
+      bPrint.onclick = doPrint;
+      bWhatsapp.onclick = doWhatsappShare;
+      row.appendChild(bPdf); row.appendChild(bXls); row.appendChild(bDoc); row.appendChild(bPrint); row.appendChild(bWhatsapp);
       body.appendChild(row);
+    }
+
+    function doPrint(){
+      const d = collectData();
+      if(!d.rows.length){ mountResult(body, 'Please add at least one item with a description.').style.background='#FDEDEC'; return; }
+      const itemRowsHtml = d.rows.map(r=>`<tr><td>${escapeHtml(r.desc)}</td><td>${escapeHtml(r.hsn)}</td><td>${r.qty}</td><td>${escapeHtml(r.unit)}</td><td>₹${r.rate.toFixed(2)}</td><td>${r.gst}%</td><td>₹${r.amount.toFixed(2)}</td></tr>`).join('');
+      const hsnRowsHtml = d.hsnRows.map(h=>`<tr><td>${escapeHtml(h.hsn)}</td><td>₹${h.taxable.toFixed(2)}</td><td>${h.cgstRate}%</td><td>₹${h.cgstAmt.toFixed(2)}</td><td>${h.sgstRate}%</td><td>₹${h.sgstAmt.toFixed(2)}</td></tr>`).join('');
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html><head><title>${escapeHtml(docType)} ${escapeHtml(d.docNo)}</title>
+        <style>body{font-family:sans-serif; padding:30px; color:#222;} table{width:100%; border-collapse:collapse; margin:12px 0;} td,th{border:1px solid #ccc; padding:6px 8px; font-size:13px; text-align:left;} h1{font-size:22px;} .cols{display:flex; gap:40px;} .lbl{color:#888; font-size:11px; text-transform:uppercase;}</style>
+        </head><body>
+        <h1>${escapeHtml(docType.toUpperCase())}</h1>
+        <div>${escapeHtml(docType)} No: ${escapeHtml(d.docNo)} &nbsp; Date: ${escapeHtml(d.docDate)} &nbsp; Valid/Due: ${escapeHtml(d.expiry)}</div>
+        <div class="cols" style="margin-top:16px;">
+          <div><div class="lbl">${docType==='Purchase Order'?'Buyer':'Seller'}</div><b>${escapeHtml(d.from.name)}</b><br>${escapeHtml(d.from.addr)}<br>GSTIN: ${escapeHtml(d.from.gstin)}</div>
+          <div><div class="lbl">${docType==='Purchase Order'?'Supplier':'Bill To'}</div><b>${escapeHtml(d.to.name)}</b><br>${escapeHtml(d.to.addr)}<br>GSTIN: ${escapeHtml(d.to.gstin)}</div>
+        </div>
+        <table><tr><th>Item</th><th>HSN</th><th>Qty</th><th>Unit</th><th>Rate</th><th>GST%</th><th>Amount</th></tr>${itemRowsHtml}</table>
+        <h3>HSN/SAC Tax Summary</h3>
+        <table><tr><th>HSN</th><th>Taxable</th><th>CGST%</th><th>CGST Amt</th><th>SGST%</th><th>SGST Amt</th></tr>${hsnRowsHtml}</table>
+        <p><b>Subtotal:</b> ₹${d.subtotal.toFixed(2)} &nbsp; <b>Total Tax:</b> ₹${d.totalTax.toFixed(2)} &nbsp; <b>Grand Total:</b> ₹${d.grandTotal.toFixed(2)}</p>
+        <p>Amount in Words: Rupees ${escapeHtml(numberToWordsINR(d.grandTotal))} Only</p>
+        ${(d.bank.name||d.bank.acc) ? `<p><b>Bank:</b> ${escapeHtml(d.bank.name)}, A/c: ${escapeHtml(d.bank.acc)}, IFSC: ${escapeHtml(d.bank.ifsc)}${d.bank.upi?', UPI: '+escapeHtml(d.bank.upi):''}</p>` : ''}
+        ${d.terms.length ? `<p><b>Terms:</b><br>${d.terms.map((term,i)=>`${i+1}. ${escapeHtml(term)}`).join('<br>')}</p>` : ''}
+        <p style="margin-top:50px;">_____________________<br>Authorized Signatory${d.signatory?': '+escapeHtml(d.signatory):''}</p>
+        </body></html>
+      `);
+      win.document.close();
+      win.onload = ()=> win.print();
+    }
+
+    function doWhatsappShare(){
+      const d = collectData();
+      if(!d.rows.length){ mountResult(body, 'Please add at least one item with a description.').style.background='#FDEDEC'; return; }
+      const lines = [
+        `📃 *${docType.toUpperCase()}*`,
+        `${docType} No: ${d.docNo} | Date: ${d.docDate}`,
+        d.from.name ? `From: ${d.from.name}` : '',
+        d.to.name ? `To: ${d.to.name}` : '',
+        '',
+        ...d.rows.map(r=> `• ${r.desc} — Qty ${r.qty} × ₹${r.rate.toFixed(2)} = ₹${r.amount.toFixed(2)}`),
+        '',
+        `Subtotal: ₹${d.subtotal.toFixed(2)}`,
+        `Total Tax: ₹${d.totalTax.toFixed(2)}`,
+        `*Grand Total: ₹${d.grandTotal.toFixed(2)}*`,
+        '',
+        `(Rupees ${numberToWordsINR(d.grandTotal)} Only)`
+      ].filter(Boolean);
+      const text = encodeURIComponent(lines.join('\n'));
+      window.open(`https://wa.me/?text=${text}`, '_blank');
     }
 
     function collectData(){
