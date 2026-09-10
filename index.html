@@ -342,6 +342,7 @@ async function initAuth(){
     // starting screen with no warning and no error. Only actual sign-in/out
     // events should rebuild the page.
     if(event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
+    if(event === 'PASSWORD_RECOVERY'){ mountNewPasswordModal(); return; }
     if(session) await refreshProfile(); else authState.profile = null;
     render();
   });
@@ -400,17 +401,95 @@ function isPro(){
   return !p.plan_expires_at || new Date(p.plan_expires_at) > new Date();
 }
 
+// Shown when Supabase fires a PASSWORD_RECOVERY event — the user just clicked
+// the reset link in their email and is now briefly authenticated specifically
+// to set a new password.
+function mountNewPasswordModal(){
+  const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
+  const card = el(`
+    <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
+      <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Set New Password</div>
+      <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Enter a new password for your account.</div>
+      <div class="field" style="margin-bottom:14px;"><label>New Password</label><input type="password" id="newPass" placeholder="••••••••"></div>
+      <div id="newPassErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
+      <button id="newPassSubmit" class="btn" style="width:100%;">Update Password</button>
+    </div>
+  `);
+  overlay.appendChild(card);
+  card.querySelector('#newPassSubmit').onclick = async ()=>{
+    const pass = card.querySelector('#newPass').value;
+    const errEl = card.querySelector('#newPassErr');
+    errEl.textContent = '';
+    if(!pass || pass.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
+    try{
+      const { error } = await sb.auth.updateUser({ password: pass });
+      if(error) throw new Error(friendlyErrorMessage(error));
+      card.innerHTML = `
+        <div style="text-align:center; padding:8px 0;">
+          <div style="font-size:40px; margin-bottom:10px;">✅</div>
+          <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Password Updated!</div>
+          <div style="font-size:13px; color:var(--sub); margin-bottom:18px;">You can now sign in with your new password.</div>
+          <button id="newPassOkClose" class="btn" style="width:100%;">Continue</button>
+        </div>
+      `;
+      card.querySelector('#newPassOkClose').onclick = ()=>{ overlay.remove(); render(); };
+    }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
+  };
+  document.body.appendChild(overlay);
+}
 function mountAuthModal(){
   let mode = 'signin';
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
   function paint(){
     overlay.innerHTML = '';
+    if(mode === 'forgot'){
+      const card = el(`
+        <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
+          <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Reset Password</div>
+          <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Enter your email — we'll send you a link to reset your password.</div>
+          <div class="field" style="margin-bottom:14px;"><label>Email</label><input type="email" id="forgotEmail" placeholder="you@example.com"></div>
+          <div id="forgotErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
+          <button id="forgotSubmit" class="btn" style="width:100%; margin-bottom:10px;">Send Reset Link</button>
+          <div style="text-align:center; font-size:12.5px;"><a href="#" id="backToSignin" style="color:var(--brand-dark); font-weight:700;">← Back to Sign In</a></div>
+          <button id="authClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button>
+        </div>
+      `);
+      overlay.appendChild(card);
+      card.querySelector('#authClose').onclick = ()=> overlay.remove();
+      card.querySelector('#backToSignin').onclick = (e)=>{ e.preventDefault(); mode='signin'; paint(); };
+      card.querySelector('#forgotSubmit').onclick = async ()=>{
+        const email = card.querySelector('#forgotEmail').value.trim();
+        const errEl = card.querySelector('#forgotErr');
+        errEl.textContent = '';
+        if(!email){ errEl.textContent = 'Please enter your email.'; return; }
+        try{
+          if(!sb) throw new Error(friendlyErrorMessage(null));
+          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+          if(error) throw new Error(friendlyErrorMessage(error));
+          card.innerHTML = `
+            <div style="text-align:center; padding:8px 0;">
+              <div style="font-size:40px; margin-bottom:10px;">📧</div>
+              <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Check your email</div>
+              <div style="font-size:13px; color:var(--sub); line-height:1.6; margin-bottom:18px;">
+                If an account exists for <b>${email}</b>, we've sent a password reset link. Please check your email (and spam folder).
+              </div>
+              <button id="forgotOkClose" class="btn" style="width:100%;">OK, Got it</button>
+            </div>
+          `;
+          card.querySelector('#forgotOkClose').onclick = ()=> overlay.remove();
+        }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
+      };
+      overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+      return;
+    }
     const card = el(`
       <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%;">
         <div style="font-weight:900; font-size:17px; margin-bottom:4px;">${mode==='signin' ? 'Sign In' : 'Create Account'}</div>
         <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Sign in to use Fast Server Mode and see your credits history.</div>
         <div class="field" style="margin-bottom:10px;"><label>Email</label><input type="email" id="authEmail" placeholder="you@example.com"></div>
-        <div class="field" style="margin-bottom:14px;"><label>Password</label><input type="password" id="authPass" placeholder="••••••••"></div>
+        <div class="field" style="margin-bottom:6px;"><label>Password</label><input type="password" id="authPass" placeholder="••••••••"></div>
+        ${mode==='signin' ? '<div style="text-align:right; margin-bottom:8px;"><a href="#" id="toForgot" style="color:var(--sub); font-size:11.5px;">Forgot password?</a></div>' : '<div style="margin-bottom:8px;"></div>'}
         <div id="authErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
         <button id="authSubmit" class="btn" style="width:100%; margin-bottom:10px;">${mode==='signin' ? 'Sign In' : 'Create Account'}</button>
         <div style="text-align:center; font-size:12.5px;">
@@ -424,6 +503,8 @@ function mountAuthModal(){
     card.querySelector('#authClose').onclick = ()=> overlay.remove();
     const swap = card.querySelector('#toSignup') || card.querySelector('#toSignin');
     if(swap) swap.onclick = (e)=>{ e.preventDefault(); mode = mode==='signin'?'signup':'signin'; paint(); };
+    const forgotLink = card.querySelector('#toForgot');
+    if(forgotLink) forgotLink.onclick = (e)=>{ e.preventDefault(); mode='forgot'; paint(); };
     card.querySelector('#authSubmit').onclick = async ()=>{
       const email = card.querySelector('#authEmail').value.trim();
       const pass = card.querySelector('#authPass').value;
