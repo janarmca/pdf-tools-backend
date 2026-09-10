@@ -1717,22 +1717,52 @@ function ensureFFmpeg(){
   if(window.__ffmpegReadyPromise) return window.__ffmpegReadyPromise;
   window.__ffmpegReadyPromise = (async ()=>{
     let indicator = null;
+    // Tries the primary (jsDelivr) URL first; if that fails for any reason
+    // (network error, that specific CDN being blocked on this network, etc.),
+    // retries once against unpkg.com before giving up — this is the fix for
+    // ALL 14 video tools sharing one CDN as a single point of failure.
+    async function loadScriptWithFallback(primaryUrl, fallbackUrl){
+      try{ await loadScriptOnce(primaryUrl); }
+      catch(e){ await loadScriptOnce(fallbackUrl); }
+    }
+    async function toBlobURLWithFallback(primaryUrl, fallbackUrl, mimeType, onProgress){
+      try{ return await toBlobURL(primaryUrl, mimeType, onProgress); }
+      catch(e){ return await toBlobURL(fallbackUrl, mimeType, onProgress); }
+    }
+    // The worker chunk previously used importScripts() against a single fixed
+    // CDN URL inside the worker thread — a failure there couldn't be caught or
+    // retried from here. Fetching the actual script TEXT up front (with the
+    // same fallback pattern) and embedding it directly into the blob avoids
+    // that blind spot entirely.
+    async function crossOriginWorkerBlobURLWithFallback(primaryUrl, fallbackUrl){
+      let code;
+      try{ code = await (await fetch(primaryUrl)).text(); }
+      catch(e){ code = await (await fetch(fallbackUrl)).text(); }
+      return URL.createObjectURL(new Blob([code], {type:'text/javascript'}));
+    }
     try{
       indicator = el(`<div style="position:fixed; left:0; right:0; bottom:0; background:#20242B; color:#fff; font-size:12.5px; font-weight:700; padding:10px 16px; text-align:center; z-index:500;">⏳ Loading video engine (first time only, ~25MB)… <span id="__ffLoadPct">0%</span></div>`);
       document.body.appendChild(indicator);
-      await loadScriptOnce('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
+      await loadScriptWithFallback(
+        'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
+        'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js'
+      );
       const { FFmpeg } = window.FFmpegWASM;
       const ffmpeg = new FFmpeg();
       const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+      const baseFallback = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
       const pctEl = indicator.querySelector('#__ffLoadPct');
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
+        coreURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.js`, `${baseFallback}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.wasm`, `${baseFallback}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
         // The ffmpeg.wasm UMD build spawns its own worker chunk (814.ffmpeg.js) as a
         // raw cross-origin Worker, which fails with "cannot be accessed from origin
         // 'null'" on pages without a real http(s) origin. Routing it through a blob
         // that just importScripts()'s the real file fixes it (see comment above).
-        classWorkerURL: crossOriginWorkerBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js')
+        classWorkerURL: await crossOriginWorkerBlobURLWithFallback(
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
+          'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js'
+        )
       });
       indicator.remove();
       return { ffmpeg, fetchFile };
@@ -5308,6 +5338,10 @@ function isFastModeChecked(checkboxId){
   return !!(cb && cb.checked);
 }
 async function callVideoProcessServer(file, op, params, prog, downloadName){
+  if(!authState.session){
+    prog.remove();
+    throw new Error('Please sign in to use Fast Server Mode — your session may have expired. Try signing in again.');
+  }
   prog.set(10,'⚡ Server-க்கு அனுப்புகிறது…');
   const form = new FormData();
   form.append('file', file);
@@ -5334,6 +5368,10 @@ async function callVideoProcessServer(file, op, params, prog, downloadName){
 }
 
 async function callVideoProcessMultiServer(files, op, params, prog, downloadName){
+  if(!authState.session){
+    prog.remove();
+    throw new Error('Please sign in to use Fast Server Mode — your session may have expired. Try signing in again.');
+  }
   prog.set(10,'⚡ Server-க்கு அனுப்புகிறது…');
   const form = new FormData();
   files.forEach(f=> form.append('files', f));
