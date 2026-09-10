@@ -1833,18 +1833,38 @@ function ensureFFmpeg(){
       const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
       const baseFallback = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
       const pctEl = indicator.querySelector('#__ffLoadPct');
-      await ffmpeg.load({
-        coreURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.js`, `${baseFallback}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.wasm`, `${baseFallback}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
-        // The ffmpeg.wasm UMD build spawns its own worker chunk (814.ffmpeg.js) as a
-        // raw cross-origin Worker, which fails with "cannot be accessed from origin
-        // 'null'" on pages without a real http(s) origin. Routing it through a blob
-        // that just importScripts()'s the real file fixes it (see comment above).
-        classWorkerURL: await crossOriginWorkerBlobURLWithFallback(
-          'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
-          'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js'
-        )
-      });
+      const workerBlobURL = await crossOriginWorkerBlobURLWithFallback(
+        'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
+        'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js'
+      );
+      try{
+        await ffmpeg.load({
+          coreURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.js`, `${baseFallback}/ffmpeg-core.js`, 'text/javascript'),
+          wasmURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.wasm`, `${baseFallback}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
+          // The ffmpeg.wasm UMD build spawns its own worker chunk (814.ffmpeg.js) as a
+          // raw cross-origin Worker, which fails with "cannot be accessed from origin
+          // 'null'" on pages without a real http(s) origin. Routing it through a blob
+          // that just importScripts()'s the real file fixes it (see comment above).
+          classWorkerURL: workerBlobURL
+        });
+      }catch(loadErr){
+        // Known ffmpeg.wasm quirk (documented in the library's own GitHub issues):
+        // on some browser/version combinations, dynamically import()-ing a blob: URL
+        // for coreURL fails with "failed to import ffmpeg-core.js" even though the
+        // underlying fetch succeeded — the blob-wrapping itself is the problem, not
+        // the network. If that specific error occurs, retry using DIRECT CDN URLs
+        // (skipping the blob step for core/wasm) as a last-resort fallback.
+        if(String(loadErr && loadErr.message).includes('import')){
+          if(pctEl) pctEl.textContent = 'retrying…';
+          await ffmpeg.load({
+            coreURL: `${base}/ffmpeg-core.js`,
+            wasmURL: `${base}/ffmpeg-core.wasm`,
+            classWorkerURL: workerBlobURL
+          });
+        } else {
+          throw loadErr;
+        }
+      }
       indicator.remove();
       return { ffmpeg, fetchFile };
     }catch(e){
