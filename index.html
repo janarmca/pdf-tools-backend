@@ -431,8 +431,28 @@ function mountAuthModal(){
       errEl.textContent = '';
       if(!email || !pass){ errEl.textContent = 'Please fill in both email and password.'; return; }
       try{
-        if(mode==='signin') await authSignIn(email, pass); else await authSignUp(email, pass);
-        overlay.remove(); render();
+        if(mode==='signin'){
+          await authSignIn(email, pass);
+          overlay.remove(); render();
+        } else {
+          await authSignUp(email, pass);
+          // Supabase requires email confirmation before the account is
+          // actually usable — signUp() succeeding does NOT mean the user is
+          // logged in yet. Show a clear message instead of silently closing
+          // the modal with no feedback, which previously left users confused
+          // about what to do next.
+          card.innerHTML = `
+            <div style="text-align:center; padding:8px 0;">
+              <div style="font-size:40px; margin-bottom:10px;">📧</div>
+              <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Almost there!</div>
+              <div style="font-size:13px; color:var(--sub); line-height:1.6; margin-bottom:18px;">
+                We've sent a confirmation link to <b>${email}</b>.<br>Please check your email (and spam folder) and click the link to activate your account.
+              </div>
+              <button id="authOkClose" class="btn" style="width:100%;">OK, Got it</button>
+            </div>
+          `;
+          card.querySelector('#authOkClose').onclick = ()=> overlay.remove();
+        }
       }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
     };
   }
