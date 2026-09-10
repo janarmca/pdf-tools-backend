@@ -359,70 +359,11 @@
     </div>
   </div>
 
-  <!-- 3 Items with auto-amount -->
+  <!-- Items with auto-amount (dynamic count) -->
   <div class="section-title">📦 Items <i>qty × price = amount</i></div>
-  
-  <div class="item-card" id="item1">
-    <div class="inline-flex">
-      <div class="input-group" style="flex:2">
-        <label>Item 1</label>
-        <input type="text" id="item1Input" value="Office Chair" placeholder="Item name">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Qty</label>
-        <input type="number" id="qty1Input" value="2" min="1" step="1">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Price (₹)</label>
-        <input type="number" id="price1Input" value="4999.00" min="0" step="0.01">
-      </div>
-      <div class="input-group amount-display" style="flex:1.2">
-        <label>Amount</label>
-        <div class="amount-box" id="amount1Display">₹ 9,998.00</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="item-card" id="item2">
-    <div class="inline-flex">
-      <div class="input-group" style="flex:2">
-        <label>Item 2</label>
-        <input type="text" id="item2Input" value="Wireless Mouse" placeholder="Item name">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Qty</label>
-        <input type="number" id="qty2Input" value="3" min="1" step="1">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Price (₹)</label>
-        <input type="number" id="price2Input" value="799.00" min="0" step="0.01">
-      </div>
-      <div class="input-group amount-display" style="flex:1.2">
-        <label>Amount</label>
-        <div class="amount-box" id="amount2Display">₹ 2,397.00</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="item-card" id="item3">
-    <div class="inline-flex">
-      <div class="input-group" style="flex:2">
-        <label>Item 3</label>
-        <input type="text" id="item3Input" value="USB-C Cable" placeholder="Item name">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Qty</label>
-        <input type="number" id="qty3Input" value="5" min="1" step="1">
-      </div>
-      <div class="input-group" style="flex:1">
-        <label>Price (₹)</label>
-        <input type="number" id="price3Input" value="299.00" min="0" step="0.01">
-      </div>
-      <div class="input-group amount-display" style="flex:1.2">
-        <label>Amount</label>
-        <div class="amount-box" id="amount3Display">₹ 1,495.00</div>
-      </div>
-    </div>
+  <div id="itemsContainer"></div>
+  <div class="inline-flex" style="margin:8px 0 4px;">
+    <button type="button" id="addItemBtn" style="flex:0 0 auto; padding:8px 16px; border-radius:10px; border:1px solid #ccc; background:#f5f5f5; cursor:pointer; font-size:13px;">+ Add Item</button>
   </div>
 
   <!-- GST Type selector + Update button -->
@@ -567,10 +508,75 @@
     const validUntilInput = document.getElementById('validUntilInput');
     const notesInput = document.getElementById('notesInput');
 
-    const itemInputs = [1,2,3].map(i => document.getElementById(`item${i}Input`));
-    const qtyInputs = [1,2,3].map(i => document.getElementById(`qty${i}Input`));
-    const priceInputs = [1,2,3].map(i => document.getElementById(`price${i}Input`));
-    const amountDisplays = [1,2,3].map(i => document.getElementById(`amount${i}Display`));
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItemBtn');
+    // Default items — identical starting values to what the 3 static cards
+    // used to hardcode, so a fresh page load looks and behaves the same.
+    let itemsData = [
+      { name: 'Office Chair', qty: 2, price: 4999.00 },
+      { name: 'Wireless Mouse', qty: 3, price: 799.00 },
+      { name: 'USB-C Cable', qty: 5, price: 299.00 }
+    ];
+    function renderItemRows() {
+      itemsContainer.innerHTML = itemsData.map((it, i) => `
+        <div class="item-card" data-idx="${i}">
+          <div class="inline-flex">
+            <div class="input-group" style="flex:2">
+              <label>Item ${i+1}</label>
+              <input type="text" class="itemNameInput" value="${String(it.name).replace(/"/g,'&quot;')}" placeholder="Item name">
+            </div>
+            <div class="input-group" style="flex:1">
+              <label>Qty</label>
+              <input type="number" class="itemQtyInput" value="${it.qty}" min="1" step="1">
+            </div>
+            <div class="input-group" style="flex:1">
+              <label>Price (₹)</label>
+              <input type="number" class="itemPriceInput" value="${it.price.toFixed(2)}" min="0" step="0.01">
+            </div>
+            <div class="input-group amount-display" style="flex:1.2">
+              <label>Amount</label>
+              <div class="amount-box itemAmountDisplay">₹ 0.00</div>
+            </div>
+            <button type="button" class="removeItemBtn" data-idx="${i}" title="Remove item" style="flex:0 0 auto; align-self:flex-end; margin-left:6px; padding:8px 10px; border:1px solid #ddd; border-radius:8px; background:#fff; color:#b3261e; cursor:pointer;" ${itemsData.length<=1?'disabled':''}>✕</button>
+          </div>
+        </div>
+      `).join('');
+      // Re-bind listeners on the freshly rendered inputs — 'input' live-updates
+      // the bill as you type (same as before); 'blur' also clamps/formats the
+      // value (qty >= 1, price >= 0 with 2 decimals), preserving the exact
+      // validation the old fixed 3-row version had on qty/price fields.
+      itemsContainer.querySelectorAll('.itemNameInput').forEach(inp => {
+        inp.addEventListener('input', updateBill);
+      });
+      itemsContainer.querySelectorAll('.itemQtyInput').forEach(inp => {
+        inp.addEventListener('input', updateBill);
+        inp.addEventListener('blur', () => {
+          let val = parseInt(inp.value, 10); if (isNaN(val) || val < 1) val = 1;
+          inp.value = val; updateBill();
+        });
+      });
+      itemsContainer.querySelectorAll('.itemPriceInput').forEach(inp => {
+        inp.addEventListener('input', updateBill);
+        inp.addEventListener('blur', () => {
+          let val = parseFloat(inp.value); if (isNaN(val) || val < 0) val = 0;
+          inp.value = val.toFixed(2); updateBill();
+        });
+      });
+      itemsContainer.querySelectorAll('.removeItemBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (itemsData.length <= 1) return; // always keep at least one item row
+          itemsData.splice(Number(btn.getAttribute('data-idx')), 1);
+          renderItemRows();
+          updateBill();
+        });
+      });
+    }
+    addItemBtn.addEventListener('click', () => {
+      itemsData.push({ name: '', qty: 1, price: 0 });
+      renderItemRows();
+      updateBill();
+    });
+    renderItemRows();
 
     const sellerDisplay = document.getElementById('sellerDisplay');
     const buyerDisplay = document.getElementById('buyerDisplay');
@@ -628,19 +634,24 @@
       const validUntil = validUntilInput.value;
 
       let items = [], subtotal = 0;
-      for (let i = 0; i < 3; i++) {
-        const name = itemInputs[i].value.trim() || `Item ${i+1}`;
-        let qty = parseInt(qtyInputs[i].value, 10);
+      const itemCards = itemsContainer.querySelectorAll('.item-card');
+      itemCards.forEach((card, i) => {
+        const nameInput = card.querySelector('.itemNameInput');
+        const qtyInput = card.querySelector('.itemQtyInput');
+        const priceInput = card.querySelector('.itemPriceInput');
+        const amountDisplay = card.querySelector('.itemAmountDisplay');
+        const name = nameInput.value.trim() || `Item ${i+1}`;
+        let qty = parseInt(qtyInput.value, 10);
         if (isNaN(qty) || qty < 1) qty = 1;
-        qtyInputs[i].value = qty;
-        let price = parseFloat(priceInputs[i].value);
+        qtyInput.value = qty;
+        let price = parseFloat(priceInput.value);
         if (isNaN(price) || price < 0) price = 0;
-        priceInputs[i].value = price.toFixed(2);
+        priceInput.value = price.toFixed(2);
         const amount = qty * price;
         subtotal += amount;
         items.push({name, qty, price, amount});
-        amountDisplays[i].textContent = fmt(amount);
-      }
+        amountDisplay.textContent = fmt(amount);
+      });
 
       const gstRate = getGstRate();
       const gstAmount = subtotal * gstRate;
@@ -872,22 +883,12 @@ ${d.notes ? `<div class="notes"><b>Notes / Terms:</b><br>${escapeHtml(d.notes)}<
 
     const allInputs = [
       sellerInput,buyerInput,sellerAddrInput,buyerAddrInput,gstSellerInput,gstBuyerInput,
-      gstTypeSelect,documentNoInput,documentDateInput,validUntilInput,notesInput,
-      ...itemInputs,...qtyInputs,...priceInputs
+      gstTypeSelect,documentNoInput,documentDateInput,validUntilInput,notesInput
     ];
     allInputs.forEach(input => {
       input.addEventListener('input', updateBill);
       input.addEventListener('change', updateBill);
     });
-
-    priceInputs.forEach(inp => inp.addEventListener('blur', () => {
-      let val=parseFloat(inp.value); if(isNaN(val)||val<0) val=0;
-      inp.value=val.toFixed(2); updateBill();
-    }));
-    qtyInputs.forEach(inp => inp.addEventListener('blur', () => {
-      let val=parseInt(inp.value,10); if(isNaN(val)||val<1) val=1;
-      inp.value=val; updateBill();
-    }));
 
     window.addEventListener('load', () => {
       if (!documentDateInput.value) documentDateInput.value = todayISO();
