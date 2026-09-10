@@ -204,6 +204,7 @@ const TOOLS = [
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
   {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
+  {id:'quotepo', name:'Quotation / Performa / PO', desc:'Professional quotation, performa invoice, or purchase order — with HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
   {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
@@ -8945,6 +8946,354 @@ TOOL_IMPL.leaveletter = {
         mountResult(body, `Leave application letter ready (${days} day${days===1?'':'s'} — ${fromDate} to ${toDate}).`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
+    paint();
+  }
+};
+
+/* ===================== QUOTATION / PERFORMA INVOICE / PURCHASE ORDER ===================== */
+TOOL_IMPL.quotepo = {
+  mount(container){
+    let items = [{ desc:'', hsn:'', qty:1, unit:'PCS', rate:0, gst:18 }];
+    let docType = 'Quotation';
+    const body = el(`<div></div>`); container.appendChild(body);
+    const esc = (s)=> String(s||'').replace(/"/g,'&quot;');
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Fill in your details once — download as PDF, Excel, or Word, all in the same professional layout with an HSN/SAC tax summary, bank details, and terms.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Document Type</div>`));
+      const typeRow = el(`<div class="filter-row"></div>`);
+      ['Quotation','Performa Invoice','Purchase Order'].forEach(dt=>{
+        const chip = el(`<button class="filter-chip ${docType===dt?'active':''}">${dt}</button>`);
+        chip.onclick = ()=>{ docType = dt; paint(); };
+        typeRow.appendChild(chip);
+      });
+      body.appendChild(typeRow);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">${docType==='Purchase Order' ? 'Buyer (You)' : 'Seller (You)'}</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="qpFromName" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpFromAddr" autocomplete="off"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="qpFromGstin" autocomplete="off"></div>
+          <div class="field"><label>PAN</label><input type="text" id="qpFromPan" autocomplete="off"></div>
+          <div class="field"><label>Mobile</label><input type="text" id="qpFromMobile" autocomplete="off"></div>
+          <div class="field"><label>Email</label><input type="email" id="qpFromEmail" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">${docType==='Purchase Order' ? 'Supplier' : 'Bill To'}</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Name</label><input type="text" id="qpToName" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="qpToAddr" autocomplete="off"></div>
+          <div class="field"><label>GSTIN</label><input type="text" id="qpToGstin" autocomplete="off"></div>
+          <div class="field"><label>Mobile</label><input type="text" id="qpToMobile" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Document Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>${docType} No.</label><input type="text" id="qpDocNo" value="${docType.slice(0,2).toUpperCase()}-001" autocomplete="off"></div>
+          <div class="field"><label>Date</label><input type="date" id="qpDocDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>${docType==='Purchase Order'?'Delivery Due':'Valid Until'}</label><input type="date" id="qpExpiry"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Items</div>`));
+      const itemsWrap = el(`<div></div>`);
+      items.forEach((it,idx)=>{
+        const row = el(`<div style="display:grid; grid-template-columns:2fr 0.9fr 0.6fr 0.6fr 0.9fr 0.7fr auto; gap:6px; margin-bottom:8px; align-items:center;"></div>`);
+        const mk = (val, ph)=> `<input type="text" data-idx="${idx}" value="${esc(val)}" placeholder="${ph||''}" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">`;
+        row.innerHTML = `
+          <div>${mk(it.desc,'Item description')}</div>
+          <div>${mk(it.hsn,'HSN/SAC')}</div>
+          <div><input type="number" data-idx="${idx}" data-field="qty" value="${it.qty}" min="0" step="1" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <div>${mk(it.unit,'Unit')}</div>
+          <div><input type="number" data-idx="${idx}" data-field="rate" value="${it.rate}" min="0" step="0.01" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <div><input type="number" data-idx="${idx}" data-field="gst" value="${it.gst}" min="0" max="28" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <button data-idx="${idx}" data-remove="1" style="border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px 10px; cursor:pointer; color:#B3261E;" ${items.length<=1?'disabled':''}>✕</button>
+        `;
+        itemsWrap.appendChild(row);
+      });
+      body.appendChild(itemsWrap);
+      itemsWrap.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          const idx = Number(inp.getAttribute('data-idx'));
+          const field = inp.getAttribute('data-field');
+          if(field) items[idx][field] = Number(inp.value)||0;
+          else {
+            const rowInputs = Array.from(inp.parentElement.parentElement.querySelectorAll('input[type="text"]'));
+            const pos = rowInputs.indexOf(inp);
+            if(pos===0) items[idx].desc = inp.value;
+            else if(pos===1) items[idx].hsn = inp.value;
+            else if(pos===2) items[idx].unit = inp.value;
+          }
+        });
+      });
+      itemsWrap.querySelectorAll('button[data-remove]').forEach(btn=>{
+        btn.onclick = ()=>{ items.splice(Number(btn.getAttribute('data-idx')),1); paint(); };
+      });
+      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add item</button>`);
+      addBtn.onclick = ()=>{ items.push({desc:'',hsn:'',qty:1,unit:'PCS',rate:0,gst:18}); paint(); };
+      body.appendChild(addBtn);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Bank Details (optional)</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>Account Name</label><input type="text" id="qpBankName" autocomplete="off"></div>
+          <div class="field"><label>Bank</label><input type="text" id="qpBankBranch" autocomplete="off"></div>
+          <div class="field"><label>Account No.</label><input type="text" id="qpBankAcc" autocomplete="off"></div>
+          <div class="field"><label>IFSC Code</label><input type="text" id="qpBankIfsc" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>UPI ID (optional)</label><input type="text" id="qpUpi" placeholder="yourname@bank" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`
+        <div class="field" style="margin-top:14px;">
+          <label>Terms & Conditions (one per line)</label>
+          <textarea id="qpTerms" rows="4">We declare that this document shows the actual price and all particulars are true and correct.
+Goods once sold will not be taken back.
+All disputes are subject to local jurisdiction.</textarea>
+        </div>
+      `));
+      body.appendChild(el(`
+        <div class="field" style="margin-top:10px;">
+          <label>Authorized Signatory Name</label>
+          <input type="text" id="qpSignatory" autocomplete="off">
+        </div>
+      `));
+
+      const row = el(`<div class="btn-row" style="margin-top:18px; flex-wrap:wrap;"></div>`);
+      const bPdf = el(`<button class="btn">📄 Download PDF</button>`);
+      const bXls = el(`<button class="btn secondary">📊 Download Excel</button>`);
+      const bDoc = el(`<button class="btn secondary">📝 Download Word</button>`);
+      bPdf.onclick = ()=> generate('pdf');
+      bXls.onclick = ()=> generate('excel');
+      bDoc.onclick = ()=> generate('word');
+      row.appendChild(bPdf); row.appendChild(bXls); row.appendChild(bDoc);
+      body.appendChild(row);
+    }
+
+    function collectData(){
+      const g = (id)=> body.querySelector(id).value || '';
+      const from = { name:g('#qpFromName'), addr:g('#qpFromAddr'), gstin:g('#qpFromGstin'), pan:g('#qpFromPan'), mobile:g('#qpFromMobile'), email:g('#qpFromEmail') };
+      const to = { name:g('#qpToName'), addr:g('#qpToAddr'), gstin:g('#qpToGstin'), mobile:g('#qpToMobile') };
+      const docNo = g('#qpDocNo'), docDate = g('#qpDocDate'), expiry = g('#qpExpiry');
+      const bank = { name:g('#qpBankName'), branch:g('#qpBankBranch'), acc:g('#qpBankAcc'), ifsc:g('#qpBankIfsc'), upi:g('#qpUpi') };
+      const terms = g('#qpTerms').split('\n').map(t=>t.trim()).filter(Boolean);
+      const signatory = g('#qpSignatory');
+      const rows = items.filter(it=>it.desc.trim()).map(it=>({...it, amount: it.qty*it.rate}));
+      const subtotal = rows.reduce((s,r)=>s+r.amount,0);
+      const hsnGroups = {};
+      rows.forEach(r=>{
+        const key = r.hsn || '—';
+        if(!hsnGroups[key]) hsnGroups[key] = { hsn:key, taxable:0, gst: r.gst };
+        hsnGroups[key].taxable += r.amount;
+      });
+      const hsnRows = Object.values(hsnGroups).map(h=>({
+        hsn:h.hsn, taxable:h.taxable, cgstRate:h.gst/2, sgstRate:h.gst/2,
+        cgstAmt: h.taxable*(h.gst/2)/100, sgstAmt: h.taxable*(h.gst/2)/100
+      }));
+      const totalTax = hsnRows.reduce((s,h)=>s+h.cgstAmt+h.sgstAmt,0);
+      const grandTotal = subtotal + totalTax;
+      return { from, to, docNo, docDate, expiry, bank, terms, signatory, rows, subtotal, hsnRows, totalTax, grandTotal };
+    }
+
+    async function generate(format){
+      const d = collectData();
+      if(!d.rows.length){ mountResult(body, 'Please add at least one item with a description.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        if(format==='pdf') await generatePdf(d, prog);
+        else if(format==='excel') generateExcel(d);
+        else await generateWord(d, prog);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${docType} downloaded (${format.toUpperCase()}).`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+
+    async function generatePdf(d, prog){
+      prog.set(20,'Loading font…');
+      const doc = await PDFDocument.create();
+      const font = await embedUnicodeFont(doc);
+      let page = doc.addPage([595.28, 841.89]);
+      let {width, height} = page.getSize();
+      let y = height - 50;
+      let t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+      let line = (yy)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
+
+      t(docType.toUpperCase(), 40, y, 20, rgb(0.13,0.29,0.62)); y-=8;
+      t(d.docNo ? `No: ${d.docNo}` : '', 400, y+20, 10);
+      t(d.docDate ? `Date: ${d.docDate}` : '', 400, y+6, 10);
+      y -= 28; line(y); y -= 18;
+
+      t(docType==='Purchase Order'?'Buyer':'Seller', 40, y, 9, rgb(0.5,0.5,0.5));
+      t(docType==='Purchase Order'?'Supplier':'Bill To', 310, y, 9, rgb(0.5,0.5,0.5)); y-=14;
+      t(d.from.name||'—', 40, y, 12); t(d.to.name||'—', 310, y, 12); y-=14;
+      t(d.from.addr, 40, y, 9, rgb(0.4,0.4,0.4)); t(d.to.addr, 310, y, 9, rgb(0.4,0.4,0.4)); y-=13;
+      t('GSTIN: '+(d.from.gstin||'—'), 40, y, 9); t('GSTIN: '+(d.to.gstin||'—'), 310, y, 9); y-=20;
+      line(y); y-=18;
+
+      const cols=[40,240,300,350,400,460,520];
+      const drawHeader = ()=>{
+        ['Item','HSN','Qty','Unit','Rate','GST%','Amount'].forEach((h,i)=> t(h, cols[i], y, 8.5, rgb(0.5,0.5,0.5)));
+        y-=8; line(y); y-=14;
+      };
+      const newPage = ()=>{
+        page = doc.addPage([595.28, 841.89]); ({width,height}=page.getSize()); y = height-50;
+        t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        line = (yy)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
+        t(docType.toUpperCase()+' (contd.)', 40, y, 13, rgb(0.13,0.29,0.62)); y-=24;
+        drawHeader();
+      };
+      drawHeader();
+      d.rows.forEach(r=>{
+        if(y<160) newPage();
+        t(r.desc.slice(0,28), cols[0], y, 9); t(r.hsn, cols[1], y, 9); t(String(r.qty), cols[2], y, 9);
+        t(r.unit, cols[3], y, 9); t('₹'+r.rate.toFixed(2), cols[4], y, 9); t(r.gst+'%', cols[5], y, 9); t('₹'+r.amount.toFixed(2), cols[6], y, 9);
+        y-=16;
+      });
+      if(y<220) newPage();
+      y-=8; line(y); y-=16;
+      t('HSN/SAC-wise Tax Summary', 40, y, 10, rgb(0.13,0.29,0.62)); y-=16;
+      ['HSN','Taxable','CGST%','CGST Amt','SGST%','SGST Amt'].forEach((h,i)=> t(h, 40+i*85, y, 8, rgb(0.5,0.5,0.5)));
+      y-=14;
+      d.hsnRows.forEach(h=>{
+        if(y<120) newPage();
+        [h.hsn, '₹'+h.taxable.toFixed(2), h.cgstRate+'%', '₹'+h.cgstAmt.toFixed(2), h.sgstRate+'%', '₹'+h.sgstAmt.toFixed(2)].forEach((v,i)=> t(v, 40+i*85, y, 8.5));
+        y-=15;
+      });
+      if(y<160) newPage();
+      y-=10; line(y); y-=18;
+      t('Subtotal', 400, y, 10); t('₹'+d.subtotal.toFixed(2), 490, y, 10); y-=15;
+      t('Total Tax', 400, y, 10); t('₹'+d.totalTax.toFixed(2), 490, y, 10); y-=15;
+      line(y-2); y-=16;
+      t('Grand Total', 400, y, 12, rgb(0.13,0.29,0.62)); t('₹'+d.grandTotal.toFixed(2), 490, y, 12, rgb(0.13,0.29,0.62)); y-=18;
+      t('Amount in Words: Rupees '+numberToWordsINR(d.grandTotal)+' Only', 40, y, 9, rgb(0.4,0.4,0.4)); y-=26;
+
+      if(d.bank.name || d.bank.acc){
+        if(y<140) newPage();
+        t('Bank Details', 40, y, 10, rgb(0.13,0.29,0.62)); y-=15;
+        t('Name: '+d.bank.name, 40, y, 9); y-=13;
+        t('Account No: '+d.bank.acc, 40, y, 9); y-=13;
+        t('IFSC: '+d.bank.ifsc+'    Bank: '+d.bank.branch, 40, y, 9); y-=13;
+        if(d.bank.upi) { t('UPI: '+d.bank.upi, 40, y, 9); y-=13; }
+        y-=10;
+      }
+      if(d.terms.length){
+        if(y < 60 + d.terms.length*13) newPage();
+        t('Terms and Conditions', 40, y, 10, rgb(0.13,0.29,0.62)); y-=15;
+        d.terms.forEach((term,i)=>{ t((i+1)+'. '+term.slice(0,95), 40, y, 8.5, rgb(0.4,0.4,0.4)); y-=13; });
+        y-=16;
+      }
+      if(y<70) newPage();
+      t('Authorized Signatory', width-180, 60, 9, rgb(0.5,0.5,0.5));
+      if(d.signatory) t(d.signatory, width-180, 45, 10);
+      page.drawLine({start:{x:width-190,y:70},end:{x:width-40,y:70},thickness:1,color:rgb(0.6,0.6,0.6)});
+
+      const bytes = await doc.save();
+      downloadBlob(new Blob([bytes],{type:'application/pdf'}), `${docType.replace(/\s+/g,'-')}-${d.docNo||'doc'}.pdf`);
+    }
+
+    function generateExcel(d){
+      const rows = [];
+      rows.push([docType.toUpperCase()]);
+      rows.push([]);
+      rows.push([docType==='Purchase Order'?'Buyer':'Seller', '', docType==='Purchase Order'?'Supplier':'Bill To']);
+      rows.push([d.from.name, '', d.to.name]);
+      rows.push([d.from.addr, '', d.to.addr]);
+      rows.push(['GSTIN: '+d.from.gstin, '', 'GSTIN: '+d.to.gstin]);
+      rows.push([]);
+      rows.push([(docType==='Purchase Order'?'PO':'Doc')+' No: '+d.docNo, 'Date: '+d.docDate, 'Valid/Due: '+d.expiry]);
+      rows.push([]);
+      rows.push(['Item','HSN','Qty','Unit','Rate','GST%','Amount']);
+      d.rows.forEach(r=> rows.push([r.desc, r.hsn, r.qty, r.unit, r.rate, r.gst, r.amount]));
+      rows.push([]);
+      rows.push(['HSN/SAC Tax Summary']);
+      rows.push(['HSN','Taxable Value','CGST%','CGST Amount','SGST%','SGST Amount']);
+      d.hsnRows.forEach(h=> rows.push([h.hsn, h.taxable, h.cgstRate, h.cgstAmt, h.sgstRate, h.sgstAmt]));
+      rows.push([]);
+      rows.push(['Subtotal', d.subtotal]);
+      rows.push(['Total Tax', d.totalTax]);
+      rows.push(['Grand Total', d.grandTotal]);
+      rows.push(['Amount in Words', 'Rupees '+numberToWordsINR(d.grandTotal)+' Only']);
+      rows.push([]);
+      if(d.bank.name || d.bank.acc){
+        rows.push(['Bank Details']);
+        rows.push(['Name', d.bank.name]); rows.push(['Account No', d.bank.acc]);
+        rows.push(['IFSC', d.bank.ifsc]); rows.push(['Bank', d.bank.branch]);
+        if(d.bank.upi) rows.push(['UPI', d.bank.upi]);
+        rows.push([]);
+      }
+      if(d.terms.length){
+        rows.push(['Terms and Conditions']);
+        d.terms.forEach((term,i)=> rows.push([(i+1)+'. '+term]));
+      }
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:28},{wch:16},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
+      XLSX.utils.book_append_sheet(wb, ws, docType.slice(0,25));
+      const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      downloadBlob(new Blob([out],{type:'application/octet-stream'}), `${docType.replace(/\s+/g,'-')}-${d.docNo||'doc'}.xlsx`);
+    }
+
+    async function generateWord(d, prog){
+      prog.set(40, 'Building document…');
+      const { Document, Paragraph, TextRun, Table, TableRow, TableCell, Packer, HeadingLevel, WidthType } = getDocxLib();
+      const cellText = (txt, opts)=> new TableCell({ children:[new Paragraph({ children:[new TextRun({text:String(txt||''), ...opts})] })] });
+      const itemHeaderRow = new TableRow({ children: ['Item','HSN','Qty','Unit','Rate','GST%','Amount'].map(h=> cellText(h,{bold:true})) });
+      const itemRows = d.rows.map(r=> new TableRow({ children:[
+        cellText(r.desc), cellText(r.hsn), cellText(r.qty), cellText(r.unit), cellText('₹'+r.rate.toFixed(2)), cellText(r.gst+'%'), cellText('₹'+r.amount.toFixed(2))
+      ]}));
+      const hsnHeaderRow = new TableRow({ children: ['HSN','Taxable','CGST%','CGST Amt','SGST%','SGST Amt'].map(h=> cellText(h,{bold:true})) });
+      const hsnRowsDocx = d.hsnRows.map(h=> new TableRow({ children:[
+        cellText(h.hsn), cellText('₹'+h.taxable.toFixed(2)), cellText(h.cgstRate+'%'), cellText('₹'+h.cgstAmt.toFixed(2)), cellText(h.sgstRate+'%'), cellText('₹'+h.sgstAmt.toFixed(2))
+      ]}));
+      const children = [
+        new Paragraph({ text: docType.toUpperCase(), heading: HeadingLevel.HEADING_1 }),
+        new Paragraph({ text: `${docType==='Purchase Order'?'PO':'Doc'} No: ${d.docNo}    Date: ${d.docDate}    Valid/Due: ${d.expiry}` }),
+        new Paragraph({ text: '' }),
+        new Paragraph({ text: (docType==='Purchase Order'?'Buyer':'Seller')+': '+d.from.name, bold:true }),
+        new Paragraph({ text: d.from.addr }),
+        new Paragraph({ text: 'GSTIN: '+d.from.gstin }),
+        new Paragraph({ text: '' }),
+        new Paragraph({ text: (docType==='Purchase Order'?'Supplier':'Bill To')+': '+d.to.name, bold:true }),
+        new Paragraph({ text: d.to.addr }),
+        new Paragraph({ text: 'GSTIN: '+d.to.gstin }),
+        new Paragraph({ text: '' }),
+        new Table({ width:{size:100, type:WidthType.PERCENTAGE}, rows: [itemHeaderRow, ...itemRows] }),
+        new Paragraph({ text: '' }),
+        new Paragraph({ text: 'HSN/SAC Tax Summary', bold:true }),
+        new Table({ width:{size:100, type:WidthType.PERCENTAGE}, rows: [hsnHeaderRow, ...hsnRowsDocx] }),
+        new Paragraph({ text: '' }),
+        new Paragraph({ text: `Subtotal: ₹${d.subtotal.toFixed(2)}` }),
+        new Paragraph({ text: `Total Tax: ₹${d.totalTax.toFixed(2)}` }),
+        new Paragraph({ text: `Grand Total: ₹${d.grandTotal.toFixed(2)}`, bold:true }),
+        new Paragraph({ text: `Amount in Words: Rupees ${numberToWordsINR(d.grandTotal)} Only` }),
+        new Paragraph({ text: '' }),
+      ];
+      if(d.bank.name || d.bank.acc){
+        children.push(new Paragraph({ text: 'Bank Details', bold:true }));
+        children.push(new Paragraph({ text: `Name: ${d.bank.name}   Account No: ${d.bank.acc}` }));
+        children.push(new Paragraph({ text: `IFSC: ${d.bank.ifsc}   Bank: ${d.bank.branch}` }));
+        if(d.bank.upi) children.push(new Paragraph({ text: `UPI: ${d.bank.upi}` }));
+        children.push(new Paragraph({ text: '' }));
+      }
+      if(d.terms.length){
+        children.push(new Paragraph({ text: 'Terms and Conditions', bold:true }));
+        d.terms.forEach((term,i)=> children.push(new Paragraph({ text: `${i+1}. ${term}` })));
+        children.push(new Paragraph({ text: '' }));
+      }
+      children.push(new Paragraph({ text: '' }));
+      children.push(new Paragraph({ text: 'Authorized Signatory' + (d.signatory ? ': '+d.signatory : '') }));
+      const doc = new Document({ sections:[{ children }] });
+      const blob = await Packer.toBlob(doc);
+      downloadBlob(blob, `${docType.replace(/\s+/g,'-')}-${d.docNo||'doc'}.docx`);
+    }
+
     paint();
   }
 };
