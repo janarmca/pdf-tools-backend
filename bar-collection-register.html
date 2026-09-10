@@ -82,7 +82,17 @@ async function importShim(name){ if(name==='xlsx') return window.XLSX; throw new
 --------------------------------------------------------- */
 
 const uid = () => Math.random().toString(36).slice(2, 10);
-const todayISO = () => new Date().toISOString().slice(0, 10);
+// Local-calendar-date helper — deliberately does NOT use toISOString() (which
+// converts to UTC). This app is used in India (IST, UTC+5:30); toISOString()
+// would put entries made shortly after local midnight onto the PREVIOUS UTC
+// day, so a bar entry at 12:30 AM IST would silently vanish from "today's"
+// filter until the owner picked yesterday's date instead. This builds the
+// YYYY-MM-DD string from the browser's own local date fields instead.
+const localISODate = (d) => {
+  const dt = (d instanceof Date) ? d : new Date(d);
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+};
+const todayISO = () => localISODate(new Date());
 const pad = (n) => String(n).padStart(2, "0");
 const fmtTime = (ts) => {
   const d = new Date(ts);
@@ -420,7 +430,7 @@ function OwnerTab({ config, entries, authed, setAuthed, onVerify, flash }) {
 
   if (!authed) return <PinGate config={config} setAuthed={setAuthed} purpose="பரிசோதனை" />;
 
-  const dayEntries = entries.filter((e) => new Date(e.timestamp).toISOString().slice(0, 10) === date);
+  const dayEntries = entries.filter((e) => localISODate(e.timestamp) === date);
   const total = dayEntries.reduce((s, e) => s + e.amount, 0);
   const verifiedTotal = dayEntries.filter((e) => e.verified).reduce((s, e) => s + e.amount, 0);
   const pendingCount = dayEntries.filter((e) => !e.verified).length;
