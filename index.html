@@ -533,14 +533,28 @@ function numberToWordsINR(n){
   const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
   function two(n){ if(n<20) return ones[n]; return tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:''); }
   function three(n){ if(n>99) return ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+two(n%100):''); return two(n); }
-  n = Math.round(n);
-  if(n===0) return 'Zero';
-  let parts=[]; const crore=Math.floor(n/10000000); n%=10000000; const lakh=Math.floor(n/100000); n%=100000; const thousand=Math.floor(n/1000); n%=1000;
-  if(crore) parts.push(three(crore)+' Crore');
-  if(lakh) parts.push(three(lakh)+' Lakh');
-  if(thousand) parts.push(three(thousand)+' Thousand');
-  if(n) parts.push(three(n));
-  return parts.join(' ');
+  function wholeToWords(num){
+    if(num===0) return 'Zero';
+    let parts=[]; let rem=num;
+    const crore=Math.floor(rem/10000000); rem%=10000000;
+    const lakh=Math.floor(rem/100000); rem%=100000;
+    const thousand=Math.floor(rem/1000); rem%=1000;
+    if(crore) parts.push(three(crore)+' Crore');
+    if(lakh) parts.push(three(lakh)+' Lakh');
+    if(thousand) parts.push(three(thousand)+' Thousand');
+    if(rem) parts.push(three(rem));
+    return parts.join(' ');
+  }
+  // Round to the nearest PAISA (not rupee) first — this avoids both the old
+  // bug (Math.round(n) silently threw paise away entirely) and floating-point
+  // display artifacts (e.g. 100.1 * 100 landing on 9999.999999 instead of 10000).
+  const totalPaise = Math.round((Number(n)||0) * 100);
+  const rupees = Math.floor(Math.abs(totalPaise) / 100);
+  const paise = Math.abs(totalPaise) % 100;
+  const sign = totalPaise < 0 ? 'Minus ' : '';
+  const rupeeWords = wholeToWords(rupees);
+  if(paise === 0) return sign + rupeeWords; // identical output to the old function for whole-rupee amounts
+  return sign + rupeeWords + ' and ' + wholeToWords(paise) + ' Paise';
 }
 // Remembers business details (company name/address/GSTIN) across visits so
 // repeat use of the accounting tools (PO, Invoice, Voucher) doesn't require
@@ -2148,12 +2162,27 @@ TOOL_IMPL.img2pdf = {
   mount(container){
     let files = [];
     const body = el(`<div></div>`); container.appendChild(body);
+    // Validates actual file type/extension before accepting — the shared
+    // uploader's `accept` attribute only restricts the native file-picker
+    // dialog, not drag & drop, so this check is needed here specifically to
+    // stop a non-image file from ever reaching pdf-lib's embedJpg/embedPng.
+    function isSupportedImage(f){
+      return f.type==='image/jpeg' || f.type==='image/png' || /\.(jpe?g|png)$/i.test(f.name||'');
+    }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'image/jpeg,image/png', multiple:true,
         label:'Drop images (JPG/PNG)', sublabel:'You can pick multiple — they become pages in order',
-        onAdd: (fl)=>{ files.push(...fl); paint(); }
+        onAdd: (fl)=>{
+          const accepted = fl.filter(isSupportedImage);
+          const rejected = fl.length - accepted.length;
+          files.push(...accepted);
+          paint(); // paint() clears body.innerHTML, so it must run before the message is appended below
+          if(rejected>0){
+            mountResult(body, rejected===1 ? 'Please drop an image file (JPG/PNG) — one file was skipped because it was not a supported image.' : `Please drop image files (JPG/PNG) — ${rejected} files were skipped because they were not supported images.`).style.background='#FDEDEC';
+          }
+        }
       });
       if(files.length){
         mountFileList(body, files,
@@ -3524,6 +3553,7 @@ TOOL_IMPL.pdfgray = {
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<div class="note tamil" style="margin-top:12px;">⚠️ <b>Note:</b> This process rasterizes the PDF pages into images. Text may no longer be selectable or searchable in the output — if you need to keep selectable text, this isn't the right tool.</div>`));
         const filterRow = el(`<div class="filter-row tamil" style="margin-top:16px;"></div>`);
         [['gray','🌫️ Grayscale'],['bw','⚫ Black-White (B&W)']].forEach(([m,label])=>{
           const chip = el(`<button class="filter-chip ${mode===m?'active':''}" data-mode="${m}">${label}</button>`);
@@ -7970,10 +8000,27 @@ TOOL_IMPL.gstinvoice = {
         prog.set(40,'Loading font…');
         const doc = await PDFDocument.create();
         const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]); // A4
-        const {width,height} = page.getSize();
+        let page = doc.addPage([595.28, 841.89]); // A4
+        let {width,height} = page.getSize();
         let y = height-50;
-        const drawText = (txt, x, yy, size=11, color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt), {x, y:yy, size, font, color});
+        let drawText = (txt, x, yy, size=11, color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt), {x, y:yy, size, font, color});
+        const cols = [50, 260, 340, 400, 470];
+        const drawTableHeader = ()=>{
+          ['Description','HSN/SAC','Qty','Rate','Amount'].forEach((h,i)=> drawText(h, cols[i], y-14, 10, rgb(0.4,0.4,0.4)));
+          y-=24;
+          page.drawLine({ start:{x:50,y:y+6}, end:{x:width-50,y:y+6}, thickness:1, color:rgb(0.85,0.85,0.85) });
+        };
+        // Adds a fresh continuation page and redraws the column headers on it,
+        // instead of the old behaviour of silently discarding remaining rows —
+        // this is the fix for the "line items disappear on long invoices" bug.
+        const addContinuationPage = ()=>{
+          page = doc.addPage([595.28, 841.89]);
+          ({width,height} = page.getSize());
+          y = height-50;
+          drawText = (txt, x, yy, size=11, color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt), {x, y:yy, size, font, color});
+          drawText('TAX INVOICE (contd.) — '+invNo, 50, y, 12, rgb(0.13,0.29,0.62)); y-=28;
+          drawTableHeader();
+        };
 
         drawText('TAX INVOICE', 50, y, 20, rgb(0.13,0.29,0.62)); y-=30;
         drawText(seller.name, 50, y, 13); y-=16;
@@ -7991,12 +8038,9 @@ TOOL_IMPL.gstinvoice = {
         drawText('State: '+(body.querySelector('#gstBuyerState').value||''), 50, y, 10); y-=26;
 
         page.drawLine({ start:{x:50,y}, end:{x:width-50,y}, thickness:1, color:rgb(0.8,0.8,0.8) }); y-=6;
-        const cols = [50, 260, 340, 400, 470];
-        ['Description','HSN/SAC','Qty','Rate','Amount'].forEach((h,i)=> drawText(h, cols[i], y-14, 10, rgb(0.4,0.4,0.4)));
-        y-=24;
-        page.drawLine({ start:{x:50,y:y+6}, end:{x:width-50,y:y+6}, thickness:1, color:rgb(0.85,0.85,0.85) });
+        drawTableHeader();
         rows.forEach(r=>{
-          if(y<120){ /* keep simple: single page, note in summary if truncated */ return; }
+          if(y<120){ addContinuationPage(); } // was: `return;` — silently dropped every remaining item
           drawText(r.desc.slice(0,32), cols[0], y-10, 10);
           drawText(r.hsn, cols[1], y-10, 10);
           drawText(String(r.qty), cols[2], y-10, 10);
@@ -8004,6 +8048,9 @@ TOOL_IMPL.gstinvoice = {
           drawText('₹'+r.amount.toFixed(2), cols[4], y-10, 10);
           y-=22;
         });
+        // Totals block also needs room — if the last continuation page is too
+        // full, start one more fresh page for totals rather than overlapping text.
+        if(y<170){ addContinuationPage(); }
         y-=14;
         page.drawLine({ start:{x:300,y:y+10}, end:{x:width-50,y:y+10}, thickness:1, color:rgb(0.85,0.85,0.85) });
         const totalsRow = (label, val)=>{ drawText(label, 350, y-4, 10.5); drawText('₹'+val.toFixed(2), 470, y-4, 10.5); y-=18; };
@@ -8368,6 +8415,29 @@ TOOL_IMPL.salaryslip = {
       const grossEarnings = basic+hra+allow;
       const totalDeductions = pf+pt+tds;
       const netPay = grossEarnings-totalDeductions;
+      // Deductions exceeding earnings is usually a data-entry mistake — warn
+      // and require explicit confirmation instead of silently generating a
+      // real, downloadable payslip showing a negative salary. The calculation
+      // itself is unchanged; this only gates whether generation proceeds.
+      if(netPay < 0){
+        const existingWarn = body.querySelector('#ssNegWarn'); if(existingWarn) existingWarn.remove();
+        const warn = el(`
+          <div id="ssNegWarn" class="note" style="background:#FFF3E0; border-color:#FFD699; margin-top:12px;">
+            <b>⚠️ Warning:</b> Net Pay is negative (₹${netPay.toFixed(2)}). Please verify the earnings and deduction amounts before generating the salary slip.
+            <div class="btn-row" style="margin-top:10px;">
+              <button class="btn secondary" id="ssNegCancel" style="flex:1;">Cancel</button>
+              <button class="btn" id="ssNegContinue" style="flex:1;">Continue with negative Net Pay?</button>
+            </div>
+          </div>
+        `);
+        body.appendChild(warn);
+        warn.querySelector('#ssNegCancel').onclick = ()=> warn.remove();
+        warn.querySelector('#ssNegContinue').onclick = ()=>{ warn.remove(); generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay}); };
+        return;
+      }
+      generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay});
+    }
+    async function generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay}){
       const prog = mountProgress(body);
       try{
         prog.set(30,'Loading font…');
@@ -8581,11 +8651,11 @@ Please notify us immediately if you are unable to ship as specified</textarea></
         prog.set(40,'Loading font…');
         const doc = await PDFDocument.create();
         const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]); // A4
-        const {width} = page.getSize();
+        let page = doc.addPage([595.28, 841.89]); // A4
+        let {width} = page.getSize();
         let y = 800;
-        const t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        const line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
+        let t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        let line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
 
         t('PURCHASE ORDER', 40, y, 20, rgb(0.13,0.29,0.62)); y-=10;
         t('PO No: '+no, 400, y+10, 10); t('Date: '+date, 400, y-6, 10); y-=22;
@@ -8602,15 +8672,32 @@ Please notify us immediately if you are unable to ship as specified</textarea></
         line(y); y-=18;
 
         const cols=[40,270,330,390,450,510];
-        ['SL','Description','Qty','Rate','GST%','Amount'].forEach((h,i)=> t(h, cols[i], y, 9, rgb(0.5,0.5,0.5)));
-        y-=8; line(y); y-=16;
+        const drawItemHeader = ()=>{
+          ['SL','Description','Qty','Rate','GST%','Amount'].forEach((h,i)=> t(h, cols[i], y, 9, rgb(0.5,0.5,0.5)));
+          y-=8; line(y); y-=16;
+        };
+        // Adds a fresh continuation page and redraws the column headers —
+        // replaces the old `if(y<160) return;` which silently discarded every
+        // remaining item once a PO ran out of room on page 1.
+        const addContinuationPage = ()=>{
+          page = doc.addPage([595.28, 841.89]);
+          ({width} = page.getSize());
+          y = 800;
+          t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+          line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
+          t('PURCHASE ORDER (contd.) — '+no, 40, y, 13, rgb(0.13,0.29,0.62)); y-=26;
+          drawItemHeader();
+        };
+        drawItemHeader();
         rows.forEach((r,i)=>{
-          if(y<160) return; // keep to one page for simplicity
+          if(y<160){ addContinuationPage(); }
           t(String(i+1), cols[0], y, 9.5); t(r.desc.slice(0,34), cols[1], y, 9.5);
           t(String(r.qty), cols[2], y, 9.5); t('₹'+r.rate.toFixed(2), cols[3], y, 9.5);
           t(r.gst+'%', cols[4], y, 9.5); t('₹'+r.amount.toFixed(2), cols[5], y, 9.5);
           y-=18;
         });
+        // Totals block also needs room — start a fresh page rather than overlap text.
+        if(y<200){ addContinuationPage(); }
         y-=6; line(y); y-=18;
 
         t('Subtotal', 400, y, 10); t('₹'+subtotal.toFixed(2), 500, y, 10); y-=15;
@@ -8621,8 +8708,12 @@ Please notify us immediately if you are unable to ship as specified</textarea></
         t('Amount in Words: Rupees '+numberToWordsINR(grandTotal)+' Only', 40, y, 9, rgb(0.4,0.4,0.4)); y-=26;
 
         if(instructions.length){
+          if(y<120){ addContinuationPage(); }
           t('Special Instructions:', 40, y, 10, rgb(0.13,0.29,0.62)); y-=14;
-          instructions.forEach((ins,i)=>{ t((i+1)+'. '+ins.slice(0,90), 40, y, 8.5, rgb(0.4,0.4,0.4)); y-=13; });
+          instructions.forEach((ins,i)=>{
+            if(y<60){ addContinuationPage(); }
+            t((i+1)+'. '+ins.slice(0,90), 40, y, 8.5, rgb(0.4,0.4,0.4)); y-=13;
+          });
           y-=10;
         }
         y = Math.max(y, 70);
