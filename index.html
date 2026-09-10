@@ -68,8 +68,7 @@
   .panel-title{font-size:19px; font-weight:800;}
   .panel-sub{font-size:12.5px; color:var(--sub); margin-top:2px;}
 
-  .drop{border:2px dashed var(--line); border-radius:16px; padding:34px 18px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; position:relative;}
-  .drop input[type="file"]{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; margin:0; padding:0;}
+  .drop{border:2px dashed var(--line); border-radius:16px; padding:34px 18px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; position:relative; display:block;}
   .drop.drag{border-color:var(--brand); background:#F0F3FC;}
   .drop-icon{font-size:30px; margin-bottom:8px;}
   .drop-title{font-weight:700; font-size:14px; margin-bottom:4px;}
@@ -1225,22 +1224,22 @@ const TOOL_IMPL = {};
 /* ===================== Shared uploader ===================== */
 // opts: {accept, multiple, label, sublabel, onAdd(files)}
 function mountUploader(container, opts){
+  // Uses a native label element wrapping a real (but visually hidden) file input —
+  // this is guaranteed, zero-JS browser behavior: clicking ANYWHERE inside a
+  // label always activates its form control. This replaces an earlier
+  // absolute-positioning + opacity:0 overlay approach, which worked in
+  // principle but reportedly still had inconsistent taps on some mobile
+  // browsers — the label pattern removes that entire class of risk since
+  // there's no positioning/z-index/event-forwarding logic left to go wrong.
   const box = el(`
-    <div class="drop tamil" id="drop-${uid()}">
+    <label class="drop tamil" id="drop-${uid()}">
       <div class="drop-icon">📤</div>
       <div class="drop-title">${opts.label || 'file drag & drop or tap or tap'}</div>
       <div class="drop-sub">${opts.sublabel || ''}</div>
-      <input type="file" ${opts.multiple?'multiple':''} accept="${opts.accept||''}">
-    </div>
+      <input type="file" ${opts.multiple?'multiple':''} accept="${opts.accept||''}" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;">
+    </label>
   `);
   const input = box.querySelector('input');
-  // No separate box click-handler needed anymore — the input now covers the
-  // entire box via CSS (position:absolute; inset:0; opacity:0), so a real
-  // click lands on it directly. The old box.onclick -> input.click() handler
-  // was redundant here (click events on the input bubble up to the box too),
-  // and could have caused the file dialog to attempt opening twice per tap —
-  // a likely cause of "click doesn't upload" feeling inconsistent, especially
-  // on mobile.
   box.addEventListener('dragover', (e)=>{ e.preventDefault(); box.classList.add('drag'); });
   box.addEventListener('dragleave', ()=> box.classList.remove('drag'));
   box.addEventListener('drop', (e)=>{
