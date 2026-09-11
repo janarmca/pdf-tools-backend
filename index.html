@@ -11135,6 +11135,11 @@ TOOL_IMPL.carrompuzzle = {
         score += correct ? 20 : 5;
         wrap.querySelector('#cpScore').textContent = '⭐ Score: '+score;
         overlay.remove();
+        // Other pieces may still have had non-zero velocity at the moment
+        // this one was pocketed (physics was paused mid-motion for the
+        // quiz) — resume stepping if so, otherwise they'd stay frozen forever.
+        const all = [striker, ...pieces.filter(pc=>pc.alive)];
+        moving = all.some(pc=> Math.abs(pc.vx)>0.01 || Math.abs(pc.vy)>0.01);
         if(pieces.filter(pc=>pc.alive).length===0){ setTimeout(()=>{ alert('🏆 Board cleared! Final score: '+score); resetBoard(); pocketedCount=0; score=0; wrap.querySelector('#cpScore').textContent='⭐ Score: 0'; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: 0'; },300); }
       };
     }
@@ -11281,6 +11286,12 @@ TOOL_IMPL.carrompuzzle = {
       const power = Math.min(Math.hypot(dx,dy)/8, 16);
       const dist = Math.hypot(dx,dy)||1;
       striker.vx = (dx/dist)*power; striker.vy = (dy/dist)*power;
+      // Without this, the main loop's `if(moving) stepPhysics()` never runs —
+      // moving is only ever recalculated INSIDE stepPhysics itself, so it
+      // could never flip from false to true on its own. This was the exact
+      // cause of "striker not moving": velocity was set correctly, but
+      // physics stepping (which applies that velocity) was never triggered.
+      if(power > 0.05) moving = true;
     });
 
     function loop(){
