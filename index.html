@@ -11093,7 +11093,16 @@ TOOL_IMPL.carrompuzzle = {
       });
       for(let i=0;i<all.length;i++) for(let j=i+1;j<all.length;j++) {
         const a=all[i],b=all[j], d=Math.hypot(a.x-b.x,a.y-b.y);
-        if(d < a.r+b.r) resolveCollision(a,b);
+        if(d < a.r+b.r){
+          const relSpeed = Math.hypot(a.vx-b.vx, a.vy-b.vy);
+          resolveCollision(a,b);
+          // Small spark burst on hard hits only — keeps gentle taps quiet
+          // and makes forceful shots feel like they actually impact.
+          if(relSpeed > 3){
+            const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+            burst(mx, my, Math.min(6, Math.round(relSpeed)), ['#fff','#FFE580'], relSpeed*0.4);
+          }
+        }
       }
       // Pocket detection
       all.forEach(p=>{
@@ -11101,7 +11110,7 @@ TOOL_IMPL.carrompuzzle = {
         pockets.forEach(pk=>{
           if(Math.hypot(p.x-pk.x,p.y-pk.y) < POCKET_R){
             if(p===striker){ striker.x=W/2; striker.y=H-PAD-40; striker.vx=0; striker.vy=0; strikerHomeX=striker.x; strikerHomeY=striker.y; }
-            else { p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: '+pocketedCount; onPocket(); }
+            else { pocketFx(p.x, p.y, p.color); p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: '+pocketedCount; onPocket(); }
           }
         });
       });
@@ -11116,6 +11125,45 @@ TOOL_IMPL.carrompuzzle = {
         strikerHomeX = striker.x; strikerHomeY = striker.y;
       }
     }
+
+    // ---- Visual polish: particles, screen shake, motion trails ----
+    let particles = [];
+    let shakeT = 0, shakeMag = 0;
+    function burst(x, y, count, colors, speed){
+      for(let i=0;i<count;i++){
+        const a = Math.random()*Math.PI*2;
+        const sp = (speed||3) * (0.4+Math.random()*0.8);
+        particles.push({
+          x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+          life: 1, decay: 0.03+Math.random()*0.03,
+          size: 2+Math.random()*3, color: colors[Math.floor(Math.random()*colors.length)]
+        });
+      }
+    }
+    function shootFx(){
+      burst(striker.x, striker.y, 10, ['#FFE580','#FFC107','#fff'], 2.5);
+      shakeT = 1; shakeMag = 3;
+    }
+    function pocketFx(x,y,color){
+      burst(x, y, 18, [color,'#FFD700','#fff'], 4);
+      shakeT = 1; shakeMag = 5;
+    }
+    function updateFx(){
+      particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=0.94; p.vy*=0.94; p.life-=p.decay; });
+      particles = particles.filter(p=> p.life>0);
+      if(shakeT>0) shakeT = Math.max(0, shakeT-0.08);
+    }
+    function drawFx(){
+      particles.forEach(p=>{
+        ctx.save(); ctx.globalAlpha = Math.max(0,p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      });
+    }
+    // Small pieces that were "just pocketed" animate shrinking into the hole
+    // over a few frames instead of vanishing instantly.
+    let pocketAnims = [];
 
     // ---- Puzzle on pocket ----
     const PUZZLES = [
@@ -11158,6 +11206,11 @@ TOOL_IMPL.carrompuzzle = {
     // ---- Drawing ----
     function draw(){
       ctx.clearRect(0,0,W,H);
+      ctx.save();
+      if(shakeT > 0){
+        const m = shakeMag * shakeT;
+        ctx.translate((Math.random()-0.5)*m, (Math.random()-0.5)*m);
+      }
       // Purple gradient background AROUND the board (matches reference — the
       // board itself is a warm wood square floating on a purple game背景).
       const bgGrad = ctx.createLinearGradient(0,0,0,H);
@@ -11249,6 +11302,20 @@ TOOL_IMPL.carrompuzzle = {
         ctx.beginPath(); ctx.arc(p.x-p.r*0.32,p.y-p.r*0.32,p.r*0.28,0,Math.PI*2);
         ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
       }
+      // Motion trails for fast-moving pieces — a few fading "echo" circles
+      // behind each one, in the direction it's traveling from. Only shows
+      // for genuinely fast pieces so it doesn't clutter slow, settling shots.
+      [striker, ...pieces.filter(p=>p.alive)].forEach(p=>{
+        const speed = Math.hypot(p.vx,p.vy);
+        if(speed < 2) return;
+        for(let i=1;i<=3;i++){
+          ctx.save();
+          ctx.globalAlpha = 0.12 * (4-i)/3;
+          ctx.fillStyle = p.color;
+          ctx.beginPath(); ctx.arc(p.x - p.vx*i*1.5, p.y - p.vy*i*1.5, p.r*0.85, 0, Math.PI*2); ctx.fill();
+          ctx.restore();
+        }
+      });
       pieces.filter(p=>p.alive).forEach(p=> drawPiece(p, p.color, 'rgba(0,0,0,.4)'));
       // Striker gets a glowing ring around it (matches the reference's
       // highlighted-striker look) plus its coin styling.
@@ -11289,6 +11356,8 @@ TOOL_IMPL.carrompuzzle = {
           ctx.fillText(Math.round(t*100)+'%', strikerHomeX, strikerHomeY+30);
         }
       }
+      drawFx();
+      ctx.restore();
     }
     // Lightens (amt>0) or darkens (amt<0) a #rrggbb hex color — used to build
     // the radial-gradient shading for each piece.
@@ -11313,6 +11382,12 @@ TOOL_IMPL.carrompuzzle = {
         // Lock in the true "home" position at the start of this drag — the
         // striker will visually pull back from here, then launch from here.
         strikerHomeX = striker.x; strikerHomeY = striker.y;
+        // Critical fix: without pointer capture, move/up events stop firing
+        // the moment the finger leaves the canvas element's bounds — on a
+        // narrow mobile screen, LEFT-RIGHT drags hit the canvas edge far
+        // more easily than up-down ones, which is exactly why horizontal
+        // aiming stopped working while other movement still seemed fine.
+        canvas.setPointerCapture(e.pointerId);
       }
     });
     canvas.addEventListener('pointermove', e=>{
@@ -11331,6 +11406,7 @@ TOOL_IMPL.carrompuzzle = {
     canvas.addEventListener('pointerup', e=>{
       if(!aiming) return;
       aiming = false;
+      try{ canvas.releasePointerCapture(e.pointerId); }catch(err){}
       // Shot direction is the OPPOSITE of the pull-back (release like a
       // slingshot: pull back, fly forward) — from the striker's current
       // (pulled-back) position back toward its true home position and beyond.
@@ -11340,6 +11416,7 @@ TOOL_IMPL.carrompuzzle = {
         const power = Math.min((dist/MAX_PULL) * 18, 18); // 0–18, scales smoothly with how far it was pulled
         striker.vx = (dx/dist)*power; striker.vy = (dy/dist)*power;
         moving = true;
+        shootFx(); // AAA-polish: burst + screen-shake feedback the instant a shot is taken
       }
       // Snap back to true home position — the pulled-back position was only
       // ever a visual offset, the shot launches from where the striker
@@ -11350,6 +11427,7 @@ TOOL_IMPL.carrompuzzle = {
     function loop(){
       requestAnimationFrame(loop);
       if(moving && !puzzleOpen) stepPhysics();
+      updateFx();
       draw();
     }
     loop();
