@@ -203,7 +203,6 @@ const TOOLS = [
   {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business'},
   {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
-  {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business'},
   {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business'},
@@ -212,13 +211,11 @@ const TOOLS = [
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
   {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
-  {id:'festivalcard', name:'Festival Card Maker', desc:'Pongal, Diwali, Navratri, Puthandu & Wedding cards', icon:'🎉', color:'#CA6F1E', cat:'image'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'quotepo', name:'Quotation / Performa / PO', desc:'Professional quotation, performa invoice, or purchase order — with HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
   {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
-  {id:'barcollection', name:'Bar Collection Register', desc:'Table sitting charges & cash collection log', icon:'🍷', color:'#8B5A2B', cat:'business'},
   {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
@@ -229,6 +226,7 @@ const TOOLS = [
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
   {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0},
+  {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0},
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
   {id:'imgcrop', name:'Crop / Resize Image', desc:'Crop a region or change size', icon:'✂️', color:'#D35400', cat:'image', cost:0},
@@ -2779,17 +2777,19 @@ TOOL_IMPL.compress = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         const opts = el(`
-          <div class="opts one tamil">
-            <div class="field">
-              <label>Compress Size</label>
-              <select id="cLevel">
-                <option value="1.5">Low compression (higher quality)</option>
-                <option value="1.1" selected>Medium (Recommended)</option>
-                <option value="0.75">High compression (smaller size)</option>
-              </select>
+          <div>
+            <div class="opts one tamil">
+              <div class="field">
+                <label>Compress Size</label>
+                <select id="cLevel">
+                  <option value="1.5">Low compression (higher quality)</option>
+                  <option value="1.1" selected>Medium (Recommended)</option>
+                  <option value="0.75">High compression (smaller size)</option>
+                </select>
+              </div>
             </div>
+            <div class="note">This re-renders every page as an image to compress it — best for image-heavy/scanned PDFs. எழுத்து-அடிப்படையிலான PDF-ல் எழுத்தை select/copy does தன்மை போய்விடும்.</div>
           </div>
-          <div class="note">This re-renders every page as an image to compress it — best for image-heavy/scanned PDFs. எழுத்து-அடிப்படையிலான PDF-ல் எழுத்தை select/copy does தன்மை போய்விடும்.</div>
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
@@ -9200,6 +9200,169 @@ TOOL_IMPL.leaveletter = {
   }
 };
 
+/* ===================== PRESCRIPTION PAD GENERATOR (for doctors) ===================== */
+TOOL_IMPL.prescription = {
+  mount(container){
+    const LS_KEY = 'prescriptionPad_doctorDefaults';
+    let medicines = [{ name:'', dosage:'', freq:'1-0-1', duration:'' }];
+    const body = el(`<div></div>`); container.appendChild(body);
+    const esc = (s)=> String(s||'').replace(/"/g,'&quot;');
+    function loadDoctorDefaults(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch{ return {}; } }
+    // Same formState-preservation pattern established after the GST Invoice
+    // bug (fields above a dynamic item list were being wiped on every
+    // add/remove because paint() rebuilds the whole form) — applied here
+    // from the start this time, not patched in after the fact.
+    let formState = Object.assign({
+      docName:'', docQual:'', docReg:'', clinicName:'', clinicAddr:'', clinicPhone:'',
+      patName:'', patAge:'', patGender:'Male', date:new Date().toISOString().slice(0,10),
+      diagnosis:'', advice:''
+    }, loadDoctorDefaults());
+    function captureFormState(){
+      const g = (id)=> body.querySelector(id);
+      const map = { docName:'#rxDocName', docQual:'#rxDocQual', docReg:'#rxDocReg', clinicName:'#rxClinicName', clinicAddr:'#rxClinicAddr', clinicPhone:'#rxClinicPhone',
+        patName:'#rxPatName', patAge:'#rxPatAge', patGender:'#rxPatGender', date:'#rxDate', diagnosis:'#rxDiagnosis', advice:'#rxAdvice' };
+      Object.entries(map).forEach(([key,sel])=>{ const elm = g(sel); if(elm) formState[key] = elm.value; });
+    }
+    function saveDoctorDefaults(){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify({ docName:formState.docName, docQual:formState.docQual, docReg:formState.docReg, clinicName:formState.clinicName, clinicAddr:formState.clinicAddr, clinicPhone:formState.clinicPhone })); }catch{}
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Fill in once — doctor/clinic details are remembered for next time. This is a formatting tool, not medical software — you're responsible for the accuracy of what you prescribe.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Doctor & Clinic</div>`));
+      const docOpts = el(`
+        <div class="opts tamil">
+          <div class="field"><label>Doctor Name</label><input type="text" id="rxDocName" autocomplete="off" value="${esc(formState.docName)}" placeholder="Dr. ..."></div>
+          <div class="field"><label>Qualification</label><input type="text" id="rxDocQual" autocomplete="off" value="${esc(formState.docQual)}" placeholder="MBBS, MD"></div>
+          <div class="field"><label>Registration No.</label><input type="text" id="rxDocReg" autocomplete="off" value="${esc(formState.docReg)}"></div>
+          <div class="field"><label>Clinic/Hospital Phone</label><input type="text" id="rxClinicPhone" autocomplete="off" value="${esc(formState.clinicPhone)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Clinic/Hospital Name</label><input type="text" id="rxClinicName" autocomplete="off" value="${esc(formState.clinicName)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Clinic Address</label><input type="text" id="rxClinicAddr" autocomplete="off" value="${esc(formState.clinicAddr)}"></div>
+        </div>
+      `);
+      body.appendChild(docOpts);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Patient</div>`));
+      const patOpts = el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Patient Name</label><input type="text" id="rxPatName" autocomplete="off" value="${esc(formState.patName)}"></div>
+          <div class="field"><label>Age</label><input type="text" id="rxPatAge" autocomplete="off" value="${esc(formState.patAge)}"></div>
+          <div class="field"><label>Gender</label><select id="rxPatGender"><option ${formState.patGender==='Male'?'selected':''}>Male</option><option ${formState.patGender==='Female'?'selected':''}>Female</option><option ${formState.patGender==='Other'?'selected':''}>Other</option></select></div>
+          <div class="field"><label>Date</label><input type="date" id="rxDate" value="${esc(formState.date)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Diagnosis (optional)</label><input type="text" id="rxDiagnosis" autocomplete="off" value="${esc(formState.diagnosis)}"></div>
+        </div>
+      `);
+      body.appendChild(patOpts);
+      [docOpts, patOpts].forEach(sec=> sec.addEventListener('input', captureFormState));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">℞ Medicines</div>`));
+      const medWrap = el(`<div></div>`);
+      medicines.forEach((m,idx)=>{
+        const row = el(`<div style="display:grid; grid-template-columns:1.6fr 0.9fr 0.9fr 0.9fr auto; gap:6px; margin-bottom:8px;"></div>`);
+        const mk = (val, ph)=> `<input type="text" data-idx="${idx}" value="${esc(val)}" placeholder="${ph||''}" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">`;
+        row.innerHTML = `
+          <div>${mk(m.name,'Medicine name')}</div>
+          <div>${mk(m.dosage,'e.g. 500mg')}</div>
+          <div>${mk(m.freq,'1-0-1')}</div>
+          <div>${mk(m.duration,'5 days')}</div>
+          <button data-idx="${idx}" data-remove="1" style="border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px 10px; cursor:pointer; color:#B3261E;" ${medicines.length<=1?'disabled':''}>✕</button>
+        `;
+        medWrap.appendChild(row);
+      });
+      body.appendChild(medWrap);
+      medWrap.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('input', ()=>{
+          const idx = Number(inp.getAttribute('data-idx'));
+          const rowInputs = Array.from(inp.parentElement.parentElement.querySelectorAll('input'));
+          const pos = rowInputs.indexOf(inp);
+          const field = ['name','dosage','freq','duration'][pos];
+          if(field) medicines[idx][field] = inp.value;
+        });
+      });
+      medWrap.querySelectorAll('button[data-remove]').forEach(btn=>{
+        btn.onclick = ()=>{ captureFormState(); medicines.splice(Number(btn.getAttribute('data-idx')),1); paint(); };
+      });
+      const addMedBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:14px;">+ Add Medicine</button>`);
+      addMedBtn.onclick = ()=>{ captureFormState(); medicines.push({name:'',dosage:'',freq:'1-0-1',duration:''}); paint(); };
+      body.appendChild(addMedBtn);
+
+      const adviceField = el(`<div class="field" style="margin-bottom:12px;"><label>Advice / Notes (optional)</label><textarea id="rxAdvice" rows="2">${esc(formState.advice)}</textarea></div>`);
+      body.appendChild(adviceField);
+      adviceField.addEventListener('input', captureFormState);
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">⚕️ Generate Prescription</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      captureFormState();
+      const validMeds = medicines.filter(m=>m.name.trim());
+      if(!formState.patName.trim() || !formState.docName.trim() || !validMeds.length){
+        mountResult(body, 'Please fill Doctor Name, Patient Name, and at least one medicine.').style.background='#FDEDEC';
+        return;
+      }
+      saveDoctorDefaults();
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        let page = doc.addPage([595.28, 841.89]);
+        const { width } = page.getSize();
+        let y = 800;
+        // t()/line() close over `page` by reference (it's a `let`, not
+        // `const`), so reassigning `page` below when a new page is added
+        // correctly redirects subsequent drawing calls onto it.
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const line = (yy)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
+
+        t(formState.docName, 40, y, 16, rgb(0,0.54,0.45)); y-=16;
+        t(formState.docQual + (formState.docReg? ' — Reg. No: '+formState.docReg : ''), 40, y, 9.5, rgb(0.4,0.4,0.4)); y-=14;
+        if(formState.clinicName) { t(formState.clinicName, 40, y, 10, rgb(0.3,0.3,0.3)); y-=13; }
+        if(formState.clinicAddr) { t(formState.clinicAddr, 40, y, 9, rgb(0.5,0.5,0.5)); y-=13; }
+        if(formState.clinicPhone) { t('Ph: '+formState.clinicPhone, 40, y, 9, rgb(0.5,0.5,0.5)); y-=13; }
+        y-=8; line(y); y-=20;
+
+        t('Patient: '+formState.patName, 40, y, 11); t('Date: '+formState.date, 400, y, 10); y-=16;
+        t('Age/Gender: '+(formState.patAge||'—')+' / '+formState.patGender, 40, y, 10, rgb(0.4,0.4,0.4)); y-=16;
+        if(formState.diagnosis){ t('Diagnosis: '+formState.diagnosis, 40, y, 10); y-=16; }
+        y-=8; line(y); y-=24;
+
+        t('℞', 40, y, 22, rgb(0,0.54,0.45)); y-=8;
+        validMeds.forEach((m,i)=>{
+          if(y < 120){
+            page = doc.addPage([595.28, 841.89]);
+            y = 800;
+          }
+          t(`${i+1}. ${m.name}`, 60, y, 11.5); y-=15;
+          const details = [m.dosage, m.freq, m.duration].filter(Boolean).join('   |   ');
+          if(details){ t(details, 75, y, 9.5, rgb(0.45,0.45,0.45)); y-=17; } else { y-=6; }
+        });
+        y-=14;
+        if(formState.advice){
+          line(y); y-=18;
+          t('Advice:', 40, y, 10, rgb(0.4,0.4,0.4)); y-=15;
+          formState.advice.split('\n').forEach(l=>{ t(l.slice(0,95), 40, y, 10); y-=14; });
+          y-=10;
+        }
+        if(y < 90) y = 90;
+        page.drawLine({start:{x:width-190,y:70},end:{x:width-40,y:70},thickness:1,color:rgb(0.6,0.6,0.6)});
+        t('Doctor Signature', width-180, 55, 9, rgb(0.5,0.5,0.5));
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `prescription-${formState.patName.replace(/\s+/g,'-')}-${formState.date}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Prescription ready — ${validMeds.length} medicine${validMeds.length===1?'':'s'} for ${formState.patName}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
 /* ===================== RENT RECEIPT GENERATOR ===================== */
 TOOL_IMPL.rentreceipt = {
   mount(container){
@@ -10058,139 +10221,6 @@ TOOL_IMPL.businesscard = {
   }
 };
 
-/* ===================== FESTIVAL CARD MAKER ===================== */
-TOOL_IMPL.festivalcard = {
-  mount(container){
-    let photoDataUrl = null;
-    const THEMES = {
-      pongal: { bg:['#F39C12','#E67E22'], accent:'#FFF8E1', defaultText:'இனிய பொங்கல் நல்வாழ்த்துக்கள்!\nHappy Pongal!', emoji:'🌾' },
-      diwali: { bg:['#6A1B9A','#AD1457'], accent:'#FFD700', defaultText:'இனிய தீபாவளி நல்வாழ்த்துக்கள்!\nHappy Diwali!', emoji:'🪔' },
-      navratri: { bg:['#C0392B','#8E44AD'], accent:'#FFD700', defaultText:'நவராத்திரி நல்வாழ்த்துக்கள்!\nHappy Navratri!', emoji:'🙏' },
-      puthandu: { bg:['#27AE60','#F39C12'], accent:'#FFF8E1', defaultText:'இனிய தமிழ் புத்தாண்டு நல்வாழ்த்துக்கள்!\nHappy Tamil New Year!', emoji:'🌿' },
-      wedding: { bg:['#AD1457','#F4D03F'], accent:'#FFFFFF', defaultText:"Save the Date!\nWe're Getting Married", emoji:'💍' }
-    };
-    const body = el(`<div></div>`); container.appendChild(body);
-    let theme = 'pongal';
-
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Pick an occasion, add a photo (optional) and your greeting — downloads as an image, ready for WhatsApp/Instagram.</div>`));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Occasion</div>`));
-      const themeRow = el(`<div class="filter-row"></div>`);
-      [['pongal','🌾 Pongal'],['diwali','🪔 Diwali'],['navratri','🙏 Navratri'],['puthandu','🌿 Puthandu'],['wedding','💍 Wedding']].forEach(([val,label])=>{
-        const chip = el(`<button class="filter-chip ${theme===val?'active':''}">${label}</button>`);
-        chip.onclick = ()=>{ theme = val; paint(); };
-        themeRow.appendChild(chip);
-      });
-      body.appendChild(themeRow);
-
-      const photoRow = el(`<div style="text-align:center; margin:14px 0;"></div>`);
-      const photoPreview = el(`<div style="width:110px; height:110px; border-radius:50%; background:#eee; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--line);">${photoDataUrl?`<img src="${photoDataUrl}" style="width:100%; height:100%; object-fit:cover;">`:'<span style="font-size:28px;">'+THEMES[theme].emoji+'</span>'}</div>`);
-      const photoInput = el(`<input type="file" accept="image/*" style="font-size:12px;">`);
-      photoInput.onchange = async (e)=>{
-        const f = e.target.files[0]; if(!f) return;
-        photoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
-        renderPreview(); paint();
-      };
-      photoRow.appendChild(photoPreview);
-      photoRow.appendChild(el(`<div style="font-size:11px; color:var(--sub); margin-bottom:6px;">Photo (optional)</div>`));
-      photoRow.appendChild(photoInput);
-      body.appendChild(photoRow);
-
-      body.appendChild(el(`
-        <div>
-          <div class="field"><label>Greeting Text</label><textarea id="fcText" rows="3">${THEMES[theme].defaultText}</textarea></div>
-          <div class="field"><label>Recipient (optional)</label><input type="text" id="fcRecipient" placeholder="To: Family Name" autocomplete="off"></div>
-        </div>
-      `));
-      body.querySelector('#fcText').addEventListener('input', renderPreview);
-      body.querySelector('#fcRecipient').addEventListener('input', renderPreview);
-
-      const previewWrap = el(`<div style="margin-top:16px; display:flex; justify-content:center;"></div>`);
-      const canvas = el(`<canvas width="500" height="500" style="max-width:100%; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></canvas>`);
-      previewWrap.appendChild(canvas);
-      body.appendChild(previewWrap);
-
-      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
-      const btn = el(`<button class="btn">🎉 Download Card</button>`);
-      btn.onclick = ()=> canvas.toBlob(blob=> downloadBlob(blob, theme+'-card.png'), 'image/png');
-      row.appendChild(btn);
-      body.appendChild(row);
-      renderPreview();
-    }
-
-    function wrapText(ctx, text, maxWidth){
-      const lines = [];
-      text.split('\n').forEach(paragraph=>{
-        const words = paragraph.split(' ');
-        let cur = '';
-        words.forEach(w=>{
-          const test = cur ? cur+' '+w : w;
-          if(ctx.measureText(test).width > maxWidth && cur){ lines.push(cur); cur = w; } else cur = test;
-        });
-        lines.push(cur);
-      });
-      return lines;
-    }
-
-    let renderSeq = 0;
-    async function renderPreview(){
-      const canvas = body.querySelector('canvas');
-      if(!canvas) return;
-      const mySeq = ++renderSeq; // guards against a slow-loading photo finishing after a newer render started (e.g. user typed while the image was still loading)
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width, h = canvas.height;
-      const th = THEMES[theme];
-      ctx.clearRect(0,0,w,h);
-      const grad = ctx.createLinearGradient(0,0,w,h);
-      grad.addColorStop(0, th.bg[0]); grad.addColorStop(1, th.bg[1]);
-      ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
-
-      // Simple geometric decorative border (per spec: no illustrated
-      // graphics needed) — a double-line frame with corner dots in the
-      // accent color reads as festive without needing hand-drawn motifs.
-      ctx.strokeStyle = th.accent; ctx.lineWidth = 3;
-      ctx.strokeRect(20,20,w-40,h-40);
-      ctx.strokeRect(30,30,w-60,h-60);
-      [[20,20],[w-20,20],[20,h-20],[w-20,h-20]].forEach(([x,y])=>{
-        ctx.fillStyle = th.accent; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
-      });
-
-      // Photo (or emoji fallback) is now properly awaited BEFORE any text is
-      // drawn — previously the image's onload callback ran asynchronously
-      // while text-drawing continued immediately, so the greeting text could
-      // render before the photo appeared, or the photo could later draw over
-      // already-placed text. This was the root cause of the tool "not
-      // working" (looking broken/incomplete) for anyone who added a photo.
-      if(photoDataUrl){
-        const img = new Image();
-        await new Promise((resolve,reject)=>{ img.onload = resolve; img.onerror = reject; img.src = photoDataUrl; });
-        if(mySeq !== renderSeq) return; // a newer render started while we were waiting — abandon this stale one
-        ctx.save();
-        ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.clip();
-        ctx.drawImage(img, w/2-70, 80, 140, 140);
-        ctx.restore();
-        ctx.strokeStyle = th.accent; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.stroke();
-      } else {
-        ctx.font = '60px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(th.emoji, w/2, 150);
-      }
-      if(mySeq !== renderSeq) return;
-      let y = photoDataUrl ? 260 : 220;
-
-      const recipient = body.querySelector('#fcRecipient') ? body.querySelector('#fcRecipient').value : '';
-      const text = body.querySelector('#fcText') ? body.querySelector('#fcText').value : th.defaultText;
-      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
-      if(recipient.trim()){ ctx.font = '600 20px Inter, sans-serif'; ctx.fillText(recipient, w/2, y); y += 35; }
-      ctx.font = '700 30px "Noto Sans Tamil", Inter, sans-serif';
-      wrapText(ctx, text, w-100).forEach(line=>{ ctx.fillText(line, w/2, y); y += 40; });
-    }
-    paint();
-  }
-};
-
 /* ===================== TAMIL HANDWRITING TRACING ===================== */
 TOOL_IMPL.tamiltracing = {
   mount(container){
@@ -11026,48 +11056,6 @@ TOOL_IMPL.expensetracker = {
   }
 };
 
-/* ===================== PETTY CASH BOOK TEMPLATE (Excel) ===================== */
-TOOL_IMPL.pettycash = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Downloads an Excel petty cash register — every row's Balance auto-calculates from the row above it.</div>`));
-      const opts = el(`<div class="opts one tamil"><div class="field"><label>Opening Balance ₹</label><input type="number" id="pcOpen" value="0"></div><div class="field"><label>எத்தனை entry rows வேணும்</label><input type="number" id="pcRows" value="40" min="10" max="200"></div></div>`);
-      body.appendChild(opts);
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🪙 Download Petty Cash Book</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const opening = Number(body.querySelector('#pcOpen').value)||0;
-      const numRows = Math.max(10, Math.min(200, Number(body.querySelector('#pcRows').value)||40));
-      const prog = mountProgress(body);
-      try{
-        prog.set(40,'Building template…');
-        const aoa = [['Date','Description','Received (₹)','Paid (₹)','Balance (₹)']];
-        aoa.push(['', 'Opening Balance', '', '', opening]);
-        for(let i=0;i<numRows;i++){
-          const rowNum = i+3; // header=1, opening=2, entries start at 3
-          aoa.push(['', '', '', '', { f: `E${rowNum-1}+C${rowNum}-D${rowNum}` }]);
-        }
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws['!cols'] = [{wch:12},{wch:28},{wch:14},{wch:14},{wch:14}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Petty Cash');
-        prog.set(90,'Preparing…');
-        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'petty-cash-book.xlsx');
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Petty Cash Book (.xlsx) downloaded — Balance column updates itself as you fill entries.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
 /* ===================== NUMBER JUNGLE — LEARNING GAME (embedded via iframe) =====
    This is a full standalone app (its own HTML/CSS/JS) built separately — it's
    loaded in an isolated iframe rather than merged into this file's code, so
@@ -11557,7 +11545,6 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
 TOOL_IMPL.billquotation = { mount(container){ mountEmbeddedTool(container, 'bill-quotation-maker.html', 'Bill / Quotation Maker'); } };
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
-TOOL_IMPL.barcollection = { mount(container){ mountEmbeddedTool(container, 'bar-collection-register.html', 'Bar Collection Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 
 render();
