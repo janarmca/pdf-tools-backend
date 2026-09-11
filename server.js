@@ -392,7 +392,11 @@ app.post('/api/redeem', redeemLimiter, requireAuth, async (req, res) => {
 // body: multipart form — file (image), question (text)
 // ============================================================
 app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), async (req, res) => {
-  const CREDIT_COST = 1;
+  // Deep-analysis requests (untruncated large Excel data, etc.) send genuinely
+  // more tokens to Gemini and cost more in real API terms — reflect that
+  // honestly in credits rather than charging the same flat 1 credit for a
+  // tiny question and a full untruncated spreadsheet dump.
+  const CREDIT_COST = req.body.deepAnalysis === 'true' ? 3 : 1;
   try {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
@@ -693,6 +697,9 @@ function buildNavamsaFromSubject(subject) {
 }
 app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res) => {
   try {
+    const CREDIT_COST = 2; // real RapidAPI Astrologer cost per call — was previously unmetered
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus');
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.', verified: false });
     const b = req.body || {};
     if (b.mode === 'compatibility') {
       const pA = b.personA, pB = b.personB;
@@ -762,6 +769,9 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
   // data, don't invent it" pattern as the other AI tools in this app, and
   // gives us free multi-language support since Gemini itself is multilingual.
   try {
+    const CREDIT_COST = 1; // real Gemini API cost per question — was previously unmetered
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
     const b = req.body || {};
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
     const lang = (b.chartContext && b.chartContext.outputLanguage) || 'en';
