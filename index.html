@@ -1856,10 +1856,6 @@ function ensureFFmpeg(){
       try{ await loadScriptOnce(primaryUrl); }
       catch(e){ await loadScriptOnce(fallbackUrl); }
     }
-    async function toBlobURLWithFallback(primaryUrl, fallbackUrl, mimeType, onProgress){
-      try{ return await toBlobURL(primaryUrl, mimeType, onProgress); }
-      catch(e){ return await toBlobURL(fallbackUrl, mimeType, onProgress); }
-    }
     // The worker chunk previously used importScripts() against a single fixed
     // CDN URL inside the worker thread — a failure there couldn't be caught or
     // retried from here. Fetching the actual script TEXT up front (with the
@@ -1881,40 +1877,28 @@ function ensureFFmpeg(){
       const { FFmpeg } = window.FFmpegWASM;
       const ffmpeg = new FFmpeg();
       const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
-      const baseFallback = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
       const pctEl = indicator.querySelector('#__ffLoadPct');
       const workerBlobURL = await crossOriginWorkerBlobURLWithFallback(
         'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
         'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js'
       );
-      try{
-        await ffmpeg.load({
-          coreURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.js`, `${baseFallback}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURLWithFallback(`${base}/ffmpeg-core.wasm`, `${baseFallback}/ffmpeg-core.wasm`, 'application/wasm', (frac)=>{ if(pctEl) pctEl.textContent = Math.round(frac*100)+'%'; }),
-          // The ffmpeg.wasm UMD build spawns its own worker chunk (814.ffmpeg.js) as a
-          // raw cross-origin Worker, which fails with "cannot be accessed from origin
-          // 'null'" on pages without a real http(s) origin. Routing it through a blob
-          // that just importScripts()'s the real file fixes it (see comment above).
-          classWorkerURL: workerBlobURL
-        });
-      }catch(loadErr){
-        // Known ffmpeg.wasm quirk (documented in the library's own GitHub issues):
-        // on some browser/version combinations, dynamically import()-ing a blob: URL
-        // for coreURL fails with "failed to import ffmpeg-core.js" even though the
-        // underlying fetch succeeded — the blob-wrapping itself is the problem, not
-        // the network. If that specific error occurs, retry using DIRECT CDN URLs
-        // (skipping the blob step for core/wasm) as a last-resort fallback.
-        if(String(loadErr && loadErr.message).includes('import')){
-          if(pctEl) pctEl.textContent = 'retrying…';
-          await ffmpeg.load({
-            coreURL: `${base}/ffmpeg-core.js`,
-            wasmURL: `${base}/ffmpeg-core.wasm`,
-            classWorkerURL: workerBlobURL
-          });
-        } else {
-          throw loadErr;
-        }
-      }
+      // coreURL/wasmURL are passed as DIRECT jsDelivr URLs, NOT wrapped in a
+      // blob: URL. This is a deliberate change from an earlier version of this
+      // function: wrapping these two in a blob and dynamically import()-ing
+      // that blob is exactly what triggers ffmpeg.wasm's well-documented
+      // "failed to import ffmpeg-core.js" bug (confirmed in the library's own
+      // GitHub issues — it happens even when the underlying fetch succeeds).
+      // jsDelivr is confirmed to send the Cross-Origin-Resource-Policy header
+      // ffmpeg.wasm's loader needs for a direct cross-origin import, so the
+      // blob step here was solving a problem that didn't exist while causing
+      // one that did. The worker still needs blob-wrapping for a separate,
+      // legitimate reason (raw cross-origin Worker construction), so that
+      // part is unchanged.
+      await ffmpeg.load({
+        coreURL: `${base}/ffmpeg-core.js`,
+        wasmURL: `${base}/ffmpeg-core.wasm`,
+        classWorkerURL: workerBlobURL
+      });
       indicator.remove();
       return { ffmpeg, fetchFile };
     }catch(e){
@@ -5421,6 +5405,7 @@ TOOL_IMPL.videothumb = {
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vtFast');
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b></div>`));
         const opts = el(`
@@ -5697,6 +5682,7 @@ TOOL_IMPL.videotogif = {
         onAdd: async (fl)=>{ file = fl[0]; try{ duration = await getVideoDuration(file); }catch(e){ duration=0; } paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 1, 'vgFastCB');
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b> — 10 வினாடிகளுக்கு மேல் எடுத்தால் GIF பெரிதாக இருக்கும்.</div>`));
         const opts = el(`
@@ -7387,6 +7373,7 @@ TOOL_IMPL.videosubtitle = {
         onAdd:(fl)=>{ file=fl[0]; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         mountFastServerNote(body, 2, 'vsubFast');
         const opts = el(`
           <div class="opts one tamil">
