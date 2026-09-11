@@ -196,7 +196,7 @@ const TOOLS = [
   {id:'pdfqrstamp', name:'Add QR to PDF', desc:'Stamp a QR code on every page', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'pdfcompare', name:'Compare PDFs (Redline)', desc:'See exactly what changed between two versions', icon:'📝', color:'#8E44AD', cat:'pdf'},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
-  {id:'kidsarcade', name:'Kids Arcade', desc:'Fun games and activities for kids', icon:'🎮', color:'#8E44AD', cat:'education'},
+  {id:'carrompuzzle', name:'Carrom Puzzle', desc:'Real physics carrom board — pocket a coin, solve a puzzle for bonus stars', icon:'🎯', color:'#8E44AD', cat:'education'},
   {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'business'},
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
@@ -11034,15 +11034,223 @@ TOOL_IMPL.numberjungle = {
   }
 };
 
-TOOL_IMPL.kidsarcade = {
+/* ===================== CARROM PUZZLE (real physics board game) ===================== */
+TOOL_IMPL.carrompuzzle = {
   mount(container){
-    const wrap = el(`<div style="margin:-4px -4px 0;"></div>`);
-    const frame = el(`<iframe src="kids-arcade.html" title="Kids Arcade" style="width:100%; height:78vh; min-height:560px; border:none; border-radius:14px; display:block; background:#0f2027;" loading="lazy"></iframe>`);
-    frame.onerror = ()=>{
-      wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Couldn't load the game — make sure "kids-arcade.html" is uploaded in the same folder as this app on GitHub.</div>`;
-    };
-    wrap.appendChild(frame);
+    const wrap = el(`<div style="display:flex; flex-direction:column; align-items:center; gap:10px;"></div>`);
+    const hud = el(`<div style="display:flex; justify-content:space-between; width:100%; max-width:480px; font-weight:800; font-size:14px;"><span id="cpScore">⭐ Score: 0</span><span id="cpPocketed">🔴 Pocketed: 0</span></div>`);
+    const canvasWrap = el(`<div style="position:relative; width:100%; max-width:480px;"></div>`);
+    const canvas = el(`<canvas width="480" height="480" style="width:100%; max-width:480px; touch-action:none; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.25); display:block;"></canvas>`);
+    canvasWrap.appendChild(canvas);
+    const note = el(`<div class="note tamil">Drag back from the striker (bottom) to aim, release to shoot. Pocket a piece → answer a puzzle for bonus stars!</div>`);
+    wrap.appendChild(hud); wrap.appendChild(canvasWrap); wrap.appendChild(note);
     container.appendChild(wrap);
+    const ctx = canvas.getContext('2d');
+    const W = 480, H = 480, PAD = 30, PLAY = W - PAD*2;
+    const POCKET_R = 22;
+    const pockets = [{x:PAD,y:PAD},{x:W-PAD,y:PAD},{x:PAD,y:H-PAD},{x:W-PAD,y:H-PAD}];
+    let score = 0, pocketedCount = 0;
+
+    function mkPiece(x,y,r,color){ return {x,y,vx:0,vy:0,r,color,alive:true}; }
+    let pieces = [];
+    function resetBoard(){
+      pieces = [];
+      const cx=W/2, cy=H/2, mr=10;
+      pieces.push(mkPiece(cx,cy,mr+1,'#D32F2F')); // queen
+      const ring = [];
+      for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; ring.push([cx+Math.cos(a)*24, cy+Math.sin(a)*24, i%2===0?'#1a1a1a':'#fafafa']); }
+      ring.forEach(([x,y,c])=> pieces.push(mkPiece(x,y,mr,c)));
+      const outer = [];
+      for(let i=0;i<5;i++){ const a=(i/5)*Math.PI*2 + Math.PI/5; outer.push([cx+Math.cos(a)*42, cy+Math.sin(a)*42, i%2===0?'#fafafa':'#1a1a1a']); }
+      outer.forEach(([x,y,c])=> pieces.push(mkPiece(x,y,mr,c)));
+      striker = mkPiece(cx, H-PAD-40, 13, '#F4D03F');
+      moving = false;
+    }
+    let striker, moving=false;
+    resetBoard();
+
+    // ---- Physics ----
+    const FRICTION = 0.985, MIN_VEL = 0.05;
+    function resolveCollision(a,b){
+      const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001;
+      const nx=dx/dist, ny=dy/dist;
+      const overlap=(a.r+b.r)-dist;
+      if(overlap>0){ a.x-=nx*overlap/2; a.y-=ny*overlap/2; b.x+=nx*overlap/2; b.y+=ny*overlap/2; }
+      const dvx=b.vx-a.vx, dvy=b.vy-a.vy, dvn=dvx*nx+dvy*ny;
+      if(dvn>0) return;
+      a.vx+=dvn*nx; a.vy+=dvn*ny; b.vx-=dvn*nx; b.vy-=dvn*ny;
+    }
+    function stepPhysics(){
+      const all = [striker, ...pieces.filter(p=>p.alive)];
+      all.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy; p.vx*=FRICTION; p.vy*=FRICTION;
+        if(Math.abs(p.vx)<MIN_VEL) p.vx=0; if(Math.abs(p.vy)<MIN_VEL) p.vy=0;
+        if(p.x-p.r<PAD){p.x=PAD+p.r; p.vx=-p.vx*0.8;} if(p.x+p.r>W-PAD){p.x=W-PAD-p.r; p.vx=-p.vx*0.8;}
+        if(p.y-p.r<PAD){p.y=PAD+p.r; p.vy=-p.vy*0.8;} if(p.y+p.r>H-PAD){p.y=H-PAD-p.r; p.vy=-p.vy*0.8;}
+      });
+      for(let i=0;i<all.length;i++) for(let j=i+1;j<all.length;j++) {
+        const a=all[i],b=all[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d < a.r+b.r) resolveCollision(a,b);
+      }
+      // Pocket detection
+      all.forEach(p=>{
+        if(p.alive===false) return;
+        pockets.forEach(pk=>{
+          if(Math.hypot(p.x-pk.x,p.y-pk.y) < POCKET_R){
+            if(p===striker){ striker.x=W/2; striker.y=H-PAD-40; striker.vx=0; striker.vy=0; }
+            else { p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: '+pocketedCount; onPocket(); }
+          }
+        });
+      });
+      moving = all.some(p=> Math.abs(p.vx)>0.01 || Math.abs(p.vy)>0.01);
+    }
+
+    // ---- Puzzle on pocket ----
+    const PUZZLES = [
+      {q:'5 + 7 = ?', a:'12'},{q:'9 × 2 = ?', a:'18'},{q:'20 − 8 = ?', a:'12'},
+      {q:'தமிழில் "3" எப்படி?', a:'மூன்று'},{q:'12 ÷ 4 = ?', a:'3'},{q:'Capital of India?', a:'Delhi'},
+      {q:'7 × 3 = ?', a:'21'},{q:'தமிழில் "நன்றி" — English?', a:'Thank you'},{q:'15 + 15 = ?', a:'30'}
+    ];
+    function onPocket(){
+      moving = false;
+      const p = PUZZLES[Math.floor(Math.random()*PUZZLES.length)];
+      const overlay = el(`
+        <div style="position:absolute; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; border-radius:12px;">
+          <div style="background:#fff; border-radius:16px; padding:24px; max-width:320px; text-align:center;">
+            <div style="font-size:32px; margin-bottom:8px;">🎉</div>
+            <div style="font-weight:900; font-size:16px; margin-bottom:14px;">${p.q}</div>
+            <input type="text" id="cpAnswer" style="width:100%; padding:10px; border:1.5px solid var(--line); border-radius:10px; text-align:center; font-size:15px; margin-bottom:12px;">
+            <button id="cpSubmit" class="btn" style="width:100%;">Submit</button>
+          </div>
+        </div>
+      `);
+      canvasWrap.style.position = 'relative';
+      canvasWrap.appendChild(overlay);
+      const input = overlay.querySelector('#cpAnswer');
+      input.focus();
+      overlay.querySelector('#cpSubmit').onclick = ()=>{
+        const correct = input.value.trim().toLowerCase() === p.a.toLowerCase();
+        score += correct ? 20 : 5;
+        wrap.querySelector('#cpScore').textContent = '⭐ Score: '+score;
+        overlay.remove();
+        if(pieces.filter(pc=>pc.alive).length===0){ setTimeout(()=>{ alert('🏆 Board cleared! Final score: '+score); resetBoard(); pocketedCount=0; score=0; wrap.querySelector('#cpScore').textContent='⭐ Score: 0'; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: 0'; },300); }
+      };
+    }
+
+    // ---- Drawing ----
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      // Wood-grain board background (radial gradient simulates light falling on wood + subtle grain lines)
+      const boardGrad = ctx.createRadialGradient(W/2,H/2,40, W/2,H/2,W*0.75);
+      boardGrad.addColorStop(0,'#E8B074'); boardGrad.addColorStop(0.6,'#D2984F'); boardGrad.addColorStop(1,'#B87A38');
+      ctx.fillStyle = boardGrad; ctx.fillRect(0,0,W,H);
+      ctx.save();
+      ctx.globalAlpha = 0.06; ctx.strokeStyle = '#5D3A1A'; ctx.lineWidth = 1;
+      for(let i=0;i<W;i+=6){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke(); }
+      ctx.restore();
+      // Wooden frame border (double-line, darker outer + inner highlight)
+      ctx.strokeStyle = '#4A2C11'; ctx.lineWidth = 10; ctx.strokeRect(PAD,PAD,PLAY,PLAY);
+      ctx.strokeStyle = 'rgba(255,220,170,.35)'; ctx.lineWidth = 2; ctx.strokeRect(PAD+7,PAD+7,PLAY-14,PLAY-14);
+      // Playing-surface inner line (traditional carrom red-ish border line)
+      ctx.strokeStyle = '#8B2E1F'; ctx.lineWidth = 2; ctx.strokeRect(PAD+16,PAD+16,PLAY-32,PLAY-32);
+
+      // Corner arrow/triangle markings pointing to each pocket — a real carrom
+      // board's signature look, not just a plain square.
+      ctx.fillStyle = 'rgba(139,46,31,.55)';
+      pockets.forEach(pk=>{
+        const dx = pk.x < W/2 ? 1 : -1, dy = pk.y < H/2 ? 1 : -1;
+        ctx.beginPath();
+        ctx.moveTo(pk.x + dx*POCKET_R*1.3, pk.y + dy*POCKET_R*1.3);
+        ctx.lineTo(pk.x + dx*POCKET_R*3.2, pk.y + dy*POCKET_R*1.3);
+        ctx.lineTo(pk.x + dx*POCKET_R*1.3, pk.y + dy*POCKET_R*3.2);
+        ctx.closePath(); ctx.fill();
+      });
+
+      // Center circle pattern (concentric rings, traditional carrom centerpoint)
+      ctx.strokeStyle = '#8B2E1F'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(W/2,H/2,58,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(W/2,H/2,52,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle = '#8B2E1F'; ctx.beginPath(); ctx.arc(W/2,H/2,4,0,Math.PI*2); ctx.fill();
+
+      // Baselines (where the striker is placed) — one per side, with the
+      // small "striker zone" circles real boards mark at each end.
+      ctx.strokeStyle = 'rgba(139,46,31,.5)'; ctx.lineWidth = 1.5;
+      [ [PAD+50, H-PAD-40, W-PAD-50, H-PAD-40], [PAD+50, PAD+40, W-PAD-50, PAD+40] ].forEach(([x1,y1,x2,y2])=>{
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      });
+
+      // Pockets — radial gradient for real depth/hole look instead of a flat circle
+      pockets.forEach(pk=>{
+        const pg = ctx.createRadialGradient(pk.x,pk.y,2, pk.x,pk.y,POCKET_R);
+        pg.addColorStop(0,'#000'); pg.addColorStop(0.7,'#0a0a0a'); pg.addColorStop(1,'#2b1a0e');
+        ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(pk.x,pk.y,POCKET_R,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 3; ctx.stroke();
+      });
+
+      // Pieces — radial gradient + highlight for a real "coin" 3D look, plus
+      // a soft drop-shadow so they read as sitting ON the board, not painted on it.
+      function drawPiece(p, baseColor, rimColor){
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+        const pg = ctx.createRadialGradient(p.x-p.r*0.35,p.y-p.r*0.35,p.r*0.15, p.x,p.y,p.r);
+        pg.addColorStop(0, lighten(baseColor,40)); pg.addColorStop(0.6, baseColor); pg.addColorStop(1, lighten(baseColor,-25));
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = pg; ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = rimColor; ctx.lineWidth = 1.5; ctx.stroke();
+        // small shine highlight
+        ctx.beginPath(); ctx.arc(p.x-p.r*0.32,p.y-p.r*0.32,p.r*0.28,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
+      }
+      pieces.filter(p=>p.alive).forEach(p=> drawPiece(p, p.color, 'rgba(0,0,0,.4)'));
+      drawPiece(striker, striker.color, '#8a6d00');
+
+      if(aiming){
+        ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3; ctx.setLineDash([7,5]);
+        ctx.beginPath(); ctx.moveTo(striker.x,striker.y); ctx.lineTo(aimX,aimY); ctx.stroke();
+        ctx.setLineDash([]);
+        // power indicator dot at the pulled-back end
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(aimX,aimY,4,0,Math.PI*2); ctx.fill();
+      }
+    }
+    // Lightens (amt>0) or darkens (amt<0) a #rrggbb hex color — used to build
+    // the radial-gradient shading for each piece.
+    function lighten(hex, amt){
+      const n = parseInt(hex.replace('#',''),16);
+      let r=(n>>16)+amt, g=((n>>8)&255)+amt, b=(n&255)+amt;
+      r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+      return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+    }
+    let aiming=false, aimX=0, aimY=0, dragStartX=0, dragStartY=0;
+    function getPos(e){
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x:(t.clientX-rect.left)*(W/rect.width), y:(t.clientY-rect.top)*(H/rect.height) };
+    }
+    canvas.addEventListener('pointerdown', e=>{
+      if(moving) return;
+      const p = getPos(e);
+      if(Math.hypot(p.x-striker.x, p.y-striker.y) < 40){ aiming=true; dragStartX=p.x; dragStartY=p.y; }
+    });
+    canvas.addEventListener('pointermove', e=>{
+      if(!aiming) return;
+      const p = getPos(e); aimX=p.x; aimY=p.y;
+    });
+    canvas.addEventListener('pointerup', e=>{
+      if(!aiming) return;
+      aiming=false;
+      const dx = striker.x-aimX, dy = striker.y-aimY;
+      const power = Math.min(Math.hypot(dx,dy)/8, 16);
+      const dist = Math.hypot(dx,dy)||1;
+      striker.vx = (dx/dist)*power; striker.vy = (dy/dist)*power;
+    });
+
+    function loop(){
+      requestAnimationFrame(loop);
+      if(moving) stepPhysics();
+      draw();
+    }
+    loop();
   }
 };
 
