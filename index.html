@@ -11055,6 +11055,7 @@ TOOL_IMPL.carrompuzzle = {
     // Local rounded-rect helper (this tool's own scope has no shared one)
     function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
     let pieces = [];
+    let striker, moving=false, strikerHomeX=0, strikerHomeY=0;
     function resetBoard(){
       pieces = [];
       const cx=W/2, cy=H/2, mr=10;
@@ -11066,9 +11067,9 @@ TOOL_IMPL.carrompuzzle = {
       for(let i=0;i<5;i++){ const a=(i/5)*Math.PI*2 + Math.PI/5; outer.push([cx+Math.cos(a)*42, cy+Math.sin(a)*42, i%2===0?'#fafafa':'#1a1a1a']); }
       outer.forEach(([x,y,c])=> pieces.push(mkPiece(x,y,mr,c)));
       striker = mkPiece(cx, H-PAD-40, 13, '#F4D03F');
+      strikerHomeX = striker.x; strikerHomeY = striker.y; // keep the drag-anchor in sync with the fresh striker
       moving = false;
     }
-    let striker, moving=false;
     resetBoard();
 
     // ---- Physics ----
@@ -11099,7 +11100,7 @@ TOOL_IMPL.carrompuzzle = {
         if(p.alive===false) return;
         pockets.forEach(pk=>{
           if(Math.hypot(p.x-pk.x,p.y-pk.y) < POCKET_R){
-            if(p===striker){ striker.x=W/2; striker.y=H-PAD-40; striker.vx=0; striker.vy=0; }
+            if(p===striker){ striker.x=W/2; striker.y=H-PAD-40; striker.vx=0; striker.vy=0; strikerHomeX=striker.x; strikerHomeY=striker.y; }
             else { p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: '+pocketedCount; onPocket(); }
           }
         });
@@ -11249,11 +11250,34 @@ TOOL_IMPL.carrompuzzle = {
       drawPiece(striker, striker.color, '#8a6d00');
 
       if(aiming){
-        ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3; ctx.setLineDash([7,5]);
-        ctx.beginPath(); ctx.moveTo(striker.x,striker.y); ctx.lineTo(aimX,aimY); ctx.stroke();
-        ctx.setLineDash([]);
-        // power indicator dot at the pulled-back end
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(aimX,aimY,4,0,Math.PI*2); ctx.fill();
+        // Shows the FORWARD launch trajectory (opposite of the pull-back),
+        // color-coded by power — green (light) through yellow to red (max) —
+        // so the power level is visually obvious, not just a plain dashed line.
+        const dx = strikerHomeX - striker.x, dy = strikerHomeY - striker.y;
+        const dist = Math.hypot(dx,dy);
+        if(dist > 2){
+          const t = Math.min(dist/MAX_PULL, 1);
+          const lineColor = t<0.5 ? '#4CAF50' : (t<0.8 ? '#FFC107' : '#E53935');
+          const nx = dx/dist, ny = dy/dist;
+          const launchLen = 40 + t*80;
+          ctx.strokeStyle = lineColor; ctx.lineWidth = 3; ctx.setLineDash([8,6]);
+          ctx.beginPath();
+          ctx.moveTo(strikerHomeX, strikerHomeY);
+          ctx.lineTo(strikerHomeX + nx*launchLen, strikerHomeY + ny*launchLen);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          // Arrowhead at the far end
+          const ax = strikerHomeX + nx*launchLen, ay = strikerHomeY + ny*launchLen;
+          ctx.fillStyle = lineColor;
+          ctx.beginPath();
+          ctx.moveTo(ax,ay);
+          ctx.lineTo(ax - nx*10 - ny*6, ay - ny*10 + nx*6);
+          ctx.lineTo(ax - nx*10 + ny*6, ay - ny*10 - nx*6);
+          ctx.closePath(); ctx.fill();
+          // Power percentage label near the striker
+          ctx.fillStyle = '#fff'; ctx.font = '700 12px sans-serif'; ctx.textAlign='center';
+          ctx.fillText(Math.round(t*100)+'%', strikerHomeX, strikerHomeY+30);
+        }
       }
     }
     // Lightens (amt>0) or darkens (amt<0) a #rrggbb hex color — used to build
@@ -11264,7 +11288,8 @@ TOOL_IMPL.carrompuzzle = {
       r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
       return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
     }
-    let aiming=false, aimX=0, aimY=0, dragStartX=0, dragStartY=0;
+    let aiming=false, aimX=0, aimY=0;
+    const MAX_PULL = 55; // clamp how far back the striker can visually be dragged
     function getPos(e){
       const rect = canvas.getBoundingClientRect();
       const t = e.touches ? e.touches[0] : e;
@@ -11273,25 +11298,43 @@ TOOL_IMPL.carrompuzzle = {
     canvas.addEventListener('pointerdown', e=>{
       if(moving) return;
       const p = getPos(e);
-      if(Math.hypot(p.x-striker.x, p.y-striker.y) < 40){ aiming=true; dragStartX=p.x; dragStartY=p.y; }
+      if(Math.hypot(p.x-striker.x, p.y-striker.y) < 40){
+        aiming = true;
+        // Lock in the true "home" position at the start of this drag — the
+        // striker will visually pull back from here, then launch from here.
+        strikerHomeX = striker.x; strikerHomeY = striker.y;
+      }
     });
     canvas.addEventListener('pointermove', e=>{
       if(!aiming) return;
       const p = getPos(e); aimX=p.x; aimY=p.y;
+      // Pull-back vector: the striker visually follows the drag, moving in
+      // the SAME direction as the finger (like pulling back a slingshot),
+      // clamped so it can't be dragged an unlimited distance.
+      const dx = p.x - strikerHomeX, dy = p.y - strikerHomeY;
+      const dist = Math.hypot(dx,dy);
+      const pull = Math.min(dist, MAX_PULL);
+      const nx = dist>0 ? dx/dist : 0, ny = dist>0 ? dy/dist : 0;
+      striker.x = strikerHomeX + nx*pull;
+      striker.y = strikerHomeY + ny*pull;
     });
     canvas.addEventListener('pointerup', e=>{
       if(!aiming) return;
-      aiming=false;
-      const dx = striker.x-aimX, dy = striker.y-aimY;
-      const power = Math.min(Math.hypot(dx,dy)/8, 16);
-      const dist = Math.hypot(dx,dy)||1;
-      striker.vx = (dx/dist)*power; striker.vy = (dy/dist)*power;
-      // Without this, the main loop's `if(moving) stepPhysics()` never runs —
-      // moving is only ever recalculated INSIDE stepPhysics itself, so it
-      // could never flip from false to true on its own. This was the exact
-      // cause of "striker not moving": velocity was set correctly, but
-      // physics stepping (which applies that velocity) was never triggered.
-      if(power > 0.05) moving = true;
+      aiming = false;
+      // Shot direction is the OPPOSITE of the pull-back (release like a
+      // slingshot: pull back, fly forward) — from the striker's current
+      // (pulled-back) position back toward its true home position and beyond.
+      const dx = strikerHomeX - striker.x, dy = strikerHomeY - striker.y;
+      const dist = Math.hypot(dx,dy);
+      if(dist > 3){
+        const power = Math.min((dist/MAX_PULL) * 18, 18); // 0–18, scales smoothly with how far it was pulled
+        striker.vx = (dx/dist)*power; striker.vy = (dy/dist)*power;
+        moving = true;
+      }
+      // Snap back to true home position — the pulled-back position was only
+      // ever a visual offset, the shot launches from where the striker
+      // actually sits on the baseline.
+      striker.x = strikerHomeX; striker.y = strikerHomeY;
     });
 
     function loop(){
