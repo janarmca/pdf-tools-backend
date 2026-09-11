@@ -11037,25 +11037,45 @@ TOOL_IMPL.numberjungle = {
 /* ===================== CARROM PUZZLE (real physics board game) ===================== */
 TOOL_IMPL.carrompuzzle = {
   mount(container){
-    const wrap = el(`<div style="display:flex; flex-direction:column; align-items:center; gap:10px;"></div>`);
-    const hud = el(`<div style="display:flex; justify-content:space-between; width:100%; max-width:480px; font-weight:800; font-size:14px;"><span id="cpScore">⭐ Score: 0</span><span id="cpPocketed">🔴 Pocketed: 0</span></div>`);
-    const canvasWrap = el(`<div style="position:relative; width:100%; max-width:480px;"></div>`);
-    const canvas = el(`<canvas width="480" height="480" style="width:100%; max-width:480px; touch-action:none; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.25); display:block;"></canvas>`);
+    const wrap = el(`<div style="display:flex; flex-direction:column; align-items:center; gap:12px; max-width:480px; margin:0 auto;"></div>`);
+    const hud = el(`
+      <div style="display:flex; justify-content:space-between; width:100%; gap:10px;">
+        <div style="flex:1; background:linear-gradient(135deg,#7B3FA0,#4A235A); border-radius:14px; padding:10px 14px; color:#fff;">
+          <div style="font-size:10px; opacity:.8; text-transform:uppercase; font-weight:700;">Score</div>
+          <div id="cpScore" style="font-size:20px; font-weight:900;">⭐ 0</div>
+        </div>
+        <div style="flex:1; background:linear-gradient(135deg,#8B2E1F,#5D1D14); border-radius:14px; padding:10px 14px; color:#fff; text-align:right;">
+          <div style="font-size:10px; opacity:.8; text-transform:uppercase; font-weight:700;">Pocketed</div>
+          <div id="cpPocketed" style="font-size:20px; font-weight:900;">🔴 0 / 12</div>
+        </div>
+      </div>
+    `);
+    const canvasWrap = el(`<div style="position:relative; width:100%;"></div>`);
+    const canvas = el(`<canvas width="480" height="480" style="width:100%; touch-action:none; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.3); display:block;"></canvas>`);
     canvasWrap.appendChild(canvas);
-    const note = el(`<div class="note tamil">Drag back from the striker (bottom) to aim, release to shoot. Pocket a piece → answer a puzzle for bonus stars!</div>`);
-    wrap.appendChild(hud); wrap.appendChild(canvasWrap); wrap.appendChild(note);
+    const howTo = el(`
+      <div class="note tamil" style="width:100%; display:flex; flex-direction:column; gap:6px;">
+        <div><b>↔️ Position:</b> Touch the striker, slide left/right to place it on the baseline.</div>
+        <div><b>⬅️ Aim & Shoot:</b> Touch the striker, pull backward, release to shoot forward.</div>
+      </div>
+    `);
+    const row = el(`<div style="display:flex; gap:8px; width:100%;"></div>`);
+    const restartBtn = el(`<button class="btn secondary" style="flex:1; padding:9px; font-size:13px;">🔄 Restart Board</button>`);
+    row.appendChild(restartBtn);
+    wrap.appendChild(hud); wrap.appendChild(canvasWrap); wrap.appendChild(howTo); wrap.appendChild(row);
     container.appendChild(wrap);
     const ctx = canvas.getContext('2d');
     const W = 480, H = 480, PAD = 30, PLAY = W - PAD*2;
     const POCKET_R = 22;
     const pockets = [{x:PAD,y:PAD},{x:W-PAD,y:PAD},{x:PAD,y:H-PAD},{x:W-PAD,y:H-PAD}];
     let score = 0, pocketedCount = 0;
+    const TOTAL_PIECES = 12; // 1 queen + 6 inner ring + 5 outer ring
 
     function mkPiece(x,y,r,color){ return {x,y,vx:0,vy:0,r,color,alive:true}; }
     // Local rounded-rect helper (this tool's own scope has no shared one)
     function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
     let pieces = [];
-    let striker, moving=false, strikerHomeX=0, strikerHomeY=0, puzzleOpen=false;
+    let striker, moving=false, strikerHomeX=0, strikerHomeY=0, puzzleOpen=false, lastStrikerX=0;
     function resetBoard(){
       pieces = [];
       const cx=W/2, cy=H/2, mr=10;
@@ -11068,6 +11088,7 @@ TOOL_IMPL.carrompuzzle = {
       outer.forEach(([x,y,c])=> pieces.push(mkPiece(x,y,mr,c)));
       striker = mkPiece(cx, H-PAD-40, 13, '#F4D03F');
       strikerHomeX = striker.x; strikerHomeY = striker.y; // keep the drag-anchor in sync with the fresh striker
+      lastStrikerX = striker.x;
       moving = false;
     }
     resetBoard();
@@ -11110,7 +11131,7 @@ TOOL_IMPL.carrompuzzle = {
         pockets.forEach(pk=>{
           if(Math.hypot(p.x-pk.x,p.y-pk.y) < POCKET_R){
             if(p===striker){ striker.x=W/2; striker.y=H-PAD-40; striker.vx=0; striker.vy=0; strikerHomeX=striker.x; strikerHomeY=striker.y; }
-            else { pocketFx(p.x, p.y, p.color); p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: '+pocketedCount; onPocket(); }
+            else { pocketFx(p.x, p.y, p.color); p.alive=false; pocketedCount++; wrap.querySelector('#cpPocketed').textContent='🔴 '+pocketedCount+' / '+TOTAL_PIECES; onPocket(); }
           }
         });
       });
@@ -11121,7 +11142,7 @@ TOOL_IMPL.carrompuzzle = {
       // wherever it happened to stop, which feels broken/stuck to a player
       // (this was the "coin doesn't come back" issue).
       if(wasMoving && !moving && striker.alive!==false){
-        striker.x = W/2; striker.y = H-PAD-40; striker.vx=0; striker.vy=0;
+        striker.x = lastStrikerX; striker.y = H-PAD-40; striker.vx=0; striker.vy=0;
         strikerHomeX = striker.x; strikerHomeY = striker.y;
       }
     }
@@ -11191,7 +11212,7 @@ TOOL_IMPL.carrompuzzle = {
       overlay.querySelector('#cpSubmit').onclick = ()=>{
         const correct = input.value.trim().toLowerCase() === p.a.toLowerCase();
         score += correct ? 20 : 5;
-        wrap.querySelector('#cpScore').textContent = '⭐ Score: '+score;
+        wrap.querySelector('#cpScore').textContent = '⭐ '+score;
         overlay.remove();
         puzzleOpen = false;
         // Other pieces may still have had non-zero velocity at the moment
@@ -11199,7 +11220,7 @@ TOOL_IMPL.carrompuzzle = {
         // quiz) — resume stepping if so, otherwise they'd stay frozen forever.
         const all = [striker, ...pieces.filter(pc=>pc.alive)];
         moving = all.some(pc=> Math.abs(pc.vx)>0.01 || Math.abs(pc.vy)>0.01);
-        if(pieces.filter(pc=>pc.alive).length===0){ setTimeout(()=>{ alert('🏆 Board cleared! Final score: '+score); resetBoard(); pocketedCount=0; score=0; wrap.querySelector('#cpScore').textContent='⭐ Score: 0'; wrap.querySelector('#cpPocketed').textContent='🔴 Pocketed: 0'; },300); }
+        if(pieces.filter(pc=>pc.alive).length===0){ setTimeout(()=>{ alert('🏆 Board cleared! Final score: '+score); resetBoard(); pocketedCount=0; score=0; wrap.querySelector('#cpScore').textContent='⭐ 0'; wrap.querySelector('#cpPocketed').textContent='🔴 0 / '+TOTAL_PIECES; },300); }
       };
     }
 
@@ -11374,39 +11395,54 @@ TOOL_IMPL.carrompuzzle = {
       const t = e.touches ? e.touches[0] : e;
       return { x:(t.clientX-rect.left)*(W/rect.width), y:(t.clientY-rect.top)*(H/rect.height) };
     }
+    let mode = null; // 'position' or 'aim', decided by initial drag direction
+    const BASELINE_Y = H-PAD-40;
+    const BASELINE_MIN_X = PAD+40, BASELINE_MAX_X = W-PAD-40;
     canvas.addEventListener('pointerdown', e=>{
       if(moving || puzzleOpen) return;
       const p = getPos(e);
       if(Math.hypot(p.x-striker.x, p.y-striker.y) < 40){
-        aiming = true;
-        // Lock in the true "home" position at the start of this drag — the
-        // striker will visually pull back from here, then launch from here.
+        mode = null; // not yet decided — first few pixels of movement decide it
         strikerHomeX = striker.x; strikerHomeY = striker.y;
-        // Critical fix: without pointer capture, move/up events stop firing
-        // the moment the finger leaves the canvas element's bounds — on a
-        // narrow mobile screen, LEFT-RIGHT drags hit the canvas edge far
-        // more easily than up-down ones, which is exactly why horizontal
-        // aiming stopped working while other movement still seemed fine.
         canvas.setPointerCapture(e.pointerId);
+        aiming = true;
       }
     });
     canvas.addEventListener('pointermove', e=>{
       if(!aiming) return;
       const p = getPos(e); aimX=p.x; aimY=p.y;
-      // Pull-back vector: the striker visually follows the drag, moving in
-      // the SAME direction as the finger (like pulling back a slingshot),
-      // clamped so it can't be dragged an unlimited distance.
       const dx = p.x - strikerHomeX, dy = p.y - strikerHomeY;
-      const dist = Math.hypot(dx,dy);
-      const pull = Math.min(dist, MAX_PULL);
-      const nx = dist>0 ? dx/dist : 0, ny = dist>0 ? dy/dist : 0;
-      striker.x = strikerHomeX + nx*pull;
-      striker.y = strikerHomeY + ny*pull;
+      // Decide the gesture once it's moved enough to be unambiguous — real
+      // carrom is two distinct actions: slide left-right along the baseline
+      // to POSITION, or pull backward (away from the board) to AIM and shoot.
+      if(mode===null && Math.hypot(dx,dy) > 8){
+        mode = Math.abs(dx) > Math.abs(dy) ? 'position' : 'aim';
+      }
+      if(mode==='position'){
+        // Slide along the baseline only — Y never changes, so this can never
+        // accidentally fire a shot.
+        striker.x = Math.max(BASELINE_MIN_X, Math.min(BASELINE_MAX_X, strikerHomeX + dx));
+        striker.y = BASELINE_Y;
+      } else if(mode==='aim'){
+        // Pull back from wherever the striker currently sits (its baseline
+        // position after any earlier repositioning), clamped to MAX_PULL.
+        const dist = Math.hypot(dx,dy);
+        const pull = Math.min(dist, MAX_PULL);
+        const nx = dist>0 ? dx/dist : 0, ny = dist>0 ? dy/dist : 0;
+        striker.x = strikerHomeX + nx*pull;
+        striker.y = strikerHomeY + ny*pull;
+      }
     });
     canvas.addEventListener('pointerup', e=>{
       if(!aiming) return;
       aiming = false;
       try{ canvas.releasePointerCapture(e.pointerId); }catch(err){}
+      if(mode==='position'){
+        // Just repositioning — confirm the new baseline spot, no shot fired.
+        strikerHomeX = striker.x; strikerHomeY = striker.y; lastStrikerX = striker.x;
+        mode = null;
+        return;
+      }
       // Shot direction is the OPPOSITE of the pull-back (release like a
       // slingshot: pull back, fly forward) — from the striker's current
       // (pulled-back) position back toward its true home position and beyond.
@@ -11422,7 +11458,16 @@ TOOL_IMPL.carrompuzzle = {
       // ever a visual offset, the shot launches from where the striker
       // actually sits on the baseline.
       striker.x = strikerHomeX; striker.y = strikerHomeY;
+      mode = null;
     });
+
+    restartBtn.onclick = ()=>{
+      if(moving || puzzleOpen) return; // don't allow restart mid-shot or mid-puzzle
+      resetBoard();
+      score = 0; pocketedCount = 0;
+      wrap.querySelector('#cpScore').textContent = '⭐ 0';
+      wrap.querySelector('#cpPocketed').textContent = '🔴 0 / '+TOTAL_PIECES;
+    };
 
     function loop(){
       requestAnimationFrame(loop);
