@@ -11052,6 +11052,8 @@ TOOL_IMPL.carrompuzzle = {
     let score = 0, pocketedCount = 0;
 
     function mkPiece(x,y,r,color){ return {x,y,vx:0,vy:0,r,color,alive:true}; }
+    // Local rounded-rect helper (this tool's own scope has no shared one)
+    function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
     let pieces = [];
     function resetBoard(){
       pieces = [];
@@ -11140,51 +11142,80 @@ TOOL_IMPL.carrompuzzle = {
     // ---- Drawing ----
     function draw(){
       ctx.clearRect(0,0,W,H);
-      // Wood-grain board background (radial gradient simulates light falling on wood + subtle grain lines)
-      const boardGrad = ctx.createRadialGradient(W/2,H/2,40, W/2,H/2,W*0.75);
-      boardGrad.addColorStop(0,'#E8B074'); boardGrad.addColorStop(0.6,'#D2984F'); boardGrad.addColorStop(1,'#B87A38');
-      ctx.fillStyle = boardGrad; ctx.fillRect(0,0,W,H);
+      // Purple gradient background AROUND the board (matches reference — the
+      // board itself is a warm wood square floating on a purple game背景).
+      const bgGrad = ctx.createLinearGradient(0,0,0,H);
+      bgGrad.addColorStop(0,'#7B3FA0'); bgGrad.addColorStop(1,'#4A235A');
+      ctx.fillStyle = bgGrad; ctx.fillRect(0,0,W,H);
+
+      // Warm, lighter wood playing surface (reference uses a light honey-wood
+      // tone, not dark brown) with subtle grain.
+      const boardGrad = ctx.createLinearGradient(PAD,PAD,W-PAD,H-PAD);
+      boardGrad.addColorStop(0,'#F0C888'); boardGrad.addColorStop(0.5,'#E8B96E'); boardGrad.addColorStop(1,'#DCA855');
+      ctx.fillStyle = boardGrad; ctx.fillRect(PAD,PAD,PLAY,PLAY);
       ctx.save();
-      ctx.globalAlpha = 0.06; ctx.strokeStyle = '#5D3A1A'; ctx.lineWidth = 1;
-      for(let i=0;i<W;i+=6){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke(); }
+      ctx.globalAlpha = 0.05; ctx.strokeStyle = '#8B5E1F'; ctx.lineWidth = 1;
+      for(let i=PAD;i<W-PAD;i+=7){ ctx.beginPath(); ctx.moveTo(i,PAD); ctx.lineTo(i,H-PAD); ctx.stroke(); }
       ctx.restore();
-      // Wooden frame border (double-line, darker outer + inner highlight)
-      ctx.strokeStyle = '#4A2C11'; ctx.lineWidth = 10; ctx.strokeRect(PAD,PAD,PLAY,PLAY);
-      ctx.strokeStyle = 'rgba(255,220,170,.35)'; ctx.lineWidth = 2; ctx.strokeRect(PAD+7,PAD+7,PLAY-14,PLAY-14);
-      // Playing-surface inner line (traditional carrom red-ish border line)
-      ctx.strokeStyle = '#8B2E1F'; ctx.lineWidth = 2; ctx.strokeRect(PAD+16,PAD+16,PLAY-32,PLAY-32);
 
-      // Corner arrow/triangle markings pointing to each pocket — a real carrom
-      // board's signature look, not just a plain square.
-      ctx.fillStyle = 'rgba(139,46,31,.55)';
-      pockets.forEach(pk=>{
-        const dx = pk.x < W/2 ? 1 : -1, dy = pk.y < H/2 ? 1 : -1;
+      // Double border frame lines (outer + inner) — the "frame within frame" look
+      ctx.strokeStyle = 'rgba(139,94,31,.55)'; ctx.lineWidth = 2;
+      ctx.strokeRect(PAD+14, PAD+14, PLAY-28, PLAY-28);
+      ctx.strokeRect(PAD+34, PAD+34, PLAY-68, PLAY-68);
+
+      // Elaborate center circle — outer ring + inner ring + geometric star
+      // pattern, matching the decorative medallion look in the reference.
+      const cx=W/2, cy=H/2;
+      ctx.strokeStyle = 'rgba(139,94,31,.55)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx,cy,64,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,58,0,Math.PI*2); ctx.stroke();
+      ctx.save();
+      ctx.globalAlpha = 0.35; ctx.strokeStyle = '#8B5E1F'; ctx.lineWidth = 1;
+      for(let i=0;i<8;i++){
+        const a1=(i/8)*Math.PI*2, a2=((i+3)/8)*Math.PI*2;
         ctx.beginPath();
-        ctx.moveTo(pk.x + dx*POCKET_R*1.3, pk.y + dy*POCKET_R*1.3);
-        ctx.lineTo(pk.x + dx*POCKET_R*3.2, pk.y + dy*POCKET_R*1.3);
-        ctx.lineTo(pk.x + dx*POCKET_R*1.3, pk.y + dy*POCKET_R*3.2);
-        ctx.closePath(); ctx.fill();
-      });
+        ctx.moveTo(cx+Math.cos(a1)*58, cy+Math.sin(a1)*58);
+        ctx.lineTo(cx+Math.cos(a2)*58, cy+Math.sin(a2)*58);
+        ctx.stroke();
+      }
+      ctx.restore();
 
-      // Center circle pattern (concentric rings, traditional carrom centerpoint)
-      ctx.strokeStyle = '#8B2E1F'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(W/2,H/2,58,0,Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(W/2,H/2,52,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle = '#8B2E1F'; ctx.beginPath(); ctx.arc(W/2,H/2,4,0,Math.PI*2); ctx.fill();
-
-      // Baselines (where the striker is placed) — one per side, with the
-      // small "striker zone" circles real boards mark at each end.
-      ctx.strokeStyle = 'rgba(139,46,31,.5)'; ctx.lineWidth = 1.5;
+      // Baselines (striker zone) per side
+      ctx.strokeStyle = 'rgba(139,94,31,.5)'; ctx.lineWidth = 1.5;
       [ [PAD+50, H-PAD-40, W-PAD-50, H-PAD-40], [PAD+50, PAD+40, W-PAD-50, PAD+40] ].forEach(([x1,y1,x2,y2])=>{
         ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
       });
 
-      // Pockets — radial gradient for real depth/hole look instead of a flat circle
+      // Small decorative yellow circles along the inner border — 2 per side,
+      // the signature detail from the reference image that isn't just plain
+      // corners. Purely decorative, not gameplay pockets.
+      const decoR = 9, decoInset = 46;
+      const decoPts = [
+        [PAD+decoInset, PAD+decoInset+40],[PAD+decoInset+40, PAD+decoInset],
+        [W-PAD-decoInset, PAD+decoInset+40],[W-PAD-decoInset-40, PAD+decoInset],
+        [PAD+decoInset, H-PAD-decoInset-40],[PAD+decoInset+40, H-PAD-decoInset],
+        [W-PAD-decoInset, H-PAD-decoInset-40],[W-PAD-decoInset-40, H-PAD-decoInset]
+      ];
+      decoPts.forEach(([x,y])=>{
+        const dg = ctx.createRadialGradient(x-3,y-3,1,x,y,decoR);
+        dg.addColorStop(0,'#FFE580'); dg.addColorStop(1,'#E8A800');
+        ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(x,y,decoR,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(139,94,31,.4)'; ctx.lineWidth = 1; ctx.stroke();
+      });
+
+      // Pockets — the signature YELLOW rounded-corner frame with the actual
+      // black hole inset inside it, matching the reference exactly (not a
+      // plain black circle sitting right at the board edge).
       pockets.forEach(pk=>{
+        const dx = pk.x < W/2 ? 1 : -1, dy = pk.y < H/2 ? 1 : -1;
+        ctx.save();
+        ctx.fillStyle = '#F4C430';
+        rr(ctx, pk.x - (dx>0?4:POCKET_R*1.7), pk.y - (dy>0?4:POCKET_R*1.7), POCKET_R*1.7+4, POCKET_R*1.7+4, 14);
+        ctx.fill();
+        ctx.restore();
         const pg = ctx.createRadialGradient(pk.x,pk.y,2, pk.x,pk.y,POCKET_R);
         pg.addColorStop(0,'#000'); pg.addColorStop(0.7,'#0a0a0a'); pg.addColorStop(1,'#2b1a0e');
         ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(pk.x,pk.y,POCKET_R,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 3; ctx.stroke();
       });
 
       // Pieces — radial gradient + highlight for a real "coin" 3D look, plus
@@ -11203,6 +11234,13 @@ TOOL_IMPL.carrompuzzle = {
         ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
       }
       pieces.filter(p=>p.alive).forEach(p=> drawPiece(p, p.color, 'rgba(0,0,0,.4)'));
+      // Striker gets a glowing ring around it (matches the reference's
+      // highlighted-striker look) plus its coin styling.
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,200,80,.9)'; ctx.shadowBlur = 14;
+      ctx.strokeStyle = 'rgba(255,220,120,.9)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(striker.x,striker.y,striker.r+5,0,Math.PI*2); ctx.stroke();
+      ctx.restore();
       drawPiece(striker, striker.color, '#8a6d00');
 
       if(aiming){
