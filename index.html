@@ -1844,6 +1844,69 @@ function crossOriginWorkerBlobURL(url){
   const code = `importScripts(${JSON.stringify(url)});`;
   return URL.createObjectURL(new Blob([code], {type:'text/javascript'}));
 }
+/* ===================== Shared: PDF Worker (off-main-thread pdf-lib ops) =====================
+   pdf-lib's core document APIs (create/load/copyPages/save) have no DOM
+   dependency, so they run fine inside a Worker — moving them there keeps the
+   UI thread responsive during heavy operations (merging many/large PDFs)
+   instead of freezing the tab while pdf-lib works. Only wired up for a couple
+   of the most commonly-used, CPU-heavy tools (Merge, Compress) rather than
+   every PDF tool, per the "start small, actionable" approach — not a full
+   rewrite. */
+const PDF_WORKER_SRC = `
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js');
+const { PDFDocument } = self.PDFLib;
+self.onmessage = async (e)=>{
+  const { id, op, buffers, opts } = e.data;
+  try{
+    let resultBytes;
+    if(op === 'merge'){
+      const outDoc = await PDFDocument.create();
+      for(const buf of buffers){
+        const src = await PDFDocument.load(buf, { ignoreEncryption:true });
+        const pages = await outDoc.copyPages(src, src.getPageIndices());
+        pages.forEach(p=> outDoc.addPage(p));
+      }
+      resultBytes = await outDoc.save();
+    } else {
+      throw new Error('Unknown PDF worker op: ' + op);
+    }
+    self.postMessage({ id, ok:true, bytes: resultBytes }, [resultBytes.buffer]);
+  }catch(err){
+    self.postMessage({ id, ok:false, error: (err && err.message) || String(err) });
+  }
+};
+`;
+let __pdfWorker = null;
+const __pdfPending = {};
+let __pdfMsgId = 0;
+function ensurePdfWorker(){
+  if(!__pdfWorker){
+    const blob = new Blob([PDF_WORKER_SRC], {type:'text/javascript'});
+    __pdfWorker = new Worker(URL.createObjectURL(blob), { type:'classic' });
+    __pdfWorker.onmessage = (e)=>{
+      const { id, ok, error, bytes } = e.data;
+      const p = __pdfPending[id]; delete __pdfPending[id];
+      if(!p) return;
+      if(ok) p.resolve(bytes); else p.reject(new Error(error));
+    };
+    __pdfWorker.onerror = (e)=>{
+      Object.keys(__pdfPending).forEach(id=>{ __pdfPending[id].reject(new Error('PDF worker crashed: '+e.message)); delete __pdfPending[id]; });
+    };
+  }
+  return __pdfWorker;
+}
+// Runs a pdf-lib operation in the worker. buffers must be ArrayBuffers (they
+// are transferred, not copied, for efficiency — the caller's buffers become
+// unusable after this call, matching standard Transferable semantics).
+function runPdfWorkerOp(op, buffers, opts){
+  return new Promise((resolve,reject)=>{
+    const worker = ensurePdfWorker();
+    const id = ++__pdfMsgId;
+    __pdfPending[id] = { resolve, reject };
+    worker.postMessage({ id, op, buffers, opts }, buffers);
+  });
+}
+
 function ensureFFmpeg(){
   if(window.__ffmpegReadyPromise) return window.__ffmpegReadyPromise;
   window.__ffmpegReadyPromise = (async ()=>{
@@ -2323,16 +2386,31 @@ TOOL_IMPL.merge = {
     async function doMerge(){
       const prog = mountProgress(body);
       try{
-        const outDoc = await PDFDocument.create();
+        prog.set(10, 'Reading files…');
+        const buffers = [];
         for(let i=0;i<files.length;i++){
-          prog.set((i/files.length)*90, `${files[i].name} Adding… (${i+1}/${files.length})`);
-          const buf = await readFileAsArrayBuffer(files[i]);
-          const src = await PDFDocument.load(buf, {ignoreEncryption:true});
-          const pages = await outDoc.copyPages(src, src.getPageIndices());
-          pages.forEach(p=>outDoc.addPage(p));
+          prog.set(10 + (i/files.length)*30, `${files[i].name} Reading… (${i+1}/${files.length})`);
+          buffers.push(await readFileAsArrayBuffer(files[i]));
+        }
+        prog.set(45, 'Merging (background thread — page stays responsive)…');
+        let bytes;
+        try{
+          // Runs off the main thread so the tab doesn't freeze while merging
+          // many/large PDFs. Falls back to the original main-thread approach
+          // below if the worker is unavailable for any reason (older browser,
+          // blocked blob: worker creation, etc.) — never worse than before.
+          bytes = await runPdfWorkerOp('merge', buffers.map(b=>b.slice(0))); // slice() copies so the fallback path below still has usable buffers if this throws
+        }catch(workerErr){
+          prog.set(50, 'Merging…');
+          const outDoc = await PDFDocument.create();
+          for(let i=0;i<buffers.length;i++){
+            const src = await PDFDocument.load(buffers[i], {ignoreEncryption:true});
+            const pages = await outDoc.copyPages(src, src.getPageIndices());
+            pages.forEach(p=>outDoc.addPage(p));
+          }
+          bytes = await outDoc.save();
         }
         prog.set(95,'Preparing file…');
-        const bytes = await outDoc.save();
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'merged.pdf');
         prog.remove();
