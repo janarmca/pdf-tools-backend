@@ -213,7 +213,6 @@ const TOOLS = [
   {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
   {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
   {id:'festivalcard', name:'Festival Card Maker', desc:'Pongal, Diwali, Navratri, Puthandu & Wedding cards', icon:'🎉', color:'#CA6F1E', cat:'image'},
-  {id:'salesledger', name:'Daily Sales Ledger', desc:'Track daily cash/UPI sales, export to Excel', icon:'📒', color:'#7D3C98', cat:'business'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'quotepo', name:'Quotation / Performa / PO', desc:'Professional quotation, performa invoice, or purchase order — with HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
   {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
@@ -229,6 +228,7 @@ const TOOLS = [
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
+  {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0},
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
   {id:'imgcrop', name:'Crop / Resize Image', desc:'Crop a region or change size', icon:'✂️', color:'#D35400', cat:'image', cost:0},
@@ -718,6 +718,30 @@ function downloadBlob(blob, filename){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  showDownloadToast(filename);
+}
+// Universal download-confirmation toast — every tool in the app calls
+// downloadBlob() to save its output, so adding this here (rather than in
+// each individual tool) gives every single one a clear "your file is ready"
+// confirmation for free, instead of a silent download users couldn't be
+// sure had actually happened.
+let __toastStack = [];
+function showDownloadToast(filename){
+  const toast = el(`
+    <div style="position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:#1B5E20; color:#fff; padding:12px 20px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.3); font-size:13.5px; font-weight:700; z-index:9999; display:flex; align-items:center; gap:8px; opacity:0; transition:opacity .25s, transform .25s; max-width:88vw;">
+      <span style="font-size:16px;">✅</span>
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Downloaded: ${escapeHtml(filename)}</span>
+    </div>
+  `);
+  document.body.appendChild(toast);
+  __toastStack.push(toast);
+  // Stack multiple toasts vertically if several downloads happen in quick succession
+  __toastStack.forEach((t,i)=>{ t.style.bottom = (24 + (__toastStack.length-1-i)*54) + 'px'; });
+  requestAnimationFrame(()=>{ toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(()=>{
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(()=>{ toast.remove(); __toastStack = __toastStack.filter(t=>t!==toast); }, 300);
+  }, 3200);
 }
 function readFileAsArrayBuffer(file){
   return new Promise((resolve,reject)=>{
@@ -736,7 +760,20 @@ function stopAnyActiveCamera(){
   }
 }
 function goHome(){ stopAnyActiveCamera(); state = {view:'home', tool:null}; render(); }
-function openTool(id){ stopAnyActiveCamera(); state = {view:'tool', tool:id, unlocked:false}; render(); window.scrollTo(0,0); }
+const RECENT_TOOLS_KEY = 'pdfToolsIndia_recentTools';
+function recordRecentTool(id){
+  try{
+    let recent = JSON.parse(localStorage.getItem(RECENT_TOOLS_KEY)) || [];
+    recent = recent.filter(t=> t!==id); // move to front if already present
+    recent.unshift(id);
+    recent = recent.slice(0, 8);
+    localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(recent));
+  }catch(e){}
+}
+function getRecentTools(){
+  try{ return JSON.parse(localStorage.getItem(RECENT_TOOLS_KEY)) || []; }catch(e){ return []; }
+}
+function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; render(); window.scrollTo(0,0); }
 
 function render(){
   const app = document.getElementById('app');
@@ -1082,6 +1119,25 @@ function renderHomeBody(){
   holder.appendChild(renderCategoryTabs());
 
   if(__activeCategory==='all'){
+    const recentIds = getRecentTools();
+    const recentTools = recentIds.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
+    if(recentTools.length){
+      const recentSection = el(`<div style="margin-top:22px;"><div style="font-weight:900; font-size:16px; margin-bottom:12px;">🕒 Recently Used</div></div>`);
+      const recentRow = el(`<div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch;"></div>`);
+      recentTools.forEach(t=>{
+        const card = el(`
+          <button style="flex:0 0 auto; width:92px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px; border-radius:14px; border:1.5px solid var(--line); background:#fff; cursor:pointer; box-shadow:0 1px 4px rgba(20,30,60,.06);">
+            <div style="width:40px; height:40px; border-radius:11px; background:${t.color}22; display:flex; align-items:center; justify-content:center; font-size:19px;">${t.icon}</div>
+            <div style="font-size:10.5px; font-weight:700; text-align:center; line-height:1.25; color:var(--ink);">${escapeHtml(t.name.length>18?t.name.slice(0,16)+'…':t.name)}</div>
+          </button>
+        `);
+        card.onclick = ()=> openTool(t.id);
+        recentRow.appendChild(card);
+      });
+      recentSection.appendChild(recentRow);
+      holder.appendChild(recentSection);
+    }
+
     const popular = POPULAR_TOOL_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
     const popSection = el(`<div style="margin-top:22px;"><div style="font-weight:900; font-size:16px; margin-bottom:12px;">⭐ Popular Tools</div></div>`);
     const popGrid = el(`<div class="grid"></div>`);
@@ -3912,7 +3968,7 @@ TOOL_IMPL.vidvoice = {
           body.appendChild(el(`<audio src="${audioUrl}" controls style="width:100%; margin:6px 0 12px;"></audio>`));
         }
         if(videoFile && audioFile){
-          mountFastServerNote(body, 2, 'vvFastR');
+          mountFastServerNote(body, 2, 'vvFastR', videoFile.size + audioFile.size);
           const opts = el(`
             <div class="opts tamil">
               <div class="field">
@@ -3942,7 +3998,7 @@ TOOL_IMPL.vidvoice = {
         if(videoFile){
           mountFileList(body, [videoFile], ()=>{ videoFile=null; videoUrl=null; paint(); });
           body.appendChild(el(`<video src="${videoUrl}" controls style="width:100%; border-radius:10px; margin:6px 0 12px; background:#000;"></video>`));
-          mountFastServerNote(body, 1, 'vvFastE');
+          mountFastServerNote(body, 1, 'vvFastE', videoFile.size + audioFile.size);
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">🎧 ஆடியோ எடு (MP3)</button>`);
           btn.onclick = doExtract;
@@ -4467,6 +4523,67 @@ TOOL_IMPL.imgenhance = {
         });
         body.appendChild(previewGrid);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== AI IMAGE UPSCALER (UpscalerJS, genuine neural-net, 100% client-side) ===================== */
+let __upscalerReadyPromise = null;
+function ensureUpscaler(){
+  if(__upscalerReadyPromise) return __upscalerReadyPromise;
+  __upscalerReadyPromise = (async ()=>{
+    // Real AI super-resolution model, MIT-licensed, runs entirely via
+    // TensorFlow.js in the browser — no server call, no per-use cost, unlike
+    // most "AI upscale" services which charge per image via a cloud API.
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@0.13.0/dist/umd/index.min.js');
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.19/dist/browser/umd/upscaler.min.js');
+    if(!window.Upscaler || !window.DefaultUpscalerJSModel) throw new Error('Could not load the AI upscaling model — check your internet connection and try again.');
+    return new window.Upscaler({ model: window.DefaultUpscalerJSModel });
+  })().catch(err=>{ __upscalerReadyPromise = null; throw err; }); // allow retry on failure, same pattern as ensureFFmpeg
+  return __upscalerReadyPromise;
+}
+TOOL_IMPL.aiupscale = {
+  mount(container){
+    ensureUpscaler().catch(()=>{}); // pre-warm in background
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Real AI super-resolution (not just resizing) — increases detail, not just pixel count. Works fully in your browser, completely free. Best on smaller/lower-res photos; very large images may be slow on older phones.</div>`));
+      mountUploader(body, { accept:'image/*', label:'Drop your image', sublabel:'',
+        onAdd:(fl)=>{ file = fl[0]; paint(); } });
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ file=null; paint(); });
+      body.appendChild(el(`<img src="${URL.createObjectURL(file)}" style="max-width:100%; border-radius:10px; margin:8px 0;">`));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🔍 AI Upscale (up to 4x)</button>`);
+      btn.onclick = doUpscale;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doUpscale(){
+      const prog = mountProgress(body);
+      try{
+        prog.set(10, 'Loading AI model… (first time only, ~10-20MB)');
+        const upscaler = await ensureUpscaler();
+        const img = new Image();
+        await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=URL.createObjectURL(file); });
+        prog.set(40, 'Running neural network… this can take a moment');
+        const resultDataUrl = await upscaler.upscale(img, {
+          progress: (p)=> prog.set(40 + p*50, 'Upscaling… '+Math.round(p*100)+'%')
+        });
+        prog.set(95, 'Preparing download…');
+        const resp = await fetch(resultDataUrl);
+        const blob = await resp.blob();
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-upscaled.png');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'AI-upscaled image downloaded.');
+      }catch(err){
+        prog.remove();
+        mountResult(body, 'Error: '+err.message+' — very large images can run out of memory on some devices; try a smaller photo.').style.background='#FDEDEC';
+      }
     }
     paint();
   }
@@ -5485,7 +5602,7 @@ TOOL_IMPL.videothumb = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vtFast');
+        mountFastServerNote(body, 1, 'vtFast', file.size);
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b></div>`));
         const opts = el(`
           <div class="opts one tamil">
@@ -5538,16 +5655,29 @@ TOOL_IMPL.videothumb = {
 // tool offer real native-ffmpeg processing on the backend as an alternative
 // to the slower/less reliable ffmpeg.wasm-in-browser path, without repeating
 // this logic in every single tool.
-function mountFastServerNote(body, creditCost, checkboxId){
+function mountFastServerNote(body, creditCost, checkboxId, fileSizeBytes){
   if(!AUTH_CONFIGURED) return null;
   const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=creditCost));
+  // Large-file threshold — above this, browser-side (WASM) processing gets
+  // noticeably slow/heavy on most phones, so it's worth clearly telling the
+  // customer server processing would help, rather than letting them
+  // discover this the hard way after a long wait. Purely informational —
+  // never forces the paid path, matches "free stays free, customer chooses
+  // to pay for speed" principle.
+  const LARGE_FILE_BYTES = 20 * 1024 * 1024; // 20MB
+  const isLarge = fileSizeBytes && fileSizeBytes > LARGE_FILE_BYTES;
+  const sizeMB = fileSizeBytes ? (fileSizeBytes/1024/1024).toFixed(1) : null;
   const fastNote = el(`<div class="tamil" style="background:${fastAvailable?'#E8F8EF':'#FFF3E0'}; border:1px solid ${fastAvailable?'#B7E4C7':'#FFD699'}; border-radius:12px; padding:12px 14px; margin-top:12px; font-size:12.5px;"></div>`);
+  let sizeWarning = '';
+  if(isLarge){
+    sizeWarning = `<div style="background:#FFF3E0; border:1px solid #FFD699; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-weight:700;">📦 இந்த file <b>${sizeMB}MB</b> — பெரியது. Browser Mode (free) வேலை செய்யும், ஆனா <b>மெதுவாக</b> இருக்கலாம். வேகமா வேணும்னா, கீழே Fast Server Mode (${creditCost} credit${creditCost>1?'s':''}) தேர்ந்தெடுக்கலாம் — free option எப்போதும் இருக்கு, force பண்ணல.</div>`;
+  }
   if(fastAvailable){
-    fastNote.innerHTML = `⚡ <b>Fast Server Mode கிடைக்கிறது</b> — Real ffmpeg server-ல் இயங்கும், browser-ஐ விட வேகமாக இருக்கும் (${creditCost} credit${creditCost>1?'s':''}${isPro()?' — Pro-க்கு இலவசம்':''}).<br><label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:700;"><input type="checkbox" id="${checkboxId}" checked> Fast Server Mode பயன்படுத்து</label>`;
+    fastNote.innerHTML = sizeWarning + `⚡ <b>Fast Server Mode கிடைக்கிறது</b> — Real ffmpeg server-ல் இயங்கும், browser-ஐ விட வேகமாக இருக்கும் (${creditCost} credit${creditCost>1?'s':''}${isPro()?' — Pro-க்கு இலவசம்':''}).<br><label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:700;"><input type="checkbox" id="${checkboxId}" checked> Fast Server Mode பயன்படுத்து</label>`;
   } else if(!authState.session){
-    fastNote.innerHTML = `🐢 இப்போது browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_login" style="color:var(--brand-dark); font-weight:800;">Login</a> செய்தால் ⚡ Fast Server Mode கிடைக்கும்.`;
+    fastNote.innerHTML = sizeWarning + `🐢 இப்போது browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_login" style="color:var(--brand-dark); font-weight:800;">Login</a> செய்தால் ⚡ Fast Server Mode கிடைக்கும்.`;
   } else {
-    fastNote.innerHTML = `🐢 Credits தீர்ந்துவிட்டது — browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_buy" style="color:var(--brand-dark); font-weight:800;">மேலும் Credits வாங்க</a>.`;
+    fastNote.innerHTML = sizeWarning + `🐢 Credits தீர்ந்துவிட்டது — browser-லேயே (மெதுவாக) செய்யப்படும். <a href="#" id="${checkboxId}_buy" style="color:var(--brand-dark); font-weight:800;">மேலும் Credits வாங்க</a>.`;
   }
   body.appendChild(fastNote);
   const loginLink = fastNote.querySelector('#'+checkboxId+'_login');
@@ -5762,7 +5892,7 @@ TOOL_IMPL.videotogif = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vgFastCB');
+        mountFastServerNote(body, 1, 'vgFastCB', file.size);
         body.appendChild(el(`<div class="note tamil">Total duration: <b>${fmtTime(duration)}</b> — 10 வினாடிகளுக்கு மேல் எடுத்தால் GIF பெரிதாக இருக்கும்.</div>`));
         const opts = el(`
           <div class="opts tamil">
@@ -6349,7 +6479,7 @@ TOOL_IMPL.videospeed = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vsFast');
+        mountFastServerNote(body, 1, 'vsFast', file.size);
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -6428,7 +6558,7 @@ TOOL_IMPL.videoreverse = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vrevFast');
+        mountFastServerNote(body, 1, 'vrevFast', file.size);
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">◀️ Reverse Do</button>`);
         btn.onclick = doReverse;
@@ -6481,7 +6611,7 @@ TOOL_IMPL.videorotate = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vrFast');
+        mountFastServerNote(body, 1, 'vrFast', file.size);
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -6553,7 +6683,7 @@ TOOL_IMPL.videomute = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vmFast');
+        mountFastServerNote(body, 1, 'vmFast', file.size);
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">🔇 Mute Do</button>`);
         btn.onclick = doMute;
@@ -6610,7 +6740,7 @@ TOOL_IMPL.videomerge = {
         });
         body.appendChild(previewGrid);
         if(files.length>=2){
-          mountFastServerNote(body, 2, 'vmergeFast');
+          mountFastServerNote(body, 2, 'vmergeFast', files.reduce((s,f)=>s+f.size,0));
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">➕ Merge</button>`);
           btn.onclick = doMerge;
@@ -7453,7 +7583,7 @@ TOOL_IMPL.videosubtitle = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 2, 'vsubFast');
+        mountFastServerNote(body, 2, 'vsubFast', file.size);
         const opts = el(`
           <div class="opts one tamil">
             <div class="field">
@@ -7528,7 +7658,7 @@ TOOL_IMPL.videowave = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<audio src="${URL.createObjectURL(file)}" controls style="width:100%; margin:6px 0 10px;"></audio>`));
-        mountFastServerNote(body, 1, 'vwFast');
+        mountFastServerNote(body, 1, 'vwFast', file.size);
         const opts = el(`
           <div class="opts tamil">
             <div class="field"><label>Background Color</label>
@@ -7595,7 +7725,7 @@ TOOL_IMPL.videoloop = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vlFast');
+        mountFastServerNote(body, 1, 'vlFast', file.size);
         const opts = el(`
           <div class="opts one tamil">
             <div class="field"><label>எத்தனை முறை மீண்டும் இயக்க வேண்டும்</label><input type="number" id="vlN" value="3" min="2" max="20"></div>
@@ -7657,7 +7787,7 @@ TOOL_IMPL.videovolume = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 1, 'vvFast');
+        mountFastServerNote(body, 1, 'vvFast', file.size);
         const opts = el(`
           <div class="opts tamil">
             <div class="field-inline"><input type="checkbox" id="vvNorm"><label for="vvNorm">தானாக சத்தத்தை சமன்படுத்து (Normalize — Fast Server Mode-க்கு கிடைக்காது)</label></div>
@@ -10038,107 +10168,6 @@ TOOL_IMPL.festivalcard = {
   }
 };
 
-/* ===================== DAILY SALES LEDGER ===================== */
-TOOL_IMPL.salesledger = {
-  mount(container){
-    const LS_KEY = 'salesLedger_entries';
-    const body = el(`<div></div>`); container.appendChild(body);
-    function loadEntries(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||[]; }catch{ return []; } }
-    function saveEntries(entries){ try{ localStorage.setItem(LS_KEY, JSON.stringify(entries)); }catch{} }
-
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">For your own daily record-keeping — not a substitute for GST returns or tax filing.</div>`));
-
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field"><label>Date</label><input type="date" id="slDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>Amount ₹</label><input type="number" id="slAmount" min="0" value="0"></div>
-          <div class="field"><label>Mode</label><select id="slMode"><option>Cash</option><option>UPI</option><option>Card</option><option>Other</option></select></div>
-          <div class="field"><label>Note (optional)</label><input type="text" id="slNote" autocomplete="off"></div>
-        </div>
-      `));
-      const addRow = el(`<div class="btn-row"></div>`);
-      const addBtn = el(`<button class="btn">➕ Add Entry</button>`);
-      addBtn.onclick = doAddEntry;
-      addRow.appendChild(addBtn);
-      body.appendChild(addRow);
-
-      const entries = loadEntries();
-      const now = new Date();
-      const thisMonth = entries.filter(e=> e.date && e.date.slice(0,7) === now.toISOString().slice(0,7));
-      const monthTotal = thisMonth.reduce((s,e)=> s + (Number(e.amount)||0), 0);
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:20px 0 8px;">This Month — Total: ₹${monthTotal.toFixed(2)}</div>`));
-
-      if(entries.length){
-        const listWrap = el(`<div style="max-height:320px; overflow-y:auto; border:1px solid var(--line); border-radius:10px;"></div>`);
-        // Show most recent first — easier to spot today's entries at a glance
-        [...entries].reverse().forEach((e)=>{
-          const realIdx = entries.indexOf(e);
-          const row = el(`<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid var(--line); font-size:13px;">
-            <div><b>₹${Number(e.amount).toFixed(2)}</b> — ${e.date} — ${e.mode}${e.note?' — '+escapeHtml(e.note):''}</div>
-            <button data-idx="${realIdx}" style="border:none; background:none; color:#B3261E; cursor:pointer; font-size:16px;">✕</button>
-          </div>`);
-          listWrap.appendChild(row);
-        });
-        body.appendChild(listWrap);
-        listWrap.querySelectorAll('button[data-idx]').forEach(btn=>{
-          btn.onclick = ()=>{
-            const all = loadEntries();
-            all.splice(Number(btn.getAttribute('data-idx')), 1);
-            saveEntries(all);
-            paint();
-          };
-        });
-
-        const row2 = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
-        const exportBtn = el(`<button class="btn secondary">📊 Export to Excel</button>`);
-        const clearBtn = el(`<button class="btn secondary" style="color:#B3261E;">🗑️ Clear All</button>`);
-        exportBtn.onclick = doExport;
-        clearBtn.onclick = ()=>{
-          if(confirm('Delete all saved entries? This cannot be undone.')){ saveEntries([]); paint(); }
-        };
-        row2.appendChild(exportBtn); row2.appendChild(clearBtn);
-        body.appendChild(row2);
-      } else {
-        body.appendChild(el(`<div class="note" style="margin-top:10px;">No entries yet — add your first sale above.</div>`));
-      }
-    }
-
-    function doAddEntry(){
-      const date = body.querySelector('#slDate').value;
-      const amount = Number(body.querySelector('#slAmount').value)||0;
-      const mode = body.querySelector('#slMode').value;
-      const note = body.querySelector('#slNote').value||'';
-      if(amount <= 0){ mountResult(body, 'Amount must be greater than zero.').style.background='#FDEDEC'; return; }
-      const entries = loadEntries();
-      entries.push({ date, amount, mode, note });
-      saveEntries(entries);
-      paint();
-    }
-
-    function doExport(){
-      const entries = loadEntries();
-      const rows = [['Date','Amount (₹)','Mode','Note']];
-      entries.forEach(e=> rows.push([e.date, e.amount, e.mode, e.note||'']));
-      rows.push([]);
-      // Live SUM formula (not a static number) — same principle as pettycash's
-      // auto-calculating Balance column, so the total stays correct even if
-      // the user edits amounts directly in Excel afterward.
-      const lastDataRow = entries.length + 1;
-      rows.push(['', { f: `SUM(B2:B${lastDataRow})` }, 'TOTAL', '']);
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:28}];
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Sales Ledger');
-      const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-      downloadBlob(new Blob([out],{type:'application/octet-stream'}), `sales-ledger-${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-    paint();
-  }
-};
-
 /* ===================== TAMIL HANDWRITING TRACING ===================== */
 TOOL_IMPL.tamiltracing = {
   mount(container){
@@ -10267,13 +10296,13 @@ TOOL_IMPL.quotepo = {
       body.appendChild(el(`<div class="note">Fill in your details once — download as PDF, Excel, or Word, share on WhatsApp, or print directly.</div>`));
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Document Type</div>`));
-      const typeRow = el(`<div class="filter-row"></div>`);
-      ['Quotation','Performa Invoice','Tax Invoice','Purchase Order'].forEach(dt=>{
-        const chip = el(`<button class="filter-chip ${docType===dt?'active':''}">${dt}</button>`);
-        chip.onclick = ()=>{ captureFormState(); docType = dt; paint(); };
-        typeRow.appendChild(chip);
-      });
-      body.appendChild(typeRow);
+      const typeSelect = el(`
+        <select style="width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; font-family:inherit; font-weight:700;">
+          ${['Quotation','Performa Invoice','Tax Invoice','Purchase Order'].map(dt=>`<option value="${dt}" ${docType===dt?'selected':''}>${dt}</option>`).join('')}
+        </select>
+      `);
+      typeSelect.onchange = ()=>{ captureFormState(); docType = typeSelect.value; paint(); };
+      body.appendChild(typeSelect);
 
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">${docType==='Purchase Order' ? 'Buyer (You)' : 'Seller (You)'}</div>`));
       const fromOpts = el(`
