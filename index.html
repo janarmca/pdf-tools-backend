@@ -9898,9 +9898,11 @@ TOOL_IMPL.festivalcard = {
       return lines;
     }
 
-    function renderPreview(){
+    let renderSeq = 0;
+    async function renderPreview(){
       const canvas = body.querySelector('canvas');
       if(!canvas) return;
+      const mySeq = ++renderSeq; // guards against a slow-loading photo finishing after a newer render started (e.g. user typed while the image was still loading)
       const ctx = canvas.getContext('2d');
       const w = canvas.width, h = canvas.height;
       const th = THEMES[theme];
@@ -9919,23 +9921,28 @@ TOOL_IMPL.festivalcard = {
         ctx.fillStyle = th.accent; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
       });
 
-      let y = 90;
+      // Photo (or emoji fallback) is now properly awaited BEFORE any text is
+      // drawn — previously the image's onload callback ran asynchronously
+      // while text-drawing continued immediately, so the greeting text could
+      // render before the photo appeared, or the photo could later draw over
+      // already-placed text. This was the root cause of the tool "not
+      // working" (looking broken/incomplete) for anyone who added a photo.
       if(photoDataUrl){
         const img = new Image();
-        img.onload = ()=>{
-          ctx.save();
-          ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.clip();
-          ctx.drawImage(img, w/2-70, 80, 140, 140);
-          ctx.restore();
-          ctx.strokeStyle = th.accent; ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.stroke();
-        };
-        img.src = photoDataUrl;
+        await new Promise((resolve,reject)=>{ img.onload = resolve; img.onerror = reject; img.src = photoDataUrl; });
+        if(mySeq !== renderSeq) return; // a newer render started while we were waiting — abandon this stale one
+        ctx.save();
+        ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(img, w/2-70, 80, 140, 140);
+        ctx.restore();
+        ctx.strokeStyle = th.accent; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.stroke();
       } else {
         ctx.font = '60px sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(th.emoji, w/2, 150);
       }
-      y = photoDataUrl ? 260 : 220;
+      if(mySeq !== renderSeq) return;
+      let y = photoDataUrl ? 260 : 220;
 
       const recipient = body.querySelector('#fcRecipient') ? body.querySelector('#fcRecipient').value : '';
       const text = body.querySelector('#fcText') ? body.querySelector('#fcText').value : th.defaultText;
