@@ -8270,30 +8270,33 @@ TOOL_IMPL.aiexcelcompare = {
         `));
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn">📊 Compare & Answer</button>`);
-        btn.onclick = doCompare;
+        btn.onclick = ()=> doCompare(false);
         row.appendChild(btn);
         body.appendChild(row);
         body.appendChild(el(`<div id="excAnswerHolder"></div>`));
       }
     }
     // Extracts a readable text summary of a workbook — every sheet, header
-    // row + up to MAX_ROWS_PER_SHEET data rows as CSV-like text. Long sheets
-    // are truncated with a clear note rather than silently cut off, matching
+    // row + up to maxRows data rows as CSV-like text. Long sheets are
+    // truncated with a clear note rather than silently cut off, matching
     // the pagination-honesty fix pattern used elsewhere in this app.
-    function summarizeWorkbook(filename, buf){
+    // Returns {text, wasTruncated} so callers can detect and react to
+    // truncation (e.g. offering a paid "Deep Analysis" pass with the full data).
+    function summarizeWorkbook(filename, buf, maxRows){
       const wb = XLSX.read(buf, {type:'array'});
       let out = `\n=== File: ${filename} ===\n`;
+      let wasTruncated = false;
       wb.SheetNames.forEach(sheetName=>{
         const ws = wb.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false});
         out += `-- Sheet: ${sheetName} (${rows.length} rows total) --\n`;
-        const shown = rows.slice(0, MAX_ROWS_PER_SHEET);
+        const shown = rows.slice(0, maxRows);
         shown.forEach(r=> out += r.map(c=> c===undefined||c===null ? '' : String(c)).join(', ') + '\n');
-        if(rows.length > MAX_ROWS_PER_SHEET) out += `[...truncated, ${rows.length - MAX_ROWS_PER_SHEET} more rows not shown...]\n`;
+        if(rows.length > maxRows){ out += `[...truncated, ${rows.length - maxRows} more rows not shown...]\n`; wasTruncated = true; }
       });
-      return out;
+      return { text: out, wasTruncated };
     }
-    async function doCompare(){
+    async function doCompare(deepMode){
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
       const question = body.querySelector('#excQuestion').value.trim();
       if(!question){ mountResult(body,'Please type a question.').style.background='#FDEDEC'; return; }
@@ -8303,16 +8306,25 @@ TOOL_IMPL.aiexcelcompare = {
       try{
         prog.set(10, 'Reading your spreadsheets…');
         let combinedData = '';
+        let anyTruncated = false;
+        // Deep mode uses a much higher per-sheet row cap — effectively "full
+        // data" for the vast majority of real spreadsheets, while still
+        // having SOME ceiling so a truly enormous file can't hang the tab
+        // or blow past Gemini's own context window.
+        const maxRows = deepMode ? 5000 : MAX_ROWS_PER_SHEET;
         for(let i=0;i<files.length;i++){
           prog.set(10 + (i/files.length)*40, `Reading ${files[i].name}…`);
           const buf = await files[i].arrayBuffer();
-          combinedData += summarizeWorkbook(files[i].name, buf);
+          const { text, wasTruncated } = summarizeWorkbook(files[i].name, buf, maxRows);
+          combinedData += text;
+          if(wasTruncated) anyTruncated = true;
         }
         const fullPrompt = `You are analyzing ${files.length} spreadsheet file(s) for a user. Use ONLY the data shown below — never invent numbers that aren't present. When comparing across files, clearly state which file(s) each part of your answer comes from. If the data needed to answer isn't present, say so plainly instead of guessing.\n${combinedData}\nQuestion: ${question}`;
         prog.set(55, 'Comparing files…');
         const form = new FormData();
         form.append('question', fullPrompt);
         form.append('toolId', 'aiexcelcompare');
+        if(deepMode) form.append('deepAnalysis', 'true');
         // No 'file' field attached — the backend's /api/ai/ask treats the
         // file as optional and sends this as a pure-text request to Gemini.
         const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
@@ -8321,6 +8333,17 @@ TOOL_IMPL.aiexcelcompare = {
         prog.set(90,'Thinking…');
         if(result.error) throw new Error(result.error);
         prog.set(100,'Done'); prog.remove();
+        if(anyTruncated && !deepMode){
+          const upsellRow = el(`
+            <div class="note" style="background:#FFF3E0; border-color:#FFD699; margin-bottom:10px;">
+              📦 Some of your data was too large to include fully in this free analysis (large sheets were sampled, not fully read).
+              For a complete analysis using ALL your data, use <b>Deep Analysis (3 credits)</b> — genuinely reflects the extra AI processing cost for large files.
+              <button id="excDeepBtn" class="btn secondary" style="margin-top:8px; padding:8px 14px; font-size:12.5px;">🔬 Run Deep Analysis (3 credits)</button>
+            </div>
+          `);
+          upsellRow.querySelector('#excDeepBtn').onclick = ()=> doCompare(true);
+          answerHolder.appendChild(upsellRow);
+        }
         const card = el(`<div style="position:relative; margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(result.answer)}</div>`);
         const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
         copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(result.answer).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
