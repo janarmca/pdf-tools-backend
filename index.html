@@ -204,6 +204,16 @@ const TOOLS = [
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
   {id:'pettycash', name:'Petty Cash Book Template', desc:'Excel with running balance formulas built in', icon:'🪙', color:'#7D3C98', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
+  {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business'},
+  {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business'},
+  {id:'pdfbookmark', name:'PDF Bookmark Adder', desc:'Add clickable bookmarks to a merged/long PDF', icon:'📑', color:'#1F618D', cat:'pdf'},
+  {id:'videowatermark', name:'Video Watermark', desc:'Add your logo/text to a video before sharing', icon:'💧', color:'#2980B9', cat:'video'},
+  {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
+  {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
+  {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
+  {id:'festivalcard', name:'Festival Card Maker', desc:'Pongal, Diwali, Navratri, Puthandu & Wedding cards', icon:'🎉', color:'#CA6F1E', cat:'image'},
+  {id:'salesledger', name:'Daily Sales Ledger', desc:'Track daily cash/UPI sales, export to Excel', icon:'📒', color:'#7D3C98', cat:'business'},
+  {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'quotepo', name:'Quotation / Performa / PO', desc:'Professional quotation, performa invoice, or purchase order — with HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
   {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
@@ -8950,6 +8960,1185 @@ TOOL_IMPL.leaveletter = {
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), `leave-application-${name.replace(/\s+/g,'-')||'letter'}.pdf`);
         prog.set(100,'Done'); prog.remove();
         mountResult(body, `Leave application letter ready (${days} day${days===1?'':'s'} — ${fromDate} to ${toDate}).`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== RENT RECEIPT GENERATOR ===================== */
+TOOL_IMPL.rentreceipt = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    const LS_KEY = 'rentReceipt_landlordDefaults';
+    function loadLandlordDefaults(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
+    }
+    function saveLandlordDefaults(){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify({
+          name: body.querySelector('#rrLandlordName').value,
+          pan: body.querySelector('#rrLandlordPan').value,
+          addr: body.querySelector('#rrLandlordAddr').value
+        }));
+      }catch{}
+    }
+    function paint(){
+      body.innerHTML = '';
+      const d = loadLandlordDefaults();
+      body.appendChild(el(`<div class="note">Generates a rent receipt for HRA tax-exemption purposes. This tool doesn't provide tax advice — please verify requirements with your employer/CA if unsure.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Tenant & Property</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Tenant Name</label><input type="text" id="rrTenant" autocomplete="off"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Rented Property Address</label><input type="text" id="rrPropertyAddr" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Payment Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>Monthly Rent ₹</label><input type="number" id="rrAmount" min="0" value="0"></div>
+          <div class="field"><label>Payment Mode</label><select id="rrMode"><option>UPI</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option></select></div>
+          <div class="field"><label>Rent Month</label><input type="month" id="rrFromMonth" value="${new Date().toISOString().slice(0,7)}"></div>
+          <div class="field"><label>To Month (optional)</label><input type="month" id="rrToMonth"></div>
+          <div class="field"><label>Payment Date</label><input type="date" id="rrDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Receipt No. (optional)</label><input type="text" id="rrReceiptNo" autocomplete="off"></div>
+        </div>
+      `));
+      const stampNote = el(`<div id="rrStampNote"></div>`);
+      body.appendChild(stampNote);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Landlord Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Landlord Name</label><input type="text" id="rrLandlordName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
+          <div class="field"><label>Landlord PAN</label><input type="text" id="rrLandlordPan" autocomplete="off" value="${escapeHtml(d.pan||'')}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Landlord Address</label><input type="text" id="rrLandlordAddr" autocomplete="off" value="${escapeHtml(d.addr||'')}"></div>
+        </div>
+      `));
+      const panNote = el(`<div id="rrPanNote"></div>`);
+      body.appendChild(panNote);
+
+      // Re-check the two conditional notes whenever amount/mode/PAN change —
+      // both are non-blocking (per spec: never hard-block the user).
+      function updateNotes(){
+        const amount = Number(body.querySelector('#rrAmount').value)||0;
+        const mode = body.querySelector('#rrMode').value;
+        const pan = body.querySelector('#rrLandlordPan').value.trim();
+        stampNote.innerHTML = (mode==='Cash' && amount>5000)
+          ? `<div class="note" style="background:#FFF3E0; border-color:#FFD699;">⚠️ Revenue stamp required by law for cash payments over ₹5,000. This PDF can't render a physical stamp — please affix and sign across a revenue stamp on the printed copy.</div>` : '';
+        panNote.innerHTML = (amount*12 > 100000 && !pan)
+          ? `<div class="note" style="background:#FFF3E0; border-color:#FFD699;">⚠️ Landlord PAN is legally required on rent receipts when annual rent exceeds ₹1,00,000. You can still generate without it, but your employer may ask for it separately.</div>` : '';
+      }
+      body.querySelectorAll('#rrAmount, #rrMode, #rrLandlordPan').forEach(elm=> elm.addEventListener('input', updateNotes));
+      updateNotes();
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🏠 Generate Receipt</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    function monthYearLabel(monthStr){
+      if(!monthStr) return '';
+      const [y,m] = monthStr.split('-');
+      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return names[Number(m)-1] + ' ' + y;
+    }
+    function countMonths(from, to){
+      if(!from || !to) return 1;
+      const [fy,fm] = from.split('-').map(Number), [ty,tm] = to.split('-').map(Number);
+      return Math.max(1, (ty-fy)*12 + (tm-fm) + 1);
+    }
+    async function doGenerate(){
+      const tenant = body.querySelector('#rrTenant').value||'';
+      const propertyAddr = body.querySelector('#rrPropertyAddr').value||'';
+      const monthlyRent = Number(body.querySelector('#rrAmount').value)||0;
+      const mode = body.querySelector('#rrMode').value;
+      const fromMonth = body.querySelector('#rrFromMonth').value;
+      const toMonth = body.querySelector('#rrToMonth').value;
+      const date = body.querySelector('#rrDate').value;
+      const receiptNo = body.querySelector('#rrReceiptNo').value || ('RR-'+Date.now().toString().slice(-6));
+      const landlordName = body.querySelector('#rrLandlordName').value||'';
+      const landlordPan = body.querySelector('#rrLandlordPan').value||'';
+      const landlordAddr = body.querySelector('#rrLandlordAddr').value||'';
+      if(!tenant.trim() || !landlordName.trim() || !fromMonth){
+        mountResult(body, 'Please fill Tenant Name, Landlord Name, and Rent Month.').style.background='#FDEDEC';
+        return;
+      }
+      const monthCount = countMonths(fromMonth, toMonth);
+      const totalAmount = monthlyRent * monthCount;
+      const periodLabel = (toMonth && toMonth !== fromMonth)
+        ? `${monthYearLabel(fromMonth)} to ${monthYearLabel(toMonth)}`
+        : monthYearLabel(fromMonth);
+      const cashAboveLimit = mode==='Cash' && monthlyRent>5000;
+      saveLandlordDefaults();
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 841.89]);
+        const {width} = page.getSize();
+        let y = 800;
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const line = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
+
+        t('RENT RECEIPT', 50, y, 18, rgb(0.13,0.29,0.62));
+        t('Receipt No: '+receiptNo, 380, y+15, 10);
+        t('Date: '+date, 380, y, 10);
+        y -= 30; line(y); y -= 25;
+        t('Received from: '+tenant, 50, y, 12); y -= 25;
+        t('Sum of Rupees: '+numberToWordsINR(totalAmount)+' Only', 50, y, 11); y -= 25;
+        t('Towards rent for the month'+(monthCount>1?'s':'')+' of: '+periodLabel, 50, y, 11); y -= 25;
+        t('For the premises situated at:', 50, y, 11); y -= 16;
+        t(propertyAddr.slice(0,80), 50, y, 11); y -= 40;
+        t('Amount: ₹'+totalAmount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2));
+        t('Mode: '+mode, 300, y, 11); y -= 30;
+        line(y); y -= 25;
+        t('Landlord Name: '+landlordName, 50, y, 11); y -= 20;
+        t('Landlord PAN: '+(landlordPan||'—'), 50, y, 11); y -= 20;
+        t('Landlord Address: '+landlordAddr.slice(0,80), 50, y, 10, rgb(0.4,0.4,0.4)); y -= 45;
+        if(cashAboveLimit){
+          t('Note: Revenue stamp affixed on the original physical copy of this receipt.', 50, y, 9, rgb(0.6,0.4,0.1));
+          y -= 40;
+        } else { y -= 40; }
+        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
+        t('Landlord Signature', 50, y-14, 9, rgb(0.5,0.5,0.5));
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `rent-receipt-${fromMonth}-${tenant.replace(/\s+/g,'-')}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Rent receipt ready — ${periodLabel}, ₹${totalAmount.toFixed(2)}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== TUITION FEE RECEIPT ===================== */
+TOOL_IMPL.tuitionreceipt = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    const LS_KEY = 'tuitionReceipt_tutorDefaults';
+    let periodMode = 'monthly';
+    function loadTutorDefaults(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
+    }
+    function saveTutorDefaults(){
+      try{
+        localStorage.setItem(LS_KEY, JSON.stringify({
+          name: body.querySelector('#trTutorName').value,
+          addr: body.querySelector('#trTutorAddr').value
+        }));
+      }catch{}
+    }
+    function paint(){
+      body.innerHTML = '';
+      const d = loadTutorDefaults();
+      body.appendChild(el(`<div class="note">Fee receipt for tuition/coaching classes — for the tutor's and parent's own records.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Student Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Student Name</label><input type="text" id="trStudent" autocomplete="off"></div>
+          <div class="field"><label>Class/Grade</label><input type="text" id="trClass" autocomplete="off"></div>
+          <div class="field"><label>Subject(s) (optional)</label><input type="text" id="trSubjects" placeholder="e.g. Maths, Science" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Fee Period</div>`));
+      const periodRow = el(`<div class="filter-row"></div>`);
+      ['Monthly','Custom'].forEach(pm=>{
+        const chip = el(`<button class="filter-chip ${periodMode===pm.toLowerCase()?'active':''}">${pm}</button>`);
+        chip.onclick = ()=>{ periodMode = pm.toLowerCase(); paint(); };
+        periodRow.appendChild(chip);
+      });
+      body.appendChild(periodRow);
+      body.appendChild(periodMode==='monthly'
+        ? el(`<div class="field" style="margin-top:10px;"><label>Fee Month</label><input type="month" id="trPeriod" value="${new Date().toISOString().slice(0,7)}"></div>`)
+        : el(`<div class="field" style="margin-top:10px;"><label>Period Description</label><input type="text" id="trPeriod" placeholder="e.g. Term 1 (June-Sept 2026)" autocomplete="off"></div>`)
+      );
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Payment Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>Fee Amount ₹</label><input type="number" id="trAmount" min="0" value="0"></div>
+          <div class="field"><label>Payment Mode</label><select id="trMode"><option>UPI</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option></select></div>
+          <div class="field"><label>Payment Date</label><input type="date" id="trDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Receipt No. (optional)</label><input type="text" id="trReceiptNo" autocomplete="off"></div>
+        </div>
+      `));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Tutor / Institute Details</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Tutor/Institute Name</label><input type="text" id="trTutorName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Address/Phone (optional)</label><input type="text" id="trTutorAddr" autocomplete="off" value="${escapeHtml(d.addr||'')}"></div>
+        </div>
+      `));
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📚 Generate Receipt</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    function monthYearLabel(monthStr){
+      if(!monthStr) return '';
+      const [y,m] = monthStr.split('-');
+      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return names[Number(m)-1] + ' ' + y;
+    }
+    async function doGenerate(){
+      const student = body.querySelector('#trStudent').value||'';
+      const cls = body.querySelector('#trClass').value||'';
+      const subjects = body.querySelector('#trSubjects').value||'';
+      const periodRaw = body.querySelector('#trPeriod').value||'';
+      const period = periodMode==='monthly' ? monthYearLabel(periodRaw) : periodRaw;
+      const amount = Number(body.querySelector('#trAmount').value)||0;
+      const mode = body.querySelector('#trMode').value;
+      const date = body.querySelector('#trDate').value;
+      const receiptNo = body.querySelector('#trReceiptNo').value || ('TR-'+Date.now().toString().slice(-6));
+      const tutorName = body.querySelector('#trTutorName').value||'';
+      const tutorAddr = body.querySelector('#trTutorAddr').value||'';
+      if(!student.trim() || !tutorName.trim() || !periodRaw){
+        mountResult(body, 'Please fill Student Name, Tutor/Institute Name, and Fee Period.').style.background='#FDEDEC';
+        return;
+      }
+      saveTutorDefaults();
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const page = doc.addPage([595.28, 841.89]);
+        const {width} = page.getSize();
+        let y = 800;
+        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const line = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
+
+        t('TUITION FEE RECEIPT', 50, y, 18, rgb(0.13,0.29,0.62));
+        t('Receipt No: '+receiptNo, 380, y+15, 10);
+        t('Date: '+date, 380, y, 10);
+        y -= 30; line(y); y -= 25;
+        t('Received from: '+student+(cls?' (Class: '+cls+')':''), 50, y, 12); y -= 25;
+        if(subjects.trim()){ t('Subject(s): '+subjects, 50, y, 11); y -= 22; }
+        t('Sum of Rupees: '+numberToWordsINR(amount)+' Only', 50, y, 11); y -= 25;
+        t('Towards tuition fee for: '+period, 50, y, 11); y -= 40;
+        t('Amount: ₹'+amount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2));
+        t('Mode: '+mode, 300, y, 11); y -= 30;
+        line(y); y -= 25;
+        t('Tutor/Institute Name: '+tutorName, 50, y, 11); y -= 20;
+        if(tutorAddr.trim()){ t('Address/Phone: '+tutorAddr, 50, y, 10, rgb(0.4,0.4,0.4)); y -= 20; }
+        y -= 45;
+        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
+        t('Tutor Signature', 50, y-14, 9, rgb(0.5,0.5,0.5));
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `tuition-receipt-${student.replace(/\s+/g,'-')}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Tuition receipt ready — ${period}, ₹${amount.toFixed(2)}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== PDF BOOKMARK ADDER ===================== */
+TOOL_IMPL.pdfbookmark = {
+  mount(container){
+    let file = null, pageCount = 0;
+    let bookmarks = [{ title:'', page:1 }];
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function paint(){
+      body.innerHTML = '';
+      if(!file){
+        mountUploader(body, {
+          accept:'application/pdf', multiple:false,
+          label:'Drop your PDF', sublabel:'Add clickable bookmarks — great after merging multiple documents',
+          onAdd: async (fl)=>{
+            file = fl[0];
+            try{
+              const buf = await file.arrayBuffer();
+              const doc = await PDFDocument.load(buf, { ignoreEncryption:true });
+              pageCount = doc.getPageCount();
+              paint();
+            }catch(err){
+              mountResult(body, 'Could not read this PDF: '+err.message).style.background='#FDEDEC';
+              file = null;
+            }
+          }
+        });
+        return;
+      }
+      mountFileList(body, [file], ()=>{ file=null; bookmarks=[{title:'',page:1}]; paint(); });
+      body.appendChild(el(`<div class="note">${pageCount} page${pageCount===1?'':'s'} in this PDF. Add a bookmark for each section — it'll show up in the reader's bookmark/outline panel.</div>`));
+
+      const listWrap = el(`<div></div>`);
+      bookmarks.forEach((bm,idx)=>{
+        const row = el(`<div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;"></div>`);
+        const titleInput = el(`<input type="text" placeholder="Bookmark title" value="${String(bm.title||'').replace(/"/g,'&quot;')}" style="flex:2; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">`);
+        const pageInput = el(`<input type="number" min="1" max="${pageCount}" value="${bm.page}" style="flex:0 0 80px; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">`);
+        const removeBtn = el(`<button style="border:1px solid var(--line); background:#fff; border-radius:8px; padding:9px 12px; cursor:pointer; color:#B3261E;" ${bookmarks.length<=1?'disabled':''}>✕</button>`);
+        titleInput.addEventListener('input', ()=> bookmarks[idx].title = titleInput.value);
+        pageInput.addEventListener('input', ()=>{
+          let v = Number(pageInput.value)||1;
+          v = Math.min(Math.max(1,v), pageCount); // clamp to actual page range — prevents an out-of-range page crashing generation later
+          pageInput.value = v;
+          bookmarks[idx].page = v;
+        });
+        removeBtn.onclick = ()=>{ bookmarks.splice(idx,1); paint(); };
+        row.appendChild(titleInput);
+        const pageLabel = el(`<span style="font-size:12px; color:var(--sub); flex:0 0 auto;">Page</span>`);
+        row.appendChild(pageLabel); row.appendChild(pageInput); row.appendChild(removeBtn);
+        listWrap.appendChild(row);
+      });
+      body.appendChild(listWrap);
+
+      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add Bookmark</button>`);
+      addBtn.onclick = ()=>{ bookmarks.push({title:'', page:1}); paint(); };
+      body.appendChild(addBtn);
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📑 Add Bookmarks & Download</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+
+    // PDF outline (bookmark) support has no high-level API in pdf-lib — this
+    // builds the raw PDF objects per the PDF spec's outline structure
+    // (a doubly-linked list of outline-item dictionaries under a root
+    // /Outlines dict referenced from the document catalog). Titles are
+    // encoded as UTF-16BE hex strings (with BOM) rather than plain
+    // PDFString, since plain PDFString can't correctly represent Tamil
+    // (or any non-Latin1) text in a PDF outline title.
+    function toUtf16BEHex(str){
+      let hex = 'FEFF';
+      for(let i=0;i<str.length;i++) hex += str.charCodeAt(i).toString(16).padStart(4,'0');
+      return hex;
+    }
+    function addOutlineToDoc(doc, entries){
+      const { PDFName, PDFHexString, PDFNumber } = window.PDFLib;
+      const context = doc.context;
+      const pages = doc.getPages();
+      const valid = entries.filter(e=> e.title.trim() && e.page>=1 && e.page<=pages.length);
+      if(!valid.length) return false;
+
+      const itemRefs = valid.map(()=> context.nextRef());
+      const outlineRootRef = context.nextRef();
+
+      valid.forEach((entry, i)=>{
+        const pageRef = pages[entry.page-1].ref;
+        const dictMap = {
+          Title: PDFHexString.of(toUtf16BEHex(entry.title)),
+          Parent: outlineRootRef,
+          Dest: context.obj([pageRef, PDFName.of('Fit')]),
+        };
+        if(i>0) dictMap.Prev = itemRefs[i-1];
+        if(i<valid.length-1) dictMap.Next = itemRefs[i+1];
+        context.assign(itemRefs[i], context.obj(dictMap));
+      });
+
+      const outlineRootDict = context.obj({
+        Type: PDFName.of('Outlines'),
+        First: itemRefs[0],
+        Last: itemRefs[itemRefs.length-1],
+        Count: PDFNumber.of(valid.length),
+      });
+      context.assign(outlineRootRef, outlineRootDict);
+      doc.catalog.set(PDFName.of('Outlines'), outlineRootRef);
+      return true;
+    }
+
+    async function doGenerate(){
+      const validCount = bookmarks.filter(b=>b.title.trim()).length;
+      if(!validCount){
+        mountResult(body, 'Please enter at least one bookmark title.').style.background='#FDEDEC';
+        return;
+      }
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Reading PDF…');
+        const buf = await file.arrayBuffer();
+        const doc = await PDFDocument.load(buf, { ignoreEncryption:true });
+        prog.set(55,'Adding bookmarks…');
+        addOutlineToDoc(doc, bookmarks);
+        prog.set(85,'Saving…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-bookmarked.pdf');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${validCount} bookmark${validCount===1?'':'s'} added — open the downloaded PDF in a reader with a bookmarks/outline panel (like Adobe Acrobat or most desktop PDF viewers) to see them.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== VIDEO WATERMARK ===================== */
+TOOL_IMPL.videowatermark = {
+  mount(container){
+    ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
+    let file = null, logoFile = null;
+    let wmType = 'logo', position = 'bottomright', opacity = 70;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function esc(s){ return s.replace(/\\/g,'\\\\').replace(/:/g,'\\:').replace(/'/g,"\u2019"); }
+
+    function paint(){
+      body.innerHTML = '';
+      mountUploader(body, { accept:'video/*', label:'Drop your video', sublabel:'',
+        onAdd:(fl)=>{ file = fl[0]; paint(); } });
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ file=null; paint(); });
+      body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Watermark Type</div>`));
+      const typeRow = el(`<div class="filter-row"></div>`);
+      [['logo','Logo Image'],['text','Text']].forEach(([val,label])=>{
+        const chip = el(`<button class="filter-chip ${wmType===val?'active':''}">${label}</button>`);
+        chip.onclick = ()=>{ wmType = val; paint(); };
+        typeRow.appendChild(chip);
+      });
+      body.appendChild(typeRow);
+
+      if(wmType==='logo'){
+        mountUploader(body, { accept:'image/*', label:'Drop your logo (PNG with transparency works best)', sublabel:'',
+          onAdd:(fl)=>{ logoFile = fl[0]; paint(); } });
+        if(logoFile) mountFileList(body, [logoFile], ()=>{ logoFile=null; paint(); });
+      } else {
+        body.appendChild(el(`<div class="field" style="margin-top:10px;"><label>Watermark Text</label><input type="text" id="vwText" autocomplete="off"></div>`));
+      }
+
+      body.appendChild(el(`<div class="opts tamil" style="margin-top:14px;">
+        <div class="field"><label>Position</label>
+          <select id="vwPos">
+            <option value="topleft">Top Left</option>
+            <option value="topright">Top Right</option>
+            <option value="bottomleft">Bottom Left</option>
+            <option value="bottomright" selected>Bottom Right</option>
+          </select>
+        </div>
+        <div class="field"><label>Opacity %</label><input type="number" id="vwOpacity" min="10" max="100" value="${opacity}"></div>
+      </div>`));
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">💧 Add Watermark</button>`);
+      btn.onclick = doWatermark;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+
+    function overlayXY(pos){
+      const pad = 20;
+      const map = {
+        topleft: `${pad}:${pad}`,
+        topright: `main_w-overlay_w-${pad}:${pad}`,
+        bottomleft: `${pad}:main_h-overlay_h-${pad}`,
+        bottomright: `main_w-overlay_w-${pad}:main_h-overlay_h-${pad}`
+      };
+      return map[pos] || map.bottomright;
+    }
+    function drawtextXY(pos){
+      const pad = 24;
+      const map = {
+        topleft: `x=${pad}:y=${pad}`,
+        topright: `x=w-tw-${pad}:y=${pad}`,
+        bottomleft: `x=${pad}:y=h-th-${pad}`,
+        bottomright: `x=w-tw-${pad}:y=h-th-${pad}`
+      };
+      return map[pos] || map.bottomright;
+    }
+
+    async function doWatermark(){
+      position = body.querySelector('#vwPos').value;
+      opacity = Number(body.querySelector('#vwOpacity').value)||70;
+      const alpha = (opacity/100).toFixed(2);
+      if(wmType==='logo' && !logoFile){ mountResult(body,'Please add a logo image.').style.background='#FDEDEC'; return; }
+      const text = wmType==='text' ? body.querySelector('#vwText').value.trim() : '';
+      if(wmType==='text' && !text){ mountResult(body,'Please enter watermark text.').style.background='#FDEDEC'; return; }
+
+      const prog = mountProgress(body);
+      try{
+        prog.set(5,'Loading video engine… (first time takes a bit longer)');
+        const { ffmpeg, fetchFile } = await ensureFFmpeg();
+        const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
+        await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
+        let args;
+        if(wmType==='logo'){
+          await ffmpeg.writeFile('logo.png', await fetchFile(logoFile));
+          const filter = `[1:v]scale=iw*0.15:-1,format=rgba,colorchannelmixer=aa=${alpha}[wm];[0:v][wm]overlay=${overlayXY(position)}`;
+          args = ['-i','in.'+ext, '-i','logo.png', '-filter_complex', filter, '-codec:a','copy', 'out.'+ext];
+        } else {
+          const filter = `drawtext=text='${esc(text)}':fontcolor=white@${alpha}:fontsize=28:${drawtextXY(position)}:box=1:boxcolor=black@0.3:boxborderw=8`;
+          args = ['-i','in.'+ext, '-vf', filter, '-codec:a','copy', 'out.'+ext];
+        }
+        prog.set(20,'Adding watermark…');
+        await ffmpeg.exec(args);
+        prog.set(85,'Preparing…');
+        const data = await ffmpeg.readFile('out.'+ext);
+        downloadBlob(new Blob([data],{type:'video/'+ext}), file.name.replace(/\.[^.]+$/,'')+'-watermarked.'+ext);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, 'Watermarked video downloaded.');
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — try a smaller/shorter video if this keeps failing.').style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== MATH PRACTICE SHEETS ===================== */
+TOOL_IMPL.mathpractice = {
+  mount(container){
+    let topic = 'multiplication';
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Pick a topic and range — generates a printable worksheet with a matching answer key page.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Topic</div>`));
+      const topicRow = el(`<div class="filter-row"></div>`);
+      [['multiplication','Multiplication'],['addition','Addition'],['subtraction','Subtraction'],['division','Division']].forEach(([val,label])=>{
+        const chip = el(`<button class="filter-chip ${topic===val?'active':''}">${label}</button>`);
+        chip.onclick = ()=>{ topic = val; paint(); };
+        topicRow.appendChild(chip);
+      });
+      body.appendChild(topicRow);
+
+      const rangeField = topic==='multiplication'
+        ? `<div class="field"><label>Tables (e.g. 2-12)</label><input type="text" id="mpRange" value="2-12"></div>`
+        : `<div class="field"><label>Numbers up to</label><input type="number" id="mpRange" value="100" min="10" max="1000"></div>`;
+      body.appendChild(el(`
+        <div class="opts tamil" style="margin-top:14px;">
+          ${rangeField}
+          <div class="field"><label>Number of Problems</label><input type="number" id="mpCount" value="20" min="10" max="100"></div>
+        </div>
+      `));
+      body.appendChild(el(`<label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; font-weight:700;"><input type="checkbox" id="mpAnswerKey" checked> Include answer key page</label>`));
+
+      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
+      const btn = el(`<button class="btn">🔢 Generate Worksheet</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+
+    function generateProblems(topic, rangeInput, count){
+      const problems = [];
+      const seen = new Set();
+      let attempts = 0;
+      if(topic==='multiplication'){
+        const [lo,hi] = rangeInput.split('-').map(n=>parseInt(n.trim())||2);
+        while(problems.length < count && attempts < count*20){
+          attempts++;
+          const a = lo + Math.floor(Math.random()*(hi-lo+1));
+          const b = 1 + Math.floor(Math.random()*12);
+          const key = a+'x'+b;
+          if(seen.has(key)) continue;
+          seen.add(key);
+          problems.push({ text: `${a} × ${b} = ____`, answer: a*b });
+        }
+      } else {
+        const max = parseInt(rangeInput)||100;
+        while(problems.length < count && attempts < count*20){
+          attempts++;
+          const a = 1 + Math.floor(Math.random()*max);
+          const b = 1 + Math.floor(Math.random()*max);
+          if(topic==='addition'){
+            const key = 'a'+a+'_'+b;
+            if(seen.has(key)) continue; seen.add(key);
+            problems.push({ text: `${a} + ${b} = ____`, answer: a+b });
+          } else if(topic==='subtraction'){
+            const hi = Math.max(a,b), lo2 = Math.min(a,b);
+            const key = 's'+hi+'_'+lo2;
+            if(seen.has(key)) continue; seen.add(key);
+            problems.push({ text: `${hi} − ${lo2} = ____`, answer: hi-lo2 });
+          } else {
+            const divisor = 1 + Math.floor(Math.random()*12);
+            const quotient = 1 + Math.floor(Math.random()*Math.max(2,Math.floor(max/12)));
+            const dividend = divisor*quotient;
+            const key = 'd'+dividend+'_'+divisor;
+            if(seen.has(key)) continue; seen.add(key);
+            problems.push({ text: `${dividend} ÷ ${divisor} = ____`, answer: quotient });
+          }
+        }
+      }
+      return problems;
+    }
+
+    async function doGenerate(){
+      const rangeInput = body.querySelector('#mpRange').value;
+      const count = Math.min(100, Math.max(10, Number(body.querySelector('#mpCount').value)||20));
+      const includeKey = body.querySelector('#mpAnswerKey').checked;
+      const problems = generateProblems(topic, rangeInput, count);
+      if(!problems.length){ mountResult(body,'Could not generate problems with this range — try a wider range.').style.background='#FDEDEC'; return; }
+
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        let page = doc.addPage([595.28, 841.89]);
+        let {width,height} = page.getSize();
+        let y = height-60;
+        let t = (txt,x,yy,size=12,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const topicLabel = {multiplication:'Multiplication',addition:'Addition',subtraction:'Subtraction',division:'Division'}[topic];
+        t('Math Practice — '+topicLabel, 50, y, 18, rgb(0.13,0.29,0.62)); y -= 20;
+        t('Name: _______________________          Date: ___________', 50, y, 11, rgb(0.4,0.4,0.4)); y -= 35;
+
+        const colX = [50, 320];
+        let col = 0, rowY = y;
+        problems.forEach((p,i)=>{
+          if(rowY < 80){
+            page = doc.addPage([595.28, 841.89]); ({width,height} = page.getSize()); rowY = height-60;
+            t = (txt,x,yy,size=12,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+          }
+          t(`${i+1}. ${p.text}`, colX[col], rowY, 13);
+          if(col===1){ rowY -= 32; col=0; } else { col=1; }
+        });
+
+        if(includeKey){
+          const keyPage = doc.addPage([595.28, 841.89]);
+          const {width:kw, height:kh} = keyPage.getSize();
+          let ky = kh-60;
+          const kt = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> keyPage.drawText(String(txt),{x,y:yy,size,font,color});
+          kt('Answer Key — '+topicLabel, 50, ky, 16, rgb(0.13,0.29,0.62)); ky -= 30;
+          let kcol=0, kRowY=ky;
+          problems.forEach((p,i)=>{
+            kt(`${i+1}. ${p.answer}`, colX[kcol], kRowY, 12);
+            if(kcol===1){ kRowY -= 24; kcol=0; } else { kcol=1; }
+          });
+        }
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `math-practice-${topic}-${new Date().toISOString().slice(0,10)}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Worksheet ready — ${problems.length} problems${includeKey?' + answer key':''}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== BATCH BACKGROUND REMOVE ===================== */
+TOOL_IMPL.batchbgremove = {
+  mount(container){
+    let files = [];
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Same AI background-removal as our single-image tool, run over many product photos at once. Processing is one-at-a-time (not all together) — with 15-20 photos this can take a few minutes, please be patient.</div>`));
+      mountUploader(body, { accept:'image/*', multiple:true, label:'Drop product photos', sublabel:'Up to 20 at once recommended',
+        onAdd:(fl)=>{ files.push(...fl.slice(0, Math.max(0,20-files.length))); paint(); } });
+      if(files.length){
+        mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
+        const row = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn">🪄 Remove All Backgrounds</button>`);
+        btn.onclick = doBatchRemove;
+        row.appendChild(btn);
+        body.appendChild(row);
+        body.appendChild(el(`<div id="bbrQueue" style="margin-top:14px;"></div>`));
+      }
+    }
+    async function doBatchRemove(){
+      const queueBox = body.querySelector('#bbrQueue');
+      queueBox.innerHTML = files.map((f,i)=>`<div id="bbrRow${i}" style="padding:8px 0; font-size:13px; border-bottom:1px solid var(--line);">⏳ ${f.name} — Waiting</div>`).join('');
+      const prog = mountProgress(body);
+      try{
+        prog.set(5,'Loading AI model… (first use downloads ~15-40MB, cached after)');
+        const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
+        const removeBackground = mod.default || mod.removeBackground;
+        const zip = new JSZip();
+        let successCount = 0;
+        for(let i=0;i<files.length;i++){
+          const rowEl = body.querySelector('#bbrRow'+i);
+          if(rowEl) rowEl.innerHTML = `⏳ ${files[i].name} — Processing…`;
+          prog.set(10 + (i/files.length)*85, `Processing image ${i+1} of ${files.length}… this may take a few minutes total`);
+          try{
+            const outBlob = await removeBackground(files[i]);
+            zip.file(files[i].name.replace(/\.[^.]+$/,'')+'-nobg.png', outBlob);
+            successCount++;
+            if(rowEl) rowEl.innerHTML = `✅ ${files[i].name} — Done`;
+          }catch(imgErr){
+            if(rowEl) rowEl.innerHTML = `❌ ${files[i].name} — Failed (${imgErr.message})`;
+          }
+        }
+        if(successCount===0){ prog.remove(); mountResult(body,'All images failed to process — please check the files and try again.').style.background='#FDEDEC'; return; }
+        prog.set(95,'Zipping results…');
+        const zipBlob = await zip.generateAsync({type:'blob'});
+        downloadBlob(zipBlob, 'background-removed-images.zip');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${successCount} of ${files.length} image(s) processed successfully — downloaded as a zip.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== BUSINESS CARD MAKER ===================== */
+TOOL_IMPL.businesscard = {
+  mount(container){
+    const LS_KEY = 'businessCard_defaults';
+    let style = 0;
+    const styles = [
+      { bg:'#1A5276', text:'#FFFFFF', accent:'#F4D03F' },
+      { bg:'#FFFFFF', text:'#20242B', accent:'#1A5276' },
+      { bg:'#2E6F5E', text:'#FFFFFF', accent:'#F4D03F' }
+    ];
+    const body = el(`<div></div>`); container.appendChild(body);
+    function loadDefaults(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch{ return {}; } }
+    function saveDefaults(){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify({
+        name: body.querySelector('#bcName').value, phone: body.querySelector('#bcPhone').value,
+        email: body.querySelector('#bcEmail').value, company: body.querySelector('#bcCompany').value, gstin: body.querySelector('#bcGstin').value
+      })); }catch{}
+    }
+    function paint(){
+      body.innerHTML = '';
+      const d = loadDefaults();
+      body.appendChild(el(`<div class="note">Fill your details — preview updates live. Download as an 8-up print sheet (PDF) or a single card image (PNG).</div>`));
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Name</label><input type="text" id="bcName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
+          <div class="field"><label>Designation</label><input type="text" id="bcDesig" autocomplete="off"></div>
+          <div class="field"><label>Company (optional)</label><input type="text" id="bcCompany" autocomplete="off" value="${escapeHtml(d.company||'')}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="bcPhone" autocomplete="off" value="${escapeHtml(d.phone||'')}"></div>
+          <div class="field"><label>Email (optional)</label><input type="email" id="bcEmail" autocomplete="off" value="${escapeHtml(d.email||'')}"></div>
+          <div class="field"><label>GSTIN (optional)</label><input type="text" id="bcGstin" autocomplete="off" value="${escapeHtml(d.gstin||'')}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>UPI ID (optional — adds a scannable QR)</label><input type="text" id="bcUpi" placeholder="yourname@bank" autocomplete="off"></div>
+        </div>
+      `));
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Style</div>`));
+      const styleRow = el(`<div class="filter-row"></div>`);
+      styles.forEach((s,i)=>{
+        const chip = el(`<button class="filter-chip ${style===i?'active':''}" style="background:${style===i?s.bg:'#fff'}; color:${style===i?s.text:'var(--ink)'};">Style ${i+1}</button>`);
+        chip.onclick = ()=>{ style=i; renderPreview(); };
+        styleRow.appendChild(chip);
+      });
+      body.appendChild(styleRow);
+
+      const previewWrap = el(`<div style="margin-top:16px; display:flex; justify-content:center;"></div>`);
+      const canvas = el(`<canvas width="700" height="400" style="max-width:100%; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></canvas>`);
+      previewWrap.appendChild(canvas);
+      body.appendChild(previewWrap);
+      body.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', renderPreview));
+
+      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
+      const bPng = el(`<button class="btn secondary">🖼️ Download PNG</button>`);
+      const bPdf = el(`<button class="btn">💳 Download 8-up PDF</button>`);
+      bPng.onclick = ()=> downloadPng(canvas);
+      bPdf.onclick = doPdfSheet;
+      row.appendChild(bPng); row.appendChild(bPdf);
+      body.appendChild(row);
+      renderPreview();
+    }
+    function renderQrToDataUrl(text, size){
+      return new Promise(resolve=>{
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:absolute; left:-9999px;';
+        document.body.appendChild(holder);
+        new QRCode(holder, { text, width:size, height:size, correctLevel: QRCode.CorrectLevel.M });
+        setTimeout(()=>{
+          const img = holder.querySelector('img') || holder.querySelector('canvas');
+          const url = img.tagName==='CANVAS' ? img.toDataURL() : img.src;
+          holder.remove();
+          resolve(url);
+        }, 60);
+      });
+    }
+    async function drawCard(ctx, w, h){
+      const s = styles[style];
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = s.bg; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = s.accent; ctx.fillRect(0,0,10,h);
+      const name = body.querySelector('#bcName').value||'Your Name';
+      const desig = body.querySelector('#bcDesig').value||'';
+      const company = body.querySelector('#bcCompany').value||'';
+      const phone = body.querySelector('#bcPhone').value||'';
+      const email = body.querySelector('#bcEmail').value||'';
+      const gstin = body.querySelector('#bcGstin').value||'';
+      const upi = body.querySelector('#bcUpi').value||'';
+      ctx.fillStyle = s.text; ctx.textBaseline = 'alphabetic';
+      ctx.font = '700 34px Inter, sans-serif'; ctx.fillText(name, 40, 90);
+      ctx.font = '500 18px Inter, sans-serif'; ctx.fillStyle = s.accent;
+      if(desig) ctx.fillText(desig, 40, 120);
+      ctx.fillStyle = s.text; ctx.font = '400 16px Inter, sans-serif';
+      let ly = 165;
+      if(company){ ctx.fillText(company, 40, ly); ly += 24; }
+      if(phone){ ctx.fillText('📞 '+phone, 40, ly); ly += 24; }
+      if(email){ ctx.fillText('✉️ '+email, 40, ly); ly += 24; }
+      if(gstin){ ctx.font = '400 13px Inter, sans-serif'; ctx.fillText('GSTIN: '+gstin, 40, 370); }
+      if(upi.trim()){
+        const qrUrl = await renderQrToDataUrl(`upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(name)}`, 200);
+        const qrImg = new Image();
+        await new Promise(res=>{ qrImg.onload=res; qrImg.src=qrUrl; });
+        ctx.drawImage(qrImg, w-160, h/2-70, 130, 130);
+      }
+    }
+    let renderSeq = 0;
+    async function renderPreview(){
+      const canvas = body.querySelector('canvas');
+      if(!canvas) return;
+      const mySeq = ++renderSeq;
+      const ctx = canvas.getContext('2d');
+      await drawCard(ctx, canvas.width, canvas.height);
+      if(mySeq !== renderSeq) return;
+    }
+    function downloadPng(canvas){
+      canvas.toBlob(blob=> downloadBlob(blob, 'business-card.png'), 'image/png');
+    }
+    async function doPdfSheet(){
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Preparing card image…');
+        const canvas = body.querySelector('canvas');
+        const cardBlob = await new Promise(res=> canvas.toBlob(res,'image/png'));
+        const cardBytes = new Uint8Array(await cardBlob.arrayBuffer());
+        const doc = await PDFDocument.create();
+        const cardImg = await doc.embedPng(cardBytes);
+        const page = doc.addPage([595.28, 841.89]);
+        const cardW = 252, cardH = cardW * (canvas.height/canvas.width);
+        const cols = 2, rows = 4, gapX = 20, gapY = 15;
+        const totalW = cols*cardW + (cols-1)*gapX, totalH = rows*cardH + (rows-1)*gapY;
+        const startX = (595.28-totalW)/2, startY = (841.89-totalH)/2 + totalH - cardH;
+        for(let r=0;r<rows;r++){
+          for(let c=0;c<cols;c++){
+            page.drawImage(cardImg, { x: startX + c*(cardW+gapX), y: startY - r*(cardH+gapY), width: cardW, height: cardH });
+          }
+        }
+        prog.set(85,'Saving…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'business-card-sheet.pdf');
+        saveDefaults();
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, '8-up business card sheet downloaded — cut along the card edges after printing.');
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== FESTIVAL CARD MAKER ===================== */
+TOOL_IMPL.festivalcard = {
+  mount(container){
+    let photoDataUrl = null;
+    const THEMES = {
+      pongal: { bg:['#F39C12','#E67E22'], accent:'#FFF8E1', defaultText:'இனிய பொங்கல் நல்வாழ்த்துக்கள்!\nHappy Pongal!', emoji:'🌾' },
+      diwali: { bg:['#6A1B9A','#AD1457'], accent:'#FFD700', defaultText:'இனிய தீபாவளி நல்வாழ்த்துக்கள்!\nHappy Diwali!', emoji:'🪔' },
+      navratri: { bg:['#C0392B','#8E44AD'], accent:'#FFD700', defaultText:'நவராத்திரி நல்வாழ்த்துக்கள்!\nHappy Navratri!', emoji:'🙏' },
+      puthandu: { bg:['#27AE60','#F39C12'], accent:'#FFF8E1', defaultText:'இனிய தமிழ் புத்தாண்டு நல்வாழ்த்துக்கள்!\nHappy Tamil New Year!', emoji:'🌿' },
+      wedding: { bg:['#AD1457','#F4D03F'], accent:'#FFFFFF', defaultText:"Save the Date!\nWe're Getting Married", emoji:'💍' }
+    };
+    const body = el(`<div></div>`); container.appendChild(body);
+    let theme = 'pongal';
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Pick an occasion, add a photo (optional) and your greeting — downloads as an image, ready for WhatsApp/Instagram.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Occasion</div>`));
+      const themeRow = el(`<div class="filter-row"></div>`);
+      [['pongal','🌾 Pongal'],['diwali','🪔 Diwali'],['navratri','🙏 Navratri'],['puthandu','🌿 Puthandu'],['wedding','💍 Wedding']].forEach(([val,label])=>{
+        const chip = el(`<button class="filter-chip ${theme===val?'active':''}">${label}</button>`);
+        chip.onclick = ()=>{ theme = val; paint(); };
+        themeRow.appendChild(chip);
+      });
+      body.appendChild(themeRow);
+
+      const photoRow = el(`<div style="text-align:center; margin:14px 0;"></div>`);
+      const photoPreview = el(`<div style="width:110px; height:110px; border-radius:50%; background:#eee; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid var(--line);">${photoDataUrl?`<img src="${photoDataUrl}" style="width:100%; height:100%; object-fit:cover;">`:'<span style="font-size:28px;">'+THEMES[theme].emoji+'</span>'}</div>`);
+      const photoInput = el(`<input type="file" accept="image/*" style="font-size:12px;">`);
+      photoInput.onchange = async (e)=>{
+        const f = e.target.files[0]; if(!f) return;
+        photoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+        renderPreview(); paint();
+      };
+      photoRow.appendChild(photoPreview);
+      photoRow.appendChild(el(`<div style="font-size:11px; color:var(--sub); margin-bottom:6px;">Photo (optional)</div>`));
+      photoRow.appendChild(photoInput);
+      body.appendChild(photoRow);
+
+      body.appendChild(el(`
+        <div class="field"><label>Greeting Text</label><textarea id="fcText" rows="3">${THEMES[theme].defaultText}</textarea></div>
+        <div class="field"><label>Recipient (optional)</label><input type="text" id="fcRecipient" placeholder="To: Family Name" autocomplete="off"></div>
+      `));
+      body.querySelector('#fcText').addEventListener('input', renderPreview);
+      body.querySelector('#fcRecipient').addEventListener('input', renderPreview);
+
+      const previewWrap = el(`<div style="margin-top:16px; display:flex; justify-content:center;"></div>`);
+      const canvas = el(`<canvas width="500" height="500" style="max-width:100%; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></canvas>`);
+      previewWrap.appendChild(canvas);
+      body.appendChild(previewWrap);
+
+      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
+      const btn = el(`<button class="btn">🎉 Download Card</button>`);
+      btn.onclick = ()=> canvas.toBlob(blob=> downloadBlob(blob, theme+'-card.png'), 'image/png');
+      row.appendChild(btn);
+      body.appendChild(row);
+      renderPreview();
+    }
+
+    function wrapText(ctx, text, maxWidth){
+      const lines = [];
+      text.split('\n').forEach(paragraph=>{
+        const words = paragraph.split(' ');
+        let cur = '';
+        words.forEach(w=>{
+          const test = cur ? cur+' '+w : w;
+          if(ctx.measureText(test).width > maxWidth && cur){ lines.push(cur); cur = w; } else cur = test;
+        });
+        lines.push(cur);
+      });
+      return lines;
+    }
+
+    function renderPreview(){
+      const canvas = body.querySelector('canvas');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      const th = THEMES[theme];
+      ctx.clearRect(0,0,w,h);
+      const grad = ctx.createLinearGradient(0,0,w,h);
+      grad.addColorStop(0, th.bg[0]); grad.addColorStop(1, th.bg[1]);
+      ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+
+      // Simple geometric decorative border (per spec: no illustrated
+      // graphics needed) — a double-line frame with corner dots in the
+      // accent color reads as festive without needing hand-drawn motifs.
+      ctx.strokeStyle = th.accent; ctx.lineWidth = 3;
+      ctx.strokeRect(20,20,w-40,h-40);
+      ctx.strokeRect(30,30,w-60,h-60);
+      [[20,20],[w-20,20],[20,h-20],[w-20,h-20]].forEach(([x,y])=>{
+        ctx.fillStyle = th.accent; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
+      });
+
+      let y = 90;
+      if(photoDataUrl){
+        const img = new Image();
+        img.onload = ()=>{
+          ctx.save();
+          ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.clip();
+          ctx.drawImage(img, w/2-70, 80, 140, 140);
+          ctx.restore();
+          ctx.strokeStyle = th.accent; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.arc(w/2, 150, 70, 0, Math.PI*2); ctx.stroke();
+        };
+        img.src = photoDataUrl;
+      } else {
+        ctx.font = '60px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(th.emoji, w/2, 150);
+      }
+      y = photoDataUrl ? 260 : 220;
+
+      const recipient = body.querySelector('#fcRecipient') ? body.querySelector('#fcRecipient').value : '';
+      const text = body.querySelector('#fcText') ? body.querySelector('#fcText').value : th.defaultText;
+      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
+      if(recipient.trim()){ ctx.font = '600 20px Inter, sans-serif'; ctx.fillText(recipient, w/2, y); y += 35; }
+      ctx.font = '700 30px "Noto Sans Tamil", Inter, sans-serif';
+      wrapText(ctx, text, w-100).forEach(line=>{ ctx.fillText(line, w/2, y); y += 40; });
+    }
+    paint();
+  }
+};
+
+/* ===================== DAILY SALES LEDGER ===================== */
+TOOL_IMPL.salesledger = {
+  mount(container){
+    const LS_KEY = 'salesLedger_entries';
+    const body = el(`<div></div>`); container.appendChild(body);
+    function loadEntries(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||[]; }catch{ return []; } }
+    function saveEntries(entries){ try{ localStorage.setItem(LS_KEY, JSON.stringify(entries)); }catch{} }
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">For your own daily record-keeping — not a substitute for GST returns or tax filing.</div>`));
+
+      body.appendChild(el(`
+        <div class="opts tamil">
+          <div class="field"><label>Date</label><input type="date" id="slDate" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Amount ₹</label><input type="number" id="slAmount" min="0" value="0"></div>
+          <div class="field"><label>Mode</label><select id="slMode"><option>Cash</option><option>UPI</option><option>Card</option><option>Other</option></select></div>
+          <div class="field"><label>Note (optional)</label><input type="text" id="slNote" autocomplete="off"></div>
+        </div>
+      `));
+      const addRow = el(`<div class="btn-row"></div>`);
+      const addBtn = el(`<button class="btn">➕ Add Entry</button>`);
+      addBtn.onclick = doAddEntry;
+      addRow.appendChild(addBtn);
+      body.appendChild(addRow);
+
+      const entries = loadEntries();
+      const now = new Date();
+      const thisMonth = entries.filter(e=> e.date && e.date.slice(0,7) === now.toISOString().slice(0,7));
+      const monthTotal = thisMonth.reduce((s,e)=> s + (Number(e.amount)||0), 0);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:20px 0 8px;">This Month — Total: ₹${monthTotal.toFixed(2)}</div>`));
+
+      if(entries.length){
+        const listWrap = el(`<div style="max-height:320px; overflow-y:auto; border:1px solid var(--line); border-radius:10px;"></div>`);
+        // Show most recent first — easier to spot today's entries at a glance
+        [...entries].reverse().forEach((e)=>{
+          const realIdx = entries.indexOf(e);
+          const row = el(`<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid var(--line); font-size:13px;">
+            <div><b>₹${Number(e.amount).toFixed(2)}</b> — ${e.date} — ${e.mode}${e.note?' — '+escapeHtml(e.note):''}</div>
+            <button data-idx="${realIdx}" style="border:none; background:none; color:#B3261E; cursor:pointer; font-size:16px;">✕</button>
+          </div>`);
+          listWrap.appendChild(row);
+        });
+        body.appendChild(listWrap);
+        listWrap.querySelectorAll('button[data-idx]').forEach(btn=>{
+          btn.onclick = ()=>{
+            const all = loadEntries();
+            all.splice(Number(btn.getAttribute('data-idx')), 1);
+            saveEntries(all);
+            paint();
+          };
+        });
+
+        const row2 = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
+        const exportBtn = el(`<button class="btn secondary">📊 Export to Excel</button>`);
+        const clearBtn = el(`<button class="btn secondary" style="color:#B3261E;">🗑️ Clear All</button>`);
+        exportBtn.onclick = doExport;
+        clearBtn.onclick = ()=>{
+          if(confirm('Delete all saved entries? This cannot be undone.')){ saveEntries([]); paint(); }
+        };
+        row2.appendChild(exportBtn); row2.appendChild(clearBtn);
+        body.appendChild(row2);
+      } else {
+        body.appendChild(el(`<div class="note" style="margin-top:10px;">No entries yet — add your first sale above.</div>`));
+      }
+    }
+
+    function doAddEntry(){
+      const date = body.querySelector('#slDate').value;
+      const amount = Number(body.querySelector('#slAmount').value)||0;
+      const mode = body.querySelector('#slMode').value;
+      const note = body.querySelector('#slNote').value||'';
+      if(amount <= 0){ mountResult(body, 'Amount must be greater than zero.').style.background='#FDEDEC'; return; }
+      const entries = loadEntries();
+      entries.push({ date, amount, mode, note });
+      saveEntries(entries);
+      paint();
+    }
+
+    function doExport(){
+      const entries = loadEntries();
+      const rows = [['Date','Amount (₹)','Mode','Note']];
+      entries.forEach(e=> rows.push([e.date, e.amount, e.mode, e.note||'']));
+      rows.push([]);
+      // Live SUM formula (not a static number) — same principle as pettycash's
+      // auto-calculating Balance column, so the total stays correct even if
+      // the user edits amounts directly in Excel afterward.
+      const lastDataRow = entries.length + 1;
+      rows.push(['', { f: `SUM(B2:B${lastDataRow})` }, 'TOTAL', '']);
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:28}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sales Ledger');
+      const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      downloadBlob(new Blob([out],{type:'application/octet-stream'}), `sales-ledger-${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    paint();
+  }
+};
+
+/* ===================== TAMIL HANDWRITING TRACING ===================== */
+TOOL_IMPL.tamiltracing = {
+  mount(container){
+    // v1 scope deliberately limited to Uyir + Mei (per spec) — full Uyirmei
+    // combinations (18 consonants × 12 vowels = 216 letterforms) are a much
+    // bigger v2 scope, not attempted here.
+    const CATEGORIES = {
+      uyir: { label:'உயிர் எழுத்துக்கள் (Vowels)', letters:['அ','ஆ','இ','ஈ','உ','ஊ','எ','ஏ','ஐ','ஒ','ஓ','ஔ'] },
+      mei: { label:'மெய் எழுத்துக்கள் (Consonants)', letters:['க்','ங்','ச்','ஞ்','ட்','ண்','த்','ந்','ப்','ம்','ய்','ர்','ல்','வ்','ழ்','ள்','ற்','ன்'] }
+    };
+    let category = 'uyir';
+    let selected = new Set(CATEGORIES.uyir.letters); // all selected by default
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Printable tracing practice — one reference letter followed by faded repetitions to trace over.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Category</div>`));
+      const catRow = el(`<div class="filter-row"></div>`);
+      Object.entries(CATEGORIES).forEach(([key,cat])=>{
+        const chip = el(`<button class="filter-chip ${category===key?'active':''}">${cat.label}</button>`);
+        chip.onclick = ()=>{ category = key; selected = new Set(CATEGORIES[key].letters); paint(); };
+        catRow.appendChild(chip);
+      });
+      body.appendChild(catRow);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Select Letters</div>`));
+      const letterGrid = el(`<div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;"></div>`);
+      CATEGORIES[category].letters.forEach(letter=>{
+        const isSelected = selected.has(letter);
+        const chip = el(`<button style="padding:10px 0; border-radius:10px; border:1.5px solid ${isSelected?'var(--brand-dark)':'var(--line)'}; background:${isSelected?'var(--brand-dark)':'#fff'}; color:${isSelected?'#fff':'var(--ink)'}; font-size:18px; font-weight:700; cursor:pointer;">${letter}</button>`);
+        chip.onclick = ()=>{ isSelected ? selected.delete(letter) : selected.add(letter); paint(); };
+        letterGrid.appendChild(chip);
+      });
+      body.appendChild(letterGrid);
+
+      body.appendChild(el(`<div class="field" style="margin-top:14px;"><label>Practice rows per letter</label><input type="number" id="ttRows" value="3" min="1" max="10"></div>`));
+
+      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
+      const btn = el(`<button class="btn">✍️ Generate Worksheet</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+
+    async function doGenerate(){
+      const letters = CATEGORIES[category].letters.filter(l=> selected.has(l));
+      const rowsPerLetter = Math.min(10, Math.max(1, Number(body.querySelector('#ttRows').value)||3));
+      if(!letters.length){ mountResult(body, 'Please select at least one letter.').style.background='#FDEDEC'; return; }
+
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Loading Tamil font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        let page = doc.addPage([595.28, 841.89]);
+        let {width,height} = page.getSize();
+        let y = height-60;
+        const fontSize = 42;
+        const rowHeight = 62;
+        let t = (txt,x,yy,size,color,opacity)=> page.drawText(String(txt),{x,y:yy,size,font,color, opacity: opacity===undefined?1:opacity});
+        let lineDraw = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:0.5,color:rgb(0.85,0.85,0.85)});
+
+        t('Tamil Handwriting Practice — '+CATEGORIES[category].label, 50, y, 16, rgb(0.13,0.29,0.62)); y -= 40;
+
+        letters.forEach(letter=>{
+          if(y < 100){
+            page = doc.addPage([595.28, 841.89]); ({width,height} = page.getSize()); y = height-60;
+            t = (txt,x,yy,size,color,opacity)=> page.drawText(String(txt),{x,y:yy,size,font,color, opacity: opacity===undefined?1:opacity});
+            lineDraw = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:0.5,color:rgb(0.85,0.85,0.85)});
+          }
+          // Reference letter, full opacity — this is what the child copies
+          t(letter, 50, y, fontSize, rgb(0.1,0.1,0.1), 1);
+          // Faded tracing repetitions across the same row — low-opacity solid
+          // glyphs (not true dotted outlines) per the spec's deliberately
+          // simpler v1 approach: much less finicky than constructing real
+          // outline paths, and reads clearly enough to trace over.
+          for(let i=0;i<rowsPerLetter;i++){
+            t(letter, 140 + i*60, y, fontSize, rgb(0.6,0.6,0.6), 0.3);
+          }
+          lineDraw(y-14);
+          y -= rowHeight;
+        });
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `tamil-tracing-${category}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Tracing worksheet ready — ${letters.length} letter${letters.length===1?'':'s'}, ${rowsPerLetter} practice repetitions each.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
