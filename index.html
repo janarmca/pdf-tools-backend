@@ -511,6 +511,11 @@ function mountAuthModal(){
       <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%;">
         <div style="font-weight:900; font-size:17px; margin-bottom:4px;">${mode==='signin' ? 'Sign In' : 'Create Account'}</div>
         <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Sign in to use Fast Server Mode and see your credits history.</div>
+        <button id="authGoogle" style="width:100%; padding:11px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-weight:700; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.96 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.97H.96A8.996 8.996 0 000 9c0 1.45.35 2.83.96 4.03l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.97l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;"><div style="flex:1; height:1px; background:var(--line);"></div><span style="font-size:11px; color:var(--sub);">OR</span><div style="flex:1; height:1px; background:var(--line);"></div></div>
         <div class="field" style="margin-bottom:10px;"><label>Email</label><input type="email" id="authEmail" placeholder="you@example.com"></div>
         <div class="field" style="margin-bottom:6px;"><label>Password</label><input type="password" id="authPass" placeholder="••••••••"></div>
         ${mode==='signin' ? '<div style="text-align:right; margin-bottom:8px;"><a href="#" id="toForgot" style="color:var(--sub); font-size:11.5px;">Forgot password?</a></div>' : '<div style="margin-bottom:8px;"></div>'}
@@ -525,6 +530,16 @@ function mountAuthModal(){
     card.style.position = 'relative';
     overlay.appendChild(card);
     card.querySelector('#authClose').onclick = ()=> overlay.remove();
+    card.querySelector('#authGoogle').onclick = async ()=>{
+      const errEl = card.querySelector('#authErr');
+      try{
+        if(!sb) throw new Error(friendlyErrorMessage(null));
+        const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.origin + window.location.pathname } });
+        if(error) throw new Error(friendlyErrorMessage(error));
+        // On success, Supabase redirects the whole page to Google — no further
+        // code runs here; the app re-initializes auth state on return.
+      }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
+    };
     const swap = card.querySelector('#toSignup') || card.querySelector('#toSignin');
     if(swap) swap.onclick = (e)=>{ e.preventDefault(); mode = mode==='signin'?'signup':'signin'; paint(); };
     const forgotLink = card.querySelector('#toForgot');
@@ -9865,8 +9880,10 @@ TOOL_IMPL.festivalcard = {
       body.appendChild(photoRow);
 
       body.appendChild(el(`
-        <div class="field"><label>Greeting Text</label><textarea id="fcText" rows="3">${THEMES[theme].defaultText}</textarea></div>
-        <div class="field"><label>Recipient (optional)</label><input type="text" id="fcRecipient" placeholder="To: Family Name" autocomplete="off"></div>
+        <div>
+          <div class="field"><label>Greeting Text</label><textarea id="fcText" rows="3">${THEMES[theme].defaultText}</textarea></div>
+          <div class="field"><label>Recipient (optional)</label><input type="text" id="fcRecipient" placeholder="To: Family Name" autocomplete="off"></div>
+        </div>
       `));
       body.querySelector('#fcText').addEventListener('input', renderPreview);
       body.querySelector('#fcRecipient').addEventListener('input', renderPreview);
