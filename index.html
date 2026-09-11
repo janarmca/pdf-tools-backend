@@ -11055,7 +11055,7 @@ TOOL_IMPL.carrompuzzle = {
     // Local rounded-rect helper (this tool's own scope has no shared one)
     function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
     let pieces = [];
-    let striker, moving=false, strikerHomeX=0, strikerHomeY=0;
+    let striker, moving=false, strikerHomeX=0, strikerHomeY=0, puzzleOpen=false;
     function resetBoard(){
       pieces = [];
       const cx=W/2, cy=H/2, mr=10;
@@ -11105,7 +11105,16 @@ TOOL_IMPL.carrompuzzle = {
           }
         });
       });
+      const wasMoving = moving;
       moving = all.some(p=> Math.abs(p.vx)>0.01 || Math.abs(p.vy)>0.01);
+      // Once everything has come to a full stop after a shot, snap the
+      // striker back to its baseline for the next shot — otherwise it stays
+      // wherever it happened to stop, which feels broken/stuck to a player
+      // (this was the "coin doesn't come back" issue).
+      if(wasMoving && !moving && striker.alive!==false){
+        striker.x = W/2; striker.y = H-PAD-40; striker.vx=0; striker.vy=0;
+        strikerHomeX = striker.x; strikerHomeY = striker.y;
+      }
     }
 
     // ---- Puzzle on pocket ----
@@ -11115,7 +11124,7 @@ TOOL_IMPL.carrompuzzle = {
       {q:'7 × 3 = ?', a:'21'},{q:'தமிழில் "நன்றி" — English?', a:'Thank you'},{q:'15 + 15 = ?', a:'30'}
     ];
     function onPocket(){
-      moving = false;
+      moving = false; puzzleOpen = true;
       const p = PUZZLES[Math.floor(Math.random()*PUZZLES.length)];
       const overlay = el(`
         <div style="position:absolute; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; border-radius:12px;">
@@ -11136,6 +11145,7 @@ TOOL_IMPL.carrompuzzle = {
         score += correct ? 20 : 5;
         wrap.querySelector('#cpScore').textContent = '⭐ Score: '+score;
         overlay.remove();
+        puzzleOpen = false;
         // Other pieces may still have had non-zero velocity at the moment
         // this one was pocketed (physics was paused mid-motion for the
         // quiz) — resume stepping if so, otherwise they'd stay frozen forever.
@@ -11296,7 +11306,7 @@ TOOL_IMPL.carrompuzzle = {
       return { x:(t.clientX-rect.left)*(W/rect.width), y:(t.clientY-rect.top)*(H/rect.height) };
     }
     canvas.addEventListener('pointerdown', e=>{
-      if(moving) return;
+      if(moving || puzzleOpen) return;
       const p = getPos(e);
       if(Math.hypot(p.x-striker.x, p.y-striker.y) < 40){
         aiming = true;
@@ -11339,7 +11349,7 @@ TOOL_IMPL.carrompuzzle = {
 
     function loop(){
       requestAnimationFrame(loop);
-      if(moving) stepPhysics();
+      if(moving && !puzzleOpen) stepPhysics();
       draw();
     }
     loop();
