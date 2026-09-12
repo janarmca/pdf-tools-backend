@@ -267,6 +267,7 @@ const TOOLS = [
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
   {id:'aireceipt', name:'Receipt/Invoice → Excel', desc:'Snap a bill, get vendor/date/amount in a spreadsheet', icon:'🧾', color:'#B7950B', cat:'ai', cost:1},
   {id:'airesume', name:'AI Resume Reviewer', desc:'Upload your CV, get honest feedback to improve it', icon:'📄', color:'#C0392B', cat:'ai', cost:1},
+  {id:'resumebuilder', name:'Resume Builder', desc:'Build a resume from scratch — 4 templates, auto-saves your info, ATS-friendly', icon:'📋', color:'#1565C0', cat:'business', cost:0},
   {id:'aiexcelcompare', name:'AI Compare Excel Files', desc:'Upload up to 10 spreadsheets, ask a question — AI compares across all of them', icon:'📊', color:'#1F618D', cat:'ai', cost:1},
 ];
 
@@ -9357,6 +9358,225 @@ TOOL_IMPL.prescription = {
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), `prescription-${formState.patName.replace(/\s+/g,'-')}-${formState.date}.pdf`);
         prog.set(100,'Done'); prog.remove();
         mountResult(body, `Prescription ready — ${validMeds.length} medicine${validMeds.length===1?'':'s'} for ${formState.patName}.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== RESUME BUILDER ===================== */
+TOOL_IMPL.resumebuilder = {
+  mount(container){
+    const LS_KEY = 'resumeBuilder_data';
+    const body = el(`<div></div>`); container.appendChild(body);
+    const esc = (s)=> String(s||'').replace(/"/g,'&quot;');
+    function loadSaved(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)); }catch{ return null; } }
+    const saved = loadSaved();
+    let template = (saved && saved.template) || 'modern';
+    let data = Object.assign({
+      name:'', title:'', email:'', phone:'', location:'', linkedin:'',
+      summary:'', skills:'',
+      experience: [{ role:'', company:'', dates:'', desc:'' }],
+      education: [{ degree:'', school:'', dates:'' }]
+    }, saved || {});
+    if(!data.experience || !data.experience.length) data.experience = [{role:'',company:'',dates:'',desc:''}];
+    if(!data.education || !data.education.length) data.education = [{degree:'',school:'',dates:''}];
+
+    function captureFormState(){
+      const g = (sel)=> body.querySelector(sel);
+      ['name','title','email','phone','location','linkedin','summary','skills'].forEach(k=>{
+        const elm = g('#rb_'+k); if(elm) data[k] = elm.value;
+      });
+      body.querySelectorAll('[data-exp-field]').forEach(elm=>{
+        const idx = Number(elm.getAttribute('data-idx')), field = elm.getAttribute('data-exp-field');
+        if(data.experience[idx]) data.experience[idx][field] = elm.value;
+      });
+      body.querySelectorAll('[data-edu-field]').forEach(elm=>{
+        const idx = Number(elm.getAttribute('data-idx')), field = elm.getAttribute('data-edu-field');
+        if(data.education[idx]) data.education[idx][field] = elm.value;
+      });
+    }
+    function saveData(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(Object.assign({template}, data))); }catch{} }
+
+    const TEMPLATES = {
+      modern:    { label:'Modern',       accent:'#1565C0', headerStyle:'band' },
+      classic:   { label:'Classic',      accent:'#2C2C2C', headerStyle:'plain' },
+      minimal:   { label:'Minimal',      accent:'#00897B', headerStyle:'plain' },
+      creative:  { label:'Creative',     accent:'#8E24AA', headerStyle:'band' }
+    };
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Your info auto-saves as you go — come back anytime without retyping. Pick a template below; you can switch anytime without losing your data.</div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Template</div>`));
+      const tplRow = el(`<div class="filter-row"></div>`);
+      Object.entries(TEMPLATES).forEach(([key,tpl])=>{
+        const chip = el(`<button class="filter-chip ${template===key?'active':''}">${tpl.label}</button>`);
+        chip.onclick = ()=>{ captureFormState(); saveData(); template = key; paint(); };
+        tplRow.appendChild(chip);
+      });
+      body.appendChild(tplRow);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Personal Details</div>`));
+      const personal = el(`
+        <div class="opts tamil">
+          <div class="field" style="grid-column:1/-1;"><label>Full Name</label><input type="text" id="rb_name" autocomplete="off" value="${esc(data.name)}"></div>
+          <div class="field" style="grid-column:1/-1;"><label>Job Title / Role</label><input type="text" id="rb_title" autocomplete="off" value="${esc(data.title)}" placeholder="e.g. Senior Accountant"></div>
+          <div class="field"><label>Email</label><input type="email" id="rb_email" autocomplete="off" value="${esc(data.email)}"></div>
+          <div class="field"><label>Phone</label><input type="text" id="rb_phone" autocomplete="off" value="${esc(data.phone)}"></div>
+          <div class="field"><label>Location</label><input type="text" id="rb_location" autocomplete="off" value="${esc(data.location)}"></div>
+          <div class="field"><label>LinkedIn (optional)</label><input type="text" id="rb_linkedin" autocomplete="off" value="${esc(data.linkedin)}"></div>
+        </div>
+      `);
+      body.appendChild(personal);
+
+      body.appendChild(el(`<div class="field" style="margin-top:12px;"><label>Professional Summary</label><textarea id="rb_summary" rows="3">${esc(data.summary)}</textarea></div>`));
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Work Experience</div>`));
+      const expWrap = el(`<div></div>`);
+      data.experience.forEach((exp,idx)=>{
+        const card = el(`
+          <div style="border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+              <input type="text" data-exp-field="role" data-idx="${idx}" value="${esc(exp.role)}" placeholder="Role/Title" style="padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+              <input type="text" data-exp-field="company" data-idx="${idx}" value="${esc(exp.company)}" placeholder="Company" style="padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+            </div>
+            <input type="text" data-exp-field="dates" data-idx="${idx}" value="${esc(exp.dates)}" placeholder="e.g. Jan 2022 – Present" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; margin-bottom:8px;">
+            <textarea data-exp-field="desc" data-idx="${idx}" rows="2" placeholder="Key achievements / responsibilities" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">${esc(exp.desc)}</textarea>
+            ${data.experience.length>1?`<button data-remove-exp="${idx}" style="margin-top:6px; border:none; background:none; color:#B3261E; font-size:12px; cursor:pointer;">✕ Remove</button>`:''}
+          </div>
+        `);
+        expWrap.appendChild(card);
+      });
+      body.appendChild(expWrap);
+      const addExpBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add Experience</button>`);
+      addExpBtn.onclick = ()=>{ captureFormState(); data.experience.push({role:'',company:'',dates:'',desc:''}); paint(); };
+      body.appendChild(addExpBtn);
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:0 0 8px;">Education</div>`));
+      const eduWrap = el(`<div></div>`);
+      data.education.forEach((edu,idx)=>{
+        const card = el(`
+          <div style="border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;">
+            <input type="text" data-edu-field="degree" data-idx="${idx}" value="${esc(edu.degree)}" placeholder="Degree / Certification" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; margin-bottom:8px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <input type="text" data-edu-field="school" data-idx="${idx}" value="${esc(edu.school)}" placeholder="School/University" style="padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+              <input type="text" data-edu-field="dates" data-idx="${idx}" value="${esc(edu.dates)}" placeholder="Year" style="padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+            </div>
+            ${data.education.length>1?`<button data-remove-edu="${idx}" style="margin-top:6px; border:none; background:none; color:#B3261E; font-size:12px; cursor:pointer;">✕ Remove</button>`:''}
+          </div>
+        `);
+        eduWrap.appendChild(card);
+      });
+      body.appendChild(eduWrap);
+      const addEduBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add Education</button>`);
+      addEduBtn.onclick = ()=>{ captureFormState(); data.education.push({degree:'',school:'',dates:''}); paint(); };
+      body.appendChild(addEduBtn);
+
+      body.appendChild(el(`<div class="field" style="margin-bottom:14px;"><label>Skills (comma-separated)</label><input type="text" id="rb_skills" autocomplete="off" value="${esc(data.skills)}" placeholder="Excel, Tally, GST filing, Team leadership"></div>`));
+
+      // Auto-save + remove handlers
+      body.querySelectorAll('input, textarea').forEach(elm=> elm.addEventListener('input', ()=>{ captureFormState(); saveData(); }));
+      body.querySelectorAll('[data-remove-exp]').forEach(btn=>{
+        btn.onclick = ()=>{ captureFormState(); data.experience.splice(Number(btn.getAttribute('data-remove-exp')),1); saveData(); paint(); };
+      });
+      body.querySelectorAll('[data-remove-edu]').forEach(btn=>{
+        btn.onclick = ()=>{ captureFormState(); data.education.splice(Number(btn.getAttribute('data-remove-edu')),1); saveData(); paint(); };
+      });
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📋 Generate Resume PDF</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+
+    async function doGenerate(){
+      captureFormState(); saveData();
+      if(!data.name.trim()){ mountResult(body,'Please enter your name.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Loading font…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc);
+        const boldFont = font; // embedUnicodeFont already returns a reasonably bold-capable font for this app's usage
+        let page = doc.addPage([595.28, 841.89]);
+        const { width, height } = page.getSize();
+        let y = height - 50;
+        const accentHex = TEMPLATES[template].accent;
+        const accentRgb = (()=>{ const n=parseInt(accentHex.slice(1),16); return rgb(((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255); })();
+        const t = (txt,x,yy,size=10.5,color=rgb(0.15,0.15,0.15))=> page.drawText(String(txt),{x,y:yy,size,font,color});
+        const ensureSpace = (needed)=>{ if(y - needed < 60){ page = doc.addPage([595.28, 841.89]); y = height-50; } };
+
+        // Header — style varies by template for genuine visual distinction,
+        // not just a different accent color on the same layout.
+        if(TEMPLATES[template].headerStyle === 'band'){
+          page.drawRectangle({x:0,y:height-90,width,height:90,color:accentRgb});
+          page.drawText(data.name, {x:40,y:height-45,size:22,font,color:rgb(1,1,1)});
+          page.drawText(data.title, {x:40,y:height-65,size:12,font,color:rgb(1,1,1)});
+          const contact = [data.email,data.phone,data.location,data.linkedin].filter(Boolean).join('   •   ');
+          page.drawText(contact, {x:40,y:height-82,size:9,font,color:rgb(0.95,0.95,0.95)});
+          y = height - 115;
+        } else {
+          t(data.name, 40, y, 22, accentRgb); y-=20;
+          t(data.title, 40, y, 12, rgb(0.35,0.35,0.35)); y-=16;
+          const contact = [data.email,data.phone,data.location,data.linkedin].filter(Boolean).join('   •   ');
+          t(contact, 40, y, 9, rgb(0.5,0.5,0.5)); y-=14;
+          page.drawLine({start:{x:40,y:y},end:{x:width-40,y:y},thickness:1.5,color:accentRgb}); y-=22;
+        }
+
+        function sectionHeader(label){
+          ensureSpace(30);
+          t(label.toUpperCase(), 40, y, 11, accentRgb); y-=6;
+          page.drawLine({start:{x:40,y:y},end:{x:width-40,y:y},thickness:0.75,color:rgb(0.85,0.85,0.85)}); y-=16;
+        }
+        function wrapText(text, maxWidth, size){
+          const words = String(text||'').split(' '); const lines=[]; let cur='';
+          words.forEach(w=>{ const test=cur?cur+' '+w:w; if(font.widthOfTextAtSize(test,size) > maxWidth && cur){ lines.push(cur); cur=w; } else cur=test; });
+          if(cur) lines.push(cur);
+          return lines;
+        }
+
+        if(data.summary.trim()){
+          sectionHeader('Summary');
+          wrapText(data.summary, width-80, 10).forEach(l=>{ ensureSpace(14); t(l,40,y,10); y-=14; });
+          y-=8;
+        }
+
+        const validExp = data.experience.filter(e=> e.role.trim() || e.company.trim());
+        if(validExp.length){
+          sectionHeader('Experience');
+          validExp.forEach(exp=>{
+            ensureSpace(16);
+            t(exp.role, 40, y, 11); t(exp.dates, width-200, y, 9, rgb(0.5,0.5,0.5)); y-=14;
+            if(exp.company){ t(exp.company, 40, y, 9.5, rgb(0.4,0.4,0.4)); y-=13; }
+            wrapText(exp.desc, width-90, 9.5).forEach(l=>{ ensureSpace(13); t('• '+l, 48, y, 9.5, rgb(0.3,0.3,0.3)); y-=13; });
+            y-=8;
+          });
+        }
+
+        const validEdu = data.education.filter(e=> e.degree.trim() || e.school.trim());
+        if(validEdu.length){
+          sectionHeader('Education');
+          validEdu.forEach(edu=>{
+            ensureSpace(14);
+            t(edu.degree, 40, y, 10.5); t(edu.dates, width-150, y, 9, rgb(0.5,0.5,0.5)); y-=14;
+            if(edu.school){ t(edu.school, 40, y, 9.5, rgb(0.4,0.4,0.4)); y-=14; }
+            y-=4;
+          });
+        }
+
+        if(data.skills.trim()){
+          sectionHeader('Skills');
+          wrapText(data.skills, width-80, 10).forEach(l=>{ ensureSpace(14); t(l,40,y,10); y-=14; });
+        }
+
+        prog.set(90,'Preparing…');
+        const bytes = await doc.save();
+        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `resume-${data.name.replace(/\s+/g,'-')||'draft'}.pdf`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `Resume PDF ready (${TEMPLATES[template].label} template).`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
