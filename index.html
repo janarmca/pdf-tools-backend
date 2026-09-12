@@ -875,7 +875,7 @@ function renderSettingsPage(){
     // ---- Support ----
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
-      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown'); }catch(e){} maybeShowDiscoverModal(true); }],
+      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v2'); }catch(e){} maybeShowDiscoverModal(true); }],
       ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
       ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
       ['📄 Terms of Service', ()=> window.open('terms.html','_blank')],
@@ -899,17 +899,19 @@ function renderSettingsPage(){
 function maybeShowDiscoverModal(forceShow){
   if(!forceShow){
     let shown = null;
-    try{ shown = localStorage.getItem('pdfToolsDiscoverShown'); }catch(e){}
+    try{ shown = localStorage.getItem('pdfToolsDiscoverShown_v2'); }catch(e){}
     if(shown) return;
   }
-  try{ localStorage.setItem('pdfToolsDiscoverShown','1'); }catch(e){}
+  try{ localStorage.setItem('pdfToolsDiscoverShown_v2','1'); }catch(e){}
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
   const cards = [
-    ['✨ NEW', '82+ tools, all in one place', 'PDF, Image, Video, Business/GST, and Education — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
-    ['🤖 AI', '7 AI tools that read your documents', 'Ask AI About Document, Summarize, Translate, Handwriting to Text, Receipt to Excel, Resume Review, and AI-powered OCR.', '💬'],
-    ['🪄 UPGRADED', 'remove.bg-quality background removal', 'A real AI model now powers Remove Background — plus background colour/photo swap and a manual touch-up brush.', '🎨'],
-    ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Salary Slip, Payment Voucher, Purchase Order, Expense Tracker, Petty Cash Book — all free.', '🧾'],
-    ['🎓 EDUCATION', 'Number Jungle learning game', 'A free Math and Science quiz game for Grades 1-12, bilingual Tamil and English, with XP and badges.', '🦜'],
+    ['✨ NEW', '100+ tools, all in one place', 'PDF, Image, Video, Business/GST, Education, and Games — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
+    ['🤖 AI', '7 AI tools that read your documents', 'Ask AI About Document, Summarize, Translate, Handwriting to Text, Receipt to Excel, Resume Review, and Compare Excel Files.', '💬'],
+    ['🆕 NEW', 'AI Image Upscaler — genuinely free', 'A real neural network sharpens and upscales your photos up to 4x, running entirely in your browser — no per-image charge.', '🔍'],
+    ['🆕 NEW', 'Build a resume from scratch', '4 professional templates, auto-saves as you type so you never lose your info, exports straight to PDF.', '📋'],
+    ['🎮 NEW', 'Carrom Puzzle — a real physics game', 'Play an actual carrom board right in the app — pocket a coin, solve a quick puzzle for bonus stars.', '🎯'],
+    ['🔑 EASIER', 'Sign in with Google', 'One tap sign-in alongside email — no new password to remember.', '🔓'],
+    ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Quotation/Performa/PO, Salary Slip, Payment Voucher, Rent Receipt, Prescription Pad — all free.', '🧾'],
     ['🔒 PRIVATE', 'Most tools stay on your device', 'PDF, Image, and Business tools run fully in your browser — only AI tools and Fast Server Mode reach our server.', '🛡️'],
   ];
   const card = el(`
