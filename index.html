@@ -10168,12 +10168,43 @@ TOOL_IMPL.resumebuilder = {
             </div>
             <input type="text" data-exp-field="dates" data-idx="${idx}" value="${esc(exp.dates)}" placeholder="e.g. Jan 2022 – Present" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; margin-bottom:8px;">
             <textarea data-exp-field="desc" data-idx="${idx}" rows="2" placeholder="Key achievements / responsibilities" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">${esc(exp.desc)}</textarea>
-            ${data.experience.length>1?`<button data-remove-exp="${idx}" style="margin-top:6px; border:none; background:none; color:#B3261E; font-size:12px; cursor:pointer;">✕ Remove</button>`:''}
+            <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+              <button data-ai-suggest="${idx}" style="border:1px solid var(--line); background:#fff; border-radius:8px; padding:5px 12px; font-size:11.5px; font-weight:700; cursor:pointer; color:#1565C0;">🤖 AI Suggest (1 credit)</button>
+              ${data.experience.length>1?`<button data-remove-exp="${idx}" style="border:none; background:none; color:#B3261E; font-size:12px; cursor:pointer;">✕ Remove</button>`:''}
+            </div>
+            <div data-ai-status="${idx}" style="font-size:11.5px; color:var(--sub); margin-top:4px;"></div>
           </div>
         `);
         expWrap.appendChild(card);
       });
       body.appendChild(expWrap);
+      expWrap.querySelectorAll('[data-ai-suggest]').forEach(btn=>{
+        btn.onclick = async ()=>{
+          const idx = Number(btn.getAttribute('data-ai-suggest'));
+          const statusEl = expWrap.querySelector(`[data-ai-status="${idx}"]`);
+          if(!AUTH_CONFIGURED || !authState.session){ statusEl.textContent = 'Please sign in to use AI suggestions.'; return; }
+          const roleInput = expWrap.querySelectorAll('[data-exp-field="role"]')[idx];
+          const companyInput = expWrap.querySelectorAll('[data-exp-field="company"]')[idx];
+          const descTextarea = expWrap.querySelectorAll('[data-exp-field="desc"]')[idx];
+          const role = roleInput.value.trim();
+          if(!role){ statusEl.textContent = 'Please enter a Role/Title first.'; return; }
+          statusEl.textContent = '⏳ Thinking…';
+          try{
+            const form = new FormData();
+            form.append('question', `Suggest 3 short, resume-style bullet points (achievements/responsibilities) for a "${role}"${companyInput.value.trim()?' at '+companyInput.value.trim():''} role. Each bullet on its own line, starting with an action verb. No numbering, no extra commentary — just the 3 bullet lines.`);
+            form.append('toolId', 'resumebuilder');
+            const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+              method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+            });
+            if(result.error) throw new Error(result.error);
+            const existing = descTextarea.value.trim();
+            descTextarea.value = (existing ? existing+'\n' : '') + result.answer.trim();
+            data.experience[idx].desc = descTextarea.value;
+            saveData();
+            statusEl.textContent = '✓ Suggestions added — edit as needed.';
+          }catch(err){ statusEl.textContent = 'Error: '+err.message; }
+        };
+      });
       const addExpBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px; margin-bottom:16px;">+ Add Experience</button>`);
       addExpBtn.onclick = ()=>{ captureFormState(); data.experience.push({role:'',company:'',dates:'',desc:''}); paint(); };
       body.appendChild(addExpBtn);
