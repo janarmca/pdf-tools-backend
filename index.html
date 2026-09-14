@@ -7509,8 +7509,32 @@ TOOL_IMPL.pdfeditor = {
             selRow.appendChild(boldBtn);
             const sizeDownBtn = el(`<button style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:13px; cursor:pointer;">A−</button>`);
             const sizeUpBtn = el(`<button style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:13px; cursor:pointer;">A+</button>`);
-            sizeDownBtn.onclick = ()=>{ snapshotForUndo(); selEl.fontSize = Math.max(6, selEl.fontSize - 2); paintEditor(); };
-            sizeUpBtn.onclick = ()=>{ snapshotForUndo(); selEl.fontSize = selEl.fontSize + 2; paintEditor(); };
+            function adjustTextSize(delta){
+              snapshotForUndo();
+              const oldFontSize = selEl.fontSize;
+              const oldH = selEl.h;
+              selEl.fontSize = Math.max(6, selEl.fontSize + delta);
+              // Grow the box proportionally with the font, same as drag-resize
+              // does — without this, a manually-enlarged font can overflow a
+              // box sized for the old, smaller text.
+              const ratio = selEl.fontSize / oldFontSize;
+              selEl.h = Math.max(12, oldH * ratio);
+              selEl.w = Math.max(12, selEl.w * ratio);
+              if(selEl.linkedWhiteoutId){
+                // Same fix as the drag-resize path: keep the cover box
+                // enclosing the text as it grows, or the original PDF text
+                // can peek through at the edges again.
+                const linkedWhiteout = (elementsByPage[curPage]||[]).find(el2=>el2.id===selEl.linkedWhiteoutId);
+                if(linkedWhiteout){
+                  const padX = Math.max(4, selEl.w*0.04), padY = Math.max(4, selEl.h*0.35);
+                  linkedWhiteout.x = selEl.x - padX; linkedWhiteout.y = selEl.y - padY;
+                  linkedWhiteout.w = selEl.w + padX*2; linkedWhiteout.h = selEl.h + padY*2;
+                }
+              }
+              paintEditor();
+            }
+            sizeDownBtn.onclick = ()=> adjustTextSize(-2);
+            sizeUpBtn.onclick = ()=> adjustTextSize(2);
             selRow.appendChild(sizeDownBtn); selRow.appendChild(sizeUpBtn);
           }
           const copyBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;">📋 Duplicate</button>`);
