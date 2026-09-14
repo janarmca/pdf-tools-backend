@@ -7502,10 +7502,34 @@ TOOL_IMPL.pdfeditor = {
       if(selectedId){
         const selEl = (elementsByPage[curPage]||[]).find(e=>e.id===selectedId);
         if(selEl){
-          const delRow = el(`<div class="btn-row" style="margin-bottom:8px;"></div>`);
-          const delBtn = el(`<button class="btn secondary" style="padding:6px 14px; font-size:12px; color:#B3261E;">🗑️ Delete Selected</button>`);
+          const selRow = el(`<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:8px; background:#F5F6F8; border-radius:10px; align-items:center;"></div>`);
+          if(selEl.type==='text'){
+            const boldBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid ${selEl.bold?'var(--brand-dark)':'var(--line)'}; background:${selEl.bold?'var(--brand-dark)':'#fff'}; color:${selEl.bold?'#fff':'var(--ink)'}; font-weight:900; font-size:13px; cursor:pointer;">B</button>`);
+            boldBtn.onclick = ()=>{ snapshotForUndo(); selEl.bold = !selEl.bold; paintEditor(); };
+            selRow.appendChild(boldBtn);
+            const sizeDownBtn = el(`<button style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:13px; cursor:pointer;">A−</button>`);
+            const sizeUpBtn = el(`<button style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:13px; cursor:pointer;">A+</button>`);
+            sizeDownBtn.onclick = ()=>{ snapshotForUndo(); selEl.fontSize = Math.max(6, selEl.fontSize - 2); paintEditor(); };
+            sizeUpBtn.onclick = ()=>{ snapshotForUndo(); selEl.fontSize = selEl.fontSize + 2; paintEditor(); };
+            selRow.appendChild(sizeDownBtn); selRow.appendChild(sizeUpBtn);
+          }
+          const copyBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;">📋 Duplicate</button>`);
+          copyBtn.onclick = ()=>{
+            snapshotForUndo();
+            // Shallow-copy every field, offset slightly so the duplicate is
+            // visibly distinct from the original rather than sitting exactly
+            // on top of it, then select the new copy for immediate use.
+            const copy = Object.assign({}, selEl, { x: selEl.x+14, y: selEl.y+14, linkedWhiteoutId: undefined });
+            elIdCounter++; copy.id = 'el'+elIdCounter;
+            elementsByPage[curPage].push(copy);
+            selectedId = copy.id;
+            paintEditor();
+          };
+          selRow.appendChild(copyBtn);
+          const delBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer; color:#B3261E;">🗑️ Delete</button>`);
           delBtn.onclick = ()=>{ snapshotForUndo(); elementsByPage[curPage] = elementsByPage[curPage].filter(e=>e.id!==selectedId); selectedId=null; paintEditor(); };
-          delRow.appendChild(delBtn); body.appendChild(delRow);
+          selRow.appendChild(delBtn);
+          body.appendChild(selRow);
         }
       }
 
