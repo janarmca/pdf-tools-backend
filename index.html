@@ -176,7 +176,7 @@ if (window['pdfjsLib']) {
 </script>
 <script>
 /* ===================== Core shell ===================== */
-const { PDFDocument, degrees, rgb, StandardFonts } = window.PDFLib || {};
+const { PDFDocument, degrees, rgb, StandardFonts, PDFName, PDFDict, PDFRawStream, PDFRef, PDFArray } = window.PDFLib || {};
 
 const TOOLS = [
   // ---- PDF Tools (free) ----
@@ -1908,6 +1908,87 @@ async function embedUnicodeFont(doc){
   }catch(e){
     return await doc.embedFont(StandardFonts.Helvetica); // offline fallback — English-only text still works
   }
+}
+
+// Attempts to extract embedded font PROGRAMS (the actual glyph data) directly
+// from a PDF's own internal object structure, keyed by BaseFont name (e.g.
+// "ArialMT", "TimesNewRomanPSMT") — this is what lets the PDF Editor reuse a
+// document's OWN exact font when editing text, instead of substituting a
+// generic one. This reaches into pdf-lib's low-level PDF object model (well
+// below its normal public API), so it is deliberately defensive at every
+// step: PDFs vary hugely in internal structure (simple vs Type0/composite
+// CID fonts — very common for non-Latin scripts — nested descriptors,
+// missing/non-embedded standard fonts, Type1 fonts that fontkit can't
+// reliably parse), and any single PDF might legitimately fail at any step.
+// A failure here should never break editing — it should just mean that
+// particular font falls back to the generic one, which is what already
+// happens today.
+async function extractEmbeddedFontsByPage(pdfLibDoc){
+  const byPage = [];
+  let pages = [];
+  try{ pages = pdfLibDoc.getPages(); }catch(e){ return byPage; }
+  for(let pi=0; pi<pages.length; pi++){
+    const map = {};
+    try{
+      const page = pages[pi];
+      const resources = page.node.Resources && page.node.Resources();
+      const fontDict = resources ? resources.lookup(PDFName.of('Font'), PDFDict) : null;
+      if(fontDict){
+        for(const [, ref] of fontDict.entries()){
+          try{
+            const fontObj = pdfLibDoc.context.lookup(ref, PDFDict);
+            if(!fontObj) continue;
+            const baseFontRaw = fontObj.get(PDFName.of('BaseFont'));
+            const baseFontName = baseFontRaw ? baseFontRaw.toString().replace(/^\//,'') : null;
+            if(!baseFontName) continue;
+            let descriptor = fontObj.lookup(PDFName.of('FontDescriptor'), PDFDict);
+            if(!descriptor){
+              // Type0 (composite/CID-keyed) fonts — the real descriptor lives
+              // one level down, inside DescendantFonts[0]. Extremely common
+              // for PDFs with non-Latin scripts (Tamil included).
+              const descendants = fontObj.lookup(PDFName.of('DescendantFonts'), PDFArray);
+              if(descendants && descendants.size() > 0){
+                const descFont = pdfLibDoc.context.lookup(descendants.get(0), PDFDict);
+                if(descFont) descriptor = descFont.lookup(PDFName.of('FontDescriptor'), PDFDict);
+              }
+            }
+            if(!descriptor) continue;
+            // FontFile2 (TrueType) and FontFile3 (CFF/OpenType) are the
+            // formats fontkit can generally re-embed. FontFile (old Type1)
+            // is deliberately skipped — fontkit does not reliably parse it,
+            // and a failed embed would be worse than a clean fallback.
+            let fontFileStream = descriptor.lookup(PDFName.of('FontFile2'), PDFRawStream)
+                              || descriptor.lookup(PDFName.of('FontFile3'), PDFRawStream)
+                              || null;
+            if(!fontFileStream || !fontFileStream.contents || !fontFileStream.contents.length) continue;
+            map[baseFontName] = fontFileStream.contents;
+          }catch(innerErr){ /* this one font didn't extract cleanly — skip it, keep trying the rest */ }
+        }
+      }
+    }catch(pageErr){ /* this whole page's font extraction failed — leave its map empty, other pages still work */ }
+    byPage.push(map);
+  }
+  return byPage;
+}
+// Fuzzy-matches a PDF.js fontFamily string (e.g. "ArialMT,Bold" or similar)
+// against the extracted BaseFont names for a page, since the two aren't
+// guaranteed to be byte-identical strings even when they refer to the same
+// font. Returns the matching font's raw bytes, or null if nothing matched
+// closely enough to be trustworthy.
+function matchExtractedFont(pageFontMap, pdfJsFontFamily){
+  if(!pageFontMap || !pdfJsFontFamily) return null;
+  const target = pdfJsFontFamily.toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(!target) return null;
+  let best = null, bestScore = 0;
+  for(const [name, bytes] of Object.entries(pageFontMap)){
+    const norm = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(!norm) continue;
+    let score = 0;
+    if(norm === target) score = 100;
+    else if(norm.includes(target) || target.includes(norm)) score = 60;
+    if(score > bestScore){ bestScore = score; best = bytes; }
+  }
+  return bestScore >= 60 ? best : null;
 }
 
 // Wraps a same-origin-restricted classic Worker script load: browsers refuse to
@@ -7255,6 +7336,8 @@ TOOL_IMPL.pdfeditor = {
     let tool = 'select';     // select | text | image | shape-rect | shape-ellipse | shape-line | whiteout | signature
     let selectedId = null;
     let elIdCounter = 0;
+    let extractedFontsByPage = null; // set on upload — see extractEmbeddedFontsByPage; may stay empty if extraction isn't possible for this PDF
+    const embeddedFontCache = {}; // baseFontName -> embedded pdf-lib font object, built lazily during export (avoids re-embedding the same font bytes per text run)
     const scale = 1.5;
     const body = el(`<div></div>`); container.appendChild(body);
 
@@ -7266,6 +7349,16 @@ TOOL_IMPL.pdfeditor = {
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
           pdfjsDoc = await loadPdfJs(file._buf);
           numPages = pdfjsDoc.numPages; curPage = 1; elementsByPage = {};
+          extractedFontsByPage = null;
+          try{
+            // Load the SAME file via pdf-lib (separately from pdf.js, which
+            // only handles rendering/text-position — this is for reaching
+            // into the PDF's own embedded font objects). Failure here just
+            // means font-matching won't be available for this PDF; editing
+            // still works normally with the generic font.
+            const srcDoc = await PDFDocument.load(file._buf.slice(0), { ignoreEncryption:true });
+            extractedFontsByPage = await extractEmbeddedFontsByPage(srcDoc);
+          }catch(fontExtractErr){ extractedFontsByPage = null; }
           await paintEditor();
         }});
     }
@@ -7309,7 +7402,7 @@ TOOL_IMPL.pdfeditor = {
             color = '#'+[px[0],px[1],px[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
           }
         }catch(e){ /* getImageData can fail on tainted canvases from cross-origin content — keep default black */ }
-        return { str: it.str, x, y: yTop-h, w, h, fontSize: Math.abs(it.transform[3])||10, bold:isBold, italic:isItalic, color };
+        return { str: it.str, x, y: yTop-h, w, h, fontSize: Math.abs(it.transform[3])||10, bold:isBold, italic:isItalic, color, fontFamily: styleInfo.fontFamily||'' };
       });
       return { canvas, items, pageWidthPt: viewport.width/scale, pageHeightPt: viewport.height/scale };
     }
@@ -7391,15 +7484,20 @@ TOOL_IMPL.pdfeditor = {
     }
 
     function editExistingText(item){
+      const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
+      const fontMatchFound = !!matchExtractedFont(pageFontMap, item.fontFamily);
       const overlay = el(`
         <div style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
           <div style="background:#fff; border-radius:14px; padding:18px; width:min(92vw,420px); max-height:85vh; overflow-y:auto;">
             <div style="font-weight:800; margin-bottom:10px;">Edit Text</div>
             <textarea id="editTextArea" rows="3" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; margin-bottom:10px;">${escapeHtml(item.str)}</textarea>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:12px; color:var(--sub);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px; color:var(--sub);">
               <span>Detected color:</span>
               <input type="color" id="editColorInput" value="${item.color||'#000000'}" style="width:32px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;">
               ${item.bold ? '<span style="font-weight:800; margin-left:4px;">Bold detected</span>' : ''}
+            </div>
+            <div style="font-size:11.5px; color:${fontMatchFound?'#1E7145':'#8A6D00'}; margin-bottom:10px;">
+              ${fontMatchFound ? '✓ Original document font matched — new text will use the exact same font.' : '⚠️ Could not match the exact original font for this text — a similar substitute font will be used instead.'}
             </div>
             <div class="btn-row" style="margin-bottom:10px;">
               <button class="btn" id="editManualBtn" style="flex:1; padding:9px; font-size:12.5px;">✅ Use This Text</button>
@@ -7429,7 +7527,9 @@ TOOL_IMPL.pdfeditor = {
           // box, then draw the new text in its place. True in-place PDF
           // text mutation isn't something pdf-lib/PDF.js support.
           newEl({ type:'whiteout', x:item.x-1, y:item.y-1, w:item.w+2, h:item.h+2 });
-          newEl({ type:'text', x:item.x, y:item.y, w:item.w, h:item.h, text:newText, fontSize:item.fontSize*scale, color:colorInput.value, bold:!!item.bold });
+          const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
+          const matchedFontBytes = matchExtractedFont(pageFontMap, item.fontFamily);
+          newEl({ type:'text', x:item.x, y:item.y, w:item.w, h:item.h, text:newText, fontSize:item.fontSize*scale, color:colorInput.value, bold:!!item.bold, matchedFontBytes });
         }
         overlay.remove(); paintEditor();
       }
@@ -7542,6 +7642,28 @@ TOOL_IMPL.pdfeditor = {
         prog.set(15,'Loading…');
         const outDoc = await PDFDocument.create();
         const font = await embedUnicodeFont(outDoc);
+        // Caches embedded fonts by the exact bytes-array reference (the same
+        // extracted font is commonly reused across several edited text runs
+        // on the same page) — avoids embedding identical font data multiple
+        // times, which would otherwise bloat the output file and slow export.
+        const fontEmbedCache = new Map();
+        async function embedMatchedFont(bytes){
+          if(!bytes) return null;
+          if(fontEmbedCache.has(bytes)) return fontEmbedCache.get(bytes);
+          let embedded = null;
+          try{
+            const fk = await ensureFontkitLib();
+            outDoc.registerFontkit(fk);
+            embedded = await outDoc.embedFont(bytes, { subset:true });
+          }catch(embedErr){
+            // This specific extracted font didn't embed cleanly (unsupported
+            // internal format, corrupt subset, etc.) — cache the failure too,
+            // so we don't retry the same broken bytes for every text run.
+            embedded = null;
+          }
+          fontEmbedCache.set(bytes, embedded);
+          return embedded;
+        }
         for(let pn=1; pn<=numPages; pn++){
           prog.set(15 + (pn/numPages)*70, `Rendering page ${pn}/${numPages}…`);
           const pd = (pn===curPage && pageData) ? pageData : await loadPageData(pn);
@@ -7557,15 +7679,18 @@ TOOL_IMPL.pdfeditor = {
               page.drawRectangle({x:px,y:py,width:pw,height:ph,color:rgb(1,1,1)});
             } else if(e.type==='text'){
               const textColor = hexToRgb(e.color);
-              page.drawText(e.text, {x:px, y:py+ph*0.2, size:e.fontSize/scale, font, color: textColor});
+              // Genuine exact-font match, when one was found for this text
+              // run — falls back to the generic font if extraction/matching
+              // didn't succeed for this particular PDF/font.
+              const matchedFont = await embedMatchedFont(e.matchedFontBytes);
+              const useFont = matchedFont || font;
+              page.drawText(e.text, {x:px, y:py+ph*0.2, size:e.fontSize/scale, font:useFont, color: textColor});
               if(e.bold){
                 // Faux-bold: draw the same text again with a hairline offset —
                 // a standard technique when a genuine separate bold font file
-                // isn't available (which it usually isn't here, since the
-                // original PDF's embedded font can't be reliably re-extracted
-                // and reused). Not identical to real bold, but a close,
+                // isn't available. Not identical to real bold, but a close,
                 // legible approximation.
-                page.drawText(e.text, {x:px+0.4, y:py+ph*0.2, size:e.fontSize/scale, font, color: textColor});
+                page.drawText(e.text, {x:px+0.4, y:py+ph*0.2, size:e.fontSize/scale, font:useFont, color: textColor});
               }
             } else if(e.type==='image'){
               const imgBytes = await (await fetch(e.src)).arrayBuffer();
