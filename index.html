@@ -7558,10 +7558,20 @@ TOOL_IMPL.pdfeditor = {
           // use for non-scanned PDFs: cover the original text with a white
           // box, then draw the new text in its place. True in-place PDF
           // text mutation isn't something pdf-lib/PDF.js support.
-          newEl({ type:'whiteout', x:item.x-1, y:item.y-1, w:item.w+2, h:item.h+2 });
+          // Padding is generous (not just 1-2px) because a PDF text item's
+          // reported bounding box often doesn't fully contain the visual ink
+          // — ascenders, descenders, italic slant, and font-specific overshoot
+          // can extend past it, which is exactly why the original text was
+          // still faintly visible around the edges before this fix.
+          const padX = Math.max(4, item.w*0.04), padY = Math.max(4, item.h*0.35);
+          const whiteoutEl = newEl({ type:'whiteout', x:item.x-padX, y:item.y-padY, w:item.w+padX*2, h:item.h+padY*2 });
           const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
           const matchedFontBytes = matchExtractedFont(pageFontMap, item.fontFamily);
-          newEl({ type:'text', x:item.x, y:item.y, w:item.w, h:item.h, text:newText, fontSize:item.fontSize*scale, color:colorInput.value, bold:!!item.bold, matchedFontBytes });
+          // linkedWhiteoutId ties this text run to its cover box — when the
+          // text is later resized, its whiteout resizes proportionally too,
+          // so growing the text (e.g. via "zoom to fit font") can't outgrow
+          // its cover and let the original text show through at the edges.
+          newEl({ type:'text', x:item.x, y:item.y, w:item.w, h:item.h, text:newText, fontSize:item.fontSize*scale, color:colorInput.value, bold:!!item.bold, matchedFontBytes, linkedWhiteoutId: whiteoutEl.id });
         }
         overlay.remove(); paintEditor();
       }
@@ -7595,10 +7605,7 @@ TOOL_IMPL.pdfeditor = {
 
     function handleCanvasClick(x,y){
       if(tool==='text'){
-        const txt = prompt('Enter text:'); if(!txt) return;
-        snapshotForUndo();
-        newEl({ type:'text', x, y:y-14, w:200, h:20, text:txt, fontSize:14, color:'#1a1a1a' });
-        paintEditor();
+        mountNewTextModal(x,y);
       } else if(tool==='whiteout'){
         snapshotForUndo();
         newEl({ type:'whiteout', x:x-40, y:y-12, w:80, h:24 });
@@ -7628,6 +7635,39 @@ TOOL_IMPL.pdfeditor = {
       } else if(tool==='signature'){
         mountSignaturePad(x,y);
       }
+    }
+
+    function mountNewTextModal(placeX, placeY){
+      const overlay = el(`
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
+          <div style="background:#fff; border-radius:14px; padding:18px; width:min(92vw,380px);">
+            <div style="font-weight:800; margin-bottom:10px;">Add Text</div>
+            <textarea id="newTextArea" rows="3" placeholder="Type here…" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; margin-bottom:10px;"></textarea>
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px; font-size:12px; color:var(--sub);">
+              <span style="display:flex; align-items:center; gap:6px;">Color: <input type="color" id="newTextColor" value="#1a1a1a" style="width:32px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;"></span>
+              <span style="display:flex; align-items:center; gap:6px;">Size: <input type="number" id="newTextSize" value="14" min="6" max="72" style="width:52px; padding:5px; border:1px solid var(--line); border-radius:6px; font-size:12.5px;"></span>
+            </div>
+            <div class="btn-row">
+              <button class="btn secondary" id="newTextCancel" style="flex:1; padding:9px; font-size:12.5px;">Cancel</button>
+              <button class="btn" id="newTextAdd" style="flex:1; padding:9px; font-size:12.5px;">➕ Add</button>
+            </div>
+          </div>
+        </div>
+      `);
+      document.body.appendChild(overlay);
+      const textarea = overlay.querySelector('#newTextArea');
+      textarea.focus();
+      overlay.querySelector('#newTextCancel').onclick = ()=> overlay.remove();
+      overlay.querySelector('#newTextAdd').onclick = ()=>{
+        const txt = textarea.value;
+        if(!txt || !txt.trim()){ overlay.remove(); return; }
+        const color = overlay.querySelector('#newTextColor').value;
+        const fontSize = Math.max(6, Number(overlay.querySelector('#newTextSize').value)||14);
+        snapshotForUndo();
+        newEl({ type:'text', x:placeX, y:placeY-fontSize, w:Math.max(60, txt.length*fontSize*0.55), h:fontSize+6, text:txt, fontSize, color });
+        overlay.remove();
+        paintEditor();
+      };
     }
 
     function mountSignaturePad(placeX, placeY){
@@ -7688,12 +7728,17 @@ TOOL_IMPL.pdfeditor = {
       // commit the final position to the data model (with one undo snapshot
       // for the whole drag, not one per pixel moved) on release.
       let dragStartX=0, dragStartY=0, elStartX=0, elStartY=0, dragging=false, dragMoved=false;
+      let linkedWoStartX=0, linkedWoStartY=0;
       inner.addEventListener('pointerdown', (ev)=>{
         ev.stopPropagation();
         selectedId = e.id;
         dragging = true; dragMoved = false;
         dragStartX = ev.clientX; dragStartY = ev.clientY;
         elStartX = e.x; elStartY = e.y;
+        if(e.type==='text' && e.linkedWhiteoutId){
+          const lw = (elementsByPage[curPage]||[]).find(el2=>el2.id===e.linkedWhiteoutId);
+          if(lw){ linkedWoStartX = lw.x; linkedWoStartY = lw.y; }
+        }
         try{ inner.setPointerCapture(ev.pointerId); }catch(err){}
       });
       inner.addEventListener('pointermove', (ev)=>{
@@ -7712,6 +7757,14 @@ TOOL_IMPL.pdfeditor = {
         e.x = elStartX + dxPx; e.y = elStartY + dyPx;
         inner.style.left = pct(e.x,'width')+'%';
         inner.style.top = pct(e.y,'height')+'%';
+        if(e.type==='text' && e.linkedWhiteoutId){
+          // Keep the cover box moving WITH its text — otherwise dragging text
+          // away from its whiteout would both re-expose the original PDF
+          // text where the cover no longer lines up, and leave a stray white
+          // patch sitting over whatever's now behind it.
+          const lw = (elementsByPage[curPage]||[]).find(el2=>el2.id===e.linkedWhiteoutId);
+          if(lw){ lw.x = linkedWoStartX + dxPx; lw.y = linkedWoStartY + dyPx; }
+        }
       });
       const endDrag = (ev)=>{
         if(!dragging) return;
@@ -7753,6 +7806,18 @@ TOOL_IMPL.pdfeditor = {
           // is meant to give — the box and the glyphs grow together instead
           // of the box growing around text that stays the same size.
           e.fontSize = Math.max(6, rzStartFont * (e.h/rzStartH));
+        }
+        if(e.type==='text' && e.linkedWhiteoutId){
+          // Keep the linked whiteout covering the text as it grows/shrinks —
+          // without this, resizing (e.g. via "zoom to fit") could make the
+          // text bigger than its original cover, letting the original PDF
+          // text show through at the edges again.
+          const linkedWhiteout = (elementsByPage[curPage]||[]).find(el2=>el2.id===e.linkedWhiteoutId);
+          if(linkedWhiteout){
+            const padX = Math.max(4, e.w*0.04), padY = Math.max(4, e.h*0.35);
+            linkedWhiteout.x = e.x - padX; linkedWhiteout.y = e.y - padY;
+            linkedWhiteout.w = e.w + padX*2; linkedWhiteout.h = e.h + padY*2;
+          }
         }
         inner.style.width = pct(e.w,'width')+'%';
         inner.style.height = pct(e.h,'height')+'%';
