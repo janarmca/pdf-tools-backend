@@ -7337,6 +7337,7 @@ TOOL_IMPL.pdfeditor = {
     let selectedId = null;
     let elIdCounter = 0;
     let extractedFontsByPage = null; // set on upload — see extractEmbeddedFontsByPage; may stay empty if extraction isn't possible for this PDF
+    let currentCanvasEl = null; // the actually-rendered <canvas> DOM node for the current page — used to compute a reliable display-scale for text sizing (see fontSizeToPx)
     let undoStack = [], redoStack = [];
     // Snapshots elementsByPage before a mutation so it can be undone. Uses
     // structuredClone (not JSON.stringify) specifically because matchedFontBytes
@@ -7569,6 +7570,7 @@ TOOL_IMPL.pdfeditor = {
       canvasEl.style.cssText = 'width:100%; display:block;';
       canvasEl.getContext('2d').drawImage(pageData.canvas,0,0);
       wrap.appendChild(canvasEl);
+      currentCanvasEl = canvasEl;
 
       // Invisible clickable overlays over existing text runs, for "edit existing text"
       if(tool==='select'){
@@ -7784,12 +7786,28 @@ TOOL_IMPL.pdfeditor = {
       };
     }
 
+    // Converts a font size (in canvas-intrinsic-pixel units, same space as
+    // e.x/e.y/e.w/e.h) into an ACTUAL CSS pixel value matching how large the
+    // canvas is really being displayed right now. This replaces an earlier
+    // "vh" (viewport-height-relative) approach, which was a genuine bug: vh
+    // is relative to the BROWSER WINDOW, not this canvas's own rendered
+    // size, so on any screen where the canvas is displayed smaller/larger
+    // than a 1:1 match with the viewport (i.e. almost always, since the
+    // canvas is responsively scaled to fit its container), text came out
+    // the wrong size — usually oversized and clipped by overflow:hidden,
+    // which is exactly the "font not fully displayed" symptom reported.
+    function fontSizeToPx(canvasFontSize){
+      if(!currentCanvasEl || !pageData) return canvasFontSize; // safe fallback — shouldn't normally happen
+      const displayScale = currentCanvasEl.getBoundingClientRect().width / pageData.canvas.width;
+      return canvasFontSize * displayScale;
+    }
+
     function renderElementDom(e){
       const pct = (v,dim)=> (v/pageData.canvas[dim])*100;
       const isSelected = selectedId===e.id;
       const wrapStyle = `position:absolute; left:${pct(e.x,'width')}%; top:${pct(e.y,'height')}%; width:${pct(e.w,'width')}%; height:${pct(e.h,'height')}%; cursor:move; border:${isSelected?'2px dashed #1565C0':'none'}; touch-action:none;`;
       let inner;
-      if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${(e.fontSize/pageData.canvas.height)*100}vh; color:${e.color}; font-weight:${e.bold?900:600}; white-space:nowrap; overflow:hidden; display:flex; align-items:center;">${escapeHtml(e.text)}</div>`);
+      if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${fontSizeToPx(e.fontSize)}px; color:${e.color}; font-weight:${e.bold?900:600}; white-space:nowrap; overflow:hidden; display:flex; align-items:center;">${escapeHtml(e.text)}</div>`);
       else if(e.type==='image') inner = el(`<div style="${wrapStyle}"><img src="${e.src}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;"></div>`);
       else if(e.type==='whiteout') inner = el(`<div style="${wrapStyle} background:#fff;"></div>`);
       else if(e.type==='shape'){
@@ -7906,7 +7924,7 @@ TOOL_IMPL.pdfeditor = {
         }
         inner.style.width = pct(e.w,'width')+'%';
         inner.style.height = pct(e.h,'height')+'%';
-        if(e.type==='text') inner.style.fontSize = (e.fontSize/pageData.canvas.height)*100+'vh';
+        if(e.type==='text') inner.style.fontSize = fontSizeToPx(e.fontSize)+'px';
       });
       const endResize = ()=>{ if(!resizing) return; resizing=false; paintEditor(); };
       handle.addEventListener('pointerup', endResize);
