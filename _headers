@@ -1,0 +1,25 @@
+# Cloudflare Pages custom headers — controls browser caching behavior.
+#
+# index.html (and its aliases) must NEVER be cached aggressively: this is
+# the file that changes with every update, so without this, browsers can
+# keep showing users an old version indefinitely even after a new deploy.
+# "no-cache" doesn't mean "never store" — it means the browser must always
+# revalidate with the server before using any cached copy, so updates are
+# picked up on the very next load while still allowing fast conditional
+# (304 Not Modified) responses when nothing has changed.
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.json
+  Cache-Control: no-cache
+
+# kids-arcade.html, number-jungle-game-engine.html, etc. are also
+# frequently-updated app files, not static assets — same rule applies.
+/*.html
+  Cache-Control: no-cache
