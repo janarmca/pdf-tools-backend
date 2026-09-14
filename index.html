@@ -244,6 +244,7 @@ const TOOLS = [
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
   {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0},
+  {id:'heic2jpg', name:'HEIC to JPG/PNG', desc:'Convert iPhone HEIC photos to JPG or PNG — 100% in your browser, free', icon:'📱', color:'#546E7A', cat:'image', cost:0},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0},
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
@@ -4686,6 +4687,85 @@ TOOL_IMPL.aiupscale = {
         prog.remove();
         mountResult(body, 'Error: '+err.message+' — very large images can run out of memory on some devices; try a smaller photo.').style.background='#FDEDEC';
       }
+    }
+    paint();
+  }
+};
+
+/* ===================== HEIC TO JPG/PNG CONVERTER ===================== */
+let __heic2anyReadyPromise = null;
+function ensureHeic2Any(){
+  if(__heic2anyReadyPromise) return __heic2anyReadyPromise;
+  __heic2anyReadyPromise = loadScriptOnce('https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js')
+    .then(()=>{
+      if(!window.heic2any) throw new Error('Could not load the HEIC converter — check your internet connection and try again.');
+      return window.heic2any;
+    })
+    .catch(err=>{ __heic2anyReadyPromise = null; throw err; }); // allow retry on failure, same pattern as ensureFFmpeg/ensureUpscaler
+  return __heic2anyReadyPromise;
+}
+TOOL_IMPL.heic2jpg = {
+  mount(container){
+    let files = [];
+    let outFormat = 'jpeg';
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">iPhone-ல் edukkura HEIC photos-ai, pala websites-ல் open panna mudiyathu. Idha JPG illa PNG-a maathunga — 100% browser-lyae, free-a. Multiple files-um select pannalam.</div>`));
+      mountUploader(body, { accept:'.heic,.heif,image/heic,image/heif', multiple:true, label:'Drop HEIC/HEIF photos here', sublabel:'',
+        onAdd:(fl)=>{ files = files.concat(Array.from(fl)); paint(); } });
+      if(!files.length) return;
+      mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
+
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Output Format</div>`));
+      const fmtRow = el(`<div class="filter-row"></div>`);
+      [['jpeg','JPG'],['png','PNG']].forEach(([val,label])=>{
+        const chip = el(`<button class="filter-chip ${outFormat===val?'active':''}">${label}</button>`);
+        chip.onclick = ()=>{ outFormat = val; paint(); };
+        fmtRow.appendChild(chip);
+      });
+      body.appendChild(fmtRow);
+
+      const row = el(`<div class="btn-row" style="margin-top:14px;"></div>`);
+      const btn = el(`<button class="btn">📱 Convert ${files.length>1?'All':''}</button>`);
+      btn.onclick = doConvert;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doConvert(){
+      const prog = mountProgress(body);
+      try{
+        prog.set(10, 'Loading converter…');
+        const heic2any = await ensureHeic2Any();
+        const outBlobs = [];
+        for(let i=0;i<files.length;i++){
+          prog.set(10 + (i/files.length)*80, `Converting ${files[i].name}… (${i+1}/${files.length})`);
+          let result;
+          try{
+            result = await heic2any({ blob: files[i], toType: 'image/'+outFormat, quality: 0.92 });
+          }catch(convErr){
+            // heic2any throws on files that turn out not to actually be
+            // HEIC/HEIF (e.g. a JPG renamed with a .heic extension) — skip
+            // that one file with a clear note instead of failing the whole batch.
+            mountResult(body, `Skipped "${files[i].name}" — doesn't look like a real HEIC/HEIF file.`).style.background='#FFF3E0';
+            continue;
+          }
+          // heic2any can return an array (for multi-image HEIC bursts) — flatten to individual output files either way.
+          const blobs = Array.isArray(result) ? result : [result];
+          blobs.forEach((b,bi)=> outBlobs.push({ blob:b, name: files[i].name.replace(/\.(heic|heif)$/i,'') + (blobs.length>1?'-'+(bi+1):'') + '.' + (outFormat==='jpeg'?'jpg':'png') }));
+        }
+        prog.set(95, 'Preparing download…');
+        if(outBlobs.length === 1){
+          downloadBlob(outBlobs[0].blob, outBlobs[0].name);
+        } else if(outBlobs.length > 1){
+          const zip = new JSZip();
+          outBlobs.forEach(o=> zip.file(o.name, o.blob));
+          const zipBlob = await zip.generateAsync({type:'blob'});
+          downloadBlob(zipBlob, 'converted-photos.zip');
+        }
+        prog.set(100,'Done'); prog.remove();
+        if(outBlobs.length) mountResult(body, `${outBlobs.length} photo${outBlobs.length===1?'':'s'} converted and downloaded.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
   }
