@@ -206,7 +206,7 @@ const TOOLS = [
   {id:'pdfheaderfooter', name:'PDF Header/Footer', desc:'Add text to top/bottom of every page', icon:'📄', color:'#1A5276', cat:'pdf'},
   {id:'pdfblankpage', name:'Insert Blank Page', desc:'Add blank pages at any position', icon:'➕', color:'#34495E', cat:'pdf'},
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
-  {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — like Sejda, free', icon:'✏️', color:'#0B5394', cat:'pdf'},
+  {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
   {id:'pdfhighlight', name:'Highlight Words in PDF', desc:'Search a word and highlight every match', icon:'🖍️', color:'#B7950B', cat:'pdf'},
@@ -7327,7 +7327,7 @@ TOOL_IMPL.pdfredact = {
   }
 };
 
-/* ===================== PDF EDITOR (Sejda-style overlay editor) ===================== */
+/* ===================== PDF EDITOR (overlay-based editor) ===================== */
 TOOL_IMPL.pdfeditor = {
   mount(container){
     let file = null, pdfjsDoc = null, numPages = 0, curPage = 1;
@@ -7368,9 +7368,41 @@ TOOL_IMPL.pdfeditor = {
     const scale = 1.5;
     const body = el(`<div></div>`); container.appendChild(body);
 
+    // Keyboard Delete/Backspace for the currently-selected element — a
+    // standard editor convenience alongside the explicit delete button.
+    // Guarded by checking body is still actually in the page (not just that
+    // this closure still exists) so the listener does nothing after the
+    // person navigates to a different tool, and skipped entirely while
+    // typing in any input/textarea (including this tool's own text-edit
+    // modals) so it can never eat a real Backspace keystroke while editing text.
+    document.addEventListener('keydown', function pdfEditorKeyHandler(ev){
+      if(!document.body.contains(body)){ document.removeEventListener('keydown', pdfEditorKeyHandler); return; }
+      if(!selectedId) return;
+      const active = document.activeElement;
+      if(active && (active.tagName==='INPUT' || active.tagName==='TEXTAREA')) return;
+      if(ev.key==='Delete' || ev.key==='Backspace'){
+        ev.preventDefault();
+        snapshotForUndo();
+        elementsByPage[curPage] = (elementsByPage[curPage]||[]).filter(e=>e.id!==selectedId);
+        selectedId = null;
+        paintEditor();
+      }
+    });
+
     function paintUpload(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Add text, images, your signature, and shapes to any PDF — click existing text to edit it too. Final export flattens the page (like most free online editors), so text won't stay separately selectable afterward.</div>`));
+      body.appendChild(el(`
+        <div class="note tamil" style="line-height:1.8;">
+          <div style="font-weight:800; margin-bottom:6px;">📖 எப்படி பயன்படுத்துவது:</div>
+          <div>1️⃣ கீழே PDF-ஐ upload பண்ணுங்கள்.</div>
+          <div>2️⃣ மேலே உள்ள toolbar-ல் ஒரு tool தேர்ந்தெடுங்கள் (Text/Image/Signature/Shapes/Whiteout), பிறகு PDF-ல் click பண்ணி வைக்கவும்.</div>
+          <div>3️⃣ Existing text-ஐ edit பண்ண, "↖️ Select" tool-ல் இருந்தபடியே அந்த text-ஐ click பண்ணவும்.</div>
+          <div>4️⃣ வைத்த எதையும் **இழுத்து நகர்த்தலாம்**; select பண்ணி, blue handle-ஐ இழுத்து **பெரிது/சிறிது** ஆக்கலாம்.</div>
+          <div>5️⃣ தவறு நடந்தா ↩️ Undo, திரும்ப வேணும்னா ↪️ Redo.</div>
+          <div>6️⃣ முடிச்சதும் "✅ Apply Changes & Download PDF" click பண்ணவும்.</div>
+          <div style="margin-top:6px; color:var(--sub); font-size:12px;">Final export page-ஐ ஒரு படமாக மாற்றும் (எந்த free online editor-உம் இப்படித்தான்) — original text பிறகு தனியா select ஆகாது.</div>
+        </div>
+      `));
       mountUploader(body, { accept:'application/pdf', label:'Drop a PDF file', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
@@ -7554,8 +7586,8 @@ TOOL_IMPL.pdfeditor = {
       function applyText(newText){
         if(newText && newText.trim() && newText!==item.str){
           snapshotForUndo();
-          // Simulated "edit" — same technique Sejda and most free PDF editors
-          // use for non-scanned PDFs: cover the original text with a white
+          // Simulated "edit" — the same technique most free PDF editors use
+          // for non-scanned PDFs: cover the original text with a white
           // box, then draw the new text in its place. True in-place PDF
           // text mutation isn't something pdf-lib/PDF.js support.
           // Padding is generous (not just 1-2px) because a PDF text item's
