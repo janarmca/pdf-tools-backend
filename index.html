@@ -7532,7 +7532,7 @@ TOOL_IMPL.pdfeditor = {
                 // peek through at the edges after the font size changes.
                 const linkedWhiteout = (elementsByPage[curPage]||[]).find(el2=>el2.id===selEl.linkedWhiteoutId);
                 if(linkedWhiteout){
-                  const padX = Math.max(4, selEl.w*0.04), padY = Math.max(4, selEl.h*0.35);
+                  const padX = Math.max(8, selEl.w*0.10), padY = Math.max(8, selEl.h*0.5);
                   linkedWhiteout.x = selEl.x - padX; linkedWhiteout.y = selEl.y - padY;
                   linkedWhiteout.w = selEl.w + padX*2; linkedWhiteout.h = selEl.h + padY*2;
                 }
@@ -7650,7 +7650,7 @@ TOOL_IMPL.pdfeditor = {
           // — ascenders, descenders, italic slant, and font-specific overshoot
           // can extend past it, which is exactly why the original text was
           // still faintly visible around the edges before this fix.
-          const padX = Math.max(4, item.w*0.04), padY = Math.max(4, item.h*0.35);
+          const padX = Math.max(8, item.w*0.10), padY = Math.max(8, item.h*0.5);
           const whiteoutEl = newEl({ type:'whiteout', x:item.x-padX, y:item.y-padY, w:item.w+padX*2, h:item.h+padY*2 });
           const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
           const matchedFontBytes = matchExtractedFont(pageFontMap, item.fontFamily);
@@ -7917,7 +7917,7 @@ TOOL_IMPL.pdfeditor = {
           // text show through at the edges again.
           const linkedWhiteout = (elementsByPage[curPage]||[]).find(el2=>el2.id===e.linkedWhiteoutId);
           if(linkedWhiteout){
-            const padX = Math.max(4, e.w*0.04), padY = Math.max(4, e.h*0.35);
+            const padX = Math.max(8, e.w*0.10), padY = Math.max(8, e.h*0.5);
             linkedWhiteout.x = e.x - padX; linkedWhiteout.y = e.y - padY;
             linkedWhiteout.w = e.w + padX*2; linkedWhiteout.h = e.h + padY*2;
           }
