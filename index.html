@@ -7337,6 +7337,33 @@ TOOL_IMPL.pdfeditor = {
     let selectedId = null;
     let elIdCounter = 0;
     let extractedFontsByPage = null; // set on upload — see extractEmbeddedFontsByPage; may stay empty if extraction isn't possible for this PDF
+    let undoStack = [], redoStack = [];
+    // Snapshots elementsByPage before a mutation so it can be undone. Uses
+    // structuredClone (not JSON.stringify) specifically because matchedFontBytes
+    // is a Uint8Array — JSON serialization would silently corrupt binary data.
+    function snapshotForUndo(){
+      try{ undoStack.push(structuredClone(elementsByPage)); }
+      catch(e){ undoStack.push(JSON.parse(JSON.stringify(elementsByPage))); } // fallback if structuredClone unavailable — loses matchedFontBytes on very old browsers, everything else still works
+      if(undoStack.length > 50) undoStack.shift(); // cap history so it can't grow unbounded on a long editing session
+      redoStack = []; // a new action invalidates any previously-undone redo history
+    }
+    function undo(){
+      if(!undoStack.length) return;
+      redoStack.push(structuredCloneSafe(elementsByPage));
+      elementsByPage = undoStack.pop();
+      selectedId = null;
+      paintEditor();
+    }
+    function redo(){
+      if(!redoStack.length) return;
+      undoStack.push(structuredCloneSafe(elementsByPage));
+      elementsByPage = redoStack.pop();
+      selectedId = null;
+      paintEditor();
+    }
+    function structuredCloneSafe(obj){
+      try{ return structuredClone(obj); }catch(e){ return JSON.parse(JSON.stringify(obj)); }
+    }
     const embeddedFontCache = {}; // baseFontName -> embedded pdf-lib font object, built lazily during export (avoids re-embedding the same font bytes per text run)
     const scale = 1.5;
     const body = el(`<div></div>`); container.appendChild(body);
@@ -7424,6 +7451,10 @@ TOOL_IMPL.pdfeditor = {
         btn.onclick = ()=>{ tool = key; selectedId=null; paintEditor(); };
         toolbar.appendChild(btn);
       });
+      const undoBtn = el(`<button style="padding:7px 11px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer; opacity:${undoStack.length?1:0.4};" ${undoStack.length?'':'disabled'}>↩️ Undo</button>`);
+      const redoBtn = el(`<button style="padding:7px 11px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer; opacity:${redoStack.length?1:0.4};" ${redoStack.length?'':'disabled'}>↪️ Redo</button>`);
+      undoBtn.onclick = undo; redoBtn.onclick = redo;
+      toolbar.appendChild(undoBtn); toolbar.appendChild(redoBtn);
       body.appendChild(toolbar);
 
       // Page nav
@@ -7441,7 +7472,7 @@ TOOL_IMPL.pdfeditor = {
         if(selEl){
           const delRow = el(`<div class="btn-row" style="margin-bottom:8px;"></div>`);
           const delBtn = el(`<button class="btn secondary" style="padding:6px 14px; font-size:12px; color:#B3261E;">🗑️ Delete Selected</button>`);
-          delBtn.onclick = ()=>{ elementsByPage[curPage] = elementsByPage[curPage].filter(e=>e.id!==selectedId); selectedId=null; paintEditor(); };
+          delBtn.onclick = ()=>{ snapshotForUndo(); elementsByPage[curPage] = elementsByPage[curPage].filter(e=>e.id!==selectedId); selectedId=null; paintEditor(); };
           delRow.appendChild(delBtn); body.appendChild(delRow);
         }
       }
@@ -7522,6 +7553,7 @@ TOOL_IMPL.pdfeditor = {
       const statusEl = overlay.querySelector('#editAiStatus');
       function applyText(newText){
         if(newText && newText.trim() && newText!==item.str){
+          snapshotForUndo();
           // Simulated "edit" — same technique Sejda and most free PDF editors
           // use for non-scanned PDFs: cover the original text with a white
           // box, then draw the new text in its place. True in-place PDF
@@ -7564,18 +7596,23 @@ TOOL_IMPL.pdfeditor = {
     function handleCanvasClick(x,y){
       if(tool==='text'){
         const txt = prompt('Enter text:'); if(!txt) return;
+        snapshotForUndo();
         newEl({ type:'text', x, y:y-14, w:200, h:20, text:txt, fontSize:14, color:'#1a1a1a' });
         paintEditor();
       } else if(tool==='whiteout'){
+        snapshotForUndo();
         newEl({ type:'whiteout', x:x-40, y:y-12, w:80, h:24 });
         paintEditor();
       } else if(tool==='shape-rect'){
+        snapshotForUndo();
         newEl({ type:'shape', shape:'rect', x:x-40, y:y-25, w:80, h:50, color:'#E53935' });
         paintEditor();
       } else if(tool==='shape-ellipse'){
+        snapshotForUndo();
         newEl({ type:'shape', shape:'ellipse', x:x-40, y:y-25, w:80, h:50, color:'#1E88E5' });
         paintEditor();
       } else if(tool==='shape-line'){
+        snapshotForUndo();
         newEl({ type:'shape', shape:'line', x:x-40, y:y, w:80, h:2, color:'#000000' });
         paintEditor();
       } else if(tool==='image'){
@@ -7583,6 +7620,7 @@ TOOL_IMPL.pdfeditor = {
         inp.onchange = async ()=>{
           const f = inp.files[0]; if(!f) return;
           const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+          snapshotForUndo();
           newEl({ type:'image', x:x-60, y:y-60, w:120, h:120, src:dataUrl });
           paintEditor();
         };
@@ -7615,6 +7653,7 @@ TOOL_IMPL.pdfeditor = {
       sc.addEventListener('pointerup', ()=> drawing=false);
       overlay.querySelector('#sigClear').onclick = ()=> sctx.clearRect(0,0,sc.width,sc.height);
       overlay.querySelector('#sigDone').onclick = ()=>{
+        snapshotForUndo();
         newEl({ type:'image', x:placeX-60, y:placeY-25, w:120, h:50, src:sc.toDataURL('image/png') });
         overlay.remove(); paintEditor();
       };
@@ -7622,7 +7661,8 @@ TOOL_IMPL.pdfeditor = {
 
     function renderElementDom(e){
       const pct = (v,dim)=> (v/pageData.canvas[dim])*100;
-      const wrapStyle = `position:absolute; left:${pct(e.x,'width')}%; top:${pct(e.y,'height')}%; width:${pct(e.w,'width')}%; height:${pct(e.h,'height')}%; cursor:pointer; border:${selectedId===e.id?'2px dashed #1565C0':'none'};`;
+      const isSelected = selectedId===e.id;
+      const wrapStyle = `position:absolute; left:${pct(e.x,'width')}%; top:${pct(e.y,'height')}%; width:${pct(e.w,'width')}%; height:${pct(e.h,'height')}%; cursor:move; border:${isSelected?'2px dashed #1565C0':'none'}; touch-action:none;`;
       let inner;
       if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${(e.fontSize/pageData.canvas.height)*100}vh; color:${e.color}; font-weight:${e.bold?900:600}; white-space:nowrap; overflow:hidden; display:flex; align-items:center;">${escapeHtml(e.text)}</div>`);
       else if(e.type==='image') inner = el(`<div style="${wrapStyle}"><img src="${e.src}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;"></div>`);
@@ -7632,8 +7672,95 @@ TOOL_IMPL.pdfeditor = {
         else if(e.shape==='ellipse') inner = el(`<div style="${wrapStyle} border:2.5px solid ${e.color}; border-radius:50%; background:transparent;"></div>`);
         else inner = el(`<div style="${wrapStyle} border-top:2.5px solid ${e.color};"></div>`);
       }
-      inner.onclick = (ev)=>{ ev.stopPropagation(); selectedId = e.id; paintEditor(); };
-      return inner;
+
+      // --- Drag to move ---
+      // A single pointerdown/move/up sequence: track the finger/cursor delta
+      // in CANVAS pixel units (converting from the DOM's percentage-based
+      // layout), move the element live for immediate visual feedback, then
+      // commit the final position to the data model (with one undo snapshot
+      // for the whole drag, not one per pixel moved) on release.
+      let dragStartX=0, dragStartY=0, elStartX=0, elStartY=0, dragging=false, dragMoved=false;
+      inner.addEventListener('pointerdown', (ev)=>{
+        ev.stopPropagation();
+        selectedId = e.id;
+        dragging = true; dragMoved = false;
+        dragStartX = ev.clientX; dragStartY = ev.clientY;
+        elStartX = e.x; elStartY = e.y;
+        try{ inner.setPointerCapture(ev.pointerId); }catch(err){}
+      });
+      inner.addEventListener('pointermove', (ev)=>{
+        if(!dragging) return;
+        const rect = inner.parentElement.getBoundingClientRect();
+        const dxPx = (ev.clientX - dragStartX) * (pageData.canvas.width/rect.width);
+        const dyPx = (ev.clientY - dragStartY) * (pageData.canvas.height/rect.height);
+        if(!dragMoved && (Math.abs(dxPx)>2 || Math.abs(dyPx)>2)){
+          // This is the moment a plain tap becomes an actual drag — snapshot
+          // the pre-drag state exactly once here, so the whole drag (however
+          // far the finger travels) undoes as a single step, and a simple
+          // tap-to-select never pollutes the undo history at all.
+          dragMoved = true;
+          snapshotForUndo();
+        }
+        e.x = elStartX + dxPx; e.y = elStartY + dyPx;
+        inner.style.left = pct(e.x,'width')+'%';
+        inner.style.top = pct(e.y,'height')+'%';
+      });
+      const endDrag = (ev)=>{
+        if(!dragging) return;
+        dragging = false;
+        if(dragMoved){
+          paintEditor();
+        } else {
+          // No real movement — this was just a select-tap, not a drag.
+          paintEditor();
+        }
+      };
+      inner.addEventListener('pointerup', endDrag);
+      inner.addEventListener('pointercancel', endDrag);
+      inner.onclick = (ev)=>{ ev.stopPropagation(); }; // selection already handled on pointerdown; suppress the extra click-triggered repaint from firing a second time
+
+      if(!isSelected) return inner;
+
+      // --- Resize handle (only shown once selected) ---
+      const handle = el(`<div style="position:absolute; right:-7px; bottom:-7px; width:14px; height:14px; background:#1565C0; border:2px solid #fff; border-radius:50%; cursor:nwse-resize; pointer-events:auto; touch-action:none;"></div>`);
+      let rzStartX=0, rzStartY=0, rzStartW=0, rzStartH=0, rzStartFont=0, resizing=false, rzMoved=false;
+      handle.addEventListener('pointerdown', (ev)=>{
+        ev.stopPropagation();
+        resizing = true; rzMoved = false;
+        rzStartX = ev.clientX; rzStartY = ev.clientY;
+        rzStartW = e.w; rzStartH = e.h; rzStartFont = e.fontSize||0;
+        try{ handle.setPointerCapture(ev.pointerId); }catch(err){}
+      });
+      handle.addEventListener('pointermove', (ev)=>{
+        if(!resizing) return;
+        const rect = inner.parentElement.getBoundingClientRect();
+        const dxPx = (ev.clientX - rzStartX) * (pageData.canvas.width/rect.width);
+        const dyPx = (ev.clientY - rzStartY) * (pageData.canvas.height/rect.height);
+        if(!rzMoved && (Math.abs(dxPx)>2 || Math.abs(dyPx)>2)){ rzMoved = true; snapshotForUndo(); }
+        e.w = Math.max(12, rzStartW + dxPx);
+        e.h = Math.max(12, rzStartH + dyPx);
+        if(e.type==='text' && rzStartH>0){
+          // Scale font size proportionally with height, so resizing a text
+          // box behaves like the "zoom to fit the font" the resize handle
+          // is meant to give — the box and the glyphs grow together instead
+          // of the box growing around text that stays the same size.
+          e.fontSize = Math.max(6, rzStartFont * (e.h/rzStartH));
+        }
+        inner.style.width = pct(e.w,'width')+'%';
+        inner.style.height = pct(e.h,'height')+'%';
+        if(e.type==='text') inner.style.fontSize = (e.fontSize/pageData.canvas.height)*100+'vh';
+      });
+      const endResize = ()=>{ if(!resizing) return; resizing=false; paintEditor(); };
+      handle.addEventListener('pointerup', endResize);
+      handle.addEventListener('pointercancel', endResize);
+      const frag = document.createDocumentFragment();
+      frag.appendChild(inner);
+      frag.appendChild(handle);
+      // Position the handle at inner's own bottom-right corner.
+      handle.style.position = 'absolute';
+      handle.style.left = `calc(${pct(e.x,'width')}% + ${pct(e.w,'width')}% - 7px)`;
+      handle.style.top = `calc(${pct(e.y,'height')}% + ${pct(e.h,'height')}% - 7px)`;
+      return frag;
     }
 
     async function doExport(){
