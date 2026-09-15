@@ -1084,7 +1084,7 @@ function renderDashboardStrip(){
 
 function renderSearchBar(){
   const wrap = el(`<div style="margin-top:20px; position:relative;"></div>`);
-  const input = el(`<input type="text" id="__toolSearch" placeholder="Search 70+ tools — e.g. 'compress', 'watermark', 'translate'…" value="${__searchQuery}" style="width:100%; padding:13px 16px 13px 42px; border:1.5px solid var(--line); border-radius:14px; font-size:14px; background:#fff;">`);
+  const input = el(`<input type="text" id="__toolSearch" placeholder="Search ${TOOLS.length}+ tools — e.g. 'compress', 'watermark', 'translate'…" value="${__searchQuery}" style="width:100%; padding:13px 16px 13px 42px; border:1.5px solid var(--line); border-radius:14px; font-size:14px; background:#fff;">`);
   const icon = el(`<div style="position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:15px; color:var(--sub); pointer-events:none;">🔍</div>`);
   wrap.appendChild(input); wrap.appendChild(icon);
   input.addEventListener('input', (e)=>{ __searchQuery = e.target.value; renderHomeBody(); });
@@ -1120,6 +1120,47 @@ function renderToolCard(t){
   `);
 }
 
+// Maps a file extension to the tool category most relevant to it — used by
+// the Smart Upload zone so a person who just has a file (and doesn't know
+// which of 100+ tools they need) can drop it and immediately see the right
+// starting point, instead of having to browse categories themselves.
+const EXT_TO_CATEGORY = {
+  pdf:'pdf', doc:'pdf', docx:'pdf', xls:'pdf', xlsx:'pdf', csv:'pdf', ppt:'pdf', pptx:'pdf',
+  jpg:'image', jpeg:'image', png:'image', webp:'image', gif:'image', bmp:'image', heic:'image', heif:'image', svg:'image',
+  mp4:'video', mov:'video', avi:'video', mkv:'video', webm:'video', m4v:'video',
+  mp3:'video', wav:'video', m4a:'video', // audio tools live in the video category in this app
+};
+function renderSmartUploadZone(){
+  const wrap = el(`
+    <div style="border:2px dashed var(--line); border-radius:16px; padding:20px; text-align:center; margin:18px 0; background:#FAFBFC;">
+      <div style="font-size:28px; margin-bottom:6px;">📂</div>
+      <div style="font-weight:800; font-size:14px; margin-bottom:4px;">உங்க கோப்பை இங்கே போடுங்கள்</div>
+      <div style="font-size:12px; color:var(--sub); margin-bottom:12px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், தேவையான tools காட்டுறோம்</div>
+      <input type="file" id="__smartUploadInput" style="display:none;">
+      <button id="__smartUploadBtn" class="btn" style="padding:9px 20px; font-size:13px;">📁 Choose File</button>
+      <div id="__smartUploadResult" style="margin-top:10px; font-size:12.5px; font-weight:700;"></div>
+    </div>
+  `);
+  const input = wrap.querySelector('#__smartUploadInput');
+  wrap.querySelector('#__smartUploadBtn').onclick = ()=> input.click();
+  input.onchange = ()=>{
+    const f = input.files[0]; if(!f) return;
+    const ext = (f.name.split('.').pop()||'').toLowerCase();
+    const category = EXT_TO_CATEGORY[ext];
+    const resultEl = wrap.querySelector('#__smartUploadResult');
+    if(category){
+      __activeCategory = category;
+      resultEl.style.color = '#1E7145';
+      resultEl.textContent = `✓ "${f.name}" — ${(CATEGORY_META[category]&&CATEGORY_META[category].label)||category} tools காட்டப்படுது கீழே`;
+      renderHomeBody();
+    } else {
+      resultEl.style.color = '#8A6D00';
+      resultEl.textContent = `"${f.name}" — idhukku specific category kandupidikkala. கீழே search box-la tool-ai thedunga.`;
+    }
+  };
+  return wrap;
+}
+
 function renderHomeBody(){
   const holder = document.getElementById('__homeBody');
   if(!holder) return;
@@ -1136,6 +1177,7 @@ function renderHomeBody(){
     return;
   }
 
+  holder.appendChild(renderSmartUploadZone());
   holder.appendChild(renderCategoryTabs());
 
   if(__activeCategory==='all'){
