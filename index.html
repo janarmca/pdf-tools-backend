@@ -791,6 +791,12 @@ function recordRecentTool(id){
 function getRecentTools(){
   try{ return JSON.parse(localStorage.getItem(RECENT_TOOLS_KEY)) || []; }catch(e){ return []; }
 }
+// Set by the Smart Upload zone right before navigating to a conversion
+// tool, so that tool can auto-load the file the person already picked
+// instead of asking them to upload it a second time. Consumed (cleared)
+// by whichever tool reads it on mount, so it never lingers or gets
+// accidentally reused by a later, unrelated visit to that tool.
+let __pendingSmartUploadFile = null;
 function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; render(); window.scrollTo(0,0); }
 
 function render(){
@@ -1120,25 +1126,38 @@ function renderToolCard(t){
   `);
 }
 
-// Maps a file extension to the tool category most relevant to it — used by
-// the Smart Upload zone so a person who just has a file (and doesn't know
-// which of 100+ tools they need) can drop it and immediately see the right
-// starting point, instead of having to browse categories themselves.
+// Maps a file extension to the tool category most relevant to it (fallback
+// when no direct conversion path is known) and to a list of direct
+// "convert straight to..." targets when one is. Tool ids here are verified
+// against the actual TOOLS registry above, not guessed.
 const EXT_TO_CATEGORY = {
   pdf:'pdf', doc:'pdf', docx:'pdf', xls:'pdf', xlsx:'pdf', csv:'pdf', ppt:'pdf', pptx:'pdf',
   jpg:'image', jpeg:'image', png:'image', webp:'image', gif:'image', bmp:'image', heic:'image', heif:'image', svg:'image',
   mp4:'video', mov:'video', avi:'video', mkv:'video', webm:'video', m4v:'video',
   mp3:'video', wav:'video', m4a:'video', // audio tools live in the video category in this app
 };
+const EXT_TO_CONVERT_TARGETS = {
+  pdf:  [['pdf2word','Word'], ['pdf2excel','Excel'], ['pdf2img','Images']],
+  doc:  [['word2pdf','PDF']],
+  docx: [['word2pdf','PDF']],
+  xls:  [['excel2pdf','PDF'], ['excel2word','Word']],
+  xlsx: [['excel2pdf','PDF'], ['excel2word','Word']],
+  csv:  [['excel2pdf','PDF']],
+  jpg:  [['img2pdf','PDF']],
+  jpeg: [['img2pdf','PDF']],
+  png:  [['img2pdf','PDF']],
+  heic: [['heic2jpg','JPG/PNG']],
+  heif: [['heic2jpg','JPG/PNG']],
+};
 function renderSmartUploadZone(){
   const wrap = el(`
     <div style="border:2px dashed var(--line); border-radius:16px; padding:20px; text-align:center; margin:18px 0; background:#FAFBFC;">
       <div style="font-size:28px; margin-bottom:6px;">📂</div>
       <div style="font-weight:800; font-size:14px; margin-bottom:4px;">உங்க கோப்பை இங்கே போடுங்கள்</div>
-      <div style="font-size:12px; color:var(--sub); margin-bottom:12px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், தேவையான tools காட்டுறோம்</div>
+      <div style="font-size:12px; color:var(--sub); margin-bottom:12px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்</div>
       <input type="file" id="__smartUploadInput" style="display:none;">
       <button id="__smartUploadBtn" class="btn" style="padding:9px 20px; font-size:13px;">📁 Choose File</button>
-      <div id="__smartUploadResult" style="margin-top:10px; font-size:12.5px; font-weight:700;"></div>
+      <div id="__smartUploadResult" style="margin-top:12px;"></div>
     </div>
   `);
   const input = wrap.querySelector('#__smartUploadInput');
@@ -1147,15 +1166,27 @@ function renderSmartUploadZone(){
     const f = input.files[0]; if(!f) return;
     const ext = (f.name.split('.').pop()||'').toLowerCase();
     const category = EXT_TO_CATEGORY[ext];
+    const convertTargets = EXT_TO_CONVERT_TARGETS[ext];
     const resultEl = wrap.querySelector('#__smartUploadResult');
-    if(category){
+    resultEl.innerHTML = '';
+    if(convertTargets && convertTargets.length){
+      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145; margin-bottom:8px;">✓ "${escapeHtml(f.name)}" — எதற்கு convert பண்ணணும்?</div>`));
+      const btnRow = el(`<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>`);
+      convertTargets.forEach(([toolId,label])=>{
+        const btn = el(`<button style="padding:8px 16px; border-radius:10px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font-weight:700; font-size:12.5px; cursor:pointer;">→ ${label}</button>`);
+        btn.onclick = ()=>{
+          __pendingSmartUploadFile = f;
+          openTool(toolId);
+        };
+        btnRow.appendChild(btn);
+      });
+      resultEl.appendChild(btnRow);
+    } else if(category){
       __activeCategory = category;
-      resultEl.style.color = '#1E7145';
-      resultEl.textContent = `✓ "${f.name}" — ${(CATEGORY_META[category]&&CATEGORY_META[category].label)||category} tools காட்டப்படுது கீழே`;
+      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145;">✓ "${escapeHtml(f.name)}" — ${escapeHtml((CATEGORY_META[category]&&CATEGORY_META[category].label)||category)} tools காட்டப்படுது கீழே</div>`));
       renderHomeBody();
     } else {
-      resultEl.style.color = '#8A6D00';
-      resultEl.textContent = `"${f.name}" — idhukku specific category kandupidikkala. கீழே search box-la tool-ai thedunga.`;
+      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#8A6D00;">"${escapeHtml(f.name)}" — இதற்கு specific tool கண்டுபிடிக்க முடியல. கீழே search box-ல் தேடுங்கள்.</div>`));
     }
   };
   return wrap;
@@ -2663,6 +2694,11 @@ TOOL_IMPL.img2pdf = {
         body.appendChild(row);
       }
     }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      if(isSupportedImage(f)) files.push(f);
+      paint();
+    }
     async function doConvert(){
       const prog = mountProgress(body);
       try{
@@ -2692,12 +2728,13 @@ TOOL_IMPL.pdf2img = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'application/pdf',
         label:'Drop a PDF file', sublabel:'Every page downloads as a JPG (ZIP)',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -2720,6 +2757,10 @@ TOOL_IMPL.pdf2img = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     async function doConvert(){
       const scale = Number(body.querySelector('#qualSel').value);
@@ -3347,12 +3388,13 @@ TOOL_IMPL.word2pdf = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         label:'ஒரு Word (.docx) file drag & drop or tap', sublabel:'PDF Convert toம் — எழுத்துரு சரியாக காட்டப்படும் (தமிழ் உட்பட)',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -3362,6 +3404,13 @@ TOOL_IMPL.word2pdf = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    // Auto-load a file handed off from the home-screen Smart Upload zone,
+    // if this is what the person picked "Convert to Word/PDF" for — saves
+    // them uploading the same file a second time.
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3386,12 +3435,13 @@ TOOL_IMPL.pdf2word = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'application/pdf',
         label:'Drop a PDF file', sublabel:'Converts to Word (.docx)',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -3401,6 +3451,10 @@ TOOL_IMPL.pdf2word = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3436,12 +3490,13 @@ TOOL_IMPL.excel2pdf = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.xlsx,.xls,.csv',
         label:'Excel (.xlsx/.xls/.csv) file drag & drop or tap', sublabel:'ஒவ்வொரு Sheet-ஐயும் PDF Convert toம்',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -3451,6 +3506,10 @@ TOOL_IMPL.excel2pdf = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3483,12 +3542,13 @@ TOOL_IMPL.excel2word = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.xlsx,.xls,.csv',
         label:'Excel (.xlsx/.xls/.csv) file drag & drop or tap', sublabel:'Word (.docx) அட்டவணையாக Convert',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -3498,6 +3558,10 @@ TOOL_IMPL.excel2word = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3536,12 +3600,13 @@ TOOL_IMPL.pdf2excel = {
   mount(container){
     let file = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'application/pdf',
         label:'Drop a PDF file', sublabel:'Converts text/tables to .xlsx',
-        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); }
+        onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
@@ -3553,6 +3618,10 @@ TOOL_IMPL.pdf2excel = {
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
     }
     // Cluster a sorted list of numeric centers into groups within `tol` of each other.
     function clusterPositions(values, tol){
@@ -4773,6 +4842,10 @@ TOOL_IMPL.heic2jpg = {
       btn.onclick = doConvert;
       row.appendChild(btn);
       body.appendChild(row);
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      files.push(f);
     }
     async function doConvert(){
       const prog = mountProgress(body);
