@@ -2698,6 +2698,8 @@ TOOL_IMPL.img2pdf = {
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
       if(isSupportedImage(f)) files.push(f);
       paint();
+    } else {
+      paint();
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -2719,7 +2721,6 @@ TOOL_IMPL.img2pdf = {
         mountResult(body, `${files.length} images, containing PDF downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -2760,7 +2761,9 @@ TOOL_IMPL.pdf2img = {
     }
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     async function doConvert(){
       const scale = Number(body.querySelector('#qualSel').value);
@@ -2787,7 +2790,6 @@ TOOL_IMPL.pdf2img = {
         mountResult(body, `${pdfjsDoc.numPages} images as a ZIP downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -3410,7 +3412,9 @@ TOOL_IMPL.word2pdf = {
     // them uploading the same file a second time.
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3426,7 +3430,6 @@ TOOL_IMPL.word2pdf = {
         mountResult(body, 'PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -3454,7 +3457,9 @@ TOOL_IMPL.pdf2word = {
     }
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3481,7 +3486,6 @@ TOOL_IMPL.pdf2word = {
         mountResult(body, 'Word file (.docx) downloaded.').style.background='#FFF6E5';
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -3509,7 +3513,9 @@ TOOL_IMPL.excel2pdf = {
     }
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3533,7 +3539,6 @@ TOOL_IMPL.excel2pdf = {
         mountResult(body, 'PDF downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -3561,7 +3566,9 @@ TOOL_IMPL.excel2word = {
     }
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     async function doConvert(){
       const prog = mountProgress(body);
@@ -3591,7 +3598,6 @@ TOOL_IMPL.excel2word = {
         mountResult(body, 'Word file (.docx) downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
@@ -3621,7 +3627,9 @@ TOOL_IMPL.pdf2excel = {
     }
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f);
+      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+    } else {
+      paint();
     }
     // Cluster a sorted list of numeric centers into groups within `tol` of each other.
     function clusterPositions(values, tol){
@@ -3758,7 +3766,6 @@ TOOL_IMPL.pdf2excel = {
         mountResult(body, 'Excel ஃபைல் (.xlsx) — PDF வடிவமைப்பு பாதுகாக்கப்பட்ட வகையில் downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
-    paint();
   }
 };
 
