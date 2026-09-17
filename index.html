@@ -3886,7 +3886,7 @@ function normalizeStatementAmount(raw){
 // tightly-packed ledger PDFs where Date/Type/Description/Voucher#/Amount
 // all end up merged into one cell by the table-grid detector). Regex
 // matching within the raw text doesn't depend on column boundaries at all.
-const STMT_DATE_RE = /\b(\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3,9})[\/\-.]\d{2,4})\b/;
+const STMT_DATE_RE = /\b(\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3,9})[\/\-.]\d{2,4})/;
 // Matches either Indian-grouped currency (1-2 digits, then groups of 2,
 // ending in a group of 3, before the decimal — e.g. "1,41,600.00" or
 // "47,200.00") or a plain decimal number ("141600.00") — the Indian-format
@@ -3895,13 +3895,19 @@ const STMT_DATE_RE = /\b(\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3,9})[\/\-.]\d{2,4})\
 // (like a voucher/serial number sitting right next to the amount with no
 // separating space) the way a looser "any digits then decimal" pattern would.
 const STMT_AMOUNT_RE = /\d{1,2}(?:,\d{2})*,\d{3}\.\d{2}|\d+\.\d{2}/g;
+// Ledger lines conventionally mark each entry as Dr (debit) or Cr (credit) —
+// used to compute Total Debits/Credits and a closing balance, the same
+// summary a proper reconciliation report leads with.
+const STMT_DRCR_RE = /\b(Dr|Cr)\b/;
 function extractDateAmountFromText(text){
   const dateMatch = text.match(STMT_DATE_RE);
   const amountMatches = [...text.matchAll(STMT_AMOUNT_RE)];
   const amountMatch = amountMatches.length ? amountMatches[amountMatches.length-1] : null; // last match — amount typically comes after any voucher/serial number on the line
+  const drCrMatch = text.match(STMT_DRCR_RE);
   return {
     dateRaw: dateMatch ? dateMatch[1] : '',
-    amountRaw: amountMatch ? amountMatch[0] : ''
+    amountRaw: amountMatch ? amountMatch[0] : '',
+    drCr: drCrMatch ? drCrMatch[1] : ''
   };
 }
 
@@ -3982,23 +3988,38 @@ TOOL_IMPL.stmtcompare = {
       body.appendChild(wrap);
     }
 
+    // Ledger pages commonly include subtotal/summary rows (page-carry
+    // totals, closing balance) that are NOT individual transactions and
+    // would otherwise show up as false "only in A/B" mismatches.
+    const STMT_NON_TXN_RE = /carried\s*over|brought\s*forward|closing\s*balance|^\s*total\s/i;
     function extractRecords(grid, mode, cols){
       const records = [];
       if(mode==='auto'){
+        let lastDate = '';
         grid.forEach((row,idx)=>{
-          const { dateRaw, amountRaw } = extractDateAmountFromText(row.join(' '));
+          const rowText = row.join(' ');
+          if(STMT_NON_TXN_RE.test(rowText)) return;
+          const { dateRaw, amountRaw, drCr } = extractDateAmountFromText(rowText);
           const amount = normalizeStatementAmount(amountRaw);
-          if(!dateRaw || isNaN(amount)) return;
-          records.push({ rowIdx: idx, date: normalizeStatementDate(dateRaw), dateRaw, amount, amountRaw, ref: '', raw: row });
+          // Ledger continuation lines (e.g. a wrapped entry with no date of
+          // its own) belong to whichever date came before them — carrying
+          // it forward means these rows aren't silently dropped.
+          const effectiveDateRaw = dateRaw || lastDate;
+          if(dateRaw) lastDate = dateRaw;
+          if(!effectiveDateRaw || isNaN(amount)) return;
+          records.push({ rowIdx: idx, date: normalizeStatementDate(effectiveDateRaw), dateRaw: effectiveDateRaw, amount, amountRaw, drCr, ref: '', raw: row });
         });
         return records;
       }
       const di = Number(cols.date), ai = Number(cols.amount), ri = cols.ref!=='' ? Number(cols.ref) : -1;
       grid.forEach((row,idx)=>{
+        const rowText = row.join(' ');
+        if(STMT_NON_TXN_RE.test(rowText)) return;
         const dateRaw = row[di], amtRaw = row[ai];
         const amount = normalizeStatementAmount(amtRaw);
         if(!dateRaw || isNaN(amount)) return; // skip header/blank/non-data rows
-        records.push({ rowIdx: idx, date: normalizeStatementDate(dateRaw), dateRaw, amount, amountRaw: amtRaw, ref: ri>=0 ? String(row[ri]||'').trim() : '', raw: row });
+        const { drCr } = extractDateAmountFromText(rowText);
+        records.push({ rowIdx: idx, date: normalizeStatementDate(dateRaw), dateRaw, amount, amountRaw: amtRaw, drCr, ref: ri>=0 ? String(row[ri]||'').trim() : '', raw: row });
       });
       return records;
     }
@@ -4007,7 +4028,7 @@ TOOL_IMPL.stmtcompare = {
       const recA = extractRecords(gridA, modeA, colsA);
       const recB = extractRecords(gridB, modeB, colsB);
       const usedB = new Set();
-      const matched = [], amountMismatches = [], onlyInA = [];
+      const matched = [], amountMismatches = [], unmatchedA = [];
       recA.forEach(a=>{
         // First try matching by reference number (most reliable when available), then by date+amount.
         let bi = -1;
@@ -4018,11 +4039,64 @@ TOOL_IMPL.stmtcompare = {
           const b = recB[bi]; usedB.add(bi);
           if(Math.abs(b.amount-a.amount) < 0.01) matched.push({a,b});
           else amountMismatches.push({a,b, diff: a.amount-b.amount});
-        } else onlyInA.push(a);
+        } else unmatchedA.push(a);
       });
-      const onlyInB = recB.filter((b,i)=> !usedB.has(i));
+      let unmatchedB = recB.filter((b,i)=> !usedB.has(i));
+
+      // Second pass on what's left: same amount but on a DIFFERENT date within
+      // a short window is very often the same transaction posted a few days
+      // apart between two parties' books (entry-date vs value-date, posting
+      // delay) — worth surfacing as its own category. Kept narrow (7 days)
+      // because statements with many repeated round amounts (e.g. the same
+      // ₹47,200 recurring monthly) would otherwise cross-match unrelated
+      // transactions that merely happen to share an amount within a wider window.
+      const dateDiscrepancies = [];
+      const onlyInA = [], usedB2 = new Set();
+      unmatchedA.forEach(a=>{
+        const aTime = new Date(a.date).getTime();
+        let bestIdx=-1, bestDiff=Infinity;
+        unmatchedB.forEach((b,i)=>{
+          if(usedB2.has(i)) return;
+          if(Math.abs(b.amount-a.amount) >= 0.01) return;
+          const bTime = new Date(b.date).getTime();
+          const dayDiff = Math.abs(aTime-bTime)/86400000;
+          if(dayDiff <= 7 && dayDiff < bestDiff){ bestDiff = dayDiff; bestIdx = i; }
+        });
+        if(bestIdx!==-1){ dateDiscrepancies.push({a, b:unmatchedB[bestIdx], days:Math.round(bestDiff)}); usedB2.add(bestIdx); }
+        else onlyInA.push(a);
+      });
+      const onlyInB = unmatchedB.filter((b,i)=> !usedB2.has(i));
+
+      // Totals & Balances — the summary a proper reconciliation report leads
+      // with, before the line-by-line detail.
+      function totals(records){
+        let debit=0, credit=0;
+        records.forEach(r=>{ if(r.drCr==='Dr') debit+=r.amount; else if(r.drCr==='Cr') credit+=r.amount; });
+        return { debit, credit, balance: debit-credit };
+      }
+      const totA = totals(recA), totB = totals(recB);
+      const fmt = n=> '₹'+Math.abs(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const balanceDiff = Math.abs(totA.balance - totB.balance);
 
       const resultsWrap = el(`<div style="margin-top:16px;"></div>`);
+
+      // Only show the totals table when Dr/Cr was actually detected for a
+      // meaningful share of records — on manually-picked columns with no
+      // Dr/Cr marker in the text this would just show all-zero rows.
+      const haveDrCr = recA.some(r=>r.drCr) && recB.some(r=>r.drCr);
+      if(haveDrCr){
+        resultsWrap.appendChild(el(`<div style="font-weight:800; font-size:13px; margin-bottom:8px;">📊 Totals & Balances</div>`));
+        resultsWrap.appendChild(el(`
+          <div style="border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:16px; font-size:12px;">
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; background:#F5F6F8; font-weight:700; padding:8px 10px;"><div>Dimension</div><div>Buyer</div><div>Supplier</div></div>
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Total Debits</div><div>${fmt(totA.debit)}</div><div>${fmt(totB.debit)}</div></div>
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Total Credits</div><div>${fmt(totA.credit)}</div><div>${fmt(totB.credit)}</div></div>
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line); font-weight:700;"><div>Closing Balance</div><div>${fmt(totA.balance)} (${totA.balance>=0?'Debit':'Credit'})</div><div>${fmt(totB.balance)} (${totB.balance>=0?'Debit':'Credit'})</div></div>
+            <div style="padding:8px 10px; border-top:1px solid var(--line); background:${balanceDiff<0.01?'#E8F5E9':'#FDEDEC'}; font-weight:700; color:${balanceDiff<0.01?'#1E7145':'#B3261E'};">${balanceDiff<0.01?'✅ Balances match':`❌ Mismatch of ${fmt(balanceDiff)}`}</div>
+          </div>
+        `));
+      }
+
       resultsWrap.appendChild(el(`
         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
           <div style="background:#E8F5E9; border-radius:10px; padding:10px; text-align:center;"><div style="font-weight:900; font-size:18px; color:#1E7145;">${matched.length}</div><div style="font-size:10.5px; color:var(--sub);">Matched</div></div>
@@ -4039,14 +4113,26 @@ TOOL_IMPL.stmtcompare = {
         items.forEach((it,i)=> list.appendChild(el(`<div style="padding:8px 12px; font-size:12px; ${i%2?'background:#FAFAFA;':''} ${i<items.length-1?'border-bottom:1px solid var(--line);':''}">${render(it)}</div>`)));
         resultsWrap.appendChild(list);
       }
-      section(`⚠️ Amount Mismatches (${amountMismatches.length})`, amountMismatches, m=> `${m.a.dateRaw} — Buyer: ₹${m.a.amount} vs Supplier: ₹${m.b.amount} <b style="color:#B3261E;">(diff: ₹${m.diff.toFixed(2)})</b>${m.a.ref?' — Ref: '+escapeHtml(m.a.ref):''}`);
-      section(`❌ Only in Buyer, missing from Supplier (${onlyInA.length})`, onlyInA, r=> `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}`);
-      section(`❌ Only in Supplier, missing from Buyer (${onlyInB.length})`, onlyInB, r=> `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}`);
+      section(`🗓️ Date Timing Discrepancies — same amount, different date (${dateDiscrepancies.length})`, dateDiscrepancies, d=> `₹${d.a.amount.toLocaleString('en-IN')} — Buyer: ${d.a.dateRaw} vs Supplier: ${d.b.dateRaw} <b style="color:#B7791F;">(${d.days} day${d.days===1?'':'s'} apart)</b> — amounts match, likely a posting-date difference`);
+      section(`⚠️ Amount Mismatches (${amountMismatches.length})`, amountMismatches, m=> {
+        const impact = Math.abs(Math.abs(m.diff) - balanceDiff) < 0.01 ? ' <b style="color:#B3261E;">— fully explains the closing balance difference</b>' : '';
+        return `${m.a.dateRaw} — Buyer: ₹${m.a.amount} vs Supplier: ₹${m.b.amount} <b style="color:#B3261E;">(diff: ₹${m.diff.toFixed(2)})</b>${m.a.ref?' — Ref: '+escapeHtml(m.a.ref):''}${impact}`;
+      });
+      section(`❌ Only in Buyer, missing from Supplier (${onlyInA.length})`, onlyInA, r=> {
+        const impact = Math.abs(r.amount - balanceDiff) < 0.01 ? ' <b style="color:#B3261E;">— this single missing entry fully explains the closing balance difference</b>' : '';
+        return `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}${impact}`;
+      });
+      section(`❌ Only in Supplier, missing from Buyer (${onlyInB.length})`, onlyInB, r=> {
+        const impact = Math.abs(r.amount - balanceDiff) < 0.01 ? ' <b style="color:#B3261E;">— this single missing entry fully explains the closing balance difference</b>' : '';
+        return `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}${impact}`;
+      });
 
       const exportBtn = el(`<button class="btn secondary" style="margin-top:16px; padding:9px 18px; font-size:12.5px;">📥 Export Report (Excel)</button>`);
       exportBtn.onclick = ()=>{
         const wb = XLSX.utils.book_new();
         const mkSheet = (rows, cols)=> XLSX.utils.aoa_to_sheet([cols, ...rows]);
+        if(haveDrCr) XLSX.utils.book_append_sheet(wb, mkSheet([['Total Debits',totA.debit,totB.debit],['Total Credits',totA.credit,totB.credit],['Closing Balance',totA.balance,totB.balance]], ['Dimension','Buyer','Supplier']), 'Totals & Balances');
+        XLSX.utils.book_append_sheet(wb, mkSheet(dateDiscrepancies.map(d=>[d.a.dateRaw, d.b.dateRaw, d.days, d.a.amount]), ['Buyer Date','Supplier Date','Days Apart','Amount']), 'Date Discrepancies');
         XLSX.utils.book_append_sheet(wb, mkSheet(amountMismatches.map(m=>[m.a.dateRaw, m.a.amount, m.b.amount, (m.a.amount-m.b.amount).toFixed(2), m.a.ref]), ['Date','Buyer Amount','Supplier Amount','Difference','Reference']), 'Amount Mismatches');
         XLSX.utils.book_append_sheet(wb, mkSheet(onlyInA.map(r=>[r.dateRaw, r.amount, r.ref]), ['Date','Amount','Reference']), 'Only in Buyer');
         XLSX.utils.book_append_sheet(wb, mkSheet(onlyInB.map(r=>[r.dateRaw, r.amount, r.ref]), ['Date','Amount','Reference']), 'Only in Supplier');
