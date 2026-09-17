@@ -1973,6 +1973,74 @@ function ensureTamilFontBytes(){
 // StandardFonts.Helvetica/HelveticaBold for ANY text the person typed themselves
 // (watermarks, stamps, headers/footers, Text→PDF) — not needed for our own fixed
 // English UI labels.
+// Detects table/grid structure in a PDF page's text items (same proven
+// technique pdf2excel already uses) and returns a 2D array of cell strings
+// plus how many "real" (repeated, multi-row) columns were found. Callers
+// can use numRealColumns to decide whether this text genuinely looks like
+// a table worth rendering as one, or whether it's just ordinary paragraph
+// text that happens to have items at varying x-positions.
+function detectPdfTableGrid(items){
+  if(!items.length) return {grid:[], numRealColumns:0};
+  const heights = items.map(it=>it.h).sort((a,b)=>a-b);
+  const medH = heights[Math.floor(heights.length/2)] || 10;
+  const yTol = Math.max(2.5, medH * 0.55);
+  const sortedItems = [...items].sort((a,b)=> b.y - a.y || a.x - b.x);
+  const rows = [];
+  sortedItems.forEach(it=>{
+    let r = rows.find(r0 => Math.abs(r0.y - it.y) <= yTol);
+    if(!r){ r = {y: it.y, items: []}; rows.push(r); }
+    r.items.push(it);
+    r.y = (r.y*(r.items.length-1) + it.y)/r.items.length;
+  });
+  rows.sort((a,b)=> b.y - a.y);
+  rows.forEach(r=> r.items.sort((a,b)=> a.x - b.x));
+
+  const allGaps = [];
+  rows.forEach(r=>{ for(let k=1;k<r.items.length;k++){ const prev=r.items[k-1]; allGaps.push(r.items[k].x-(prev.x+prev.w)); } });
+  const avgCharW = (items.reduce((s,it)=> s + (it.w/Math.max(1,it.str.length)), 0))/items.length || 5;
+  const colGapTol = Math.max(avgCharW*1.6, 8);
+
+  rows.forEach(r=>{
+    const cells = []; let cur = null;
+    r.items.forEach(it=>{
+      if(cur && (it.x - (cur.x + cur.w)) <= colGapTol){
+        cur.str += (it.x - (cur.x+cur.w) > avgCharW*0.35 ? ' ' : '') + it.str;
+        cur.w = (it.x + it.w) - cur.x;
+      } else { cur = { x: it.x, w: it.w, str: it.str }; cells.push(cur); }
+    });
+    r.cells = cells;
+  });
+
+  const colTol = Math.max(avgCharW*2.2, 12);
+  function clusterPositions(values, tol){
+    const sorted = [...values].sort((a,b)=>a-b);
+    const clusters = [];
+    sorted.forEach(v=>{
+      const last = clusters[clusters.length-1];
+      if(last && (v - last.max) <= tol){ last.items.push(v); last.max = v; last.center = (last.items.reduce((s,x)=>s+x,0))/last.items.length; }
+      else clusters.push({items:[v], max:v, center:v});
+    });
+    return clusters.map(c=>c.center);
+  }
+  const rawCenters = clusterPositions(rows.flatMap(r=>r.cells.map(c=>c.x)), colTol).sort((a,b)=>a-b);
+  const rowsUsingCenter = rawCenters.map(c=> new Set(rows.filter(r=> r.cells.some(cell=> Math.abs(cell.x-c) <= colTol)).map(r=>r.y)).size);
+  const minRowsForRealColumn = Math.max(2, Math.ceil(rows.length*0.12));
+  const realCenters = rawCenters.filter((c,i)=> rowsUsingCenter[i] >= minRowsForRealColumn);
+  const colCenters = (realCenters.length ? realCenters : rawCenters);
+
+  function nearestColIdx(x){
+    let bi=0, bd=Infinity;
+    colCenters.forEach((c,ci)=>{ const d=Math.abs(c-x); if(d<bd){ bd=d; bi=ci; } });
+    return bi;
+  }
+  const grid = rows.map(r=>{
+    const rowArr = new Array(colCenters.length).fill('');
+    r.cells.forEach(c=>{ const ci = nearestColIdx(c.x); rowArr[ci] = rowArr[ci] ? (rowArr[ci] + ' ' + c.str) : c.str; });
+    return rowArr;
+  });
+  return {grid, numRealColumns: realCenters.length};
+}
+
 async function embedUnicodeFont(doc){
   try{
     const fk = await ensureFontkitLib();
@@ -3466,7 +3534,7 @@ TOOL_IMPL.pdf2word = {
       try{
         prog.set(15,'Reading…');
         const pdfjsDoc = await loadPdfJs(file._buf);
-        const { Document, Paragraph, TextRun, Packer } = getDocxLib();
+        const { Document, Paragraph, TextRun, Table, TableRow, TableCell, Packer, WidthType } = getDocxLib();
         const children = [];
         for(let i=1;i<=pdfjsDoc.numPages;i++){
           prog.set(15+(i/pdfjsDoc.numPages)*70, `page ${i}/${pdfjsDoc.numPages}…`);
@@ -3474,6 +3542,25 @@ TOOL_IMPL.pdf2word = {
           const content = await page.getTextContent();
           const styles = content.styles || {};
           const items = content.items.filter(it=>it.str && it.str.length);
+
+          // Check whether this page genuinely contains a table (repeated,
+          // multi-row columns) before deciding how to render it — a page of
+          // ordinary paragraph text also has items at "varying x-positions",
+          // but only a real table has the SAME column positions reused
+          // across many rows, which is what numRealColumns captures.
+          const gridItems = items.map(it=>({ x:it.transform[4], y:it.transform[5], w: it.width || (it.str.length*(it.transform[0]||6)*0.5), h: Math.abs(it.transform[3])||10, str: it.str }));
+          const { grid, numRealColumns } = detectPdfTableGrid(gridItems);
+
+          if(numRealColumns >= 2 && grid.length){
+            const tableRows = grid.map(r => new TableRow({ children: r.map(cell => new TableCell({
+              width:{size: Math.max(1000, Math.floor(9000/Math.max(1,r.length))), type: WidthType.DXA},
+              children:[ new Paragraph({ children:[ new TextRun(String(cell)) ] }) ]
+            })) }));
+            children.push(new Table({ rows: tableRows, width:{size:100, type:WidthType.PERCENTAGE} }));
+            children.push(new Paragraph({ text:'' }));
+            continue;
+          }
+
           // Group individual text runs into lines by Y-position proximity —
           // pdf.js gives one item per run of same-styled text, not per
           // visual line, so runs on the same line (possibly with different
@@ -3507,7 +3594,7 @@ TOOL_IMPL.pdf2word = {
         prog.set(100,'Done');
         downloadBlob(blob, file.name.replace(/\.pdf$/i,'')+'.docx');
         prog.remove();
-        mountResult(body, 'Word file (.docx) downloaded — bold/italic/font size preserved where detectable.').style.background='#FFF6E5';
+        mountResult(body, 'Word file (.docx) downloaded — bold/italic/font size preserved, tables kept as real tables where detected.').style.background='#FFF6E5';
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
