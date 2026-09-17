@@ -2005,7 +2005,7 @@ function detectPdfTableGrid(items){
     const cells = []; let cur = null;
     r.items.forEach(it=>{
       if(cur && (it.x - (cur.x + cur.w)) <= colGapTol){
-        cur.str += (it.x - (cur.x+cur.w) > avgCharW*0.35 ? ' ' : '') + it.str;
+        cur.str += ' ' + it.str;
         cur.w = (it.x + it.w) - cur.x;
       } else { cur = { x: it.x, w: it.w, str: it.str }; cells.push(cur); }
     });
