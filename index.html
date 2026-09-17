@@ -3962,11 +3962,18 @@ TOOL_IMPL.stmtcompare = {
       if(gridA && gridA.length) mountColumnPicker('A', gridA, colsA, c=>{ colsA=c; });
       if(gridB && gridB.length) mountColumnPicker('B', gridB, colsB, c=>{ colsB=c; });
 
-      if(gridA && gridB && colsA && colsB && colsA.date!=='' && colsA.amount!=='' && colsB.date!=='' && colsB.amount!==''){
-        const runRow = el(`<div class="btn-row" style="margin-top:14px;"></div>`);
-        const btn = el(`<button class="btn">🔍 Compare & Find Mismatches</button>`);
-        btn.onclick = doCompareStatements;
+      if(gridA && gridB){
+        const ready = colsA && colsB && colsA.date!=='' && colsA.amount!=='' && colsB.date!=='' && colsB.amount!=='';
+        const missing = [];
+        if(!colsA || colsA.date==='') missing.push('Buyer Date column');
+        if(!colsA || colsA.amount==='') missing.push('Buyer Amount column');
+        if(!colsB || colsB.date==='') missing.push('Supplier Date column');
+        if(!colsB || colsB.amount==='') missing.push('Supplier Amount column');
+        const runRow = el(`<div class="btn-row" style="margin-top:14px; flex-direction:column; align-items:stretch; gap:6px;"></div>`);
+        const btn = el(`<button class="btn" ${ready?'':'disabled'} style="${ready?'':'opacity:0.5; cursor:not-allowed;'}">🔍 Compare & Find Mismatches</button>`);
+        if(ready) btn.onclick = doCompareStatements;
         runRow.appendChild(btn);
+        if(!ready) runRow.appendChild(el(`<div style="font-size:11.5px; color:#B7791F; text-align:center;">தேர்வு செய்யவும்: ${escapeHtml(missing.join(', '))}</div>`));
         body.appendChild(runRow);
       }
     }
