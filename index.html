@@ -4076,7 +4076,18 @@ TOOL_IMPL.stmtcompare = {
       }
       const totA = totals(recA), totB = totals(recB);
       const fmt = n=> '₹'+Math.abs(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const balanceDiff = Math.abs(totA.balance - totB.balance);
+      // Double-entry accounting: what the Buyer books as a Debit (a purchase,
+      // what they owe), the Supplier books as a Credit (a sale, what's owed
+      // to them) for the SAME transaction — and vice versa for payments.
+      // Comparing same-side totals (Buyer Debit vs Supplier Debit) is a
+      // category error; the correct check is Buyer Debit vs Supplier Credit.
+      const debitCreditDiff = Math.abs(totA.debit - totB.credit);
+      const creditDebitDiff = Math.abs(totA.credit - totB.debit);
+      // A correctly-reconciled pair has Buyer's balance and Supplier's
+      // balance as mirror images (opposite sign, same magnitude) — e.g.
+      // Buyer owes ₹X (Debit balance) exactly when Supplier is owed ₹X
+      // (Credit balance) by that same buyer.
+      const balanceDiff = Math.abs(totA.balance + totB.balance);
 
       const resultsWrap = el(`<div style="margin-top:16px;"></div>`);
 
@@ -4085,14 +4096,17 @@ TOOL_IMPL.stmtcompare = {
       // Dr/Cr marker in the text this would just show all-zero rows.
       const haveDrCr = recA.some(r=>r.drCr) && recB.some(r=>r.drCr);
       if(haveDrCr){
-        resultsWrap.appendChild(el(`<div style="font-weight:800; font-size:13px; margin-bottom:8px;">📊 Totals & Balances</div>`));
+        resultsWrap.appendChild(el(`<div style="font-weight:800; font-size:13px; margin-bottom:4px;">📊 Totals & Balances</div>`));
+        resultsWrap.appendChild(el(`<div style="font-size:11px; color:var(--sub); margin-bottom:8px;">Double-entry accounting — Buyer's Debit lines up with Supplier's Credit (and vice versa), since they record the same transactions from opposite sides. So each row below compares the matching sides, not same-label totals.</div>`));
         resultsWrap.appendChild(el(`
           <div style="border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:16px; font-size:12px;">
-            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; background:#F5F6F8; font-weight:700; padding:8px 10px;"><div>Dimension</div><div>Buyer</div><div>Supplier</div></div>
-            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Total Debits</div><div>${fmt(totA.debit)}</div><div>${fmt(totB.debit)}</div></div>
-            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Total Credits</div><div>${fmt(totA.credit)}</div><div>${fmt(totB.credit)}</div></div>
-            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line); font-weight:700;"><div>Closing Balance</div><div>${fmt(totA.balance)} (${totA.balance>=0?'Debit':'Credit'})</div><div>${fmt(totB.balance)} (${totB.balance>=0?'Debit':'Credit'})</div></div>
-            <div style="padding:8px 10px; border-top:1px solid var(--line); background:${balanceDiff<0.01?'#E8F5E9':'#FDEDEC'}; font-weight:700; color:${balanceDiff<0.01?'#1E7145':'#B3261E'};">${balanceDiff<0.01?'✅ Balances match':`❌ Mismatch of ${fmt(balanceDiff)}`}</div>
+            <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr; background:#F5F6F8; font-weight:700; padding:8px 10px;"><div>Comparison</div><div>Buyer</div><div>Supplier</div></div>
+            <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Debit ↔ Credit</div><div>${fmt(totA.debit)}</div><div>${fmt(totB.credit)}</div></div>
+            <div style="padding:6px 10px; border-top:1px solid var(--line); font-size:11px; color:${debitCreditDiff<0.01?'#1E7145':'#B3261E'};">${debitCreditDiff<0.01?'✅ Match':`❌ Differs by ${fmt(debitCreditDiff)}`}</div>
+            <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line);"><div>Credit ↔ Debit</div><div>${fmt(totA.credit)}</div><div>${fmt(totB.debit)}</div></div>
+            <div style="padding:6px 10px; border-top:1px solid var(--line); font-size:11px; color:${creditDebitDiff<0.01?'#1E7145':'#B3261E'};">${creditDebitDiff<0.01?'✅ Match':`❌ Differs by ${fmt(creditDebitDiff)}`}</div>
+            <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr; padding:8px 10px; border-top:1px solid var(--line); font-weight:700;"><div>Closing Balance</div><div>${fmt(totA.balance)} (${totA.balance>=0?'Debit':'Credit'})</div><div>${fmt(totB.balance)} (${totB.balance>=0?'Debit':'Credit'})</div></div>
+            <div style="padding:8px 10px; border-top:1px solid var(--line); background:${balanceDiff<0.01?'#E8F5E9':'#FDEDEC'}; font-weight:700; color:${balanceDiff<0.01?'#1E7145':'#B3261E'};">${balanceDiff<0.01?'✅ Balances mirror each other correctly':`❌ Mismatch of ${fmt(balanceDiff)}`}</div>
           </div>
         `));
       }
@@ -4131,7 +4145,7 @@ TOOL_IMPL.stmtcompare = {
       exportBtn.onclick = ()=>{
         const wb = XLSX.utils.book_new();
         const mkSheet = (rows, cols)=> XLSX.utils.aoa_to_sheet([cols, ...rows]);
-        if(haveDrCr) XLSX.utils.book_append_sheet(wb, mkSheet([['Total Debits',totA.debit,totB.debit],['Total Credits',totA.credit,totB.credit],['Closing Balance',totA.balance,totB.balance]], ['Dimension','Buyer','Supplier']), 'Totals & Balances');
+        if(haveDrCr) XLSX.utils.book_append_sheet(wb, mkSheet([['Debit (Buyer) vs Credit (Supplier)',totA.debit,totB.credit],['Credit (Buyer) vs Debit (Supplier)',totA.credit,totB.debit],['Closing Balance',totA.balance,totB.balance]], ['Comparison','Buyer','Supplier']), 'Totals & Balances');
         XLSX.utils.book_append_sheet(wb, mkSheet(dateDiscrepancies.map(d=>[d.a.dateRaw, d.b.dateRaw, d.days, d.a.amount]), ['Buyer Date','Supplier Date','Days Apart','Amount']), 'Date Discrepancies');
         XLSX.utils.book_append_sheet(wb, mkSheet(amountMismatches.map(m=>[m.a.dateRaw, m.a.amount, m.b.amount, (m.a.amount-m.b.amount).toFixed(2), m.a.ref]), ['Date','Buyer Amount','Supplier Amount','Difference','Reference']), 'Amount Mismatches');
         XLSX.utils.book_append_sheet(wb, mkSheet(onlyInA.map(r=>[r.dateRaw, r.amount, r.ref]), ['Date','Amount','Reference']), 'Only in Buyer');
