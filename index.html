@@ -288,6 +288,7 @@ const TOOLS = [
   {id:'airesume', name:'AI Resume Reviewer', desc:'Upload your CV, get honest feedback to improve it', icon:'📄', color:'#C0392B', cat:'ai', cost:1},
   {id:'resumebuilder', name:'Resume Builder', desc:'Build a resume from scratch — 4 templates, auto-saves your info, ATS-friendly', icon:'📋', color:'#1565C0', cat:'business', cost:0},
   {id:'aiexcelcompare', name:'AI Compare Excel Files', desc:'Upload up to 10 spreadsheets, ask a question — AI compares across all of them', icon:'📊', color:'#1F618D', cat:'ai', cost:1},
+  {id:'stmtcompare', name:'Statement Reconciliation', desc:'Compare Buyer vs Supplier statements (PDF/Excel/Text) — find mismatches automatically', icon:'🔍', color:'#B7410E', cat:'business'},
 ];
 
 let state = { view:'home', tool:null };
@@ -3877,6 +3878,192 @@ TOOL_IMPL.pdf2excel = {
         mountResult(body, 'Excel ஃபைல் (.xlsx) — PDF வடிவமைப்பு பாதுகாக்கப்பட்ட வகையில் downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
+  }
+};
+
+/* ===================== STATEMENT RECONCILIATION (Buyer vs Supplier) ===================== */
+// Parses a statement file (PDF/Excel/CSV/Text) into a plain 2D grid of
+// strings, reusing detectPdfTableGrid for PDFs (same technique as pdf2excel
+// and the table-aware branch of pdf2word) so all three input formats end up
+// in one common shape the rest of the tool can work with.
+async function parseStatementFileToGrid(file){
+  const ext = (file.name.split('.').pop()||'').toLowerCase();
+  if(ext === 'pdf'){
+    const buf = await readFileAsArrayBuffer(file);
+    const pdfjsDoc = await loadPdfJs(buf);
+    let combined = [];
+    for(let i=1;i<=pdfjsDoc.numPages;i++){
+      const page = await pdfjsDoc.getPage(i);
+      const content = await page.getTextContent();
+      const items = content.items.filter(it=>it.str && it.str.length).map(it=>({ x:it.transform[4], y:it.transform[5], w: it.width || (it.str.length*(it.transform[0]||6)*0.5), h: Math.abs(it.transform[3])||10, str: it.str }));
+      const { grid } = detectPdfTableGrid(items);
+      combined = combined.concat(grid);
+    }
+    return combined;
+  } else if(ext === 'txt' || ext === 'csv'){
+    const text = await file.text();
+    // Text/CSV: split on lines, then on whichever delimiter is most
+    // consistently present across lines — commas for a real .csv, or tabs /
+    // 2+ spaces for a plain-text statement someone pasted or exported.
+    const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
+    const delim = lines.some(l=>l.includes('\t')) ? /\t+/ : (lines.filter(l=>l.includes(',')).length > lines.length*0.6 ? /,/ : /\s{2,}/);
+    return lines.map(l=> l.split(delim).map(c=>c.trim()));
+  } else { // xlsx/xls and anything else XLSX.read can parse
+    const buf = await readFileAsArrayBuffer(file);
+    const wb = XLSX.read(buf, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''}).map(r=> r.map(c=>String(c)));
+  }
+}
+// Best-effort date normalizer — statements come in all sorts of formats
+// (DD/MM/YYYY, DD-MM-YY, "12 Jan 2026", ISO, etc.); this tries a handful of
+// common patterns and falls back to the raw trimmed string so two identical
+// formats still compare equal even if we can't fully parse them.
+function normalizeStatementDate(raw){
+  if(!raw) return '';
+  const s = String(raw).trim();
+  let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){ let [,d,mo,y] = m; if(y.length===2) y = (Number(y)>50?'19':'20')+y; return `${y.padStart(4,'0')}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  const d = new Date(s);
+  if(!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+  return s.toLowerCase();
+}
+function normalizeStatementAmount(raw){
+  if(raw===undefined || raw===null) return NaN;
+  const cleaned = String(raw).replace(/[₹$,\s]/g,'').replace(/^\((.*)\)$/,'-$1'); // strip currency/commas, treat (123) as -123
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? NaN : n;
+}
+
+TOOL_IMPL.stmtcompare = {
+  mount(container){
+    let fileA=null, fileB=null, gridA=null, gridB=null, colsA=null, colsB=null;
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">Buyer மற்றும் Supplier statement-ஐ upload பண்ணுங்கள் (PDF, Excel, அல்லது Text) — தானாக ஒப்பிட்டு, mismatches கண்டறியும். Date, Amount column எது என்று நீங்கள் தேர்வு செய்யுங்கள்.</div>`));
+
+      const row = el(`<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;"></div>`);
+      const colA = el(`<div></div>`), colB = el(`<div></div>`);
+      colA.appendChild(el(`<div style="font-weight:800; font-size:12px; margin-bottom:6px;">📥 Buyer Statement</div>`));
+      colB.appendChild(el(`<div style="font-weight:800; font-size:12px; margin-bottom:6px;">📤 Supplier Statement</div>`));
+      mountUploader(colA, { accept:'.pdf,.xlsx,.xls,.csv,.txt', label:'File', sublabel:'',
+        onAdd: async (fl)=>{ fileA = fl[0]; gridA=null; colsA=null; paint(); const prog=mountProgress(body); try{ gridA = await parseStatementFileToGrid(fileA); }catch(e){ mountResult(body,'Buyer file படிக்க முடியவில்லை: '+e.message).style.background='#FDEDEC'; } prog.remove(); paint(); } });
+      if(fileA) mountFileList(colA, [fileA], ()=>{ fileA=null; gridA=null; colsA=null; paint(); });
+      mountUploader(colB, { accept:'.pdf,.xlsx,.xls,.csv,.txt', label:'File', sublabel:'',
+        onAdd: async (fl)=>{ fileB = fl[0]; gridB=null; colsB=null; paint(); const prog=mountProgress(body); try{ gridB = await parseStatementFileToGrid(fileB); }catch(e){ mountResult(body,'Supplier file படிக்க முடியவில்லை: '+e.message).style.background='#FDEDEC'; } prog.remove(); paint(); } });
+      if(fileB) mountFileList(colB, [fileB], ()=>{ fileB=null; gridB=null; colsB=null; paint(); });
+      row.appendChild(colA); row.appendChild(colB);
+      body.appendChild(row);
+
+      if(gridA && gridA.length) mountColumnPicker('A', gridA, colsA, c=>{ colsA=c; });
+      if(gridB && gridB.length) mountColumnPicker('B', gridB, colsB, c=>{ colsB=c; });
+
+      if(gridA && gridB && colsA && colsB && colsA.date!=='' && colsA.amount!=='' && colsB.date!=='' && colsB.amount!==''){
+        const runRow = el(`<div class="btn-row" style="margin-top:14px;"></div>`);
+        const btn = el(`<button class="btn">🔍 Compare & Find Mismatches</button>`);
+        btn.onclick = doCompareStatements;
+        runRow.appendChild(btn);
+        body.appendChild(runRow);
+      }
+    }
+
+    function mountColumnPicker(label, grid, current, onChange){
+      const maxCols = Math.max(...grid.slice(0,20).map(r=>r.length));
+      const wrap = el(`<div style="border:1px solid var(--line); border-radius:10px; padding:10px; margin-bottom:10px;"></div>`);
+      wrap.appendChild(el(`<div style="font-weight:700; font-size:12px; margin-bottom:6px;">${label==='A'?'Buyer':'Supplier'} — எந்த column-ல் Date, Amount இருக்கு?</div>`));
+      const selRow = el(`<div style="display:flex; gap:10px; flex-wrap:wrap;"></div>`);
+      const preview = grid.slice(0,3);
+      function colLabel(ci){
+        const sample = preview.map(r=>r[ci]).filter(Boolean).join(', ');
+        return `Col ${ci+1}${sample?' ('+sample.slice(0,20)+')':''}`;
+      }
+      const dateSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Date column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+      const amtSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Amount column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+      const refSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Reference/Invoice No. (optional)…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+      if(current){ dateSel.value = current.date; amtSel.value = current.amount; refSel.value = current.ref; }
+      function update(){ onChange({ date: dateSel.value, amount: amtSel.value, ref: refSel.value }); paint(); }
+      dateSel.onchange = update; amtSel.onchange = update; refSel.onchange = update;
+      selRow.appendChild(dateSel); selRow.appendChild(amtSel); selRow.appendChild(refSel);
+      wrap.appendChild(selRow);
+      body.appendChild(wrap);
+    }
+
+    function extractRecords(grid, cols){
+      const di = Number(cols.date), ai = Number(cols.amount), ri = cols.ref!=='' ? Number(cols.ref) : -1;
+      const records = [];
+      grid.forEach((row,idx)=>{
+        const dateRaw = row[di], amtRaw = row[ai];
+        const amount = normalizeStatementAmount(amtRaw);
+        if(!dateRaw || isNaN(amount)) return; // skip header/blank/non-data rows
+        records.push({ rowIdx: idx, date: normalizeStatementDate(dateRaw), dateRaw, amount, amountRaw: amtRaw, ref: ri>=0 ? String(row[ri]||'').trim() : '', raw: row });
+      });
+      return records;
+    }
+
+    function doCompareStatements(){
+      const recA = extractRecords(gridA, colsA);
+      const recB = extractRecords(gridB, colsB);
+      const usedB = new Set();
+      const matched = [], amountMismatches = [], onlyInA = [];
+      recA.forEach(a=>{
+        // First try matching by reference number (most reliable when available), then by date+amount.
+        let bi = -1;
+        if(a.ref) bi = recB.findIndex((b,i)=> !usedB.has(i) && b.ref && b.ref===a.ref);
+        if(bi===-1) bi = recB.findIndex((b,i)=> !usedB.has(i) && b.date===a.date && Math.abs(b.amount-a.amount)<0.01);
+        if(bi===-1 && a.ref) bi = recB.findIndex((b,i)=> !usedB.has(i) && b.ref===a.ref); // ref match even if amount later found to differ
+        if(bi!==-1){
+          const b = recB[bi]; usedB.add(bi);
+          if(Math.abs(b.amount-a.amount) < 0.01) matched.push({a,b});
+          else amountMismatches.push({a,b, diff: a.amount-b.amount});
+        } else onlyInA.push(a);
+      });
+      const onlyInB = recB.filter((b,i)=> !usedB.has(i));
+
+      const resultsWrap = el(`<div style="margin-top:16px;"></div>`);
+      resultsWrap.appendChild(el(`
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
+          <div style="background:#E8F5E9; border-radius:10px; padding:10px; text-align:center;"><div style="font-weight:900; font-size:18px; color:#1E7145;">${matched.length}</div><div style="font-size:10.5px; color:var(--sub);">Matched</div></div>
+          <div style="background:#FFF3E0; border-radius:10px; padding:10px; text-align:center;"><div style="font-weight:900; font-size:18px; color:#B7791F;">${amountMismatches.length}</div><div style="font-size:10.5px; color:var(--sub);">Amount Mismatch</div></div>
+          <div style="background:#FDEDEC; border-radius:10px; padding:10px; text-align:center;"><div style="font-weight:900; font-size:18px; color:#B3261E;">${onlyInA.length}</div><div style="font-size:10.5px; color:var(--sub);">Only in Buyer</div></div>
+          <div style="background:#FDEDEC; border-radius:10px; padding:10px; text-align:center;"><div style="font-weight:900; font-size:18px; color:#B3261E;">${onlyInB.length}</div><div style="font-size:10.5px; color:var(--sub);">Only in Supplier</div></div>
+        </div>
+      `));
+
+      function section(title, items, render){
+        if(!items.length) return;
+        resultsWrap.appendChild(el(`<div style="font-weight:800; font-size:13px; margin:14px 0 8px;">${title}</div>`));
+        const list = el(`<div style="border:1px solid var(--line); border-radius:10px; overflow:hidden;"></div>`);
+        items.forEach((it,i)=> list.appendChild(el(`<div style="padding:8px 12px; font-size:12px; ${i%2?'background:#FAFAFA;':''} ${i<items.length-1?'border-bottom:1px solid var(--line);':''}">${render(it)}</div>`)));
+        resultsWrap.appendChild(list);
+      }
+      section(`⚠️ Amount Mismatches (${amountMismatches.length})`, amountMismatches, m=> `${m.a.dateRaw} — Buyer: ₹${m.a.amount} vs Supplier: ₹${m.b.amount} <b style="color:#B3261E;">(diff: ₹${m.diff.toFixed(2)})</b>${m.a.ref?' — Ref: '+escapeHtml(m.a.ref):''}`);
+      section(`❌ Only in Buyer, missing from Supplier (${onlyInA.length})`, onlyInA, r=> `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}`);
+      section(`❌ Only in Supplier, missing from Buyer (${onlyInB.length})`, onlyInB, r=> `${r.dateRaw} — ₹${r.amount}${r.ref?' — Ref: '+escapeHtml(r.ref):''}`);
+
+      const exportBtn = el(`<button class="btn secondary" style="margin-top:16px; padding:9px 18px; font-size:12.5px;">📥 Export Report (Excel)</button>`);
+      exportBtn.onclick = ()=>{
+        const wb = XLSX.utils.book_new();
+        const mkSheet = (rows, cols)=> XLSX.utils.aoa_to_sheet([cols, ...rows]);
+        XLSX.utils.book_append_sheet(wb, mkSheet(amountMismatches.map(m=>[m.a.dateRaw, m.a.amount, m.b.amount, (m.a.amount-m.b.amount).toFixed(2), m.a.ref]), ['Date','Buyer Amount','Supplier Amount','Difference','Reference']), 'Amount Mismatches');
+        XLSX.utils.book_append_sheet(wb, mkSheet(onlyInA.map(r=>[r.dateRaw, r.amount, r.ref]), ['Date','Amount','Reference']), 'Only in Buyer');
+        XLSX.utils.book_append_sheet(wb, mkSheet(onlyInB.map(r=>[r.dateRaw, r.amount, r.ref]), ['Date','Amount','Reference']), 'Only in Supplier');
+        XLSX.utils.book_append_sheet(wb, mkSheet(matched.map(m=>[m.a.dateRaw, m.a.amount, m.a.ref]), ['Date','Amount','Reference']), 'Matched');
+        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'reconciliation-report.xlsx');
+      };
+      resultsWrap.appendChild(exportBtn);
+
+      const old = body.querySelector('#__stmtResults');
+      if(old) old.remove();
+      resultsWrap.id = '__stmtResults';
+      body.appendChild(resultsWrap);
+    }
+
+    paint();
   }
 };
 
