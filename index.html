@@ -2012,34 +2012,61 @@ function detectPdfTableGrid(items){
     r.cells = cells;
   });
 
-  const colTol = Math.max(avgCharW*2.2, 12);
-  function clusterPositions(values, tol){
-    const sorted = [...values].sort((a,b)=>a-b);
-    const clusters = [];
-    sorted.forEach(v=>{
-      const last = clusters[clusters.length-1];
-      if(last && (v - last.max) <= tol){ last.items.push(v); last.max = v; last.center = (last.items.reduce((s,x)=>s+x,0))/last.items.length; }
-      else clusters.push({items:[v], max:v, center:v});
-    });
-    return clusters.map(c=>c.center);
-  }
-  const rawCenters = clusterPositions(rows.flatMap(r=>r.cells.map(c=>c.x)), colTol).sort((a,b)=>a-b);
-  const rowsUsingCenter = rawCenters.map(c=> new Set(rows.filter(r=> r.cells.some(cell=> Math.abs(cell.x-c) <= colTol)).map(r=>r.y)).size);
-  const minRowsForRealColumn = Math.max(2, Math.ceil(rows.length*0.12));
-  const realCenters = rawCenters.filter((c,i)=> rowsUsingCenter[i] >= minRowsForRealColumn);
-  const colCenters = (realCenters.length ? realCenters : rawCenters);
+  // Column detection: find genuine empty gaps in x-coverage across ALL rows
+  // (a sweep over every cell's full [x, x+w] extent), rather than clustering
+  // on left-edge x-position alone. Left-edge clustering breaks down for
+  // right-aligned numeric columns (amounts, invoice numbers) — the left
+  // edge shifts with digit count even though the column is visually
+  // consistent (right edges align, not left) — which was the actual cause
+  // of columns coming out misaligned on statements/invoices full of numbers.
+  const allCells = rows.flatMap(r=>r.cells);
+  if(!allCells.length) return {grid:[], numRealColumns:0};
+  const minGapWidth = Math.max(avgCharW*1.8, 10);
+  const events = [];
+  allCells.forEach(c=>{ events.push([c.x, 1]); events.push([c.x+c.w, -1]); });
+  events.sort((a,b)=> a[0]-b[0]);
+  let depth = 0, gapStart = null;
+  const boundaries = [-Infinity];
+  events.forEach(([pos, delta])=>{
+    if(depth===0 && delta===1 && gapStart!==null && pos-gapStart >= minGapWidth){
+      boundaries.push((gapStart+pos)/2);
+    }
+    depth += delta;
+    if(depth===0) gapStart = pos;
+  });
+  boundaries.push(Infinity);
 
-  function nearestColIdx(x){
-    let bi=0, bd=Infinity;
-    colCenters.forEach((c,ci)=>{ const d=Math.abs(c-x); if(d<bd){ bd=d; bi=ci; } });
-    return bi;
+  function bandIdx(x){
+    for(let i=0;i<boundaries.length-1;i++){ if(x>=boundaries[i] && x<boundaries[i+1]) return i; }
+    return boundaries.length-2;
   }
+  const numBands = boundaries.length-1;
+
+  // Real, repeated table columns get used by MANY rows; a band only hit by
+  // a handful of rows (stray header text at its own x-position, not an
+  // actual column) gets folded into whichever real band its cells sit
+  // closest to, same reasoning as before, just applied per-band.
+  const bandRowCounts = new Array(numBands).fill(0);
+  rows.forEach(r=>{ const used = new Set(r.cells.map(c=> bandIdx(c.x + c.w/2))); used.forEach(bi=> bandRowCounts[bi]++); });
+  const minRowsForRealBand = Math.max(2, Math.ceil(rows.length*0.12));
+  const realBandIdxs = bandRowCounts.map((cnt,i)=> cnt>=minRowsForRealBand ? i : -1).filter(i=>i>=0);
+  const finalBandIdxs = realBandIdxs.length ? realBandIdxs : Array.from({length:numBands},(_,i)=>i);
+
   const grid = rows.map(r=>{
-    const rowArr = new Array(colCenters.length).fill('');
-    r.cells.forEach(c=>{ const ci = nearestColIdx(c.x); rowArr[ci] = rowArr[ci] ? (rowArr[ci] + ' ' + c.str) : c.str; });
+    const rowArr = new Array(finalBandIdxs.length).fill('');
+    r.cells.forEach(c=>{
+      const rawBi = bandIdx(c.x + c.w/2);
+      let ci = finalBandIdxs.indexOf(rawBi);
+      if(ci===-1){
+        let best=0, bd=Infinity;
+        finalBandIdxs.forEach((fb,idx)=>{ const center=(boundaries[fb]+boundaries[fb+1])/2; const d=Math.abs(center-(c.x+c.w/2)); if(d<bd){bd=d; best=idx;} });
+        ci = best;
+      }
+      rowArr[ci] = rowArr[ci] ? (rowArr[ci] + ' ' + c.str) : c.str;
+    });
     return rowArr;
   });
-  return {grid, numRealColumns: realCenters.length};
+  return {grid, numRealColumns: finalBandIdxs.length};
 }
 
 async function embedUnicodeFont(doc){
@@ -3743,17 +3770,6 @@ TOOL_IMPL.pdf2excel = {
     } else {
       paint();
     }
-    // Cluster a sorted list of numeric centers into groups within `tol` of each other.
-    function clusterPositions(values, tol){
-      const sorted = [...values].sort((a,b)=>a-b);
-      const clusters = [];
-      sorted.forEach(v=>{
-        const last = clusters[clusters.length-1];
-        if(last && (v - last.max) <= tol){ last.items.push(v); last.max = v; last.center = (last.items.reduce((s,x)=>s+x,0))/last.items.length; }
-        else clusters.push({items:[v], max:v, center:v});
-      });
-      return clusters.map(c=>c.center);
-    }
     async function doConvert(){
       const prog = mountProgress(body);
       try{
@@ -3781,88 +3797,16 @@ TOOL_IMPL.pdf2excel = {
             continue;
           }
 
-          // 1) Group items into text rows using a y-tolerance based on median glyph height.
-          const heights = items.map(it=>it.h).sort((a,b)=>a-b);
-          const medH = heights[Math.floor(heights.length/2)] || 10;
-          const yTol = Math.max(2.5, medH * 0.55);
-          items.sort((a,b)=> b.y - a.y || a.x - b.x);
-          const rows = [];
-          items.forEach(it=>{
-            let r = rows.find(r0 => Math.abs(r0.y - it.y) <= yTol);
-            if(!r){ r = {y: it.y, items: []}; rows.push(r); }
-            r.items.push(it);
-            r.y = (r.y*(r.items.length-1) + it.y)/r.items.length; // running average baseline
-          });
-          rows.sort((a,b)=> b.y - a.y);
-          rows.forEach(r=> r.items.sort((a,b)=> a.x - b.x));
-
-          // 2) Merge items within a row that are close together horizontally into a single cell
-          //    (words that belong together, separated only by a normal space), while a bigger
-          //    gap marks a real column boundary — this mirrors how the text is laid out in the PDF.
-          const allGaps = [];
-          rows.forEach(r=>{
-            for(let k=1;k<r.items.length;k++){
-              const prev = r.items[k-1];
-              allGaps.push(r.items[k].x - (prev.x + prev.w));
-            }
-          });
-          allGaps.sort((a,b)=>a-b);
-          const avgCharW = (items.reduce((s,it)=> s + (it.w/Math.max(1,it.str.length)), 0))/items.length || 5;
-          const colGapTol = Math.max(avgCharW*1.6, 8); // gaps bigger than this = new column
-
-          rows.forEach(r=>{
-            const cells = [];
-            let cur = null;
-            r.items.forEach(it=>{
-              if(cur && (it.x - (cur.x + cur.w)) <= colGapTol){
-                cur.str += (it.x - (cur.x+cur.w) > avgCharW*0.35 ? ' ' : '') + it.str;
-                cur.w = (it.x + it.w) - cur.x;
-              } else {
-                cur = { x: it.x, w: it.w, str: it.str };
-                cells.push(cur);
-              }
-            });
-            r.cells = cells;
-          });
-
-          // 3) Determine global column positions by clustering the left-x of every cell across
-          //    all rows, so the same PDF column lines up in the same Excel column every row.
-          const colTol = Math.max(avgCharW*2.2, 12);
-          const rawCenters = clusterPositions(rows.flatMap(r=>r.cells.map(c=>c.x)), colTol).sort((a,b)=>a-b);
-
-          // Real, repeated table columns get used by MANY rows; one-off text (a stray header
-          // label like "PO No:" sitting at its own x-position) only appears in ONE row. Treating
-          // every distinct x-position as its own column fragments the sheet with lots of near-
-          // empty columns on mixed documents (header text + a real table on the same page).
-          // Keep only positions used by a meaningful share of rows as "real" columns; fold
-          // everything else into whichever real column is closest.
-          const rowsUsingCenter = rawCenters.map(c=>
-            new Set(rows.filter(r=> r.cells.some(cell=> Math.abs(cell.x-c) <= colTol)).map(r=>r.y)).size
-          );
-          const minRowsForRealColumn = Math.max(2, Math.ceil(rows.length*0.12));
-          const realCenters = rawCenters.filter((c,i)=> rowsUsingCenter[i] >= minRowsForRealColumn);
-          const colCenters = (realCenters.length ? realCenters : rawCenters); // fall back if the page is too sparse to have "repeated" columns at all
-
-          function nearestColIdx(x){
-            let bi=0, bd=Infinity;
-            colCenters.forEach((c,ci)=>{ const d=Math.abs(c-x); if(d<bd){ bd=d; bi=ci; } });
-            return bi;
-          }
-
-          // 4) Build the grid: place each cell text at its column index (merge if two cells map
-          //    to the same column in one row — keep them space-joined, in x order).
-          const aoa = rows.map(r=>{
-            const rowArr = new Array(colCenters.length).fill('');
-            r.cells.forEach(c=>{
-              const ci = nearestColIdx(c.x);
-              rowArr[ci] = rowArr[ci] ? (rowArr[ci] + ' ' + c.str) : c.str;
-            });
-            return rowArr;
-          });
+          // Shared, gap-based column-band detection (see detectPdfTableGrid) —
+          // robust to right-aligned numeric columns (amounts, invoice
+          // numbers), where the left edge shifts with digit count even
+          // though the column is visually consistent.
+          const { grid: aoa } = detectPdfTableGrid(items);
 
           const ws = XLSX.utils.aoa_to_sheet(aoa.length ? aoa : [['']]);
           // Reasonable auto column widths based on content length.
-          const colWidths = colCenters.map((_,ci)=>{
+          const numCols = aoa.reduce((mx,r)=>Math.max(mx,r.length),0);
+          const colWidths = Array.from({length:numCols},(_,ci)=>{
             let maxLen = 6;
             aoa.forEach(r=>{ if(r[ci] && r[ci].length>maxLen) maxLen = r[ci].length; });
             return { wch: Math.min(60, maxLen+2) };
