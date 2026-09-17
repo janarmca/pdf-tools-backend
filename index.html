@@ -3472,10 +3472,34 @@ TOOL_IMPL.pdf2word = {
           prog.set(15+(i/pdfjsDoc.numPages)*70, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const content = await page.getTextContent();
-          const text = content.items.map(it=>it.str).join(' ');
-          const lines = text.split(/\s{4,}|\n+/).filter(l=>l.trim());
-          (lines.length?lines:[text]).forEach(line=>{ children.push(new Paragraph({children:[new TextRun(line)]})); });
-          children.push(new Paragraph({ text:'' }));
+          const styles = content.styles || {};
+          const items = content.items.filter(it=>it.str && it.str.length);
+          // Group individual text runs into lines by Y-position proximity —
+          // pdf.js gives one item per run of same-styled text, not per
+          // visual line, so runs on the same line (possibly with different
+          // bold/italic/size mid-line) need to be reassembled here.
+          const lines = [];
+          items.forEach(it=>{
+            const y = it.transform[5];
+            let line = lines.find(l=> Math.abs(l.y - y) < 3);
+            if(!line){ line = {y, items:[]}; lines.push(line); }
+            line.items.push(it);
+          });
+          lines.sort((a,b)=> b.y - a.y); // PDF y-axis increases upward; reading order is top-to-bottom
+          lines.forEach(line=>{
+            line.items.sort((a,b)=> a.transform[4] - b.transform[4]); // left-to-right within the line
+            const runs = line.items.map(it=>{
+              const fontSizePt = Math.abs(it.transform[3]) || 11;
+              const styleInfo = styles[it.fontName] || {};
+              const famLower = (styleInfo.fontFamily||'').toLowerCase();
+              const bold = /bold|black|heavy|700|800|900/.test(famLower);
+              const italics = /italic|oblique/.test(famLower);
+              // docx TextRun size is in half-points (12pt font = size:24)
+              return new TextRun({ text: it.str, bold, italics, size: Math.round(fontSizePt*2) });
+            });
+            children.push(new Paragraph({ children: runs }));
+          });
+          children.push(new Paragraph({ text:'' })); // blank line between pages
         }
         prog.set(90,'Word Preparing file…');
         const doc = new Document({ sections:[{ children }] });
@@ -3483,7 +3507,7 @@ TOOL_IMPL.pdf2word = {
         prog.set(100,'Done');
         downloadBlob(blob, file.name.replace(/\.pdf$/i,'')+'.docx');
         prog.remove();
-        mountResult(body, 'Word file (.docx) downloaded.').style.background='#FFF6E5';
+        mountResult(body, 'Word file (.docx) downloaded — bold/italic/font size preserved where detectable.').style.background='#FFF6E5';
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
