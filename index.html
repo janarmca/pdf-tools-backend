@@ -8180,10 +8180,15 @@ TOOL_IMPL.pdfeditor = {
       // text element render at 0px font-size, i.e. completely invisible.
       body.appendChild(wrap);
 
-      // Invisible clickable overlays over existing text runs, for "edit existing text"
+      // Clickable overlays over existing text runs, for "edit existing text" —
+      // subtly highlighted on hover so it's clear this text is editable
+      // (these were previously completely invisible, even on hover, which
+      // left no visual cue that clicking here does anything).
       if(tool==='select'){
         pageData.items.forEach((it,idx)=>{
-          const hit = el(`<div data-existing-text-idx="${idx}" style="position:absolute; left:${(it.x/pageData.canvas.width)*100}%; top:${(it.y/pageData.canvas.height)*100}%; width:${(it.w/pageData.canvas.width)*100}%; height:${(it.h/pageData.canvas.height)*100}%; cursor:text;"></div>`);
+          const hit = el(`<div data-existing-text-idx="${idx}" style="position:absolute; left:${(it.x/pageData.canvas.width)*100}%; top:${(it.y/pageData.canvas.height)*100}%; width:${(it.w/pageData.canvas.width)*100}%; height:${(it.h/pageData.canvas.height)*100}%; cursor:text; transition:background-color 0.1s;"></div>`);
+          hit.onmouseenter = ()=>{ hit.style.backgroundColor = 'rgba(21,101,192,0.15)'; };
+          hit.onmouseleave = ()=>{ hit.style.backgroundColor = 'transparent'; };
           hit.onclick = (ev)=>{ ev.stopPropagation(); editExistingText(it); };
           wrap.appendChild(hit);
         });
@@ -8415,7 +8420,7 @@ TOOL_IMPL.pdfeditor = {
       let inner;
       if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${fontSizeToPx(e.fontSize)}px; color:${e.color}; font-weight:${e.bold?900:600}; white-space:nowrap; overflow:hidden; display:flex; align-items:center;">${escapeHtml(e.text)}</div>`);
       else if(e.type==='image') inner = el(`<div style="${wrapStyle}"><img src="${e.src}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;"></div>`);
-      else if(e.type==='whiteout') inner = el(`<div style="${wrapStyle} background:#fff;"></div>`);
+      else if(e.type==='whiteout') inner = el(`<div style="${wrapStyle} background:#fff; border:1px dashed #B0B0B0;"></div>`);
       else if(e.type==='shape'){
         if(e.shape==='rect') inner = el(`<div style="${wrapStyle} border:2.5px solid ${e.color}; background:transparent;"></div>`);
         else if(e.shape==='ellipse') inner = el(`<div style="${wrapStyle} border:2.5px solid ${e.color}; border-radius:50%; background:transparent;"></div>`);
