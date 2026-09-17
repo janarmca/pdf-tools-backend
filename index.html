@@ -3880,15 +3880,39 @@ function normalizeStatementAmount(raw){
   const n = parseFloat(cleaned);
   return isNaN(n) ? NaN : n;
 }
+// Finds the first date-like substring and the last currency-amount-like
+// substring within a full line of text — used as a robust fallback when a
+// statement's columns can't be reliably separated (common in dense,
+// tightly-packed ledger PDFs where Date/Type/Description/Voucher#/Amount
+// all end up merged into one cell by the table-grid detector). Regex
+// matching within the raw text doesn't depend on column boundaries at all.
+const STMT_DATE_RE = /\b(\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3,9})[\/\-.]\d{2,4})\b/;
+// Matches either Indian-grouped currency (1-2 digits, then groups of 2,
+// ending in a group of 3, before the decimal — e.g. "1,41,600.00" or
+// "47,200.00") or a plain decimal number ("141600.00") — the Indian-format
+// alternative is tried first and is deliberately strict about the digit
+// grouping so it can't accidentally swallow an adjacent, unrelated number
+// (like a voucher/serial number sitting right next to the amount with no
+// separating space) the way a looser "any digits then decimal" pattern would.
+const STMT_AMOUNT_RE = /\d{1,2}(?:,\d{2})*,\d{3}\.\d{2}|\d+\.\d{2}/g;
+function extractDateAmountFromText(text){
+  const dateMatch = text.match(STMT_DATE_RE);
+  const amountMatches = [...text.matchAll(STMT_AMOUNT_RE)];
+  const amountMatch = amountMatches.length ? amountMatches[amountMatches.length-1] : null; // last match — amount typically comes after any voucher/serial number on the line
+  return {
+    dateRaw: dateMatch ? dateMatch[1] : '',
+    amountRaw: amountMatch ? amountMatch[0] : ''
+  };
+}
 
 TOOL_IMPL.stmtcompare = {
   mount(container){
-    let fileA=null, fileB=null, gridA=null, gridB=null, colsA=null, colsB=null;
+    let fileA=null, fileB=null, gridA=null, gridB=null, colsA=null, colsB=null, modeA='auto', modeB='auto';
     const body = el(`<div></div>`); container.appendChild(body);
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">Buyer மற்றும் Supplier statement-ஐ upload பண்ணுங்கள் (PDF, Excel, அல்லது Text) — தானாக ஒப்பிட்டு, mismatches கண்டறியும். Date, Amount column எது என்று நீங்கள் தேர்வு செய்யுங்கள்.</div>`));
+      body.appendChild(el(`<div class="note tamil">Buyer மற்றும் Supplier statement-ஐ upload பண்ணுங்கள் (PDF, Excel, அல்லது Text) — தானாக ஒப்பிட்டு, mismatches கண்டறியும். "Auto-detect" — Date/Amount-ஐ தானாக கண்டுபிடிக்கும் (PDF/Text-க்கு recommended); Excel-ல் columns தெளிவா separate-ஆ இருந்தா "Pick columns" use பண்ணலாம்.</div>`));
 
       const row = el(`<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;"></div>`);
       const colA = el(`<div></div>`), colB = el(`<div></div>`);
@@ -3903,16 +3927,16 @@ TOOL_IMPL.stmtcompare = {
       row.appendChild(colA); row.appendChild(colB);
       body.appendChild(row);
 
-      if(gridA && gridA.length) mountColumnPicker('A', gridA, colsA, c=>{ colsA=c; });
-      if(gridB && gridB.length) mountColumnPicker('B', gridB, colsB, c=>{ colsB=c; });
+      if(gridA && gridA.length) mountModePicker('A', gridA, modeA, colsA, m=>{ modeA=m; }, c=>{ colsA=c; });
+      if(gridB && gridB.length) mountModePicker('B', gridB, modeB, colsB, m=>{ modeB=m; }, c=>{ colsB=c; });
 
       if(gridA && gridB){
-        const ready = colsA && colsB && colsA.date!=='' && colsA.amount!=='' && colsB.date!=='' && colsB.amount!=='';
+        const readyA = modeA==='auto' || (colsA && colsA.date!=='' && colsA.amount!=='');
+        const readyB = modeB==='auto' || (colsB && colsB.date!=='' && colsB.amount!=='');
+        const ready = readyA && readyB;
         const missing = [];
-        if(!colsA || colsA.date==='') missing.push('Buyer Date column');
-        if(!colsA || colsA.amount==='') missing.push('Buyer Amount column');
-        if(!colsB || colsB.date==='') missing.push('Supplier Date column');
-        if(!colsB || colsB.amount==='') missing.push('Supplier Amount column');
+        if(!readyA) missing.push('Buyer Date/Amount column');
+        if(!readyB) missing.push('Supplier Date/Amount column');
         const runRow = el(`<div class="btn-row" style="margin-top:14px; flex-direction:column; align-items:stretch; gap:6px;"></div>`);
         const btn = el(`<button class="btn" ${ready?'':'disabled'} style="${ready?'':'opacity:0.5; cursor:not-allowed;'}">🔍 Compare & Find Mismatches</button>`);
         if(ready) btn.onclick = doCompareStatements;
@@ -3922,30 +3946,54 @@ TOOL_IMPL.stmtcompare = {
       }
     }
 
-    function mountColumnPicker(label, grid, current, onChange){
-      const maxCols = Math.max(...grid.slice(0,20).map(r=>r.length));
+    function mountModePicker(label, grid, mode, current, onModeChange, onColsChange){
       const wrap = el(`<div style="border:1px solid var(--line); border-radius:10px; padding:10px; margin-bottom:10px;"></div>`);
-      wrap.appendChild(el(`<div style="font-weight:700; font-size:12px; margin-bottom:6px;">${label==='A'?'Buyer':'Supplier'} — எந்த column-ல் Date, Amount இருக்கு?</div>`));
-      const selRow = el(`<div style="display:flex; gap:10px; flex-wrap:wrap;"></div>`);
-      const preview = grid.slice(0,3);
-      function colLabel(ci){
-        const sample = preview.map(r=>r[ci]).filter(Boolean).join(', ');
-        return `Col ${ci+1}${sample?' ('+sample.slice(0,20)+')':''}`;
+      wrap.appendChild(el(`<div style="font-weight:700; font-size:12px; margin-bottom:8px;">${label==='A'?'Buyer':'Supplier'}</div>`));
+      const toggleRow = el(`<div style="display:flex; gap:6px; margin-bottom:8px;"></div>`);
+      const autoBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid ${mode==='auto'?'var(--brand-dark)':'var(--line)'}; background:${mode==='auto'?'var(--brand-dark)':'#fff'}; color:${mode==='auto'?'#fff':'var(--ink)'}; font-size:11.5px; font-weight:700; cursor:pointer;">🤖 Auto-detect</button>`);
+      const manualBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid ${mode==='manual'?'var(--brand-dark)':'var(--line)'}; background:${mode==='manual'?'var(--brand-dark)':'#fff'}; color:${mode==='manual'?'#fff':'var(--ink)'}; font-size:11.5px; font-weight:700; cursor:pointer;">📋 Pick columns</button>`);
+      autoBtn.onclick = ()=>{ onModeChange('auto'); paint(); };
+      manualBtn.onclick = ()=>{ onModeChange('manual'); paint(); };
+      toggleRow.appendChild(autoBtn); toggleRow.appendChild(manualBtn);
+      wrap.appendChild(toggleRow);
+
+      if(mode==='auto'){
+        // Show a couple of sample rows with what auto-detect actually found, so the person can see at a glance whether it's reading the file correctly.
+        const sample = grid.slice(0,3).map(r=> extractDateAmountFromText(r.join(' ')));
+        const preview = el(`<div style="font-size:11px; color:var(--sub);">Sample: ${sample.map(s=> s.dateRaw&&s.amountRaw ? `${s.dateRaw} → ₹${s.amountRaw}` : '(கண்டுபிடிக்க முடியவில்லை)').join(' | ')}</div>`);
+        wrap.appendChild(preview);
+      } else {
+        const maxCols = Math.max(...grid.slice(0,20).map(r=>r.length));
+        const selRow = el(`<div style="display:flex; gap:10px; flex-wrap:wrap;"></div>`);
+        const preview = grid.slice(0,3);
+        function colLabel(ci){
+          const sample = preview.map(r=>r[ci]).filter(Boolean).join(', ');
+          return `Col ${ci+1}${sample?' ('+sample.slice(0,20)+')':''}`;
+        }
+        const dateSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Date column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+        const amtSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Amount column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+        const refSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Reference/Invoice No. (optional)…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
+        if(current){ dateSel.value = current.date; amtSel.value = current.amount; refSel.value = current.ref; }
+        function update(){ onColsChange({ date: dateSel.value, amount: amtSel.value, ref: refSel.value }); paint(); }
+        dateSel.onchange = update; amtSel.onchange = update; refSel.onchange = update;
+        selRow.appendChild(dateSel); selRow.appendChild(amtSel); selRow.appendChild(refSel);
+        wrap.appendChild(selRow);
       }
-      const dateSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Date column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
-      const amtSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Amount column…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
-      const refSel = el(`<select style="padding:6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="">Reference/Invoice No. (optional)…</option>${Array.from({length:maxCols},(_,i)=>`<option value="${i}">${colLabel(i)}</option>`).join('')}</select>`);
-      if(current){ dateSel.value = current.date; amtSel.value = current.amount; refSel.value = current.ref; }
-      function update(){ onChange({ date: dateSel.value, amount: amtSel.value, ref: refSel.value }); paint(); }
-      dateSel.onchange = update; amtSel.onchange = update; refSel.onchange = update;
-      selRow.appendChild(dateSel); selRow.appendChild(amtSel); selRow.appendChild(refSel);
-      wrap.appendChild(selRow);
       body.appendChild(wrap);
     }
 
-    function extractRecords(grid, cols){
-      const di = Number(cols.date), ai = Number(cols.amount), ri = cols.ref!=='' ? Number(cols.ref) : -1;
+    function extractRecords(grid, mode, cols){
       const records = [];
+      if(mode==='auto'){
+        grid.forEach((row,idx)=>{
+          const { dateRaw, amountRaw } = extractDateAmountFromText(row.join(' '));
+          const amount = normalizeStatementAmount(amountRaw);
+          if(!dateRaw || isNaN(amount)) return;
+          records.push({ rowIdx: idx, date: normalizeStatementDate(dateRaw), dateRaw, amount, amountRaw, ref: '', raw: row });
+        });
+        return records;
+      }
+      const di = Number(cols.date), ai = Number(cols.amount), ri = cols.ref!=='' ? Number(cols.ref) : -1;
       grid.forEach((row,idx)=>{
         const dateRaw = row[di], amtRaw = row[ai];
         const amount = normalizeStatementAmount(amtRaw);
@@ -3956,8 +4004,8 @@ TOOL_IMPL.stmtcompare = {
     }
 
     function doCompareStatements(){
-      const recA = extractRecords(gridA, colsA);
-      const recB = extractRecords(gridB, colsB);
+      const recA = extractRecords(gridA, modeA, colsA);
+      const recB = extractRecords(gridB, modeB, colsB);
       const usedB = new Set();
       const matched = [], amountMismatches = [], onlyInA = [];
       recA.forEach(a=>{
