@@ -238,6 +238,7 @@ const TOOLS = [
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
+  {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another', icon:'🗣️', color:'#8E44AD', cat:'ai', cost:1},
 
   // ---- Image Tools (Paid) ----
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
@@ -7110,6 +7111,128 @@ TOOL_IMPL.readaloud = {
       loadVoices();
       speechSynthesis.onvoiceschanged = ()=>{ loadVoices(); paint(); }; // voices load async in most browsers — re-render once they actually arrive
     }
+    paint();
+  }
+};
+
+/* ===================== LIVE SPEECH TRANSLATOR ===================== */
+const LIVETRANSLATE_LANGS = [
+  ['ta-IN','Tamil'], ['en-US','English'], ['hi-IN','Hindi'], ['te-IN','Telugu'],
+  ['kn-IN','Kannada'], ['ml-IN','Malayalam'], ['fr-FR','French'], ['es-ES','Spanish'],
+  ['de-DE','German'], ['ar-SA','Arabic'], ['zh-CN','Chinese'], ['ja-JP','Japanese'],
+];
+TOOL_IMPL.livetranslate = {
+  mount(container){
+    let fromLang = 'ta-IN', toLang = 'en-US', listening = false, recognition = null, voices = [];
+    let history = []; // [{original, translated}]
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function loadVoices(){ voices = (window.speechSynthesis && speechSynthesis.getVoices()) || []; }
+    function pickVoice(langCode){
+      const base = langCode.split('-')[0];
+      return voices.find(v=>v.lang===langCode) || voices.find(v=>v.lang.startsWith(base)) || null;
+    }
+
+    function paint(){
+      body.innerHTML = '';
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR || !window.speechSynthesis){
+        body.appendChild(el(`<div class="note tamil">⚠️ இந்த browser-ல் Speech Recognition/Synthesis ஆதரவு இல்லை. Chrome/Edge (desktop அல்லது Android) பயன்படுத்தவும்.</div>`));
+        return;
+      }
+      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். ஒவ்வொரு வாக்கியத்துக்கும் 1 credit.</div>`));
+
+      const langRow = el(`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:14px;"></div>`);
+      const fromSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===fromLang?'selected':''}>🗣️ ${name}</option>`).join('')}</select>`);
+      const swapBtn = el(`<button style="border:none; background:none; font-size:20px; cursor:pointer; padding:4px;">⇄</button>`);
+      const toSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===toLang?'selected':''}>👂 ${name}</option>`).join('')}</select>`);
+      fromSel.onchange = ()=>{ fromLang = fromSel.value; };
+      toSel.onchange = ()=>{ toLang = toSel.value; };
+      swapBtn.onclick = ()=>{ const t=fromLang; fromLang=toLang; toLang=t; paint(); };
+      langRow.appendChild(fromSel); langRow.appendChild(swapBtn); langRow.appendChild(toSel);
+      body.appendChild(langRow);
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn" style="${listening?'background:#B3261E;':''}">${listening?'⏹️ நிறுத்து':'🎙️ பேசத் தொடங்கு'}</button>`);
+      btn.onclick = listening ? stopListening : startListening;
+      row.appendChild(btn);
+      body.appendChild(row);
+
+      const statusEl = el(`<div id="ltStatus" style="text-align:center; font-size:12.5px; color:var(--sub); margin:8px 0;"></div>`);
+      body.appendChild(statusEl);
+
+      const histWrap = el(`<div style="margin-top:10px;"></div>`);
+      [...history].reverse().forEach(h=>{
+        histWrap.appendChild(el(`
+          <div style="border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px;">
+            <div style="color:var(--sub); margin-bottom:3px;">🗣️ ${escapeHtml(h.original)}</div>
+            <div style="font-weight:700;">👂 ${escapeHtml(h.translated)}</div>
+          </div>
+        `));
+      });
+      body.appendChild(histWrap);
+    }
+
+    function startListening(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'AI translation பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
+      recognition.lang = fromLang;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      let finalizedUpTo = '';
+      recognition.onresult = (ev)=>{
+        let interim = '';
+        for(let i=ev.resultIndex; i<ev.results.length; i++){
+          const r = ev.results[i];
+          if(r.isFinal){
+            const said = r[0].transcript.trim();
+            if(said) handleUtterance(said);
+          } else interim += r[0].transcript;
+        }
+        const statusEl = body.querySelector('#ltStatus');
+        if(statusEl) statusEl.textContent = interim ? `🎙️ …${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது…';
+      };
+      recognition.onerror = (ev)=>{
+        const statusEl = body.querySelector('#ltStatus');
+        if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
+      };
+      recognition.onend = ()=>{ if(listening) recognition.start(); }; // browsers auto-stop after a pause — restart to keep it continuous while the person hasn't pressed Stop
+      recognition.start();
+      listening = true;
+      paint();
+    }
+    function stopListening(){
+      listening = false;
+      if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; }
+      paint();
+    }
+    async function handleUtterance(said){
+      const statusEl = body.querySelector('#ltStatus');
+      if(statusEl) statusEl.textContent = '⏳ மொழிபெயர்க்கிறது…';
+      try{
+        const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
+        const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
+        const form = new FormData();
+        form.append('question', `Translate this from ${fromName} to ${toName}. Respond with ONLY the translation, no preamble, no quotes: ${said}`);
+        form.append('toolId', 'livetranslate');
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+        });
+        if(result.error) throw new Error(result.error);
+        const translated = result.answer.trim();
+        history.push({ original: said, translated });
+        const utterance = new SpeechSynthesisUtterance(translated);
+        const voice = pickVoice(toLang);
+        if(voice) utterance.voice = voice;
+        utterance.lang = toLang;
+        speechSynthesis.speak(utterance);
+        paint();
+      }catch(err){
+        if(statusEl) statusEl.textContent = 'Error: '+err.message;
+      }
+    }
+    if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
     paint();
   }
 };
