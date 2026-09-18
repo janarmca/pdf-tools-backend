@@ -4624,7 +4624,7 @@ TOOL_IMPL.vidvoice = {
         if(videoFile){
           mountFileList(body, [videoFile], ()=>{ videoFile=null; videoUrl=null; paint(); });
           body.appendChild(el(`<video src="${videoUrl}" controls style="width:100%; border-radius:10px; margin:6px 0 12px; background:#000;"></video>`));
-          mountFastServerNote(body, 1, 'vvFastE', videoFile.size + audioFile.size);
+          mountFastServerNote(body, 1, 'vvFastE', videoFile.size);
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn tamil">🎧 ஆடியோ எடு (MP3)</button>`);
           btn.onclick = doExtract;
