@@ -2266,24 +2266,32 @@ function ensureFFmpeg(){
       );
       const { FFmpeg } = window.FFmpegWASM;
       const ffmpeg = new FFmpeg();
-      const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+      const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
       const pctEl = indicator.querySelector('#__ffLoadPct');
       const workerBlobURL = await crossOriginWorkerBlobURLWithFallback(
         'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
         'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js'
       );
-      // coreURL/wasmURL are passed as DIRECT jsDelivr URLs, NOT wrapped in a
-      // blob: URL. This is a deliberate change from an earlier version of this
-      // function: wrapping these two in a blob and dynamically import()-ing
-      // that blob is exactly what triggers ffmpeg.wasm's well-documented
-      // "failed to import ffmpeg-core.js" bug (confirmed in the library's own
-      // GitHub issues — it happens even when the underlying fetch succeeds).
-      // jsDelivr is confirmed to send the Cross-Origin-Resource-Policy header
-      // ffmpeg.wasm's loader needs for a direct cross-origin import, so the
-      // blob step here was solving a problem that didn't exist while causing
-      // one that did. The worker still needs blob-wrapping for a separate,
-      // legitimate reason (raw cross-origin Worker construction), so that
-      // part is unchanged.
+      // Two separate, confirmed root causes of the "failed to import
+      // ffmpeg-core.js" error, found via multiple independent developer
+      // reports of this exact same error:
+      // 1) Version mismatch — @ffmpeg/ffmpeg (the main library) is pinned to
+      //    0.12.10 above; @ffmpeg/core (the actual wasm engine) MUST match
+      //    that same version, not an older one like 0.12.6.
+      // 2) Build format — the UMD build of ffmpeg-core has no `export
+      //    default`, so a dynamic import() of it silently resolves to
+      //    undefined instead of throwing a clear error. The ESM build
+      //    (dist/esm, used above) doesn't have this problem.
+      // Separately: coreURL/wasmURL are passed as DIRECT jsDelivr URLs, NOT
+      // wrapped in a blob: URL, because wrapping them and dynamically
+      // import()-ing that blob is its own distinct trigger for the same
+      // error message (confirmed in the library's own GitHub issues — it
+      // happens even when the underlying fetch succeeds). jsDelivr sends the
+      // Cross-Origin-Resource-Policy header ffmpeg.wasm's loader needs for a
+      // direct cross-origin import, so the blob step here was solving a
+      // problem that didn't exist while causing one that did. The worker
+      // still needs blob-wrapping for a separate, legitimate reason (raw
+      // cross-origin Worker construction), so that part is unchanged.
       await ffmpeg.load({
         coreURL: `${base}/ffmpeg-core.js`,
         wasmURL: `${base}/ffmpeg-core.wasm`,
