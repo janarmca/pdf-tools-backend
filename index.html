@@ -4589,6 +4589,13 @@ TOOL_IMPL.vidvoice = {
         }
         mountUploader(body, { accept:'audio/*', label:'குரல்/ஆடியோவை drag & drop or tap', sublabel:'MP3 / WAV / M4A / AAC',
           onAdd:(fl)=>{ audioFile = fl[0]; audioUrl = URL.createObjectURL(audioFile); paint(); } });
+        if(!audioFile){
+          const micRow = el(`<div class="btn-row" style="margin-top:8px;"></div>`);
+          const micBtn = el(`<button class="btn secondary tamil" style="font-size:12.5px; padding:8px 16px;">🎙️ அல்லது Mic-ல் Record பண்ணுங்கள்</button>`);
+          micBtn.onclick = openMicRecorder;
+          micRow.appendChild(micBtn);
+          body.appendChild(micRow);
+        }
         if(audioFile){
           mountFileList(body, [audioFile], ()=>{ audioFile=null; audioUrl=null; paint(); });
           body.appendChild(el(`<audio src="${audioUrl}" controls style="width:100%; margin:6px 0 12px;"></audio>`));
@@ -4607,6 +4614,10 @@ TOOL_IMPL.vidvoice = {
                   <option value="replace">முழுவதுமாக நீக்கிவிட்டு புதியதை மட்டும் வை (Replace)</option>
                   <option value="mix">இரண்டையும் சேர்த்து கலக்கு (Mix)</option>
                 </select>
+              </div>
+              <div class="field" style="grid-column:1/-1; flex-direction:row; align-items:center; gap:8px; display:flex;">
+                <input type="checkbox" id="vvLoopAudio" style="width:auto; margin:0;">
+                <label for="vvLoopAudio" style="margin:0; font-weight:600; font-size:12.5px;" class="tamil">புதிய audio, video-வை விட குறைவா இருந்தா — முடியும் வரை loop பண்ணு (இல்லைனா default-ஆ, மீதி silence-ஆ இருக்கும்)</label>
               </div>
             </div>
           `);
@@ -4634,13 +4645,80 @@ TOOL_IMPL.vidvoice = {
       }
     }
 
+    function openMicRecorder(){
+      const overlay = el(`
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
+          <div style="background:#fff; border-radius:14px; padding:18px; width:min(92vw,380px); text-align:center;">
+            <div style="font-weight:800; margin-bottom:10px;" class="tamil">🎙️ Mic-ல் Record பண்ணுங்கள்</div>
+            <div id="micStatus" style="font-size:13px; color:var(--sub); margin-bottom:12px;" class="tamil">Record தொடங்க தயாராக உள்ளது…</div>
+            <audio id="micPreview" controls style="width:100%; display:none; margin-bottom:12px;"></audio>
+            <div class="btn-row">
+              <button id="micStartBtn" class="btn" style="flex:1; padding:9px; font-size:13px;">⏺️ Record தொடங்கு</button>
+              <button id="micStopBtn" class="btn secondary" style="flex:1; padding:9px; font-size:13px; display:none;">⏹️ Stop</button>
+            </div>
+            <div class="btn-row" style="margin-top:8px;">
+              <button id="micUseBtn" class="btn tamil" style="flex:1; padding:9px; font-size:13px; display:none;">✅ இதை பயன்படுத்து</button>
+              <button id="micRedoBtn" class="btn secondary tamil" style="flex:1; padding:9px; font-size:13px; display:none;">🔄 மீண்டும் Record</button>
+            </div>
+            <button id="micCancelBtn" style="width:100%; margin-top:10px; padding:8px; border:none; background:none; color:var(--sub); font-size:12.5px; cursor:pointer;" class="tamil">Cancel</button>
+          </div>
+        </div>
+      `);
+      document.body.appendChild(overlay);
+      let stream = null, recorder = null, chunks = [], recordedBlob = null;
+      const statusEl = overlay.querySelector('#micStatus');
+      const preview = overlay.querySelector('#micPreview');
+      const startBtn = overlay.querySelector('#micStartBtn');
+      const stopBtn = overlay.querySelector('#micStopBtn');
+      const useBtn = overlay.querySelector('#micUseBtn');
+      const redoBtn = overlay.querySelector('#micRedoBtn');
+      function cleanupStream(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } }
+      function close(){ cleanupStream(); overlay.remove(); }
+      overlay.querySelector('#micCancelBtn').onclick = close;
+      startBtn.onclick = async ()=>{
+        if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
+          statusEl.textContent = 'இந்த browser-ல் mic access கிடைக்கவில்லை.'; return;
+        }
+        try{
+          stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        }catch(err){ statusEl.textContent = 'Mic permission கிடைக்கவில்லை — browser settings-ல் allow பண்ணுங்கள்.'; return; }
+        chunks = [];
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+        recorder = mimeType ? new MediaRecorder(stream, {mimeType}) : new MediaRecorder(stream);
+        recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
+        recorder.onstop = ()=>{
+          recordedBlob = new Blob(chunks, {type: recorder.mimeType || 'audio/webm'});
+          preview.src = URL.createObjectURL(recordedBlob);
+          preview.style.display = 'block';
+          useBtn.style.display = ''; redoBtn.style.display = '';
+          statusEl.textContent = 'Record முடிந்தது — கேட்டு பாருங்கள்.';
+          cleanupStream();
+        };
+        recorder.start();
+        statusEl.textContent = '🔴 Recording… பேசுங்கள்.';
+        startBtn.style.display = 'none'; stopBtn.style.display = '';
+        preview.style.display = 'none'; useBtn.style.display = 'none'; redoBtn.style.display = 'none';
+      };
+      stopBtn.onclick = ()=>{ if(recorder && recorder.state!=='inactive') recorder.stop(); stopBtn.style.display='none'; };
+      redoBtn.onclick = ()=>{ recordedBlob=null; preview.style.display='none'; useBtn.style.display='none'; redoBtn.style.display='none'; startBtn.style.display=''; statusEl.textContent='Record தொடங்க தயாராக உள்ளது…'; };
+      useBtn.onclick = ()=>{
+        if(!recordedBlob) return;
+        const ext = (recorder.mimeType||'audio/webm').includes('webm') ? 'webm' : 'ogg';
+        audioFile = new File([recordedBlob], `mic-recording.${ext}`, {type: recordedBlob.type});
+        audioUrl = URL.createObjectURL(audioFile);
+        close();
+        paint();
+      };
+    }
+
     async function doReplace(){
       const mix = body.querySelector('#vvMode').value === 'mix';
       const startSec = parseTimeToSec(body.querySelector('#vvStart').value) || 0;
+      const loopAudio = body.querySelector('#vvLoopAudio').checked;
       const prog = mountProgress(body);
       if(AUTH_CONFIGURED && isFastModeChecked('vvFastR')){
         try{
-          const blob = await callVideoProcessMultiServer([videoFile, audioFile], 'voicereplace', {mix, startSec}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
+          const blob = await callVideoProcessMultiServer([videoFile, audioFile], 'voicereplace', {mix, startSec, loopAudio}, prog, videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
           mountResult(body, `⚡ Fast Server Mode மூலம் குரல் இணைக்கப்பட்டது.`);
         }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — browser mode-ஐ முயற்சிக்கவும்.').style.background='#FDEDEC'; }
         return;
@@ -4661,14 +4739,20 @@ TOOL_IMPL.vidvoice = {
         // video timeline, instead of always starting from 0:00.
         const delayMs = Math.round(startSec*1000);
         const delayedAudio = delayMs>0 ? `adelay=${delayMs}|${delayMs},` : '';
+        // -stream_loop -1 on the audio INPUT (must precede its own -i) repeats
+        // it indefinitely when it's shorter than the video — combined with
+        // duration=first (mix) / -shortest (replace) below, which stop the
+        // output at the video's own length, this fills the whole video with
+        // repeated audio instead of trailing off into silence.
+        const audioInputFlags = loopAudio ? ['-stream_loop','-1'] : [];
         // Always re-encode (rather than "-c:v copy") — stream-copying a webm/mkv video
         // straight into an .mp4 container fails whenever the source codec isn't natively
         // mp4-compatible. Re-encoding to h264+aac guarantees a playable result regardless
         // of the input format, at the cost of a little extra time.
         if(mix){
-          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`,'-map','0:v:0','-map','[aout]','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
+          await ffmpeg.exec(['-i','in_v.'+vExt, ...audioInputFlags,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`,'-map','0:v:0','-map','[aout]','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
         } else {
-          await ffmpeg.exec(['-i','in_v.'+vExt,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1]`,'-map','0:v:0','-map','[a1]','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
+          await ffmpeg.exec(['-i','in_v.'+vExt, ...audioInputFlags,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1]`,'-map','0:v:0','-map','[a1]','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
         }
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
