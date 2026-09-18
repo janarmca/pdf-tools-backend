@@ -238,7 +238,7 @@ const TOOLS = [
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
-  {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another', icon:'🗣️', color:'#8E44AD', cat:'ai', cost:1},
+  {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text to Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:3},
 
   // ---- Image Tools (Paid) ----
@@ -7124,7 +7124,7 @@ const LIVETRANSLATE_LANGS = [
 ];
 TOOL_IMPL.livetranslate = {
   mount(container){
-    let fromLang = 'ta-IN', toLang = 'en-US', listening = false, recognition = null, voices = [];
+    let fromLang = 'ta-IN', toLang = 'en-US', listening = false, recognition = null, voices = [], nativeTranslator = null;
     let history = []; // [{original, translated}]
     const body = el(`<div></div>`); container.appendChild(body);
 
@@ -7141,7 +7141,7 @@ TOOL_IMPL.livetranslate = {
         body.appendChild(el(`<div class="note tamil">⚠️ இந்த browser-ல் Speech Recognition/Synthesis ஆதரவு இல்லை. Chrome/Edge (desktop அல்லது Android) பயன்படுத்தவும்.</div>`));
         return;
       }
-      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். ஒவ்வொரு வாக்கியத்துக்கும் 1 credit.</div>`));
+      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். Chrome/Edge desktop-ல் <b>முற்றிலும் இலவசம்</b> (on-device) — மற்ற browsers/mobile-ல் ஒவ்வொரு வாக்கியத்துக்கும் 1 credit (Gemini AI).</div>`));
 
       const langRow = el(`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:14px;"></div>`);
       const fromSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===fromLang?'selected':''}>🗣️ ${name}</option>`).join('')}</select>`);
@@ -7175,13 +7175,11 @@ TOOL_IMPL.livetranslate = {
     }
 
     function startListening(){
-      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'AI translation பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
       recognition.lang = fromLang;
       recognition.continuous = true;
       recognition.interimResults = true;
-      let finalizedUpTo = '';
       recognition.onresult = (ev)=>{
         let interim = '';
         for(let i=ev.resultIndex; i<ev.results.length; i++){
@@ -7201,27 +7199,58 @@ TOOL_IMPL.livetranslate = {
       recognition.onend = ()=>{ if(listening) recognition.start(); }; // browsers auto-stop after a pause — restart to keep it continuous while the person hasn't pressed Stop
       recognition.start();
       listening = true;
+      // Try to set up Chrome/Edge's free, on-device Translator API right here,
+      // inside the button-click handler — creating it requires a user gesture,
+      // which this click provides. Desktop Chrome 138+/Edge 148+ only (no
+      // mobile support); handleUtterance falls back to the paid Gemini path
+      // whenever this isn't available or the language pair isn't supported.
+      nativeTranslator = null;
+      setupNativeTranslator();
       paint();
+    }
+    async function setupNativeTranslator(){
+      try{
+        if(!('Translator' in self)) return;
+        const srcBase = fromLang.split('-')[0], tgtBase = toLang.split('-')[0];
+        const availability = await Translator.availability({ sourceLanguage: srcBase, targetLanguage: tgtBase });
+        if(availability === 'unavailable') return;
+        nativeTranslator = await Translator.create({ sourceLanguage: srcBase, targetLanguage: tgtBase });
+      }catch(e){ nativeTranslator = null; } // any failure here just means handleUtterance uses the Gemini fallback instead
     }
     function stopListening(){
       listening = false;
       if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; }
+      nativeTranslator = null;
       paint();
     }
     async function handleUtterance(said){
       const statusEl = body.querySelector('#ltStatus');
       if(statusEl) statusEl.textContent = '⏳ மொழிபெயர்க்கிறது…';
       try{
-        const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
-        const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
-        const form = new FormData();
-        form.append('question', `Translate this from ${fromName} to ${toName}. Respond with ONLY the translation, no preamble, no quotes: ${said}`);
-        form.append('toolId', 'livetranslate');
-        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
-          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
-        });
-        if(result.error) throw new Error(result.error);
-        const translated = result.answer.trim();
+        let translated;
+        if(nativeTranslator){
+          // Free path: Chrome/Edge's on-device Translator API — no backend
+          // call, no credit charge, no sign-in needed.
+          translated = (await nativeTranslator.translate(said)).trim();
+        } else {
+          // Paid fallback: this device/browser doesn't have the native
+          // Translator API (all mobile browsers, Firefox, Safari, older
+          // Chrome/Edge) — use the existing Gemini-backed translation.
+          if(!AUTH_CONFIGURED || !authState.session){
+            if(statusEl) statusEl.textContent = 'இந்த browser-ல் free translation கிடைக்கவில்லை — Gemini AI பயன்படுத்த sign in பண்ணவும்.';
+            return;
+          }
+          const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
+          const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
+          const form = new FormData();
+          form.append('question', `Translate this from ${fromName} to ${toName}. Respond with ONLY the translation, no preamble, no quotes: ${said}`);
+          form.append('toolId', 'livetranslate');
+          const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+            method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+          });
+          if(result.error) throw new Error(result.error);
+          translated = result.answer.trim();
+        }
         history.push({ original: said, translated });
         const utterance = new SpeechSynthesisUtterance(translated);
         const voice = pickVoice(toLang);
