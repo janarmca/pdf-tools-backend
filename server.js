@@ -436,6 +436,45 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
+// POST /api/ai/image — Text-to-Image generation (Gemini 3.1 Flash Image)
+// body: { prompt: string }
+// Priced higher than a plain text question (3 credits) since Gemini image
+// output genuinely costs several times more per call than text output —
+// this reflects that honestly rather than charging the flat 1-credit rate.
+// ============================================================
+app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
+  const CREDIT_COST = 3;
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
+    }
+    const prompt = (req.body.prompt || '').trim();
+    if (!prompt) return res.status(400).json({ error: 'Prompt தேவை.' });
+    const toolId = req.body.toolId || 'texttoimage';
+    const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      }
+    );
+    const geminiJson = await geminiRes.json();
+    if (!geminiRes.ok) throw new Error(geminiJson.error?.message || 'Image generation failed');
+    const responseParts = geminiJson.candidates?.[0]?.content?.parts || [];
+    const imagePart = responseParts.find(p => p.inlineData || p.inline_data);
+    if (!imagePart) throw new Error('Model did not return an image — try rephrasing the prompt.');
+    const inline = imagePart.inlineData || imagePart.inline_data;
+    res.json({ ok: true, imageBase64: inline.data, mimeType: inline.mimeType || inline.mime_type || 'image/png' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
 // POST /api/payment/create-order — Razorpay order உருவாக்குதல்
 // body: { planId: 'credits_100' | 'pro_monthly' | ... }
 // ============================================================
