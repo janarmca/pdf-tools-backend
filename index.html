@@ -741,7 +741,25 @@ function fmtBytes(b){
   if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
   return (b/1024/1024).toFixed(2) + ' MB';
 }
-function downloadBlob(blob, filename){
+async function downloadBlob(blob, filename){
+  // Try the File System Access API's native "Save As" dialog first — lets
+  // the person choose their own filename and location instead of a silent,
+  // automatic download to the default downloads folder. Desktop Chrome/Edge
+  // only (not Safari, Firefox, or any mobile browser), so this gracefully
+  // falls through to the standard approach everywhere else.
+  if(window.showSaveFilePicker){
+    try{
+      const handle = await window.showSaveFilePicker({ suggestedName: filename });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      showDownloadToast(filename);
+      return;
+    }catch(err){
+      if(err.name === 'AbortError') return; // person cancelled the Save As dialog — respect that, don't silently download anyway
+      // any other failure (permission denied, etc.) — fall through to the standard download below
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
