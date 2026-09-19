@@ -7206,6 +7206,15 @@ TOOL_IMPL.livetranslate = {
       recognition.interimResults = true;
       let accumulated = '';
       let silenceTimer = null;
+      // ev.results is cumulative for the WHOLE session, growing with every
+      // event — ev.resultIndex is meant to mark where the new/changed
+      // results start, but isn't reliable across all browser
+      // implementations. Explicitly tracking how many results have already
+      // been committed as final (rather than trusting resultIndex) is what
+      // actually prevents the same final segment from being re-appended to
+      // `accumulated` on a later event — which is what caused the reported
+      // "word word word2 word word2 word3..." repeating/growing text.
+      let processedFinalCount = 0;
       const SILENCE_MS = 1800; // how long to wait after the last final segment before treating the sentence as "done"
       function scheduleCommit(){
         if(silenceTimer) clearTimeout(silenceTimer);
@@ -7217,9 +7226,11 @@ TOOL_IMPL.livetranslate = {
       }
       recognition.onresult = (ev)=>{
         let interim = '';
-        for(let i=ev.resultIndex; i<ev.results.length; i++){
+        for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
           if(r.isFinal){
+            if(i < processedFinalCount) continue; // already appended this one on a previous event — skip it
+            processedFinalCount = i+1;
             const said = r[0].transcript.trim();
             if(said){ accumulated = (accumulated ? accumulated+' ' : '') + said; scheduleCommit(); }
           } else interim += r[0].transcript;
