@@ -210,6 +210,7 @@ const TOOLS = [
   {id:'pdfheaderfooter', name:'PDF Header/Footer', desc:'Add text to top/bottom of every page', icon:'📄', color:'#1A5276', cat:'pdf'},
   {id:'pdfblankpage', name:'Insert Blank Page', desc:'Add blank pages at any position', icon:'➕', color:'#34495E', cat:'pdf'},
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
+  {id:'pdfprotect', name:'Protect PDF (Password)', desc:'Add a password so only people who know it can open the file', icon:'🔐', color:'#7A2E2E', cat:'pdf'},
   {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
@@ -8507,6 +8508,62 @@ TOOL_IMPL.pdfredact = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
+  }
+};
+
+/* ===================== PDF PASSWORD PROTECTION ===================== */
+TOOL_IMPL.pdfprotect = {
+  mount(container){
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">PDF-க்கு ஒரு password சேர்க்கலாம் — அந்த password தெரிந்தவர்கள் மட்டுமே கோப்பை திறக்க முடியும். முழுவதும் browser-லேயே நடக்கும் — கோப்பு server-க்கு போகாது.</div>`));
+      mountUploader(body, {
+        accept:'application/pdf',
+        label:'ஒரு PDF file drag & drop or tap', sublabel:'',
+        onAdd: async (fl)=> handleFile(fl[0])
+      });
+      if(file){
+        mountFileList(body, [file], ()=>{ file=null; paint(); });
+        const pwField = el(`
+          <div style="margin-top:14px;">
+            <div class="field"><label class="tamil">Password</label><input type="password" id="pfPass1" autocomplete="new-password" placeholder="குறைந்தது 4 எழுத்துகள்"></div>
+            <div class="field"><label class="tamil">Password மீண்டும் தட்டச்சு செய்யவும்</label><input type="password" id="pfPass2" autocomplete="new-password"></div>
+          </div>
+        `);
+        body.appendChild(pwField);
+        const row = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn tamil">🔐 PDF-ஐ Protect பண்ணு</button>`);
+        btn.onclick = doProtect;
+        row.appendChild(btn);
+        body.appendChild(row);
+      }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
+    } else {
+      paint();
+    }
+    async function doProtect(){
+      const p1 = body.querySelector('#pfPass1').value;
+      const p2 = body.querySelector('#pfPass2').value;
+      if(!p1 || p1.length < 4){ mountResult(body, 'குறைந்தது 4 எழுத்துகள் கொண்ட password கொடுக்கவும்.').style.background='#FDEDEC'; return; }
+      if(p1 !== p2){ mountResult(body, 'இரண்டு passwords ஒன்றுபோல் இல்லை — மீண்டும் சரிபார்க்கவும்.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Encryption library ஏற்றுகிறது…');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-encrypt-lite');
+        prog.set(55,'PDF-ஐ Protect பண்ணுகிறது…');
+        const encryptedBytes = await mod.encryptPDF(new Uint8Array(file._buf), p1);
+        prog.set(100,'Done');
+        downloadBlob(new Blob([encryptedBytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-protected.pdf');
+        prog.remove();
+        mountResult(body, 'Password-protected PDF தயார் — இந்த password-ஐ பாதுகாப்பா வைத்துக்கொள்ளுங்கள், மறந்தால் யாராலும் திறக்க முடியாது.').style.background='#FFF6E5';
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
   }
 };
 
