@@ -211,6 +211,7 @@ const TOOLS = [
   {id:'pdfblankpage', name:'Insert Blank Page', desc:'Add blank pages at any position', icon:'➕', color:'#34495E', cat:'pdf'},
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
   {id:'pdfprotect', name:'Protect PDF (Password)', desc:'Add a password so only people who know it can open the file', icon:'🔐', color:'#7A2E2E', cat:'pdf'},
+  {id:'pdfunlock', name:'Unlock PDF (Remove Password)', desc:'Remove password protection when you know the current password', icon:'🔓', color:'#2E7A5A', cat:'pdf'},
   {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
@@ -8563,6 +8564,63 @@ TOOL_IMPL.pdfprotect = {
         prog.remove();
         mountResult(body, 'Password-protected PDF தயார் — இந்த password-ஐ பாதுகாப்பா வைத்துக்கொள்ளுங்கள், மறந்தால் யாராலும் திறக்க முடியாது.').style.background='#FFF6E5';
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+  }
+};
+
+/* ===================== PDF UNLOCK (remove password) ===================== */
+TOOL_IMPL.pdfunlock = {
+  mount(container){
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">Password-protected PDF-ல் இருந்து password-ஐ நீக்கலாம் — தற்போதைய password தெரிந்திருக்க வேண்டும். முழுவதும் browser-லேயே நடக்கும் — கோப்பு server-க்கு போகாது.</div>`));
+      mountUploader(body, {
+        accept:'application/pdf',
+        label:'Password-protected PDF file drag & drop or tap', sublabel:'',
+        onAdd: async (fl)=> handleFile(fl[0])
+      });
+      if(file){
+        mountFileList(body, [file], ()=>{ file=null; paint(); });
+        const pwField = el(`
+          <div style="margin-top:14px;">
+            <div class="field"><label class="tamil">தற்போதைய Password</label><input type="password" id="ufPass" autocomplete="current-password" placeholder="இந்த PDF-ஐ திறக்க தேவையான password"></div>
+          </div>
+        `);
+        body.appendChild(pwField);
+        const row = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn tamil">🔓 Password நீக்கு</button>`);
+        btn.onclick = doUnlock;
+        row.appendChild(btn);
+        body.appendChild(row);
+      }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
+    } else {
+      paint();
+    }
+    async function doUnlock(){
+      const pw = body.querySelector('#ufPass').value;
+      if(!pw){ mountResult(body, 'Password கொடுக்கவும்.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        prog.set(20,'Decryption library ஏற்றுகிறது…');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt-lite');
+        prog.set(55,'Password நீக்குகிறது…');
+        const decryptedBytes = await mod.decryptPDF(new Uint8Array(file._buf), pw);
+        prog.set(100,'Done');
+        downloadBlob(new Blob([decryptedBytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-unlocked.pdf');
+        prog.remove();
+        mountResult(body, 'Password நீக்கப்பட்ட PDF தயார்.').style.background='#FFF6E5';
+      }catch(err){
+        prog.remove();
+        const msg = /password/i.test(err.message) ? 'தவறான password — சரியா இருக்கானு பார்த்து, மீண்டும் முயற்சிக்கவும்.' : 'Error: '+err.message;
+        mountResult(body, msg).style.background='#FDEDEC';
+      }
     }
   }
 };
