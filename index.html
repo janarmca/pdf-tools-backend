@@ -7141,7 +7141,7 @@ TOOL_IMPL.livetranslate = {
         body.appendChild(el(`<div class="note tamil">⚠️ இந்த browser-ல் Speech Recognition/Synthesis ஆதரவு இல்லை. Chrome/Edge (desktop அல்லது Android) பயன்படுத்தவும்.</div>`));
         return;
       }
-      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். Chrome/Edge desktop-ல் <b>முற்றிலும் இலவசம்</b> (on-device) — மற்ற browsers/mobile-ல் ஒவ்வொரு வாக்கியத்துக்கும் 1 credit (Gemini AI).</div>`));
+      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். <b>முற்றிலும் இலவசம்</b> (எல்லா devices-லும்) — MyMemory அல்லது Chrome-ன் on-device translation பயன்படுத்தப்படும். அரிதாக அவை கிடைக்காவிட்டால் மட்டும், Gemini AI (1 credit, sign in தேவை) fallback-ஆக பயன்படும்.</div>`));
 
       const langRow = el(`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:14px;"></div>`);
       const fromSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===fromLang?'selected':''}>🗣️ ${name}</option>`).join('')}</select>`);
@@ -7231,33 +7231,54 @@ TOOL_IMPL.livetranslate = {
       nativeTranslator = null;
       paint();
     }
+    // MyMemory: free, no-signup, CORS-enabled translation API, callable
+    // directly from browser JS — works on every browser/device (including
+    // mobile, unlike the native Translator API above). ~5,000 chars/day per
+    // IP without an email param (~50,000/day with one) — plenty for casual
+    // conversational use. Used as the universal free fallback; only if this
+    // itself fails (rate-limited, network issue, unsupported language pair)
+    // does the tool fall back further to the paid Gemini path.
+    async function tryMyMemory(text, srcBase, tgtBase){
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcBase}|${tgtBase}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      const translated = json.responseData && json.responseData.translatedText;
+      if(!translated || /MYMEMORY WARNING|INVALID|QUERY LENGTH LIMIT/i.test(translated)) throw new Error('MyMemory unavailable');
+      return translated.trim();
+    }
     async function handleUtterance(said){
       const statusEl = body.querySelector('#ltStatus');
       if(statusEl) statusEl.textContent = '⏳ மொழிபெயர்க்கிறது…';
+      const srcBase = fromLang.split('-')[0], tgtBase = toLang.split('-')[0];
       try{
         let translated;
         if(nativeTranslator){
-          // Free path: Chrome/Edge's on-device Translator API — no backend
-          // call, no credit charge, no sign-in needed.
+          // Free path 1: Chrome/Edge's on-device Translator API — no
+          // network call at all, no credit charge, no sign-in needed.
           translated = (await nativeTranslator.translate(said)).trim();
         } else {
-          // Paid fallback: this device/browser doesn't have the native
-          // Translator API (all mobile browsers, Firefox, Safari, older
-          // Chrome/Edge) — use the existing Gemini-backed translation.
-          if(!AUTH_CONFIGURED || !authState.session){
-            if(statusEl) statusEl.textContent = 'இந்த browser-ல் free translation கிடைக்கவில்லை — Gemini AI பயன்படுத்த sign in பண்ணவும்.';
-            return;
+          try{
+            // Free path 2: MyMemory — works on every browser/device,
+            // including mobile, with no sign-in or credits needed.
+            translated = await tryMyMemory(said, srcBase, tgtBase);
+          }catch(myMemoryErr){
+            // Paid fallback: MyMemory itself failed (rate limit, unusual
+            // language pair, network issue) — fall back to Gemini.
+            if(!AUTH_CONFIGURED || !authState.session){
+              if(statusEl) statusEl.textContent = 'Free translation தற்போது கிடைக்கவில்லை — Gemini AI பயன்படுத்த sign in பண்ணவும்.';
+              return;
+            }
+            const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
+            const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
+            const form = new FormData();
+            form.append('question', `Translate this from ${fromName} to ${toName}. Respond with ONLY the translation, no preamble, no quotes: ${said}`);
+            form.append('toolId', 'livetranslate');
+            const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+              method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+            });
+            if(result.error) throw new Error(result.error);
+            translated = result.answer.trim();
           }
-          const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
-          const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
-          const form = new FormData();
-          form.append('question', `Translate this from ${fromName} to ${toName}. Respond with ONLY the translation, no preamble, no quotes: ${said}`);
-          form.append('toolId', 'livetranslate');
-          const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
-            method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
-          });
-          if(result.error) throw new Error(result.error);
-          translated = result.answer.trim();
         }
         history.push({ original: said, translated });
         const utterance = new SpeechSynthesisUtterance(translated);
