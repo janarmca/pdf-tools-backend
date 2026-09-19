@@ -7125,15 +7125,15 @@ const LIVETRANSLATE_LANGS = [
 TOOL_IMPL.livetranslate = {
   mount(container){
     let langA = 'ta-IN', langB = 'en-US', activeSide = null, recognition = null, voices = [], nativeTranslator = null;
+    let accumulated = ''; // the growing transcript for the current speak-tap-to-stop-tap session — committed for translation only when the person taps Stop
     // Incremented every time a new recognition session starts. Each
     // session's event handlers capture their own generation number in
     // closure and check it against this shared counter before doing
     // anything — if a newer session has since started, the older one's
-    // events are stale and are ignored entirely. This is the definitive
-    // fix for repeated/growing text: even if the browser allows a brief
-    // overlap between an ending session and its restart (so both fire
-    // events for a moment), only the current generation's session is ever
-    // allowed to accumulate text or call handleUtterance.
+    // events are stale and are ignored entirely. This is a safety net on
+    // top of the "single session, no auto-restart" design below — it
+    // guards against any lingering event from a session that was just
+    // explicitly stopped.
     let sessionGeneration = 0;
     let fromLang = langA, toLang = langB; // set to whichever direction is currently active before each listen
     let history = []; // [{original, translated}]
@@ -7153,7 +7153,7 @@ TOOL_IMPL.livetranslate = {
         body.appendChild(el(`<div class="note tamil">⚠️ இந்த browser-ல் Speech Recognition/Synthesis ஆதரவு இல்லை. Chrome/Edge (desktop அல்லது Android) பயன்படுத்தவும்.</div>`));
         return;
       }
-      body.appendChild(el(`<div class="note tamil"><b>இருவரும் பேசும் Conversation Mode:</b> கீழே இரண்டு மொழிகளையும் தேர்வு செய்யுங்கள். யார் பேசுகிறாரோ, அவருடைய பக்கத்தை tap பண்ணிவிட்டு பேசுங்கள் — இன்னொரு மொழியில் தானாக மொழிபெயர்க்கப்பட்டு உரக்க படிக்கப்படும். <b>முற்றிலும் இலவசம்.</b></div>`));
+      body.appendChild(el(`<div class="note tamil"><b>இருவரும் பேசும் Conversation Mode:</b> கீழே இரண்டு மொழிகளையும் தேர்வு செய்யுங்கள். யார் பேசுகிறாரோ, அவருடைய பக்கத்தை tap பண்ணி பேசுங்கள் — <b>பேசி முடித்ததும், அதே பக்கத்தை மீண்டும் tap பண்ணி "நிறுத்து" சொல்லுங்கள்</b> — அப்போதுதான் மொழிபெயர்க்கப்பட்டு உரக்க படிக்கப்படும். <b>முற்றிலும் இலவசம்.</b></div>`));
 
       const langRow = el(`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:14px;"></div>`);
       const aSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===langA?'selected':''}>${name}</option>`).join('')}</select>`);
@@ -7196,49 +7196,33 @@ TOOL_IMPL.livetranslate = {
       activeSide = side;
       fromLang = side==='A' ? langA : langB;
       toLang = side==='A' ? langB : langA;
+      accumulated = '';
       startListening();
       paint();
     }
 
     function startListening(){
       sessionGeneration++;
-      const myGeneration = sessionGeneration; // captured in closure — this session's own identity
+      const myGeneration = sessionGeneration; // captured in closure — used to ignore a stale/leftover event from a session that's already been stopped
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
       recognition.lang = fromLang;
-      // continuous=true so the session keeps listening through a whole,
-      // possibly multi-clause sentence — the browser's speech engine fires
-      // multiple "final" segments as someone talks (e.g. after each clause
-      // or natural breath), NOT just once at the very end. Translating each
-      // one immediately (as an earlier version did) sounded like stuttering
-      // ("My name My name..."); stopping after just the first one
-      // (continuous=false, an earlier fix) cut people off mid-sentence
-      // instead. The real fix is below: accumulate every final segment and
-      // only commit it for translation after a genuine pause in speech.
+      // A single continuous=true session runs for as long as the person is
+      // speaking — no automatic restarting at all. Earlier versions tried to
+      // auto-detect "done speaking" (via a silence timer, or by restarting
+      // the session after each pause) and translate automatically, but this
+      // repeatedly caused duplicated/repeated text: restarting created a
+      // brief window where the old and new sessions could both still fire
+      // events for the same speech, each independently accumulating and
+      // translating it. The reliable fix is to remove auto-restart
+      // entirely — text just keeps building up in the live preview below
+      // while the person talks, and nothing is translated until they
+      // explicitly tap Stop.
       recognition.continuous = true;
       recognition.interimResults = true;
-      let accumulated = '';
-      let silenceTimer = null;
-      // ev.results is cumulative for the WHOLE session, growing with every
-      // event — ev.resultIndex is meant to mark where the new/changed
-      // results start, but isn't reliable across all browser
-      // implementations. Explicitly tracking how many results have already
-      // been committed as final (rather than trusting resultIndex) is what
-      // prevents the same final segment from being re-appended to
-      // `accumulated` on a later event within THIS session.
       let processedFinalCount = 0;
-      const SILENCE_MS = 1800; // how long to wait after the last final segment before treating the sentence as "done"
-      function scheduleCommit(){
-        if(silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(()=>{
-          if(myGeneration !== sessionGeneration) return; // a newer session has taken over — this one's pending commit is stale, drop it
-          const said = accumulated.trim();
-          accumulated = '';
-          if(said) handleUtterance(said);
-        }, SILENCE_MS);
-      }
       recognition.onresult = (ev)=>{
-        if(myGeneration !== sessionGeneration) return; // stale session (overlapping with a newer restart) — ignore entirely, this is the definitive fix for growing/repeated text
+        if(myGeneration !== sessionGeneration) return;
         let interim = '';
         for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
@@ -7246,11 +7230,11 @@ TOOL_IMPL.livetranslate = {
             if(i < processedFinalCount) continue; // already appended this one on a previous event — skip it
             processedFinalCount = i+1;
             const said = r[0].transcript.trim();
-            if(said){ accumulated = (accumulated ? accumulated+' ' : '') + said; scheduleCommit(); }
+            if(said) accumulated = (accumulated ? accumulated+' ' : '') + said;
           } else interim += r[0].transcript;
         }
         const statusEl = body.querySelector('#ltStatus');
-        if(statusEl) statusEl.textContent = interim ? `🎙️ …${accumulated}${accumulated?' ':''}${interim}` : (accumulated ? `🎙️ …${accumulated}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது…');
+        if(statusEl) statusEl.textContent = (accumulated || interim) ? `🎙️ ${accumulated}${accumulated&&interim?' ':''}${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது… பேசி முடித்ததும் "நிறுத்து" tap பண்ணுங்கள்.';
       };
       recognition.onerror = (ev)=>{
         if(myGeneration !== sessionGeneration) return;
@@ -7258,22 +7242,13 @@ TOOL_IMPL.livetranslate = {
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
       recognition.onend = ()=>{
-        if(myGeneration !== sessionGeneration) return; // stale session ending — a newer one is already running, don't touch its state or restart on its behalf
-        // The browser can end a "continuous" session on its own after a
-        // longer stretch of silence — commit whatever's been accumulated so
-        // far (don't lose the last bit of speech) before restarting.
-        if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
-        const said = accumulated.trim();
-        accumulated = '';
-        if(said) handleUtterance(said);
-        // Restart by calling startListening() again (creating a BRAND NEW
-        // SpeechRecognition instance, bumping sessionGeneration) rather than
-        // recognition.start() on this same object — guarantees the next
-        // session's tracking state and results array always start in sync,
-        // and the generation check above means even if the browser briefly
-        // overlaps the old and new sessions, only the current one's events
-        // are ever acted on.
-        if(activeSide) startListening();
+        if(myGeneration !== sessionGeneration) return;
+        // The browser can end a "continuous" session on its own after an
+        // unusually long stretch of silence (not the person tapping Stop) —
+        // treat that the same as if they'd tapped Stop themselves, rather
+        // than silently restarting (which is exactly what caused the
+        // duplication bugs in earlier versions).
+        if(activeSide) stopListening();
       };
       try{ recognition.start(); }catch(e){}
       // Try to set up Chrome/Edge's free, on-device Translator API right here,
@@ -7294,11 +7269,14 @@ TOOL_IMPL.livetranslate = {
       }catch(e){ nativeTranslator = null; } // any failure here just means handleUtterance uses the Gemini fallback instead
     }
     function stopListening(){
-      activeSide = null;
       sessionGeneration++; // invalidates any lingering event from the session just being stopped
       if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; }
       nativeTranslator = null;
+      activeSide = null;
+      const said = accumulated.trim();
+      accumulated = '';
       paint();
+      if(said) handleUtterance(said); // translate exactly once, only now that the person has explicitly finished speaking
     }
     // MyMemory: free, no-signup, CORS-enabled translation API, callable
     // directly from browser JS — works on every browser/device (including
