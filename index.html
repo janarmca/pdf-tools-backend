@@ -7178,8 +7178,6 @@ TOOL_IMPL.livetranslate = {
 
       const statusEl = el(`<div id="ltStatus" style="text-align:center; font-size:12.5px; color:var(--sub); margin:10px 0;"></div>`);
       body.appendChild(statusEl);
-      const debugEl = el(`<div id="ltDebug" style="font-family:monospace; font-size:10.5px; color:#B7791F; background:#FFF8E1; border-radius:8px; padding:8px; margin-bottom:10px; white-space:pre-wrap; word-break:break-word;"></div>`);
-      body.appendChild(debugEl);
 
       const histWrap = el(`<div style="margin-top:6px;"></div>`);
       [...history].reverse().forEach(h=>{
@@ -7246,10 +7244,8 @@ TOOL_IMPL.livetranslate = {
         // previous one, replace it rather than appending both.
         const pieces = [];
         let interim = '';
-        const rawDebug = [];
         for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
-          rawDebug.push(`[${i}]${r.isFinal?'FINAL':'interim'}: "${r[0].transcript}"`);
           if(r.isFinal){
             const text = r[0].transcript.trim();
             if(!text) continue; // the browser sometimes reports empty/whitespace-only "final" results
@@ -7263,8 +7259,6 @@ TOOL_IMPL.livetranslate = {
         accumulated = pieces.join(' ');
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = (accumulated || interim) ? `🎙️ ${accumulated}${accumulated&&interim?' ':''}${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது… பேசி முடித்ததும் "நிறுத்து" tap பண்ணுங்கள்.';
-        const debugEl = body.querySelector('#ltDebug');
-        if(debugEl) debugEl.textContent = 'DEBUG (raw browser data):\n' + rawDebug.join('\n');
       };
       recognition.onerror = (ev)=>{
         if(myGeneration !== sessionGeneration) return;
