@@ -978,6 +978,47 @@ function maybeShowDiscoverModal(forceShow){
 }
 
 
+// ===================== LANGUAGE (Tamil / English / Hindi) =====================
+// Detects the browser's own language setting (navigator.language) rather than
+// IP-based geolocation — no third-party API dependency, and reflects what the
+// person actually set their device to, which is a more direct signal of
+// preference than guessing from their network location.
+// NOTE: this translates the key homepage elements (hero, category labels,
+// trust banner) as a first phase — translating the full app (13,000+ lines,
+// hundreds of tool-specific strings) is a much larger, ongoing effort beyond
+// this pass.
+function detectInitialLang(){
+  try{
+    const saved = localStorage.getItem('pdfToolsLang');
+    if(saved && ['ta','en','hi'].includes(saved)) return saved;
+  }catch(e){}
+  const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  if(nav.startsWith('ta')) return 'ta';
+  if(nav.startsWith('hi')) return 'hi';
+  return 'en';
+}
+let __appLang = detectInitialLang();
+function setAppLang(lang){
+  __appLang = lang;
+  try{ localStorage.setItem('pdfToolsLang', lang); }catch(e){}
+  render();
+}
+const I18N = {
+  heroTitle: { en:'PDF, Business, Video, AI & More — All Free, One Place', ta:'PDF, வணிகம், வீடியோ, AI மற்றும் பல — அனைத்தும் இலவசம், ஒரே இடத்தில்', hi:'PDF, बिज़नेस, वीडियो, AI और भी बहुत कुछ — सब मुफ़्त, एक ही जगह' },
+  heroSub: { en:"Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device unless you choose Fast Server Mode.", ta:'இணைத்தல், சுருக்குதல், மாற்றுதல், மொழிபெயர்ப்பு, விலைப்பட்டியல் மற்றும் பல — ஆவணங்கள், படங்கள், வீடியோ, வணிகம், கல்விக்கான ஒரே தூய்மையான கருவித்தொகுப்பு. Fast Server Mode தேர்வு செய்யாத வரை உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும்.', hi:'मर्ज, कंप्रेस, कन्वर्ट, ट्रांसलेट, इनवॉइस और भी बहुत कुछ — दस्तावेज़ों, इमेज, वीडियो, बिज़नेस और शिक्षा के लिए एक साफ़-सुथरा टूलकिट। जब तक आप Fast Server Mode न चुनें, आपकी फ़ाइलें आपके डिवाइस पर ही रहती हैं।' },
+  trustTitle: { en:'Quality software built by a Tamilian, for Tamil people', ta:'ஒரு தமிழன் தமிழ் மக்களுக்காக உருவாக்கிக் கொண்டிருக்கும் தரமான மென்பொருள்', hi:'एक तमिल व्यक्ति द्वारा तमिल लोगों के लिए बनाया गया गुणवत्तापूर्ण सॉफ़्टवेयर' },
+  catLabels: {
+    pdf: { en:'PDF', ta:'PDF', hi:'PDF' },
+    business: { en:'Business', ta:'வணிகம்', hi:'बिज़नेस' },
+    image: { en:'Image', ta:'படம்', hi:'इमेज' },
+    video: { en:'Video', ta:'வீடியோ', hi:'वीडियो' },
+    ai: { en:'AI', ta:'AI', hi:'AI' },
+    education: { en:'Education', ta:'கல்வி', hi:'शिक्षा' },
+  },
+};
+function tr(key){ return (I18N[key] && I18N[key][__appLang]) || (I18N[key] && I18N[key].en) || ''; }
+function catLabel(key){ return (I18N.catLabels[key] && I18N.catLabels[key][__appLang]) || (CATEGORY_META[key] && CATEGORY_META[key].label) || key; }
+
 function renderTopbar(){
   const bar = el(`
     <div class="topbar">
@@ -992,6 +1033,13 @@ function renderTopbar(){
     </div>
   `);
   const widget = bar.querySelector('#__authWidget');
+  const langBtn = el(`<button class="btn secondary" style="padding:7px 10px; font-size:12.5px; font-weight:800;" title="Language">🌐 ${__appLang.toUpperCase()}</button>`);
+  langBtn.onclick = ()=>{
+    const order = ['en','ta','hi'];
+    const next = order[(order.indexOf(__appLang)+1) % order.length];
+    setAppLang(next);
+  };
+  widget.appendChild(langBtn);
   if(!AUTH_CONFIGURED){
     widget.appendChild(el(`<div class="free-badge">✓ No limits</div>`));
   } else if(!authState.session){
@@ -1013,8 +1061,8 @@ function renderTopbar(){
 function renderHero(){
   return el(`
     <div class="hero tamil">
-      <h1>PDF, Business, Video, AI & More — All Free, One Place</h1>
-      <p>Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device unless you choose Fast Server Mode.</p>
+      <h1>${tr('heroTitle')}</h1>
+      <p>${tr('heroSub')}</p>
       <div class="hero-badges">
         <div class="hero-badge">🧰 ${TOOLS.length}+ tools</div>
         <div class="hero-badge">🔒 Privacy-first</div>
@@ -1027,7 +1075,7 @@ function renderHero(){
 function renderTrustBanner(){
   return el(`
     <div class="tamil" style="max-width:720px; margin:18px auto 0; background:linear-gradient(135deg,#FFF8E7,#FFF3D6); border:1.5px solid #F0D896; border-radius:16px; padding:16px 18px;">
-      <div style="font-weight:900; font-size:14.5px; color:#7A5A00; margin-bottom:6px;">🇮🇳 ஒரு தமிழன் தமிழ் மக்களுக்காக உருவாக்கிக் கொண்டிருக்கும் தரமான மென்பொருள்</div>
+      <div style="font-weight:900; font-size:14.5px; color:#7A5A00; margin-bottom:6px;">🇮🇳 ${tr('trustTitle')}</div>
       <div style="font-size:12.5px; color:var(--sub); line-height:1.55;">
         <b>எப்போதும் இலவசம்:</b> Merge, Compress, Convert போன்ற பெரும்பாலான tools, உங்க browser-லேயே இயங்குகின்றன — server cost ஏதும் இல்லாதவை — இவை <b>எப்போதும், நிரந்தரமா இலவசம்</b>.<br>
         <b>ஏன் சில tools credit கேட்கும்:</b> AI-powered tools (Translation, Image generation போன்றவை) Google Gemini போன்ற AI models-ஐ அழைக்கின்றன — இதற்கு உண்மையான, ரூபாய் செலவு ஆகிறது. அந்த செலவை மட்டும், நேர்மையா, credit-ஆ காட்டுகிறோம் — வேறு எந்த hidden cost-உம் இல்லை.
@@ -1107,7 +1155,7 @@ function renderSearchBar(){
 }
 
 function renderCategoryTabs(){
-  const cats = [['all','All','🗂️',true], ...Object.keys(CATEGORY_META).map(k=>[k, CATEGORY_META[k].label, CATEGORY_META[k].icon, CATEGORY_META[k].isFree])];
+  const cats = [['all','All','🗂️',true], ...Object.keys(CATEGORY_META).map(k=>[k, catLabel(k), CATEGORY_META[k].icon, CATEGORY_META[k].isFree])];
   const wrap = el(`<div style="display:flex; gap:10px; margin-top:16px; overflow-x:auto; padding:2px 2px 8px;"></div>`);
   cats.forEach(([key,label,icon,isFree])=>{
     const active = __activeCategory===key;
@@ -1142,7 +1190,7 @@ function renderCategoryCards(){
     const card = el(`
       <button class="cat-card" style="position:relative; overflow:hidden; border:none; border-radius:20px; padding:22px 14px; min-height:135px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer; background:${CATEGORY_GRADIENTS[key]}; box-shadow:0 6px 18px rgba(20,30,60,.15); animation:catCardIn .4s ease-out ${idx*0.06}s both;">
         <div style="font-size:34px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));">${meta.icon}</div>
-        <div style="font-size:14px; font-weight:900; color:#fff; text-align:center;">${meta.label}</div>
+        <div style="font-size:14px; font-weight:900; color:#fff; text-align:center;">${catLabel(key)}</div>
         <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,.85); background:rgba(255,255,255,.18); padding:2px 10px; border-radius:20px;">${count} tools</div>
       </button>
     `);
@@ -1221,7 +1269,7 @@ function renderSmartUploadZone(){
       resultEl.appendChild(btnRow);
     } else if(category){
       __activeCategory = category;
-      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145;">✓ "${escapeHtml(f.name)}" — ${escapeHtml((CATEGORY_META[category]&&CATEGORY_META[category].label)||category)} tools காட்டப்படுது கீழே</div>`));
+      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145;">✓ "${escapeHtml(f.name)}" — ${escapeHtml(category ? catLabel(category) : category)} tools காட்டப்படுது கீழே</div>`));
       renderHomeBody();
     } else {
       resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#8A6D00;">"${escapeHtml(f.name)}" — இதற்கு specific tool கண்டுபிடிக்க முடியல. கீழே search box-ல் தேடுங்கள்.</div>`));
@@ -1289,7 +1337,7 @@ function renderHomeBody(){
     const section = el(`
       <div style="margin-top:26px;">
         <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
-          <div style="font-weight:900; font-size:16px;">${meta.icon} ${meta.label} Tools</div>
+          <div style="font-weight:900; font-size:16px;">${meta.icon} ${catLabel(cat)} Tools</div>
           <div style="font-size:11.5px; color:var(--sub);">${meta.sub}</div>
         </div>
       </div>
