@@ -7124,7 +7124,8 @@ const LIVETRANSLATE_LANGS = [
 ];
 TOOL_IMPL.livetranslate = {
   mount(container){
-    let fromLang = 'ta-IN', toLang = 'en-US', listening = false, recognition = null, voices = [], nativeTranslator = null;
+    let langA = 'ta-IN', langB = 'en-US', activeSide = null, recognition = null, voices = [], nativeTranslator = null;
+    let fromLang = langA, toLang = langB; // set to whichever direction is currently active before each listen
     let history = []; // [{original, translated}]
     const body = el(`<div></div>`); container.appendChild(body);
 
@@ -7133,6 +7134,7 @@ TOOL_IMPL.livetranslate = {
       const base = langCode.split('-')[0];
       return voices.find(v=>v.lang===langCode) || voices.find(v=>v.lang.startsWith(base)) || null;
     }
+    function langName(code){ return (LIVETRANSLATE_LANGS.find(l=>l[0]===code)||[])[1] || code; }
 
     function paint(){
       body.innerHTML = '';
@@ -7141,28 +7143,33 @@ TOOL_IMPL.livetranslate = {
         body.appendChild(el(`<div class="note tamil">⚠️ இந்த browser-ல் Speech Recognition/Synthesis ஆதரவு இல்லை. Chrome/Edge (desktop அல்லது Android) பயன்படுத்தவும்.</div>`));
         return;
       }
-      body.appendChild(el(`<div class="note tamil">ஒரு மொழியில் பேசுங்கள் — இன்னொரு மொழியில் மொழிபெயர்க்கப்பட்டு, உரக்க படிக்கப்படும். <b>முற்றிலும் இலவசம்</b> (எல்லா devices-லும்) — MyMemory அல்லது Chrome-ன் on-device translation பயன்படுத்தப்படும். அரிதாக அவை கிடைக்காவிட்டால் மட்டும், Gemini AI (1 credit, sign in தேவை) fallback-ஆக பயன்படும்.</div>`));
+      body.appendChild(el(`<div class="note tamil"><b>இருவரும் பேசும் Conversation Mode:</b> கீழே இரண்டு மொழிகளையும் தேர்வு செய்யுங்கள். யார் பேசுகிறாரோ, அவருடைய பக்கத்தை tap பண்ணிவிட்டு பேசுங்கள் — இன்னொரு மொழியில் தானாக மொழிபெயர்க்கப்பட்டு உரக்க படிக்கப்படும். <b>முற்றிலும் இலவசம்.</b></div>`));
 
       const langRow = el(`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin-bottom:14px;"></div>`);
-      const fromSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===fromLang?'selected':''}>🗣️ ${name}</option>`).join('')}</select>`);
-      const swapBtn = el(`<button style="border:none; background:none; font-size:20px; cursor:pointer; padding:4px;">⇄</button>`);
-      const toSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===toLang?'selected':''}>👂 ${name}</option>`).join('')}</select>`);
-      fromSel.onchange = ()=>{ fromLang = fromSel.value; };
-      toSel.onchange = ()=>{ toLang = toSel.value; };
-      swapBtn.onclick = ()=>{ const t=fromLang; fromLang=toLang; toLang=t; paint(); };
-      langRow.appendChild(fromSel); langRow.appendChild(swapBtn); langRow.appendChild(toSel);
+      const aSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===langA?'selected':''}>${name}</option>`).join('')}</select>`);
+      const midLabel = el(`<div style="font-size:18px;">↔️</div>`);
+      const bSel = el(`<select style="padding:9px; border:1px solid var(--line); border-radius:8px; font-size:13px;">${LIVETRANSLATE_LANGS.map(([code,name])=>`<option value="${code}" ${code===langB?'selected':''}>${name}</option>`).join('')}</select>`);
+      aSel.onchange = ()=>{ langA = aSel.value; };
+      bSel.onchange = ()=>{ langB = bSel.value; };
+      langRow.appendChild(aSel); langRow.appendChild(midLabel); langRow.appendChild(bSel);
       body.appendChild(langRow);
 
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn" style="${listening?'background:#B3261E;':''}">${listening?'⏹️ நிறுத்து':'🎙️ பேசத் தொடங்கு'}</button>`);
-      btn.onclick = listening ? stopListening : startListening;
-      row.appendChild(btn);
-      body.appendChild(row);
+      // Two big, tappable sides — one per person. Tapping starts listening
+      // in THAT person's language and translates to the other side, so a
+      // back-and-forth conversation just means each person taps their own
+      // button when it's their turn — no manual language-swapping needed.
+      const convoRow = el(`<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>`);
+      const aBtn = el(`<button style="padding:22px 8px; border-radius:14px; border:2px solid ${activeSide==='A'?'#B3261E':'var(--brand-dark)'}; background:${activeSide==='A'?'#FDEDEC':'#fff'}; font-size:13px; font-weight:800; cursor:pointer;">${activeSide==='A'?'⏹️ நிறுத்து':'🎙️'}<br>${escapeHtml(langName(langA))}</button>`);
+      const bBtn = el(`<button style="padding:22px 8px; border-radius:14px; border:2px solid ${activeSide==='B'?'#B3261E':'var(--brand-dark)'}; background:${activeSide==='B'?'#FDEDEC':'#fff'}; font-size:13px; font-weight:800; cursor:pointer;">${activeSide==='B'?'⏹️ நிறுத்து':'🎙️'}<br>${escapeHtml(langName(langB))}</button>`);
+      aBtn.onclick = ()=>{ activeSide==='A' ? stopListening() : startSide('A'); };
+      bBtn.onclick = ()=>{ activeSide==='B' ? stopListening() : startSide('B'); };
+      convoRow.appendChild(aBtn); convoRow.appendChild(bBtn);
+      body.appendChild(convoRow);
 
-      const statusEl = el(`<div id="ltStatus" style="text-align:center; font-size:12.5px; color:var(--sub); margin:8px 0;"></div>`);
+      const statusEl = el(`<div id="ltStatus" style="text-align:center; font-size:12.5px; color:var(--sub); margin:10px 0;"></div>`);
       body.appendChild(statusEl);
 
-      const histWrap = el(`<div style="margin-top:10px;"></div>`);
+      const histWrap = el(`<div style="margin-top:6px;"></div>`);
       [...history].reverse().forEach(h=>{
         histWrap.appendChild(el(`
           <div style="border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px;">
@@ -7172,6 +7179,14 @@ TOOL_IMPL.livetranslate = {
         `));
       });
       body.appendChild(histWrap);
+    }
+
+    function startSide(side){
+      activeSide = side;
+      fromLang = side==='A' ? langA : langB;
+      toLang = side==='A' ? langB : langA;
+      startListening();
+      paint();
     }
 
     function startListening(){
@@ -7204,9 +7219,8 @@ TOOL_IMPL.livetranslate = {
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
-      recognition.onend = ()=>{ if(listening) recognition.start(); }; // one utterance session just ended — start the next one, keeping the overall listening experience continuous
+      recognition.onend = ()=>{ if(activeSide) recognition.start(); }; // one utterance session just ended — start the next one, keeping the overall listening experience continuous
       recognition.start();
-      listening = true;
       // Try to set up Chrome/Edge's free, on-device Translator API right here,
       // inside the button-click handler — creating it requires a user gesture,
       // which this click provides. Desktop Chrome 138+/Edge 148+ only (no
@@ -7214,7 +7228,6 @@ TOOL_IMPL.livetranslate = {
       // whenever this isn't available or the language pair isn't supported.
       nativeTranslator = null;
       setupNativeTranslator();
-      paint();
     }
     async function setupNativeTranslator(){
       try{
@@ -7226,7 +7239,7 @@ TOOL_IMPL.livetranslate = {
       }catch(e){ nativeTranslator = null; } // any failure here just means handleUtterance uses the Gemini fallback instead
     }
     function stopListening(){
-      listening = false;
+      activeSide = null;
       if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; }
       nativeTranslator = null;
       paint();
