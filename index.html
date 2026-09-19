@@ -201,7 +201,7 @@ const TOOLS = [
   {id:'excel2pdf', name:'Excel → PDF', desc:'Convert .xlsx to PDF', icon:'📊', color:'#1E7145', cat:'pdf'},
   {id:'excel2word', name:'Excel → Word', desc:'Turn .xlsx into a .docx table', icon:'📑', color:'#22795A', cat:'pdf'},
   {id:'pdf2excel', name:'PDF → Excel', desc:'Extract tables into .xlsx, layout preserved', icon:'🧮', color:'#0F9B8E', cat:'pdf'},
-  {id:'pdfgray', name:'PDF to Grayscale', desc:'Convert to Grayscale / B&W', icon:'⚫', color:'#4A4A4A', cat:'pdf'},
+  {id:'pdfgray', name:'PDF → Grayscale', desc:'Convert to Grayscale / B&W', icon:'⚫', color:'#4A4A4A', cat:'pdf'},
   {id:'pdfcrop', name:'Crop PDF Margins', desc:'Trim white space from pages', icon:'📐', color:'#5B6B73', cat:'pdf'},
   {id:'pdfmeta', name:'Edit PDF Info', desc:'Change Title / Author / Subject', icon:'🏷️', color:'#7D6608', cat:'pdf'},
   {id:'txt2pdf', name:'Text → PDF', desc:'Turn a .txt file or typed text into a PDF', icon:'📝', color:'#2C5F8A', cat:'pdf'},
@@ -244,14 +244,14 @@ const TOOLS = [
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
-  {id:'texttoimage', name:'Text to Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:3},
+  {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:3},
 
   // ---- Image Tools (Paid) ----
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
   {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0},
-  {id:'heic2jpg', name:'HEIC to JPG/PNG', desc:'Convert iPhone HEIC photos to JPG or PNG — 100% in your browser, free', icon:'📱', color:'#546E7A', cat:'image', cost:0},
+  {id:'heic2jpg', name:'HEIC → JPG/PNG', desc:'Convert iPhone HEIC photos to JPG or PNG — 100% in your browser, free', icon:'📱', color:'#546E7A', cat:'image', cost:0},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0},
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
@@ -811,7 +811,6 @@ function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
   app.appendChild(renderTopbar());
-  app.appendChild(renderPermBanner());
   if(state.view==='home'){
     app.appendChild(renderHero());
     app.appendChild(renderGrid());
@@ -977,50 +976,6 @@ function maybeShowDiscoverModal(forceShow){
 }
 
 
-function renderPermBanner(){
-  const wrap = el(`<div></div>`);
-  let status = null;
-  try{ status = localStorage.getItem('pdfToolsCamPerm'); }catch(e){}
-  if(status === 'granted' || status === 'skipped') return wrap; // already asked once
-  const banner = el(`
-    <div class="tamil" style="max-width:640px; margin:14px auto 0; background:#EAF2FF; border:1px solid #BBD6FF; border-radius:14px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start;">
-      <div style="font-size:22px; line-height:1;">📷🎙️</div>
-      <div style="flex:1;">
-        <div style="font-weight:800; font-size:13.5px; color:var(--ink); margin-bottom:4px;">Camera Scanner and Video Recording tools need camera/mic access</div>
-        <div style="font-size:12.5px; color:var(--sub); margin-bottom:10px;">Would you like to grant permission now? You can also do this later when needed.</div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button id="__permAllow" class="btn" style="padding:8px 16px; font-size:12.5px;">✓ Allow Access</button>
-          <button id="__permSkip" class="btn secondary" style="padding:8px 16px; font-size:12.5px;">Later</button>
-        </div>
-      </div>
-    </div>
-  `);
-  wrap.appendChild(banner);
-  banner.querySelector('#__permSkip').onclick = ()=>{
-    try{ localStorage.setItem('pdfToolsCamPerm','skipped'); }catch(e){}
-    banner.remove();
-  };
-  banner.querySelector('#__permAllow').onclick = async ()=>{
-    if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
-      banner.innerHTML = `<div class="tamil" style="font-size:12.5px; color:var(--warn); font-weight:700;">⚠️ This browser cannot access the camera/mic.</div>`;
-      return;
-    }
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-      stream.getTracks().forEach(t=> t.stop()); // we only needed the permission prompt, not an active stream yet
-      try{ localStorage.setItem('pdfToolsCamPerm','granted'); }catch(e){}
-      banner.innerHTML = `<div class="tamil" style="font-size:12.5px; color:#1E7145; font-weight:700;">✅ Permission granted — you can now use Camera Scanner & Video Recording tools right away.</div>`;
-      setTimeout(()=> banner.remove(), 2500);
-    }catch(err){
-      try{ localStorage.setItem('pdfToolsCamPerm','skipped'); }catch(e){}
-      banner.innerHTML = `<div class="tamil" style="font-size:12.5px; color:var(--warn); font-weight:700;">Permission was not granted — you'll be asked again inside the tool when needed.</div>`;
-      setTimeout(()=> banner.remove(), 2500);
-    }
-  };
-  return wrap;
-}
-
-
 function renderTopbar(){
   const bar = el(`
     <div class="topbar">
@@ -1056,8 +1011,8 @@ function renderTopbar(){
 function renderHero(){
   return el(`
     <div class="hero tamil">
-      <h1>All PDF Tools — In One Place, Free</h1>
-      <p>Merge, compress, convert, translate, and more — one clean toolkit for documents, images, and video. Your files stay on your device unless you choose Fast Server Mode.</p>
+      <h1>PDF, Business, Video, AI & More — All Free, One Place</h1>
+      <p>Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device unless you choose Fast Server Mode.</p>
       <div class="hero-badges">
         <div class="hero-badge">🧰 ${TOOLS.length}+ tools</div>
         <div class="hero-badge">🔒 Privacy-first</div>
@@ -1179,9 +1134,10 @@ const EXT_TO_CONVERT_TARGETS = {
   xls:  [['excel2pdf','PDF'], ['excel2word','Word']],
   xlsx: [['excel2pdf','PDF'], ['excel2word','Word']],
   csv:  [['excel2pdf','PDF']],
-  jpg:  [['img2pdf','PDF']],
-  jpeg: [['img2pdf','PDF']],
-  png:  [['img2pdf','PDF']],
+  jpg:  [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  jpeg: [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  png:  [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  webp: [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
   heic: [['heic2jpg','JPG/PNG']],
   heif: [['heic2jpg','JPG/PNG']],
 };
