@@ -205,6 +205,7 @@ const TOOLS = [
   {id:'pdfcrop', name:'Crop PDF Margins', desc:'Trim white space from pages', icon:'📐', color:'#5B6B73', cat:'pdf'},
   {id:'pdfmeta', name:'Edit PDF Info', desc:'Change Title / Author / Subject', icon:'🏷️', color:'#7D6608', cat:'pdf'},
   {id:'txt2pdf', name:'Text → PDF', desc:'Turn a .txt file or typed text into a PDF', icon:'📝', color:'#2C5F8A', cat:'pdf'},
+  {id:'txt2html', name:'Text → HTML', desc:'Turn a .txt file into a clean, readable HTML page — handles large files', icon:'🌐', color:'#455A64', cat:'pdf'},
   {id:'pdfnup', name:'Multiple Pages per Sheet', desc:'Print 2/4 pages on one sheet (N-up)', icon:'🗂️', color:'#3752A6', cat:'pdf'},
   {id:'pdfsplitsize', name:'Split PDF by Size', desc:'Split into files under a max size', icon:'📏', color:'#C0392B', cat:'pdf'},
   {id:'pdfheaderfooter', name:'PDF Header/Footer', desc:'Add text to top/bottom of every page', icon:'📄', color:'#1A5276', cat:'pdf'},
@@ -6248,6 +6249,87 @@ TOOL_IMPL.txt2pdf = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
+  }
+};
+
+/* ===================== TEXT TO HTML ===================== */
+TOOL_IMPL.txt2html = {
+  mount(container){
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">.txt file-ஐ தெளிவான, படிக்க எளிதான HTML page-ஆக மாற்றும். மிகப் பெரிய files-ஐயும் handle செய்யும் (chunk-வாரியாக படிக்கும்) — ஆனா மிக மிக பெரிய files (100MB+) device-ன் memory-ஐ பொறுத்து மெதுவாக இருக்கலாம் அல்லது சில devices-ல் வேலை செய்யாமல் போகலாம்.</div>`));
+      mountUploader(body, {
+        accept:'.txt,text/plain',
+        label:'.txt file drag & drop or tap', sublabel:'',
+        onAdd: (fl)=>{ file = fl[0]; paint(); }
+      });
+      if(file){
+        mountFileList(body, [file], ()=>{ file=null; paint(); });
+        const opts = el(`
+          <div class="opts one">
+            <div class="field">
+              <label class="tamil">Font style</label>
+              <select id="t2hFont">
+                <option value="sans">Sans-serif (Regular reading)</option>
+                <option value="mono">Monospace (Code/logs/tables)</option>
+              </select>
+            </div>
+          </div>
+        `);
+        body.appendChild(opts);
+        const row = el(`<div class="btn-row"></div>`);
+        const btn = el(`<button class="btn tamil">🌐 HTML-ஆக Convert பண்ணு</button>`);
+        btn.onclick = doConvert;
+        row.appendChild(btn);
+        body.appendChild(row);
+      }
+    }
+    paint();
+    async function doConvert(){
+      const fontChoice = body.querySelector('#t2hFont').value;
+      const fontStack = fontChoice==='mono' ? "'Consolas','Monaco',monospace" : "-apple-system,'Segoe UI',Roboto,sans-serif";
+      const prog = mountProgress(body);
+      try{
+        prog.set(5,'படிக்கிறது…');
+        // Read the file in chunks via a stream rather than file.text() (which
+        // loads the entire file into one giant string at once) — chunked
+        // reading + building the output as an ARRAY of pieces (joined into
+        // the Blob at the end, never concatenated into one huge string in
+        // memory) is genuinely more memory-efficient for very large files,
+        // since the browser can manage the pieces separately instead of
+        // needing one contiguous multi-hundred-MB string.
+        const CHUNK_TARGET = 4 * 1024 * 1024; // ~4MB text per chunk before HTML-escaping
+        const reader = file.stream().getReader();
+        const decoder = new TextDecoder('utf-8');
+        const htmlParts = [];
+        htmlParts.push(`<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>${escapeHtml(file.name.replace(/\.txt$/i,''))}</title>\n<style>body{font-family:${fontStack}; max-width:900px; margin:24px auto; padding:0 16px; line-height:1.6; color:#1a1a1a; white-space:pre-wrap; word-wrap:break-word;}</style>\n</head><body>`);
+        let pending = '';
+        let totalBytesRead = 0;
+        const fileSize = file.size || 1;
+        while(true){
+          const { done, value } = await reader.read();
+          if(done) break;
+          totalBytesRead += value.length;
+          prog.set(5 + (totalBytesRead/fileSize)*80, `படிக்கிறது… ${(totalBytesRead/1048576).toFixed(1)}MB`);
+          pending += decoder.decode(value, {stream:true});
+          if(pending.length >= CHUNK_TARGET){
+            htmlParts.push(escapeHtml(pending));
+            pending = '';
+          }
+        }
+        pending += decoder.decode(); // flush any remaining bytes from the decoder
+        if(pending) htmlParts.push(escapeHtml(pending));
+        htmlParts.push(`</body></html>`);
+        prog.set(90,'HTML தயார் செய்கிறது…');
+        const blob = new Blob(htmlParts, {type:'text/html'});
+        prog.set(100,'Done');
+        downloadBlob(blob, file.name.replace(/\.txt$/i,'')+'.html');
+        prog.remove();
+        mountResult(body, `HTML file தயார் (${(blob.size/1048576).toFixed(2)}MB).`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — கோப்பு device memory-க்கு மிகப் பெரியதாக இருக்கலாம்.').style.background='#FDEDEC'; }
+    }
   }
 };
 
