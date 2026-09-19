@@ -7316,7 +7316,10 @@ TOOL_IMPL.livetranslate = {
     // itself fails (rate-limited, network issue, unsupported language pair)
     // does the tool fall back further to the paid Gemini path.
     async function tryMyMemory(text, srcBase, tgtBase){
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcBase}|${tgtBase}`;
+      // The de= (email) param bumps MyMemory's free daily limit 10x
+      // (~5,000 to ~50,000 chars/day) — it's just used as an identifier for
+      // MyMemory's own rate-limiting, not actually emailed anywhere.
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcBase}|${tgtBase}&de=support@pdftoolsindia.com`;
       const res = await fetch(url);
       const json = await res.json();
       const translated = json.responseData && json.responseData.translatedText;
