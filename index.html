@@ -2985,6 +2985,7 @@ TOOL_IMPL.pdf2img = {
       try{
         const pdfjsDoc = await loadPdfJs(file._buf);
         const zip = new JSZip();
+        const pageImages = []; // [{dataUrl, filename}] — kept so we can show a visible gallery, not just a silent ZIP
         for(let i=1;i<=pdfjsDoc.numPages;i++){
           prog.set((i/pdfjsDoc.numPages)*90, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
@@ -2994,14 +2995,39 @@ TOOL_IMPL.pdf2img = {
           await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
           const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
           const base64 = dataUrl.split(',')[1];
-          zip.file(`page-${String(i).padStart(3,'0')}.jpg`, base64, {base64:true});
+          const filename = `page-${String(i).padStart(3,'0')}.jpg`;
+          zip.file(filename, base64, {base64:true});
+          pageImages.push({dataUrl, filename});
         }
         prog.set(95,'ZIP Preparing…');
         const blob = await zip.generateAsync({type:'blob'});
         prog.set(100,'Done');
-        downloadBlob(blob, 'pages.zip');
         prog.remove();
-        mountResult(body, `${pdfjsDoc.numPages} images as a ZIP downloaded.`);
+        const zipRow = el(`<div class="btn-row" style="margin-top:4px;"></div>`);
+        const zipBtn = el(`<button class="btn tamil">📦 அனைத்தையும் ZIP-ஆக Download</button>`);
+        zipBtn.onclick = ()=> downloadBlob(blob, 'pages.zip');
+        zipRow.appendChild(zipBtn);
+        mountResult(body, `${pdfjsDoc.numPages} பக்கங்கள் படங்களாக தயார் — கீழே ஒவ்வொன்றையும் பாருங்கள், தனித்தனியாகவோ ZIP-ஆகவோ download செய்யலாம்.`);
+        body.appendChild(zipRow);
+        const gallery = el(`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-top:14px;"></div>`);
+        pageImages.forEach((pg,idx)=>{
+          const card = el(`
+            <div style="border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;">
+              <img src="${pg.dataUrl}" style="width:100%; display:block; cursor:pointer;" loading="lazy">
+              <div style="padding:6px 8px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                <span style="font-size:10.5px; color:var(--sub);">பக்கம் ${idx+1}</span>
+                <button style="border:none; background:none; cursor:pointer; font-size:14px;" title="Download">📥</button>
+              </div>
+            </div>
+          `);
+          const img = card.querySelector('img');
+          img.onclick = ()=> window.open(pg.dataUrl, '_blank');
+          card.querySelector('button').onclick = ()=>{
+            fetch(pg.dataUrl).then(r=>r.blob()).then(b=> downloadBlob(b, pg.filename));
+          };
+          gallery.appendChild(card);
+        });
+        body.appendChild(gallery);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
