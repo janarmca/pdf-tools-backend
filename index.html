@@ -7220,19 +7220,25 @@ TOOL_IMPL.livetranslate = {
       // explicitly tap Stop.
       recognition.continuous = true;
       recognition.interimResults = true;
-      let processedFinalCount = 0;
+      // Rebuild the full recognized-so-far text FRESH from ev.results on
+      // every single event, rather than incrementally tracking/appending
+      // "new since last event" segments (an earlier approach, which assumed
+      // each result index represents a distinct new segment that never
+      // changes once finalized — this doesn't hold on every browser/device;
+      // some appear to re-report already-final results, or replace a given
+      // index's text with a longer revision, which incremental appending
+      // then duplicates). Reading ev.results as "the complete current
+      // state" and rebuilding from scratch each time is correct regardless
+      // of exactly how a given browser's speech engine reports results.
       recognition.onresult = (ev)=>{
         if(myGeneration !== sessionGeneration) return;
-        let interim = '';
+        let finals = '', interim = '';
         for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
-          if(r.isFinal){
-            if(i < processedFinalCount) continue; // already appended this one on a previous event — skip it
-            processedFinalCount = i+1;
-            const said = r[0].transcript.trim();
-            if(said) accumulated = (accumulated ? accumulated+' ' : '') + said;
-          } else interim += r[0].transcript;
+          if(r.isFinal) finals += (finals?' ':'') + r[0].transcript.trim();
+          else interim += r[0].transcript;
         }
+        accumulated = finals;
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = (accumulated || interim) ? `🎙️ ${accumulated}${accumulated&&interim?' ':''}${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது… பேசி முடித்ததும் "நிறுத்து" tap பண்ணுங்கள்.';
       };
