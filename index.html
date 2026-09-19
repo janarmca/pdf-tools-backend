@@ -7193,40 +7193,58 @@ TOOL_IMPL.livetranslate = {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
       recognition.lang = fromLang;
-      // continuous=true was firing multiple premature "final" results for a
-      // single sentence (each one separately translated+spoken, sounding
-      // like stuttering/repetition) — continuous=false captures exactly one
-      // clean utterance per session, naturally waiting for a pause in speech
-      // before finalizing just once. onend below restarts a fresh session
-      // automatically, so listening still feels continuous to the person
-      // even though each utterance is now its own clean recognition pass.
-      recognition.continuous = false;
+      // continuous=true so the session keeps listening through a whole,
+      // possibly multi-clause sentence — the browser's speech engine fires
+      // multiple "final" segments as someone talks (e.g. after each clause
+      // or natural breath), NOT just once at the very end. Translating each
+      // one immediately (as an earlier version did) sounded like stuttering
+      // ("My name My name..."); stopping after just the first one
+      // (continuous=false, an earlier fix) cut people off mid-sentence
+      // instead. The real fix is below: accumulate every final segment and
+      // only commit it for translation after a genuine pause in speech.
+      recognition.continuous = true;
       recognition.interimResults = true;
-      let lastProcessed = ''; // extra safety net against any duplicate/near-duplicate final firing
+      let accumulated = '';
+      let silenceTimer = null;
+      const SILENCE_MS = 1800; // how long to wait after the last final segment before treating the sentence as "done"
+      function scheduleCommit(){
+        if(silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(()=>{
+          const said = accumulated.trim();
+          accumulated = '';
+          if(said) handleUtterance(said);
+        }, SILENCE_MS);
+      }
       recognition.onresult = (ev)=>{
         let interim = '';
         for(let i=ev.resultIndex; i<ev.results.length; i++){
           const r = ev.results[i];
           if(r.isFinal){
             const said = r[0].transcript.trim();
-            if(said && said !== lastProcessed){ lastProcessed = said; handleUtterance(said); }
+            if(said){ accumulated = (accumulated ? accumulated+' ' : '') + said; scheduleCommit(); }
           } else interim += r[0].transcript;
         }
         const statusEl = body.querySelector('#ltStatus');
-        if(statusEl) statusEl.textContent = interim ? `🎙️ …${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது…';
+        if(statusEl) statusEl.textContent = interim ? `🎙️ …${accumulated}${accumulated?' ':''}${interim}` : (accumulated ? `🎙️ …${accumulated}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது…');
       };
       recognition.onerror = (ev)=>{
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
       recognition.onend = ()=>{
-        // one utterance session just ended — start the next one, keeping the
-        // overall listening experience continuous. Guarded with try/catch:
-        // onend can occasionally fire in quick succession (a known Web
-        // Speech API quirk), and calling start() while a session is still
-        // finishing its own startup throws "recognition has already
-        // started" — harmless when that happens, since it just means
-        // recognition is already running, which is what we wanted anyway.
+        // The browser can end a "continuous" session on its own after a
+        // longer stretch of silence — commit whatever's been accumulated so
+        // far (don't lose the last bit of speech) before restarting.
+        if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+        const said = accumulated.trim();
+        accumulated = '';
+        if(said) handleUtterance(said);
+        // Guarded with try/catch: onend can occasionally fire in quick
+        // succession (a known Web Speech API quirk), and calling start()
+        // while a session is still finishing its own startup throws
+        // "recognition has already started" — harmless when that happens,
+        // since it just means recognition is already running, which is
+        // what we wanted anyway.
         if(activeSide){ try{ recognition.start(); }catch(e){} }
       };
       try{ recognition.start(); }catch(e){}
