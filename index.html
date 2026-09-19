@@ -7234,21 +7234,33 @@ TOOL_IMPL.livetranslate = {
       // of exactly how a given browser's speech engine reports results.
       recognition.onresult = (ev)=>{
         if(myGeneration !== sessionGeneration) return;
-        let finals = '', interim = '';
-        // TEMPORARY DIAGNOSTIC: show the browser's own raw results data,
-        // untouched, so we can see exactly what the speech engine itself is
-        // reporting — this will definitively show whether duplicated text
-        // is coming from the browser's own recognition (each result already
-        // containing repeated words) or from something in how results are
-        // being combined here.
+        // Ground-truth debug data from the actual reported bug showed the
+        // browser's OWN speech engine reporting multiple separate "final"
+        // results for what should be one segment — some empty/whitespace,
+        // some exact duplicates (" நீ" then " நீ" again), and some a
+        // progressively longer revision of the previous one ("நீ" then
+        // "நீ சொல்வது"). This is not a combining-logic bug on this end —
+        // it's genuinely how this device's recognizer reports results. The
+        // fix: skip empty segments, skip exact repeats of the previous
+        // segment, and when a segment is a longer extension of the
+        // previous one, replace it rather than appending both.
+        const pieces = [];
+        let interim = '';
         const rawDebug = [];
         for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
           rawDebug.push(`[${i}]${r.isFinal?'FINAL':'interim'}: "${r[0].transcript}"`);
-          if(r.isFinal) finals += (finals?' ':'') + r[0].transcript.trim();
-          else interim += r[0].transcript;
+          if(r.isFinal){
+            const text = r[0].transcript.trim();
+            if(!text) continue; // the browser sometimes reports empty/whitespace-only "final" results
+            const last = pieces.length ? pieces[pieces.length-1] : '';
+            if(text === last) continue; // exact repeat of the previous segment
+            else if(last && text.startsWith(last)) pieces[pieces.length-1] = text; // a longer, refined revision of the previous segment — replace, don't append
+            else if(last && last.startsWith(text)) continue; // a shorter prefix of what we already have — already covered
+            else pieces.push(text);
+          } else interim += r[0].transcript;
         }
-        accumulated = finals;
+        accumulated = pieces.join(' ');
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = (accumulated || interim) ? `🎙️ ${accumulated}${accumulated&&interim?' ':''}${interim}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது… பேசி முடித்ததும் "நிறுத்து" tap பண்ணுங்கள்.';
         const debugEl = body.querySelector('#ltDebug');
