@@ -2051,7 +2051,10 @@ function loadScriptOnce(src){
     const s = document.createElement('script');
     s.src = src; s.async = true; s.setAttribute('data-src', src);
     s.onload = ()=> resolve();
-    s.onerror = ()=> reject(new Error('இயந்திரம் ஏற்ற முடியவில்லை — இணைய இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.'));
+    s.onerror = ()=>{
+      s.remove(); // a failed load must not leave the tag in the DOM — otherwise any retry incorrectly resolves immediately instead of genuinely re-attempting the load
+      reject(new Error('இயந்திரம் ஏற்ற முடியவில்லை — இணைய இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.'));
+    };
     document.head.appendChild(s);
   });
 }
@@ -5471,8 +5474,8 @@ function ensureUpscaler(){
     // TensorFlow.js in the browser — no server call, no per-use cost, unlike
     // most "AI upscale" services which charge per image via a cloud API.
     await loadScriptOnce('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');
-    await loadScriptOnce('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@0.13.0/dist/umd/index.min.js');
-    await loadScriptOnce('https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.19/dist/browser/umd/upscaler.min.js');
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0/dist/umd/index.min.js');
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/upscaler@1.0.0/dist/browser/umd/upscaler.min.js');
     if(!window.Upscaler || !window.DefaultUpscalerJSModel) throw new Error('Could not load the AI upscaling model — check your internet connection and try again.');
     return new window.Upscaler({ model: window.DefaultUpscalerJSModel });
   })().catch(err=>{ __upscalerReadyPromise = null; throw err; }); // allow retry on failure, same pattern as ensureFFmpeg
