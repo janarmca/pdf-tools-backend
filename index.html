@@ -7219,8 +7219,17 @@ TOOL_IMPL.livetranslate = {
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
-      recognition.onend = ()=>{ if(activeSide) recognition.start(); }; // one utterance session just ended — start the next one, keeping the overall listening experience continuous
-      recognition.start();
+      recognition.onend = ()=>{
+        // one utterance session just ended — start the next one, keeping the
+        // overall listening experience continuous. Guarded with try/catch:
+        // onend can occasionally fire in quick succession (a known Web
+        // Speech API quirk), and calling start() while a session is still
+        // finishing its own startup throws "recognition has already
+        // started" — harmless when that happens, since it just means
+        // recognition is already running, which is what we wanted anyway.
+        if(activeSide){ try{ recognition.start(); }catch(e){} }
+      };
+      try{ recognition.start(); }catch(e){}
       // Try to set up Chrome/Edge's free, on-device Translator API right here,
       // inside the button-click handler — creating it requires a user gesture,
       // which this click provides. Desktop Chrome 138+/Edge 148+ only (no
