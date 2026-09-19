@@ -8642,14 +8642,61 @@ const PDF_WEAK_PASSWORD_LIST = [
   '01011990','01012000','01011980','01012001','01011995','15081947','26011950',
   'letmein','welcome','qwerty','asdfgh','zxcvbn','abc123','iloveyou',
 ];
+// Generates candidate passwords from personal details the person supplies
+// about THEMSELVES/their own family (name, DOB, phone, job/business ID) —
+// this mirrors how people actually choose PDF passwords in practice (a
+// birthdate, a name+year, a phone number), so it's a far more targeted
+// search than blind common-password guessing once the person can supply
+// these details about their own forgotten file.
+function generatePersonalPasswordGuesses(details){
+  const guesses = new Set();
+  const addDobFormats = (dobStr)=>{
+    if(!dobStr) return;
+    const m = dobStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if(!m) { guesses.add(dobStr.replace(/\D/g,'')); return; }
+    let [, d, mo, y] = m;
+    d = d.padStart(2,'0'); mo = mo.padStart(2,'0');
+    const y4 = y.length===2 ? '19'+y : y, y2 = y.length===4 ? y.slice(2) : y;
+    [`${d}${mo}${y4}`, `${mo}${d}${y4}`, `${y4}${mo}${d}`, `${d}${mo}${y2}`, `${mo}${d}${y2}`, `${d}${mo}`, `${mo}${d}`, y4, `${d}-${mo}-${y4}`].forEach(g=>guesses.add(g));
+  };
+  const addNameCombos = (name, dobStr)=>{
+    if(!name) return;
+    const clean = name.replace(/\s+/g,'').trim();
+    if(!clean) return;
+    guesses.add(clean); guesses.add(clean.toLowerCase()); guesses.add(clean.toUpperCase());
+    guesses.add(clean[0].toUpperCase()+clean.slice(1).toLowerCase());
+    if(dobStr){
+      const m = dobStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+      if(m){
+        let [, d, mo, y] = m;
+        const y4 = y.length===2 ? '19'+y : y, y2 = y.length===4 ? y.slice(2) : y;
+        [clean+y4, clean+y2, y4+clean, clean+d.padStart(2,'0')+mo.padStart(2,'0')].forEach(g=>guesses.add(g));
+      }
+    }
+    ['123','1234','@123','2024','2025'].forEach(suf=>guesses.add(clean+suf));
+  };
+  addDobFormats(details.myDob);
+  addDobFormats(details.familyDob);
+  addNameCombos(details.myName, details.myDob);
+  addNameCombos(details.familyName, details.familyDob);
+  if(details.phone){
+    const digits = details.phone.replace(/\D/g,'');
+    if(digits.length>=4) guesses.add(digits.slice(-4));
+    if(digits.length>=6) guesses.add(digits.slice(-6));
+    if(digits) guesses.add(digits);
+  }
+  if(details.jobId) guesses.add(details.jobId.trim());
+  if(details.bizNum) guesses.add(details.bizNum.trim());
+  return [...guesses].filter(Boolean);
+}
 TOOL_IMPL.pdfpwrecover = {
   mount(container){
-    let file = null, running = false, cancelled = false;
+    let file = null, running = false, cancelled = false, showPersonal = false;
     const body = el(`<div></div>`); container.appendChild(body);
     async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். இது ${PDF_WEAK_PASSWORD_LIST.length} சாதாரண/பலவீனமான passwords-ஐ மட்டுமே முயற்சிக்கும் — genuinely strong password என்றால், இது வேலை செய்யாது (அதற்கு ஆண்டுக்கணக்கான நேரம் ஆகும், browser-ல் சாத்தியமில்லை).</div>`));
+      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். Genuinely strong password என்றால், இது வேலை செய்யாது (browser-ல் சாத்தியமில்லை) — common/personal-detail-based guesses-ஐ மட்டுமே முயற்சிக்கும்.</div>`));
       mountUploader(body, {
         accept:'application/pdf',
         label:'Password மறந்துவிட்ட PDF file drag & drop or tap', sublabel:'',
@@ -8657,9 +8704,26 @@ TOOL_IMPL.pdfpwrecover = {
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        const toggleBtn = el(`<button class="btn secondary tamil" style="margin-top:10px; font-size:12.5px; padding:8px 16px;">${showPersonal?'▼':'▶'} Personal Details (optional) — சரியான guess கிடைக்க வாய்ப்பு அதிகரிக்கும்</button>`);
+        toggleBtn.onclick = ()=>{ showPersonal = !showPersonal; paint(); };
+        body.appendChild(toggleBtn);
+        if(showPersonal){
+          const pd = el(`
+            <div style="margin-top:10px; padding:12px; border:1px solid var(--line); border-radius:10px;">
+              <div class="field"><label class="tamil">உங்கள் பெயர்</label><input type="text" id="pdMyName"></div>
+              <div class="field"><label class="tamil">உங்கள் பிறந்த தேதி (DD/MM/YYYY)</label><input type="text" id="pdMyDob" placeholder="15/08/1990"></div>
+              <div class="field"><label class="tamil">குடும்ப உறுப்பினர் பெயர் (மனைவி/கணவர்/பிள்ளை/அம்மா)</label><input type="text" id="pdFamName"></div>
+              <div class="field"><label class="tamil">அவரின் பிறந்த தேதி</label><input type="text" id="pdFamDob" placeholder="10/05/1965"></div>
+              <div class="field"><label class="tamil">மொபைல் நம்பர்</label><input type="text" id="pdPhone"></div>
+              <div class="field"><label class="tamil">Job ID / Employee ID</label><input type="text" id="pdJobId"></div>
+              <div class="field"><label class="tamil">Business / GST Number</label><input type="text" id="pdBizNum"></div>
+            </div>
+          `);
+          body.appendChild(pd);
+        }
         if(!running){
           const row = el(`<div class="btn-row"></div>`);
-          const btn = el(`<button class="btn tamil">🔍 Common Passwords முயற்சி செய்</button>`);
+          const btn = el(`<button class="btn tamil">🔍 Password கண்டுபிடி</button>`);
           btn.onclick = doRecover;
           row.appendChild(btn);
           body.appendChild(row);
@@ -8673,6 +8737,19 @@ TOOL_IMPL.pdfpwrecover = {
       paint();
     }
     async function doRecover(){
+      const personalGuesses = showPersonal ? generatePersonalPasswordGuesses({
+        myName: body.querySelector('#pdMyName')?.value,
+        myDob: body.querySelector('#pdMyDob')?.value,
+        familyName: body.querySelector('#pdFamName')?.value,
+        familyDob: body.querySelector('#pdFamDob')?.value,
+        phone: body.querySelector('#pdPhone')?.value,
+        jobId: body.querySelector('#pdJobId')?.value,
+        bizNum: body.querySelector('#pdBizNum')?.value,
+      }) : [];
+      // Personal guesses first — they're far more likely to be the actual
+      // password than a generic common one, so trying them first means a
+      // real hit is typically found almost instantly.
+      const candidateList = [...new Set([...personalGuesses, ...PDF_WEAK_PASSWORD_LIST])];
       running = true; cancelled = false;
       paint();
       const prog = mountProgress(body);
@@ -8682,10 +8759,10 @@ TOOL_IMPL.pdfpwrecover = {
       try{
         prog.set(10,'Library ஏற்றுகிறது…');
         const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt-lite');
-        for(let i=0; i<PDF_WEAK_PASSWORD_LIST.length; i++){
+        for(let i=0; i<candidateList.length; i++){
           if(cancelled) break;
-          const pw = PDF_WEAK_PASSWORD_LIST[i];
-          prog.set(10 + (i/PDF_WEAK_PASSWORD_LIST.length)*85, `முயற்சி ${i+1}/${PDF_WEAK_PASSWORD_LIST.length}…`);
+          const pw = candidateList[i];
+          prog.set(10 + (i/candidateList.length)*85, `முயற்சி ${i+1}/${candidateList.length}…`);
           try{
             const decryptedBytes = await mod.decryptPDF(new Uint8Array(file._buf), pw);
             // success — this password worked
@@ -8700,7 +8777,7 @@ TOOL_IMPL.pdfpwrecover = {
         if(cancelled){
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
-          mountResult(body, `இந்த ${PDF_WEAK_PASSWORD_LIST.length} common passwords-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். Password-ஐ பற்றி ஏதாவது நினைவிருந்தால், "Unlock PDF" tool-ஐ அந்த password-உடன் முயற்சிக்கவும்.`).style.background='#FDEDEC';
+          mountResult(body, `இந்த ${candidateList.length} guesses-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். "Unlock PDF" tool-ஐ password நினைவு வந்ததும் முயற்சிக்கவும்.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
