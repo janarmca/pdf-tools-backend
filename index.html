@@ -246,6 +246,7 @@ const TOOLS = [
   {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business'},
   {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
+  {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business'},
   {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business'},
@@ -13722,6 +13723,93 @@ TOOL_IMPL.expensetracker = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
+  }
+};
+
+/* ===================== EMI / LOAN CALCULATOR ===================== */
+TOOL_IMPL.emicalc = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    let schedule = [];
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">Home, car அல்லது personal loan-க்கான monthly EMI, மொத்த interest, மற்றும் full repayment schedule கணக்கிடும்.</div>`));
+      const opts = el(`
+        <div class="opts">
+          <div class="field"><label class="tamil">Loan Amount (₹)</label><input type="number" id="emiP" value="1000000" min="1"></div>
+          <div class="field"><label class="tamil">Interest Rate (% per year)</label><input type="number" id="emiR" value="8" min="0.1" step="0.01"></div>
+          <div class="field"><label class="tamil">Loan Tenure (Years)</label><input type="number" id="emiY" value="20" min="1"></div>
+        </div>
+      `);
+      body.appendChild(opts);
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn tamil">🏦 EMI கணக்கிடு</button>`);
+      btn.onclick = doCalculate;
+      row.appendChild(btn);
+      body.appendChild(row);
+      const resultHolder = el(`<div id="emiResultHolder"></div>`);
+      body.appendChild(resultHolder);
+    }
+    paint();
+    function doCalculate(){
+      const P = Number(body.querySelector('#emiP').value);
+      const annualRate = Number(body.querySelector('#emiR').value);
+      const years = Number(body.querySelector('#emiY').value);
+      if(!P || P<=0 || !annualRate || annualRate<=0 || !years || years<=0){
+        mountResult(body, 'சரியான Loan Amount, Interest Rate, Tenure கொடுக்கவும்.').style.background='#FDEDEC';
+        return;
+      }
+      const R = annualRate/12/100; // monthly interest rate
+      const N = Math.round(years*12); // number of monthly installments
+      // Standard EMI formula: EMI = P × R × (1+R)^N / ((1+R)^N - 1)
+      // Verified against a well-known reference value before shipping:
+      // ₹10,00,000 at 8% for 20 years → ₹8,364.40/month.
+      const factor = Math.pow(1+R, N);
+      const emi = P * R * factor / (factor - 1);
+      const totalPayment = emi * N;
+      const totalInterest = totalPayment - P;
+
+      schedule = [];
+      let balance = P;
+      for(let m=1; m<=N; m++){
+        const interestPortion = balance * R;
+        const principalPortion = emi - interestPortion;
+        balance = Math.max(0, balance - principalPortion);
+        schedule.push({ month:m, emi, principal:principalPortion, interest:interestPortion, balance });
+      }
+
+      const holder = body.querySelector('#emiResultHolder');
+      holder.innerHTML = '';
+      holder.appendChild(el(`
+        <div style="margin-top:16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
+          <div style="background:#E8F0FE; border-radius:12px; padding:14px; text-align:center;">
+            <div style="font-size:11px; color:var(--sub); font-weight:700;" class="tamil">மாதாந்திர EMI</div>
+            <div style="font-size:19px; font-weight:900; color:#1A5D8A;">₹${emi.toLocaleString('en-IN',{maximumFractionDigits:0})}</div>
+          </div>
+          <div style="background:#FFF3E0; border-radius:12px; padding:14px; text-align:center;">
+            <div style="font-size:11px; color:var(--sub); font-weight:700;" class="tamil">மொத்த வட்டி</div>
+            <div style="font-size:19px; font-weight:900; color:#B7791F;">₹${totalInterest.toLocaleString('en-IN',{maximumFractionDigits:0})}</div>
+          </div>
+          <div style="background:#E8F5E9; border-radius:12px; padding:14px; text-align:center;">
+            <div style="font-size:11px; color:var(--sub); font-weight:700;" class="tamil">மொத்த தொகை (Principal + Interest)</div>
+            <div style="font-size:19px; font-weight:900; color:#1E7145;">₹${totalPayment.toLocaleString('en-IN',{maximumFractionDigits:0})}</div>
+          </div>
+        </div>
+      `));
+      const dlRow = el(`<div class="btn-row" style="margin-top:14px;"></div>`);
+      const dlBtn = el(`<button class="btn secondary tamil">📥 Full Repayment Schedule (Excel)</button>`);
+      dlBtn.onclick = ()=>{
+        const wb = XLSX.utils.book_new();
+        const rows = [['Month','EMI','Principal','Interest','Balance']];
+        schedule.forEach(s=> rows.push([s.month, Math.round(s.emi), Math.round(s.principal), Math.round(s.interest), Math.round(s.balance)]));
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, 'EMI Schedule');
+        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'emi-schedule.xlsx');
+      };
+      dlRow.appendChild(dlBtn);
+      holder.appendChild(dlRow);
+    }
   }
 };
 
