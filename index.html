@@ -212,6 +212,7 @@ const TOOLS = [
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
   {id:'pdfprotect', name:'Protect PDF (Password)', desc:'Add a password so only people who know it can open the file', icon:'🔐', color:'#7A2E2E', cat:'pdf'},
   {id:'pdfunlock', name:'Unlock PDF (Remove Password)', desc:'Remove password protection when you know the current password', icon:'🔓', color:'#2E7A5A', cat:'pdf'},
+  {id:'pdfpwrecover', name:'PDF Password Recovery', desc:'Forgot the password on your own PDF? Try common/weak passwords automatically', icon:'🔍', color:'#B8860B', cat:'pdf'},
   {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
@@ -8621,6 +8622,88 @@ TOOL_IMPL.pdfunlock = {
         const msg = /password/i.test(err.message) ? 'தவறான password — சரியா இருக்கானு பார்த்து, மீண்டும் முயற்சிக்கவும்.' : 'Error: '+err.message;
         mountResult(body, msg).style.background='#FDEDEC';
       }
+    }
+  }
+};
+
+/* ===================== PDF PASSWORD RECOVERY (weak passwords only) ===================== */
+// A curated list of the most common weak passwords/PINs people actually use
+// on protected documents — NOT a full brute-force engine. Genuinely strong
+// passwords are computationally infeasible to crack in-browser (would take
+// years), so this only ever succeeds against weak, guessable ones — which is
+// exactly the realistic case for someone who set a quick PIN and forgot it.
+const PDF_WEAK_PASSWORD_LIST = [
+  '123456','000000','111111','123123','654321','121212','112233','123321','696969','666666',
+  '112211','101010','789456','159753','753159','147258','258369','369258','987654','456789',
+  '1234','0000','1111','2222','3333','4444','5555','6666','7777','8888','9999','1212','2121',
+  '12345','54321','11111','22222','00000','99999','88888','77777','66666',
+  '12345678','87654321','11223344','22334455','19801980','19901990','20002000',
+  'password','Password','password1','Password1','admin','Admin','admin123',
+  '01011990','01012000','01011980','01012001','01011995','15081947','26011950',
+  'letmein','welcome','qwerty','asdfgh','zxcvbn','abc123','iloveyou',
+];
+TOOL_IMPL.pdfpwrecover = {
+  mount(container){
+    let file = null, running = false, cancelled = false;
+    const body = el(`<div></div>`); container.appendChild(body);
+    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். இது ${PDF_WEAK_PASSWORD_LIST.length} சாதாரண/பலவீனமான passwords-ஐ மட்டுமே முயற்சிக்கும் — genuinely strong password என்றால், இது வேலை செய்யாது (அதற்கு ஆண்டுக்கணக்கான நேரம் ஆகும், browser-ல் சாத்தியமில்லை).</div>`));
+      mountUploader(body, {
+        accept:'application/pdf',
+        label:'Password மறந்துவிட்ட PDF file drag & drop or tap', sublabel:'',
+        onAdd: async (fl)=> handleFile(fl[0])
+      });
+      if(file){
+        mountFileList(body, [file], ()=>{ file=null; paint(); });
+        if(!running){
+          const row = el(`<div class="btn-row"></div>`);
+          const btn = el(`<button class="btn tamil">🔍 Common Passwords முயற்சி செய்</button>`);
+          btn.onclick = doRecover;
+          row.appendChild(btn);
+          body.appendChild(row);
+        }
+      }
+    }
+    if(__pendingSmartUploadFile){
+      const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
+      handleFile(f);
+    } else {
+      paint();
+    }
+    async function doRecover(){
+      running = true; cancelled = false;
+      paint();
+      const prog = mountProgress(body);
+      const stopBtn = el(`<button class="btn secondary" style="margin-top:8px;">நிறுத்து</button>`);
+      stopBtn.onclick = ()=>{ cancelled = true; };
+      body.appendChild(stopBtn);
+      try{
+        prog.set(10,'Library ஏற்றுகிறது…');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt-lite');
+        for(let i=0; i<PDF_WEAK_PASSWORD_LIST.length; i++){
+          if(cancelled) break;
+          const pw = PDF_WEAK_PASSWORD_LIST[i];
+          prog.set(10 + (i/PDF_WEAK_PASSWORD_LIST.length)*85, `முயற்சி ${i+1}/${PDF_WEAK_PASSWORD_LIST.length}…`);
+          try{
+            const decryptedBytes = await mod.decryptPDF(new Uint8Array(file._buf), pw);
+            // success — this password worked
+            prog.set(100,'Done'); prog.remove(); stopBtn.remove();
+            downloadBlob(new Blob([decryptedBytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-unlocked.pdf');
+            mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட PDF தயார்.`).style.background='#FFF6E5';
+            running = false;
+            return;
+          }catch(e){ /* wrong password — try the next one */ }
+        }
+        prog.remove(); stopBtn.remove();
+        if(cancelled){
+          mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
+        } else {
+          mountResult(body, `இந்த ${PDF_WEAK_PASSWORD_LIST.length} common passwords-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். Password-ஐ பற்றி ஏதாவது நினைவிருந்தால், "Unlock PDF" tool-ஐ அந்த password-உடன் முயற்சிக்கவும்.`).style.background='#FDEDEC';
+        }
+      }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      running = false;
     }
   }
 };
