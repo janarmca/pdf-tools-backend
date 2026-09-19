@@ -813,6 +813,8 @@ function render(){
   app.appendChild(renderTopbar());
   if(state.view==='home'){
     app.appendChild(renderHero());
+    app.appendChild(renderTrustBanner());
+    app.appendChild(renderDailyKural());
     app.appendChild(renderGrid());
   } else if(state.view==='settings'){
     app.appendChild(renderSettingsPage());
@@ -1021,6 +1023,50 @@ function renderHero(){
       </div>
     </div>
   `);
+}
+function renderTrustBanner(){
+  return el(`
+    <div class="tamil" style="max-width:720px; margin:18px auto 0; background:linear-gradient(135deg,#FFF8E7,#FFF3D6); border:1.5px solid #F0D896; border-radius:16px; padding:16px 18px;">
+      <div style="font-weight:900; font-size:14.5px; color:#7A5A00; margin-bottom:6px;">🇮🇳 ஒரு தமிழன் தமிழ் மக்களுக்காக உருவாக்கிக் கொண்டிருக்கும் தரமான மென்பொருள்</div>
+      <div style="font-size:12.5px; color:var(--sub); line-height:1.55;">
+        <b>எப்போதும் இலவசம்:</b> Merge, Compress, Convert போன்ற பெரும்பாலான tools, உங்க browser-லேயே இயங்குகின்றன — server cost ஏதும் இல்லாதவை — இவை <b>எப்போதும், நிரந்தரமா இலவசம்</b>.<br>
+        <b>ஏன் சில tools credit கேட்கும்:</b> AI-powered tools (Translation, Image generation போன்றவை) Google Gemini போன்ற AI models-ஐ அழைக்கின்றன — இதற்கு உண்மையான, ரூபாய் செலவு ஆகிறது. அந்த செலவை மட்டும், நேர்மையா, credit-ஆ காட்டுகிறோம் — வேறு எந்த hidden cost-உம் இல்லை.
+      </div>
+    </div>
+  `);
+}
+// Cache across renders so navigating home repeatedly doesn't re-fetch the
+// 850KB dataset every time — only the first homepage visit in a session
+// pays the fetch cost.
+let __kuralCache = null;
+let __kuralFetchPromise = null;
+function pickTodaysKural(list){
+  // Deterministic by day-of-year, so everyone sees the same Kural on the
+  // same calendar day, and it rotates through all 1330 over ~3.6 years.
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  return list[dayOfYear % list.length];
+}
+function renderDailyKural(){
+  const wrap = el(`<div id="__kuralWrap" style="max-width:720px; margin:14px auto 0;"></div>`);
+  function paintKural(k){
+    wrap.innerHTML = '';
+    wrap.appendChild(el(`
+      <div class="tamil" style="background:linear-gradient(135deg,#F3F0FF,#EAE4FF); border:1.5px solid #D8CCF5; border-radius:16px; padding:18px 20px;">
+        <div style="font-weight:900; font-size:13px; color:#5B3FA0; margin-bottom:10px;">📜 இன்றைய திருக்குறள் — Kural #${k.n}</div>
+        <div style="font-size:16px; font-weight:800; color:var(--ink); line-height:1.6; margin-bottom:10px;">${escapeHtml(k.l1)}<br>${escapeHtml(k.l2)}</div>
+        <div style="font-size:12.5px; color:var(--ink); line-height:1.6; margin-bottom:8px;"><b>தமிழில்:</b> ${escapeHtml(k.ta)}</div>
+        <div style="font-size:12.5px; color:var(--sub); line-height:1.6;"><b>English:</b> ${escapeHtml(k.en)}</div>
+      </div>
+    `));
+  }
+  if(__kuralCache){ paintKural(pickTodaysKural(__kuralCache)); return wrap; }
+  if(!__kuralFetchPromise){
+    __kuralFetchPromise = fetch('thirukkural-daily.json').then(r=>r.json());
+  }
+  __kuralFetchPromise.then(list=>{ __kuralCache = list; paintKural(pickTodaysKural(list)); }).catch(()=>{ wrap.innerHTML=''; });
+  return wrap;
 }
 const CATEGORY_META = {
   pdf:   { label: 'PDF', icon:'📄', sub: 'Runs entirely in your browser', isFree: true },
