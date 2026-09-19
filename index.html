@@ -7178,15 +7178,23 @@ TOOL_IMPL.livetranslate = {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
       recognition.lang = fromLang;
-      recognition.continuous = true;
+      // continuous=true was firing multiple premature "final" results for a
+      // single sentence (each one separately translated+spoken, sounding
+      // like stuttering/repetition) — continuous=false captures exactly one
+      // clean utterance per session, naturally waiting for a pause in speech
+      // before finalizing just once. onend below restarts a fresh session
+      // automatically, so listening still feels continuous to the person
+      // even though each utterance is now its own clean recognition pass.
+      recognition.continuous = false;
       recognition.interimResults = true;
+      let lastProcessed = ''; // extra safety net against any duplicate/near-duplicate final firing
       recognition.onresult = (ev)=>{
         let interim = '';
         for(let i=ev.resultIndex; i<ev.results.length; i++){
           const r = ev.results[i];
           if(r.isFinal){
             const said = r[0].transcript.trim();
-            if(said) handleUtterance(said);
+            if(said && said !== lastProcessed){ lastProcessed = said; handleUtterance(said); }
           } else interim += r[0].transcript;
         }
         const statusEl = body.querySelector('#ltStatus');
@@ -7196,7 +7204,7 @@ TOOL_IMPL.livetranslate = {
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
-      recognition.onend = ()=>{ if(listening) recognition.start(); }; // browsers auto-stop after a pause — restart to keep it continuous while the person hasn't pressed Stop
+      recognition.onend = ()=>{ if(listening) recognition.start(); }; // one utterance session just ended — start the next one, keeping the overall listening experience continuous
       recognition.start();
       listening = true;
       // Try to set up Chrome/Edge's free, on-device Translator API right here,
