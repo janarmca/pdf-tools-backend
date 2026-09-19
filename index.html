@@ -3612,15 +3612,79 @@ TOOL_IMPL.word2pdf = {
     async function doConvert(){
       const prog = mountProgress(body);
       try{
-        prog.set(20,'Word file Reading…');
+        prog.set(15,'Word file Reading…');
         const result = await mammoth.convertToHtml({arrayBuffer: file._buf});
-        prog.set(55,'PDF Creating…');
-        const html = `<div style="font-family:'Noto Sans Tamil','Noto Sans Devanagari','Noto Sans',sans-serif;">${result.value}</div>`;
-        const bytes = await htmlToFontCorrectPdfBytes(html, {isHtml:true, fontSize:15});
+        prog.set(30,'Font Preparing…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc); // real, selectable Tamil+Latin text — not a rendered image
+        const a4W = 595.28, a4H = 841.89, marginX = 50, marginTop = 50, marginBottom = 50, maxWidth = a4W - marginX*2;
+        let page = doc.addPage([a4W, a4H]);
+        let y = a4H - marginTop;
+        function newPageIfNeeded(neededHeight){
+          if(y - neededHeight < marginBottom){ page = doc.addPage([a4W, a4H]); y = a4H - marginTop; }
+        }
+        // Word-wraps text to maxWidth and draws it line by line; bold is
+        // approximated with a faux-bold hairline offset (same technique the
+        // PDF Editor already uses) since embedding a separate bold Tamil font
+        // file would roughly double the font-loading cost for this feature.
+        function drawWrapped(text, size, bold){
+          const words = text.split(/\s+/).filter(Boolean);
+          const lineHeight = size*1.35;
+          let line = '';
+          const flush = ()=>{
+            if(!line) return;
+            newPageIfNeeded(lineHeight);
+            page.drawText(line, {x:marginX, y, size, font, color:rgb(0.08,0.08,0.08)});
+            if(bold) page.drawText(line, {x:marginX+0.4, y, size, font, color:rgb(0.08,0.08,0.08)});
+            y -= lineHeight;
+          };
+          words.forEach(word=>{
+            const testLine = line ? line+' '+word : word;
+            if(font.widthOfTextAtSize(testLine, size) > maxWidth && line){ flush(); line = word; }
+            else line = testLine;
+          });
+          flush();
+        }
+        const holder = document.createElement('div');
+        holder.innerHTML = result.value;
+        const blocks = Array.from(holder.children);
+        blocks.forEach((elm, idx)=>{
+          prog.set(30 + (idx/Math.max(1,blocks.length))*55, 'PDF Creating…');
+          const tag = elm.tagName.toLowerCase();
+          if(tag === 'table'){
+            const rows = Array.from(elm.querySelectorAll('tr'));
+            const numCols = Math.max(1, ...rows.map(r=>r.children.length));
+            const colWidth = maxWidth / numCols;
+            rows.forEach(row=>{
+              newPageIfNeeded(20);
+              Array.from(row.children).forEach((cell,ci)=>{
+                const cellX = marginX + ci*colWidth;
+                page.drawRectangle({x:cellX, y:y-16, width:colWidth, height:18, borderColor:rgb(0.75,0.75,0.75), borderWidth:0.5});
+                let cellText = cell.textContent.trim();
+                while(font.widthOfTextAtSize(cellText, 9) > colWidth-6 && cellText.length>1) cellText = cellText.slice(0,-1);
+                page.drawText(cellText, {x:cellX+3, y:y-12, size:9, font, color:rgb(0.1,0.1,0.1)});
+              });
+              y -= 18;
+            });
+            y -= 10;
+          } else if(/^h[1-6]$/.test(tag)){
+            const size = Math.max(12, 22 - parseInt(tag[1])*2);
+            drawWrapped(elm.textContent.trim(), size, true);
+            y -= 6;
+          } else {
+            const text = elm.textContent.trim();
+            if(!text){ y -= 10; return; }
+            const wholeBold = elm.children.length===1 && /^(strong|b)$/i.test(elm.children[0].tagName);
+            drawWrapped(text, 12, wholeBold);
+            y -= 6;
+          }
+        });
+        prog.set(92,'PDF Preparing file…');
+        const bytes = await doc.save();
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.docx?$/i,'')+'.pdf');
         prog.remove();
-        mountResult(body, 'PDF downloaded.');
+        mountResult(body, 'PDF downloaded — real, selectable/searchable text (Tamil supported), தமிழ் அடங்கியது.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
@@ -3756,23 +3820,47 @@ TOOL_IMPL.excel2pdf = {
     async function doConvert(){
       const prog = mountProgress(body);
       try{
-        prog.set(20,'Reading…');
+        prog.set(15,'Reading…');
         const wb = XLSX.read(file._buf, {type:'array'});
-        let html = `<div style="font-family:'Noto Sans Tamil','Noto Sans',sans-serif;">`;
-        wb.SheetNames.forEach(name=>{
-          const ws = wb.Sheets[name];
-          html += `<h3 style="margin:18px 0 8px;">${escapeHtml(name)}</h3>`;
-          let tblHtml = XLSX.utils.sheet_to_html(ws, {editable:false});
-          tblHtml = tblHtml.replace(/<table/,'<table style="border-collapse:collapse;width:100%;font-size:13px;"').replace(/<td/g,'<td style="border:1px solid #ccc;padding:5px 8px;"');
-          html += tblHtml;
+        prog.set(30,'Font Preparing…');
+        const doc = await PDFDocument.create();
+        const font = await embedUnicodeFont(doc); // real, selectable Tamil+Latin text — not a rendered image
+        const a4W = 841.89, a4H = 595.28, marginX = 40, marginTop = 40, marginBottom = 40; // landscape — spreadsheets are usually wider than tall
+        const maxWidth = a4W - marginX*2;
+        let page = doc.addPage([a4W, a4H]);
+        let y = a4H - marginTop;
+        function newPageIfNeeded(neededHeight){
+          if(y - neededHeight < marginBottom){ page = doc.addPage([a4W, a4H]); y = a4H - marginTop; }
+        }
+        wb.SheetNames.forEach((name, sheetIdx)=>{
+          prog.set(30 + (sheetIdx/wb.SheetNames.length)*55, 'PDF Creating…');
+          if(sheetIdx>0){ page = doc.addPage([a4W, a4H]); y = a4H - marginTop; }
+          newPageIfNeeded(24);
+          page.drawText(name, {x:marginX, y, size:14, font, color:rgb(0.05,0.05,0.05)});
+          y -= 22;
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:false, defval:''});
+          if(!rows.length) return;
+          const numCols = Math.max(1, ...rows.map(r=>r.length));
+          const colWidth = maxWidth / numCols;
+          const rowH = 18, cellSize = 8.5;
+          rows.forEach(row=>{
+            newPageIfNeeded(rowH);
+            for(let ci=0; ci<numCols; ci++){
+              const cellX = marginX + ci*colWidth;
+              page.drawRectangle({x:cellX, y:y-rowH+2, width:colWidth, height:rowH, borderColor:rgb(0.8,0.8,0.8), borderWidth:0.5});
+              let cellText = String(row[ci] ?? '').trim();
+              while(font.widthOfTextAtSize(cellText, cellSize) > colWidth-6 && cellText.length>1) cellText = cellText.slice(0,-1);
+              if(cellText) page.drawText(cellText, {x:cellX+3, y:y-rowH+7, size:cellSize, font, color:rgb(0.1,0.1,0.1)});
+            }
+            y -= rowH;
+          });
         });
-        html += `</div>`;
-        prog.set(55,'PDF Creating…');
-        const bytes = await htmlToFontCorrectPdfBytes(html, {isHtml:true, fontSize:13});
+        prog.set(92,'PDF Preparing file…');
+        const bytes = await doc.save();
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.(xlsx|xls|csv)$/i,'')+'.pdf');
         prog.remove();
-        mountResult(body, 'PDF downloaded.');
+        mountResult(body, 'PDF downloaded — real, selectable/searchable text (Tamil supported), தமிழ் அடங்கியது.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
