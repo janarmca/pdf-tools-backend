@@ -7250,13 +7250,18 @@ TOOL_IMPL.livetranslate = {
         const said = accumulated.trim();
         accumulated = '';
         if(said) handleUtterance(said);
-        // Guarded with try/catch: onend can occasionally fire in quick
-        // succession (a known Web Speech API quirk), and calling start()
-        // while a session is still finishing its own startup throws
-        // "recognition has already started" — harmless when that happens,
-        // since it just means recognition is already running, which is
-        // what we wanted anyway.
-        if(activeSide){ try{ recognition.start(); }catch(e){} }
+        // Restart by calling startListening() again (creating a BRAND NEW
+        // SpeechRecognition instance with fresh state), not recognition.start()
+        // on this same object. Reusing the same object risked a subtle bug:
+        // when a session ends and restarts, the new session's results array
+        // genuinely starts over from index 0, but calling .start() on the
+        // same object could leave processedFinalCount/accumulated from the
+        // OLD session still around, mismatched against the new session's
+        // indices — this is what caused final segments to be re-processed
+        // and duplicated even after the earlier processedFinalCount fix.
+        // A fresh instance each time guarantees the tracking state and the
+        // actual results array always start in sync.
+        if(activeSide) startListening();
       };
       try{ recognition.start(); }catch(e){}
       // Try to set up Chrome/Edge's free, on-device Translator API right here,
