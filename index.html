@@ -7125,6 +7125,16 @@ const LIVETRANSLATE_LANGS = [
 TOOL_IMPL.livetranslate = {
   mount(container){
     let langA = 'ta-IN', langB = 'en-US', activeSide = null, recognition = null, voices = [], nativeTranslator = null;
+    // Incremented every time a new recognition session starts. Each
+    // session's event handlers capture their own generation number in
+    // closure and check it against this shared counter before doing
+    // anything — if a newer session has since started, the older one's
+    // events are stale and are ignored entirely. This is the definitive
+    // fix for repeated/growing text: even if the browser allows a brief
+    // overlap between an ending session and its restart (so both fire
+    // events for a moment), only the current generation's session is ever
+    // allowed to accumulate text or call handleUtterance.
+    let sessionGeneration = 0;
     let fromLang = langA, toLang = langB; // set to whichever direction is currently active before each listen
     let history = []; // [{original, translated}]
     const body = el(`<div></div>`); container.appendChild(body);
@@ -7182,6 +7192,7 @@ TOOL_IMPL.livetranslate = {
     }
 
     function startSide(side){
+      if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; } // stop any previous side's still-running session before switching
       activeSide = side;
       fromLang = side==='A' ? langA : langB;
       toLang = side==='A' ? langB : langA;
@@ -7190,6 +7201,8 @@ TOOL_IMPL.livetranslate = {
     }
 
     function startListening(){
+      sessionGeneration++;
+      const myGeneration = sessionGeneration; // captured in closure — this session's own identity
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
       recognition.lang = fromLang;
@@ -7211,20 +7224,21 @@ TOOL_IMPL.livetranslate = {
       // results start, but isn't reliable across all browser
       // implementations. Explicitly tracking how many results have already
       // been committed as final (rather than trusting resultIndex) is what
-      // actually prevents the same final segment from being re-appended to
-      // `accumulated` on a later event — which is what caused the reported
-      // "word word word2 word word2 word3..." repeating/growing text.
+      // prevents the same final segment from being re-appended to
+      // `accumulated` on a later event within THIS session.
       let processedFinalCount = 0;
       const SILENCE_MS = 1800; // how long to wait after the last final segment before treating the sentence as "done"
       function scheduleCommit(){
         if(silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(()=>{
+          if(myGeneration !== sessionGeneration) return; // a newer session has taken over — this one's pending commit is stale, drop it
           const said = accumulated.trim();
           accumulated = '';
           if(said) handleUtterance(said);
         }, SILENCE_MS);
       }
       recognition.onresult = (ev)=>{
+        if(myGeneration !== sessionGeneration) return; // stale session (overlapping with a newer restart) — ignore entirely, this is the definitive fix for growing/repeated text
         let interim = '';
         for(let i=0; i<ev.results.length; i++){
           const r = ev.results[i];
@@ -7239,10 +7253,12 @@ TOOL_IMPL.livetranslate = {
         if(statusEl) statusEl.textContent = interim ? `🎙️ …${accumulated}${accumulated?' ':''}${interim}` : (accumulated ? `🎙️ …${accumulated}` : '🎙️ கேட்டுக்கொண்டிருக்கிறது…');
       };
       recognition.onerror = (ev)=>{
+        if(myGeneration !== sessionGeneration) return;
         const statusEl = body.querySelector('#ltStatus');
         if(statusEl) statusEl.textContent = 'Mic error: '+ev.error+' — மீண்டும் முயற்சிக்கவும்.';
       };
       recognition.onend = ()=>{
+        if(myGeneration !== sessionGeneration) return; // stale session ending — a newer one is already running, don't touch its state or restart on its behalf
         // The browser can end a "continuous" session on its own after a
         // longer stretch of silence — commit whatever's been accumulated so
         // far (don't lose the last bit of speech) before restarting.
@@ -7251,16 +7267,12 @@ TOOL_IMPL.livetranslate = {
         accumulated = '';
         if(said) handleUtterance(said);
         // Restart by calling startListening() again (creating a BRAND NEW
-        // SpeechRecognition instance with fresh state), not recognition.start()
-        // on this same object. Reusing the same object risked a subtle bug:
-        // when a session ends and restarts, the new session's results array
-        // genuinely starts over from index 0, but calling .start() on the
-        // same object could leave processedFinalCount/accumulated from the
-        // OLD session still around, mismatched against the new session's
-        // indices — this is what caused final segments to be re-processed
-        // and duplicated even after the earlier processedFinalCount fix.
-        // A fresh instance each time guarantees the tracking state and the
-        // actual results array always start in sync.
+        // SpeechRecognition instance, bumping sessionGeneration) rather than
+        // recognition.start() on this same object — guarantees the next
+        // session's tracking state and results array always start in sync,
+        // and the generation check above means even if the browser briefly
+        // overlaps the old and new sessions, only the current one's events
+        // are ever acted on.
         if(activeSide) startListening();
       };
       try{ recognition.start(); }catch(e){}
@@ -7283,6 +7295,7 @@ TOOL_IMPL.livetranslate = {
     }
     function stopListening(){
       activeSide = null;
+      sessionGeneration++; // invalidates any lingering event from the session just being stopped
       if(recognition){ try{ recognition.onend = null; recognition.stop(); }catch(e){} recognition = null; }
       nativeTranslator = null;
       paint();
