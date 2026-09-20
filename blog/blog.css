@@ -1,0 +1,72 @@
+:root{
+  --navy:#132A4D;
+  --navy-light:#3752A6;
+  --bg:#F7F5F0;
+  --card:#fff;
+  --text:#1A1A2E;
+  --sub:#63697A;
+  --line:#E4DFD5;
+  --pdf:#3752A6;
+  --business:#0F4A2C;
+  --tax:#8A3A1A;
+  --security:#7A2E2E;
+}
+*{ box-sizing:border-box; }
+html{ scroll-padding-top:20px; }
+body{ margin:0; font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.tamil{ font-family:'Noto Sans Tamil','Noto Sans',sans-serif; }
+a{ color:var(--navy-light); }
+img{ max-width:100%; }
+
+header.site{ background:var(--navy); }
+header.site .inner{ max-width:800px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; }
+header.site a.logo{ color:#fff; font-weight:900; text-decoration:none; font-size:17px; letter-spacing:-0.01em; }
+header.site a.back{ color:rgba(255,255,255,.85); text-decoration:none; font-size:13.5px; font-weight:600; }
+header.site a.back:hover{ color:#fff; }
+
+.wrap{ max-width:740px; margin:0 auto; padding:0 20px; }
+
+/* ---- Index page: editorial list, not a card grid ---- */
+.hero{ padding:52px 0 28px; }
+.hero h1{ font-size:34px; font-weight:900; letter-spacing:-0.02em; margin:0 0 10px; line-height:1.15; }
+.hero p{ color:var(--sub); font-size:15.5px; max-width:520px; margin:0; }
+
+.post-row{ display:flex; gap:18px; padding:26px 0; border-bottom:1px solid var(--line); border-left:4px solid var(--accent,var(--navy-light)); padding-left:18px; text-decoration:none; color:inherit; transition:padding-left .15s; }
+.post-row:hover{ padding-left:24px; }
+.post-row .cat{ font-size:11px; font-weight:800; text-transform:none; color:var(--accent,var(--navy-light)); margin-bottom:4px; }
+.post-row h2{ font-size:19px; font-weight:800; margin:0 0 6px; line-height:1.3; }
+.post-row p{ color:var(--sub); font-size:14px; margin:0; line-height:1.55; }
+.post-row .meta{ color:var(--sub); font-size:12px; margin-top:8px; }
+
+/* ---- Article page ---- */
+article{ padding:44px 0 60px; }
+.article-cat{ font-size:12.5px; font-weight:800; color:var(--accent,var(--navy-light)); margin-bottom:10px; }
+article h1{ font-size:30px; font-weight:900; letter-spacing:-0.02em; line-height:1.2; margin:0 0 14px; }
+.article-meta{ color:var(--sub); font-size:13px; margin-bottom:30px; }
+article .lede{ font-size:17px; color:#2A2A3E; margin-bottom:26px; line-height:1.6; }
+article h2{ font-size:21px; font-weight:800; margin:34px 0 12px; }
+article h3{ font-size:17px; font-weight:800; margin:24px 0 8px; }
+article p{ font-size:15.5px; margin:0 0 16px; max-width:680px; }
+article ul, article ol{ font-size:15.5px; margin:0 0 16px; padding-left:22px; }
+article li{ margin-bottom:6px; }
+article strong{ color:var(--text); }
+article .tip{ background:#fff; border:1px solid var(--line); border-left:3px solid var(--accent,var(--navy-light)); border-radius:8px; padding:14px 16px; margin:20px 0; font-size:14.5px; }
+
+.cta-box{ background:var(--navy); border-radius:16px; padding:26px 24px; margin:36px 0 12px; text-align:center; }
+.cta-box .label{ color:rgba(255,255,255,.7); font-size:12px; font-weight:700; margin-bottom:6px; }
+.cta-box h3{ color:#fff; font-size:19px; font-weight:900; margin:0 0 14px; }
+.cta-box a.btn{ display:inline-block; background:#fff; color:var(--navy); font-weight:800; font-size:14px; padding:12px 26px; border-radius:10px; text-decoration:none; }
+.cta-box a.btn:hover{ opacity:.92; }
+
+.related{ margin-top:44px; padding-top:24px; border-top:1px solid var(--line); }
+.related h3{ font-size:14px; font-weight:800; color:var(--sub); margin:0 0 14px; }
+.related a{ display:block; font-size:15px; font-weight:700; color:var(--text); text-decoration:none; margin-bottom:8px; }
+.related a:hover{ color:var(--navy-light); }
+
+footer.site{ text-align:center; padding:30px 20px; color:var(--sub); font-size:12.5px; }
+
+@media(max-width:600px){
+  .hero h1{ font-size:27px; }
+  article h1{ font-size:24px; }
+  .post-row{ padding-left:14px; gap:0; flex-direction:column; }
+}

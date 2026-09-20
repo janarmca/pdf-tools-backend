@@ -952,6 +952,7 @@ function renderSettingsPage(){
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
       ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v4'); }catch(e){} maybeShowDiscoverModal(true); }],
+      ['📝 Blog', ()=> window.open('blog/','_blank')],
       ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
       ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
       ['📄 Terms of Service', ()=> window.open('terms.html','_blank')],
@@ -14944,6 +14945,18 @@ TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-at
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 
 render();
+// Deep-link support: a URL like pdftoolsindia.com/?tool=merge opens that
+// tool directly instead of landing on the homepage — used by blog posts and
+// other external links. Validated against the real TOOLS list so an
+// unrecognized or malformed ?tool= value is silently ignored rather than
+// calling openTool with a bogus id.
+(function(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkTool = params.get('tool');
+    if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)) openTool(deepLinkTool);
+  }catch(e){ /* malformed URL params — just show the homepage as normal */ }
+})();
 initAuth().then(async ()=>{
   render();
   // Catches UPI/other redirect-based Razorpay payments — these complete via
