@@ -8719,9 +8719,9 @@ TOOL_IMPL.pdfprotect = {
       const prog = mountProgress(body);
       try{
         prog.set(20,'Encryption library ஏற்றுகிறது…');
-        const mod = await import('https://esm.sh/@pdfsmaller/pdf-encrypt-lite');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-encrypt');
         prog.set(55,'PDF-ஐ Protect பண்ணுகிறது…');
-        const encryptedBytes = await mod.encryptPDF(new Uint8Array(file._buf), p1);
+        const encryptedBytes = await mod.encryptPDF(new Uint8Array(file._buf), p1, { algorithm: 'AES-256' });
         prog.set(100,'Done');
         downloadBlob(new Blob([encryptedBytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-protected.pdf');
         prog.remove();
@@ -8772,7 +8772,7 @@ TOOL_IMPL.pdfunlock = {
       const prog = mountProgress(body);
       try{
         prog.set(20,'Decryption library ஏற்றுகிறது…');
-        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt-lite');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt');
         prog.set(55,'Password நீக்குகிறது…');
         const decryptedBytes = await mod.decryptPDF(new Uint8Array(file._buf), pw);
         prog.set(100,'Done');
@@ -8920,7 +8920,7 @@ TOOL_IMPL.pdfpwrecover = {
       body.appendChild(stopBtn);
       try{
         prog.set(10,'Library ஏற்றுகிறது…');
-        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt-lite');
+        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt');
         for(let i=0; i<candidateList.length; i++){
           if(cancelled) break;
           const pw = candidateList[i];
