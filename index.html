@@ -247,6 +247,9 @@ const TOOLS = [
   {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
+  {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
+  {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
+  {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business'},
   {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business'},
@@ -14220,6 +14223,218 @@ TOOL_IMPL.emicalc = {
       };
       dlRow.appendChild(dlBtn);
       holder.appendChild(dlRow);
+    }
+  }
+};
+
+/* ===================== INCOME TAX CALCULATOR ===================== */
+TOOL_IMPL.incometaxcalc = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">FY 2026-27 (Budget 2026-ல் slabs மாற்றம் இல்லை) slabs அடிப்படையில், Old Regime-ஐயும் New Regime-ஐயும் ஒப்பிட்டு, எது உங்களுக்கு குறைவான tax தரும் என்று காட்டும். இது ஒரு estimate மட்டும் — CA/tax consultant-ஐ இறுதி முடிவுக்கு அணுகவும்.</div>`));
+      const opts = el(`
+        <div class="opts">
+          <div class="field"><label class="tamil">மொத்த வருடாந்திர வருமானம் (Gross Annual Income) ₹</label><input type="number" id="itGross" value="1000000" min="0"></div>
+          <div class="field">
+            <label class="tamil">வயது</label>
+            <select id="itAge">
+              <option value="below60">60 வயதுக்கு கீழ்</option>
+              <option value="60to80">60-80 (Senior Citizen)</option>
+              <option value="above80">80+ (Super Senior)</option>
+            </select>
+          </div>
+          <div class="field"><label class="tamil">Section 80C Investments (Old Regime மட்டும், PF/LIC/ELSS etc, ₹1.5L வரை) ₹</label><input type="number" id="it80c" value="0" min="0"></div>
+          <div class="field"><label class="tamil">மற்ற Deductions (Old Regime மட்டும் — HRA, 80D, Home Loan Interest etc) ₹</label><input type="number" id="itOther" value="0" min="0"></div>
+        </div>
+      `);
+      body.appendChild(opts);
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn tamil">🧾 Tax கணக்கிடு</button>`);
+      btn.onclick = doCalculate;
+      row.appendChild(btn);
+      body.appendChild(row);
+      body.appendChild(el(`<div id="itResultHolder"></div>`));
+    }
+    paint();
+    // New regime slabs, FY 2026-27 — same for all ages (senior-citizen
+    // exemptions only apply under the old regime).
+    function newRegimeTax(taxableIncome){
+      const slabs = [[400000,0],[800000,0.05],[1200000,0.10],[1600000,0.15],[2000000,0.20],[2400000,0.25],[Infinity,0.30]];
+      let tax = 0, prev = 0;
+      for(const [limit, rate] of slabs){
+        if(taxableIncome > prev){ tax += (Math.min(taxableIncome, limit) - prev) * rate; prev = limit; } else break;
+      }
+      return tax;
+    }
+    function oldRegimeTax(taxableIncome, ageCat){
+      const exemption = ageCat==='above80' ? 500000 : ageCat==='60to80' ? 300000 : 250000;
+      const slabs = [[exemption,0],[500000,0.05],[1000000,0.20],[Infinity,0.30]];
+      let tax = 0, prev = 0;
+      for(const [limit, rate] of slabs){
+        if(taxableIncome > prev){ tax += (Math.min(taxableIncome, Math.max(limit,prev)) - prev) * rate; prev = Math.max(limit,prev); } else break;
+      }
+      return tax;
+    }
+    function doCalculate(){
+      const gross = Number(body.querySelector('#itGross').value)||0;
+      const ageCat = body.querySelector('#itAge').value;
+      const c80 = Math.min(150000, Number(body.querySelector('#it80c').value)||0);
+      const otherDed = Number(body.querySelector('#itOther').value)||0;
+
+      // New regime: standard deduction ₹75,000, no other deductions
+      const newTaxable = Math.max(0, gross - 75000);
+      let newTax = newRegimeTax(newTaxable);
+      if(newTaxable <= 1200000) newTax = Math.max(0, newTax - Math.min(60000, newTax)); // Sec 87A rebate
+      const newCess = newTax * 0.04;
+      const newTotal = Math.round(newTax + newCess);
+
+      // Old regime: standard deduction ₹50,000, plus 80C + other deductions
+      const oldTaxable = Math.max(0, gross - 50000 - c80 - otherDed);
+      let oldTax = oldRegimeTax(oldTaxable, ageCat);
+      const rebateThreshold = 500000;
+      if(oldTaxable <= rebateThreshold) oldTax = Math.max(0, oldTax - Math.min(25000, oldTax)); // Sec 87A rebate
+      const oldCess = oldTax * 0.04;
+      const oldTotal = Math.round(oldTax + oldCess);
+
+      const holder = body.querySelector('#itResultHolder');
+      holder.innerHTML = '';
+      const better = newTotal <= oldTotal ? 'new' : 'old';
+      holder.appendChild(el(`
+        <div>
+          <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="background:${better==='new'?'#E8F5E9':'#F5F5F5'}; border-radius:12px; padding:14px; text-align:center; ${better==='new'?'border:2px solid #2E7D32;':''}">
+              <div style="font-size:11px; color:var(--sub); font-weight:700;">New Regime ${better==='new'?'✓ சிறந்தது':''}</div>
+              <div style="font-size:20px; font-weight:900; color:#2E7D32;">₹${newTotal.toLocaleString('en-IN')}</div>
+              <div style="font-size:10px; color:var(--sub); margin-top:4px;" class="tamil">Taxable: ₹${newTaxable.toLocaleString('en-IN')}</div>
+            </div>
+            <div style="background:${better==='old'?'#E8F5E9':'#F5F5F5'}; border-radius:12px; padding:14px; text-align:center; ${better==='old'?'border:2px solid #2E7D32;':''}">
+              <div style="font-size:11px; color:var(--sub); font-weight:700;">Old Regime ${better==='old'?'✓ சிறந்தது':''}</div>
+              <div style="font-size:20px; font-weight:900; color:#2E7D32;">₹${oldTotal.toLocaleString('en-IN')}</div>
+              <div style="font-size:10px; color:var(--sub); margin-top:4px;" class="tamil">Taxable: ₹${oldTaxable.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+          <div class="tamil" style="margin-top:12px; font-size:12.5px; color:var(--sub); text-align:center;">
+            ${better==='new' ? 'New Regime' : 'Old Regime'}-ல் ₹${Math.abs(newTotal-oldTotal).toLocaleString('en-IN')} குறைவாக tax கட்டலாம் (இந்த inputs-ன் அடிப்படையில்).
+          </div>
+        </div>
+      `));
+    }
+  }
+};
+
+/* ===================== AGE CALCULATOR ===================== */
+TOOL_IMPL.agecalc = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      const opts = el(`
+        <div class="opts">
+          <div class="field"><label class="tamil">பிறந்த தேதி</label><input type="date" id="acDob"></div>
+          <div class="field"><label class="tamil">எந்த தேதி வரை கணக்கிட வேண்டும்</label><input type="date" id="acAsOf"></div>
+        </div>
+      `);
+      body.appendChild(opts);
+      body.querySelector('#acAsOf').valueAsDate = new Date();
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn tamil">🎂 வயது கணக்கிடு</button>`);
+      btn.onclick = doCalculate;
+      row.appendChild(btn);
+      body.appendChild(row);
+      body.appendChild(el(`<div id="acResultHolder"></div>`));
+    }
+    paint();
+    function doCalculate(){
+      const dobStr = body.querySelector('#acDob').value;
+      const asOfStr = body.querySelector('#acAsOf').value;
+      const holder = body.querySelector('#acResultHolder');
+      if(!dobStr){ holder.innerHTML=''; mountResult(body, 'பிறந்த தேதியை தேர்வு செய்யவும்.').style.background='#FDEDEC'; return; }
+      const dob = new Date(dobStr+'T00:00:00');
+      const asOf = new Date((asOfStr||new Date().toISOString().slice(0,10))+'T00:00:00');
+      if(dob > asOf){ holder.innerHTML=''; mountResult(body, 'பிறந்த தேதி, இன்றைய தேதிக்கு பிறகு இருக்க முடியாது.').style.background='#FDEDEC'; return; }
+      let years = asOf.getFullYear() - dob.getFullYear();
+      let months = asOf.getMonth() - dob.getMonth();
+      let days = asOf.getDate() - dob.getDate();
+      if(days < 0){
+        months--;
+        const prevMonth = new Date(asOf.getFullYear(), asOf.getMonth(), 0);
+        days += prevMonth.getDate();
+      }
+      if(months < 0){ years--; months += 12; }
+      const totalDays = Math.round((asOf - dob) / 86400000);
+
+      let nextBday = new Date(asOf.getFullYear(), dob.getMonth(), dob.getDate());
+      if(nextBday < asOf || (nextBday.getMonth()===asOf.getMonth() && nextBday.getDate()===asOf.getDate())) nextBday = new Date(asOf.getFullYear()+1, dob.getMonth(), dob.getDate());
+      const daysToNextBday = Math.round((nextBday - asOf) / 86400000);
+
+      holder.innerHTML = '';
+      holder.appendChild(el(`
+        <div style="margin-top:16px; background:#FCE4EC; border-radius:14px; padding:20px; text-align:center;">
+          <div style="font-size:26px; font-weight:900; color:#C2185B;">${years} ஆண்டுகள், ${months} மாதங்கள், ${days} நாட்கள்</div>
+          <div class="tamil" style="font-size:12px; color:var(--sub); margin-top:8px;">மொத்தம் ${totalDays.toLocaleString('en-IN')} நாட்கள் வாழ்ந்திருக்கிறீர்கள்</div>
+          <div class="tamil" style="font-size:12px; color:var(--sub); margin-top:4px;">அடுத்த பிறந்தநாளுக்கு இன்னும் ${daysToNextBday} நாட்கள்</div>
+        </div>
+      `));
+    }
+  }
+};
+
+/* ===================== PERCENTAGE CALCULATOR ===================== */
+TOOL_IMPL.percentcalc = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      const tabRow = el(`<div class="btn-row"></div>`);
+      ['X% of Y','X என்பது Y-ல் எத்தனை %','அதிகரிப்பு/குறைப்பு %'].forEach((label,i)=>{
+        const b = el(`<button class="btn ${i===0?'':'secondary'}" data-idx="${i}" style="font-size:12.5px; padding:9px 14px;">${label}</button>`);
+        b.onclick = ()=>{ activeTab = i; paint(); };
+        tabRow.appendChild(b);
+      });
+      body.appendChild(tabRow);
+      const form = el(`<div class="opts" style="margin-top:14px;"></div>`);
+      if(activeTab===0){
+        form.appendChild(el(`<div class="field"><label class="tamil">Percentage (%)</label><input type="number" id="pcA" value="10"></div>`));
+        form.appendChild(el(`<div class="field"><label class="tamil">எண்</label><input type="number" id="pcB" value="500"></div>`));
+      } else if(activeTab===1){
+        form.appendChild(el(`<div class="field"><label class="tamil">எண் (X)</label><input type="number" id="pcA" value="50"></div>`));
+        form.appendChild(el(`<div class="field"><label class="tamil">மொத்தம் (Y)</label><input type="number" id="pcB" value="200"></div>`));
+      } else {
+        form.appendChild(el(`<div class="field"><label class="tamil">முந்தைய மதிப்பு</label><input type="number" id="pcA" value="100"></div>`));
+        form.appendChild(el(`<div class="field"><label class="tamil">புதிய மதிப்பு</label><input type="number" id="pcB" value="120"></div>`));
+      }
+      body.appendChild(form);
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn tamil">💯 கணக்கிடு</button>`);
+      btn.onclick = doCalculate;
+      row.appendChild(btn);
+      body.appendChild(row);
+      body.appendChild(el(`<div id="pcResultHolder"></div>`));
+    }
+    let activeTab = 0;
+    paint();
+    function doCalculate(){
+      const a = Number(body.querySelector('#pcA').value);
+      const b = Number(body.querySelector('#pcB').value);
+      const holder = body.querySelector('#pcResultHolder');
+      holder.innerHTML = '';
+      let resultText = '';
+      if(activeTab===0){
+        const result = (a/100)*b;
+        resultText = `${a}% of ${b} = <b>${result.toLocaleString('en-IN')}</b>`;
+      } else if(activeTab===1){
+        if(b===0){ mountResult(body,'0-ஆல் வகுக்க முடியாது.').style.background='#FDEDEC'; return; }
+        const result = (a/b)*100;
+        resultText = `${a} என்பது ${b}-ல் <b>${result.toFixed(2)}%</b>`;
+      } else {
+        if(a===0){ mountResult(body,'முந்தைய மதிப்பு 0 ஆக இருக்க முடியாது.').style.background='#FDEDEC'; return; }
+        const change = ((b-a)/a)*100;
+        const dir = change>=0 ? 'அதிகரிப்பு' : 'குறைப்பு';
+        resultText = `${Math.abs(change).toFixed(2)}% <b>${dir}</b>`;
+      }
+      holder.appendChild(el(`<div style="margin-top:16px; background:#E0F7FA; border-radius:14px; padding:20px; text-align:center; font-size:20px; font-weight:900; color:#00838F;">${resultText}</div>`));
     }
   }
 };
