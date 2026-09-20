@@ -9081,7 +9081,7 @@ TOOL_IMPL.pdfpwrecover = {
     async function doRecover(){
       const ext = (file.name.split('.').pop()||'').toLowerCase();
       const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
-      const personalGuesses = showPersonal ? generatePersonalPasswordGuesses({
+      const personalGuessesRaw = showPersonal ? generatePersonalPasswordGuesses({
         myName: body.querySelector('#pdMyName')?.value,
         myDob: body.querySelector('#pdMyDob')?.value,
         familyName: body.querySelector('#pdFamName')?.value,
@@ -9090,6 +9090,15 @@ TOOL_IMPL.pdfpwrecover = {
         jobId: body.querySelector('#pdJobId')?.value,
         bizNum: body.querySelector('#pdBizNum')?.value,
       }) : [];
+      // Cross-combine the personal-detail-derived guesses with each other
+      // too (not just treat them as a flat list) — the same logic used for
+      // the person's own typed guesses. Splits each candidate into its
+      // letter-prefix and number/symbol-suffix, then mixes prefixes from
+      // one with suffixes from another — e.g. name+DOB gives "raja1990" and
+      // phone gives "9876", this also tries "raja9876", covering the case
+      // where the actual password combines parts from different personal
+      // details rather than matching any single generated guess exactly.
+      const personalGuesses = personalGuessesRaw.length ? generateGuessCombinations(personalGuessesRaw) : [];
       // Personal guesses first — they're far more likely to be the actual
       // password than a generic common one, so trying them first means a
       // real hit is typically found almost instantly.
