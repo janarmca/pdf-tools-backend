@@ -1046,6 +1046,13 @@ const I18N = {
   heroTitle: { en:'PDF, Business, Video, AI & More — All Free, One Place', ta:'PDF, வணிகம், வீடியோ, AI மற்றும் பல — அனைத்தும் இலவசம், ஒரே இடத்தில்', hi:'PDF, बिज़नेस, वीडियो, AI और भी बहुत कुछ — सब मुफ़्त, एक ही जगह' },
   heroSub: { en:"Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device unless you choose Fast Server Mode.", ta:'இணைத்தல், சுருக்குதல், மாற்றுதல், மொழிபெயர்ப்பு, விலைப்பட்டியல் மற்றும் பல — ஆவணங்கள், படங்கள், வீடியோ, வணிகம், கல்விக்கான ஒரே தூய்மையான கருவித்தொகுப்பு. Fast Server Mode தேர்வு செய்யாத வரை உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும்.', hi:'मर्ज, कंप्रेस, कन्वर्ट, ट्रांसलेट, इनवॉइस और भी बहुत कुछ — दस्तावेज़ों, इमेज, वीडियो, बिज़नेस और शिक्षा के लिए एक साफ़-सुथरा टूलकिट। जब तक आप Fast Server Mode न चुनें, आपकी फ़ाइलें आपके डिवाइस पर ही रहती हैं।' },
   trustTitle: { en:'Quality software built by a Tamilian, for Tamil people', ta:'ஒரு தமிழன் தமிழ் மக்களுக்காக உருவாக்கிக் கொண்டிருக்கும் தரமான மென்பொருள்', hi:'एक तमिल व्यक्ति द्वारा तमिल लोगों के लिए बनाया गया गुणवत्तापूर्ण सॉफ़्टवेयर' },
+  freeTitle: { en:'✓ Always Free', ta:'✓ எப்போதும் இலவசம்', hi:'✓ हमेशा मुफ़्त' },
+  freeDesc: { en:'Most tools like Merge, Compress, Convert run entirely in your browser — no server cost.', ta:'Merge, Compress, Convert போன்ற பெரும்பாலான tools உங்க browser-லேயே இயங்கும் — server cost இல்லாதவை.', hi:'Merge, Compress, Convert जैसे अधिकांश tools पूरी तरह आपके browser में चलते हैं — कोई server cost नहीं।' },
+  creditTitle: { en:'⚡ Why Some Tools Need Credits', ta:'⚡ ஏன் சில tools credit', hi:'⚡ कुछ tools को credit क्यों चाहिए' },
+  creditDesc: { en:'AI tools call Google Gemini — we pass on only the real cost, with no hidden markup.', ta:'AI tools Gemini-ஐ அழைக்கின்றன — உண்மையான செலவை மட்டும், hidden markup இல்லாம காட்டுகிறோம்.', hi:'AI tools Gemini को call करते हैं — हम केवल असली लागत दिखाते हैं, कोई hidden markup नहीं।' },
+  uploadTitle: { en:'Drop your file here', ta:'உங்க கோப்பை இங்கே போடுங்கள்', hi:'अपनी फ़ाइल यहाँ डालें' },
+  uploadDesc: { en:'PDF, Word, Excel, Image, Video — whatever the format, we take you straight to the tool you need.', ta:'PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்.', hi:'PDF, Word, Excel, Image, Video — कोई भी format हो, हम आपको सीधे ज़रूरी tool तक ले जाते हैं।' },
+  uploadBtn: { en:'📁 Choose File', ta:'📁 கோப்பை தேர்வு செய்யவும்', hi:'📁 फ़ाइल चुनें' },
   catLabels: {
     pdf: { en:'PDF', ta:'PDF', hi:'PDF' },
     business: { en:'Business', ta:'வணிகம்', hi:'बिज़नेस' },
@@ -1119,12 +1126,12 @@ function renderTrustBanner(){
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div style="background:rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;">
-          <div style="font-size:11.5px; font-weight:900; color:#6FE0A0; margin-bottom:5px;">✓ எப்போதும் இலவசம்</div>
-          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">Merge, Compress, Convert போன்ற பெரும்பாலான tools உங்க browser-லேயே இயங்கும் — server cost இல்லாதவை.</div>
+          <div style="font-size:11.5px; font-weight:900; color:#6FE0A0; margin-bottom:5px;">${tr('freeTitle')}</div>
+          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">${tr('freeDesc')}</div>
         </div>
         <div style="background:rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;">
-          <div style="font-size:11.5px; font-weight:900; color:#F5C05A; margin-bottom:5px;">⚡ ஏன் சில tools credit</div>
-          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">AI tools Gemini-ஐ அழைக்கின்றன — உண்மையான செலவை மட்டும், hidden markup இல்லாம காட்டுகிறோம்.</div>
+          <div style="font-size:11.5px; font-weight:900; color:#F5C05A; margin-bottom:5px;">${tr('creditTitle')}</div>
+          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">${tr('creditDesc')}</div>
         </div>
       </div>
     </div>
@@ -1294,10 +1301,10 @@ function renderSmartUploadZone(){
   const wrap = el(`
     <div style="border:2px dashed #B8CCF0; border-radius:18px; padding:22px 20px; text-align:center; margin:18px 0; background:linear-gradient(180deg,#F3F7FF,#EAF1FE);">
       <div style="width:52px; height:52px; border-radius:50%; background:var(--brand-dark); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px; box-shadow:0 4px 14px rgba(55,82,166,.3);">📂</div>
-      <div style="font-weight:800; font-size:14px; margin-bottom:4px;">உங்க கோப்பை இங்கே போடுங்கள்</div>
-      <div style="font-size:12px; color:var(--sub); margin-bottom:14px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்</div>
+      <div style="font-weight:800; font-size:14px; margin-bottom:4px;">${tr('uploadTitle')}</div>
+      <div style="font-size:12px; color:var(--sub); margin-bottom:14px;">${tr('uploadDesc')}</div>
       <input type="file" id="__smartUploadInput" style="display:none;">
-      <button id="__smartUploadBtn" class="btn" style="padding:9px 20px; font-size:13px;">📁 Choose File</button>
+      <button id="__smartUploadBtn" class="btn" style="padding:9px 20px; font-size:13px;">${tr('uploadBtn')}</button>
       <div id="__smartUploadResult" style="margin-top:12px;"></div>
     </div>
   `);
