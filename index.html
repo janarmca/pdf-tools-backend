@@ -229,7 +229,7 @@ const TOOLS = [
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
   {id:'pdfprotect', name:'Protect PDF (Password)', desc:'Add a password so only people who know it can open the file', icon:'🔐', color:'#7A2E2E', cat:'pdf'},
   {id:'pdfunlock', name:'Unlock PDF (Remove Password)', desc:'Remove password protection when you know the current password', icon:'🔓', color:'#2E7A5A', cat:'pdf'},
-  {id:'pdfpwrecover', name:'PDF Password Recovery', desc:'Forgot the password on your own PDF? Try common/weak passwords automatically', icon:'🔍', color:'#B8860B', cat:'pdf'},
+  {id:'pdfpwrecover', name:'Document Password Recovery', desc:'Forgot the password on your own PDF, Excel, or Word file? Try common/weak passwords automatically', icon:'🔍', color:'#B8860B', cat:'pdf'},
   {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
@@ -8858,10 +8858,10 @@ TOOL_IMPL.pdfpwrecover = {
     async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். Genuinely strong password என்றால், இது வேலை செய்யாது (browser-ல் சாத்தியமில்லை) — common/personal-detail-based guesses-ஐ மட்டுமே முயற்சிக்கும்.</div>`));
+      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF, Excel, அல்லது Word file-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். Genuinely strong password என்றால், இது வேலை செய்யாது (browser-ல் சாத்தியமில்லை) — common/personal-detail-based guesses-ஐ மட்டுமே முயற்சிக்கும்.</div>`));
       mountUploader(body, {
-        accept:'application/pdf',
-        label:'Password மறந்துவிட்ட PDF file drag & drop or tap', sublabel:'',
+        accept:'.pdf,.xlsx,.xls,.docx,.doc,application/pdf',
+        label:'Password மறந்துவிட்ட PDF/Excel/Word file drag & drop or tap', sublabel:'',
         onAdd: async (fl)=> handleFile(fl[0])
       });
       if(file){
@@ -8898,7 +8898,21 @@ TOOL_IMPL.pdfpwrecover = {
     } else {
       paint();
     }
+    // Tries one password against one file, dispatching to the right library
+    // by file type — returns the decrypted bytes on success, throws on a
+    // wrong password (so the calling loop can just try the next candidate).
+    async function tryOnePassword(ext, pw, pdfMod, officeCryptoMod){
+      if(ext==='pdf') return await pdfMod.decryptPDF(new Uint8Array(file._buf), pw);
+      // office-crypto's API is synchronous (OfficeFile -> loadKey -> decrypt)
+      // rather than a single async call, but otherwise behaves the same way:
+      // throws on a wrong password, returns plain bytes on success.
+      const officeFile = officeCryptoMod.OfficeFile(new Uint8Array(file._buf));
+      officeFile.loadKey({ password: pw });
+      return officeFile.decrypt();
+    }
     async function doRecover(){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
       const personalGuesses = showPersonal ? generatePersonalPasswordGuesses({
         myName: body.querySelector('#pdMyName')?.value,
         myDob: body.querySelector('#pdMyDob')?.value,
@@ -8920,17 +8934,19 @@ TOOL_IMPL.pdfpwrecover = {
       body.appendChild(stopBtn);
       try{
         prog.set(10,'Library ஏற்றுகிறது…');
-        const mod = await import('https://esm.sh/@pdfsmaller/pdf-decrypt');
+        const pdfMod = ext==='pdf' ? await import('https://esm.sh/@pdfsmaller/pdf-decrypt') : null;
+        const officeCryptoMod = isOffice ? await import('https://esm.sh/office-crypto') : null;
         for(let i=0; i<candidateList.length; i++){
           if(cancelled) break;
           const pw = candidateList[i];
           prog.set(10 + (i/candidateList.length)*85, `முயற்சி ${i+1}/${candidateList.length}…`);
           try{
-            const decryptedBytes = await mod.decryptPDF(new Uint8Array(file._buf), pw);
+            const decryptedBytes = await tryOnePassword(ext, pw, pdfMod, officeCryptoMod);
             // success — this password worked
             prog.set(100,'Done'); prog.remove(); stopBtn.remove();
-            downloadBlob(new Blob([decryptedBytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-unlocked.pdf');
-            mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட PDF தயார்.`).style.background='#FFF6E5';
+            const mime = ext==='pdf' ? 'application/pdf' : 'application/octet-stream';
+            downloadBlob(new Blob([decryptedBytes],{type:mime}), file.name.replace(/\.[^.]+$/,'')+'-unlocked.'+ext);
+            mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட file தயார்.`).style.background='#FFF6E5';
             running = false;
             return;
           }catch(e){ /* wrong password — try the next one */ }
@@ -8939,7 +8955,7 @@ TOOL_IMPL.pdfpwrecover = {
         if(cancelled){
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
-          mountResult(body, `இந்த ${candidateList.length} guesses-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். "Unlock PDF" tool-ஐ password நினைவு வந்ததும் முயற்சிக்கவும்.`).style.background='#FDEDEC';
+          mountResult(body, `இந்த ${candidateList.length} guesses-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். Password நினைவு வந்ததும், அந்த file-ஐ சம்பந்தப்பட்ட software-லேயே திறந்து பாருங்கள்.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
