@@ -8815,6 +8815,12 @@ const PDF_WEAK_PASSWORD_LIST = [
 // password — not all possible 3-symbol combinations (which would run into
 // the thousands and defeat the purpose of keeping this fast).
 const PDF_SYMBOL_PATTERNS = ['!@#','@#$','!!!','###','$$$','***','%%%','&&&','@@@','???','!@!','123'];
+// Shared by every name-based brute-force mode so the case variants actually
+// tried and the count shown in time estimates never drift apart from each
+// other — covers all 4 common ways a name gets typed into a password.
+function getNameCaseVariants(name){
+  return [...new Set([name, name.toLowerCase(), name.toUpperCase(), name[0].toUpperCase()+name.slice(1).toLowerCase()])];
+}
 // Generates candidate passwords from personal details the person supplies
 // about THEMSELVES/their own family (name, DOB, phone, job/business ID) —
 // this mirrors how people actually choose PDF passwords in practice (a
@@ -8877,7 +8883,7 @@ function generateGuessCombinations(guesses){
     combos.add(g); // always try exactly what they typed
     const m = g.match(/^([a-zA-Z]*)(.*)$/);
     const prefix = m[1], suffix = m[2];
-    if(prefix){ prefixes.add(prefix); prefixes.add(prefix.toLowerCase()); prefixes.add(prefix[0].toUpperCase()+prefix.slice(1).toLowerCase()); }
+    if(prefix){ getNameCaseVariants(prefix).forEach(v=> prefixes.add(v)); }
     if(suffix) suffixes.add(suffix);
   });
   prefixes.forEach(p=>{
@@ -8888,12 +8894,25 @@ function generateGuessCombinations(guesses){
 }
 TOOL_IMPL.pdfpwrecover = {
   mount(container){
-    let file = null, running = false, cancelled = false, showPersonal = false, showAdvanced = false;
+    let file = null, running = false, cancelled = false, showPersonal = false, showAdvanced = false, hasAcknowledged = false;
     const body = el(`<div></div>`); container.appendChild(body);
     async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF, Excel, அல்லது Word file-க்கு மட்டும் பயன்படுத்தவும்</b> — யாருக்கும் சொந்தமான file-ஐ இதன் மூலம் திறக்க முயற்சிக்க வேண்டாம். Genuinely strong password என்றால், இது வேலை செய்யாது (browser-ல் சாத்தியமில்லை) — common/personal-detail-based guesses-ஐ மட்டுமே முயற்சிக்கும்.</div>`));
+      body.appendChild(el(`<div class="note tamil">⚠️ <b>உங்கள் சொந்த PDF, Excel, அல்லது Word file-க்கு மட்டும் பயன்படுத்தவும்.</b> யாருக்கும் சொந்தமான file-ஐ, அவர்களின் அனுமதி இல்லாமல் திறக்க முயற்சிப்பது Information Technology Act, 2000 (Section 43, 66, 66C)-ன் கீழ் <b>தண்டனைக்குரிய குற்றம்</b> — சிறை மற்றும்/அல்லது அபராதம் விதிக்கப்படலாம். இந்த tool-ஐ பயன்படுத்துவதால் ஏற்படும் எந்த சட்ட விளைவுக்கும் பயனர் மட்டுமே முழுப் பொறுப்பு. Genuinely strong password என்றால், இது வேலை செய்யாது (browser-ல் சாத்தியமில்லை) — common/personal-detail-based guesses-ஐ மட்டுமே முயற்சிக்கும்.</div>`));
+      const ackRow = el(`
+        <label style="display:flex; align-items:flex-start; gap:10px; margin:14px 0; padding:12px; background:#FFF8E1; border:1.5px solid #F0D896; border-radius:10px; cursor:pointer;">
+          <input type="checkbox" id="pdAckBox" style="width:20px; height:20px; margin-top:2px; flex-shrink:0; accent-color:#B7791F;">
+          <span class="tamil" style="font-size:12.5px; line-height:1.5;">நான் உறுதிப்படுத்துகிறேன்: இது <b>எனது சொந்த file</b>, அல்லது இதை திறக்க எனக்கு <b>சட்டப்பூர்வ அனுமதி</b> உண்டு.</span>
+        </label>
+      `);
+      body.appendChild(ackRow);
+      ackRow.querySelector('#pdAckBox').checked = hasAcknowledged;
+      ackRow.querySelector('#pdAckBox').addEventListener('change', (e)=>{ hasAcknowledged = e.target.checked; paint(); });
+      if(!hasAcknowledged){
+        body.appendChild(el(`<div class="tamil" style="font-size:12px; color:var(--sub); text-align:center; padding:10px;">மேலே உள்ள checkbox-ஐ தேர்ந்தெடுத்தால் file upload செய்யலாம்.</div>`));
+        return;
+      }
       mountUploader(body, {
         accept:'.pdf,.xlsx,.xls,.docx,.doc,application/pdf',
         label:'Password மறந்துவிட்ட PDF/Excel/Word file drag & drop or tap', sublabel:'',
@@ -8983,12 +9002,13 @@ TOOL_IMPL.pdfpwrecover = {
               if(!name){ est.textContent = 'பெயரை மேலே type பண்ணவும்.'; return; }
               const maxNumLen = Math.max(0, 10 - name.length);
               if(maxNumLen === 0){ est.textContent = 'இந்த பெயரே 10 எழுத்துகள் — எண் சேர்க்க இடமில்லை.'; return; }
+              const variantCount = getNameCaseVariants(name).length;
               let sumAllLengths = 0;
               for(let len=1; len<=maxNumLen; len++) sumAllLengths += Math.pow(10, len);
-              const total = sumAllLengths * 3; // ×3 for the three case variants tried
+              const total = sumAllLengths * variantCount;
               const ms = total * MS_PER_ATTEMPT;
               const label = ms < 60000 ? `${Math.round(ms/1000)} வினாடிகள்` : ms < 3600000 ? `${Math.round(ms/60000)} நிமிடங்கள்` : `${(ms/3600000).toFixed(1)} மணி நேரம்`;
-              est.textContent = `"${name}" + 1 முதல் ${maxNumLen}-digit வரை எல்லா எண்களும் (3 case variants) — மொத்தம் ${total.toLocaleString('en-IN')} combinations, கிட்டத்தட்ட ${label}.`;
+              est.textContent = `"${name}" + 1 முதல் ${maxNumLen}-digit வரை எல்லா எண்களும் (${variantCount} case variants) — மொத்தம் ${total.toLocaleString('en-IN')} combinations, கிட்டத்தட்ட ${label}.`;
             }
             nameAdv.querySelector('#pdBruteName').addEventListener('input', updateNameEstimate);
             updateNameEstimate();
@@ -9005,7 +9025,7 @@ TOOL_IMPL.pdfpwrecover = {
             // charset breakdown) — only the digit and symbol parts are
             // searched, and the symbol part uses a curated list of patterns
             // people actually type (not all possible 3-symbol combinations).
-            const symEst = Math.round(3 * 10000 * PDF_SYMBOL_PATTERNS.length * MS_PER_ATTEMPT / 1000 / 60);
+            const symEst = Math.round(4 * 10000 * PDF_SYMBOL_PATTERNS.length * MS_PER_ATTEMPT / 1000 / 60); // 4 = max possible case variants from getNameCaseVariants; upper-bound estimate since no name is typed yet at this point
             const symAdv = el(`
               <div style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px;">
                 <div style="font-weight:800; font-size:12.5px; margin-bottom:8px;" class="tamil">பெயர் + 4-Digit + Symbol Pattern</div>
@@ -9186,7 +9206,7 @@ TOOL_IMPL.pdfpwrecover = {
       // covering the ways people most commonly type a name into a password,
       // without trying every letter-case permutation (which would multiply
       // the search space far beyond what's worth the wait for a marginal gain).
-      const nameVariants = [...new Set([name, name.toLowerCase(), name[0].toUpperCase()+name.slice(1).toLowerCase()])];
+      const nameVariants = getNameCaseVariants(name);
       // Try every suffix LENGTH from 1 up to maxNumLen, not just the longest
       // one — a real password like "Raja1990" has a 4-digit suffix, not one
       // padded with leading zeros to fill the full 6-digit budget. Trying
@@ -9247,7 +9267,7 @@ TOOL_IMPL.pdfpwrecover = {
     async function doNameDigitSymbolBruteForce(name){
       const ext = (file.name.split('.').pop()||'').toLowerCase();
       const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
-      const nameVariants = [...new Set([name, name.toLowerCase(), name[0].toUpperCase()+name.slice(1).toLowerCase()])];
+      const nameVariants = getNameCaseVariants(name);
       const total = nameVariants.length * 10000 * PDF_SYMBOL_PATTERNS.length;
       running = true; cancelled = false;
       paint();
