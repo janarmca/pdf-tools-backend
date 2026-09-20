@@ -8811,6 +8811,10 @@ const PDF_WEAK_PASSWORD_LIST = [
   '01011990','01012000','01011980','01012001','01011995','15081947','26011950',
   'letmein','welcome','qwerty','asdfgh','zxcvbn','abc123','iloveyou',
 ];
+// Curated common 3-symbol patterns people actually type at the end of a
+// password — not all possible 3-symbol combinations (which would run into
+// the thousands and defeat the purpose of keeping this fast).
+const PDF_SYMBOL_PATTERNS = ['!@#','@#$','!!!','###','$$$','***','%%%','&&&','@@@','???','!@!','123'];
 // Generates candidate passwords from personal details the person supplies
 // about THEMSELVES/their own family (name, DOB, phone, job/business ID) —
 // this mirrors how people actually choose PDF passwords in practice (a
@@ -8968,6 +8972,28 @@ TOOL_IMPL.pdfpwrecover = {
               const name = (nameAdv.querySelector('#pdBruteName').value||'').trim();
               if(!name){ mountResult(body, 'பெயரை type பண்ணவும்.').style.background='#FDEDEC'; return; }
               doNameNumberBruteForce(name);
+            };
+
+            // Name + 4-digit + symbol-pattern — genuinely feasible because the
+            // "letters" part comes from a name the person actually supplies
+            // (not brute-forced across all possible letter combinations,
+            // which would be astronomically large per the earlier full-
+            // charset breakdown) — only the digit and symbol parts are
+            // searched, and the symbol part uses a curated list of patterns
+            // people actually type (not all possible 3-symbol combinations).
+            const symEst = Math.round(3 * 10000 * PDF_SYMBOL_PATTERNS.length * MS_PER_ATTEMPT / 1000 / 60);
+            const symAdv = el(`
+              <div style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px;">
+                <div style="font-weight:800; font-size:12.5px; margin-bottom:8px;" class="tamil">பெயர் + 4-Digit + Symbol Pattern</div>
+                <div style="font-size:11.5px; color:var(--sub); margin-bottom:8px;">மேலே கொடுத்த பெயரையே பயன்படுத்தும் (letters brute-force ஆகாது — அதனால்தான் இது practical). "${PDF_SYMBOL_PATTERNS.join('", "')}" போன்ற ${PDF_SYMBOL_PATTERNS.length} common symbol patterns மட்டும் முயற்சிக்கும் — மொத்தம் கிட்டத்தட்ட ${symEst} நிமிடங்கள்.</div>
+                <button id="pdSymBruteBtn" class="btn tamil" style="width:100%;">🔢🔣 பெயர் + எண் + Symbol தொடங்கு</button>
+              </div>
+            `);
+            body.appendChild(symAdv);
+            symAdv.querySelector('#pdSymBruteBtn').onclick = ()=>{
+              const name = (nameAdv.querySelector('#pdBruteName').value||'').trim();
+              if(!name){ mountResult(body, 'மேலே பெயரை type பண்ணவும்.').style.background='#FDEDEC'; return; }
+              doNameDigitSymbolBruteForce(name);
             };
           }
         }
@@ -9144,6 +9170,52 @@ TOOL_IMPL.pdfpwrecover = {
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
           mountResult(body, `"${name}" + எண் — இந்த ${total.toLocaleString('en-IN')} combinations-ல் எதுவும் வேலை செய்யவில்லை.`).style.background='#FDEDEC';
+        }
+      }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      running = false;
+    }
+    async function doNameDigitSymbolBruteForce(name){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
+      const nameVariants = [...new Set([name, name.toLowerCase(), name[0].toUpperCase()+name.slice(1).toLowerCase()])];
+      const total = nameVariants.length * 10000 * PDF_SYMBOL_PATTERNS.length;
+      running = true; cancelled = false;
+      paint();
+      const prog = mountProgress(body);
+      const stopBtn = el(`<button class="btn secondary" style="margin-top:8px;">நிறுத்து</button>`);
+      stopBtn.onclick = ()=>{ cancelled = true; };
+      body.appendChild(stopBtn);
+      try{
+        prog.set(1,'Library ஏற்றுகிறது…');
+        const pdfMod = ext==='pdf' ? await import('https://esm.sh/@pdfsmaller/pdf-decrypt') : null;
+        const officeCryptoMod = isOffice ? await import('https://esm.sh/office-crypto') : null;
+        let attempted = 0;
+        outer:
+        for(let d=0; d<10000; d++){
+          const digits = String(d).padStart(4,'0');
+          for(const nameVariant of nameVariants){
+            for(const sym of PDF_SYMBOL_PATTERNS){
+              if(cancelled) break outer;
+              const pw = nameVariant + digits + sym;
+              attempted++;
+              if(attempted % 200 === 0) prog.set(1 + (attempted/total)*95, `முயற்சி ${attempted.toLocaleString('en-IN')}/${total.toLocaleString('en-IN')}…`);
+              try{
+                const decryptedBytes = await tryOnePassword(ext, pw, pdfMod, officeCryptoMod);
+                prog.set(100,'Done'); prog.remove(); stopBtn.remove();
+                const mime = ext==='pdf' ? 'application/pdf' : 'application/octet-stream';
+                downloadBlob(new Blob([decryptedBytes],{type:mime}), file.name.replace(/\.[^.]+$/,'')+'-unlocked.'+ext);
+                mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட file தயார்.`).style.background='#FFF6E5';
+                running = false;
+                return;
+              }catch(e){ /* wrong password — try the next one */ }
+            }
+          }
+        }
+        prog.remove(); stopBtn.remove();
+        if(cancelled){
+          mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
+        } else {
+          mountResult(body, `"${name}" + digits + symbol — இந்த ${total.toLocaleString('en-IN')} combinations-ல் எதுவும் வேலை செய்யவில்லை.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
