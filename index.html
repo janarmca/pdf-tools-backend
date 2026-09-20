@@ -8862,6 +8862,30 @@ function generatePersonalPasswordGuesses(details){
   if(details.bizNum) guesses.add(details.bizNum.trim());
   return [...guesses].filter(Boolean);
 }
+// Splits each of the person's own remembered guesses into a letter-prefix
+// and a number/symbol-suffix, then cross-combines prefixes from any one
+// guess with suffixes from any other — covers the common real-world case
+// of correctly remembering the "word" part of a password but mixing up
+// which ending went with it (or vice versa), not just retrying the guesses
+// verbatim.
+function generateGuessCombinations(guesses){
+  const prefixes = new Set(), suffixes = new Set();
+  const combos = new Set();
+  guesses.forEach(g=>{
+    g = (g||'').trim();
+    if(!g) return;
+    combos.add(g); // always try exactly what they typed
+    const m = g.match(/^([a-zA-Z]*)(.*)$/);
+    const prefix = m[1], suffix = m[2];
+    if(prefix){ prefixes.add(prefix); prefixes.add(prefix.toLowerCase()); prefixes.add(prefix[0].toUpperCase()+prefix.slice(1).toLowerCase()); }
+    if(suffix) suffixes.add(suffix);
+  });
+  prefixes.forEach(p=>{
+    if(suffixes.size){ suffixes.forEach(s=> combos.add(p+s)); }
+    else combos.add(p);
+  });
+  return [...combos].filter(Boolean);
+}
 TOOL_IMPL.pdfpwrecover = {
   mount(container){
     let file = null, running = false, cancelled = false, showPersonal = false, showAdvanced = false;
@@ -8994,6 +9018,43 @@ TOOL_IMPL.pdfpwrecover = {
               const name = (nameAdv.querySelector('#pdBruteName').value||'').trim();
               if(!name){ mountResult(body, 'மேலே பெயரை type பண்ணவும்.').style.background='#FDEDEC'; return; }
               doNameDigitSymbolBruteForce(name);
+            };
+
+            // User's own remembered guesses — the person might recall
+            // several near-misses ("was it raja123, or Raja@456, or
+            // raja@789?") without being sure which one is exact. Trying each
+            // guess as typed is the obvious first step; the more useful part
+            // is splitting each guess into its letter-prefix and its
+            // number/symbol-suffix, then cross-combining prefixes from one
+            // guess with suffixes from another — since it's common to
+            // correctly remember the "word" part of a password but mix up
+            // which number/symbol ending went with it (or vice versa).
+            const guessAdv = el(`
+              <div style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px;">
+                <div style="font-weight:800; font-size:12.5px; margin-bottom:8px;" class="tamil">உங்களுக்கு நினைவிருக்கும் Passwords (5-10)</div>
+                <div style="font-size:11.5px; color:var(--sub); margin-bottom:8px;">"இது தான் password-ன்னு நினைவு, ஆனா சரியா தெரியல" — அப்படி இருந்தா, நினைவிருக்கும் அத்தனையையும் ஒரு வரிக்கு ஒன்றா type பண்ணுங்கள். ஒவ்வொன்றையும் அப்படியே முயற்சிப்பதோடு, அவற்றின் பெயர்-பகுதி மற்றும் எண்/symbol-பகுதியை கலந்தும் (cross-combination) முயற்சிக்கும்.</div>
+                <textarea id="pdGuessList" rows="5" style="width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit;" placeholder="raja123&#10;Raja@456&#10;raja@789"></textarea>
+                <div id="pdGuessEstimate" style="font-size:12px; color:var(--sub); margin:8px 0;"></div>
+                <button id="pdGuessBruteBtn" class="btn tamil" style="width:100%;">🔍 இந்த Guesses + Combinations முயற்சி செய்</button>
+              </div>
+            `);
+            body.appendChild(guessAdv);
+            function updateGuessEstimate(){
+              const raw = guessAdv.querySelector('#pdGuessList').value;
+              const guesses = raw.split('\n').map(g=>g.trim()).filter(Boolean);
+              const est = guessAdv.querySelector('#pdGuessEstimate');
+              if(!guesses.length){ est.textContent = 'ஒவ்வொரு வரியிலும் ஒரு guess type பண்ணவும்.'; return; }
+              const combos = generateGuessCombinations(guesses);
+              const ms = combos.length * MS_PER_ATTEMPT;
+              est.textContent = `${guesses.length} guesses-ல் இருந்து ${combos.length} combinations generate ஆகும் — சில வினாடிகளில் முடியும்.`;
+            }
+            guessAdv.querySelector('#pdGuessList').addEventListener('input', updateGuessEstimate);
+            updateGuessEstimate();
+            guessAdv.querySelector('#pdGuessBruteBtn').onclick = ()=>{
+              const raw = guessAdv.querySelector('#pdGuessList').value;
+              const guesses = raw.split('\n').map(g=>g.trim()).filter(Boolean);
+              if(!guesses.length){ mountResult(body, 'குறைந்தது ஒரு guess type பண்ணவும்.').style.background='#FDEDEC'; return; }
+              doGuessCombinationRecover(guesses);
             };
           }
         }
@@ -9216,6 +9277,43 @@ TOOL_IMPL.pdfpwrecover = {
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
           mountResult(body, `"${name}" + digits + symbol — இந்த ${total.toLocaleString('en-IN')} combinations-ல் எதுவும் வேலை செய்யவில்லை.`).style.background='#FDEDEC';
+        }
+      }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      running = false;
+    }
+    async function doGuessCombinationRecover(guesses){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
+      const candidateList = generateGuessCombinations(guesses);
+      running = true; cancelled = false;
+      paint();
+      const prog = mountProgress(body);
+      const stopBtn = el(`<button class="btn secondary" style="margin-top:8px;">நிறுத்து</button>`);
+      stopBtn.onclick = ()=>{ cancelled = true; };
+      body.appendChild(stopBtn);
+      try{
+        prog.set(10,'Library ஏற்றுகிறது…');
+        const pdfMod = ext==='pdf' ? await import('https://esm.sh/@pdfsmaller/pdf-decrypt') : null;
+        const officeCryptoMod = isOffice ? await import('https://esm.sh/office-crypto') : null;
+        for(let i=0; i<candidateList.length; i++){
+          if(cancelled) break;
+          const pw = candidateList[i];
+          prog.set(10 + (i/candidateList.length)*85, `முயற்சி ${i+1}/${candidateList.length}…`);
+          try{
+            const decryptedBytes = await tryOnePassword(ext, pw, pdfMod, officeCryptoMod);
+            prog.set(100,'Done'); prog.remove(); stopBtn.remove();
+            const mime = ext==='pdf' ? 'application/pdf' : 'application/octet-stream';
+            downloadBlob(new Blob([decryptedBytes],{type:mime}), file.name.replace(/\.[^.]+$/,'')+'-unlocked.'+ext);
+            mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட file தயார்.`).style.background='#FFF6E5';
+            running = false;
+            return;
+          }catch(e){ /* wrong password — try the next one */ }
+        }
+        prog.remove(); stopBtn.remove();
+        if(cancelled){
+          mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
+        } else {
+          mountResult(body, `இந்த ${candidateList.length} guesses மற்றும் combinations-ல் எதுவும் வேலை செய்யவில்லை.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
