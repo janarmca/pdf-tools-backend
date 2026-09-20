@@ -8931,6 +8931,44 @@ TOOL_IMPL.pdfpwrecover = {
             adv.querySelector('#pdDigitLen').addEventListener('change', updateEstimate);
             updateEstimate();
             adv.querySelector('#pdBruteBtn').onclick = ()=> doNumericBruteForce(Number(adv.querySelector('#pdDigitLen').value));
+
+            // Name + Number combination brute-force — a name on its own (or
+            // name+date) is already covered by Personal Details above; this
+            // is for when only a rough number length is known (e.g. "name
+            // followed by some digits, don't remember how many"), trying
+            // every possible numeric suffix up to a 10-character total
+            // budget across the name's own casing plus lowercase and
+            // Capitalized — the three ways people most commonly type a name
+            // into a password.
+            const nameAdv = el(`
+              <div style="margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:10px;">
+                <div style="font-weight:800; font-size:12.5px; margin-bottom:8px;" class="tamil">பெயர் + எண் Combination (10 எழுத்துகள் வரை)</div>
+                <div class="field"><label class="tamil">பெயர் (எ.கா: raja, kumar)</label><input type="text" id="pdBruteName" placeholder="raja"></div>
+                <div id="pdNameTimeEstimate" style="font-size:12px; color:var(--sub); margin:8px 0;"></div>
+                <button id="pdNameBruteBtn" class="btn tamil" style="width:100%;">🔢 பெயர் + எண் Brute-Force தொடங்கு</button>
+              </div>
+            `);
+            body.appendChild(nameAdv);
+            function updateNameEstimate(){
+              const name = (nameAdv.querySelector('#pdBruteName').value||'').trim();
+              const est = nameAdv.querySelector('#pdNameTimeEstimate');
+              if(!name){ est.textContent = 'பெயரை மேலே type பண்ணவும்.'; return; }
+              const maxNumLen = Math.max(0, 10 - name.length);
+              if(maxNumLen === 0){ est.textContent = 'இந்த பெயரே 10 எழுத்துகள் — எண் சேர்க்க இடமில்லை.'; return; }
+              let sumAllLengths = 0;
+              for(let len=1; len<=maxNumLen; len++) sumAllLengths += Math.pow(10, len);
+              const total = sumAllLengths * 3; // ×3 for the three case variants tried
+              const ms = total * MS_PER_ATTEMPT;
+              const label = ms < 60000 ? `${Math.round(ms/1000)} வினாடிகள்` : ms < 3600000 ? `${Math.round(ms/60000)} நிமிடங்கள்` : `${(ms/3600000).toFixed(1)} மணி நேரம்`;
+              est.textContent = `"${name}" + 1 முதல் ${maxNumLen}-digit வரை எல்லா எண்களும் (3 case variants) — மொத்தம் ${total.toLocaleString('en-IN')} combinations, கிட்டத்தட்ட ${label}.`;
+            }
+            nameAdv.querySelector('#pdBruteName').addEventListener('input', updateNameEstimate);
+            updateNameEstimate();
+            nameAdv.querySelector('#pdNameBruteBtn').onclick = ()=>{
+              const name = (nameAdv.querySelector('#pdBruteName').value||'').trim();
+              if(!name){ mountResult(body, 'பெயரை type பண்ணவும்.').style.background='#FDEDEC'; return; }
+              doNameNumberBruteForce(name);
+            };
           }
         }
       }
@@ -9039,6 +9077,73 @@ TOOL_IMPL.pdfpwrecover = {
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
           mountResult(body, `இந்த ${total.toLocaleString('en-IN')} ${digitLen}-digit combinations-ல் எதுவும் வேலை செய்யவில்லை — password இது அளவு PIN இல்லை போலும்.`).style.background='#FDEDEC';
+        }
+      }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      running = false;
+    }
+    async function doNameNumberBruteForce(name){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
+      const maxNumLen = Math.max(0, 10 - name.length);
+      if(maxNumLen === 0){ mountResult(body, 'இந்த பெயரே 10 எழுத்துகள் — எண் சேர்க்க இடமில்லை.').style.background='#FDEDEC'; return; }
+      // Three casings of the name — as typed, lowercase, and Capitalized —
+      // covering the ways people most commonly type a name into a password,
+      // without trying every letter-case permutation (which would multiply
+      // the search space far beyond what's worth the wait for a marginal gain).
+      const nameVariants = [...new Set([name, name.toLowerCase(), name[0].toUpperCase()+name.slice(1).toLowerCase()])];
+      // Try every suffix LENGTH from 1 up to maxNumLen, not just the longest
+      // one — a real password like "Raja1990" has a 4-digit suffix, not one
+      // padded with leading zeros to fill the full 6-digit budget. Trying
+      // every length only adds about 11% more total attempts (the sum
+      // 10^1+10^2+...+10^6 is barely more than 10^6 alone) but is what
+      // actually makes a natural, unpadded number like a birth year findable.
+      let total = 0;
+      for(let len=1; len<=maxNumLen; len++) total += Math.pow(10, len);
+      total *= nameVariants.length;
+      running = true; cancelled = false;
+      paint();
+      const prog = mountProgress(body);
+      const stopBtn = el(`<button class="btn secondary" style="margin-top:8px;">நிறுத்து</button>`);
+      stopBtn.onclick = ()=>{ cancelled = true; };
+      body.appendChild(stopBtn);
+      try{
+        prog.set(1,'Library ஏற்றுகிறது…');
+        const pdfMod = ext==='pdf' ? await import('https://esm.sh/@pdfsmaller/pdf-decrypt') : null;
+        const officeCryptoMod = isOffice ? await import('https://esm.sh/office-crypto') : null;
+        let attempted = 0;
+        // Length is the OUTERMOST loop (not name-variant) — this tries every
+        // short, more-likely suffix across all case variants before moving
+        // to longer, less-likely ones. Looping variant-outermost instead
+        // would mean exhausting an entire 1-million-combination variant
+        // before ever trying a different casing, which could push a genuine
+        // 4-digit password's discovery time from ~seconds to ~hours purely
+        // because of casing order, not because the password itself was hard.
+        outer:
+        for(let len=1; len<=maxNumLen; len++){
+          const rangeSize = Math.pow(10, len);
+          for(const nameVariant of nameVariants){
+            for(let n=0; n<rangeSize; n++){
+              if(cancelled) break outer;
+              const pw = nameVariant + String(n).padStart(len, '0');
+              attempted++;
+              if(attempted % 200 === 0) prog.set(1 + (attempted/total)*95, `முயற்சி ${attempted.toLocaleString('en-IN')}/${total.toLocaleString('en-IN')}…`);
+              try{
+                const decryptedBytes = await tryOnePassword(ext, pw, pdfMod, officeCryptoMod);
+                prog.set(100,'Done'); prog.remove(); stopBtn.remove();
+                const mime = ext==='pdf' ? 'application/pdf' : 'application/octet-stream';
+                downloadBlob(new Blob([decryptedBytes],{type:mime}), file.name.replace(/\.[^.]+$/,'')+'-unlocked.'+ext);
+                mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட file தயார்.`).style.background='#FFF6E5';
+                running = false;
+                return;
+              }catch(e){ /* wrong password — try the next one */ }
+            }
+          }
+        }
+        prog.remove(); stopBtn.remove();
+        if(cancelled){
+          mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
+        } else {
+          mountResult(body, `"${name}" + எண் — இந்த ${total.toLocaleString('en-IN')} combinations-ல் எதுவும் வேலை செய்யவில்லை.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
