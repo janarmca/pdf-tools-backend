@@ -1113,11 +1113,19 @@ function renderHero(){
 }
 function renderTrustBanner(){
   return el(`
-    <div class="tamil" style="max-width:720px; margin:18px auto 0; background:linear-gradient(135deg,#FFF8E7,#FFF3D6); border:1.5px solid #F0D896; border-radius:16px; padding:16px 18px;">
-      <div style="font-weight:900; font-size:14.5px; color:#7A5A00; margin-bottom:6px;">🇮🇳 ${tr('trustTitle')}</div>
-      <div style="font-size:12.5px; color:var(--sub); line-height:1.55;">
-        <b>எப்போதும் இலவசம்:</b> Merge, Compress, Convert போன்ற பெரும்பாலான tools, உங்க browser-லேயே இயங்குகின்றன — server cost ஏதும் இல்லாதவை — இவை <b>எப்போதும், நிரந்தரமா இலவசம்</b>.<br>
-        <b>ஏன் சில tools credit கேட்கும்:</b> AI-powered tools (Translation, Image generation போன்றவை) Google Gemini போன்ற AI models-ஐ அழைக்கின்றன — இதற்கு உண்மையான, ரூபாய் செலவு ஆகிறது. அந்த செலவை மட்டும், நேர்மையா, credit-ஆ காட்டுகிறோம் — வேறு எந்த hidden cost-உம் இல்லை.
+    <div class="tamil" style="max-width:720px; margin:16px auto 0; background:#132A4D; border-radius:18px; padding:18px 20px; box-shadow:0 8px 24px rgba(19,42,77,.22);">
+      <div style="font-weight:900; font-size:14px; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:18px;">🇮🇳</span> ${tr('trustTitle')}
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="background:rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;">
+          <div style="font-size:11.5px; font-weight:900; color:#6FE0A0; margin-bottom:5px;">✓ எப்போதும் இலவசம்</div>
+          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">Merge, Compress, Convert போன்ற பெரும்பாலான tools உங்க browser-லேயே இயங்கும் — server cost இல்லாதவை.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;">
+          <div style="font-size:11.5px; font-weight:900; color:#F5C05A; margin-bottom:5px;">⚡ ஏன் சில tools credit</div>
+          <div style="font-size:11.5px; color:rgba(255,255,255,.82); line-height:1.5;">AI tools Gemini-ஐ அழைக்கின்றன — உண்மையான செலவை மட்டும், hidden markup இல்லாம காட்டுகிறோம்.</div>
+        </div>
       </div>
     </div>
   `);
@@ -1186,8 +1194,8 @@ function renderDashboardStrip(){
 
 function renderSearchBar(){
   const wrap = el(`<div style="margin-top:20px; position:relative;"></div>`);
-  const input = el(`<input type="text" id="__toolSearch" placeholder="Search ${TOOLS.length}+ tools — e.g. 'compress', 'watermark', 'translate'…" value="${__searchQuery}" style="width:100%; padding:13px 16px 13px 42px; border:1.5px solid var(--line); border-radius:14px; font-size:14px; background:#fff;">`);
-  const icon = el(`<div style="position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:15px; color:var(--sub); pointer-events:none;">🔍</div>`);
+  const input = el(`<input type="text" id="__toolSearch" placeholder="Search ${TOOLS.length}+ tools — e.g. 'compress', 'watermark', 'translate'…" value="${__searchQuery}" style="width:100%; padding:15px 18px 15px 46px; border:none; border-radius:16px; font-size:14.5px; background:#fff; box-shadow:0 4px 16px rgba(20,30,60,.1); box-sizing:border-box;">`);
+  const icon = el(`<div style="position:absolute; left:17px; top:50%; transform:translateY(-50%); font-size:16px; color:var(--brand-dark); pointer-events:none;">🔍</div>`);
   wrap.appendChild(input); wrap.appendChild(icon);
   input.addEventListener('input', (e)=>{ __searchQuery = e.target.value; renderHomeBody(); });
   return wrap;
@@ -1284,10 +1292,10 @@ const EXT_TO_CONVERT_TARGETS = {
 };
 function renderSmartUploadZone(){
   const wrap = el(`
-    <div style="border:2px dashed var(--line); border-radius:16px; padding:20px; text-align:center; margin:18px 0; background:#FAFBFC;">
-      <div style="font-size:28px; margin-bottom:6px;">📂</div>
+    <div style="border:2px dashed #B8CCF0; border-radius:18px; padding:22px 20px; text-align:center; margin:18px 0; background:linear-gradient(180deg,#F3F7FF,#EAF1FE);">
+      <div style="width:52px; height:52px; border-radius:50%; background:var(--brand-dark); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px; box-shadow:0 4px 14px rgba(55,82,166,.3);">📂</div>
       <div style="font-weight:800; font-size:14px; margin-bottom:4px;">உங்க கோப்பை இங்கே போடுங்கள்</div>
-      <div style="font-size:12px; color:var(--sub); margin-bottom:12px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்</div>
+      <div style="font-size:12px; color:var(--sub); margin-bottom:14px;">PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்</div>
       <input type="file" id="__smartUploadInput" style="display:none;">
       <button id="__smartUploadBtn" class="btn" style="padding:9px 20px; font-size:13px;">📁 Choose File</button>
       <div id="__smartUploadResult" style="margin-top:12px;"></div>
