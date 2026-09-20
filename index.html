@@ -8860,7 +8860,7 @@ function generatePersonalPasswordGuesses(details){
 }
 TOOL_IMPL.pdfpwrecover = {
   mount(container){
-    let file = null, running = false, cancelled = false, showPersonal = false;
+    let file = null, running = false, cancelled = false, showPersonal = false, showAdvanced = false;
     const body = el(`<div></div>`); container.appendChild(body);
     async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
     function paint(){
@@ -8892,10 +8892,46 @@ TOOL_IMPL.pdfpwrecover = {
         }
         if(!running){
           const row = el(`<div class="btn-row"></div>`);
-          const btn = el(`<button class="btn tamil">🔍 Password கண்டுபிடி</button>`);
+          const btn = el(`<button class="btn tamil">🔍 Common Passwords முயற்சி செய்</button>`);
           btn.onclick = doRecover;
           row.appendChild(btn);
           body.appendChild(row);
+
+          const advToggle = el(`<button class="btn secondary tamil" style="margin-top:10px; font-size:12.5px; padding:8px 16px;">${showAdvanced?'▼':'▶'} Advanced: Numeric PIN முழுவதுமாக முயற்சி (Brute-Force)</button>`);
+          advToggle.onclick = ()=>{ showAdvanced = !showAdvanced; paint(); };
+          body.appendChild(advToggle);
+          if(showAdvanced){
+            // Measured on a genuine 5-page, text-heavy PDF (not a trivial
+            // 1-pager) at ~7.7ms/attempt — used as the estimate basis so the
+            // time shown is honest about real-world speed, not an
+            // optimistic best case. Actual speed varies by device and file.
+            const MS_PER_ATTEMPT = 8;
+            const adv = el(`
+              <div style="margin-top:10px; padding:12px; border:1px solid var(--line); border-radius:10px;">
+                <div class="field">
+                  <label class="tamil">Password எத்தனை எண்கள் (digits) இருக்கும் என்று நினைக்கிறீர்கள்?</label>
+                  <select id="pdDigitLen">
+                    <option value="4">4 digits (10,000 combinations)</option>
+                    <option value="5">5 digits (1,00,000 combinations)</option>
+                    <option value="6">6 digits (10,00,000 combinations)</option>
+                  </select>
+                </div>
+                <div id="pdTimeEstimate" style="font-size:12px; color:var(--sub); margin:8px 0;"></div>
+                <button id="pdBruteBtn" class="btn tamil" style="width:100%;">🔢 Numeric Brute-Force தொடங்கு</button>
+              </div>
+            `);
+            body.appendChild(adv);
+            function updateEstimate(){
+              const len = Number(adv.querySelector('#pdDigitLen').value);
+              const total = Math.pow(10, len);
+              const ms = total * MS_PER_ATTEMPT;
+              const label = ms < 60000 ? `${Math.round(ms/1000)} வினாடிகள்` : ms < 3600000 ? `${Math.round(ms/60000)} நிமிடங்கள்` : `${(ms/3600000).toFixed(1)} மணி நேரம்`;
+              adv.querySelector('#pdTimeEstimate').textContent = `மொத்தம் ${total.toLocaleString('en-IN')} combinations — கிட்டத்தட்ட ${label} ஆகலாம் (device-ஐ பொறுத்து மாறுபடும்). இடையில் "நிறுத்து" பண்ணலாம்.`;
+            }
+            adv.querySelector('#pdDigitLen').addEventListener('change', updateEstimate);
+            updateEstimate();
+            adv.querySelector('#pdBruteBtn').onclick = ()=> doNumericBruteForce(Number(adv.querySelector('#pdDigitLen').value));
+          }
         }
       }
     }
@@ -8963,6 +8999,46 @@ TOOL_IMPL.pdfpwrecover = {
           mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
         } else {
           mountResult(body, `இந்த ${candidateList.length} guesses-ல் எதுவும் வேலை செய்யவில்லை — இது genuinely strong password-ஆக இருக்கலாம். Password நினைவு வந்ததும், அந்த file-ஐ சம்பந்தப்பட்ட software-லேயே திறந்து பாருங்கள்.`).style.background='#FDEDEC';
+        }
+      }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      running = false;
+    }
+    async function doNumericBruteForce(digitLen){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      const isOffice = ['xlsx','xls','docx','doc'].includes(ext);
+      const total = Math.pow(10, digitLen);
+      running = true; cancelled = false;
+      paint();
+      const prog = mountProgress(body);
+      const stopBtn = el(`<button class="btn secondary" style="margin-top:8px;">நிறுத்து</button>`);
+      stopBtn.onclick = ()=>{ cancelled = true; };
+      body.appendChild(stopBtn);
+      try{
+        prog.set(1,'Library ஏற்றுகிறது…');
+        const pdfMod = ext==='pdf' ? await import('https://esm.sh/@pdfsmaller/pdf-decrypt') : null;
+        const officeCryptoMod = isOffice ? await import('https://esm.sh/office-crypto') : null;
+        // Generated on-the-fly (not pre-built into one giant array) — a
+        // million-entry array of strings is wasteful when a simple padded
+        // counter does the same job with no extra memory.
+        for(let n=0; n<total; n++){
+          if(cancelled) break;
+          const pw = String(n).padStart(digitLen, '0');
+          if(n % 200 === 0) prog.set(1 + (n/total)*95, `முயற்சி ${n.toLocaleString('en-IN')}/${total.toLocaleString('en-IN')}…`);
+          try{
+            const decryptedBytes = await tryOnePassword(ext, pw, pdfMod, officeCryptoMod);
+            prog.set(100,'Done'); prog.remove(); stopBtn.remove();
+            const mime = ext==='pdf' ? 'application/pdf' : 'application/octet-stream';
+            downloadBlob(new Blob([decryptedBytes],{type:mime}), file.name.replace(/\.[^.]+$/,'')+'-unlocked.'+ext);
+            mountResult(body, `Password கண்டுபிடிக்கப்பட்டது: "${pw}" — Password நீக்கப்பட்ட file தயார்.`).style.background='#FFF6E5';
+            running = false;
+            return;
+          }catch(e){ /* wrong password — try the next one */ }
+        }
+        prog.remove(); stopBtn.remove();
+        if(cancelled){
+          mountResult(body, 'நிறுத்தப்பட்டது.').style.background='#FFF3E0';
+        } else {
+          mountResult(body, `இந்த ${total.toLocaleString('en-IN')} ${digitLen}-digit combinations-ல் எதுவும் வேலை செய்யவில்லை — password இது அளவு PIN இல்லை போலும்.`).style.background='#FDEDEC';
         }
       }catch(err){ prog.remove(); stopBtn.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       running = false;
