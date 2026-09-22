@@ -14696,23 +14696,39 @@ TOOL_IMPL.carrompuzzle = {
    with this file's code. Each file must be uploaded alongside index.html
    on GitHub for these to load. ============================= */
 function mountEmbeddedTool(container, filename, title, needsAuth){
-  const wrap = el(`<div style="margin:-4px -4px 0;"></div>`);
-  const frame = el(`<iframe src="${filename}" title="${title}" style="width:100%; height:82vh; min-height:600px; border:none; border-radius:14px; display:block; background:#fff;" loading="lazy"></iframe>`);
-  frame.onerror = ()=>{
-    wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Couldn't load this tool — make sure "${filename}" is uploaded in the same folder as this app on GitHub.</div>`;
-  };
-  if(needsAuth){
-    // This embedded tool calls credit-gated backend endpoints — it can't see
-    // this page's Supabase session on its own (iframes are sandboxed), so we
-    // hand it the current access token via postMessage once it's loaded, and
-    // again whenever the session refreshes.
-    frame.onload = ()=>{
-      const token = authState.session && authState.session.access_token;
-      if(token) frame.contentWindow.postMessage({ type:'jamtaris-auth', token }, '*');
-    };
-  }
-  wrap.appendChild(frame);
+  // This used to render an <iframe> inline within the app's normal tool-view
+  // chrome — visually it read as a cramped "box" rather than the tool's own
+  // full page. These are genuinely standalone, self-contained apps, so they
+  // open in a real new tab instead, giving them the whole browser window.
+  const wrap = el(`
+    <div style="text-align:center; padding:60px 20px;">
+      <div style="font-size:32px; margin-bottom:12px;">🔗</div>
+      <div style="font-size:15px; font-weight:800; margin-bottom:8px;">${title} புதிய tab-ல் திறக்கும்</div>
+      <div class="tamil" style="font-size:13px; color:var(--sub); margin-bottom:18px;">திறக்கவில்லை என்றால் (pop-up blocked), கீழே தட்டவும்.</div>
+      <button class="btn" id="__openEmbeddedBtn">🔗 ${title}-ஐ திற</button>
+    </div>
+  `);
   container.appendChild(wrap);
+  function openIt(){
+    const win = window.open(filename, '_blank');
+    if(needsAuth && win){
+      // Child window's load timing isn't directly observable from here
+      // (unlike an iframe's onload), so retry posting the token a few times
+      // over a couple of seconds rather than relying on a single message
+      // that might arrive before the child page has attached its listener.
+      const token = authState.session && authState.session.access_token;
+      if(token){
+        let attempts = 0;
+        const iv = setInterval(()=>{
+          attempts++;
+          try{ win.postMessage({ type:'jamtaris-auth', token }, '*'); }catch(e){}
+          if(attempts>=10 || win.closed) clearInterval(iv);
+        }, 400);
+      }
+    }
+  }
+  wrap.querySelector('#__openEmbeddedBtn').onclick = openIt;
+  openIt(); // auto-open right away — the button above is only a fallback if the browser blocked it
 }
 TOOL_IMPL.billquotation = { mount(container){ mountEmbeddedTool(container, 'bill-quotation-maker.html', 'Bill / Quotation Maker'); } };
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
