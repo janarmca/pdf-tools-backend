@@ -251,9 +251,7 @@ const TOOLS = [
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'gstinvoice', name:'GST Invoice Generator', desc:'CGST/SGST/IGST auto-calculated, proper invoice format', icon:'🧾', color:'#1E7145', cat:'business'},
-  {id:'quotepo', name:'Quotation / Performa / PO', desc:'Professional quotation, performa invoice, or purchase order — with HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
-  {id:'billquotation', name:'Bill / Quotation Maker', desc:'Real-time GST bill & quotation generator', icon:'🧾', color:'#2563EB', cat:'business'},
-  {id:'purchaseorder', name:'Purchase Order Generator', desc:'PO number, items, terms — vendor-ready PDF', icon:'📦', color:'#3752A6', cat:'business'},
+  {id:'quotepo', name:'Quotation / Bill / PO / Performa', desc:'Quotation, Tax Invoice (Bill), Performa Invoice, or Purchase Order — HSN/SAC tax summary, bank details & QR', icon:'📃', color:'#1A5276', cat:'business'},
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
   {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
@@ -13672,202 +13670,10 @@ TOOL_IMPL.paymentvoucher = {
   }
 };
 
-/* ===================== PURCHASE ORDER GENERATOR ===================== */
-TOOL_IMPL.purchaseorder = {
-  mount(container){
-    let items = [{ desc:'', qty:1, rate:0, gst:18 }];
-    const saved = loadBizProfile();
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Your business details are remembered automatically — you only need to type them once.</div>`));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Your Business (Buyer)</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="poCompany" autocomplete="off" value="${(saved.company||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="poCompanyAddr" autocomplete="off" value="${(saved.companyAddr||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field"><label>GSTIN</label><input type="text" id="poCompanyGstin" autocomplete="off" value="${(saved.companyGstin||'').replace(/"/g,'&quot;')}"></div>
-          <div class="field"><label>Destination</label><input type="text" id="poDest" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Vendor / Supplier</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field" style="grid-column:1/-1;"><label>Vendor Name</label><input type="text" id="poVendor" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Vendor Address</label><input type="text" id="poVendorAddr" autocomplete="off"></div>
-          <div class="field"><label>Vendor GSTIN</label><input type="text" id="poVendorGstin" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Order Details</div>`));
-      body.appendChild(el(`
-        <div class="opts tamil">
-          <div class="field"><label>PO Number</label><input type="text" id="poNo" autocomplete="off" value="PO-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="poDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>Mode of Transport</label><input type="text" id="poMode" autocomplete="off" placeholder="By Road"></div>
-          <div class="field"><label>Terms of Payment</label><input type="text" id="poPayTerms" autocomplete="off" placeholder="15 Days"></div>
-          <div class="field"><label>Terms of Delivery</label><input type="text" id="poDelTerms" autocomplete="off" placeholder="Immediate"></div>
-          <div class="field"><label>Freight</label><select id="poFreight"><option>To Pay</option><option>Paid</option><option>Including</option></select></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Items</div>`));
-      const itemsWrap = el(`<div></div>`);
-      items.forEach((it,idx)=>{
-        itemsWrap.appendChild(el(`
-          <div style="display:grid; grid-template-columns:2fr 0.6fr 0.9fr 0.7fr auto; gap:6px; margin-bottom:8px;">
-            <input type="text" placeholder="Item / description" data-f="desc" data-i="${idx}" value="${(it.desc||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Qty" data-f="qty" data-i="${idx}" value="${it.qty}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="Rate ₹" data-f="rate" data-i="${idx}" value="${it.rate}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <input type="number" placeholder="GST%" data-f="gst" data-i="${idx}" value="${it.gst}" min="0" style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px;">
-            <button data-remove="${idx}" style="background:none; border:none; color:var(--warn); font-size:16px; cursor:pointer;">✕</button>
-          </div>
-        `));
-      });
-      itemsWrap.addEventListener('input',(e)=>{
-        const f=e.target.getAttribute('data-f'), i=Number(e.target.getAttribute('data-i'));
-        if(f==null) return;
-        items[i][f] = (f==='desc') ? e.target.value : Number(e.target.value)||0;
-        updateLiveTotal();
-      });
-      itemsWrap.addEventListener('click',(e)=>{
-        const idx = e.target.getAttribute('data-remove'); if(idx==null) return;
-        items.splice(Number(idx),1); if(!items.length) items.push({desc:'',qty:1,rate:0,gst:18}); paint();
-      });
-      body.appendChild(itemsWrap);
-      const addBtn = el(`<button class="btn secondary" style="padding:7px 16px; font-size:12.5px;">+ Add item</button>`);
-      addBtn.onclick = ()=>{ items.push({desc:'',qty:1,rate:0,gst:18}); paint(); };
-      body.appendChild(addBtn);
-
-      const liveTotal = el(`<div style="margin-top:14px; padding:14px 16px; background:#F0F4FF; border-radius:12px; font-weight:800; font-size:14px; text-align:right;"></div>`);
-      body.appendChild(liveTotal);
-      function updateLiveTotal(){
-        const subtotal = items.reduce((s,it)=>s+it.qty*it.rate,0);
-        const gstAmt = items.reduce((s,it)=>s+(it.qty*it.rate*it.gst/100),0);
-        liveTotal.textContent = `Subtotal ₹${subtotal.toFixed(2)}  +  GST ₹${gstAmt.toFixed(2)}  =  Grand Total ₹${(subtotal+gstAmt).toFixed(2)}`;
-      }
-      updateLiveTotal();
-
-      body.appendChild(el(`<div class="opts one tamil" style="margin-top:14px;"><div class="field" style="grid-column:1/-1;"><label>Special Instructions (one per line, optional)</label><textarea id="poInstr" rows="3" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:12.5px; font-family:inherit;" placeholder="Please send a copy of the original invoice to office…">Please send the copy of original invoice to office
-Please notify us immediately if you are unable to ship as specified</textarea></div></div>`));
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📦 Generate PO</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const company = body.querySelector('#poCompany').value||'';
-      const companyAddr = body.querySelector('#poCompanyAddr').value||'';
-      const companyGstin = body.querySelector('#poCompanyGstin').value||'';
-      const dest = body.querySelector('#poDest').value||'';
-      const vendor = body.querySelector('#poVendor').value||'';
-      const vendorAddr = body.querySelector('#poVendorAddr').value||'';
-      const vendorGstin = body.querySelector('#poVendorGstin').value||'';
-      const no = body.querySelector('#poNo').value||'PO-001';
-      const date = body.querySelector('#poDate').value||'';
-      const mode = body.querySelector('#poMode').value||'';
-      const payTerms = body.querySelector('#poPayTerms').value||'';
-      const delTerms = body.querySelector('#poDelTerms').value||'';
-      const freight = body.querySelector('#poFreight').value||'';
-      const instructions = (body.querySelector('#poInstr').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
-      const validItems = items.filter(it=>it.desc.trim() && it.qty>0);
-      if(!validItems.length){ mountResult(body,'குறைந்தது ஒரு item-ஐயாவது நிரப்பவும்.').style.background='#FDEDEC'; return; }
-
-      saveBizProfile({ company, companyAddr, companyGstin }); // remembered for next time
-
-      const prog = mountProgress(body);
-      try{
-        prog.set(20,'Calculating…');
-        const rows = validItems.map(it=>{ const amount=it.qty*it.rate; const gstAmt=amount*it.gst/100; return {...it, amount, gstAmt}; });
-        const subtotal = rows.reduce((s,r)=>s+r.amount,0);
-        const totalGst = rows.reduce((s,r)=>s+r.gstAmt,0);
-        const cgst = totalGst/2, sgst = totalGst/2;
-        const grandTotal = subtotal+totalGst;
-
-        prog.set(40,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        let page = doc.addPage([595.28, 841.89]); // A4
-        let {width} = page.getSize();
-        let y = 800;
-        let t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        let line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
-
-        t('PURCHASE ORDER', 40, y, 20, rgb(0.13,0.29,0.62)); y-=10;
-        t('PO No: '+no, 400, y+10, 10); t('Date: '+date, 400, y-6, 10); y-=22;
-        line(y); y-=18;
-
-        t('Buyer', 40, y, 9, rgb(0.5,0.5,0.5)); t('Supplier', 310, y, 9, rgb(0.5,0.5,0.5)); y-=14;
-        t(company||'—', 40, y, 12); t(vendor||'—', 310, y, 12); y-=14;
-        t(companyAddr, 40, y, 9, rgb(0.4,0.4,0.4)); t(vendorAddr, 310, y, 9, rgb(0.4,0.4,0.4)); y-=13;
-        t('GSTIN: '+companyGstin, 40, y, 9); t('GSTIN: '+vendorGstin, 310, y, 9); y-=22;
-
-        t('Destination: '+dest, 40, y, 9); t('Mode of Transport: '+mode, 310, y, 9); y-=14;
-        t('Terms of Payment: '+payTerms, 40, y, 9); t('Terms of Delivery: '+delTerms, 310, y, 9); y-=14;
-        t('Freight: '+freight, 40, y, 9); y-=20;
-        line(y); y-=18;
-
-        const cols=[40,270,330,390,450,510];
-        const drawItemHeader = ()=>{
-          ['SL','Description','Qty','Rate','GST%','Amount'].forEach((h,i)=> t(h, cols[i], y, 9, rgb(0.5,0.5,0.5)));
-          y-=8; line(y); y-=16;
-        };
-        // Adds a fresh continuation page and redraws the column headers —
-        // replaces the old `if(y<160) return;` which silently discarded every
-        // remaining item once a PO ran out of room on page 1.
-        const addContinuationPage = ()=>{
-          page = doc.addPage([595.28, 841.89]);
-          ({width} = page.getSize());
-          y = 800;
-          t = (txt,x,yy,size=10,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-          line = (yy,color)=> page.drawLine({start:{x:40,y:yy},end:{x:width-40,y:yy},thickness:1,color:color||rgb(0.8,0.8,0.8)});
-          t('PURCHASE ORDER (contd.) — '+no, 40, y, 13, rgb(0.13,0.29,0.62)); y-=26;
-          drawItemHeader();
-        };
-        drawItemHeader();
-        rows.forEach((r,i)=>{
-          if(y<160){ addContinuationPage(); }
-          t(String(i+1), cols[0], y, 9.5); t(r.desc.slice(0,34), cols[1], y, 9.5);
-          t(String(r.qty), cols[2], y, 9.5); t('₹'+r.rate.toFixed(2), cols[3], y, 9.5);
-          t(r.gst+'%', cols[4], y, 9.5); t('₹'+r.amount.toFixed(2), cols[5], y, 9.5);
-          y-=18;
-        });
-        // Totals block also needs room — start a fresh page rather than overlap text.
-        if(y<200){ addContinuationPage(); }
-        y-=6; line(y); y-=18;
-
-        t('Subtotal', 400, y, 10); t('₹'+subtotal.toFixed(2), 500, y, 10); y-=15;
-        t('CGST', 400, y, 10); t('₹'+cgst.toFixed(2), 500, y, 10); y-=15;
-        t('SGST', 400, y, 10); t('₹'+sgst.toFixed(2), 500, y, 10); y-=15;
-        line(y, rgb(0.6,0.6,0.6)); y-=16;
-        t('Grand Total', 400, y, 12, rgb(0.13,0.29,0.62)); t('₹'+grandTotal.toFixed(2), 500, y, 12, rgb(0.13,0.29,0.62)); y-=20;
-        t('Amount in Words: Rupees '+numberToWordsINR(grandTotal)+' Only', 40, y, 9, rgb(0.4,0.4,0.4)); y-=26;
-
-        if(instructions.length){
-          if(y<120){ addContinuationPage(); }
-          t('Special Instructions:', 40, y, 10, rgb(0.13,0.29,0.62)); y-=14;
-          instructions.forEach((ins,i)=>{
-            if(y<60){ addContinuationPage(); }
-            t((i+1)+'. '+ins.slice(0,90), 40, y, 8.5, rgb(0.4,0.4,0.4)); y-=13;
-          });
-          y-=10;
-        }
-        y = Math.max(y, 70);
-        line(y+30);
-        ['Prepared By','Checked By','Authorized Signatory'].forEach((lbl,i)=>{
-          t(lbl, 40+i*180, y+10, 8.5, rgb(0.5,0.5,0.5));
-        });
-
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `purchase-order-${no}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `PO generated — Grand Total ₹${grandTotal.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
+/* Purchase Order Generator and Bill/Quotation Maker were removed and merged
+   into quotepo (Quotation/Bill/PO/Performa) — that tool already supported
+   all 4 document types with richer GST/HSN/SAC/bank-details features than
+   either standalone version had. */
 
 /* ===================== EXPENSE TRACKER TEMPLATE (Excel) ===================== */
 TOOL_IMPL.expensetracker = {
@@ -14733,7 +14539,6 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
   wrap.querySelector('#__openEmbeddedBtn').onclick = openIt;
   openIt(); // auto-open right away — the button above is only a fallback if the browser blocked it
 }
-TOOL_IMPL.billquotation = { mount(container){ mountEmbeddedTool(container, 'bill-quotation-maker.html', 'Bill / Quotation Maker'); } };
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
