@@ -473,6 +473,36 @@ input[type=color]{width:36px;height:28px;padding:2px;border:1px solid #d7dee8;
 
 <script>
 /* ============================================================================
+   0. REAL AI BACKEND (added — this tool previously labeled its "AI suggest"
+      buttons as AI but only pulled from the static AI_LIB template library
+      below, keyed by job-title keyword match. That's kept as an honest,
+      free, always-available fallback (used when not signed in, or if the
+      real call fails), but signed-in users now get genuine AI suggestions
+      grounded in what they've actually typed, not a generic template.
+   ============================================================================ */
+const BACKEND_URL = 'https://all-in-one-tools-22743935825.asia-south1.run.app';
+let __authToken = null;
+window.addEventListener('message', (e)=>{
+  if(e.data && e.data.type === 'jamtaris-auth' && e.data.token) __authToken = e.data.token;
+});
+async function callRealAI(prompt){
+  if(!__authToken) return null; // not signed in (or opened directly, not via the main app) — caller falls back to AI_LIB
+  try{
+    const form = new FormData();
+    form.append('question', prompt);
+    form.append('toolId', 'resumebuilder');
+    const res = await fetch(BACKEND_URL + '/api/ai/ask', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + __authToken },
+      body: form
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    return (data.answer || '').trim() || null;
+  }catch(e){ return null; } // network hiccup, out of credits, etc. — fall back silently rather than blocking the user's workflow
+}
+
+/* ============================================================================
    1. AI CONTENT LIBRARY
    ============================================================================ */
 const FALLBACK = {
@@ -1792,31 +1822,43 @@ function clearJD(){
 /* ============================================================================
    16. AI ACTIONS
    ============================================================================ */
-function aiSummary(){
-  const key = matchRole(state.contact.jobTitle);
-  const text = key ? AI_LIB[key].summary : FALLBACK.summary;
+async function aiSummary(){
+  const jobTitle = state.contact.jobTitle || '';
+  toast('Thinking…');
+  const skillsHint = state.skills.length ? ` Relevant skills: ${state.skills.slice(0,6).join(', ')}.` : '';
+  const real = await callRealAI(`Write a genuinely personalized, 2-3 sentence professional resume summary for a "${jobTitle || 'professional'}".${skillsHint} No generic filler, no placeholder brackets, output only the summary text with no preamble.`);
+  const key = matchRole(jobTitle);
+  const text = real || (key ? AI_LIB[key].summary : FALLBACK.summary);
   state.summary = text; $("f_summary").value = text;
   render(); saveDraft();
-  toast(key ? `Summary generated for “${key}”` : "Generic summary generated");
+  toast(real ? 'AI summary generated (1 credit)' : (key ? `Summary generated for “${key}”` : "Generic summary generated"));
 }
-function aiBullets(expId){
+async function aiBullets(expId){
   const exp = state.experience.find(e => e.id === expId);
   if(!exp) return;
-  const key = matchRole(exp.jobTitle || state.contact.jobTitle);
-  const lines = key ? AI_LIB[key].bullets.slice() : FALLBACK.bullets.slice();
+  const jobTitle = exp.jobTitle || state.contact.jobTitle || '';
+  toast('Thinking…');
+  const real = await callRealAI(`Suggest 3-4 short, resume-style bullet points (achievements/responsibilities) for a "${jobTitle}"${exp.company ? ' at '+exp.company : ''} role. Each bullet on its own line, starting with an action verb, no numbering. Output only the bullet lines, nothing else.`);
+  const key = matchRole(jobTitle);
+  const lines = real ? real.split('\n').map(l=>l.replace(/^[-•*]\s*/,'').trim()).filter(Boolean) : (key ? AI_LIB[key].bullets.slice() : FALLBACK.bullets.slice());
   exp.bullets = lines.map(l => ({ id: uid(), html: escapeText(l) }));
   renderExperienceList(); render(); saveDraft();
-  toast(key ? `Bullets for “${key}”` : "Generic bullets generated");
+  toast(real ? 'AI bullets generated (1 credit)' : (key ? `Bullets for “${key}”` : "Generic bullets generated"));
 }
-function aiSkills(){
-  const key = matchRole(state.contact.jobTitle);
-  const skills = key ? AI_LIB[key].skills.slice() : FALLBACK.skills.slice();
+async function aiSkills(){
+  const jobTitle = state.contact.jobTitle || '';
+  toast('Thinking…');
+  const existingHint = state.skills.length ? ` They already have: ${state.skills.join(', ')} — suggest different, complementary ones.` : '';
+  const real = await callRealAI(`Suggest 6-8 relevant resume skills (comma-separated, no numbering, no extra commentary) for a "${jobTitle || 'professional'}" role.${existingHint} Output only the comma-separated list.`);
+  const key = matchRole(jobTitle);
+  const skills = real ? real.split(',').map(s=>s.trim()).filter(Boolean) : (key ? AI_LIB[key].skills.slice() : FALLBACK.skills.slice());
   const merged = state.skills.slice();
   skills.forEach(s => { if(!merged.some(x => x.toLowerCase() === s.toLowerCase())) merged.push(s); });
   state.skills = merged;
   renderSkillTags(); render(); saveDraft();
-  toast(key ? `Skills for “${key}”` : "Generic skills suggested");
+  toast(real ? 'AI skills suggested (1 credit)' : (key ? `Skills for “${key}”` : "Generic skills suggested"));
 }
+
 
 /* ============================================================================
    17. EXPORT / IMPORT
