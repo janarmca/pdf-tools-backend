@@ -952,7 +952,7 @@ function renderSettingsPage(){
     // ---- Support ----
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
-      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v4'); }catch(e){} maybeShowDiscoverModal(true); }],
+      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v5'); }catch(e){} maybeShowDiscoverModal(true); }],
       ['📝 Blog', ()=> window.open('blog/','_blank')],
       ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
       ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
@@ -977,19 +977,19 @@ function renderSettingsPage(){
 function maybeShowDiscoverModal(forceShow){
   if(!forceShow){
     let shown = null;
-    try{ shown = localStorage.getItem('pdfToolsDiscoverShown_v4'); }catch(e){}
+    try{ shown = localStorage.getItem('pdfToolsDiscoverShown_v5'); }catch(e){}
     if(shown) return;
   }
-  try{ localStorage.setItem('pdfToolsDiscoverShown_v4','1'); }catch(e){}
+  try{ localStorage.setItem('pdfToolsDiscoverShown_v5','1'); }catch(e){}
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
   const cards = [
-    ['✨ NEW', '111+ tools, all in one place', 'PDF, Image, Video, Business/GST, Education, and Games — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
+    ['✨ NEW', '112+ tools, all in one place', 'PDF, Image, Video, Business/GST, Education, and Games — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
+    ['📋 UPGRADED', 'Resume Builder — now with real AI', 'JD matching, drag-drop reordering, multiple saved versions, undo/redo, and genuine AI-written summaries/bullets/skills — not a template.', '📋'],
     ['🔐 NEW', 'Forgot your PDF/Excel/Word password?', 'Recover it — tries common passwords, your personal details, name+number combinations, and even your own remembered guesses.', '🔍'],
     ['🧮 NEW', 'EMI, Income Tax, Age & % Calculators', 'EMI/Loan (with repayment schedule), Income Tax (Old vs New regime), Age, and Percentage calculators — all free, instant.', '🧮'],
     ['🤖 AI', '7 AI tools that read your documents', 'Ask AI About Document, Summarize, Translate, Handwriting to Text, Receipt to Excel, Resume Review, and Compare Excel Files.', '💬'],
     ['🆕 NEW', 'AI Image Upscaler — genuinely free', 'A real neural network sharpens and upscales your photos up to 4x, running entirely in your browser — no per-image charge.', '🔍'],
-    ['🌐 NEW', 'Text → HTML for large files', 'Turns a .txt file into a clean, readable HTML page — reads it in chunks so even large files work smoothly.', '📄'],
-    ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Quotation/Performa/PO, Salary Slip, Payment Voucher, Rent Receipt, Prescription Pad — all free.', '🧾'],
+    ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Quotation/Bill/PO/Performa, Salary Slip, Payment Voucher, Rent Receipt, Prescription Pad — all free.', '🧾'],
     ['🔒 PRIVATE', 'Most tools stay on your device', 'PDF, Image, and Business tools run fully in your browser — only AI tools and Fast Server Mode reach our server.', '🛡️'],
   ];
   const card = el(`
