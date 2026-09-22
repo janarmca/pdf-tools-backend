@@ -282,6 +282,7 @@ const TOOLS = [
   {id:'imgpassport', name:'Passport / ID Photo', desc:'Standard size + background + 4-up print sheet', icon:'🪪', color:'#5B2C6F', cat:'image', cost:0},
   {id:'imgbatchresize', name:'Batch Resize Images', desc:'Resize many images to one size at once', icon:'📐', color:'#7D3C98', cat:'image', cost:0},
   {id:'imgborder', name:'Add Border to Image', desc:'Add a frame/border and rounded corners', icon:'🖼️', color:'#935116', cat:'image', cost:0},
+  {id:'imgfilters', name:'Photo Filters', desc:'Vivid, B&W, Sepia, Vintage, Cool, Warm, Vignette — pick a look, adjust intensity', icon:'🎞️', color:'#7B2CBF', cat:'image', cost:0},
   {id:'exifremove', name:'Strip Photo Privacy Data', desc:'Remove GPS/camera info (EXIF)', icon:'🛡️', color:'#1F6F78', cat:'image', cost:0},
   {id:'imgwatermark', name:'Watermark an Image', desc:'Stamp text/logo onto a photo', icon:'💧', color:'#2980B9', cat:'image', cost:0},
   {id:'imgcollage', name:'Image Collage', desc:'Combine multiple photos into one grid', icon:'🖇️', color:'#B5482A', cat:'image', cost:0},
@@ -8636,6 +8637,135 @@ TOOL_IMPL.imgborder = {
       ctx.arcTo(x,y+h,x,y,r);
       ctx.arcTo(x,y,x+w,y,r);
       ctx.closePath();
+    }
+    paint();
+  }
+};
+
+/* ===================== PHOTO FILTERS ===================== */
+// Canva-inspired preset gallery — filters use the browser's native canvas
+// ctx.filter (CSS filter syntax: brightness/contrast/saturate/sepia/
+// grayscale/hue-rotate), which is fast and reliable rather than a manual
+// per-pixel loop. Vignette is the one preset that needs a manual overlay
+// (a radial gradient darkening the edges), since ctx.filter has no
+// vignette primitive.
+const IMG_FILTER_PRESETS = [
+  { key:'original', label:'Original', css:'none' },
+  { key:'vivid',    label:'Vivid',    css:'saturate(160%) contrast(112%)' },
+  { key:'bw',       label:'B&W',      css:'grayscale(100%)' },
+  { key:'sepia',    label:'Sepia',    css:'sepia(80%)' },
+  { key:'vintage',  label:'Vintage',  css:'sepia(35%) contrast(92%) brightness(96%) saturate(85%)', vignette:true },
+  { key:'cool',     label:'Cool',     css:'saturate(115%) hue-rotate(-8deg) brightness(102%)' },
+  { key:'warm',     label:'Warm',     css:'saturate(115%) hue-rotate(8deg) brightness(103%) sepia(10%)' },
+  { key:'vignette', label:'Vignette', css:'none', vignette:true },
+];
+function drawFilteredImage(ctx, img, w, h, preset, intensity){
+  // Draw the plain original first, then a filtered copy on top blended by
+  // intensity (0-1) — this is how the "adjust the strength" slider works,
+  // since ctx.filter itself has no partial-strength concept.
+  ctx.clearRect(0,0,w,h);
+  ctx.filter = 'none'; ctx.globalAlpha = 1;
+  ctx.drawImage(img,0,0,w,h);
+  if(preset.css !== 'none' && intensity > 0){
+    ctx.filter = preset.css; ctx.globalAlpha = intensity;
+    ctx.drawImage(img,0,0,w,h);
+    ctx.filter = 'none'; ctx.globalAlpha = 1;
+  }
+  if(preset.vignette && intensity > 0){
+    const grad = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.35, w/2,h/2, Math.max(w,h)*0.72);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, `rgba(0,0,0,${0.55*intensity})`);
+    ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+  }
+}
+TOOL_IMPL.imgfilters = {
+  mount(container){
+    let file = null, img = null, selectedKey = 'vivid';
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">ஒரு look-ஐ தேர்ந்தெடுக்கவும் — கீழே intensity slider-ஆல் அதன் strength-ஐ சரிசெய்யலாம்.</div>`));
+      mountUploader(body, { accept:'image/*', label:'படத்தை drag & drop or tap', sublabel:'',
+        onAdd: async (fl)=>{
+          file = fl[0];
+          const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+          img = new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataUrl; });
+          selectedKey = 'vivid';
+          paint();
+        }});
+      if(!file || !img) return;
+      mountFileList(body, [file], ()=>{ file=null; img=null; paint(); });
+
+      const gallery = el(`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; margin:14px 0;"></div>`);
+      const THUMB = 130;
+      IMG_FILTER_PRESETS.forEach(preset=>{
+        const scale = Math.min(THUMB/img.naturalWidth, THUMB/img.naturalHeight);
+        const tw = Math.round(img.naturalWidth*scale), th = Math.round(img.naturalHeight*scale);
+        const thumbCanvas = document.createElement('canvas'); thumbCanvas.width=tw; thumbCanvas.height=th;
+        drawFilteredImage(thumbCanvas.getContext('2d'), img, tw, th, preset, 1);
+        const isActive = preset.key === selectedKey;
+        const card = el(`
+          <button style="border:2px solid ${isActive?'var(--brand-dark)':'var(--line)'}; border-radius:10px; padding:4px; background:#fff; cursor:pointer; text-align:center;">
+            <div style="border-radius:6px; overflow:hidden; margin-bottom:4px;"></div>
+            <div style="font-size:10.5px; font-weight:${isActive?'900':'600'};">${preset.label}</div>
+          </button>
+        `);
+        card.querySelector('div').appendChild(thumbCanvas);
+        thumbCanvas.style.width = '100%'; thumbCanvas.style.display = 'block';
+        card.onclick = ()=>{ selectedKey = preset.key; paint(); };
+        gallery.appendChild(card);
+      });
+      body.appendChild(gallery);
+
+      const opts = el(`
+        <div class="opts tamil">
+          <div class="field">
+            <label>Intensity <span id="ifIntLbl">100</span>%</label>
+            <input type="range" id="ifIntensity" min="0" max="100" value="100">
+          </div>
+        </div>
+      `);
+      body.appendChild(opts);
+      const previewWrap = el(`<div style="margin:10px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden;"></div>`);
+      const previewCanvas = document.createElement('canvas');
+      const PREVIEW_MAX = 480;
+      const pscale = Math.min(1, PREVIEW_MAX/Math.max(img.naturalWidth, img.naturalHeight));
+      previewCanvas.width = Math.round(img.naturalWidth*pscale); previewCanvas.height = Math.round(img.naturalHeight*pscale);
+      previewCanvas.style.width = '100%'; previewCanvas.style.display = 'block';
+      previewWrap.appendChild(previewCanvas);
+      body.appendChild(previewWrap);
+      function updatePreview(){
+        const preset = IMG_FILTER_PRESETS.find(p=>p.key===selectedKey);
+        const intensity = Number(opts.querySelector('#ifIntensity').value)/100;
+        drawFilteredImage(previewCanvas.getContext('2d'), img, previewCanvas.width, previewCanvas.height, preset, intensity);
+      }
+      opts.querySelector('#ifIntensity').addEventListener('input', (e)=>{
+        opts.querySelector('#ifIntLbl').textContent = e.target.value;
+        updatePreview();
+      });
+      updatePreview();
+
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn tamil">🎞️ Filter Apply பண்ணி Download</button>`);
+      btn.onclick = doApply;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doApply(){
+      const preset = IMG_FILTER_PRESETS.find(p=>p.key===selectedKey);
+      const intensity = Number(body.querySelector('#ifIntensity').value)/100;
+      const prog = mountProgress(body);
+      try{
+        prog.set(30,'Processing…');
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+        drawFilteredImage(canvas.getContext('2d'), img, canvas.width, canvas.height, preset, intensity);
+        prog.set(80,'Preparing…');
+        const blob = await new Promise(res=> canvas.toBlob(res,'image/jpeg',0.94));
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+`-${preset.key}.jpg`);
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `"${preset.label}" filter apply செய்யப்பட்டு downloaded.`);
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
   }
