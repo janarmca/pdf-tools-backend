@@ -6057,6 +6057,26 @@ TOOL_IMPL.imgcrop = {
         mountFileList(body, [file], ()=>{ file=null; previewUrl=null; paint(); });
         body.appendChild(el(`<div class="note tamil">Crop do பெட்டியை இழு — வேண்டாம் எனில் முழு the imageயும் அப்படியே Resize மட்டும் can be done.</div>`));
         selector = mountRectSelector(body, previewUrl, {fx0:0.05, fy0:0.05, fx1:0.95, fy1:0.95});
+        // Aspect-ratio presets — snaps to a centered rectangle of that ratio
+        // rather than leaving freeform-drag as the only option, which was a
+        // genuine gap: people cropping for Instagram (1:1), a video thumbnail
+        // (16:9), or a passport-style photo shouldn't have to eyeball it.
+        const ratios = [['Free',null],['1:1',1],['4:3',4/3],['16:9',16/9],['3:4',3/4],['9:16',9/16],['Passport 35:45',35/45]];
+        const ratioRow = el(`<div class="btn-row" style="margin-bottom:6px; flex-wrap:wrap;"></div>`);
+        ratios.forEach(([label, ratio])=>{
+          const b = el(`<button class="btn secondary" style="padding:7px 14px; font-size:12px;">${label}</button>`);
+          b.onclick = ()=>{
+            if(ratio===null) return; // "Free" — leave the current selection as-is, just a label for clarity
+            // Largest centered rectangle of this ratio that fits inside the image
+            const imgRatio = natW/natH;
+            let rw, rh;
+            if(ratio > imgRatio){ rw = natW; rh = natW/ratio; } else { rh = natH; rw = natH*ratio; }
+            const fx0 = (natW-rw)/2/natW, fy0 = (natH-rh)/2/natH;
+            selector.setRect({ fx0, fy0, fx1: fx0+rw/natW, fy1: fy0+rh/natH });
+          };
+          ratioRow.appendChild(b);
+        });
+        body.appendChild(ratioRow);
         const opts = el(`
           <div class="opts tamil">
             <div class="field">
@@ -6402,6 +6422,18 @@ TOOL_IMPL.imgcollage = {
               <label>இடைவெளி (px)</label>
               <input type="number" id="clGap" value="10" min="0" max="60">
             </div>
+            <div class="field">
+              <label>Cell அளவு</label>
+              <select id="clCellSize">
+                <option value="400">சிறியது (400px)</option>
+                <option value="600" selected>நடுத்தரம் (600px)</option>
+                <option value="900">பெரியது (900px)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>பின்னணி நிறம்</label>
+              <input type="color" id="clBgColor" value="#ffffff" style="width:100%; height:38px; padding:2px; cursor:pointer;">
+            </div>
           </div>
         `);
         body.appendChild(opts);
@@ -6416,6 +6448,8 @@ TOOL_IMPL.imgcollage = {
       if(files.length<2){ mountResult(body,'குறைந்தது 2 the imagesயாவது add.').style.background='#FDEDEC'; return; }
       const cols = Math.max(1, Math.min(6, Number(body.querySelector('#clCols').value)||2));
       const gap = Math.max(0, Number(body.querySelector('#clGap').value)||10);
+      const cellW = Number(body.querySelector('#clCellSize').value)||600, cellH = cellW; // fixed square cell box; images fit inside via 'contain'
+      const bgColor = body.querySelector('#clBgColor').value||'#ffffff';
       const prog = mountProgress(body);
       try{
         prog.set(10,'the images Reading…');
@@ -6427,12 +6461,11 @@ TOOL_IMPL.imgcollage = {
           prog.set(10 + (i/files.length)*40, `Reading ${i+1}/${files.length}…`);
         }
         const rows = Math.ceil(imgs.length/cols);
-        const cellW = 600, cellH = 600; // fixed cell box; images fit inside via 'contain'
         const canvas = document.createElement('canvas');
         canvas.width = cols*cellW + (cols+1)*gap;
         canvas.height = rows*cellH + (rows+1)*gap;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = bgColor; ctx.fillRect(0,0,canvas.width,canvas.height);
         imgs.forEach((img,i)=>{
           const col = i%cols, row = Math.floor(i/cols);
           const cx = gap + col*(cellW+gap), cy = gap + row*(cellH+gap);
