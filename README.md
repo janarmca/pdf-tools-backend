@@ -57,7 +57,7 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 3. Re-minify and ship.
 
 ## Known follow-ups
-- **`server.js` needs a Cloud Run redeploy** to go live with: (1) Text-to-Image switched from Gemini to Together.ai's FLUX.1-schnell (~25x cheaper, ~Rs 0.26/image vs ~Rs 6.41 — needs `TOGETHER_API_KEY` env var set, get one at together.ai with $5 minimum prepaid credit), (2) the 3→5 credit price fix. Frontend changes are already live.
+- **`server.js` needs a Cloud Run redeploy** to go live with: (1) Text-to-Image now on Cloudflare Workers AI's FLUX.1-schnell — genuinely free, ~10,000 Neurons/day, **no credit card needed** (needs `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` env vars — same Cloudflare account as the Pages frontend), (2) the 3→5 credit price fix (still applies — margin is now even larger). Frontend changes are already live.
 - PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
 
 ## Recent major changes
