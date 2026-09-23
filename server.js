@@ -436,19 +436,22 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
-// POST /api/ai/image — Text-to-Image generation (Gemini 3.1 Flash Image)
+// POST /api/ai/image — Text-to-Image generation (Together.ai — FLUX.1-schnell)
 // body: { prompt: string }
-// Priced at 5 credits (not the flat 1-credit rate) since Gemini image output
-// genuinely costs ~$0.067/image (~Rs 6.41). At the bulk 100-credit pack rate
-// (Rs 1.79/credit), 3 credits (Rs 5.37) was actually a LOSS on every image -
-// verified and raised to 5 credits (Rs 8.95 at the same rate) for a safe
-// margin, rather than silently eating the difference.
+// Switched from Gemini (gemini-3.1-flash-image, ~$0.067/image = ~Rs 6.41,
+// AND required Google Cloud billing with a ~Rs 2000 verification hold) to
+// Together.ai's FLUX.1-schnell (~$0.0027/image = ~Rs 0.26 — about 25x
+// cheaper), which only needs a one-time $5 minimum prepaid credit purchase
+// (docs.together.ai/docs/billing) — a far lower barrier than Google Cloud's
+// billing setup. Priced at 5 credits to the user (kept as-is after the
+// earlier Gemini-cost-driven raise from 3->5) since the margin is now large
+// either way; could safely be lowered again if desired.
 // ============================================================
 app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
   const CREDIT_COST = 5;
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
+    if (!process.env.TOGETHER_API_KEY) {
+      return res.status(501).json({ error: 'AI feature not set up yet — add TOGETHER_API_KEY in Cloud Run env vars (get one at together.ai, add at least $5 credit).' });
     }
     const prompt = (req.body.prompt || '').trim();
     if (!prompt) return res.status(400).json({ error: 'Prompt தேவை.' });
@@ -456,21 +459,27 @@ app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
     const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      }
-    );
-    const geminiJson = await geminiRes.json();
-    if (!geminiRes.ok) throw new Error(geminiJson.error?.message || 'Image generation failed');
-    const responseParts = geminiJson.candidates?.[0]?.content?.parts || [];
-    const imagePart = responseParts.find(p => p.inlineData || p.inline_data);
-    if (!imagePart) throw new Error('Model did not return an image — try rephrasing the prompt.');
-    const inline = imagePart.inlineData || imagePart.inline_data;
-    res.json({ ok: true, imageBase64: inline.data, mimeType: inline.mimeType || inline.mime_type || 'image/png' });
+    const togetherRes = await fetch('https://api.together.xyz/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'black-forest-labs/FLUX.1-schnell',
+        prompt,
+        width: 1024,
+        height: 1024,
+        steps: 4, // schnell is a distilled, few-step model — 4 is Together's documented recommended step count
+        n: 1,
+        response_format: 'b64_json'
+      })
+    });
+    const togetherJson = await togetherRes.json();
+    if (!togetherRes.ok) throw new Error(togetherJson.error?.message || togetherJson.error || 'Image generation failed');
+    const imageData = togetherJson.data?.[0]?.b64_json;
+    if (!imageData) throw new Error('Model did not return an image — try rephrasing the prompt.');
+    res.json({ ok: true, imageBase64: imageData, mimeType: 'image/png' });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
