@@ -5658,7 +5658,7 @@ TOOL_IMPL.qrgen = {
 /* imgcrop — moved to category-image.js (lazy-loaded) */
 TOOL_IMPL.pdfcrop = {
   mount(container){
-    let file = null, previewUrl = null;
+    let file = null, previewUrl = null, previewCanvas = null;
     let selector = null;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
@@ -5672,18 +5672,52 @@ TOOL_IMPL.pdfcrop = {
           const viewport = page.getViewport({scale: Math.min(1.6, 720/page.getViewport({scale:1}).width)});
           const canvas = document.createElement('canvas'); canvas.width=viewport.width; canvas.height=viewport.height;
           await page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
+          previewCanvas = canvas; // kept (not just the dataURL) so auto-detect can read pixel data
           previewUrl = canvas.toDataURL('image/jpeg',0.85);
           paint();
         }});
       if(file && previewUrl){
-        mountFileList(body, [file], ()=>{ file=null; previewUrl=null; paint(); });
+        mountFileList(body, [file], ()=>{ file=null; previewUrl=null; previewCanvas=null; paint(); });
         selector = mountRectSelector(body, previewUrl, {fx0:0.06, fy0:0.06, fx1:0.94, fy1:0.94});
+        const autoRow = el(`<div class="btn-row" style="margin:8px 0;"></div>`);
+        const autoBtn = el(`<button class="btn secondary tamil">🔍 Auto-detect Margins (வெற்று space தானாக கண்டறி)</button>`);
+        autoBtn.onclick = doAutoDetect;
+        autoRow.appendChild(autoBtn);
+        body.appendChild(autoRow);
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">📐 Crop Do</button>`);
         btn.onclick = doCrop;
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    function doAutoDetect(){
+      // Scans page 1's rendered pixels from each edge inward for the first
+      // row/column that isn't near-white — the standard technique every
+      // competitor's "auto-crop"/"auto-detect margins" feature uses.
+      const ctx = previewCanvas.getContext('2d');
+      const {width:w, height:h} = previewCanvas;
+      const data = ctx.getImageData(0,0,w,h).data;
+      const THRESHOLD = 245; // a pixel counts as "content" if any channel dips below this — tolerant of slight JPEG noise in true-white margins
+      function isContentPixel(x,y){
+        const i = (y*w+x)*4;
+        return data[i] < THRESHOLD || data[i+1] < THRESHOLD || data[i+2] < THRESHOLD;
+      }
+      function rowHasContent(y){ for(let x=0;x<w;x+=2) if(isContentPixel(x,y)) return true; return false; } // step by 2px — plenty accurate, halves the scan cost
+      function colHasContent(x){ for(let y=0;y<h;y+=2) if(isContentPixel(x,y)) return true; return false; }
+      let top=0, bottom=h-1, left=0, right=w-1;
+      while(top<h-1 && !rowHasContent(top)) top++;
+      while(bottom>top && !rowHasContent(bottom)) bottom--;
+      while(left<w-1 && !colHasContent(left)) left++;
+      while(right>left && !colHasContent(right)) right--;
+      if(bottom<=top || right<=left){
+        mountResult(body, 'இந்த பக்கத்தில் content கண்டறிய முடியவில்லை — completely வெற்றாக இருக்கலாம்.').style.background='#FFF3E0';
+        return;
+      }
+      const pad = Math.round(Math.min(w,h)*0.015); // a small padding around the detected content, matching "trim tight with a small padding"
+      const fx0 = Math.max(0,(left-pad))/w, fx1 = Math.min(w,(right+pad))/w;
+      const fy0 = Math.max(0,(top-pad))/h, fy1 = Math.min(h,(bottom+pad))/h;
+      selector.setRect({fx0, fy0, fx1, fy1});
     }
     async function doCrop(){
       const rect = selector.getRect();
