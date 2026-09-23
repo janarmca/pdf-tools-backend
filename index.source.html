@@ -2679,14 +2679,58 @@ TOOL_IMPL.split = {
       }
       mountFileList(body, [file], ()=>{ file=null; paint(); });
       const opts = el(`
-        <div class="opts one tamil">
-          <div class="field">
-            <label>Page range (e.g. 1-3, 5, 7-9) — out of ${pageCount} பக்கங்கள்</label>
-            <input type="text" id="rangeInput" placeholder="1-${pageCount}" value="1-${pageCount}">
+        <div>
+          <div class="opts one tamil">
+            <div class="field">
+              <label>Split முறை</label>
+              <select id="splitMode">
+                <option value="range" selected>ஒரு Range மட்டும் Extract (single file)</option>
+                <option value="everyN">ஒவ்வொரு N பக்கங்களுக்கும் ஒரு file</option>
+                <option value="equalParts">N சம பாகங்களாக பிரி</option>
+                <option value="multiRange">பல Ranges — ஒவ்வொன்றும் தனி file</option>
+              </select>
+            </div>
           </div>
+          <div id="splitModeField" class="opts one tamil"></div>
         </div>
       `);
       body.appendChild(opts);
+      const modeField = opts.querySelector('#splitModeField');
+      function renderModeField(){
+        const mode = opts.querySelector('#splitMode').value;
+        modeField.innerHTML = '';
+        if(mode==='range'){
+          modeField.appendChild(el(`
+            <div class="field">
+              <label>Page range (e.g. 1-3, 5, 7-9) — out of ${pageCount} பக்கங்கள்</label>
+              <input type="text" id="rangeInput" placeholder="1-${pageCount}" value="1-${pageCount}">
+            </div>
+          `));
+        } else if(mode==='everyN'){
+          modeField.appendChild(el(`
+            <div class="field">
+              <label>எத்தனை பக்கங்களுக்கு ஒரு file (out of ${pageCount})</label>
+              <input type="number" id="everyNInput" min="1" max="${pageCount}" value="${Math.min(10,pageCount)}">
+            </div>
+          `));
+        } else if(mode==='equalParts'){
+          modeField.appendChild(el(`
+            <div class="field">
+              <label>எத்தனை சம பாகங்கள் (out of ${pageCount} பக்கங்கள்)</label>
+              <input type="number" id="equalPartsInput" min="2" max="${pageCount}" value="${Math.min(4,Math.max(2,pageCount))}">
+            </div>
+          `));
+        } else if(mode==='multiRange'){
+          modeField.appendChild(el(`
+            <div class="field">
+              <label>Ranges — semicolon (;) பிரித்து — out of ${pageCount} பக்கங்கள்</label>
+              <input type="text" id="multiRangeInput" placeholder="e.g. 1-3; 5-7; 10">
+            </div>
+          `));
+        }
+      }
+      renderModeField();
+      opts.querySelector('#splitMode').addEventListener('change', renderModeField);
       const row = el(`<div class="btn-row"></div>`);
       const btn = el(`<button class="btn tamil">✂️ பிரித்து Download</button>`);
       btn.onclick = doSplit;
@@ -2709,24 +2753,92 @@ TOOL_IMPL.split = {
       return Array.from(idxs).sort((a,b)=>a-b);
     }
 
+    // Splits pageCount pages into "count" roughly-equal-sized chunks — the
+    // first (pageCount % count) chunks get one extra page, so parts differ
+    // by at most 1 page rather than dumping the remainder onto the last one.
+    function equalPartRanges(pageCount, count){
+      const base = Math.floor(pageCount/count), extra = pageCount % count;
+      const parts = []; let start = 0;
+      for(let i=0;i<count;i++){
+        const size = base + (i<extra?1:0);
+        if(size<=0) continue;
+        parts.push(Array.from({length:size},(_,k)=>start+k));
+        start += size;
+      }
+      return parts;
+    }
+
+    async function buildPdfFromIndices(src, idxs){
+      const outDoc = await PDFDocument.create();
+      const pages = await outDoc.copyPages(src, idxs);
+      pages.forEach(p=>outDoc.addPage(p));
+      return await outDoc.save();
+    }
+
     async function doSplit(){
-      const rangeStr = body.querySelector('#rangeInput').value || `1-${pageCount}`;
-      const idxs = parseRanges(rangeStr, pageCount);
-      if(!idxs.length){ mountResult(body,'Please enter a valid page range.').style.background='#FDEDEC'; return; }
+      const mode = body.querySelector('#splitMode').value;
       const prog = mountProgress(body);
       try{
-        prog.set(20,'Reading…');
+        prog.set(10,'Reading…');
         const src = await PDFDocument.load(file._buf, {ignoreEncryption:true});
-        const outDoc = await PDFDocument.create();
-        prog.set(50,'Extracting pages…');
-        const pages = await outDoc.copyPages(src, idxs);
-        pages.forEach(p=>outDoc.addPage(p));
-        prog.set(90,'Preparing…');
-        const bytes = await outDoc.save();
-        prog.set(100,'Done');
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'split.pdf');
-        prog.remove();
-        mountResult(body, `${idxs.length} new file with PDF downloaded.`);
+
+        if(mode==='range'){
+          const rangeStr = body.querySelector('#rangeInput').value || `1-${pageCount}`;
+          const idxs = parseRanges(rangeStr, pageCount);
+          if(!idxs.length){ prog.remove(); mountResult(body,'Please enter a valid page range.').style.background='#FDEDEC'; return; }
+          prog.set(50,'Extracting pages…');
+          const bytes = await buildPdfFromIndices(src, idxs);
+          prog.set(100,'Done'); prog.remove();
+          downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'split.pdf');
+          mountResult(body, `${idxs.length} pages கொண்ட file downloaded.`);
+          return;
+        }
+
+        // Every other mode produces MULTIPLE files — collect them all, then
+        // ZIP if there's more than one (a single trivial ZIP entry would be
+        // an unnecessary extra step for the person to open).
+        let chunks = []; // array of {idxs, name}
+        if(mode==='everyN'){
+          const n = Math.max(1, Number(body.querySelector('#everyNInput').value)||1);
+          for(let start=0; start<pageCount; start+=n){
+            const idxs = Array.from({length:Math.min(n,pageCount-start)},(_,k)=>start+k);
+            chunks.push({idxs, name:`pages-${start+1}-${start+idxs.length}.pdf`});
+          }
+        } else if(mode==='equalParts'){
+          const count = Math.max(2, Math.min(pageCount, Number(body.querySelector('#equalPartsInput').value)||2));
+          equalPartRanges(pageCount, count).forEach((idxs,i)=>{
+            chunks.push({idxs, name:`part-${i+1}.pdf`});
+          });
+        } else if(mode==='multiRange'){
+          const raw = body.querySelector('#multiRangeInput').value || '';
+          const rangeStrs = raw.split(';').map(s=>s.trim()).filter(Boolean);
+          if(!rangeStrs.length){ prog.remove(); mountResult(body,'குறைந்தது ஒரு range-ஆவது கொடுங்கள்.').style.background='#FDEDEC'; return; }
+          rangeStrs.forEach((rs,i)=>{
+            const idxs = parseRanges(rs, pageCount);
+            if(idxs.length) chunks.push({idxs, name:`range-${i+1}-(${rs.replace(/[^0-9,-]/g,'')}).pdf`});
+          });
+          if(!chunks.length){ prog.remove(); mountResult(body,'சரியான range எதுவும் கிடைக்கவில்லை.').style.background='#FDEDEC'; return; }
+        }
+
+        if(chunks.length === 1){
+          prog.set(60,'Building…');
+          const bytes = await buildPdfFromIndices(src, chunks[0].idxs);
+          prog.set(100,'Done'); prog.remove();
+          downloadBlob(new Blob([bytes],{type:'application/pdf'}), chunks[0].name);
+          mountResult(body, `1 file downloaded.`);
+          return;
+        }
+        const zip = new JSZip();
+        for(let i=0;i<chunks.length;i++){
+          prog.set(10 + (i/chunks.length)*80, `${chunks[i].name} Building… (${i+1}/${chunks.length})`);
+          const bytes = await buildPdfFromIndices(src, chunks[i].idxs);
+          zip.file(chunks[i].name, bytes);
+        }
+        prog.set(95,'ZIP தயார் செய்யப்படுகிறது…');
+        const blob = await zip.generateAsync({type:'blob'});
+        downloadBlob(blob, 'split-files.zip');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${chunks.length} files ZIP-ஆக downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
