@@ -3960,20 +3960,24 @@ TOOL_IMPL.pdf2text = {
 /* ===================== WORD -> PDF ===================== */
 TOOL_IMPL.word2pdf = {
   mount(container){
-    let file = null;
+    let files = [];
     const body = el(`<div></div>`); container.appendChild(body);
-    async function handleFile(f){ file = f; file._buf = await readFileAsArrayBuffer(file); paint(); }
+    async function handleFiles(fl){
+      for(const f of fl){ f._buf = await readFileAsArrayBuffer(f); files.push(f); }
+      paint();
+    }
     function paint(){
       body.innerHTML = '';
       mountUploader(body, {
         accept:'.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        label:'ஒரு Word (.docx) file drag & drop or tap', sublabel:'PDF Convert toம் — எழுத்துரு சரியாக காட்டப்படும் (தமிழ் உட்பட)',
-        onAdd: async (fl)=> handleFile(fl[0])
+        multiple:true,
+        label:'Word (.docx) files drag & drop or tap', sublabel:'PDF Convert toம் — எழுத்துரு சரியாக காட்டப்படும் (தமிழ் உட்பட). பல files-ஐயும் ஒரே நேரத்தில் convert பண்ணலாம்.',
+        onAdd: handleFiles
       });
-      if(file){
-        mountFileList(body, [file], ()=>{ file=null; paint(); });
+      if(files.length){
+        mountFileList(body, files, (idx)=>{ files.splice(idx,1); paint(); });
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn tamil">📄 PDF Convert to</button>`);
+        const btn = el(`<button class="btn tamil">📄 PDF Convert to${files.length>1?` (${files.length} files)`:''}</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -3984,86 +3988,111 @@ TOOL_IMPL.word2pdf = {
     // them uploading the same file a second time.
     if(__pendingSmartUploadFile){
       const f = __pendingSmartUploadFile; __pendingSmartUploadFile = null;
-      handleFile(f); // handleFile() calls paint() itself once the file is ready — don't paint() again below, or the empty state flashes first
+      handleFiles([f]); // handleFiles() calls paint() itself once ready — don't paint() again below, or the empty state flashes first
     } else {
       paint();
     }
+
+    // Converts ONE Word file's buffer to PDF bytes — unchanged logic from
+    // the original single-file implementation, just extracted so it can be
+    // called once per file in a batch. onProgress(fraction 0-1) reports
+    // this file's own progress; the caller maps it into the overall bar.
+    async function convertOneFile(buf, onProgress){
+      const result = await mammoth.convertToHtml({arrayBuffer: buf});
+      onProgress(0.15);
+      const doc = await PDFDocument.create();
+      const font = await embedUnicodeFont(doc); // real, selectable Tamil+Latin text — not a rendered image
+      const a4W = 595.28, a4H = 841.89, marginX = 50, marginTop = 50, marginBottom = 50, maxWidth = a4W - marginX*2;
+      let page = doc.addPage([a4W, a4H]);
+      let y = a4H - marginTop;
+      function newPageIfNeeded(neededHeight){
+        if(y - neededHeight < marginBottom){ page = doc.addPage([a4W, a4H]); y = a4H - marginTop; }
+      }
+      // Word-wraps text to maxWidth and draws it line by line; bold is
+      // approximated with a faux-bold hairline offset (same technique the
+      // PDF Editor already uses) since embedding a separate bold Tamil font
+      // file would roughly double the font-loading cost for this feature.
+      function drawWrapped(text, size, bold){
+        const words = text.split(/\s+/).filter(Boolean);
+        const lineHeight = size*1.35;
+        let line = '';
+        const flush = ()=>{
+          if(!line) return;
+          newPageIfNeeded(lineHeight);
+          page.drawText(line, {x:marginX, y, size, font, color:rgb(0.08,0.08,0.08)});
+          if(bold) page.drawText(line, {x:marginX+0.4, y, size, font, color:rgb(0.08,0.08,0.08)});
+          y -= lineHeight;
+        };
+        words.forEach(word=>{
+          const testLine = line ? line+' '+word : word;
+          if(font.widthOfTextAtSize(testLine, size) > maxWidth && line){ flush(); line = word; }
+          else line = testLine;
+        });
+        flush();
+      }
+      const holder = document.createElement('div');
+      holder.innerHTML = result.value;
+      const blocks = Array.from(holder.children);
+      blocks.forEach((elm, idx)=>{
+        onProgress(0.3 + (idx/Math.max(1,blocks.length))*0.55);
+        const tag = elm.tagName.toLowerCase();
+        if(tag === 'table'){
+          const rows = Array.from(elm.querySelectorAll('tr'));
+          const numCols = Math.max(1, ...rows.map(r=>r.children.length));
+          const colWidth = maxWidth / numCols;
+          rows.forEach(row=>{
+            newPageIfNeeded(20);
+            Array.from(row.children).forEach((cell,ci)=>{
+              const cellX = marginX + ci*colWidth;
+              page.drawRectangle({x:cellX, y:y-16, width:colWidth, height:18, borderColor:rgb(0.75,0.75,0.75), borderWidth:0.5});
+              let cellText = cell.textContent.trim();
+              while(font.widthOfTextAtSize(cellText, 9) > colWidth-6 && cellText.length>1) cellText = cellText.slice(0,-1);
+              page.drawText(cellText, {x:cellX+3, y:y-12, size:9, font, color:rgb(0.1,0.1,0.1)});
+            });
+            y -= 18;
+          });
+          y -= 10;
+        } else if(/^h[1-6]$/.test(tag)){
+          const size = Math.max(12, 22 - parseInt(tag[1])*2);
+          drawWrapped(elm.textContent.trim(), size, true);
+          y -= 6;
+        } else {
+          const text = elm.textContent.trim();
+          if(!text){ y -= 10; return; }
+          const wholeBold = elm.children.length===1 && /^(strong|b)$/i.test(elm.children[0].tagName);
+          drawWrapped(text, 12, wholeBold);
+          y -= 6;
+        }
+      });
+      onProgress(0.92);
+      return await doc.save();
+    }
+
     async function doConvert(){
       const prog = mountProgress(body);
       try{
-        prog.set(15,'Word file Reading…');
-        const result = await mammoth.convertToHtml({arrayBuffer: file._buf});
-        prog.set(30,'Font Preparing…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc); // real, selectable Tamil+Latin text — not a rendered image
-        const a4W = 595.28, a4H = 841.89, marginX = 50, marginTop = 50, marginBottom = 50, maxWidth = a4W - marginX*2;
-        let page = doc.addPage([a4W, a4H]);
-        let y = a4H - marginTop;
-        function newPageIfNeeded(neededHeight){
-          if(y - neededHeight < marginBottom){ page = doc.addPage([a4W, a4H]); y = a4H - marginTop; }
+        if(files.length === 1){
+          const bytes = await convertOneFile(files[0]._buf, frac=> prog.set(frac*100, 'PDF Creating…'));
+          prog.set(100,'Done');
+          downloadBlob(new Blob([bytes],{type:'application/pdf'}), files[0].name.replace(/\.docx?$/i,'')+'.pdf');
+          prog.remove();
+          mountResult(body, 'PDF downloaded — real, selectable/searchable text (Tamil supported), தமிழ் அடங்கியது.');
+          return;
         }
-        // Word-wraps text to maxWidth and draws it line by line; bold is
-        // approximated with a faux-bold hairline offset (same technique the
-        // PDF Editor already uses) since embedding a separate bold Tamil font
-        // file would roughly double the font-loading cost for this feature.
-        function drawWrapped(text, size, bold){
-          const words = text.split(/\s+/).filter(Boolean);
-          const lineHeight = size*1.35;
-          let line = '';
-          const flush = ()=>{
-            if(!line) return;
-            newPageIfNeeded(lineHeight);
-            page.drawText(line, {x:marginX, y, size, font, color:rgb(0.08,0.08,0.08)});
-            if(bold) page.drawText(line, {x:marginX+0.4, y, size, font, color:rgb(0.08,0.08,0.08)});
-            y -= lineHeight;
-          };
-          words.forEach(word=>{
-            const testLine = line ? line+' '+word : word;
-            if(font.widthOfTextAtSize(testLine, size) > maxWidth && line){ flush(); line = word; }
-            else line = testLine;
+        // Batch mode — every competitor reviewed offers this, and it was a
+        // genuine gap: one file at a time was the only option before.
+        const zip = new JSZip();
+        for(let i=0;i<files.length;i++){
+          const bytes = await convertOneFile(files[i]._buf, frac=>{
+            prog.set((i/files.length)*100 + (frac/files.length)*100, `${files[i].name} Converting… (${i+1}/${files.length})`);
           });
-          flush();
+          zip.file(files[i].name.replace(/\.docx?$/i,'')+'.pdf', bytes);
         }
-        const holder = document.createElement('div');
-        holder.innerHTML = result.value;
-        const blocks = Array.from(holder.children);
-        blocks.forEach((elm, idx)=>{
-          prog.set(30 + (idx/Math.max(1,blocks.length))*55, 'PDF Creating…');
-          const tag = elm.tagName.toLowerCase();
-          if(tag === 'table'){
-            const rows = Array.from(elm.querySelectorAll('tr'));
-            const numCols = Math.max(1, ...rows.map(r=>r.children.length));
-            const colWidth = maxWidth / numCols;
-            rows.forEach(row=>{
-              newPageIfNeeded(20);
-              Array.from(row.children).forEach((cell,ci)=>{
-                const cellX = marginX + ci*colWidth;
-                page.drawRectangle({x:cellX, y:y-16, width:colWidth, height:18, borderColor:rgb(0.75,0.75,0.75), borderWidth:0.5});
-                let cellText = cell.textContent.trim();
-                while(font.widthOfTextAtSize(cellText, 9) > colWidth-6 && cellText.length>1) cellText = cellText.slice(0,-1);
-                page.drawText(cellText, {x:cellX+3, y:y-12, size:9, font, color:rgb(0.1,0.1,0.1)});
-              });
-              y -= 18;
-            });
-            y -= 10;
-          } else if(/^h[1-6]$/.test(tag)){
-            const size = Math.max(12, 22 - parseInt(tag[1])*2);
-            drawWrapped(elm.textContent.trim(), size, true);
-            y -= 6;
-          } else {
-            const text = elm.textContent.trim();
-            if(!text){ y -= 10; return; }
-            const wholeBold = elm.children.length===1 && /^(strong|b)$/i.test(elm.children[0].tagName);
-            drawWrapped(text, 12, wholeBold);
-            y -= 6;
-          }
-        });
-        prog.set(92,'PDF Preparing file…');
-        const bytes = await doc.save();
-        prog.set(100,'Done');
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.docx?$/i,'')+'.pdf');
-        prog.remove();
-        mountResult(body, 'PDF downloaded — real, selectable/searchable text (Tamil supported), தமிழ் அடங்கியது.');
+        prog.set(95,'ZIP தயார் செய்யப்படுகிறது…');
+        const blob = await zip.generateAsync({type:'blob'});
+        downloadBlob(blob, 'converted-pdfs.zip');
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${files.length} PDF-கள் ZIP-ஆக downloaded — real, selectable/searchable text (Tamil supported).`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
