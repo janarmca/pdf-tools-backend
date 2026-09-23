@@ -57,8 +57,6 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 3. Re-minify and ship.
 
 ## Known follow-ups
-- **`bar-collection-register.html`** exists in the repo but is **not wired up as a tool** — it's a working "Bar Sitting Collection Register" business app (React/Babel-based) with no entry in the `TOOLS` array and nothing referencing the file. Needs a decision: register it as a new tool, or remove it if it's no longer wanted.
-- Cloud Run's `/api/ai/image` (Text-to-Image via Gemini) endpoint status should be re-verified after any backend redeploy.
 - PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
 
 ## Recent major changes
@@ -71,4 +69,5 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 - Homepage redesigned (bento-grid category layout, trust banner, Tamil/English/Hindi language switcher), Blog section added for SEO.
 - Site-wide minification for basic source-code protection (see File Structure above).
 - Education and Image categories split into lazy-loaded `category-*.js` files (see File Structure above) to reduce initial page weight.
-- Removed 2 dead files from the repo: `bill-quotation-maker.html` (its tool was consolidated away) and `kamakshi_gst_checking.html` (an exact byte-for-byte duplicate of `gst-checking.html`).
+- Confirmed `server.js` (with the `/api/ai/image` Text-to-Image endpoint) is deployed to Cloud Run and live — verified via `curl -X POST .../api/ai/image` returning the expected "login required" auth error (not "route not found").
+- Removed 2 dead files from the repo: `bill-quotation-maker.html` (its tool was consolidated away) and `kamakshi_gst_checking.html` (an exact byte-for-byte duplicate of `gst-checking.html`). Also removed `bar-collection-register.html` (never wired up as a tool, confirmed no longer needed).
