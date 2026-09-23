@@ -2899,12 +2899,46 @@ TOOL_IMPL.merge = {
           (idx)=>{ files.splice(idx,1); paint(); },
           (idx,dir)=>{ const j=idx+dir; if(j<0||j>=files.length) return; const t=files[idx]; files[idx]=files[j]; files[j]=t; paint(); }
         );
+        // Per-file page range — genuine gap vs competitors (most free tools
+        // only merge whole documents, not selected pages from each). Left
+        // blank means "all pages" — the common case stays a single click.
+        const advWrap = el(`<div class="opts tamil" style="margin-top:8px;"></div>`);
+        files.forEach((f, i)=>{
+          const field = el(`
+            <div class="field" style="grid-column:1/-1;">
+              <label>${f.name} — Pages (காலியாக விட்டால் அனைத்தும்)</label>
+              <input type="text" id="mergeRange${i}" placeholder="e.g. 1-3, 5">
+            </div>
+          `);
+          advWrap.appendChild(field);
+        });
+        body.appendChild(advWrap);
+        const blankRow = el(`<div class="field-inline" style="margin:4px 0 8px;"><input type="checkbox" id="mergeBlankSep"><label for="mergeBlankSep">ஒவ்வொரு file-க்கும் இடையே ஒரு காலி பக்கம் சேர் (blank separator)</label></div>`);
+        body.appendChild(blankRow);
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil" ${files.length<2?'disabled':''}>🧩 Merge</button>`);
         btn.onclick = doMerge;
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+
+    // Parses "1-3, 5" style range strings — same logic as the Split tool's
+    // parser, kept local here since it's small and each tool's copy is
+    // independently simple to verify (no shared-global risk).
+    function parseRanges(str, max){
+      const idxs = new Set();
+      str.split(',').forEach(part=>{
+        part = part.trim(); if(!part) return;
+        if(part.includes('-')){
+          const [a,b] = part.split('-').map(n=>parseInt(n.trim(),10));
+          if(!isNaN(a) && !isNaN(b)){ for(let i=Math.max(1,a); i<=Math.min(max,b); i++) idxs.add(i-1); }
+        } else {
+          const n = parseInt(part,10);
+          if(!isNaN(n) && n>=1 && n<=max) idxs.add(n-1);
+        }
+      });
+      return Array.from(idxs).sort((a,b)=>a-b);
     }
 
     async function doMerge(){
@@ -2916,21 +2950,34 @@ TOOL_IMPL.merge = {
           prog.set(10 + (i/files.length)*30, `${files[i].name} Reading… (${i+1}/${files.length})`);
           buffers.push(await readFileAsArrayBuffer(files[i]));
         }
-        prog.set(45, 'Merging (background thread — page stays responsive)…');
+        const rangeStrs = files.map((f,i)=> (body.querySelector(`#mergeRange${i}`)?.value || '').trim());
+        const insertBlank = body.querySelector('#mergeBlankSep')?.checked || false;
+        const hasCustomRanges = rangeStrs.some(s=>s.length>0);
+        prog.set(45, 'Merging…');
         let bytes;
-        try{
-          // Runs off the main thread so the tab doesn't freeze while merging
-          // many/large PDFs. Falls back to the original main-thread approach
-          // below if the worker is unavailable for any reason (older browser,
-          // blocked blob: worker creation, etc.) — never worse than before.
-          bytes = await runPdfWorkerOp('merge', buffers.map(b=>b.slice(0))); // slice() copies so the fallback path below still has usable buffers if this throws
-        }catch(workerErr){
-          prog.set(50, 'Merging…');
+        if(!hasCustomRanges && !insertBlank){
+          try{
+            // Fast path: whole-file merge with no page filtering or blank
+            // separators — runs off the main thread so the tab doesn't
+            // freeze on many/large PDFs. Falls back below if unavailable.
+            bytes = await runPdfWorkerOp('merge', buffers.map(b=>b.slice(0)));
+          }catch(workerErr){ bytes = null; }
+        }
+        if(!bytes){
           const outDoc = await PDFDocument.create();
           for(let i=0;i<buffers.length;i++){
             const src = await PDFDocument.load(buffers[i], {ignoreEncryption:true});
-            const pages = await outDoc.copyPages(src, src.getPageIndices());
+            const rangeStr = rangeStrs[i];
+            const pageIndices = rangeStr ? parseRanges(rangeStr, src.getPageCount()) : src.getPageIndices();
+            if(rangeStr && !pageIndices.length){
+              throw new Error(`"${files[i].name}" — "${rangeStr}" சரியான page range இல்லை.`);
+            }
+            const pages = await outDoc.copyPages(src, pageIndices);
             pages.forEach(p=>outDoc.addPage(p));
+            if(insertBlank && i < buffers.length-1){
+              const lastPage = outDoc.getPage(outDoc.getPageCount()-1);
+              outDoc.addPage([lastPage.getWidth(), lastPage.getHeight()]); // matches the size of the page just added, so the separator doesn't look mismatched
+            }
           }
           bytes = await outDoc.save();
         }
