@@ -8910,7 +8910,12 @@ TOOL_IMPL.pdfform = {
       if(file){
         mountFileList(body, [file], ()=>{ file=null; fields=[]; form=null; paint(); });
         if(!fields.length){
-          body.appendChild(el(`<div class="note tamil">இந்த PDF-ல் நிரப்பக்கூடிய Form fields எதுவும் கண்டறியப்படவில்லை.</div>`));
+          body.appendChild(el(`<div class="note tamil" style="background:#FFF6E5;">இந்த PDF-ல் நிரப்பக்கூடிய (fillable) Form fields எதுவும் கண்டறியப்படவில்லை — இது ஒரு "flat" PDF-ஆக இருக்கலாம் (scan செய்யப்பட்ட அல்லது fields இல்லாத form). கவலைப்பட வேண்டாம் — "PDF Editor" கருவியில் எந்த PDF-லும், எந்த இடத்திலும் click பண்ணி text/signature வைக்கலாம் (fields இருந்தாலும் இல்லாட்டியும்).</div>`));
+          const goRow = el(`<div class="btn-row"></div>`);
+          const goBtn = el(`<button class="btn tamil">✏️ PDF Editor-ல் திற (fields இல்லாத forms-க்கும் வேலை செய்யும்)</button>`);
+          goBtn.onclick = ()=> openTool('pdfeditor');
+          goRow.appendChild(goBtn);
+          body.appendChild(goRow);
           return;
         }
         body.appendChild(el(`<div class="note tamil">கண்டறியப்பட்ட ${fields.length} fields — மதிப்புகளை நிரப்பி சேமிக்கவும்.</div>`));
