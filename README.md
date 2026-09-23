@@ -57,10 +57,16 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 3. Re-minify and ship.
 
 ## Known follow-ups
-- **`server.js` needs a Cloud Run redeploy** to go live with: (1) Text-to-Image now on Cloudflare Workers AI's FLUX.1-schnell — genuinely free, ~10,000 Neurons/day, **no credit card needed** (needs `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` env vars — same Cloudflare account as the Pages frontend), (2) the 3→5 credit price fix (still applies — margin is now even larger). Frontend changes are already live.
 - PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
 
+## ⚠️ Cloud Run env var gotcha
+`gcloud run services update --set-env-vars` **replaces the entire env var set**, not just the ones listed — this caused a real production outage once (wiped Supabase/Razorpay/Gemini keys, leaving only the 2 vars in that command, which crashed the server on startup with `Error: supabaseUrl is required`). **Always use `--update-env-vars` instead** to add/change vars without touching the rest. Confirm the full var list before AND after any env change:
+```bash
+gcloud run services describe all-in-one-tools --project=pdf-tools-506813 --region=asia-south1 --format="value(spec.template.spec.containers[0].env[].name)"
+```
+
 ## Recent major changes
+- **Text-to-Image now runs on Cloudflare Workers AI (FLUX.1-schnell)** — confirmed live in production (`/api/ai/image` correctly returns the login-required auth error, not route-not-found). Genuinely free, ~10,000 Neurons/day, no credit card needed — see the env var table in `.env.example`.
 - **Password Recovery suite** (PDF/Excel/Word): common-password dictionary, personal-details-based guessing with cross-combination, name+number and name+digit+symbol brute-force with honest time estimates, and a "your own remembered guesses" mode — all client-side, all clearly scoped to genuinely weak/guessable passwords (AES-256 with a real strong password is not crackable, and the tool doesn't pretend otherwise).
 - **PDF Protect/Unlock** upgraded to AES-256 (previously RC4-only, which real-world PDFs from banks/government rarely use).
 - **EMI/Loan, Income Tax (FY 2026-27 Old vs New regime), Age, and Percentage calculators** added.
