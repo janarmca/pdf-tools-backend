@@ -3312,6 +3312,22 @@ TOOL_IMPL.watermark = {
                 <option value="black">Black</option>
               </select>
             </div>
+            <div class="field">
+              <label>Placement</label>
+              <select id="wmPlacement">
+                <option value="center">ஒரே watermark — நடுவில்</option>
+                <option value="tiled">Tiled — முழு பக்கமும் repeat (high-security documents-க்கு)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>எந்த பக்கங்களுக்கு</label>
+              <select id="wmPages">
+                <option value="all">அனைத்து பக்கங்களும்</option>
+                <option value="first">முதல் பக்கம் மட்டும்</option>
+                <option value="odd">Odd பக்கங்கள் மட்டும் (1,3,5…)</option>
+                <option value="even">Even பக்கங்கள் மட்டும் (2,4,6…)</option>
+              </select>
+            </div>
           </div>
         `);
         body.appendChild(opts);
@@ -3328,6 +3344,8 @@ TOOL_IMPL.watermark = {
       const opacity = (Number(body.querySelector('#wmOpacity').value)||30)/100;
       const rot = Number(body.querySelector('#wmRotate').value)||0;
       const colorKey = body.querySelector('#wmColor').value;
+      const placement = body.querySelector('#wmPlacement').value;
+      const pageFilter = body.querySelector('#wmPages').value;
       const COLORS = { gray: rgb(0.5,0.5,0.5), red: rgb(0.8,0.1,0.1), blue: rgb(0.1,0.3,0.7), black: rgb(0,0,0) };
       const prog = mountProgress(body);
       try{
@@ -3336,14 +3354,34 @@ TOOL_IMPL.watermark = {
         prog.set(30,'Loading font…');
         const font = await embedUnicodeFont(doc);
         const pages = doc.getPages();
+        function shouldWatermark(pageNum1based){ // 1-based page number
+          if(pageFilter==='first') return pageNum1based===1;
+          if(pageFilter==='odd') return pageNum1based%2===1;
+          if(pageFilter==='even') return pageNum1based%2===0;
+          return true; // 'all'
+        }
         pages.forEach((page,i)=>{
           prog.set(20 + (i/pages.length)*60, `page ${i+1}/${pages.length}…`);
+          if(!shouldWatermark(i+1)) return;
           const {width,height} = page.getSize();
-          page.drawText(text, {
-            x: width/2 - (text.length*size*0.28), y: height/2,
-            size, font, color: COLORS[colorKey]||COLORS.gray, opacity,
-            rotate: degrees(rot)
-          });
+          if(placement==='tiled'){
+            // Repeats the watermark in a grid across the page — the
+            // industry-standard approach for documents where a single
+            // centered mark could be cropped or covered out.
+            const textW = font.widthOfTextAtSize(text, size);
+            const stepX = textW + size*1.5, stepY = size*3;
+            for(let ty = -stepY; ty < height+stepY; ty += stepY){
+              for(let tx = -stepX; tx < width+stepX; tx += stepX){
+                page.drawText(text, { x: tx, y: ty, size, font, color: COLORS[colorKey]||COLORS.gray, opacity, rotate: degrees(rot) });
+              }
+            }
+          } else {
+            page.drawText(text, {
+              x: width/2 - (text.length*size*0.28), y: height/2,
+              size, font, color: COLORS[colorKey]||COLORS.gray, opacity,
+              rotate: degrees(rot)
+            });
+          }
         });
         prog.set(90,'Preparing…');
         const bytes = await doc.save();
