@@ -3287,6 +3287,15 @@ TOOL_IMPL.compress = {
           <div>
             <div class="opts one tamil">
               <div class="field">
+                <label>முறை</label>
+                <select id="cMode">
+                  <option value="preset" selected>Quality Preset</option>
+                  <option value="target">குறிப்பிட்ட Size-க்கு (KB/MB Limit)</option>
+                </select>
+              </div>
+            </div>
+            <div id="cPresetField" class="opts one tamil">
+              <div class="field">
                 <label>Compress Size</label>
                 <select id="cLevel">
                   <option value="1.5">Low compression (higher quality)</option>
@@ -3295,16 +3304,101 @@ TOOL_IMPL.compress = {
                 </select>
               </div>
             </div>
+            <div id="cTargetField" class="opts tamil" style="display:none;">
+              <div class="field">
+                <label>Target Size</label>
+                <input type="number" id="cTargetNum" placeholder="e.g. 200" min="1" value="500">
+              </div>
+              <div class="field">
+                <label>Unit</label>
+                <select id="cTargetUnit">
+                  <option value="KB" selected>KB</option>
+                  <option value="MB">MB</option>
+                </select>
+              </div>
+            </div>
             <div class="note">This re-renders every page as an image to compress it — best for image-heavy/scanned PDFs. எழுத்து-அடிப்படையிலான PDF-ல் எழுத்தை select/copy does தன்மை போய்விடும்.</div>
           </div>
         `);
         body.appendChild(opts);
+        opts.querySelector('#cMode').addEventListener('change', (e)=>{
+          const isTarget = e.target.value==='target';
+          opts.querySelector('#cPresetField').style.display = isTarget ? 'none' : '';
+          opts.querySelector('#cTargetField').style.display = isTarget ? '' : 'none';
+        });
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn tamil">📦 Compress</button>`);
-        btn.onclick = doCompress;
+        btn.onclick = ()=>{
+          const mode = body.querySelector('#cMode').value;
+          if(mode==='target') doCompressToTarget(); else doCompress();
+        };
         row.appendChild(btn);
         body.appendChild(row);
       }
+    }
+    async function doCompressToTarget(){
+      const targetNum = Number(body.querySelector('#cTargetNum').value);
+      const unit = body.querySelector('#cTargetUnit').value;
+      if(!targetNum || targetNum<=0){ mountResult(body,'சரியான Target size கொடுங்கள்.').style.background='#FDEDEC'; return; }
+      const targetBytes = targetNum * (unit==='MB' ? 1024*1024 : 1024);
+      const prog = mountProgress(body);
+      try{
+        const originalSize = file.size;
+        prog.set(5,'Pages Reading…');
+        const pdfjsDoc = await loadPdfJs(file._buf);
+        // Render every page ONCE at a fixed, reasonably-high scale — the
+        // expensive step. Each trial below only re-encodes these same
+        // canvases at a different JPEG quality (cheap), rather than
+        // re-rendering from pdf.js every time, so the binary search below
+        // stays fast even on multi-page documents.
+        const canvases = [];
+        for(let i=1;i<=pdfjsDoc.numPages;i++){
+          prog.set(5 + (i/pdfjsDoc.numPages)*35, `page ${i}/${pdfjsDoc.numPages} Rendering…`);
+          const page = await pdfjsDoc.getPage(i);
+          const viewport = page.getViewport({scale:1.5});
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+          canvases.push(canvas);
+        }
+        async function buildAtQuality(q){
+          const outDoc = await PDFDocument.create();
+          for(const canvas of canvases){
+            const jpgUrl = canvas.toDataURL('image/jpeg', q);
+            const jpgBytes = Uint8Array.from(atob(jpgUrl.split(',')[1]), c=>c.charCodeAt(0));
+            const img = await outDoc.embedJpg(jpgBytes);
+            const newPage = outDoc.addPage([canvas.width, canvas.height]);
+            newPage.drawImage(img, {x:0,y:0,width:canvas.width,height:canvas.height});
+          }
+          return await outDoc.save();
+        }
+        // Binary search over JPEG quality (0.05-0.95) for the highest
+        // quality that still fits under the target size.
+        let lo = 0.05, hi = 0.95, bestBytes = null, bestQ = lo;
+        for(let iter=0; iter<7; iter++){
+          const mid = (lo+hi)/2;
+          prog.set(40 + (iter/7)*50, `Trying quality ${Math.round(mid*100)}%… (${iter+1}/7)`);
+          const bytes = await buildAtQuality(mid);
+          if(bytes.length <= targetBytes){
+            bestBytes = bytes; bestQ = mid; lo = mid; // this quality fits — try higher quality
+          } else {
+            hi = mid; // too big — need lower quality
+          }
+        }
+        if(!bestBytes){
+          // Even the lowest quality tried didn't fit — use the lowest as the closest we can get
+          prog.set(92,'Preparing…');
+          bestBytes = await buildAtQuality(0.05);
+        }
+        prog.set(100,'Done'); prog.remove();
+        const newSize = bestBytes.length;
+        downloadBlob(new Blob([bestBytes],{type:'application/pdf'}), 'compressed.pdf');
+        if(newSize > targetBytes){
+          mountResult(body, `Target அளவை (${fmtBytes(targetBytes)}) அடைய முடியவில்லை — quality-ஐ மிகவும் குறைத்தாலும் கிடைத்த மிகச் சிறிய அளவு: ${fmtBytes(originalSize)} → ${fmtBytes(newSize)}. (பக்கங்கள் மிக அதிகமா/complex-ஆ இருக்கலாம் — pages-ஐ பிரித்து தனித்தனியா compress பண்ணிப் பாருங்கள்.)`).style.background='#FFF3E0';
+        } else {
+          mountResult(body, `${fmtBytes(originalSize)} → ${fmtBytes(newSize)} (target: ${fmtBytes(targetBytes)}-க்குள்) — downloaded.`);
+        }
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     async function doCompress(){
       const scale = Number(body.querySelector('#cLevel').value);
