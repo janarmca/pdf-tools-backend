@@ -5545,6 +5545,8 @@ TOOL_IMPL.pdfnup = {
               <select id="nupN">
                 <option value="2">2 pages / sheet</option>
                 <option value="4" selected>4 pages / sheet</option>
+                <option value="6">6 pages / sheet</option>
+                <option value="9">9 pages / sheet</option>
               </select>
             </div>
           </div>
@@ -5567,7 +5569,10 @@ TOOL_IMPL.pdfnup = {
         const srcPages = src.getPages();
         const embedded = await outDoc.embedPages(srcPages);
         const sheetW = 841.89, sheetH = 595.28; // A4 landscape fits scanned/portrait pages nicely
-        const cols = n===2 ? 2 : 2, rows = n===2 ? 1 : 2;
+        // Grid layout per page-count — chosen so each cell stays reasonably
+        // close to A4's own aspect ratio rather than being needlessly thin.
+        const LAYOUTS = { 2:{cols:2,rows:1}, 4:{cols:2,rows:2}, 6:{cols:3,rows:2}, 9:{cols:3,rows:3} };
+        const {cols, rows} = LAYOUTS[n] || LAYOUTS[4];
         const cellW = sheetW/cols, cellH = sheetH/rows;
         for(let i=0;i<embedded.length; i+=n){
           prog.set(10 + (i/embedded.length)*80, `தாள் Preparing… (${i+1}/${embedded.length})`);
