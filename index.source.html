@@ -4104,13 +4104,14 @@ TOOL_IMPL.pdf2word = {
         const pdfjsDoc = await loadPdfJs(file._buf);
         const { Document, Paragraph, TextRun, Table, TableRow, TableCell, Packer, WidthType } = getDocxLib();
         const children = [];
+        let totalTextLen = 0; // tracks how much real text was found, to detect a scanned/image-only PDF at the end
         for(let i=1;i<=pdfjsDoc.numPages;i++){
           prog.set(15+(i/pdfjsDoc.numPages)*70, `page ${i}/${pdfjsDoc.numPages}…`);
           const page = await pdfjsDoc.getPage(i);
           const content = await page.getTextContent();
           const styles = content.styles || {};
           const items = content.items.filter(it=>it.str && it.str.length);
-
+          totalTextLen += items.reduce((sum,it)=>sum+it.str.length, 0);
           // Check whether this page genuinely contains a table (repeated,
           // multi-row columns) before deciding how to render it — a page of
           // ordinary paragraph text also has items at "varying x-positions",
@@ -4162,7 +4163,15 @@ TOOL_IMPL.pdf2word = {
         prog.set(100,'Done');
         downloadBlob(blob, file.name.replace(/\.pdf$/i,'')+'.docx');
         prog.remove();
-        mountResult(body, 'Word file (.docx) downloaded — bold/italic/font size preserved, tables kept as real tables where detected.').style.background='#FFF6E5';
+        // Genuine gap this fixes: without this check, a scanned (image-only)
+        // PDF silently produces a near-empty Word doc with no explanation.
+        // 20 chars total across the whole document is a very low bar — real
+        // documents clear it easily even on a single short page.
+        if(totalTextLen < 20){
+          mountResult(body, 'இந்த PDF-ல் எழுத்து மிகக் குறைவாக கிடைத்தது — இது ஒரு ஸ்கேன் ed (படம்) document-ஆக இருக்கலாம். "🔎 படத்திலிருந்து எழுத்து (OCR)" கருவியை முதலில் பயன்படுத்தி, அதன் பிறகு அந்த PDF-ஐ இங்கே கொடுங்கள்.').style.background='#FFF6E5';
+        } else {
+          mountResult(body, 'Word file (.docx) downloaded — bold/italic/font size preserved, tables kept as real tables where detected.').style.background='#FFF6E5';
+        }
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
   }
