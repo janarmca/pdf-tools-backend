@@ -438,12 +438,14 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 // ============================================================
 // POST /api/ai/image — Text-to-Image generation (Gemini 3.1 Flash Image)
 // body: { prompt: string }
-// Priced higher than a plain text question (3 credits) since Gemini image
-// output genuinely costs several times more per call than text output —
-// this reflects that honestly rather than charging the flat 1-credit rate.
+// Priced at 5 credits (not the flat 1-credit rate) since Gemini image output
+// genuinely costs ~$0.067/image (~Rs 6.41). At the bulk 100-credit pack rate
+// (Rs 1.79/credit), 3 credits (Rs 5.37) was actually a LOSS on every image -
+// verified and raised to 5 credits (Rs 8.95 at the same rate) for a safe
+// margin, rather than silently eating the difference.
 // ============================================================
 app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
-  const CREDIT_COST = 3;
+  const CREDIT_COST = 5;
   try {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });

@@ -315,7 +315,7 @@ const TOOLS = [
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
-  {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:3},
+  {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'littlestar', name:'Little Star — Education Arcade', desc:'Fun mini-games, daily challenges & character customization, Tamil + English', icon:'⭐', color:'#D6336C', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
@@ -6422,7 +6422,7 @@ TOOL_IMPL.texttoimage = {
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">என்ன படம் வேண்டும் என்று விவரமாக எழுதுங்கள் — AI உருவாக்கும் (Gemini). ஒவ்வொரு படத்திற்கும் 3 credits.</div>`));
+      body.appendChild(el(`<div class="note tamil">என்ன படம் வேண்டும் என்று விவரமாக எழுதுங்கள் — AI உருவாக்கும் (Gemini). ஒவ்வொரு படத்திற்கும் 5 credits.</div>`));
       const ta = el(`<textarea id="t2iPrompt" rows="3" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="எ.கா: A watercolor painting of the Ilkal fort at sunset, warm orange sky, birds flying">${escapeHtml(prompt)}</textarea>`);
       ta.addEventListener('input',(e)=> prompt = e.target.value);
       body.appendChild(ta);
