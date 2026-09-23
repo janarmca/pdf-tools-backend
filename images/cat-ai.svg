@@ -1,5 +1,10 @@
 <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3DD6D6"/><stop offset="100%" stop-color="#0D6B6B"/></linearGradient></defs>
+  <defs>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3DD6D6"/><stop offset="100%" stop-color="#0D6B6B"/></linearGradient>
+    <linearGradient id="g5b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E3F9F9"/><stop offset="100%" stop-color="#C5EFEF"/></linearGradient>
+  </defs>
+  <ellipse cx="100" cy="80" rx="88" ry="70" fill="url(#g5b)"/>
+  <circle cx="100" cy="75" r="58" fill="#3DD6D6" opacity="0.15"/>
   <g transform="translate(50,25)">
     <circle cx="50" cy="50" r="46" fill="url(#g5)"/>
     <circle cx="50" cy="50" r="10" fill="#fff"/>
@@ -11,5 +16,11 @@
     <line x1="50" y1="50" x2="80" y2="30" stroke="#fff" stroke-width="2.5"/>
     <line x1="50" y1="50" x2="20" y2="70" stroke="#fff" stroke-width="2.5"/>
     <line x1="50" y1="50" x2="80" y2="70" stroke="#fff" stroke-width="2.5"/>
+  </g>
+  <g transform="translate(158,38)" fill="#FFD84D">
+    <path d="M0 -12 L2.8 -2.8 L12 0 L2.8 2.8 L0 12 L-2.8 2.8 L-12 0 L-2.8 -2.8 Z"/>
+  </g>
+  <g transform="translate(30,120)" fill="#3DD6D6" opacity="0.8">
+    <path d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6 Z"/>
   </g>
 </svg>

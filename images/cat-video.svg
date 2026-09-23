@@ -1,10 +1,23 @@
 <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F0A868"/><stop offset="100%" stop-color="#B8541E"/></linearGradient></defs>
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F0A868"/><stop offset="100%" stop-color="#B8541E"/></linearGradient>
+    <linearGradient id="g4b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCEEE3"/><stop offset="100%" stop-color="#F5D9C0"/></linearGradient>
+  </defs>
+  <ellipse cx="100" cy="80" rx="88" ry="70" fill="url(#g4b)"/>
   <g transform="translate(35,30)">
     <rect x="0" y="0" width="130" height="90" rx="12" fill="url(#g4)"/>
     <rect x="10" y="10" width="110" height="70" rx="6" fill="#fff" opacity="0.15"/>
+    <g fill="#fff" opacity="0.55">
+      <rect x="-3" y="8" width="7" height="10" rx="1.5"/><rect x="-3" y="24" width="7" height="10" rx="1.5"/>
+      <rect x="-3" y="40" width="7" height="10" rx="1.5"/><rect x="-3" y="56" width="7" height="10" rx="1.5"/>
+      <rect x="-3" y="72" width="7" height="10" rx="1.5"/>
+      <rect x="126" y="8" width="7" height="10" rx="1.5"/><rect x="126" y="24" width="7" height="10" rx="1.5"/>
+      <rect x="126" y="40" width="7" height="10" rx="1.5"/><rect x="126" y="56" width="7" height="10" rx="1.5"/>
+      <rect x="126" y="72" width="7" height="10" rx="1.5"/>
+    </g>
+    <circle cx="65" cy="45" r="27" fill="#fff" opacity="0.18"/>
     <polygon points="52,25 52,65 90,45" fill="#fff"/>
-    <rect x="0" y="-10" width="16" height="16" rx="3" fill="#B8541E"/>
-    <rect x="114" y="-10" width="16" height="16" rx="3" fill="#B8541E"/>
   </g>
+  <path d="M160 100 q6 -10 12 0 q6 10 -6 16 q-12 -6 -6 -16" fill="#B8541E" opacity="0.5"/>
+  <circle cx="26" cy="112" r="5" fill="#F0A868" opacity="0.7"/>
 </svg>

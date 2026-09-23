@@ -1,12 +1,25 @@
 <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2FA366"/><stop offset="100%" stop-color="#0F4A2C"/></linearGradient></defs>
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2FA366"/><stop offset="100%" stop-color="#0F4A2C"/></linearGradient>
+    <linearGradient id="g2b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EAF8F0"/><stop offset="100%" stop-color="#CDEEDA"/></linearGradient>
+  </defs>
+  <ellipse cx="100" cy="82" rx="88" ry="70" fill="url(#g2b)"/>
+  <polyline points="18,108 42,86 60,98 88,58 110,72" fill="none" stroke="#8FD4AC" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="104,66 114,62 116,74" fill="#8FD4AC" opacity="0.85"/>
   <g transform="translate(45,30)">
     <rect x="0" y="30" width="110" height="75" rx="8" fill="#fff" stroke="#0F4A2C" stroke-width="3"/>
     <rect x="35" y="8" width="40" height="26" rx="6" fill="none" stroke="#0F4A2C" stroke-width="3"/>
     <rect x="0" y="55" width="110" height="20" fill="url(#g2)"/>
     <circle cx="55" cy="65" r="9" fill="#fff"/>
-    <text x="55" y="70" font-family="Arial,sans-serif" font-size="13" font-weight="900" fill="#0F4A2C" text-anchor="middle">₹</text>
+    <circle cx="55" cy="65" r="5.5" fill="none" stroke="#0F4A2C" stroke-width="2"/>
+    <circle cx="55" cy="65" r="2" fill="#0F4A2C"/>
     <rect x="12" y="82" width="30" height="6" rx="3" fill="#B8E0C8"/>
     <rect x="68" y="82" width="30" height="6" rx="3" fill="#B8E0C8"/>
   </g>
+  <g transform="translate(158,100)">
+    <circle r="14" fill="#F1C40F" stroke="#fff" stroke-width="2.5"/>
+    <circle r="7.5" fill="none" stroke="#8A6D00" stroke-width="2"/>
+    <circle r="2.5" fill="#8A6D00"/>
+  </g>
+  <circle cx="138" cy="118" r="8" fill="#F1C40F" opacity="0.7"/>
 </svg>
