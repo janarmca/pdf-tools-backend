@@ -3648,6 +3648,7 @@ TOOL_IMPL.sign = {
     let file = null, pdfjsDoc = null, pageCount = 0, currentPage = 1;
     let sigDataUrl = null;
     let sigPos = {xPct:0.65, yPct:0.15};
+    let sigMode = 'draw', typedSigText = '';
     const body = el(`<div></div>`); container.appendChild(body);
 
     function paint(){
@@ -3668,20 +3669,97 @@ TOOL_IMPL.sign = {
 
       const sigWrap = el(`
         <div class="tamil" style="margin-top:16px;">
-          <label style="font-size:11.5px; font-weight:700; color:var(--sub); display:block; margin-bottom:6px;">Draw your signature</label>
-          <canvas class="sig-canvas" id="sigPad" width="600" height="180"></canvas>
-          <div class="btn-row">
-            <button class="btn secondary tamil" id="clearSig">🧹 Clear</button>
+          <div class="btn-row" style="margin-bottom:8px;">
+            <button class="btn secondary tamil sig-mode-btn ${sigMode==='draw'?'active':''}" data-mode="draw">✍️ வரை</button>
+            <button class="btn secondary tamil sig-mode-btn ${sigMode==='type'?'active':''}" data-mode="type">⌨️ தட்டச்சு</button>
+            <button class="btn secondary tamil sig-mode-btn ${sigMode==='upload'?'active':''}" data-mode="upload">📤 Upload</button>
           </div>
+          <div id="sigModeArea"></div>
         </div>
       `);
       body.appendChild(sigWrap);
-      setupSignaturePad(sigWrap.querySelector('#sigPad'));
-      sigWrap.querySelector('#clearSig').onclick = ()=>{
-        const c = sigWrap.querySelector('#sigPad');
-        c.getContext('2d').clearRect(0,0,c.width,c.height);
-        sigDataUrl = null;
-      };
+      sigWrap.querySelectorAll('.sig-mode-btn').forEach(b=>{
+        b.style.background = b.classList.contains('active') ? 'var(--brand-dark)' : '';
+        b.style.color = b.classList.contains('active') ? '#fff' : '';
+        b.onclick = ()=>{ sigMode = b.getAttribute('data-mode'); sigDataUrl = null; paint(); };
+      });
+      const modeArea = sigWrap.querySelector('#sigModeArea');
+
+      if(sigMode==='draw'){
+        modeArea.appendChild(el(`
+          <div>
+            <label style="font-size:11.5px; font-weight:700; color:var(--sub); display:block; margin-bottom:6px;">Draw your signature</label>
+            <canvas class="sig-canvas" id="sigPad" width="600" height="180"></canvas>
+            <div class="btn-row" style="margin-top:6px; align-items:center;">
+              <button class="btn secondary tamil" id="clearSig">🧹 Clear</button>
+              <label style="display:flex; align-items:center; gap:6px; font-size:12px;">Color <input type="color" id="sigColor" value="#20242B" style="width:34px; height:30px; padding:2px; cursor:pointer;"></label>
+            </div>
+          </div>
+        `));
+        setupSignaturePad(modeArea.querySelector('#sigPad'), modeArea.querySelector('#sigColor'));
+        modeArea.querySelector('#clearSig').onclick = ()=>{
+          const c = modeArea.querySelector('#sigPad');
+          c.getContext('2d').clearRect(0,0,c.width,c.height);
+          sigDataUrl = null;
+        };
+      } else if(sigMode==='type'){
+        const FONTS = [
+          {label:'Cursive', css:"'Brush Script MT', cursive"},
+          {label:'Elegant', css:"'Lucida Handwriting', cursive"},
+          {label:'Simple', css:"'Segoe Script', 'Comic Sans MS', cursive"},
+        ];
+        modeArea.appendChild(el(`
+          <div>
+            <div class="opts one tamil">
+              <div class="field">
+                <label>உங்கள் பெயர் தட்டச்சு செய்யவும்</label>
+                <input type="text" id="sigTypeText" placeholder="e.g. Kumar S" value="${typedSigText||''}">
+              </div>
+              <div class="field">
+                <label>Style</label>
+                <select id="sigTypeFont">${FONTS.map((f,i)=>`<option value="${i}">${f.label}</option>`).join('')}</select>
+              </div>
+              <div class="field">
+                <label>Color</label>
+                <input type="color" id="sigTypeColor" value="#20242B" style="width:100%; height:38px; padding:2px; cursor:pointer;">
+              </div>
+            </div>
+            <canvas id="sigTypeCanvas" width="600" height="180" style="border:1px solid var(--line); border-radius:10px; background:#fff; display:block; margin-top:8px; width:100%; max-width:600px;"></canvas>
+          </div>
+        `));
+        const typeCanvas = modeArea.querySelector('#sigTypeCanvas');
+        function renderTypedSig(){
+          typedSigText = modeArea.querySelector('#sigTypeText').value.trim();
+          const font = FONTS[Number(modeArea.querySelector('#sigTypeFont').value)];
+          const color = modeArea.querySelector('#sigTypeColor').value;
+          const ctx = typeCanvas.getContext('2d');
+          ctx.clearRect(0,0,typeCanvas.width,typeCanvas.height);
+          if(!typedSigText){ sigDataUrl = null; return; }
+          ctx.fillStyle = color;
+          ctx.font = `60px ${font.css}`;
+          ctx.textBaseline = 'middle';
+          ctx.fillText(typedSigText, 20, typeCanvas.height/2);
+          sigDataUrl = typeCanvas.toDataURL('image/png');
+        }
+        modeArea.querySelector('#sigTypeText').addEventListener('input', renderTypedSig);
+        modeArea.querySelector('#sigTypeFont').addEventListener('change', renderTypedSig);
+        modeArea.querySelector('#sigTypeColor').addEventListener('input', renderTypedSig);
+        if(typedSigText) renderTypedSig();
+      } else if(sigMode==='upload'){
+        modeArea.appendChild(el(`<div class="note tamil">உங்கள் signature-ஐ ஒரு படமாக (transparent PNG சிறந்தது) upload செய்யவும்.</div>`));
+        mountUploader(modeArea, {
+          accept:'image/*',
+          label:'Signature படத்தை drag & drop or tap', sublabel:'',
+          onAdd: async (fl)=>{
+            const f = fl[0];
+            sigDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+            paint();
+          }
+        });
+        if(sigDataUrl){
+          modeArea.appendChild(el(`<img src="${sigDataUrl}" style="max-width:250px; max-height:120px; margin-top:8px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:6px; display:block;">`));
+        }
+      }
 
       const opts = el(`
         <div class="opts tamil" style="margin-top:14px;">
@@ -3704,9 +3782,10 @@ TOOL_IMPL.sign = {
       body.appendChild(row);
     }
 
-    function setupSignaturePad(canvas){
+    function setupSignaturePad(canvas, colorInput){
       const ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#20242B'; ctx.lineWidth = 2.5; ctx.lineCap='round';
+      ctx.strokeStyle = colorInput ? colorInput.value : '#20242B'; ctx.lineWidth = 2.5; ctx.lineCap='round';
+      if(colorInput) colorInput.addEventListener('input', ()=>{ ctx.strokeStyle = colorInput.value; });
       let drawing = false, last = null;
       function getPos(e){
         const rect = canvas.getBoundingClientRect();
