@@ -57,6 +57,7 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 3. Re-minify and ship.
 
 ## Known follow-ups
+- **Text-to-Image (`/api/ai/image`) needs Google Cloud billing enabled** — the route deploys and requires login correctly, but `gemini-3.1-flash-image` has genuinely no free API tier (confirmed via Google's own developer forum and its pricing page as of mid-2026 — even projects with active prepaid credit hit `limit: 0` on the free-tier quota bucket specifically, since this model only serves paid requests). Enable billing on the `pdf-tools-506813` GCP project at console.cloud.google.com/billing to fix. Pricing is ~$0.067/image at 1K resolution — already accounted for by the tool's existing 3-credits-per-image charge to users.
 - PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
 
 ## Recent major changes
