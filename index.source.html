@@ -4526,9 +4526,11 @@ TOOL_IMPL.camscan = {
           const finalRow = el(`<div class="btn-row tamil"></div>`);
           const bSave = el(`<button class="btn accent">📕 PDF ஆக சேமி (${pages.length} page)</button>`);
           bSave.onclick = doSavePdf;
+          const bSaveImg = el(`<button class="btn secondary">🖼️ Images ஆக சேமி (JPG)</button>`);
+          bSaveImg.onclick = doSaveImages;
           const bClear = el(`<button class="btn secondary">🗑️ அனைத்தையும் Clear</button>`);
           bClear.onclick = ()=>{ pages=[]; paint(); };
-          finalRow.appendChild(bSave); finalRow.appendChild(bClear);
+          finalRow.appendChild(bSave); finalRow.appendChild(bSaveImg); finalRow.appendChild(bClear);
           body.appendChild(finalRow);
           body.appendChild(el(`<div class="note tamil">💡 இந்த ஸ்கேன் PDF-ல் இருந்து தட்டச்சு that can be உரையை எடுக்க வேண்டுமா? Save ed பிறகு, முகப்புக்கு சென்று "🔎 படத்திலிருந்து எழுத்து (OCR)" கருவியை திற — அந்த PDF-ஐ போட்டால் உரையை படித்துத் தரும் (தமிழ் + 20 மொழிகள்).</div>`));
         }
@@ -4687,6 +4689,30 @@ TOOL_IMPL.camscan = {
         prog.set(100,'Done');
         prog.remove();
         startAdjustNext();
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    async function doSaveImages(){
+      if(!pages.length){ mountResult(body,'குறைந்தது ஒரு பக்கத்தையாவது add.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        if(pages.length === 1){
+          // Single page — no need to zip, just download the JPG directly
+          prog.set(50,'Preparing…');
+          const bytes = Uint8Array.from(atob(pages[0].dataUrl.split(',')[1]), c=>c.charCodeAt(0));
+          downloadBlob(new Blob([bytes],{type:'image/jpeg'}), 'scanned-document.jpg');
+        } else {
+          const zip = new JSZip();
+          for(let i=0;i<pages.length;i++){
+            prog.set((i/pages.length)*90, `page ${i+1}/${pages.length} Adding…`);
+            const bytes = Uint8Array.from(atob(pages[i].dataUrl.split(',')[1]), c=>c.charCodeAt(0));
+            zip.file(`page-${String(i+1).padStart(2,'0')}.jpg`, bytes);
+          }
+          prog.set(95,'ZIP தயார் செய்யப்படுகிறது…');
+          const blob = await zip.generateAsync({type:'blob'});
+          downloadBlob(blob, 'scanned-pages.zip');
+        }
+        prog.set(100,'Done'); prog.remove();
+        mountResult(body, `${pages.length} பக்கங்கள் ${pages.length===1?'JPG-ஆக':'ZIP-ஆக'} downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     async function doSavePdf(){
