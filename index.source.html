@@ -315,7 +315,8 @@ const TOOLS = [
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
-  {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it (Gemini)', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
+  {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
+  {id:'aibgreplace', name:'AI Background Replace', desc:'Product/portrait photos-க்கு AI-generated background — competitors இதை Pro-க்கு பின்னால் வைக்கின்றன, நாங்க free', icon:'🪄', color:'#7C3AED', cat:'image', cost:5},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'littlestar', name:'Little Star — Education Arcade', desc:'Fun mini-games, daily challenges & character customization, Tamil + English', icon:'⭐', color:'#D6336C', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
@@ -6895,7 +6896,7 @@ TOOL_IMPL.texttoimage = {
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note tamil">என்ன படம் வேண்டும் என்று விவரமாக எழுதுங்கள் — AI உருவாக்கும் (Gemini). ஒவ்வொரு படத்திற்கும் 5 credits.</div>`));
+      body.appendChild(el(`<div class="note tamil">என்ன படம் வேண்டும் என்று விவரமாக எழுதுங்கள் — AI உருவாக்கும். ஒவ்வொரு படத்திற்கும் 5 credits.</div>`));
       const ta = el(`<textarea id="t2iPrompt" rows="3" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="எ.கா: A watercolor painting of the Ilkal fort at sunset, warm orange sky, birds flying">${escapeHtml(prompt)}</textarea>`);
       ta.addEventListener('input',(e)=> prompt = e.target.value);
       body.appendChild(ta);
@@ -6942,6 +6943,87 @@ TOOL_IMPL.texttoimage = {
         generatedImages.push({ dataUrl, prompt: p });
         prog.set(100,'Done'); prog.remove();
         paint();
+      }catch(err){ prog.remove(); mountResult(body, 'Error: '+err.message).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
+
+/* ===================== AI BACKGROUND REPLACE =====================
+   Combines two already-proven pieces: bgremove's background-cutout
+   (@imgly/background-removal, same library, same import pattern) and
+   texttoimage's backend call (/api/ai/image — Cloudflare Workers AI,
+   free) — generates a described background and composites the cutout
+   subject onto it. Canva/Fotor offer this; Picsart gates it behind Pro
+   ("AI generation and background removal require Pro" per research). */
+TOOL_IMPL.aibgreplace = {
+  mount(container){
+    let file = null, cutoutBlob = null, prompt = '';
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">ஒரு photo (product/portrait) upload பண்ணுங்க — subject-ஐ தானாக வெட்டி எடுத்து, நீங்க describe பண்ணும் AI background-ஐ பின்னால் வைக்கும்.</div>`));
+      mountUploader(body, { accept:'image/*', label:'Photo drag & drop or tap', sublabel:'',
+        onAdd: (fl)=>{ file = fl[0]; cutoutBlob = null; paint(); } });
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ file=null; cutoutBlob=null; paint(); });
+      body.appendChild(el(`<img src="${URL.createObjectURL(file)}" style="max-width:100%; max-height:260px; border-radius:10px; margin:8px 0; display:block;">`));
+      const ta = el(`<textarea id="abgPrompt" rows="2" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="எ.கா: a clean white studio background, soft shadow, professional product photography">${escapeHtml(prompt)}</textarea>`);
+      ta.addEventListener('input',(e)=> prompt = e.target.value);
+      body.appendChild(ta);
+      const row = el(`<div class="btn-row" style="margin-top:10px;"></div>`);
+      const btn = el(`<button class="btn">🪄 Background Generate & Replace</button>`);
+      btn.onclick = doGenerate;
+      row.appendChild(btn);
+      body.appendChild(row);
+    }
+    async function doGenerate(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'இந்த feature பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
+      const p = (body.querySelector('#abgPrompt').value || '').trim();
+      if(!p){ mountResult(body, 'Background-ஐ பற்றி describe பண்ணுங்க முதலில்.').style.background='#FDEDEC'; return; }
+      const prog = mountProgress(body);
+      try{
+        // Step 1: cut out the subject — same library/call bgremove already
+        // uses and has proven reliable, not a new/untested dependency.
+        if(!cutoutBlob){
+          prog.set(10,'Subject-ஐ AI detect பண்றது… (முதல் தடவை ~15-40MB model download)');
+          const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
+          const removeBackground = mod.default || mod.removeBackground;
+          cutoutBlob = await removeBackground(file, {
+            progress: (key, cur, total) => { if(total) prog.set(10 + Math.round(cur/total*35), 'Subject-ஐ AI detect பண்றது… '+Math.round(cur/total*100)+'%'); }
+          });
+        }
+        // Step 2: generate the described background via the same backend
+        // endpoint texttoimage already uses (Cloudflare Workers AI, free).
+        prog.set(50, 'Background உருவாக்குகிறது…');
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/image', {
+          method:'POST',
+          headers:{ Authorization:'Bearer '+authState.session.access_token, 'Content-Type':'application/json' },
+          body: JSON.stringify({ prompt: p, toolId: 'aibgreplace' })
+        });
+        if(result.error) throw new Error(result.error);
+        prog.set(80, 'இணைக்கிறது…');
+        const bgImg = new Image();
+        await new Promise((res,rej)=>{ bgImg.onload=res; bgImg.onerror=rej; bgImg.src = `data:${result.mimeType||'image/png'};base64,${result.imageBase64}`; });
+        const subjectImg = new Image();
+        await new Promise((res,rej)=>{ subjectImg.onload=res; subjectImg.onerror=rej; subjectImg.src = URL.createObjectURL(cutoutBlob); });
+        // Composite: cover-fit the generated background to the subject's own
+        // canvas size (so the subject's resolution is never downscaled to
+        // match the AI background), then draw the transparent-cutout subject
+        // on top at its native size.
+        const canvas = document.createElement('canvas');
+        canvas.width = subjectImg.naturalWidth; canvas.height = subjectImg.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        const scale = Math.max(canvas.width/bgImg.naturalWidth, canvas.height/bgImg.naturalHeight);
+        const bw = bgImg.naturalWidth*scale, bh = bgImg.naturalHeight*scale;
+        ctx.drawImage(bgImg, (canvas.width-bw)/2, (canvas.height-bh)/2, bw, bh);
+        ctx.drawImage(subjectImg, 0, 0);
+        const blob = await new Promise(res=> canvas.toBlob(res,'image/png'));
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-newbg.png');
+        prog.set(100,'Done'); prog.remove();
+        const url = URL.createObjectURL(blob);
+        mountResult(body, 'Background மாற்றப்பட்ட படம் downloaded. Preview கீழே:');
+        body.appendChild(el(`<img src="${url}" style="max-width:100%; margin-top:10px; border:1px solid var(--line); border-radius:10px;">`));
       }catch(err){ prog.remove(); mountResult(body, 'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
