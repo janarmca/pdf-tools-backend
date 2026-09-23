@@ -436,22 +436,24 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
-// POST /api/ai/image — Text-to-Image generation (Together.ai — FLUX.1-schnell)
+// POST /api/ai/image — Text-to-Image generation (Cloudflare Workers AI —
+// FLUX.1-schnell)
 // body: { prompt: string }
-// Switched from Gemini (gemini-3.1-flash-image, ~$0.067/image = ~Rs 6.41,
-// AND required Google Cloud billing with a ~Rs 2000 verification hold) to
-// Together.ai's FLUX.1-schnell (~$0.0027/image = ~Rs 0.26 — about 25x
-// cheaper), which only needs a one-time $5 minimum prepaid credit purchase
-// (docs.together.ai/docs/billing) — a far lower barrier than Google Cloud's
-// billing setup. Priced at 5 credits to the user (kept as-is after the
-// earlier Gemini-cost-driven raise from 3->5) since the margin is now large
-// either way; could safely be lowered again if desired.
+// Switched from Together.ai to Cloudflare Workers AI: genuinely free up to
+// 10,000 "Neurons"/day (an ongoing daily allowance, not a one-time trial),
+// confirmed via Cloudflare's own official product page and pricing docs as
+// requiring NO credit card for the free tier (only needed if usage exceeds
+// the daily pool). Verified exact request format against Cloudflare's own
+// official model docs (developers.cloudflare.com/workers-ai/models/flux-1-schnell).
+// Needs CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN (Workers AI: Read scope)
+// env vars — the account ID is already visible in the Cloudflare dashboard
+// used for this project's Cloudflare Pages frontend deploy.
 // ============================================================
 app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
   const CREDIT_COST = 5;
   try {
-    if (!process.env.TOGETHER_API_KEY) {
-      return res.status(501).json({ error: 'AI feature not set up yet — add TOGETHER_API_KEY in Cloud Run env vars (get one at together.ai, add at least $5 credit).' });
+    if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN) {
+      return res.status(501).json({ error: 'AI feature not set up yet — add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Cloud Run env vars.' });
     }
     const prompt = (req.body.prompt || '').trim();
     if (!prompt) return res.status(400).json({ error: 'Prompt தேவை.' });
@@ -459,27 +461,34 @@ app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
     const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
-    const togetherRes = await fetch('https://api.together.xyz/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'black-forest-labs/FLUX.1-schnell',
-        prompt,
-        width: 1024,
-        height: 1024,
-        steps: 4, // schnell is a distilled, few-step model — 4 is Together's documented recommended step count
-        n: 1,
-        response_format: 'b64_json'
-      })
-    });
-    const togetherJson = await togetherRes.json();
-    if (!togetherRes.ok) throw new Error(togetherJson.error?.message || togetherJson.error || 'Image generation failed');
-    const imageData = togetherJson.data?.[0]?.b64_json;
+    const cfRes = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt })
+      }
+    );
+    const contentType = cfRes.headers.get('content-type') || '';
+    let imageData;
+    if (contentType.includes('application/json')) {
+      const cfJson = await cfRes.json();
+      if (!cfRes.ok || cfJson.success === false) {
+        throw new Error(cfJson.errors?.[0]?.message || 'Image generation failed');
+      }
+      imageData = cfJson.result?.image; // base64 string
+    } else {
+      // Some Workers AI image models return the raw image bytes directly
+      // rather than JSON — handle that shape too rather than assuming one.
+      if (!cfRes.ok) throw new Error('Image generation failed (HTTP ' + cfRes.status + ')');
+      const buf = Buffer.from(await cfRes.arrayBuffer());
+      imageData = buf.toString('base64');
+    }
     if (!imageData) throw new Error('Model did not return an image — try rephrasing the prompt.');
-    res.json({ ok: true, imageBase64: imageData, mimeType: 'image/png' });
+    res.json({ ok: true, imageBase64: imageData, mimeType: 'image/jpeg' });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
