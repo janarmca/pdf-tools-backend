@@ -5,7 +5,7 @@
 // (i.e. loading the app itself). It does not touch any other request type,
 // so it can never interfere with blob: URLs, downloads, CDN library loads,
 // backend API calls, or anything a tool does while running.
-const CACHE_NAME = 'pdf-tools-shell-v2';
+const CACHE_NAME = 'pdf-tools-shell-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
