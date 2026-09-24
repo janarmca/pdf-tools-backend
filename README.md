@@ -59,6 +59,9 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 ## Known follow-ups
 - PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
 
+## ⚠️ Service worker (`sw.js`) gotcha
+`sw.js` caches `index.html` for offline use, keyed by `CACHE_NAME`. Browsers only detect a new service worker (and re-cache) when **`sw.js` itself changes byte-for-byte** — editing `index.html` alone, however many times, never triggers this. A user's browser can keep running a service worker (and its cached app shell) from weeks ago even after many deploys, and hard refresh does **not** reliably force an active service worker to update in every browser. **Bump `CACHE_NAME` (e.g. `v2` → `v3`) whenever a change needs to reach service-worker-controlled clients promptly** — this was the actual cause of AI tool images not appearing for a user despite multiple confirmed-correct deploys and hard refreshes.
+
 ## ⚠️ Cloud Run env var gotcha
 `gcloud run services update --set-env-vars` **replaces the entire env var set**, not just the ones listed — this caused a real production outage once (wiped Supabase/Razorpay/Gemini keys, leaving only the 2 vars in that command, which crashed the server on startup with `Error: supabaseUrl is required`). **Always use `--update-env-vars` instead** to add/change vars without touching the rest. Confirm the full var list before AND after any env change:
 ```bash
