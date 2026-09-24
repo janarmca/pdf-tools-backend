@@ -53,12 +53,14 @@
   .hero-badge{background:rgba(255,255,255,.75); border:1px solid var(--line); border-radius:20px; padding:6px 13px; font-size:11.5px; font-weight:700; color:var(--ink); backdrop-filter:blur(4px);}
 
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:14px; margin-top:8px;}
+  .grid-compact{display:grid; grid-template-columns:repeat(auto-fill,minmax(128px,1fr)); gap:10px; margin-top:8px;}
   @media (max-width:480px){
     /* Was showing 1 tool per row on phones — 185px minimum column width
        doesn't leave room for 2 columns once the page's 16px side padding
        and 14px gap are subtracted from a typical ~375-390px phone screen.
        No media queries existed anywhere in this app before this fix. */
     .grid{grid-template-columns:repeat(2, 1fr); gap:10px;}
+    .grid-compact{grid-template-columns:repeat(3, 1fr); gap:8px;}
     .tool-card{padding:14px 10px; gap:6px;}
     .tool-icon{width:40px; height:40px; font-size:19px;}
     .tool-name{font-size:13.5px;}
@@ -1284,6 +1286,23 @@ function renderToolCard(t){
     </button>
   `);
 }
+// A smaller variant for spots like "Popular Tools" that show a quick-glance
+// row rather than the full browsing grid — same photo/data, tighter frame.
+function renderToolCardCompact(t){
+  const isPaid = !!t.cost;
+  return el(`
+    <button class="tool-card" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06);">
+      <div style="position:relative; width:100%; height:72px; overflow:hidden; border-radius:14px 14px 0 0; background:${t.color}18; flex-shrink:0;">
+        <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="128" height="72" style="display:block; width:100%; height:72px; object-fit:cover;" onerror="this.style.display='none'">
+        ${isPaid ? `<div style="position:absolute; top:5px; right:5px; background:#fff; color:#B8860B; font-size:8px; font-weight:800; padding:2px 5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.15);">⚡${t.cost}</div>` : ''}
+        <div style="position:absolute; bottom:-10px; left:9px; width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; background:${t.color}; box-shadow:0 3px 7px rgba(0,0,0,.18); border:2px solid var(--card);">${t.icon}</div>
+      </div>
+      <div style="padding:15px 10px 11px; display:flex; flex-direction:column; gap:2px; text-align:left;">
+        <div style="font-weight:800; font-size:12px; line-height:1.25;">${t.name}</div>
+      </div>
+    </button>
+  `);
+}
 
 // Maps a file extension to the tool category most relevant to it (fallback
 // when no direct conversion path is known) and to a list of direct
@@ -1391,8 +1410,8 @@ function renderHomeBody(){
     }
 
     holder.appendChild(el(`<div style="font-weight:900; font-size:17px; margin-top:26px; margin-bottom:2px;">⭐ Popular Tools</div>`));
-    const popularGrid = el(`<div class="grid"></div>`);
-    POPULAR_TOOL_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> popularGrid.appendChild(renderToolCard(t)));
+    const popularGrid = el(`<div class="grid-compact"></div>`);
+    POPULAR_TOOL_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> popularGrid.appendChild(renderToolCardCompact(t)));
     holder.appendChild(popularGrid);
 
     holder.appendChild(el(`<div style="font-weight:900; font-size:17px; margin-top:26px; margin-bottom:2px;">Browse by category</div>`));
