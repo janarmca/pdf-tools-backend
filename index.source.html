@@ -388,7 +388,7 @@ function friendlyErrorMessage(err){
   if(/Failed to fetch|NetworkError|network error|ERR_/i.test(msg)){
     return 'Network error — please check your internet connection and try again.';
   }
-  if(/Invalid login credentials/i.test(msg)) return 'Incorrect email or password. Please try again.';
+  if(/Invalid login credentials/i.test(msg)) return 'Incorrect email or password. (If you signed in with Google before, that account has no password set yet — use "Forgot password?" below to set one.)';
   if(/User already registered/i.test(msg)) return 'An account with this email already exists — try signing in instead.';
   if(/Not enough credits/i.test(msg)) return msg;
   if(/Payment details missing|Invalid signature/i.test(msg)) return 'We couldn\'t verify that payment. Please contact support with your Payment ID if money was deducted.';
