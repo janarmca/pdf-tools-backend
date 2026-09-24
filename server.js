@@ -97,6 +97,23 @@ async function deductCredits(userId, amount, toolId) {
   return data === true;
 }
 
+// Refunds credits after a deductCredits() call whose paid operation then
+// failed — call this from a catch block, and ONLY if `allowed` was true
+// (i.e. a real deduction actually happened; if deductCredits returned
+// false, nothing was taken and there's nothing to refund). Swallows its
+// own errors (logs, doesn't throw) so a refund failure never masks the
+// original error that's already being returned to the user.
+async function refundCredits(userId, amount, toolId) {
+  try {
+    const { error } = await supabase.rpc('refund_credits', {
+      p_user_id: userId, p_amount: amount, p_tool_id: toolId
+    });
+    if (error) console.error(`refundCredits failed for user ${userId}, tool ${toolId}:`, error.message);
+  } catch (e) {
+    console.error(`refundCredits threw for user ${userId}, tool ${toolId}:`, e.message);
+  }
+}
+
 // ============================================================
 // GET /api/me — login ஆன user-ன் profile (credits, plan) திருப்பும்
 // ============================================================
@@ -121,8 +138,9 @@ app.get('/api/pricing', async (req, res) => {
 // ============================================================
 app.post('/api/video/compress', creditLimiter, requireAuth, uploadVideo.single('file'), async (req, res) => {
   const CREDIT_COST = 2; // இந்த tool-க்கு எத்தனை credits
+  let allowed = false;
   try {
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'videocompress');
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'videocompress');
     if (!allowed) return res.status(402).json({ error: 'போதுமான credits இல்லை — மேலும் வாங்கவும் (Not enough credits)' });
 
     const inputPath = req.file.path;
@@ -145,6 +163,9 @@ app.post('/api/video/compress', creditLimiter, requireAuth, uploadVideo.single('
       fs.unlink(outputPath, () => {});
     });
   } catch (e) {
+    // Refund: credits were taken above, before ffmpeg ran - a crash/invalid
+    // file/timeout here previously left the user charged for nothing.
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'videocompress');
     res.status(500).json({ error: e.message });
   }
 });
@@ -166,8 +187,9 @@ app.post('/api/video/process', creditLimiter, requireAuth, uploadVideo.single('f
   let params = {};
   try { params = JSON.parse(req.body.params || '{}'); } catch (e) { /* use defaults */ }
 
+  let allowed = false;
   try {
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
     if (!allowed) return res.status(402).json({ error: 'போதுமான credits இல்லை — மேலும் வாங்கவும் (Not enough credits)' });
 
     const inputPath = req.file.path;
@@ -230,6 +252,7 @@ app.post('/api/video/process', creditLimiter, requireAuth, uploadVideo.single('f
       fs.unlink(outputPath, () => {});
     });
   } catch (e) {
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'video_' + op);
     res.status(500).json({ error: e.message });
   }
 });
@@ -254,8 +277,9 @@ app.post('/api/video/process-multi', creditLimiter, requireAuth, uploadVideo.arr
   const files = req.files || [];
   const cleanupPaths = files.map(f => f.path);
 
+  let allowed = false;
   try {
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'video_' + op);
     if (!allowed) return res.status(402).json({ error: 'போதுமான credits இல்லை — மேலும் வாங்கவும் (Not enough credits)' });
 
     let ext = 'mp4', downloadName = op + '.mp4';
@@ -327,6 +351,7 @@ app.post('/api/video/process-multi', creditLimiter, requireAuth, uploadVideo.arr
     });
   } catch (e) {
     cleanupPaths.forEach(p => fs.unlink(p, () => {}));
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'video_' + op);
     res.status(500).json({ error: e.message });
   }
 });
@@ -397,12 +422,13 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
   // honestly in credits rather than charging the same flat 1 credit for a
   // tiny question and a full untruncated spreadsheet dump.
   const CREDIT_COST = req.body.deepAnalysis === 'true' ? 3 : 1;
+  let allowed = false;
   try {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
     }
     const toolId = req.body.toolId || 'askai'; // which of the AI tools called this — for usage_logs
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+    allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
     const question = req.body.question || 'Summarize this document and pull out any key dates, numbers, or names.';
@@ -431,6 +457,7 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
     res.json({ ok: true, answer });
   } catch (e) {
     if (req.file) fs.unlink(req.file.path, () => {});
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, req.body.toolId || 'askai');
     res.status(500).json({ error: e.message });
   }
 });
@@ -451,6 +478,7 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 // ============================================================
 app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
   const CREDIT_COST = 5;
+  let allowed = false; // tracked outside try so the catch block below can tell whether a real deduction happened (and therefore needs refunding) vs. failing before/during the deduction itself
   try {
     if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN) {
       return res.status(501).json({ error: 'AI feature not set up yet — add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Cloud Run env vars.' });
@@ -458,7 +486,7 @@ app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
     const prompt = (req.body.prompt || '').trim();
     if (!prompt) return res.status(400).json({ error: 'Prompt தேவை.' });
     const toolId = req.body.toolId || 'texttoimage';
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+    allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
     const cfRes = await fetch(
@@ -490,6 +518,12 @@ app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
     if (!imageData) throw new Error('Model did not return an image — try rephrasing the prompt.');
     res.json({ ok: true, imageBase64: imageData, mimeType: 'image/jpeg' });
   } catch (e) {
+    // The exact bug this fixes: credits were deducted above BEFORE this
+    // Cloudflare call, so a failure here (network error, daily quota
+    // exceeded, invalid prompt, etc.) previously charged the user for
+    // nothing. Only refund if a real deduction happened (allowed===true) —
+    // if deductCredits itself returned false, nothing was ever taken.
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, req.body.toolId || 'texttoimage');
     res.status(500).json({ error: e.message });
   }
 });
@@ -755,9 +789,10 @@ function buildNavamsaFromSubject(subject) {
   return navamsa;
 }
 app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res) => {
+  const CREDIT_COST = 2; // real RapidAPI Astrologer cost per call — was previously unmetered
+  let allowed = false;
   try {
-    const CREDIT_COST = 2; // real RapidAPI Astrologer cost per call — was previously unmetered
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus');
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus');
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.', verified: false });
     const b = req.body || {};
     if (b.mode === 'compatibility') {
@@ -819,6 +854,7 @@ app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res
       chartSummaryForAI: `Lagna (Ascendant): ${lagna}. Moon Nakshatra: ${nakshatra ? nakshatra.en+' pada '+nakshatra.pada : 'unknown'}. Planets: ${planetSummary}.${transitSummary ? ' Current transits: '+transitSummary+'.' : ''}`
     });
   } catch (e) {
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'astrologyplus');
     res.status(502).json({ error: e.message, verified: false, accuracyStatus: 'unverified' });
   }
 });
@@ -827,9 +863,10 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
   // using our existing Gemini setup — this is exactly the same "explain real
   // data, don't invent it" pattern as the other AI tools in this app, and
   // gives us free multi-language support since Gemini itself is multilingual.
+  const CREDIT_COST = 1; // real Gemini API cost per question — was previously unmetered
+  let allowed = false;
   try {
-    const CREDIT_COST = 1; // real Gemini API cost per question — was previously unmetered
-    const allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
     const b = req.body || {};
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
@@ -841,9 +878,12 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || 'AI interpretation request failed');
     const answer = data.candidates && data.candidates[0] && data.candidates[0].content.parts[0].text;
-    res.json({ answer: answer || 'No answer generated.' });
+    if (!answer) throw new Error('AI did not return an answer — try rephrasing the question.');
+    res.json({ answer });
   } catch (e) {
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
     res.status(502).json({ error: e.message });
   }
 });

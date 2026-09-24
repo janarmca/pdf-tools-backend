@@ -127,3 +127,32 @@ begin
   return true;
 end;
 $$ language plpgsql security definer;
+
+-- Refunds credits after a deduct_credits() call whose paid operation then
+-- failed (e.g. the AI/video-processing call itself errored after credits
+-- were already taken) — added to fix a real bug where every credit-charging
+-- endpoint deducted upfront, before attempting the actual work, with no
+-- way to give the credits back if that work then failed. Mirrors
+-- deduct_credits' own Pro-user handling exactly: a Pro/Business user's
+-- deduct_credits call never actually subtracted anything (unlimited access,
+-- logged as a 0-credit usage entry), so refunding them here would
+-- incorrectly hand out real credits they never had taken — this function
+-- checks the same is_pro condition and is a no-op for those users, only
+-- crediting back p_amount for users who were genuinely charged.
+create or replace function public.refund_credits(p_user_id uuid, p_amount integer, p_tool_id text)
+returns void as $$
+declare
+  is_pro boolean;
+begin
+  select (plan in ('pro','business') and (plan_expires_at is null or plan_expires_at > now()))
+    into is_pro
+    from public.profiles where id = p_user_id for update;
+
+  if is_pro then
+    return; -- nothing was actually deducted for a Pro/Business user — nothing to refund
+  end if;
+
+  update public.profiles set credits = credits + p_amount where id = p_user_id;
+  insert into public.usage_logs (user_id, tool_id, credits_used) values (p_user_id, p_tool_id || '_refund', -p_amount);
+end;
+$$ language plpgsql security definer;
