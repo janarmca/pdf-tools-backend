@@ -1390,7 +1390,12 @@ function renderHomeBody(){
       holder.appendChild(recentSection);
     }
 
-    holder.appendChild(el(`<div style="font-weight:900; font-size:17px; margin-top:24px; margin-bottom:2px;">Browse by category</div>`));
+    holder.appendChild(el(`<div style="font-weight:900; font-size:17px; margin-top:26px; margin-bottom:2px;">⭐ Popular Tools</div>`));
+    const popularGrid = el(`<div class="grid"></div>`);
+    POPULAR_TOOL_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> popularGrid.appendChild(renderToolCard(t)));
+    holder.appendChild(popularGrid);
+
+    holder.appendChild(el(`<div style="font-weight:900; font-size:17px; margin-top:26px; margin-bottom:2px;">Browse by category</div>`));
     holder.appendChild(renderCategoryCards());
     return;
   }
