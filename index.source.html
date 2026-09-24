@@ -1187,7 +1187,7 @@ const CATEGORY_META = {
   ai:    { label: 'AI', icon:'🤖', sub: 'Powered by AI — 1 credit per use', isFree: false },
   education: { label: 'Education', icon:'🎓', sub: 'Learning games for Grades 1-12', isFree: true },
 };
-const POPULAR_TOOL_IDS = ['merge','compress','pdf2word','askai','videocompress','bgremove','ocr','aitranslate'];
+const POPULAR_TOOL_IDS = ['merge','compress','pdf2word','askai','videocompress','bgremove','ocr','aitranslate','resumebuilder'];
 let __activeCategory = 'all';
 let __searchQuery = '';
 
@@ -1398,7 +1398,9 @@ function renderHomeBody(){
       recentTools.forEach(t=>{
         const card = el(`
           <button style="flex:0 0 auto; width:92px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px; border-radius:14px; border:1.5px solid var(--line); background:#fff; cursor:pointer; box-shadow:0 1px 4px rgba(20,30,60,.06);">
-            <div style="width:40px; height:40px; border-radius:11px; background:${t.color}22; display:flex; align-items:center; justify-content:center; font-size:19px;">${t.icon}</div>
+            <div style="position:relative; width:40px; height:40px; border-radius:11px; background:${t.color}22; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:19px;">${t.icon}
+              <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="40" height="40" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" onerror="this.remove()">
+            </div>
             <div style="font-size:10.5px; font-weight:700; text-align:center; line-height:1.25; color:var(--ink);">${escapeHtml(t.name.length>18?t.name.slice(0,16)+'…':t.name)}</div>
           </button>
         `);
