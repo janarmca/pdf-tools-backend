@@ -5044,15 +5044,38 @@ TOOL_IMPL.camscan = {
         body.appendChild(filterRow);
 
         const btnRow = el(`<div class="btn-row tamil"></div>`);
+        const bRotate = el(`<button class="btn secondary">🔄 சுழற்று (Rotate)</button>`);
+        bRotate.onclick = rotateAdjustImage;
         const bReset = el(`<button class="btn secondary">↺ முழு படம்</button>`);
         bReset.onclick = ()=>{ corners = [{fx:0.02,fy:0.02},{fx:0.98,fy:0.02},{fx:0.98,fy:0.98},{fx:0.02,fy:0.98}]; updateOverlay(); };
         const bCancel = el(`<button class="btn secondary">✕ ரத்து</button>`);
         bCancel.onclick = ()=>{ startAdjustNext(); };
         const bAdd = el(`<button class="btn">✅ பக்கத்தை Add</button>`);
         bAdd.onclick = applyAdjust;
-        btnRow.appendChild(bReset); btnRow.appendChild(bCancel); btnRow.appendChild(bAdd);
+        btnRow.appendChild(bRotate); btnRow.appendChild(bReset); btnRow.appendChild(bCancel); btnRow.appendChild(bAdd);
         body.appendChild(btnRow);
       }
+    }
+
+    // Rotates the captured/uploaded photo 90° clockwise — a genuine gap
+    // (this tool previously had no rotate at all), needed when a phone
+    // camera captures the document sideways. Rotates the underlying image
+    // itself rather than just the crop selection, so width/height swap
+    // correctly; the corner quad is reset to the new full-frame default
+    // since the old fractional corners can't map correctly across a
+    // dimension swap.
+    async function rotateAdjustImage(){
+      const img = new Image();
+      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=adjustImg; });
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalHeight; canvas.height = img.naturalWidth;
+      const ctx = canvas.getContext('2d');
+      ctx.translate(canvas.width/2, canvas.height/2);
+      ctx.rotate(Math.PI/2);
+      ctx.drawImage(img, -img.naturalWidth/2, -img.naturalHeight/2);
+      adjustImg = canvas.toDataURL('image/jpeg', 0.92);
+      corners = [{fx:0.02,fy:0.02},{fx:0.98,fy:0.02},{fx:0.98,fy:0.98},{fx:0.02,fy:0.98}];
+      paint();
     }
 
     async function openCamera(){
