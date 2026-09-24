@@ -1,382 +1,265 @@
-  <svg width="160" height="160" viewBox="0 0 600 600"
+<svg width="200" height="160" viewBox="0 0 600 480"
      xmlns="http://www.w3.org/2000/svg">
 
   <defs>
 
-    <!-- Background -->
     <radialGradient id="bg" cx="50%" cy="45%">
       <stop offset="0%" stop-color="#ffffff"/>
       <stop offset="70%" stop-color="#eefcff"/>
       <stop offset="100%" stop-color="#dff7ff"/>
     </radialGradient>
 
-    <!-- Glass sphere -->
     <radialGradient id="glass" cx="35%" cy="25%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-      <stop offset="35%" stop-color="#a9f4ff" stop-opacity="0.55"/>
-      <stop offset="75%" stop-color="#24cfe5" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#087eaf" stop-opacity="0.5"/>
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset="35%" stop-color="#a9f4ff" stop-opacity=".55"/>
+      <stop offset="75%" stop-color="#24cfe5" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#087eaf" stop-opacity=".5"/>
     </radialGradient>
 
-    <!-- Blue brain -->
-    <linearGradient id="blueBrain"
-                    x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="blueBrain" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#68f4ff"/>
       <stop offset="45%" stop-color="#159fe5"/>
       <stop offset="100%" stop-color="#0752b7"/>
     </linearGradient>
 
-    <!-- Purple brain -->
-    <linearGradient id="purpleBrain"
-                    x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="purpleBrain" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#e49cff"/>
       <stop offset="45%" stop-color="#a44bea"/>
       <stop offset="100%" stop-color="#5421b7"/>
     </linearGradient>
 
-    <!-- Processor -->
-    <linearGradient id="chip"
-                    x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="chip" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#42eaff"/>
       <stop offset="50%" stop-color="#126bc5"/>
       <stop offset="100%" stop-color="#182b91"/>
     </linearGradient>
 
-    <!-- Orbit blue -->
     <linearGradient id="orbitBlue">
       <stop offset="0%" stop-color="#ffffff"/>
       <stop offset="35%" stop-color="#22e7ff"/>
       <stop offset="100%" stop-color="#2768ff"/>
     </linearGradient>
 
-    <!-- Orbit purple -->
     <linearGradient id="orbitPurple">
       <stop offset="0%" stop-color="#b9ffff"/>
       <stop offset="45%" stop-color="#c75cff"/>
       <stop offset="100%" stop-color="#6c30e8"/>
     </linearGradient>
 
-    <!-- Gold -->
-    <linearGradient id="gold"
-                    x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="gold">
       <stop offset="0%" stop-color="#fff7a0"/>
       <stop offset="50%" stop-color="#ffd329"/>
       <stop offset="100%" stop-color="#e99b00"/>
     </linearGradient>
 
-    <!-- Glow -->
     <filter id="glow">
-      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feGaussianBlur stdDeviation="5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <filter id="softGlow">
-      <feGaussianBlur stdDeviation="14"/>
-    </filter>
-
     <filter id="shadow">
-      <feDropShadow dx="0" dy="12"
-                    stdDeviation="14"
+      <feDropShadow dx="0" dy="8" stdDeviation="10"
                     flood-color="#159bc5"
-                    flood-opacity="0.28"/>
+                    flood-opacity=".28"/>
     </filter>
-
-    <!-- Brain clip shapes -->
-    <clipPath id="leftBrainClip">
-      <path d="
-        M300 175
-        C255 150 205 175 190 220
-        C165 225 145 250 153 280
-        C128 310 145 350 175 360
-        C160 400 195 430 230 420
-        C250 455 295 440 300 405
-        Z"/>
-    </clipPath>
-
-    <clipPath id="rightBrainClip">
-      <path d="
-        M300 175
-        C345 150 395 175 410 220
-        C435 225 455 250 447 280
-        C472 310 455 350 425 360
-        C440 400 405 430 370 420
-        C350 455 305 440 300 405
-        Z"/>
-    </clipPath>
 
   </defs>
 
-
-  <!-- ================================= -->
   <!-- BACKGROUND -->
-  <!-- ================================= -->
+  <rect width="600" height="480" fill="url(#bg)"/>
 
-  <rect width="600" height="600" fill="url(#bg)"/>
-
-  <ellipse cx="300" cy="470"
-           rx="225" ry="45"
+  <!-- SOFT GLOW -->
+  <ellipse cx="300" cy="400"
+           rx="210" ry="35"
            fill="#5ddff5"
-           opacity="0.18"
-           filter="url(#softGlow)"/>
+           opacity=".18"/>
 
-
-  <!-- ================================= -->
-  <!-- OUTER GLOW -->
-  <!-- ================================= -->
-
-  <circle cx="300" cy="300"
-          r="235"
+  <circle cx="300" cy="240"
+          r="215"
           fill="#65eaff"
-          opacity="0.13"
-          filter="url(#softGlow)"/>
+          opacity=".12"/>
 
-
-  <!-- ================================= -->
-  <!-- ORBITAL RINGS - BACK -->
-  <!-- ================================= -->
-
-  <ellipse cx="300" cy="300"
-           rx="250" ry="125"
+  <!-- BACK ORBIT -->
+  <ellipse cx="300" cy="240"
+           rx="250"
+           ry="115"
            fill="none"
            stroke="url(#orbitBlue)"
-           stroke-width="8"
-           opacity="0.75"
-           transform="rotate(18 300 300)"
-           filter="url(#glow)"/>
+           stroke-width="7"
+           opacity=".75"
+           transform="rotate(18 300 240)"/>
 
-  <ellipse cx="300" cy="300"
-           rx="250" ry="125"
+  <ellipse cx="300" cy="240"
+           rx="250"
+           ry="115"
            fill="none"
            stroke="url(#orbitPurple)"
-           stroke-width="7"
-           opacity="0.7"
-           transform="rotate(-18 300 300)"
-           filter="url(#glow)"/>
+           stroke-width="6"
+           opacity=".7"
+           transform="rotate(-18 300 240)"/>
 
-
-  <!-- ================================= -->
-  <!-- ORBIT NODES -->
-  <!-- ================================= -->
-
-  <circle cx="88" cy="280"
-          r="25"
+  <!-- LEFT ORBIT NODE -->
+  <circle cx="75" cy="220"
+          r="18"
           fill="#17cfff"
-          opacity="0.3"
-          filter="url(#softGlow)"/>
+          opacity=".25"/>
 
-  <circle cx="88" cy="280"
-          r="15"
+  <circle cx="75" cy="220"
+          r="11"
           fill="url(#orbitBlue)"
           filter="url(#glow)"/>
 
-  <circle cx="512" cy="325"
-          r="25"
+  <!-- RIGHT ORBIT NODE -->
+  <circle cx="525" cy="255"
+          r="18"
           fill="#b94dff"
-          opacity="0.3"
-          filter="url(#softGlow)"/>
+          opacity=".25"/>
 
-  <circle cx="512" cy="325"
-          r="15"
+  <circle cx="525" cy="255"
+          r="11"
           fill="url(#orbitPurple)"
           filter="url(#glow)"/>
 
-
-  <!-- ================================= -->
   <!-- GOLD ORBIT -->
-  <!-- ================================= -->
+  <path d="M90 320
+           C205 425 405 435 525 300"
+        fill="none"
+        stroke="url(#gold)"
+        stroke-width="7"
+        stroke-linecap="round"/>
 
-  <path d="
-    M100 390
-    C210 510 390 520 515 365
-  "
-  fill="none"
-  stroke="url(#gold)"
-  stroke-width="8"
-  stroke-linecap="round"
-  filter="url(#glow)"/>
-
-  <circle cx="465" cy="430"
-          r="19"
+  <circle cx="470" cy="350"
+          r="15"
           fill="url(#gold)"
           filter="url(#glow)"/>
 
-
-  <!-- ================================= -->
   <!-- GLASS SPHERE -->
-  <!-- ================================= -->
-
-  <circle cx="300" cy="300"
-          r="205"
+  <circle cx="300" cy="240"
+          r="185"
           fill="url(#glass)"
           stroke="#56dcf7"
           stroke-width="5"
-          opacity="0.88"
+          opacity=".9"
           filter="url(#shadow)"/>
 
-  <circle cx="300" cy="300"
-          r="187"
+  <circle cx="300" cy="240"
+          r="168"
           fill="none"
           stroke="#ffffff"
-          stroke-opacity="0.5"
+          stroke-opacity=".5"
           stroke-width="3"/>
 
-
-  <!-- ================================= -->
   <!-- LEFT BRAIN -->
-  <!-- ================================= -->
-
   <path d="
-    M300 175
-    C255 150 205 175 190 220
-    C165 225 145 250 153 280
-    C128 310 145 350 175 360
-    C160 400 195 430 230 420
-    C250 455 295 440 300 405
+    M300 125
+    C255 105 210 130 195 170
+    C165 175 150 200 158 225
+    C135 255 150 290 180 300
+    C165 335 200 365 235 355
+    C255 390 292 375 300 345
     Z"
     fill="url(#blueBrain)"
     stroke="#57eaff"
     stroke-width="4"/>
 
-
-  <!-- Left brain folds -->
-
-  <g clip-path="url(#leftBrainClip)"
-     fill="none"
+  <!-- LEFT BRAIN DETAILS -->
+  <g fill="none"
      stroke="#7af5ff"
      stroke-width="7"
      stroke-linecap="round"
-     opacity="0.65">
+     opacity=".65">
 
-    <path d="M205 195 C245 225 205 245 240 270"/>
-    <path d="M170 240 C210 260 175 290 220 305"/>
-    <path d="M160 305 C205 315 180 350 225 355"/>
-    <path d="M185 370 C220 350 215 395 250 405"/>
-    <path d="M245 180 C265 215 250 235 275 255"/>
-    <path d="M250 285 C215 300 250 325 220 345"/>
-
+    <path d="M205 150 C245 180 210 200 240 220"/>
+    <path d="M170 195 C210 215 180 245 220 255"/>
+    <path d="M165 255 C205 265 180 300 225 305"/>
+    <path d="M190 320 C225 300 220 340 250 350"/>
+    <path d="M245 135 C265 170 250 190 275 210"/>
   </g>
 
-
-  <!-- ================================= -->
   <!-- RIGHT BRAIN -->
-  <!-- ================================= -->
-
   <path d="
-    M300 175
-    C345 150 395 175 410 220
-    C435 225 455 250 447 280
-    C472 310 455 350 425 360
-    C440 400 405 430 370 420
-    C350 455 305 440 300 405
+    M300 125
+    C345 105 390 130 405 170
+    C435 175 450 200 442 225
+    C465 255 450 290 420 300
+    C435 335 400 365 365 355
+    C345 390 308 375 300 345
     Z"
     fill="url(#purpleBrain)"
     stroke="#d48cff"
     stroke-width="4"/>
 
-
-  <!-- Right brain folds -->
-
-  <g clip-path="url(#rightBrainClip)"
-     fill="none"
+  <!-- RIGHT BRAIN DETAILS -->
+  <g fill="none"
      stroke="#e9b1ff"
      stroke-width="7"
      stroke-linecap="round"
-     opacity="0.65">
+     opacity=".65">
 
-    <path d="M395 195 C355 225 395 245 360 270"/>
-    <path d="M430 240 C390 260 425 290 380 305"/>
-    <path d="M440 305 C395 315 420 350 375 355"/>
-    <path d="M415 370 C380 350 385 395 350 405"/>
-    <path d="M355 180 C335 215 350 235 325 255"/>
-    <path d="M350 285 C385 300 350 325 380 345"/>
-
+    <path d="M395 150 C355 180 390 200 360 220"/>
+    <path d="M430 195 C390 215 420 245 380 255"/>
+    <path d="M435 255 C395 265 420 300 375 305"/>
+    <path d="M410 320 C375 300 380 340 350 350"/>
+    <path d="M355 135 C335 170 350 190 325 210"/>
   </g>
 
-
-  <!-- ================================= -->
-  <!-- NEURAL CIRCUITS -->
-  <!-- ================================= -->
-
+  <!-- NEURAL CONNECTIONS -->
   <g fill="none"
      stroke="#ffffff"
      stroke-width="4"
-     stroke-linecap="round"
-     filter="url(#glow)">
+     stroke-linecap="round">
 
-    <!-- Left -->
-    <path d="M245 235 L275 260"/>
-    <path d="M220 285 L270 295"/>
-    <path d="M230 350 L275 330"/>
+    <path d="M245 185 L275 210"/>
+    <path d="M220 235 L270 240"/>
+    <path d="M230 300 L275 270"/>
 
-    <!-- Right -->
-    <path d="M355 235 L325 260"/>
-    <path d="M380 285 L330 295"/>
-    <path d="M370 350 L325 330"/>
-
+    <path d="M355 185 L325 210"/>
+    <path d="M380 235 L330 240"/>
+    <path d="M370 300 L325 270"/>
   </g>
 
-
-  <!-- ================================= -->
   <!-- NEURAL NODES -->
-  <!-- ================================= -->
-
   <g filter="url(#glow)">
 
-    <circle cx="245" cy="235" r="9"
+    <circle cx="245" cy="185" r="9"
             fill="#ffffff"
             stroke="#53efff"
             stroke-width="5"/>
 
-    <circle cx="220" cy="285" r="9"
+    <circle cx="220" cy="235" r="9"
             fill="#ffffff"
             stroke="#53efff"
             stroke-width="5"/>
 
-    <circle cx="230" cy="350" r="9"
+    <circle cx="230" cy="300" r="9"
             fill="#ffffff"
             stroke="#53efff"
             stroke-width="5"/>
 
-    <circle cx="355" cy="235" r="9"
+    <circle cx="355" cy="185" r="9"
             fill="#ffffff"
             stroke="#ff9cff"
             stroke-width="5"/>
 
-    <circle cx="380" cy="285" r="9"
+    <circle cx="380" cy="235" r="9"
             fill="#ffffff"
             stroke="#ff9cff"
             stroke-width="5"/>
 
-    <circle cx="370" cy="350" r="9"
+    <circle cx="370" cy="300" r="9"
             fill="#ffffff"
             stroke="#ff9cff"
             stroke-width="5"/>
-
   </g>
 
-
-  <!-- ================================= -->
-  <!-- CENTRAL PROCESSOR -->
-  <!-- ================================= -->
-
+  <!-- CENTRAL AI CHIP -->
   <g filter="url(#shadow)">
 
-    <!-- Chip glow -->
     <rect x="240"
-          y="245"
-          width="120"
-          height="120"
-          rx="22"
-          fill="#55eaff"
-          opacity="0.35"
-          filter="url(#softGlow)"/>
-
-    <!-- Chip body -->
-    <rect x="240"
-          y="245"
+          y="185"
           width="120"
           height="120"
           rx="20"
@@ -384,9 +267,8 @@
           stroke="#65efff"
           stroke-width="5"/>
 
-    <!-- Inner chip -->
     <rect x="253"
-          y="258"
+          y="198"
           width="94"
           height="94"
           rx="12"
@@ -394,9 +276,8 @@
           stroke="#63eaff"
           stroke-width="3"/>
 
-    <!-- AI -->
     <text x="300"
-          y="322"
+          y="263"
           text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="48"
@@ -404,108 +285,81 @@
           fill="#ffffff">
       AI
     </text>
-
   </g>
 
-
-  <!-- ================================= -->
-  <!-- PROCESSOR PINS -->
-  <!-- ================================= -->
-
+  <!-- CHIP PINS -->
   <g stroke="#ffd84d"
      stroke-width="6"
      stroke-linecap="round">
 
-    <!-- Top -->
-    <line x1="265" y1="245" x2="265" y2="230"/>
-    <line x1="280" y1="245" x2="280" y2="230"/>
-    <line x1="295" y1="245" x2="295" y2="230"/>
-    <line x1="310" y1="245" x2="310" y2="230"/>
-    <line x1="325" y1="245" x2="325" y2="230"/>
-    <line x1="340" y1="245" x2="340" y2="230"/>
+    <line x1="265" y1="185" x2="265" y2="170"/>
+    <line x1="280" y1="185" x2="280" y2="170"/>
+    <line x1="295" y1="185" x2="295" y2="170"/>
+    <line x1="310" y1="185" x2="310" y2="170"/>
+    <line x1="325" y1="185" x2="325" y2="170"/>
+    <line x1="340" y1="185" x2="340" y2="170"/>
 
-    <!-- Bottom -->
-    <line x1="265" y1="365" x2="265" y2="380"/>
-    <line x1="280" y1="365" x2="280" y2="380"/>
-    <line x1="295" y1="365" x2="295" y2="380"/>
-    <line x1="310" y1="365" x2="310" y2="380"/>
-    <line x1="325" y1="365" x2="325" y2="380"/>
-    <line x1="340" y1="365" x2="340" y2="380"/>
+    <line x1="265" y1="305" x2="265" y2="320"/>
+    <line x1="280" y1="305" x2="280" y2="320"/>
+    <line x1="295" y1="305" x2="295" y2="320"/>
+    <line x1="310" y1="305" x2="310" y2="320"/>
+    <line x1="325" y1="305" x2="325" y2="320"/>
+    <line x1="340" y1="305" x2="340" y2="320"/>
 
-    <!-- Left -->
+    <line x1="240" y1="210" x2="225" y2="210"/>
+    <line x1="240" y1="225" x2="225" y2="225"/>
+    <line x1="240" y1="240" x2="225" y2="240"/>
+    <line x1="240" y1="255" x2="225" y2="255"/>
     <line x1="240" y1="270" x2="225" y2="270"/>
     <line x1="240" y1="285" x2="225" y2="285"/>
-    <line x1="240" y1="300" x2="225" y2="300"/>
-    <line x1="240" y1="315" x2="225" y2="315"/>
-    <line x1="240" y1="330" x2="225" y2="330"/>
-    <line x1="240" y1="345" x2="225" y2="345"/>
 
-    <!-- Right -->
+    <line x1="360" y1="210" x2="375" y2="210"/>
+    <line x1="360" y1="225" x2="375" y2="225"/>
+    <line x1="360" y1="240" x2="375" y2="240"/>
+    <line x1="360" y1="255" x2="375" y2="255"/>
     <line x1="360" y1="270" x2="375" y2="270"/>
     <line x1="360" y1="285" x2="375" y2="285"/>
-    <line x1="360" y1="300" x2="375" y2="300"/>
-    <line x1="360" y1="315" x2="375" y2="315"/>
-    <line x1="360" y1="330" x2="375" y2="330"/>
-    <line x1="360" y1="345" x2="375" y2="345"/>
-
   </g>
 
-
-  <!-- ================================= -->
-  <!-- GOLD SPARKLE -->
-  <!-- ================================= -->
-
-  <g transform="translate(455 105)"
+  <!-- GOLD STAR -->
+  <g transform="translate(465 90)"
      fill="url(#gold)"
      filter="url(#glow)">
-
     <path d="
-      M0 -35
-      L8 -8
-      L35 0
-      L8 8
-      L0 35
-      L-8 8
-      L-35 0
-      L-8 -8
+      M0 -30
+      L7 -7
+      L30 0
+      L7 7
+      L0 30
+      L-7 7
+      L-30 0
+      L-7 -7
       Z"/>
   </g>
 
-
-  <!-- ================================= -->
-  <!-- SMALL CYAN SPARKLE -->
-  <!-- ================================= -->
-
-  <g transform="translate(105 390)"
+  <!-- CYAN STAR -->
+  <g transform="translate(105 330)"
      fill="#21e8ff"
      filter="url(#glow)">
-
     <path d="
-      M0 -18
+      M0 -16
       L4 -4
-      L18 0
+      L16 0
       L4 4
-      L0 18
+      L0 16
       L-4 4
-      L-18 0
+      L-16 0
       L-4 -4
       Z"/>
   </g>
 
-
-  <!-- ================================= -->
   <!-- GLASS HIGHLIGHT -->
-  <!-- ================================= -->
-
-  <path d="
-    M175 205
-    C210 135 310 110 375 145
-  "
-  fill="none"
-  stroke="#ffffff"
-  stroke-width="12"
-  stroke-linecap="round"
-  opacity="0.6"
-  filter="url(#glow)"/>
+  <path d="M175 145
+           C215 90 305 85 375 115"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="11"
+        stroke-linecap="round"
+        opacity=".6"/>
 
 </svg>
