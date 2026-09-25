@@ -12,11 +12,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>PDF Tools India - இலவச PDF, GST Bill, Image, Video Tools | 87+ கருவிகள்</title>
-<meta name="description" content="இலவச PDF Merge, Split, Compress, GST Invoice Maker, Bill/Quotation Maker, Image Background Remover, Video Compressor - 87+ tools ஒரே இடத்தில். No signup needed for most tools. Tamil & English support.">
+<title>PDF Tools India - இலவச PDF, GST Bill, Image, Video Tools | 122+ கருவிகள்</title>
+<meta name="description" content="இலவச PDF Merge, Split, Compress, GST Invoice Maker, Bill/Quotation Maker, Image Background Remover, Video Compressor - 122+ tools ஒரே இடத்தில். No signup needed for most tools. Tamil & English support.">
 <meta name="keywords" content="PDF tools India, free PDF merge, PDF split online, GST invoice maker free, GST bill software Tamil Nadu, image background remover free, video compressor online, PDF tools Tamil">
 <link rel="canonical" href="https://pdftoolsindia.com/">
-<meta property="og:title" content="PDF Tools India - 87+ இலவச கருவிகள்">
+<meta property="og:title" content="PDF Tools India - 122+ இலவச கருவிகள்">
 <meta property="og:description" content="PDF, GST Bill, Image, Video, AI, Education tools - அனைத்தும் ஒரே இடத்தில், இலவசமாக.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdftoolsindia.com/">
@@ -965,7 +965,7 @@ function renderSettingsPage(){
     // ---- Support ----
     body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 10px;">Support</div>`));
     const supportLinks = [
-      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v5'); }catch(e){} maybeShowDiscoverModal(true); }],
+      ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v6'); }catch(e){} maybeShowDiscoverModal(true); }],
       ['📝 Blog', ()=> window.open('blog/','_blank')],
       ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
       ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
@@ -990,13 +990,14 @@ function renderSettingsPage(){
 function maybeShowDiscoverModal(forceShow){
   if(!forceShow){
     let shown = null;
-    try{ shown = localStorage.getItem('pdfToolsDiscoverShown_v5'); }catch(e){}
+    try{ shown = localStorage.getItem('pdfToolsDiscoverShown_v6'); }catch(e){}
     if(shown) return;
   }
-  try{ localStorage.setItem('pdfToolsDiscoverShown_v5','1'); }catch(e){}
+  try{ localStorage.setItem('pdfToolsDiscoverShown_v6','1'); }catch(e){}
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
   const cards = [
-    ['✨ NEW', '112+ tools, all in one place', 'PDF, Image, Video, Business/GST, Education, and Games — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
+    ['🆕 NEW', '8 new PDF tools just added', 'PDF → PNG, PDF ↔ PowerPoint, OCR → Searchable PDF, Extract Pages, Flatten PDF, Repair PDF, and PDF Metadata Remover — all free.', '📄'],
+    ['✨ NEW', '122+ tools, all in one place', 'PDF, Image, Video, Business/GST, Education, and Games — merge, split, compress, OCR, watermark, invoicing, and much more.', '🧰'],
     ['📋 UPGRADED', 'Resume Builder — now with real AI', 'JD matching, drag-drop reordering, multiple saved versions, undo/redo, and genuine AI-written summaries/bullets/skills — not a template.', '📋'],
     ['🔐 NEW', 'Forgot your PDF/Excel/Word password?', 'Recover it — tries common passwords, your personal details, name+number combinations, and even your own remembered guesses.', '🔍'],
     ['🧮 NEW', 'EMI, Income Tax, Age & % Calculators', 'EMI/Loan (with repayment schedule), Income Tax (Old vs New regime), Age, and Percentage calculators — all free, instant.', '🧮'],
