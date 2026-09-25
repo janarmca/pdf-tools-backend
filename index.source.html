@@ -1291,16 +1291,13 @@ function toolSlug(t){
 function renderToolCard(t){
   const isPaid = !!t.cost;
   return el(`
-    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit;">
-      <div style="position:relative; width:100%; height:118px; overflow:hidden; border-radius:16px 16px 0 0; background:${t.color}18; flex-shrink:0;">
-        <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="185" height="118" style="display:block; width:100%; height:118px; object-fit:cover;" onerror="this.style.display='none'">
-        ${isPaid ? `<div style="position:absolute; top:8px; right:8px; background:#fff; color:#B8860B; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.15);">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
-        <div class="tool-icon" style="position:absolute; bottom:-16px; left:14px; background:${t.color}; box-shadow:0 4px 10px rgba(0,0,0,.18); border:3px solid var(--card);">${t.icon}</div>
+    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; text-decoration:none; color:inherit;">
+      ${isPaid ? `<div style="position:absolute; top:8px; right:8px; background:#FFF3E0; color:#B8860B; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:6px;">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
+      <div class="tool-icon" style="position:relative; background:${t.color}22; overflow:hidden;">${t.icon}
+        <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" onerror="this.remove()">
       </div>
-      <div style="padding:24px 16px 18px; display:flex; flex-direction:column; gap:6px; text-align:left;">
-        <div class="tool-name">${t.name}</div>
-        <div class="tool-desc">${t.desc}</div>
-      </div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc}</div>
     </a>
   `);
 }

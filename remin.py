@@ -1,33 +1,31 @@
-import subprocess
+import re, subprocess, tempfile, os
 
 with open('index.source.html', encoding='utf-8') as f:
-    src = f.read()
+    html = f.read()
 
-start_tag = '<script>'
-idx = src.rfind(start_tag)
-if idx == -1:
-    raise SystemExit("Could not find any <script> tag in index.source.html")
-start = idx + len(start_tag)
-end = src.find('</script>', start)
-if end == -1:
-    raise SystemExit("Could not find closing </script> after the last <script> tag")
-script_body = src[start:end]
+def minify_script(m):
+    code = m.group(1)
+    if not code.strip():
+        return m.group(0)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False, encoding='utf-8') as tf:
+        tf.write(code)
+        tmp_path = tf.name
+    try:
+        result = subprocess.run(
+            ['npx', '--yes', 'terser', tmp_path, '--compress', '--mangle'],
+            capture_output=True, text=True, timeout=120
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr)
+        minified = result.stdout
+    finally:
+        os.unlink(tmp_path)
+    return m.group(0).replace(code, minified)
 
-with open('/tmp/_body.js', 'w', encoding='utf-8') as f:
-    f.write(script_body)
-
-result = subprocess.run(
-    ['npx', '--yes', 'terser', '/tmp/_body.js', '--compress', '--mangle'],
-    capture_output=True, text=True
-)
-if result.returncode != 0:
-    print(result.stderr)
-    raise SystemExit("terser failed")
-
-minified = result.stdout
-new_html = src[:start] + minified + src[end:]
+pattern = re.compile(r'(?<=<script>)(.*?)(?=</script>)', re.S)
+out = pattern.sub(minify_script, html)
 
 with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(new_html)
+    f.write(out)
 
 print("Re-minified index.html successfully (rebuilt fresh from index.source.html).")
