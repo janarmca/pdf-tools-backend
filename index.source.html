@@ -1256,11 +1256,11 @@ function renderCategoryCards(){
           <div style="font-size:19px; font-weight:900; color:#fff;">${catLabel(key)}</div>
           <div style="font-size:11.5px; color:rgba(255,255,255,.8); margin-top:2px;">${count} tools — merge, split, compress, convert & more</div>
         </div>
-        <img src="images/cat-${key}.svg" alt="${catLabel(key)}" style="width:78%; max-width:190px; align-self:flex-end; height:auto; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));" loading="lazy">
+        <img src="images/tools-cat/${key}.jpg" onerror="this.onerror=null;this.src='images/cat-${key}.svg'" alt="${catLabel(key)}" style="width:78%; max-width:190px; align-self:flex-end; height:auto; object-fit:cover; border-radius:14px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));" loading="lazy">
       </button>
     `) : el(`
       <button class="cat-card cat-${key}" style="position:relative; overflow:hidden; border:none; border-radius:18px; padding:12px 12px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; background:${CATEGORY_GRADIENTS[key]}; box-shadow:0 6px 16px rgba(20,30,60,.15); animation:catCardIn .4s ease-out ${idx*0.06}s both;">
-        <img src="images/cat-${key}.svg" alt="${catLabel(key)}" style="width:100%; max-width:80px; height:46px; object-fit:contain; filter:drop-shadow(0 3px 6px rgba(0,0,0,.2));" loading="lazy">
+        <img src="images/tools-cat/${key}.jpg" onerror="this.onerror=null;this.src='images/cat-${key}.svg'" alt="${catLabel(key)}" style="width:100%; max-width:80px; height:46px; object-fit:cover; border-radius:10px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.2));" loading="lazy">
         <div style="font-size:12.5px; font-weight:900; color:#fff; text-align:center;">${catLabel(key)}</div>
         <div style="font-size:9.5px; font-weight:700; color:rgba(255,255,255,.85); background:rgba(255,255,255,.18); padding:1px 8px; border-radius:20px;">${count} tools</div>
       </button>
