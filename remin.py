@@ -3,10 +3,6 @@ import subprocess
 with open('index.source.html', encoding='utf-8') as f:
     src = f.read()
 
-# The file has multiple inline <script> blocks (a diagnostic error-catcher,
-# a pdf.js worker-path setup, then the real app code). The app code is
-# always the LAST inline <script>...</script> block, immediately before
-# </body> — so find that one specifically rather than the first.
 start_tag = '<script>'
 idx = src.rfind(start_tag)
 if idx == -1:
@@ -29,11 +25,6 @@ if result.returncode != 0:
     raise SystemExit("terser failed")
 
 minified = result.stdout
-
-# Rebuild index.html FRESH from index.source.html every time (rather than
-# patching the previous index.html) — this guarantees the <head>, script
-# tags, and everything else outside the main script always stay byte-for-byte
-# in sync with the source.
 new_html = src[:start] + minified + src[end:]
 
 with open('index.html', 'w', encoding='utf-8') as f:
