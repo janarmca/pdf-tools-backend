@@ -1270,10 +1270,18 @@ function renderCategoryCards(){
   });
   return wrap;
 }
+// Turns a tool's display name into a URL-safe slug for its static SEO
+// landing page (/tools/<slug>.html — see generate-tool-pages.mjs). Verified
+// against the full 114-tool TOOLS list to produce zero collisions before
+// this was wired in; re-check with that script's own dry-run if tools are
+// ever renamed.
+function toolSlug(t){
+  return t.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || t.id;
+}
 function renderToolCard(t){
   const isPaid = !!t.cost;
   return el(`
-    <button class="tool-card" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06);">
+    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit;">
       <div style="position:relative; width:100%; height:118px; overflow:hidden; border-radius:16px 16px 0 0; background:${t.color}18; flex-shrink:0;">
         <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="185" height="118" style="display:block; width:100%; height:118px; object-fit:cover;" onerror="this.style.display='none'">
         ${isPaid ? `<div style="position:absolute; top:8px; right:8px; background:#fff; color:#B8860B; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.15);">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
@@ -1283,7 +1291,7 @@ function renderToolCard(t){
         <div class="tool-name">${t.name}</div>
         <div class="tool-desc">${t.desc}</div>
       </div>
-    </button>
+    </a>
   `);
 }
 // A smaller variant for spots like "Popular Tools" that show a quick-glance
@@ -1291,7 +1299,7 @@ function renderToolCard(t){
 function renderToolCardCompact(t){
   const isPaid = !!t.cost;
   return el(`
-    <button class="tool-card" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06);">
+    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit;">
       <div style="position:relative; width:100%; height:72px; overflow:hidden; border-radius:14px 14px 0 0; background:${t.color}18; flex-shrink:0;">
         <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="128" height="72" style="display:block; width:100%; height:72px; object-fit:cover;" onerror="this.style.display='none'">
         ${isPaid ? `<div style="position:absolute; top:5px; right:5px; background:#fff; color:#B8860B; font-size:8px; font-weight:800; padding:2px 5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.15);">⚡${t.cost}</div>` : ''}
@@ -1300,7 +1308,7 @@ function renderToolCardCompact(t){
       <div style="padding:15px 10px 11px; display:flex; flex-direction:column; gap:2px; text-align:left;">
         <div style="font-weight:800; font-size:12px; line-height:1.25;">${t.name}</div>
       </div>
-    </button>
+    </a>
   `);
 }
 
@@ -1459,8 +1467,12 @@ function renderGrid(){
 }
 
 document.addEventListener('click', (e)=>{
+  // Tool cards are real <a href="/tools/<slug>.html"> now (so crawlers can
+  // discover and index every tool page — they previously had no href at
+  // all), but a real click should still switch instantly client-side
+  // instead of doing a full page navigation, so it's prevented here.
   const openBtn = e.target.closest('[data-open]');
-  if(openBtn){ openTool(openBtn.getAttribute('data-open')); return; }
+  if(openBtn){ e.preventDefault(); openTool(openBtn.getAttribute('data-open')); return; }
   if(e.target.closest('#__logoHome')){ goHome(); return; }
   if(e.target.closest('[data-back]')){ goHome(); return; }
 });
@@ -1617,6 +1629,17 @@ const TOOL_IMPL = {};
 
 /* ===================== Shared uploader ===================== */
 // opts: {accept, multiple, label, sublabel, onAdd(files)}
+// Global safety net: without this, dropping a file even slightly outside a
+// dropzone's exact bounds (very easy on mobile, or a slightly-off drag) hits
+// the BROWSER's own default drag/drop behavior — it navigates the whole tab
+// away to display the raw file, wiping all app state. Each individual
+// dropzone already calls preventDefault() on its own dragover/drop, but that
+// only protects clicks that land inside it; this document-level catch-all
+// closes the gap for anywhere else on the page. Reported as "file not
+// uploaded — the page just refreshed."
+window.addEventListener('dragover', (e)=> e.preventDefault());
+window.addEventListener('drop', (e)=> e.preventDefault());
+
 function mountUploader(container, opts){
   // Uses a native label element wrapping a real (but visually hidden) file input —
   // this is guaranteed, zero-JS browser behavior: clicking ANYWHERE inside a
