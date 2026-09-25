@@ -146,6 +146,46 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/pdf-png.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/extract-pages.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/flatten-pdf.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/repair-pdf.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pdf-metadata-remover.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ocr-pdf-searchable-pdf.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pdf-powerpoint.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/powerpoint-pdf.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/excel-word.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
