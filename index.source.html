@@ -232,7 +232,7 @@ const TOOLS = [
   {id:'pdf2text', name:'PDF → Text', desc:'Extract the text content', icon:'📝', color:'#556270', cat:'pdf'},
   {id:'excel2word', name:'Excel → Word', desc:'Turn .xlsx into a .docx table', icon:'📑', color:'#22795A', cat:'pdf'},
   {id:'txt2html', name:'Text → HTML', desc:'Turn a .txt file into a clean, readable HTML page — handles large files', icon:'🌐', color:'#455A64', cat:'pdf'},
-  {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — completely free', icon:'✏️', color:'#0B5394', cat:'pdf'},
+  {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — core editing is free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'sign', name:'Sign PDF', desc:'Draw your signature and place it', icon:'✍️', color:'#AF3F73', cat:'pdf'},
   {id:'pdfstamp', name:'PDF Stamp', desc:'Stamp APPROVED / CONFIDENTIAL etc.', icon:'🔖', color:'#943126', cat:'pdf'},
@@ -3981,8 +3981,10 @@ TOOL_IMPL.ocr = {
     }
     async function doAiOcrUpgrade(){
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use AI-Powered OCR.').style.background='#FDEDEC'; return; }
-      const btn = body.querySelector('#ocrAiUpgrade');
       const holder = body.querySelector('#ocrAiResultHolder');
+      const ok = await confirmCreditSpend(holder, '1 credit');
+      if(!ok) return;
+      const btn = body.querySelector('#ocrAiUpgrade');
       btn.disabled = true; btn.textContent = 'Reading with AI…';
       const prog = mountProgress(body);
       try{
@@ -6941,6 +6943,12 @@ TOOL_IMPL.livetranslate = {
               if(statusEl) statusEl.textContent = 'Free translation தற்போது கிடைக்கவில்லை — Gemini AI பயன்படுத்த sign in பண்ணவும்.';
               return;
             }
+            // Not a blocking confirm here on purpose — this fires mid-conversation
+            // as a last-resort fallback (native + free MyMemory path both already
+            // failed), and stopping to ask "continue?" would break the live back-
+            // and-forth. A visible status line still tells the person a credit is
+            // about to be used, instead of it only showing up in their balance.
+            if(statusEl) statusEl.textContent = '⚡ Free translation unavailable — using AI (1 credit)…';
             const fromName = (LIVETRANSLATE_LANGS.find(l=>l[0]===fromLang)||[])[1] || fromLang;
             const toName = (LIVETRANSLATE_LANGS.find(l=>l[0]===toLang)||[])[1] || toLang;
             const form = new FormData();
@@ -7010,6 +7018,8 @@ TOOL_IMPL.texttoimage = {
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'AI image generation பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#t2iPrompt').value || '').trim();
       if(!p){ mountResult(body, 'படத்தை பற்றி எழுதுங்கள் முதலில்.').style.background='#FDEDEC'; return; }
+      const ok = await confirmCreditSpend(body, '5 credits');
+      if(!ok) return;
       const prog = mountProgress(body);
       prog.set(20, 'படம் உருவாக்குகிறது…');
       try{
@@ -7062,6 +7072,8 @@ TOOL_IMPL.aibgreplace = {
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'இந்த feature பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#abgPrompt').value || '').trim();
       if(!p){ mountResult(body, 'Background-ஐ பற்றி describe பண்ணுங்க முதலில்.').style.background='#FDEDEC'; return; }
+      const ok = await confirmCreditSpend(body, '5 credits');
+      if(!ok) return;
       const prog = mountProgress(body);
       try{
         // Step 1: cut out the subject — same library/call bgremove already
@@ -8742,6 +8754,8 @@ TOOL_IMPL.pdfeditor = {
             english: 'Translate this text to English. Respond with ONLY the translation, no preamble: ',
             improve: 'Rewrite this text to be clearer and more professional, keeping the same meaning and roughly the same length. Respond with ONLY the rewritten text, no preamble: '
           };
+          const ok = await confirmCreditSpend(statusEl.parentElement, '1 credit');
+          if(!ok) return;
           statusEl.textContent = '⏳ Thinking…';
           try{
             const form = new FormData();
@@ -9784,6 +9798,26 @@ TOOL_IMPL.pdfqrstamp = {
   }
 };
 
+// Shared "you're about to spend credits" step — every AI/cloud action that
+// charges credits shows this BEFORE the charge fires, so the cost is seen
+// and explicitly agreed to instead of only showing up afterwards in the
+// credits balance. Renders inline (not native confirm()) to match the
+// app's own visual style and behave the same on mobile.
+function confirmCreditSpend(container, costLabel){
+  return new Promise(resolve=>{
+    const box = el(`<div style="margin:10px 0; border:1px solid #BBD6FF; background:#EAF2FF; border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+      <div style="font-size:12.5px; font-weight:700; color:var(--ink);">🤖 This uses AI — costs ${costLabel}. Continue?</div>
+      <div style="display:flex; gap:8px; flex:0 0 auto;">
+        <button class="btn secondary" style="padding:6px 14px; font-size:12px;" id="ccsNo">Cancel</button>
+        <button class="btn" style="padding:6px 14px; font-size:12px;" id="ccsYes">Yes, use ${costLabel}</button>
+      </div>
+    </div>`);
+    container.appendChild(box);
+    box.querySelector('#ccsYes').onclick = ()=>{ box.remove(); resolve(true); };
+    box.querySelector('#ccsNo').onclick = ()=>{ box.remove(); resolve(false); };
+  });
+}
+
 /* ===================== ASK AI ABOUT DOCUMENT ===================== */
 /* ===================== Shared: AI document-upload tool base =====================
    Powers all 6 "AI /" tools: handles upload (image OR PDF), preview, calling the
@@ -9850,6 +9884,8 @@ function mountAiUploadTool(container, config){
     if(!question) return;
     const answerHolder = body.querySelector('#aiAnswerHolder');
     answerHolder.innerHTML = '';
+    const ok = await confirmCreditSpend(answerHolder, config.creditCost || '1 credit');
+    if(!ok) return;
     const prog = mountProgress(body);
     try{
       prog.set(20, isPdf ? 'Reading your PDF…' : 'Reading your image…');
@@ -10110,6 +10146,8 @@ TOOL_IMPL.aiexcelcompare = {
       if(!question){ mountResult(body,'Please type a question.').style.background='#FDEDEC'; return; }
       const answerHolder = body.querySelector('#excAnswerHolder');
       answerHolder.innerHTML = '';
+      const ok = await confirmCreditSpend(answerHolder, deepMode ? '3 credits' : '1 credit');
+      if(!ok) return;
       const prog = mountProgress(body);
       try{
         prog.set(10, 'Reading your spreadsheets…');
