@@ -11,6 +11,8 @@
 <style>html,body,#root{height:100%;margin:0;}</style>
 </head>
 <body>
+<button onclick="try{window.close();}catch(e){} setTimeout(function(){var h=document.getElementById('__jamtCloseHint'); if(h) h.style.display='block';},350);" title="Close" style="position:fixed; top:10px; right:10px; z-index:999999; width:34px; height:34px; border-radius:50%; border:none; background:#0f172a; color:#fff; font-size:15px; line-height:1; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3);">✕</button>
+<div id="__jamtCloseHint" style="display:none; position:fixed; top:52px; right:10px; z-index:999999; background:#0f172a; color:#fff; font-size:11px; padding:8px 12px; border-radius:10px; max-width:210px; line-height:1.4; box-shadow:0 4px 14px rgba(0,0,0,.3);">இந்த tab-ஐ இப்போது கையால் மூடலாம் (you can close this tab now)</div>
 <div id="root"></div>
 <script>
   // window.storage polyfill — the real one only exists inside Claude.ai artifacts.

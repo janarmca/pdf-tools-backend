@@ -870,7 +870,7 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
   // using our existing Gemini setup — this is exactly the same "explain real
   // data, don't invent it" pattern as the other AI tools in this app, and
   // gives us free multi-language support since Gemini itself is multilingual.
-  const CREDIT_COST = 1; // real Gemini API cost per question — was previously unmetered
+  const CREDIT_COST = 2; // real Gemini API cost per question — bumped from 1 to 2 per the owner's pricing call
   let allowed = false;
   try {
     allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
