@@ -879,7 +879,16 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
     const lang = (b.chartContext && b.chartContext.outputLanguage) || 'en';
     const summaryLine = (b.chartContext && b.chartContext.chartSummaryForAI) ? `\n\nCalculated chart summary: ${b.chartContext.chartSummaryForAI}` : '';
-    const prompt = `You are a Vedic astrology assistant. Using ONLY the verified, calculated chart data below (never invent planetary positions), give a substantive, specific reading that references the actual Lagna, Nakshatra, planet placements, and current Dasha period shown below — do not give a vague generic answer. Answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. End with a brief note that this is an interpretation, not a guarantee.\n\nVerified chart data (raw):\n${JSON.stringify(b.chartContext)}${summaryLine}\n\nQuestion: ${b.question}`;
+    const prompt = `You are an expert Vedic astrologer trained on the classical texts — Brihat Parashara Hora Shastra, Jaimini Sutras, Phaladeepika, Saravali — and their established rules for yogas (planetary combinations), planetary strength by exact degree (exaltation, debilitation, own sign, moolatrikona, combustion, retrogression), house lordship, aspects (drishti), and Dasha-Bhukti-Antardasha timing.
+
+Using ONLY the verified, calculated chart data below (never invent planetary positions or degrees — every position you reason about must come from this data), apply real classical astrological methodology to answer the question:
+- Identify any relevant yogas/combinations formed by the actual planetary placements that bear on the question (e.g. Raja yoga, Dhana yoga, Gaja-Kesari, Kemadruma, etc. — only if the data actually supports them).
+- Judge each relevant planet's real strength from its exact degree and sign (exalted, debilitated, own sign, retrograde, combust) rather than treating every placement as equal.
+- Consider house lordships and aspects (drishti) between the planets/houses relevant to the question.
+- Factor in the current Dasha-Bhukti-Antardasha period shown in the data for timing.
+Weave these into ONE coherent, specific, well-reasoned answer grounded in the actual data — never a vague reading that could apply to any chart, and never a bare list of technical terms without applying them.
+
+Answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. End with a brief note that this is an interpretation, not a guarantee.\n\nVerified chart data (raw):\n${JSON.stringify(b.chartContext)}${summaryLine}\n\nQuestion: ${b.question}`;
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
