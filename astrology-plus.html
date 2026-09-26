@@ -206,6 +206,29 @@ async function post(url,body){
   return d;
 }
 const PLANET_NAMES_TA = { Sun:'சூரியன்', Moon:'சந்திரன்', Mercury:'புதன்', Venus:'சுக்கிரன்', Mars:'செவ்வாய்', Jupiter:'குரு', Saturn:'சனி', Uranus:'யுரேனஸ்', Neptune:'நெப்டியூன்', Pluto:'புளூட்டோ' };
+const SIGN_SHORT_TO_FULL = { Ari:'Aries', Tau:'Taurus', Gem:'Gemini', Can:'Cancer', Leo:'Leo', Vir:'Virgo', Lib:'Libra', Sco:'Scorpio', Sag:'Sagittarius', Cap:'Capricorn', Aqu:'Aquarius', Pis:'Pisces' };
+const SIGN_NAMES = {
+  en: {Aries:'Aries',Taurus:'Taurus',Gemini:'Gemini',Cancer:'Cancer',Leo:'Leo',Virgo:'Virgo',Libra:'Libra',Scorpio:'Scorpio',Sagittarius:'Sagittarius',Capricorn:'Capricorn',Aquarius:'Aquarius',Pisces:'Pisces'},
+  ta: {Aries:'மேஷம்',Taurus:'ரிஷபம்',Gemini:'மிதுனம்',Cancer:'கடகம்',Leo:'சிம்மம்',Virgo:'கன்னி',Libra:'துலாம்',Scorpio:'விருச்சிகம்',Sagittarius:'தனுசு',Capricorn:'மகரம்',Aquarius:'கும்பம்',Pisces:'மீனம்'},
+  hi: {Aries:'मेष',Taurus:'वृषभ',Gemini:'मिथुन',Cancer:'कर्क',Leo:'सिंह',Virgo:'कन्या',Libra:'तुला',Scorpio:'वृश्चिक',Sagittarius:'धनु',Capricorn:'मकर',Aquarius:'कुंभ',Pisces:'मीन'},
+  te: {Aries:'మేషం',Taurus:'వృషభం',Gemini:'మిథునం',Cancer:'కర్కాటకం',Leo:'సింహం',Virgo:'కన్య',Libra:'తుల',Scorpio:'వృశ్చికం',Sagittarius:'ధనుస్సు',Capricorn:'మకరం',Aquarius:'కుంభం',Pisces:'మీనం'},
+  kn: {Aries:'ಮೇಷ',Taurus:'ವೃಷಭ',Gemini:'ಮಿಥುನ',Cancer:'ಕರ್ಕಾಟಕ',Leo:'ಸಿಂಹ',Virgo:'ಕನ್ಯಾ',Libra:'ತುಲಾ',Scorpio:'ವೃಶ್ಚಿಕ',Sagittarius:'ಧನು',Capricorn:'ಮಕರ',Aquarius:'ಕುಂಭ',Pisces:'ಮೀನ'},
+  ml: {Aries:'മേടം',Taurus:'ഇടവം',Gemini:'മിഥുനം',Cancer:'കർക്കടകം',Leo:'ചിങ്ങം',Virgo:'കന്നി',Libra:'തുലാം',Scorpio:'വൃശ്ചികം',Sagittarius:'ധനു',Capricorn:'മകരം',Aquarius:'കുംഭം',Pisces:'മീനം'}
+};
+const FIELD_LABELS = {
+  en: {sun:'Sun',moon:'Moon',lagna:'Lagna',ayanamsa:'Ayanamsa (Lahiri)',house:'House system'},
+  ta: {sun:'சூரியன்',moon:'சந்திரன்',lagna:'லக்னம்',ayanamsa:'அயனாம்சம் (லாஹிரி)',house:'வீட்டு முறை'},
+  hi: {sun:'सूर्य',moon:'चंद्र',lagna:'लग्न',ayanamsa:'अयनांश (लाहिड़ी)',house:'भाव पद्धति'},
+  te: {sun:'సూర్యుడు',moon:'చంద్రుడు',lagna:'లగ్నం',ayanamsa:'అయనాంశ (లాహిరి)',house:'హౌస్ విధానం'},
+  kn: {sun:'ಸೂರ್ಯ',moon:'ಚಂದ್ರ',lagna:'ಲಗ್ನ',ayanamsa:'ಅಯನಾಂಶ (ಲಾಹಿರಿ)',house:'ಹೌಸ್ ಪದ್ಧತಿ'},
+  ml: {sun:'സൂര്യൻ',moon:'ചന്ദ്രൻ',lagna:'ലഗ്നം',ayanamsa:'അയനാംശം (ലാഹിരി)',house:'ഹൗസ് സംപ്രദായം'}
+};
+function localSign(shortOrFull){
+  if(!shortOrFull) return '—';
+  const full = SIGN_SHORT_TO_FULL[shortOrFull] || shortOrFull;
+  const lang = window.JAMTARIS_LANGUAGE || 'ta';
+  return (SIGN_NAMES[lang] && SIGN_NAMES[lang][full]) || full;
+}
 function toTamilPlanetList(names){
   // names look like "Sun" or "Saturn (R)" — translate the planet part, keep the (R) retrograde marker
   return names.map(n=>{
@@ -223,13 +246,15 @@ function render(d){
   });
   $('chartCenter').textContent = d.lagna || 'சரிபார்க்கப்பட்டது';
   const subj = (d.chart_data && d.chart_data.subject) || {};
+  const __lang = window.JAMTARIS_LANGUAGE || 'ta';
+  const __L = FIELD_LABELS[__lang] || FIELD_LABELS.ta;
   const summary = [
-    `☀️ Sun: ${subj.sun ? subj.sun.sign : '—'}`,
-    `🌙 Moon: ${subj.moon ? subj.moon.sign : '—'}`,
-    `⬆️ Lagna: ${d.lagna || '—'}`,
+    `☀️ ${__L.sun}: ${subj.sun ? localSign(subj.sun.sign) : '—'}`,
+    `🌙 ${__L.moon}: ${subj.moon ? localSign(subj.moon.sign) : '—'}`,
+    `⬆️ ${__L.lagna}: ${d.lagna ? localSign(d.lagna) : '—'}`,
     `⭐ நக்ஷத்திரம்: ${d.nakshatra ? d.nakshatra.ta+' ('+d.nakshatra.en+') பாதம் '+d.nakshatra.pada : '—'}`,
-    `📅 Ayanamsa (Lahiri): ${subj.ayanamsa_value ? subj.ayanamsa_value.toFixed(2)+'°' : '—'}`,
-    `🏠 House system: ${subj.houses_system_name || '—'}`,
+    `📅 ${__L.ayanamsa}: ${subj.ayanamsa_value ? subj.ayanamsa_value.toFixed(2)+'°' : '—'}`,
+    `🏠 ${__L.house}: ${subj.houses_system_name || '—'}`,
   ].join('\n');
   $('history').textContent = summary;
   const navBox = $('navamsaTable');
