@@ -87,6 +87,41 @@
 
 
 
+<div class="card">
+  <div class="section">💞 திருமண பொருத்தம் (10 பொருத்தம்)</div>
+  <div class="notice">மணமகள் மற்றும் மணமகனின் பிறப்பு விவரங்களை கொடுத்து, சரிபார்க்கப்பட்ட நட்சத்திர/ராசி கணக்கீட்டின் அடிப்படையில் எத்தனை பொருத்தங்கள் உள்ளன என்று பாருங்கள் (தின, கண, மகேந்திர, ஸ்திரீ தீர்க்க, யோனி, ராசி, ராசியாதிபதி, வசிய, ரஜ்ஜு, வேதை — பாரம்பரிய 10 பொருத்தம்).</div>
+
+  <div style="margin-top:14px; font-weight:800;">👰 மணமகள் விவரங்கள்</div>
+  <div class="grid3" style="margin-top:8px">
+    <div><label>பெயர்</label><input id="brideName"></div>
+    <div><label>பிறந்த தேதி</label><input id="brideDob" type="date"></div>
+    <div><label>பிறப்பு நேரம்</label><input id="brideTob" type="time" step="1"></div>
+  </div>
+  <div class="grid" style="margin-top:8px">
+    <div style="position:relative;"><label>பிறந்த இடம்</label><input id="bridePlace" placeholder="ஊர், மாநிலம், நாடு" autocomplete="off"><div id="bridePlaceSuggestions" style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #d8e0eb; border-radius:10px; margin-top:4px; max-height:180px; overflow-y:auto; z-index:20; display:none; box-shadow:0 8px 20px rgba(0,0,0,.12);"></div></div>
+    <div><label>ஆயத்தொலைவுகள்</label><div style="display:flex; gap:6px;"><input id="brideCoords" placeholder="ஊர் பெயர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="brideFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div><div id="brideCoordsStatus" class="small" style="margin-top:4px;"></div></div>
+  </div>
+  <input id="brideTimezone" type="hidden" value="Asia/Kolkata">
+
+  <div style="margin-top:18px; font-weight:800;">🤵 மணமகன் விவரங்கள்</div>
+  <div class="grid3" style="margin-top:8px">
+    <div><label>பெயர்</label><input id="groomName"></div>
+    <div><label>பிறந்த தேதி</label><input id="groomDob" type="date"></div>
+    <div><label>பிறப்பு நேரம்</label><input id="groomTob" type="time" step="1"></div>
+  </div>
+  <div class="grid" style="margin-top:8px">
+    <div style="position:relative;"><label>பிறந்த இடம்</label><input id="groomPlace" placeholder="ஊர், மாநிலம், நாடு" autocomplete="off"><div id="groomPlaceSuggestions" style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #d8e0eb; border-radius:10px; margin-top:4px; max-height:180px; overflow-y:auto; z-index:20; display:none; box-shadow:0 8px 20px rgba(0,0,0,.12);"></div></div>
+    <div><label>ஆயத்தொலைவுகள்</label><div style="display:flex; gap:6px;"><input id="groomCoords" placeholder="ஊர் பெயர் போட்டு 'கண்டுபிடி' அழுத்தவும்" style="flex:1;"><button type="button" class="btn" id="groomFindCoords" style="flex:0 0 auto; min-width:auto; padding:11px 14px;">📍</button></div><div id="groomCoordsStatus" class="small" style="margin-top:4px;"></div></div>
+  </div>
+  <input id="groomTimezone" type="hidden" value="Asia/Kolkata">
+
+  <div class="row" style="margin-top:14px">
+    <button class="btn primary" id="checkPorutham">💞 பொருத்தம் பார்க்க</button>
+  </div>
+  <div id="poruthamStatus" class="notice" style="margin-top:12px">இன்னும் பொருத்தம் பார்க்கப்படவில்லை.</div>
+  <div id="poruthamResult" style="margin-top:12px; display:none;"></div>
+</div>
+
 <div class="footer"><b>ஜாம்தாரிஸ்</b> · Intelligent Business Operating System · ஜோதிடம்+<br>ஜனார்த்தனன் தியாகராஜன் · 7667663922 · janarmca@gmail.com</div>
 </div>
 <script>(function(){
@@ -309,5 +344,51 @@ $('ask').onclick=async()=>{
   }catch(x){ $('answer').textContent='பதில் கிடைக்கவில்லை: '+x.message; }
 };
 $('clear').onclick=()=>location.reload();
+
+// --- திருமண பொருத்தம் (10 Porutham) — reuses the same geocode/timezone
+// helpers as the main birth-chart form above, just with bride/groom prefixes.
+wireFindCoords('brideFindCoords', 'bridePlace', 'brideCoords', 'brideCoordsStatus', 'brideTimezone');
+wirePlaceAutocomplete('bridePlace', 'bridePlaceSuggestions', 'brideCoords', 'brideTimezone', 'brideCoordsStatus');
+wireFindCoords('groomFindCoords', 'groomPlace', 'groomCoords', 'groomCoordsStatus', 'groomTimezone');
+wirePlaceAutocomplete('groomPlace', 'groomPlaceSuggestions', 'groomCoords', 'groomTimezone', 'groomCoordsStatus');
+function poruthamPayload(prefix){
+  return {
+    name: $(prefix+'Name').value.trim(), dob: $(prefix+'Dob').value, tob: $(prefix+'Tob').value,
+    coords: $(prefix+'Coords').value.trim(), timezone: ($(prefix+'Timezone').value||'').trim() || 'Asia/Kolkata'
+  };
+}
+if($('checkPorutham')) $('checkPorutham').onclick = async () => {
+  const bride = poruthamPayload('bride'), groom = poruthamPayload('groom');
+  if(!bride.dob || !bride.tob || !bride.coords || !groom.dob || !groom.tob || !groom.coords){
+    $('poruthamStatus').className='notice warning';
+    $('poruthamStatus').textContent='மணமகள் மற்றும் மணமகன் இருவருக்கும் பிறந்த தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.';
+    return;
+  }
+  $('poruthamStatus').className='notice';
+  $('poruthamStatus').textContent='சரிபார்க்கப்பட்ட நட்சத்திர/ராசி கணக்கீட்டின் அடிப்படையில் பொருத்தம் பார்க்கிறது…';
+  $('poruthamResult').style.display='none';
+  try{
+    const d = await post(CALC_ENDPOINT, { mode:'porutham', bride, groom });
+    if(d.verified===false) throw Error('கணக்கீடு சரிபார்க்கப்படவில்லை.');
+    const rows = d.porutham.items.map(it =>
+      `<div style="display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f5;">
+         <span>${it.matched ? '✅' : '❌'} ${it.ta} <span class="small">(${it.en})</span></span>
+         <span class="small">${it.detail}</span>
+       </div>`
+    ).join('');
+    $('poruthamResult').innerHTML = `
+      <div class="result" style="text-align:center; font-weight:900; font-size:1.15rem; margin-bottom:10px;">${d.porutham.matchedCount} / ${d.porutham.total} பொருத்தங்கள் உள்ளன</div>
+      <div class="small" style="margin-bottom:8px;">👰 ${d.bride.nakshatra.ta} (${d.bride.nakshatra.en}) · ${localSign(d.bride.moonSign)} &nbsp;|&nbsp; 🤵 ${d.groom.nakshatra.ta} (${d.groom.nakshatra.en}) · ${localSign(d.groom.moonSign)}</div>
+      ${rows}
+      <div class="small" style="margin-top:12px; color:#7b5200;">இது ஒரு பாரம்பரிய கணக்கீட்டு ஆய்வு. இறுதி முடிவுக்கு முன் தகுதியான ஜோதிடரை கலந்தாலோசிக்கவும்.</div>
+    `;
+    $('poruthamResult').style.display='block';
+    $('poruthamStatus').className='notice success';
+    $('poruthamStatus').textContent='✓ சரிபார்க்கப்பட்ட கணக்கீடு பெறப்பட்டது.';
+  }catch(x){
+    $('poruthamStatus').className='notice warning';
+    $('poruthamStatus').textContent='பொருத்தம் கிடைக்கவில்லை: '+x.message;
+  }
+};
 })();</script>
 </body></html>
