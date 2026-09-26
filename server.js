@@ -761,6 +761,193 @@ function calcNakshatra(moonAbsPos) {
   const pada = Math.floor((moonAbsPos % NAK_SPAN) / (NAK_SPAN / 4)) + 1; // each Nakshatra has 4 padas (quarters)
   return { ...NAKSHATRAS[idx], pada };
 }
+
+// ============================================================
+// PORUTHAM (திருமண பொருத்தம்) — classical Tamil 10-item marriage matching,
+// computed deterministically from each person's REAL calculated Moon
+// Nakshatra + Moon Rashi (never AI-guessed, never fabricated). Every rule
+// below was cross-checked against multiple published classical references
+// (astrologeranil.com, prokerala.com, thirumanaporuthamonline.com,
+// findyourfate.com, astrosaxena.com and others) before shipping.
+// ============================================================
+function nakIdx(nakName) { return NAKSHATRAS.findIndex(n => n.en === nakName); }
+// Every classical counting-based porutham counts forward starting from the
+// BRIDE's own star/sign as position 1.
+function forwardCount(fromIdx, toIdx, total) { return ((toIdx - fromIdx + total) % total) + 1; }
+
+// 1) Dina Porutham — classical 9-Tara cycle. Tara category = ((count-1)%9)+1.
+// Sampat(2)/Kshema(4)/Sadhana(6)/Mitra(8)/Parama-Mitra(9) are auspicious;
+// Janma(1)/Vipat(3)/Pratyak(5)/Naidhana(7) are not.
+const DINA_GOOD_TARA = [2, 4, 6, 8, 9];
+function dinaPorutham(girlNakIdx, boyNakIdx) {
+  const n = forwardCount(girlNakIdx, boyNakIdx, 27);
+  const tara = ((n - 1) % 9) + 1;
+  return { matched: DINA_GOOD_TARA.includes(tara), detail: `எண்ணிக்கை ${n} (தாரை ${tara})` };
+}
+
+// 2) Gana Porutham — Deva/Manushya/Rakshasa temperament groups.
+const GANA_DEVA = ['Ashwini','Mrigashira','Punarvasu','Pushya','Hasta','Swati','Anuradha','Shravana','Revati'];
+const GANA_MANUSHYA = ['Bharani','Rohini','Ardra','Purva Phalguni','Uttara Phalguni','Purva Ashadha','Uttara Ashadha','Purva Bhadrapada','Uttara Bhadrapada'];
+function ganaOf(nakName) {
+  if (GANA_DEVA.includes(nakName)) return 'Deva';
+  if (GANA_MANUSHYA.includes(nakName)) return 'Manushya';
+  return 'Rakshasa';
+}
+function ganaPorutham(girlNak, boyNak) {
+  const g = ganaOf(girlNak), b = ganaOf(boyNak);
+  // Same gana is always fine; Deva+Manushya (either direction) is fine.
+  // A Rakshasa paired with a DIFFERENT gana is the combination classical
+  // sources flag as poor — Rakshasa+Rakshasa itself is acceptable.
+  const matched = g === b || (g !== 'Rakshasa' && b !== 'Rakshasa');
+  return { matched, detail: `${g} + ${b}` };
+}
+
+// 3) Mahendra Porutham — good when the count lands on 4,7,10,13,16,19,22,25.
+const MAHENDRA_GOOD = [4, 7, 10, 13, 16, 19, 22, 25];
+function mahendraPorutham(girlNakIdx, boyNakIdx) {
+  const n = forwardCount(girlNakIdx, boyNakIdx, 27);
+  return { matched: MAHENDRA_GOOD.includes(n), detail: `எண்ணிக்கை ${n}` };
+}
+
+// 4) Sthree Deergha Porutham — good when the count is 13 or more (classical
+// threshold, confirmed against a direct Tamil-language source).
+function streeDeerghaPorutham(girlNakIdx, boyNakIdx) {
+  const n = forwardCount(girlNakIdx, boyNakIdx, 27);
+  return { matched: n >= 13, detail: `எண்ணிக்கை ${n}` };
+}
+
+// 5) Yoni Porutham — animal-symbol compatibility. Simplified to the 7
+// classically-agreed "sworn enemy" pairs (0-point pairs in the fuller
+// Ashtakoota scoring); everything else counts as matched.
+const NAKSHATRA_YONI = {
+  Ashwini:'Horse', Bharani:'Elephant', Krittika:'Sheep', Rohini:'Serpent', Mrigashira:'Serpent',
+  Ardra:'Dog', Punarvasu:'Cat', Pushya:'Sheep', Ashlesha:'Cat', Magha:'Rat', 'Purva Phalguni':'Rat',
+  'Uttara Phalguni':'Cow', Hasta:'Buffalo', Chitra:'Tiger', Swati:'Buffalo', Vishakha:'Tiger',
+  Anuradha:'Deer', Jyeshtha:'Deer', Mula:'Dog', 'Purva Ashadha':'Monkey', 'Uttara Ashadha':'Mongoose',
+  Shravana:'Monkey', Dhanishta:'Lion', Shatabhisha:'Horse', 'Purva Bhadrapada':'Lion',
+  'Uttara Bhadrapada':'Cow', Revati:'Elephant'
+};
+const YONI_ENEMY_PAIRS = [['Horse','Buffalo'],['Elephant','Lion'],['Sheep','Monkey'],['Serpent','Mongoose'],['Dog','Deer'],['Cat','Rat'],['Cow','Tiger']];
+function yoniPorutham(girlNak, boyNak) {
+  const ya = NAKSHATRA_YONI[girlNak], yb = NAKSHATRA_YONI[boyNak];
+  const isEnemy = YONI_ENEMY_PAIRS.some(([x, y]) => (x === ya && y === yb) || (x === yb && y === ya));
+  return { matched: !isEnemy, detail: `${ya} + ${yb}` };
+}
+
+// 6) Rasi Porutham — counting the Moon-sign distance from bride to groom;
+// 2,4,6,8,12 are the classically-flagged "no agreement" distances.
+function rasiPorutham(girlSignIdx, boySignIdx) {
+  const n = forwardCount(girlSignIdx, boySignIdx, 12);
+  return { matched: ![2, 4, 6, 8, 12].includes(n), detail: `எண்ணிக்கை ${n}` };
+}
+
+// 7) Rasi Adhipathi Porutham — friendship between the two Moon-sign lords,
+// using the classical Naisargika Maitri (natural planetary friendship) table.
+const SIGN_LORD = { Aries:'Mars', Taurus:'Venus', Gemini:'Mercury', Cancer:'Moon', Leo:'Sun', Virgo:'Mercury', Libra:'Venus', Scorpio:'Mars', Sagittarius:'Jupiter', Capricorn:'Saturn', Aquarius:'Saturn', Pisces:'Jupiter' };
+const NAISARGIKA_MAITRI = {
+  Sun: { friends:['Moon','Mars','Jupiter'], enemies:['Venus','Saturn'] },
+  Moon: { friends:['Sun','Mercury'], enemies:[] },
+  Mars: { friends:['Sun','Moon','Jupiter'], enemies:['Mercury'] },
+  Mercury: { friends:['Sun','Venus'], enemies:['Moon'] },
+  Jupiter: { friends:['Sun','Moon','Mars'], enemies:['Mercury','Venus'] },
+  Venus: { friends:['Mercury','Saturn'], enemies:['Sun','Moon'] },
+  Saturn: { friends:['Mercury','Venus'], enemies:['Sun','Moon','Mars'] }
+};
+function planetRelation(a, b) {
+  if (a === b) return 'same';
+  if (NAISARGIKA_MAITRI[a].friends.includes(b)) return 'friend';
+  if (NAISARGIKA_MAITRI[a].enemies.includes(b)) return 'enemy';
+  return 'neutral';
+}
+function rasiAdhipathiPorutham(girlSign, boySign) {
+  const la = SIGN_LORD[girlSign], lb = SIGN_LORD[boySign];
+  const matched = !(planetRelation(la, lb) === 'enemy' && planetRelation(lb, la) === 'enemy');
+  return { matched, detail: `${la} + ${lb}` };
+}
+
+// 8) Vasya Porutham — simplified to the well-documented core rule (same
+// animal-group = matched). The fuller fractional 0/0.5/1/2 Ashtakoota
+// scoring varies across classical sources, so a fixed pass/fail on group
+// membership is the safer, unambiguous version to ship.
+function vasyaGroup(signName, degInSign) {
+  if (signName === 'Sagittarius') return degInSign < 15 ? 'Manava' : 'Chatushpada';
+  if (signName === 'Capricorn') return degInSign < 15 ? 'Chatushpada' : 'Jalachara';
+  if (['Aries','Taurus'].includes(signName)) return 'Chatushpada';
+  if (['Gemini','Virgo','Libra','Aquarius'].includes(signName)) return 'Manava';
+  if (['Cancer','Pisces'].includes(signName)) return 'Jalachara';
+  if (signName === 'Leo') return 'Vanachara';
+  if (signName === 'Scorpio') return 'Keeta';
+  return 'Manava';
+}
+function vasyaPorutham(girlSign, girlDeg, boySign, boyDeg) {
+  const ga = vasyaGroup(girlSign, girlDeg), gb = vasyaGroup(boySign, boyDeg);
+  return { matched: ga === gb, detail: `${ga} + ${gb}` };
+}
+
+// 9) Rajju Porutham — most critical for longevity; SAME Rajju group is
+// inauspicious, different groups are fine.
+const RAJJU_GROUPS = {
+  Sirasu: ['Mrigashira','Chitra','Dhanishta'],
+  Kantha: ['Rohini','Ardra','Hasta','Swati','Shravana','Shatabhisha'],
+  Nabhi: ['Krittika','Punarvasu','Uttara Phalguni','Vishakha','Uttara Ashadha','Purva Bhadrapada'],
+  Kati: ['Bharani','Pushya','Purva Phalguni','Anuradha','Purva Ashadha','Uttara Bhadrapada'],
+  Pada: ['Ashwini','Ashlesha','Magha','Jyeshtha','Mula','Revati']
+};
+function rajjuOf(nakName) {
+  for (const [g, list] of Object.entries(RAJJU_GROUPS)) if (list.includes(nakName)) return g;
+  return null;
+}
+function rajjuPorutham(girlNak, boyNak) {
+  const ra = rajjuOf(girlNak), rb = rajjuOf(boyNak);
+  return { matched: ra !== rb, detail: `${ra} + ${rb}` };
+}
+
+// 10) Vedha Porutham — 12 classical mutual-affliction nakshatra pairs, plus
+// Chitra/Mrigashira/Dhanishta which are mutually Vedha to each other.
+const VEDHA_PAIRS = [
+  ['Hasta','Shatabhisha'], ['Swati','Rohini'], ['Vishakha','Krittika'], ['Anuradha','Bharani'],
+  ['Jyeshtha','Ashwini'], ['Mula','Ashlesha'], ['Purva Ashadha','Pushya'], ['Uttara Ashadha','Punarvasu'],
+  ['Shravana','Ardra'], ['Purva Bhadrapada','Uttara Phalguni'], ['Uttara Bhadrapada','Purva Phalguni'],
+  ['Revati','Magha'], ['Chitra','Mrigashira'], ['Chitra','Dhanishta'], ['Mrigashira','Dhanishta']
+];
+function vedhaPorutham(girlNak, boyNak) {
+  const isVedha = VEDHA_PAIRS.some(([x, y]) => (x === girlNak && y === boyNak) || (x === boyNak && y === girlNak));
+  return { matched: !isVedha, detail: girlNak === boyNak ? 'ஒரே நட்சத்திரம்' : `${girlNak} + ${boyNak}` };
+}
+
+const PORUTHAM_NAMES = [
+  { key:'dina', ta:'தின பொருத்தம்', en:'Dina Porutham' },
+  { key:'gana', ta:'கண பொருத்தம்', en:'Gana Porutham' },
+  { key:'mahendra', ta:'மகேந்திர பொருத்தம்', en:'Mahendra Porutham' },
+  { key:'streeDeergha', ta:'ஸ்திரீ தீர்க்க பொருத்தம்', en:'Sthree Deergha Porutham' },
+  { key:'yoni', ta:'யோனி பொருத்தம்', en:'Yoni Porutham' },
+  { key:'rasi', ta:'ராசி பொருத்தம்', en:'Rasi Porutham' },
+  { key:'rasiAdhipathi', ta:'ராசியாதிபதி பொருத்தம்', en:'Rasi Adhipathi Porutham' },
+  { key:'vasya', ta:'வசிய பொருத்தம்', en:'Vasya Porutham' },
+  { key:'rajju', ta:'ரஜ்ஜு பொருத்தம்', en:'Rajju Porutham' },
+  { key:'vedha', ta:'வேதை பொருத்தம்', en:'Vedha Porutham' }
+];
+
+function calculatePorutham(girl, boy) {
+  // girl/boy = { nakshatra: 'Ashwini', moonSign: 'Aries', moonDeg: 12.3 }
+  const gNakIdx = nakIdx(girl.nakshatra), bNakIdx = nakIdx(boy.nakshatra);
+  const results = {
+    dina: dinaPorutham(gNakIdx, bNakIdx),
+    gana: ganaPorutham(girl.nakshatra, boy.nakshatra),
+    mahendra: mahendraPorutham(gNakIdx, bNakIdx),
+    streeDeergha: streeDeerghaPorutham(gNakIdx, bNakIdx),
+    yoni: yoniPorutham(girl.nakshatra, boy.nakshatra),
+    rasi: rasiPorutham(SIGNS_ORDER.indexOf(girl.moonSign), SIGNS_ORDER.indexOf(boy.moonSign)),
+    rasiAdhipathi: rasiAdhipathiPorutham(girl.moonSign, boy.moonSign),
+    vasya: vasyaPorutham(girl.moonSign, girl.moonDeg, boy.moonSign, boy.moonDeg),
+    rajju: rajjuPorutham(girl.nakshatra, boy.nakshatra),
+    vedha: vedhaPorutham(girl.nakshatra, boy.nakshatra)
+  };
+  const items = PORUTHAM_NAMES.map(p => ({ ...p, matched: results[p.key].matched, detail: results[p.key].detail }));
+  const matchedCount = items.filter(i => i.matched).length;
+  return { items, matchedCount, total: items.length };
+}
+// ============================================================
 // Planet names in Tamil, for showing inside the chart grid instead of English
 const PLANET_NAMES_TA = { Sun:'சூரியன்', Moon:'சந்திரன்', Mercury:'புதன்', Venus:'சுக்கிரன்', Mars:'செவ்வாய்', Jupiter:'குரு', Saturn:'சனி', Uranus:'யுரேனஸ்', Neptune:'நெப்டியூன்', Pluto:'புளூட்டோ' };
 // ============================================================
@@ -796,12 +983,36 @@ function buildNavamsaFromSubject(subject) {
   return navamsa;
 }
 app.post('/api/astrology/calculate', creditLimiter, requireAuth, async (req, res) => {
-  const CREDIT_COST = 2; // real RapidAPI Astrologer cost per call — was previously unmetered
+  const b = req.body || {};
+  const isPorutham = b.mode === 'porutham';
+  const CREDIT_COST = isPorutham ? 4 : 2; // porutham needs 2 real birth-chart lookups (bride+groom) — double the single-chart cost
   let allowed = false;
   try {
-    allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus');
+    allowed = await deductCredits(req.user.id, CREDIT_COST, isPorutham ? 'astrologyplus_porutham' : 'astrologyplus');
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.', verified: false });
-    const b = req.body || {};
+    if (isPorutham) {
+      const pA = b.bride, pB = b.groom;
+      if (!pA || !pB || !pA.dob || !pA.tob || !pA.coords || !pB.dob || !pB.tob || !pB.coords) {
+        return res.status(400).json({ error: 'மணமகள் மற்றும் மணமகன் இருவருக்கும் முழு பிறந்த தேதி, நேரம், ஆயத்தொலைவுகள் தேவை.', verified: false });
+      }
+      const [dataA, dataB] = await Promise.all([
+        astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(pA.dob, pA.tob, pA.coords, pA.name || 'Bride', pA.timezone) }),
+        astrologerCall('/api/v5/chart-data/birth-chart', { subject: toSubject(pB.dob, pB.tob, pB.coords, pB.name || 'Groom', pB.timezone) })
+      ]);
+      const subjA = (dataA.chart_data && dataA.chart_data.subject) || dataA.subject || dataA;
+      const subjB = (dataB.chart_data && dataB.chart_data.subject) || dataB.subject || dataB;
+      if (!subjA.moon || !Number.isFinite(subjA.moon.abs_pos) || !subjB.moon || !Number.isFinite(subjB.moon.abs_pos)) {
+        throw new Error('சந்திரன் நிலை கணக்கிட முடியவில்லை — பிறப்பு விவரங்களை சரிபார்க்கவும்.');
+      }
+      const nakA = calcNakshatra(subjA.moon.abs_pos), nakB = calcNakshatra(subjB.moon.abs_pos);
+      const signA = SIGN_NAME_MAP[subjA.moon.sign] || subjA.moon.sign;
+      const signB = SIGN_NAME_MAP[subjB.moon.sign] || subjB.moon.sign;
+      const porutham = calculatePorutham(
+        { nakshatra: nakA.en, moonSign: signA, moonDeg: subjA.moon.position },
+        { nakshatra: nakB.en, moonSign: signB, moonDeg: subjB.moon.position }
+      );
+      return res.json({ verified: true, bride: { nakshatra: nakA, moonSign: signA }, groom: { nakshatra: nakB, moonSign: signB }, porutham });
+    }
     if (b.mode === 'compatibility') {
       const pA = b.personA, pB = b.personB;
       if (!pA || !pB || !pA.dob || !pA.tob || !pA.coords || !pB.dob || !pB.tob || !pB.coords) {
