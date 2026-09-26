@@ -870,12 +870,18 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
   // using our existing Gemini setup — this is exactly the same "explain real
   // data, don't invent it" pattern as the other AI tools in this app, and
   // gives us free multi-language support since Gemini itself is multilingual.
-  const CREDIT_COST = 2; // real Gemini API cost per question — bumped from 1 to 2 per the owner's pricing call
+  const b = req.body || {};
+  // Same "combination question" heuristic as astrology-plus.html's pre-submit
+  // check — recomputed here server-side (never trust a client-supplied flag
+  // for pricing) so a multi-part question is charged for answering several
+  // things at once instead of the single-question rate.
+  const qText = b.question || '';
+  const isCombination = (qText.match(/\?/g) || []).length > 1 || /\b(and also|another question|multiple questions|plus|as well as)\b/i.test(qText);
+  const CREDIT_COST = isCombination ? 50 : 2; // real Gemini API cost per question — bumped from 1 to 2; a combination/multi-part question costs 50
   let allowed = false;
   try {
-    allowed = await deductCredits(req.user.id, CREDIT_COST, 'astrologyplus_ai');
-    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
-    const b = req.body || {};
+    allowed = await deductCredits(req.user.id, CREDIT_COST, isCombination ? 'astrologyplus_ai_combo' : 'astrologyplus_ai');
+    if (!allowed) return res.status(402).json({ error: isCombination ? 'இது கலவை/பல-பஔுதி — 50 credits தெவை. பொதுமான credits இல்லை.' : 'Not enough credits — please buy more or upgrade to Pro.' });
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
     const lang = (b.chartContext && b.chartContext.outputLanguage) || 'en';
     const summaryLine = (b.chartContext && b.chartContext.chartSummaryForAI) ? `\n\nCalculated chart summary: ${b.chartContext.chartSummaryForAI}` : '';

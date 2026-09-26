@@ -70,11 +70,7 @@
 
 <div class="card">
   <div class="section">📚 முழுமையான ஜோதிட வரலாறு+</div>
-  <div class="grid">
-    <div><label>பிறப்பு ஜாதகம் (செயல்படுகிறது ✓)</label><input value="D1 ராசி — Sun/Moon/Lagna/9 கிரகங்கள்" disabled></div>
-    <div><label>Transit (செயல்படுகிறது ✓)</label><input value="Real-time — astrologer.p.rapidapi.com" disabled></div>
-  </div>
-  <div class="small" style="margin-top:8px">குறிப்பு: பிரிவு சக்கரங்கள் (D9, D10 etc.) இன்னும் இணைக்கப்படவில்லை.</div>
+  
   <div id="history" class="result" style="margin-top:12px">சரிபார்க்கப்பட்ட ஜாதக வரலாறு இங்கே தோன்றும்.</div>
   <div id="transitTable" style="margin-top:14px;"></div>
   <div id="navamsaTable"></div>
@@ -89,16 +85,7 @@
   <div id="answer" class="result" style="margin-top:12px">இன்னும் பதில் இல்லை.</div>
 </div>
 
-<div class="card">
-  <div class="section">🛡️ ஜாம்தாரிஸ் உண்மைத் தன்மை விதிகள்</div>
-  <div class="notice success"><b>கற்பனை இல்லை.</b> வானியல் கணக்கீடுகள், ஜாதக நிலைகள், தசா தேதிகள் மற்றும் பொருத்த தரவுகள் கணக்கீடு engine-லிருந்து மட்டுமே வர வேண்டும். AI விளக்குகிறது, ஆராய்கிறது; அது ephemeris மதிப்புகளை உருவாக்காது. ஆதாரம் போதுமானதாக இல்லையெனில், பதில் அதைத் தெளிவாகக் கூற வேண்டும்.</div>
-  <ul class="small" style="line-height:1.7">
-    <li>துல்லியத்திற்கு சரியான பிறப்பு நேரம், இடம், ஆயத்தொலைவுகள் மற்றும் நேர மண்டலம் தேவை.</li>
-    <li>ஒவ்வொரு கணக்கீடும் ராசி முறை மற்றும் அயனாம்சத்தை பதிவு செய்யும்.</li>
-    <li>திருமண பதில்கள் விளக்கங்கள் மட்டுமே, உத்தரவாதங்கள் அல்ல.</li>
-    <li>வரலாற்று/ஆராய்ச்சி கூற்றுகளுக்கு ஆதாரங்கள் இணைக்கப்பட வேண்டும்.</li>
-  </ul>
-</div>
+
 
 <div class="footer"><b>ஜாம்தாரிஸ்</b> · Intelligent Business Operating System · ஜோதிடம்+<br>ஜனார்த்தனன் தியாகராஜன் · 7667663922 · janarmca@gmail.com</div>
 </div>
@@ -273,9 +260,14 @@ $('calculate').onclick=async()=>{
 $('ask').onclick=async()=>{
   const q=$('question').value.trim();
   if(!q){ $('answer').textContent='தயவுசெய்து ஒரு தெளிவான கேள்வியை எழுதுங்கள்.'; return; }
-  if((q.match(/\?/g)||[]).length>1 || /\b(and also|another question|multiple questions|plus|as well as)\b/i.test(q)){
-    $('answer').textContent='ஒரு நேரத்தில் ஒரே ஒரு தெளிவான கேள்வி மட்டும் கேளுங்கள். மிக முக்கியமான ஒரு கேள்வியை தேர்ந்தெடுத்து மீண்டும் சமர்ப்பிக்கவும்.';
-    return;
+  // A "combination" (multi-part) question is no longer hard-rejected — the
+  // server independently re-checks this same heuristic and charges 50
+  // credits instead of 2 for it, so this confirm() is just an honest preview
+  // of that price before the person submits.
+  const isCombo = (q.match(/\?/g)||[]).length>1 || /\b(and also|another question|multiple questions|plus|as well as)\b/i.test(q);
+  if(isCombo){
+    const proceed = confirm('இது ஒரு கலவை/பல-பகுதி கேள்வியாக தெரிகிறது — சாதாரண ஒரு-கேள்விக்கு 2 credits-க்கு puததிலாக, இதர்ஔு 50 credits கழிக்கப்படும். தொடரவா?');
+    if(!proceed) return;
   }
   if(!window.__lastChartResult){
     $('answer').textContent = 'முதலில் மேலே "✨ துல்லியமான ஜாதகம் கணக்கிடு" பொத்தானை அழுத்தி ஜாதகத்தை கணக்கிடவும், அப்புறம் கேள்வி கேளுங்கள்.';
