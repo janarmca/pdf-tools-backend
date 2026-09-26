@@ -486,8 +486,15 @@ app.post('/api/ai/image', creditLimiter, requireAuth, async (req, res) => {
     const prompt = (req.body.prompt || '').trim();
     if (!prompt) return res.status(400).json({ error: 'Prompt தேவை.' });
     const toolId = req.body.toolId || 'texttoimage';
-    allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
-    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+    // aibgreplace is advertised as free (competitors gate this behind their
+    // Pro tier; we don't) and the underlying Workers AI call itself is free
+    // up to the daily Neurons quota, so it's exempt from this endpoint's
+    // usual per-generation charge. Other callers (texttoimage) still pay.
+    const isFreeTool = toolId === 'aibgreplace';
+    if (!isFreeTool) {
+      allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+      if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+    }
 
     const cfRes = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`,

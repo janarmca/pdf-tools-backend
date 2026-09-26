@@ -327,7 +327,7 @@ const TOOLS = [
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
-  {id:'aibgreplace', name:'AI Background Replace', desc:'Product/portrait photos-க்கு AI-generated background — competitors இதை Pro-க்கு பின்னால் வைக்கின்றன, நாங்க free', icon:'🪄', color:'#7C3AED', cat:'image', cost:5},
+  {id:'aibgreplace', name:'AI Background Replace', desc:'Product/portrait photos-க்கு AI-generated background — competitors இதை Pro-க்கு பின்னால் வைக்கின்றன, நாங்க free', icon:'🪄', color:'#7C3AED', cat:'image'},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'littlestar', name:'Little Star — Education Arcade', desc:'Fun mini-games, daily challenges & character customization, Tamil + English', icon:'⭐', color:'#D6336C', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
@@ -7792,8 +7792,6 @@ TOOL_IMPL.aibgreplace = {
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'இந்த feature பயன்படுத்த sign in பண்ணவும்.').style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#abgPrompt').value || '').trim();
       if(!p){ mountResult(body, 'Background-ஐ பற்றி describe பண்ணுங்க முதலில்.').style.background='#FDEDEC'; return; }
-      const ok = await confirmCreditSpend(body, '5 credits');
-      if(!ok) return;
       const prog = mountProgress(body);
       try{
         // Step 1: cut out the subject — same library/call bgremove already
