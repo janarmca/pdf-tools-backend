@@ -291,7 +291,7 @@ $('ask').onclick=async()=>{
   // of that price before the person submits.
   const isCombo = (q.match(/\?/g)||[]).length>1 || /\b(and also|another question|multiple questions|plus|as well as)\b/i.test(q);
   if(isCombo){
-    const proceed = confirm('இது ஒரு கலவை/பல-பகுதி கேள்வியாக தெரிகிறது — சாதாரண ஒரு-கேள்விக்கு 2 credits-க்கு puததிலாக, இதர்ஔு 50 credits கழிக்கப்படும். தொடரவா?');
+    const proceed = confirm('இது ஒரு கலவை/பல-பகுதி கேள்வியாக தெரிகிறது — சாதாரண ஒரு-கேள்விக்கு 2 credits-க்கு பதிலாக, இதற்கு 50 credits கழிக்கப்படும். தொடரவா?');
     if(!proceed) return;
   }
   if(!window.__lastChartResult){
