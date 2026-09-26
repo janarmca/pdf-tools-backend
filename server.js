@@ -881,7 +881,7 @@ app.post('/api/claude/analyze', creditLimiter, requireAuth, async (req, res) => 
   let allowed = false;
   try {
     allowed = await deductCredits(req.user.id, CREDIT_COST, isCombination ? 'astrologyplus_ai_combo' : 'astrologyplus_ai');
-    if (!allowed) return res.status(402).json({ error: isCombination ? 'இது கலவை/பல-பஔுதி — 50 credits தெவை. பொதுமான credits இல்லை.' : 'Not enough credits — please buy more or upgrade to Pro.' });
+    if (!allowed) return res.status(402).json({ error: isCombination ? 'இது கலவை/பல-பகுதி கேள்வி — 50 credits தேவை. போதுமான credits இல்லை.' : 'Not enough credits — please buy more or upgrade to Pro.' });
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'AI interpretation is not configured (GEMINI_API_KEY missing).' });
     const lang = (b.chartContext && b.chartContext.outputLanguage) || 'en';
     const summaryLine = (b.chartContext && b.chartContext.chartSummaryForAI) ? `\n\nCalculated chart summary: ${b.chartContext.chartSummaryForAI}` : '';
