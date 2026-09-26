@@ -1294,31 +1294,38 @@ function toolSlug(t){
 }
 function renderToolCard(t){
   const isPaid = !!t.cost;
+  // Full-bleed photo card — same visual language as the homepage category
+  // cards (photo fills the whole card via position:absolute inset:0, dark
+  // bottom gradient overlay keeps the white name/desc text readable over
+  // any photo). Falls back gracefully to the flat tool color if a tool has
+  // no photo yet (images/tools/<id>.jpg 404s → onerror hides the <img>,
+  // leaving just the color + gradient + text, still fully readable).
   return el(`
-    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; text-decoration:none; color:inherit;">
-      ${isPaid ? `<div style="position:absolute; top:8px; right:8px; background:#FFF3E0; color:#B8860B; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:6px;">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
-      <div class="tool-icon" style="position:relative; background:${t.color}22; overflow:visible;">
-        <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:12px;" onerror="this.style.display='none'">
-        <span style="position:absolute; bottom:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:${t.color}; display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1; border:2px solid var(--card); box-shadow:0 2px 5px rgba(0,0,0,.25); z-index:2;">${t.icon}</span>
+    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; overflow:hidden; padding:0; gap:0; text-decoration:none; color:inherit; min-height:152px; background:${t.color};">
+      <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+      <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,50,.05) 0%, rgba(10,20,50,.35) 55%, rgba(10,20,50,.85) 100%);"></div>
+      ${isPaid ? `<div style="position:absolute; top:8px; right:8px; z-index:2; background:#FFF3E0; color:#B8860B; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:6px;">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
+      <div style="position:relative; z-index:1; height:100%; padding:14px 12px 12px; display:flex; flex-direction:column; justify-content:flex-end; gap:4px;">
+        <span style="width:30px; height:30px; border-radius:9px; background:${t.color}; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.25); margin-bottom:2px;">${t.icon}</span>
+        <div class="tool-name" style="color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.4);">${t.name}</div>
+        <div class="tool-desc" style="color:rgba(255,255,255,.88); text-shadow:0 1px 3px rgba(0,0,0,.4);">${t.desc}</div>
       </div>
-      <div class="tool-name">${t.name}</div>
-      <div class="tool-desc">${t.desc}</div>
     </a>
   `);
 }
 // A smaller variant for spots like "Popular Tools" that show a quick-glance
-// row rather than the full browsing grid — same photo/data, tighter frame.
+// row rather than the full browsing grid — same full-bleed photo treatment,
+// tighter frame, title only (no description).
 function renderToolCardCompact(t){
   const isPaid = !!t.cost;
   return el(`
-    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit;">
-      <div style="position:relative; width:100%; height:72px; overflow:hidden; border-radius:14px 14px 0 0; background:${t.color}18; flex-shrink:0;">
-        <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" width="128" height="72" style="display:block; width:100%; height:72px; object-fit:cover;" onerror="this.style.display='none'">
-        ${isPaid ? `<div style="position:absolute; top:5px; right:5px; background:#fff; color:#B8860B; font-size:8px; font-weight:800; padding:2px 5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.15);">⚡${t.cost}</div>` : ''}
-        <div style="position:absolute; bottom:-10px; left:9px; width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; background:${t.color}; box-shadow:0 3px 7px rgba(0,0,0,.18); border:2px solid var(--card);">${t.icon}</div>
-      </div>
-      <div style="padding:15px 10px 11px; display:flex; flex-direction:column; gap:2px; text-align:left;">
-        <div style="font-weight:800; font-size:12px; line-height:1.25;">${t.name}</div>
+    <a class="tool-card" href="/tools/${toolSlug(t)}.html" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit; min-height:112px; background:${t.color};">
+      <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+      <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,50,.05) 0%, rgba(10,20,50,.4) 60%, rgba(10,20,50,.88) 100%);"></div>
+      ${isPaid ? `<div style="position:absolute; top:5px; right:5px; z-index:2; background:#fff; color:#B8860B; font-size:8px; font-weight:800; padding:2px 5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.15);">⚡${t.cost}</div>` : ''}
+      <div style="position:relative; z-index:1; height:100%; padding:9px 9px 8px; display:flex; flex-direction:column; justify-content:flex-end; gap:2px;">
+        <span style="width:24px; height:24px; border-radius:7px; background:${t.color}; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,.25); margin-bottom:2px;">${t.icon}</span>
+        <div style="font-weight:800; font-size:12px; line-height:1.25; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.4);">${t.name}</div>
       </div>
     </a>
   `);
