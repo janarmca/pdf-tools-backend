@@ -13503,9 +13503,9 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
   const wrap = el(`
     <div style="text-align:center; padding:60px 20px;">
       <div style="font-size:32px; margin-bottom:12px;">🔗</div>
-      <div style="font-size:15px; font-weight:800; margin-bottom:8px;">${title} புதிய tab-ல் திறக்கும்</div>
-      <div class="tamil" style="font-size:13px; color:var(--sub); margin-bottom:18px;">திறக்கவில்லை என்றால் (pop-up blocked), கீழே தட்டவும்.</div>
-      <button class="btn" id="__openEmbeddedBtn">🔗 ${title}-ஐ திற</button>
+      <div style="font-size:15px; font-weight:800; margin-bottom:8px;">${title} will open in a new tab</div>
+      <div style="font-size:13px; color:var(--sub); margin-bottom:18px;">If it doesn't open (pop-up blocked), tap below.</div>
+      <button class="btn" id="__openEmbeddedBtn">🔗 Open ${title}</button>
     </div>
   `);
   container.appendChild(wrap);
