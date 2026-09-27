@@ -421,6 +421,30 @@ input[type=color]{width:36px;height:28px;padding:2px;border:1px solid #d7dee8;
       </div>
     </details>
 
+    <details class="panel">
+      <summary>🧷 Custom Sections</summary>
+      <div class="panel-body">
+        <p style="font-size:11.5px;color:#94a3b8;margin:0 0 8px;line-height:1.5">
+          Add any section a resume checker (like ResumeGemini) supports but isn't
+          built in here — Languages, Awards, References, Volunteer work, Publications,
+          Hobbies, etc.
+        </p>
+        <div class="btn-row" style="flex-wrap:wrap;">
+          <button class="btn lite sm" onclick="addCustomSection('Languages')">+ Languages</button>
+          <button class="btn lite sm" onclick="addCustomSection('Awards &amp; Achievements')">+ Awards</button>
+          <button class="btn lite sm" onclick="addCustomSection('Volunteer / Extracurricular')">+ Volunteer</button>
+          <button class="btn lite sm" onclick="addCustomSection('Publications')">+ Publications</button>
+          <button class="btn lite sm" onclick="addCustomSection('References')">+ References</button>
+          <button class="btn lite sm" onclick="addCustomSection('Hobbies &amp; Interests')">+ Hobbies</button>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:8px">
+          <input type="text" id="customSectionTitleInput" placeholder="Or type your own section title">
+          <button class="btn lite sm" onclick="addCustomSection($('customSectionTitleInput').value)">Add</button>
+        </div>
+        <div id="customSecList" style="margin-top:10px"></div>
+      </div>
+    </details>
+
     <details class="panel" open>
       <summary>🧩 Section order, visibility &amp; column</summary>
       <div class="panel-body">
@@ -750,6 +774,7 @@ function blankState(){
     font: "system",
     contact:{ fullName:"", jobTitle:"", email:"", phone:"", location:"", linkedin:"", website:"" },
     summary:"", experience:[], projects:[], education:[], skills:[], certifications:[],
+    customSections:[], // user-defined extra sections (Languages, Awards, References, etc.)
     sectionOrder:["summary","experience","projects","education","skills","certifications"],
     hidden:{},
     placement: Object.assign({}, DEFAULT_PLACEMENT),
@@ -799,6 +824,11 @@ function normalizeState(raw){
   out.certifications = (Array.isArray(out.certifications) ? out.certifications : []).map(c => ({
     id: c.id || uid(), name: c.name || "", issuer: c.issuer || "", date: c.date || ""
   }));
+  out.customSections = (Array.isArray(out.customSections) ? out.customSections : []).map(cs => {
+    const bullets = migrateBullets(cs.bullets);
+    if(!bullets.length) bullets.push({ id: uid(), html: "" });
+    return { id: cs.id || uid(), title: cs.title || "", bullets };
+  });
 
   if(!Array.isArray(out.skills)) out.skills = [];
   if(!Array.isArray(out.sectionOrder)) out.sectionOrder = base.sectionOrder;
@@ -807,7 +837,15 @@ function normalizeState(raw){
   if(!FONTS[out.font]) out.font = "system";
   if(typeof out.jobDescription !== "string") out.jobDescription = "";
 
-  Object.keys(SECTION_LABELS).forEach(k => {
+  // Keep sectionOrder/placement in sync with whatever custom sections actually
+  // exist — drops stale "cs_<id>" entries left behind by a deleted section,
+  // and adds any missing ones (e.g. an older saved draft from before this
+  // field existed) so a custom section is never silently invisible.
+  const customKeys = out.customSections.map(cs => "cs_" + cs.id);
+  out.sectionOrder = out.sectionOrder.filter(k => !k.startsWith("cs_") || customKeys.includes(k));
+  customKeys.forEach(k => { if(!out.sectionOrder.includes(k)) out.sectionOrder.push(k); });
+
+  Object.keys(SECTION_LABELS).concat(customKeys).forEach(k => {
     if(out.placement[k] !== "side") out.placement[k] = "main";
   });
   return out;
@@ -937,7 +975,25 @@ function sanitizeHTML(html){
   return tmp.innerHTML;
 }
 
+function customSectionById(id){ return state.customSections.find(cs => cs.id === id); }
+
+// Custom sections are keyed "cs_<id>" in sectionOrder/placement/hidden (since
+// SECTION_LABELS/SECTION_HEADINGS are fixed objects that can't hold a dynamic,
+// user-editable title) — this resolves either kind of key to its display name.
+function sectionLabel(key){
+  if(SECTION_LABELS[key]) return SECTION_LABELS[key];
+  if(key.indexOf("cs_") === 0){
+    const cs = customSectionById(key.slice(3));
+    return (cs && cs.title.trim()) || "Custom Section";
+  }
+  return key;
+}
+
 function hasContent(key){
+  if(key.indexOf("cs_") === 0){
+    const cs = customSectionById(key.slice(3));
+    return !!(cs && cs.bullets.some(b => stripTags(b.html).length > 0));
+  }
   switch(key){
     case "summary":        return state.summary.trim().length > 0;
     case "experience":     return state.experience.some(e => e.jobTitle || e.company);
@@ -980,6 +1036,12 @@ function bulletsHTML(bullets){
 }
 
 function renderSection(key){
+  if(key.indexOf("cs_") === 0){
+    const cs = customSectionById(key.slice(3));
+    if(!cs) return "";
+    const bullets = bulletsHTML(cs.bullets);
+    return bullets ? `<section class="r-section"><h2 class="r-h">${esc(sectionLabel(key))}</h2>${bullets}</section>` : "";
+  }
   const heading = SECTION_HEADINGS[key];
 
   if(key === "summary"){
@@ -1348,6 +1410,54 @@ function renderCertList(){
     </div>`).join("");
 }
 
+/* ============================================================================
+   10b. CUSTOM SECTIONS (Languages, Awards, References, etc. — user-defined)
+   ============================================================================ */
+function addCustomSection(title){
+  title = (title || "").trim();
+  if(!title){ toast("Enter a section title first"); return; }
+  const id = uid();
+  state.customSections.push({ id, title, bullets: [{ id: uid(), html: "" }] });
+  state.sectionOrder.push("cs_" + id);
+  state.placement["cs_" + id] = "main";
+  renderCustomSectionsList(); renderSectionList(); render(); saveDraft();
+  const titleInput = $("customSectionTitleInput");
+  if(titleInput) titleInput.value = "";
+  setTimeout(() => {
+    const box = document.querySelector(`.rep[data-list="customSections"][data-id="${id}"] .bullet-input`);
+    if(box) box.focus();
+  }, 30);
+}
+function removeCustomSection(id){
+  state.customSections = state.customSections.filter(cs => cs.id !== id);
+  const key = "cs_" + id;
+  state.sectionOrder = state.sectionOrder.filter(k => k !== key);
+  delete state.placement[key];
+  delete state.hidden[key];
+  renderCustomSectionsList(); renderSectionList(); render(); saveDraft();
+}
+function renderCustomSectionsList(){
+  const wrap = $("customSecList");
+  if(!wrap) return;
+  if(!state.customSections.length){
+    wrap.innerHTML = `<div class="empty-note">No custom sections yet — tap a quick-add button above, or type your own title.</div>`;
+    return;
+  }
+  wrap.innerHTML = state.customSections.map(cs => `
+    <div class="rep" data-id="${cs.id}" data-list="customSections">
+      <div class="rep-head">
+        <span class="drag-handle" draggable="true" title="Drag to reorder">⋮⋮</span>
+        <input type="text" data-field="title" value="${esc(cs.title)}" placeholder="Section title"
+               style="flex:1;min-width:0;border:none;background:transparent;font-weight:700;font-size:12px;color:#334155;padding:2px 4px;">
+        <button class="rep-del" onclick="removeCustomSection('${cs.id}')" title="Delete section">×</button>
+      </div>
+      <div class="bullets-editor" data-list="customSections" data-parent="${cs.id}">
+        ${cs.bullets.map(bulletRowHTML).join("")}
+        <button type="button" class="add-bullet">+ Add line</button>
+      </div>
+    </div>`).join("");
+}
+
 function bindRepeaterInputs(){
   document.addEventListener("input", ev => {
     const inp = ev.target.closest(".rep [data-field]");
@@ -1505,6 +1615,7 @@ function rerenderList(listName){
   else if(listName === "projects")  renderProjectList();
   else if(listName === "education") renderEducationList();
   else if(listName === "certifications") renderCertList();
+  else if(listName === "customSections") renderCustomSectionsList();
 }
 
 /* ============================================================================
@@ -1656,7 +1767,7 @@ function renderSectionList(){
     return `<div class="sec-row ${state.hidden[key] ? "off" : ""}">
       <input type="checkbox" ${state.hidden[key] ? "" : "checked"}
              onchange="toggleSection('${key}', this.checked)">
-      <span class="name">${SECTION_LABELS[key] || key}</span>
+      <span class="name">${esc(sectionLabel(key))}</span>
       <select class="place-sel ${isSide ? "side" : ""}"
               onchange="setPlacement('${key}', this.value)">
         <option value="main" ${isSide ? "" : "selected"}>Main</option>
@@ -1666,6 +1777,7 @@ function renderSectionList(){
         <button onclick="moveSection(${i},-1)" ${i === 0 ? "disabled" : ""}>↑</button>
         <button onclick="moveSection(${i},1)" ${i === state.sectionOrder.length-1 ? "disabled" : ""}>↓</button>
       </div>
+      ${key.indexOf("cs_") === 0 ? `<button class="rep-del" style="font-size:15px;" onclick="removeCustomSection('${key.slice(3)}')" title="Delete this section">×</button>` : ""}
     </div>`;
   }).join("");
 }
@@ -1721,6 +1833,10 @@ function resumeFullText(){
   state.education.forEach(e => parts.push(e.degree, e.institution));
   state.certifications.forEach(c => parts.push(c.name, c.issuer));
   state.skills.forEach(s => parts.push(s));
+  state.customSections.forEach(cs => {
+    parts.push(cs.title);
+    (cs.bullets||[]).forEach(b => parts.push(stripTags(b.html)));
+  });
   return parts.filter(Boolean).join(" ");
 }
 
@@ -1917,6 +2033,16 @@ function exportDOC(){
   }
 
   function sectionHTML(key){
+    if(key.indexOf("cs_") === 0){
+      const cs = customSectionById(key.slice(3));
+      if(!cs) return "";
+      const bl = (cs.bullets || []).filter(b => stripTags(b.html).length);
+      if(!bl.length) return "";
+      const list = `<ul style="margin:3pt 0 0 0;padding-left:15pt;">${
+        bl.map(b => `<li style="${ff}font-size:10pt;color:#374151;margin-bottom:1.5pt;">${sanitizeHTML(b.html)}</li>`).join("")
+      }</ul>`;
+      return heading(sectionLabel(key)) + list;
+    }
     if(key === "summary") return heading(SECTION_HEADINGS.summary) + paragraph(state.summary);
     if(key === "experience"){
       const items = state.experience
@@ -2115,6 +2241,7 @@ function refreshAll(){
   renderProjectList();
   renderEducationList();
   renderCertList();
+  renderCustomSectionsList();
   renderSkillTags();
   renderSectionList();
   render();
@@ -2137,6 +2264,7 @@ function refreshAll(){
   renderProjectList();
   renderEducationList();
   renderCertList();
+  renderCustomSectionsList();
 
   $("skillInput").addEventListener("keydown", e => {
     if(e.key === "Enter"){ e.preventDefault(); addSkillFromInput(); }

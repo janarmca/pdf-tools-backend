@@ -329,7 +329,6 @@ const TOOLS = [
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'Product/portrait photos-க்கு AI-generated background — competitors இதை Pro-க்கு பின்னால் வைக்கின்றன, நாங்க free', icon:'🪄', color:'#7C3AED', cat:'image'},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
-  {id:'littlestar', name:'Little Star — Education Arcade', desc:'Fun mini-games, daily challenges & character customization, Tamil + English', icon:'⭐', color:'#D6336C', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'carrompuzzle', name:'Carrom Puzzle', desc:'Real physics carrom board — pocket a coin, solve a puzzle for bonus stars', icon:'🎯', color:'#8E44AD', cat:'education'},
@@ -11963,7 +11962,7 @@ TOOL_IMPL.prescription = {
    Full standalone app (its own HTML/CSS/JS), loaded via iframe rather than
    duplicated inline here — the canonical version lives in Resume_build.html
    in the repo root. */
-TOOL_IMPL.resumebuilder = { mount(container){ mountEmbeddedTool(container, 'Resume_build.html?v=3', 'Resume Builder', true); } };
+TOOL_IMPL.resumebuilder = { mount(container){ mountEmbeddedTool(container, 'Resume_build.html?v=4', 'Resume Builder', true); } };
 
 
 /* ===================== RENT RECEIPT GENERATOR ===================== */
@@ -13490,7 +13489,6 @@ TOOL_IMPL.percentcalc = {
    collide with anything in this 8000+ line app. The file must be uploaded
    alongside index.html (same folder) on GitHub for this to load. ============= */
 /* numberjungle — moved to category-education.js (lazy-loaded) */
-/* littlestar — moved to category-education.js (lazy-loaded) */
 /* carrompuzzle — moved to category-education.js (lazy-loaded) */
 
 /* ===================== EMBEDDED BUSINESS TOOLS (each is a standalone
