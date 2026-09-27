@@ -169,7 +169,6 @@ const PROMPTS = {
 
   // ---------- Education (5) ----------
   numberjungle: 'a young child happily playing a number-matching learning game on a tablet',
-  littlestar: 'a small child playing colorful educational games on a tablet, parent nearby smiling',
   mathpractice: 'a schoolchild solving printed math practice worksheets at a desk, pencil in hand',
   tamiltracing: 'a young child tracing Tamil letters on a tablet screen with a stylus, focused',
   carrompuzzle: 'a child and parent playing a carrom-style puzzle game together on a tablet',
