@@ -23,3 +23,20 @@
 # frequently-updated app files, not static assets — same rule applies.
 /*.html
   Cache-Control: no-cache
+
+# category-image.js, category-education.js, etc. are lazy-loaded at runtime
+# (index.source.html injects <script src="category-<cat>.js"> the first time
+# a tool from that category opens) and are updated often, same as index.html
+# itself. Without this rule, Cloudflare's default long-lived caching for
+# static assets meant a browser (or the CDN edge) could keep serving an old,
+# already-fixed-on-GitHub version of a category file for a long time after
+# every deploy — this is the "same tool still looks/behaves old" / general
+# cache problem users hit repeatedly. This makes every .js file always
+# revalidate with the server, same as the app shell.
+/*.js
+  Cache-Control: no-cache
+
+# thirukkural-daily.json is fetched at runtime and changes daily — must
+# also always revalidate, or users can get stuck seeing yesterday's kural.
+/*.json
+  Cache-Control: no-cache

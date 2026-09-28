@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type Race — Typing Practice Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Poppins:wght@400;500;600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#1a0f1f,#3a1530,#5c1f2e); color:#fff; min-height:100vh;}
+  .ta{font-family:'Noto Sans Tamil',sans-serif;}
+  .mono{font-family:'Roboto Mono',monospace;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+  #app{max-width:1100px; margin:0 auto; padding:14px;}
+
+  header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    background:rgba(255,255,255,0.06); border:2px solid #FF5E5B; border-radius:16px; padding:12px; margin-bottom:12px;}
+  .logo{font-size:20px; font-weight:800; color:#FF5E5B;}
+  .lang-btn{background:#FF5E5B; color:#fff; border:none; padding:7px 12px; border-radius:8px; font-weight:700; cursor:pointer; font-size:11px;}
+
+  .stat-strip{display:flex; gap:6px; flex-wrap:wrap; font-size:11px;}
+  .stat{background:rgba(255,94,91,0.15); border:1px solid #FF5E5B; color:#FF9B96; padding:5px 9px; border-radius:6px; font-weight:700;}
+  .xpbar-wrap{width:100%; background:rgba(255,255,255,0.08); border-radius:6px; height:8px; margin-top:6px; overflow:hidden;}
+  .xpbar-fill{height:100%; background:linear-gradient(90deg,#FF5E5B,#FFB627); transition:width .3s;}
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .3s;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:12px 0;}
+  .card{background:rgba(255,255,255,0.06); border:2px solid rgba(255,94,91,0.35); border-radius:14px; padding:14px;
+    cursor:pointer; transition:.25s; text-align:center;}
+  .card:hover{transform:translateY(-4px); border-color:#FF5E5B; box-shadow:0 10px 22px rgba(0,0,0,.3);}
+  .card .ic{font-size:28px; margin-bottom:4px;}
+  .card .t1{font-weight:700; font-size:13px; color:#FF9B96;}
+  .card .t2{font-size:10px; color:#bbb; margin-top:3px;}
+  .card .t3{font-size:11px; color:#FFB627; margin-top:6px; font-weight:700;}
+
+  .box{background:rgba(255,255,255,0.05); border:1px solid rgba(255,94,91,0.3); border-radius:12px; padding:16px; margin:10px 0;}
+
+  .btn{background:#FF5E5B; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;}
+  .btn-out{background:transparent; border:2px solid #FF5E5B; color:#FF9B96;}
+  .btn-big{padding:14px 26px; font-size:15px;}
+
+  .typebox{font-size:19px; line-height:1.9; letter-spacing:0.5px; padding:20px; background:rgba(0,0,0,0.25); border-radius:12px; border:2px solid rgba(255,94,91,0.3); min-height:90px;}
+  .typebox .ch-ok{color:#4CD964;}
+  .typebox .ch-bad{color:#FF5E5B; text-decoration:underline; text-decoration-color:#FF5E5B;}
+  .typebox .ch-todo{color:#999;}
+  .typebox .ch-cur{border-bottom:3px solid #FFB627; animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{border-color:transparent;}}
+  #typeHint{font-size:12px; color:#FFB627; margin:6px 0 2px;}
+  #typeInput{width:100%; margin-top:14px; padding:12px; font-size:16px; border-radius:8px; border:2px solid #FF5E5B; background:rgba(255,255,255,0.08); color:#fff; font-family:'Roboto Mono',monospace;}
+  #typeInput:focus{outline:none; border-color:#FFB627;}
+
+  .live-stats{display:flex; gap:10px; flex-wrap:wrap; margin:12px 0;}
+  .live-stat{flex:1; min-width:100px; background:rgba(255,255,255,0.06); border-radius:10px; padding:10px; text-align:center;}
+  .live-stat .v{font-size:22px; font-weight:800; color:#FFB627; font-family:'Roboto Mono',monospace;}
+  .live-stat .l{font-size:10px; color:#bbb; text-transform:uppercase; margin-top:2px;}
+
+  .badge-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px; margin:10px 0;}
+  .badge{background:rgba(255,94,91,0.12); border:1px solid #FF5E5B; border-radius:10px; padding:10px; text-align:center;}
+  .badge .bic{font-size:24px;}
+  .badge .bt{font-size:9px; color:#FF9B96; margin-top:3px; font-weight:700;}
+  .badge .bd{font-size:8px; color:#999; margin-top:2px;}
+  .badge.empty{opacity:.28;}
+
+  .result-hero{font-size:52px; font-weight:900; font-family:'Roboto Mono',monospace; color:#FFB627; margin:6px 0;}
+  footer{text-align:center; color:#777; font-size:10px; margin-top:18px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div style="flex:1; min-width:180px;">
+      <div class="logo">🏁 <span id="titleTxt">Type Race</span></div>
+      <div class="xpbar-wrap"><div class="xpbar-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat">🏆 <span id="levelTxt">Lv.1</span></div>
+      <div class="stat">⭐ <span id="xpTxt">0</span> XP</div>
+      <div class="stat">🎖️ <span id="badgeCount">0</span>/10</div>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()"><span id="langLabel">தமிழ் / English</span></button>
+  </header>
+
+  <!-- HOME -->
+  <div class="panel active" id="home">
+    <h2 id="homeH" style="text-align:center; color:#FF9B96;"></h2>
+    <p id="homeP" style="text-align:center; color:#bbb; font-size:12px;"></p>
+    <div class="grid" id="homeGrid"></div>
+    <div style="text-align:center; margin-top:18px;">
+      <button class="btn btn-out" onclick="showPanel('badges')" id="viewBadgesBtn">🎖️ View Badges</button>
+    </div>
+  </div>
+
+  <!-- PLAY -->
+  <div class="panel" id="play">
+    <button class="btn btn-out" onclick="quitSession()" style="margin-bottom:10px;">← <span id="backTxt">Back</span></button>
+    <div class="live-stats">
+      <div class="live-stat"><div class="v" id="liveWpm">0</div><div class="l" id="liveWpmL">WPM</div></div>
+      <div class="live-stat"><div class="v" id="liveAcc">100%</div><div class="l" id="liveAccL">Accuracy</div></div>
+      <div class="live-stat"><div class="v" id="liveItem">1/10</div><div class="l" id="liveItemL">Progress</div></div>
+    </div>
+    <div id="typeHint"></div>
+    <div class="typebox" id="typeDisplay"></div>
+    <input type="text" id="typeInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Start typing here…">
+  </div>
+
+  <!-- RESULTS -->
+  <div class="panel" id="results">
+    <div style="text-align:center;">
+      <div id="resultTitle" style="color:#FF9B96; font-size:16px; font-weight:700;"></div>
+      <div class="result-hero" id="resultWpm">0 WPM</div>
+      <div id="resultAcc" style="font-size:15px; color:#4CD964; font-weight:700;"></div>
+      <div id="resultXp" style="margin-top:10px; color:#FFB627; font-weight:700;"></div>
+      <div id="resultBadges" class="badge-grid" style="max-width:420px; margin:14px auto;"></div>
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-big" onclick="retrySameMode()" id="retryBtn">🔁 Play Again</button>
+        <button class="btn btn-out btn-big" onclick="showPanel('home')" id="homeBtnFromResult">🏠 Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="panel" id="badges">
+    <button class="btn btn-out" onclick="showPanel('home')" style="margin-bottom:10px;">← <span id="backTxt2">Back</span></button>
+    <h2 id="badgesH" style="color:#FF9B96;"></h2>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <footer id="footerTxt">🏁 Type Race — Free Forever • English + Tamil • No sign-up needed</footer>
+</div>
+
+<script>
+/* ================= WORD BANKS (all static, deterministic — no AI/network) ================= */
+const BEGINNER_WORDS = ['cat','dog','sun','run','big','red','fun','map','pen','cup','hat','box','jam','key','leg','net','owl','pig','rat','sit','top','van','wet','yes','zip','arm','bed','can','day','ear','fan'];
+const INTERMEDIATE_WORDS = ['school','friend','garden','basket','yellow','planet','monkey','travel','window','bottle','flower','pencil','orange','rocket','castle','forest','cousin','parent','dinner','summer','winter','holiday','picture','morning','evening','elephant','umbrella','breakfast','vegetable','festival'];
+const ADVANCED_SENTENCES = [
+  'The quick brown fox jumps over the lazy dog.',
+  'Practice makes a person perfect over time.',
+  'Reading books every day improves your vocabulary.',
+  'Honesty is always the best policy in life.',
+  'A good friend is a real treasure to keep.',
+  'Early to bed and early to rise makes you wise.',
+  'Hard work always pays off in the end.',
+  'Kindness costs nothing but means everything.',
+  'Slow and steady wins the race every time.',
+  'Never give up even when things get difficult.',
+  'A healthy mind lives in a healthy body.',
+  'Small steps every day lead to big results.',
+  'Sharing your knowledge helps everyone grow.',
+  'Curiosity is the first step toward learning.',
+  'Every expert was once a complete beginner.',
+  'Discipline is choosing what you want most.',
+  'A single tree does not make a whole forest.',
+  'Patience and effort will overcome anything.',
+  'Good habits are hard to build but easy to keep.',
+  'Time once lost can never be found again.'
+];
+// Tamil words typed using English letters (romanized/Tanglish input) — lets kids
+// practice Tamil vocabulary without needing a separate Tamil keyboard layout.
+// Multiple accepted spellings are listed since romanization isn't one-to-one.
+const TAMIL_WORDS = [
+  {ta:'பள்ளி', en:'school', ans:['palli']},
+  {ta:'புத்தகம்', en:'book', ans:['puthagam','puthakam']},
+  {ta:'நண்பன்', en:'friend', ans:['nanban']},
+  {ta:'வீடு', en:'house', ans:['veedu','veetu']},
+  {ta:'மரம்', en:'tree', ans:['maram']},
+  {ta:'பூ', en:'flower', ans:['poo']},
+  {ta:'நீர்', en:'water', ans:['neer','nir']},
+  {ta:'சூரியன்', en:'sun', ans:['sooriyan','suryan']},
+  {ta:'நிலா', en:'moon', ans:['nila']},
+  {ta:'குடும்பம்', en:'family', ans:['kudumbam']},
+  {ta:'ஆசிரியர்', en:'teacher', ans:['aasiriyar','asiriyar']},
+  {ta:'மாணவன்', en:'student', ans:['maanavan','manavan']},
+  {ta:'உணவு', en:'food', ans:['unavu']},
+  {ta:'பறவை', en:'bird', ans:['paravai']},
+  {ta:'மலை', en:'mountain', ans:['malai']},
+  {ta:'ஆறு', en:'river', ans:['aaru','aru']},
+  {ta:'கடல்', en:'sea', ans:['kadal']},
+  {ta:'வானம்', en:'sky', ans:['vaanam','vanam']},
+  {ta:'பசு', en:'cow', ans:['pasu']},
+  {ta:'மழை', en:'rain', ans:['mazhai']},
+  {ta:'விளையாட்டு', en:'game/play', ans:['vilaiyaattu','vilayattu']},
+  {ta:'கல்வி', en:'education', ans:['kalvi']},
+  {ta:'நேரம்', en:'time', ans:['neram']},
+  {ta:'அன்பு', en:'love', ans:['anbu']},
+  {ta:'நன்றி', en:'thanks', ans:['nandri','nanri']},
+  {ta:'வணக்கம்', en:'hello/greeting', ans:['vanakkam']},
+  {ta:'ஊர்', en:'town/village', ans:['oor','ur']},
+  {ta:'தமிழ்', en:'Tamil', ans:['tamil','thamizh']},
+  {ta:'இசை', en:'music', ans:['isai']},
+  {ta:'கதை', en:'story', ans:['kathai']}
+];
+
+/* ================= STATE ================= */
+let lang = localStorage.getItem('tr_lang') || 'en';
+let state = { xp:0, badges:[], sessions:0, bestWpm:{}, modesDone:{} };
+function loadState(){
+  const s = localStorage.getItem('tr_state_v1');
+  if(s){ try{ state = JSON.parse(s); }catch(e){} }
+}
+function saveState(){ localStorage.setItem('tr_state_v1', JSON.stringify(state)); localStorage.setItem('tr_lang', lang); }
+loadState();
+
+const LEVEL_NAMES_EN = ['Beginner','Explorer','Learner','Achiever','Scholar','Champion','Genius','Master','Legend'];
+const LEVEL_NAMES_TA = ['தொடக்கநிலை','ஆய்வாளர்','கற்பவர்','சாதனையாளர்','அறிஞர்','வீரர்','மேதை','மாஸ்டர்','புராணம்'];
+function levelFromXp(xp){ return Math.min(9, Math.floor(xp/100)+1); }
+
+const T = {
+  en:{ homeH:'⌨️ Choose Your Race 🏁', homeP:'Pick a mode and start typing — improve your speed & accuracy with instant feedback!',
+       badgesH:'🎖️ Your Badge Wall', back:'Back', viewBadges:'🎖️ View Badges',
+       modes:{
+         beg:{t1:'Beginner Words', t2:'Short & simple words'},
+         mid:{t1:'Intermediate Words', t2:'Everyday vocabulary'},
+         adv:{t1:'Sentences', t2:'Full sentence typing'},
+         tam:{t1:'Tamil Words', t2:'Type Tamil words in English letters'}
+       },
+       hint_word:'Type the word shown below, then press Space or Enter.',
+       hint_sent:'Type the sentence shown below exactly as written.',
+       hint_tam:'Type the ROMANIZED spelling of the Tamil word shown (e.g. பள்ளி → palli).',
+       resultTitle:'Race Complete!', accLabel:'Accuracy', xpEarned:'XP earned', playAgain:'🔁 Play Again', home:'🏠 Home',
+       footer:'🏁 Type Race — Free Forever • English + Tamil • No sign-up needed'
+     },
+  ta:{ homeH:'⌨️ உங்கள் பந்தயத்தை தேர்ந்தெடுங்கள் 🏁', homeP:'ஒரு பயிற்சியை தேர்ந்தெடுத்து தட்டச்சு செய்ய தொடங்குங்கள் — உடனடி மதிப்பீட்டுடன் வேகத்தையும் துல்லியத்தையும் மேம்படுத்துங்கள்!',
+       badgesH:'🎖️ உங்கள் பேட்ஜ் சுவர்', back:'திரும்பு', viewBadges:'🎖️ பேட்ஜ்களைப் பார்',
+       modes:{
+         beg:{t1:'எளிய சொற்கள்', t2:'சிறிய, எளிய சொற்கள்'},
+         mid:{t1:'நடுநிலை சொற்கள்', t2:'அன்றாட சொற்கள்'},
+         adv:{t1:'வாக்கியங்கள்', t2:'முழு வாக்கியம் தட்டச்சு'},
+         tam:{t1:'தமிழ் சொற்கள்', t2:'தமிழ் சொற்களை ஆங்கில எழுத்தில் தட்டச்சு செய்யவும்'}
+       },
+       hint_word:'கீழே உள்ள சொல்லைத் தட்டச்சு செய்து Space அல்லது Enter அழுத்தவும்.',
+       hint_sent:'கீழே உள்ள வாக்கியத்தை அப்படியே தட்டச்சு செய்யவும்.',
+       hint_tam:'கீழே உள்ள தமிழ் சொல்லின் ஆங்கில எழுத்துப் பெயர்ப்பைத் தட்டச்சு செய்யவும் (எ.கா. பள்ளி → palli).',
+       resultTitle:'பந்தயம் முடிந்தது!', accLabel:'துல்லியம்', xpEarned:'கிடைத்த XP', playAgain:'🔁 மீண்டும் விளையாடு', home:'🏠 முகப்பு',
+       footer:'🏁 டைப் ரேஸ் — எப்போதும் இலவசம் • தமிழ் + ஆங்கிலம் • பதிவு தேவையில்லை'
+     }
+};
+
+const BADGES = [
+  {id:'first', icon:'🏁', t:{en:'First Race',ta:'முதல் பந்தயம்'}, d:{en:'Complete any session',ta:'ஒரு அமர்வை முடிக்கவும்'}, check:s=>s.sessions>=1},
+  {id:'speed30', icon:'⚡', t:{en:'Speed Demon',ta:'வேக வீரர்'}, d:{en:'30+ WPM in English',ta:'ஆங்கிலத்தில் 30+ WPM'}, check:s=>Math.max(s.bestWpm.beg||0,s.bestWpm.mid||0,s.bestWpm.adv||0)>=30},
+  {id:'speed50', icon:'🚀', t:{en:'Turbo Typer',ta:'சூப்பர் வேகம்'}, d:{en:'50+ WPM in English',ta:'ஆங்கிலத்தில் 50+ WPM'}, check:s=>Math.max(s.bestWpm.beg||0,s.bestWpm.mid||0,s.bestWpm.adv||0)>=50},
+  {id:'acc95', icon:'🎯', t:{en:'Sharpshooter',ta:'குறிவைப்பாளர்'}, d:{en:'95%+ accuracy once',ta:'95%+ துல்லியம்'}, check:s=>(s.bestAcc||0)>=95},
+  {id:'acc100', icon:'💯', t:{en:'Perfectionist',ta:'முழுமையாளர்'}, d:{en:'100% accuracy once',ta:'100% துல்லியம்'}, check:s=>(s.bestAcc||0)>=100},
+  {id:'tamil', icon:'🌾', t:{en:'Tamil Typist',ta:'தமிழ் தட்டச்சர்'}, d:{en:'Finish a Tamil session',ta:'தமிழ் அமர்வை முடிக்கவும்'}, check:s=>!!(s.modesDone&&s.modesDone.tam)},
+  {id:'fire5', icon:'🔥', t:{en:'On Fire',ta:'தீயில் வேகம்'}, d:{en:'5 sessions played',ta:'5 அமர்வுகள்'}, check:s=>s.sessions>=5},
+  {id:'marathon', icon:'🏆', t:{en:'Marathon Master',ta:'மாரத்தான் மாஸ்டர்'}, d:{en:'20 sessions played',ta:'20 அமர்வுகள்'}, check:s=>s.sessions>=20},
+  {id:'sentence', icon:'📖', t:{en:'Sentence Master',ta:'வாக்கிய மாஸ்டர்'}, d:{en:'Finish Sentences mode',ta:'வாக்கியப் பயிற்சி முடிக்கவும்'}, check:s=>!!(s.modesDone&&s.modesDone.adv)},
+  {id:'allround', icon:'🌟', t:{en:'All-Rounder',ta:'அனைத்திலும் திறமை'}, d:{en:'Try every mode',ta:'எல்லா பயிற்சிகளையும் முயற்சி'}, check:s=>s.modesDone&&s.modesDone.beg&&s.modesDone.mid&&s.modesDone.adv&&s.modesDone.tam}
+];
+
+function checkBadges(){
+  const newly = [];
+  BADGES.forEach(b=>{
+    if(!state.badges.includes(b.id) && b.check(state)){ state.badges.push(b.id); newly.push(b); }
+  });
+  return newly;
+}
+
+/* ================= NAV ================= */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='home') renderHome();
+  if(id==='badges') renderBadges();
+}
+function toggleLang(){ lang = lang==='en' ? 'ta' : 'en'; saveState(); renderAll(); }
+
+function renderTopBar(){
+  const lvl = levelFromXp(state.xp);
+  const names = lang==='en' ? LEVEL_NAMES_EN : LEVEL_NAMES_TA;
+  document.getElementById('levelTxt').textContent = 'Lv.'+lvl+' '+names[lvl-1];
+  document.getElementById('xpTxt').textContent = state.xp;
+  document.getElementById('badgeCount').textContent = state.badges.length;
+  document.getElementById('xpFill').style.width = (state.xp % 100) + '%';
+  document.getElementById('footerTxt').textContent = T[lang].footer;
+  document.getElementById('viewBadgesBtn').textContent = T[lang].viewBadges;
+  document.getElementById('backTxt').textContent = T[lang].back;
+  document.getElementById('backTxt2').textContent = T[lang].back;
+}
+
+const MODE_DEFS = [
+  {id:'beg', icon:'🔤'},
+  {id:'mid', icon:'📝'},
+  {id:'adv', icon:'📖'},
+  {id:'tam', icon:'🌾'}
+];
+function renderHome(){
+  renderTopBar();
+  document.getElementById('homeH').textContent = T[lang].homeH;
+  document.getElementById('homeP').textContent = T[lang].homeP;
+  const grid = document.getElementById('homeGrid');
+  grid.innerHTML = '';
+  MODE_DEFS.forEach(m=>{
+    const info = T[lang].modes[m.id];
+    const best = state.bestWpm[m.id] || 0;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="ic">${m.icon}</div><div class="t1">${info.t1}</div><div class="t2">${info.t2}</div><div class="t3">${best>0? 'Best: '+best+' WPM' : (lang==='en'?'Not played yet':'இன்னும் விளையாடவில்லை')}</div>`;
+    card.onclick = () => startSession(m.id);
+    grid.appendChild(card);
+  });
+}
+function renderBadges(){
+  renderTopBar();
+  document.getElementById('badgesH').textContent = T[lang].badgesH;
+  const grid = document.getElementById('badgeGrid');
+  grid.innerHTML = '';
+  BADGES.forEach(b=>{
+    const earned = state.badges.includes(b.id);
+    const el = document.createElement('div');
+    el.className = 'badge' + (earned?'':' empty');
+    el.innerHTML = `<div class="bic">${b.icon}</div><div class="bt">${b.t[lang]}</div><div class="bd">${b.d[lang]}</div>`;
+    grid.appendChild(el);
+  });
+}
+function renderAll(){
+  const activePanel = document.querySelector('.panel.active').id;
+  renderTopBar();
+  if(activePanel==='home') renderHome();
+  if(activePanel==='badges') renderBadges();
+  document.getElementById('titleTxt').textContent = 'Type Race';
+}
+
+/* ================= GAME SESSION ================= */
+let session = null; // {mode, items:[...], idx, startTime, correctChars, totalTyped, mistakes}
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function buildItems(mode){
+  if(mode==='beg') return shuffle(BEGINNER_WORDS).slice(0,10);
+  if(mode==='mid') return shuffle(INTERMEDIATE_WORDS).slice(0,10);
+  if(mode==='adv') return shuffle(ADVANCED_SENTENCES).slice(0,5);
+  if(mode==='tam') return shuffle(TAMIL_WORDS).slice(0,10);
+}
+function targetTextOf(mode, item){ return mode==='tam' ? '' : item; }
+
+function startSession(mode){
+  session = { mode, items: buildItems(mode), idx:0, startTime:null, correctChars:0, totalTyped:0, mistakes:0 };
+  showPanel('play');
+  const hintKey = mode==='adv' ? 'hint_sent' : (mode==='tam' ? 'hint_tam' : 'hint_word');
+  document.getElementById('typeHint').textContent = T[lang][hintKey];
+  document.getElementById('typeInput').value = '';
+  document.getElementById('typeInput').disabled = false;
+  renderPlayItem();
+  setTimeout(()=>document.getElementById('typeInput').focus(), 50);
+}
+function currentTarget(){
+  const it = session.items[session.idx];
+  return session.mode==='tam' ? it.ta : it;
+}
+function renderPlayItem(){
+  const it = session.items[session.idx];
+  const display = document.getElementById('typeDisplay');
+  const typed = document.getElementById('typeInput').value;
+  if(session.mode==='tam'){
+    display.innerHTML = `<div class="ta" style="font-size:30px; text-align:center; margin-bottom:8px;">${it.ta}</div><div style="text-align:center; color:#999; font-size:12px;">(${it.en})</div>`;
+  } else {
+    const target = it;
+    let html = '';
+    for(let i=0;i<target.length;i++){
+      let cls = 'ch-todo';
+      if(i < typed.length){ cls = typed[i]===target[i] ? 'ch-ok' : 'ch-bad'; }
+      else if(i === typed.length){ cls += ' ch-cur'; }
+      html += `<span class="${cls}">${target[i]===' '?'&nbsp;':target[i]}</span>`;
+    }
+    display.innerHTML = html;
+  }
+  document.getElementById('liveItem').textContent = (session.idx+1)+'/'+session.items.length;
+}
+function elapsedMinutes(){ return session.startTime ? (Date.now()-session.startTime)/60000 : 0; }
+function updateLiveStats(){
+  const mins = elapsedMinutes();
+  const wpm = mins>0 ? Math.round((session.correctChars/5)/mins) : 0;
+  const acc = session.totalTyped>0 ? Math.round((session.correctChars/session.totalTyped)*100) : 100;
+  document.getElementById('liveWpm').textContent = wpm;
+  document.getElementById('liveAcc').textContent = acc+'%';
+}
+
+document.getElementById('typeInput').addEventListener('input', (e)=>{
+  if(!session) return;
+  if(!session.startTime) session.startTime = Date.now();
+  const typed = e.target.value;
+  const it = session.items[session.idx];
+
+  if(session.mode==='tam'){
+    // Tamil mode: compare whole romanized word against accepted answers (case-insensitive),
+    // advance on Space/Enter or when the typed length reaches the longest accepted answer.
+    return; // handled in keydown for word submission
+  }
+  const target = it;
+  // count only the newest character for correctness stats (avoid double counting on backspace)
+  session.totalTyped = typed.length;
+  let correct = 0;
+  for(let i=0;i<typed.length && i<target.length;i++) if(typed[i]===target[i]) correct++;
+  session.correctChars = correct;
+  renderPlayItem();
+  updateLiveStats();
+  if(typed.length >= target.length){
+    setTimeout(()=>advanceItem(), 250);
+  }
+});
+
+document.getElementById('typeInput').addEventListener('keydown', (e)=>{
+  if(!session) return;
+  if(session.mode==='tam' && (e.key===' ' || e.key==='Enter')){
+    e.preventDefault();
+    if(!session.startTime) session.startTime = Date.now();
+    const typed = e.target.value.trim().toLowerCase();
+    const it = session.items[session.idx];
+    session.totalTyped += Math.max(typed.length, 1);
+    const isCorrect = it.ans.includes(typed);
+    if(isCorrect) session.correctChars += typed.length; else session.mistakes++;
+    updateLiveStats();
+    advanceItem();
+  }
+});
+
+function advanceItem(){
+  session.idx++;
+  document.getElementById('typeInput').value = '';
+  if(session.idx >= session.items.length){
+    finishSession();
+  } else {
+    renderPlayItem();
+  }
+}
+function quitSession(){ session = null; showPanel('home'); }
+
+function finishSession(){
+  const mins = Math.max(elapsedMinutes(), 0.05);
+  const wpm = Math.max(0, Math.round((session.correctChars/5)/mins));
+  const acc = session.totalTyped>0 ? Math.round((session.correctChars/session.totalTyped)*100) : 100;
+  const xpEarned = Math.max(5, Math.round(wpm*0.5 + acc*0.3));
+
+  state.xp += xpEarned;
+  state.sessions = (state.sessions||0) + 1;
+  state.bestWpm = state.bestWpm || {};
+  state.bestWpm[session.mode] = Math.max(state.bestWpm[session.mode]||0, wpm);
+  state.bestAcc = Math.max(state.bestAcc||0, acc);
+  state.modesDone = state.modesDone || {};
+  state.modesDone[session.mode] = true;
+  const newBadges = checkBadges();
+  saveState();
+
+  document.getElementById('resultTitle').textContent = T[lang].resultTitle;
+  document.getElementById('resultWpm').textContent = wpm+' WPM';
+  document.getElementById('resultAcc').textContent = T[lang].accLabel+': '+acc+'%';
+  document.getElementById('resultXp').textContent = '+'+xpEarned+' '+T[lang].xpEarned;
+  document.getElementById('retryBtn').textContent = T[lang].playAgain;
+  document.getElementById('homeBtnFromResult').textContent = T[lang].home;
+  const bGrid = document.getElementById('resultBadges');
+  bGrid.innerHTML = '';
+  newBadges.forEach(b=>{
+    const el = document.createElement('div');
+    el.className = 'badge';
+    el.innerHTML = `<div class="bic">${b.icon}</div><div class="bt">${b.t[lang]}</div>`;
+    bGrid.appendChild(el);
+  });
+  window.__lastMode = session.mode;
+  session = null;
+  showPanel('results');
+}
+function retrySameMode(){ if(window.__lastMode) startSession(window.__lastMode); }
+
+/* ================= INIT ================= */
+renderHome();
+</script>
+</body>
+</html>

@@ -383,8 +383,23 @@ if($('checkPorutham')) $('checkPorutham').onclick = async () => {
          <span class="small">${it.detail}</span>
        </div>`
     ).join('');
+    const v = d.porutham.verdict;
+    const VERDICT_STYLE = {
+      caution:  { emoji:'🔴', bg:'#FDECEA', fg:'#7A2E22' },
+      weak:     { emoji:'🟠', bg:'#FDF3E5', fg:'#7A4E13' },
+      moderate: { emoji:'🟡', bg:'#FEF9E5', fg:'#6B5A0A' },
+      strong:   { emoji:'🟢', bg:'#EAF7EE', fg:'#1E5E33' }
+    };
+    const vs = v ? (VERDICT_STYLE[v.tier] || VERDICT_STYLE.moderate) : null;
+    const verdictBlock = v ? `
+      <div style="background:${vs.bg}; color:${vs.fg}; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;">
+        <div style="font-weight:900; font-size:1.05rem;">${vs.emoji} ${v.title}</div>
+        <div class="small" style="margin-top:4px;">Weighted compatibility score: ${v.scorePct}% (Rajju, Vedha, Dina, Gana and Rasi count for more than the other five, per classical weighting)</div>
+        ${v.majorMisses.length ? `<div class="small" style="margin-top:6px;">Does not match: ${v.majorMisses.join(', ')}</div>` : ''}
+      </div>` : '';
     $('poruthamResult').innerHTML = `
       <div class="result" style="text-align:center; font-weight:900; font-size:1.15rem; margin-bottom:10px;">${d.porutham.matchedCount} / ${d.porutham.total} Poruthams match</div>
+      ${verdictBlock}
       <div class="small" style="margin-bottom:8px;">👰 ${d.bride.nakshatra.ta} (${d.bride.nakshatra.en}) · ${localSign(d.bride.moonSign)} &nbsp;|&nbsp; 🤵 ${d.groom.nakshatra.ta} (${d.groom.nakshatra.en}) · ${localSign(d.groom.moonSign)}</div>
       ${rows}
       <div class="small" style="margin-top:12px; color:#7b5200;">This is a traditional calculation-based analysis. Please consult a qualified astrologer before making a final decision.</div>
