@@ -812,6 +812,31 @@ function fmtBytes(b){
   if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
   return (b/1024/1024).toFixed(2) + ' MB';
 }
+// Extension -> file-type info for the native Save As dialog below. Without
+// this, showSaveFilePicker() has no idea what kind of file it's saving, so
+// the dialog's type dropdown only ever offers "All Files" — confusing (and
+// on some Windows/Chrome versions, the saved file can end up losing its
+// extension if the person doesn't notice it needs to be typed in manually).
+// Passing `types` makes the correct type (PDF file, ZIP archive, etc.) the
+// dialog's default, with the extension enforced automatically.
+const DOWNLOAD_TYPE_MAP = {
+  pdf:  {description:'PDF file',        accept:{'application/pdf':['.pdf']}},
+  zip:  {description:'ZIP archive',     accept:{'application/zip':['.zip']}},
+  docx: {description:'Word document',   accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}},
+  xlsx: {description:'Excel workbook',  accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}},
+  pptx: {description:'PowerPoint file', accept:{'application/vnd.openxmlformats-officedocument.presentationml.presentation':['.pptx']}},
+  png:  {description:'PNG image',       accept:{'image/png':['.png']}},
+  jpg:  {description:'JPEG image',      accept:{'image/jpeg':['.jpg','.jpeg']}},
+  jpeg: {description:'JPEG image',      accept:{'image/jpeg':['.jpg','.jpeg']}},
+  gif:  {description:'GIF image',       accept:{'image/gif':['.gif']}},
+  webp: {description:'WebP image',      accept:{'image/webp':['.webp']}},
+  mp4:  {description:'MP4 video',       accept:{'video/mp4':['.mp4']}},
+  mp3:  {description:'MP3 audio',       accept:{'audio/mpeg':['.mp3']}},
+  wav:  {description:'WAV audio',       accept:{'audio/wav':['.wav']}},
+  txt:  {description:'Text file',       accept:{'text/plain':['.txt']}},
+  csv:  {description:'CSV file',        accept:{'text/csv':['.csv']}},
+  json: {description:'JSON file',       accept:{'application/json':['.json']}},
+};
 async function downloadBlob(blob, filename){
   // Try the File System Access API's native "Save As" dialog first — lets
   // the person choose their own filename and location instead of a silent,
@@ -820,7 +845,11 @@ async function downloadBlob(blob, filename){
   // falls through to the standard approach everywhere else.
   if(window.showSaveFilePicker){
     try{
-      const handle = await window.showSaveFilePicker({ suggestedName: filename });
+      const ext = (filename.match(/\.([a-zA-Z0-9]+)$/) || [])[1];
+      const typeInfo = ext && DOWNLOAD_TYPE_MAP[ext.toLowerCase()];
+      const pickerOpts = { suggestedName: filename };
+      if(typeInfo) pickerOpts.types = [typeInfo];
+      const handle = await window.showSaveFilePicker(pickerOpts);
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
