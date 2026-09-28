@@ -10961,7 +10961,10 @@ TOOL_IMPL.askai = {
     mountAiUploadTool(container, {
       toolId: 'askai',
       intro: 'Upload a receipt, bill, ID, contract, or any document — then ask a question about it. Answered by AI, reading directly from your file.',
-      uploadLabel: 'Drop a photo or PDF of your document',
+      uploadLabel: 'Drop a photo, PDF, Word or Excel file',
+      uploadSublabel: 'Image, PDF, DOCX, XLSX/XLS/CSV',
+      accept: 'image/*,application/pdf,.docx,.xlsx,.xls,.csv',
+      tryTextExtraction: true, // typed PDF/Word/Excel needs no vision — cheaper via NVIDIA; a photo/scan (ID, printed receipt, etc.) still falls back to Gemini vision below
       buttonLabel: '💬 Ask AI',
       renderExtraOptions(body){
         const chipRow = el(`<div class="filter-row"></div>`);
@@ -11068,7 +11071,10 @@ TOOL_IMPL.aitranslate = {
     mountAiUploadTool(container, {
       toolId: 'aitranslate',
       intro: 'Upload a document in any language — AI reads it and translates the full text into the language you choose.',
-      uploadLabel: 'Drop a photo or PDF to translate',
+      uploadLabel: 'Drop a photo, PDF, Word or Excel file to translate',
+      uploadSublabel: 'Image, PDF, DOCX, XLSX/XLS/CSV',
+      accept: 'image/*,application/pdf,.docx,.xlsx,.xls,.csv',
+      tryTextExtraction: true, // typed PDF/Word/Excel needs no vision — cheaper via NVIDIA; a photo/scan still falls back to Gemini vision below
       buttonLabel: '🌐 Translate',
       renderExtraOptions(body){
         body.appendChild(el(`
