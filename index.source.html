@@ -906,7 +906,17 @@ function stopAnyActiveCamera(){
     window.__camStream = null;
   }
 }
-function goHome(){ stopAnyActiveCamera(); state = {view:'home', tool:null}; render(); }
+function goHome(){ stopAnyActiveCamera(); state = {view:'home', tool:null}; render(); try{ sessionStorage.removeItem(LAST_TOOL_KEY); }catch(e){} }
+// Android Chrome (and other mobile browsers, under memory pressure) can silently
+// discard a backgrounded tab while the native file/photo picker is open, then
+// reload the page from scratch the moment the person returns to it — this loses
+// all in-memory app state and dumps them back on the homepage, which feels like
+// the site "reset" right when they were trying to upload something. We can't
+// recover the file they'd picked (a File object can't survive a real page
+// reload), but sessionStorage DOES survive this kind of same-tab reload, so we
+// use it to jump straight back into the tool they were on instead of the
+// homepage — much less jarring, even though they still need to tap upload again.
+const LAST_TOOL_KEY = 'pdfToolsIndia_lastOpenTool';
 const RECENT_TOOLS_KEY = 'pdfToolsIndia_recentTools';
 function recordRecentTool(id){
   try{
@@ -926,7 +936,7 @@ function getRecentTools(){
 // by whichever tool reads it on mount, so it never lingers or gets
 // accidentally reused by a later, unrelated visit to that tool.
 let __pendingSmartUploadFile = null;
-function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; render(); window.scrollTo(0,0); }
+function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
 function render(){
   const app = document.getElementById('app');
@@ -13881,8 +13891,17 @@ render();
   try{
     const params = new URLSearchParams(window.location.search);
     const deepLinkTool = params.get('tool');
-    if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)) openTool(deepLinkTool);
-  }catch(e){ /* malformed URL params — just show the homepage as normal */ }
+    if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
+      openTool(deepLinkTool);
+      return;
+    }
+    // No explicit ?tool= link — but if this looks like the SAME tab picking back
+    // up after being force-reloaded (e.g. Android Chrome discarded it while the
+    // native file picker was open), sessionStorage still has the tool they were
+    // last on. Send them straight back there instead of the homepage.
+    const lastTool = sessionStorage.getItem(LAST_TOOL_KEY);
+    if(lastTool && TOOLS.some(t=>t.id===lastTool)) openTool(lastTool);
+  }catch(e){ /* malformed URL params / sessionStorage unavailable — just show the homepage as normal */ }
 })();
 initAuth().then(async ()=>{
   render();
