@@ -482,13 +482,14 @@ window.addEventListener('message', (e)=>{
 async function callRealAI(prompt){
   if(!__authToken) return null; // not signed in (or opened directly, not via the main app) — caller falls back to AI_LIB
   try{
-    const form = new FormData();
-    form.append('question', prompt);
-    form.append('toolId', 'resumebuilder');
-    const res = await fetch(BACKEND_URL + '/api/ai/ask', {
+    // Resume suggestions are a plain instruction (no document to read), so
+    // this goes through the text-only /api/ai/text (NVIDIA Llama-3) instead
+    // of the vision-capable /api/ai/ask (Gemini) — same result, cheaper,
+    // since nothing here ever needed vision in the first place.
+    const res = await fetch(BACKEND_URL + '/api/ai/text', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + __authToken },
-      body: form
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + __authToken },
+      body: JSON.stringify({ instruction: prompt, toolId: 'resumebuilder' })
     });
     const data = await res.json();
     if(data.error) throw new Error(data.error);

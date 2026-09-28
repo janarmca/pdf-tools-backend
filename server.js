@@ -463,6 +463,65 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
+// POST /api/ai/text — text-only AI tasks (summarize, rewrite, resume
+// suggestions) via NVIDIA Build's hosted Llama-3, instead of Gemini.
+// These tools never need to actually SEE an image — the file (PDF/Excel/
+// Word) is read into plain text on the client first (pdf.js/xlsx/mammoth,
+// all free, no server cost), and only that text is sent here. Using a
+// text-only model for a text-only task means: no vision cost, a much
+// bigger context window than Gemini Flash-Lite's practical free-tier limit
+// (useful for long reports/contracts), and build.nvidia.com's free API key
+// (no credit card, no credit cap as of setup time — see build.nvidia.com).
+// Add NVIDIA_API_KEY to your Render/Cloud Run env vars to activate this.
+// body: { instruction, text?, toolId, creditCost? } — `text` is optional:
+// pass it for "read this document and do X" tasks (summarize, etc.); leave
+// it out for a plain instruction with no document attached (e.g. Resume
+// Builder's "AI suggest", which asks for a draft based on what the person
+// already typed into the form, not a document to summarize).
+// ============================================================
+app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
+  const CREDIT_COST = req.body.creditCost ? Number(req.body.creditCost) : 1;
+  let allowed = false;
+  try {
+    if (!process.env.NVIDIA_API_KEY) {
+      return res.status(501).json({ error: 'AI feature not set up yet — add NVIDIA_API_KEY in Render/Cloud Run env vars (see backend/README.md).' });
+    }
+    const toolId = req.body.toolId || 'aisummarize';
+    const text = (req.body.text || '').toString();
+    const instruction = (req.body.instruction || '').toString();
+    if (!instruction.trim()) return res.status(400).json({ error: 'Missing instruction.' });
+
+    allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+
+    const userContent = text.trim() ? `${instruction}\n\n---\nDocument content:\n${text}` : instruction;
+    const nvidiaRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'meta/llama-3.3-70b-instruct',
+        messages: [
+          { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
+          { role: 'user', content: userContent }
+        ],
+        temperature: 0.3,
+        max_tokens: 1500
+      })
+    });
+    const nvidiaJson = await nvidiaRes.json();
+    if (!nvidiaRes.ok) throw new Error(nvidiaJson.error?.message || nvidiaJson.message || 'AI request failed');
+    const answer = nvidiaJson.choices?.[0]?.message?.content || 'No answer returned.';
+    res.json({ ok: true, answer });
+  } catch (e) {
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, req.body.toolId || 'aisummarize');
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
 // POST /api/ai/image — Text-to-Image generation (Cloudflare Workers AI —
 // FLUX.1-schnell)
 // body: { prompt: string }

@@ -10765,7 +10765,102 @@ function confirmCreditSpend(container, costLabel){
   });
 }
 
-/* ===================== ASK AI ABOUT DOCUMENT ===================== */
+/* ===================== Shared: text-only AI (NVIDIA Llama-3) =====================
+   For AI tasks that never need to actually SEE an image — summarizing a
+   document, reviewing resume text, etc. Reads the file into plain text on
+   the client first (free, no server cost — pdf.js/XLSX/mammoth, all
+   already lazy-loaded) and sends only that text to the backend's
+   /api/ai/text, which calls NVIDIA's hosted Llama-3 instead of Gemini.
+   Cheaper than a vision model for a task that was never visual, and NVIDIA
+   Build's free API key has a far bigger context window than Gemini
+   Flash-Lite's practical free-tier limit — useful for long documents. */
+
+// Extracts plain text from a file client-side, or returns null if the file
+// needs a vision model instead (a photo, or a PDF with no real text layer —
+// i.e. a scanned document, using the same "very little text found" 20-char
+// heuristic the PDF→Text tool already uses).
+async function extractDocumentText(file){
+  const name = (file.name || '').toLowerCase();
+  const type = file.type || '';
+  try{
+    if(name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv') || type.includes('spreadsheet')){
+      await ensureXlsx();
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, {type:'array'});
+      let out = '';
+      wb.SheetNames.forEach(sheetName=>{
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false});
+        out += `-- Sheet: ${sheetName} --\n`;
+        rows.slice(0, 2000).forEach(r=> out += r.map(c=> c===undefined||c===null ? '' : String(c)).join(', ') + '\n');
+        if(rows.length > 2000) out += `[...truncated, ${rows.length-2000} more rows...]\n`;
+      });
+      return out.trim() ? out : null;
+    }
+    if(name.endsWith('.docx') || type.includes('wordprocessingml')){
+      await ensureMammoth();
+      const buf = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({arrayBuffer: buf});
+      return result.value && result.value.trim().length > 20 ? result.value : null;
+    }
+    if(name.endsWith('.pdf') || type === 'application/pdf'){
+      await ensurePdfJs();
+      const buf = await file.arrayBuffer();
+      const pdfjsDoc = await loadPdfJs(buf);
+      let fullText = '';
+      for(let i=1;i<=pdfjsDoc.numPages;i++){
+        const page = await pdfjsDoc.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map(it=>it.str).join(' ') + '\n';
+      }
+      // Same threshold pdf2text uses to flag "this is probably a scanned
+      // image" — below it, fall back to vision instead of sending near-empty text.
+      return fullText.trim().length >= 20 ? fullText : null;
+    }
+  }catch(e){ return null; } // extraction failed for any reason — caller falls back to vision
+  return null; // image or unrecognized type — always needs vision
+}
+// Calls the text-only NVIDIA backend. `text` is optional — omit it (or pass
+// '') for a plain instruction with no document attached. Throws on error
+// (matching backendFetchJson's contract).
+async function callNvidiaText(instruction, text, toolId, creditCost){
+  const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/text', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authState.session.access_token },
+    body: JSON.stringify({ instruction, text: text || '', toolId, creditCost })
+  });
+  if(result.error) throw new Error(result.error);
+  return result.answer;
+}
+// Renders an AI text answer with a Copy button and a "pick your own filename,
+// download as .txt" row — shared by every AI tool that returns free-form
+// text (used by mountAiUploadTool's default renderer and by aisummarize).
+function renderAiTextAnswer(answerHolder, answerText, baseName){
+  const card = el(`<div style="position:relative; margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(answerText)}</div>`);
+  const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
+  copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(answerText).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
+  card.style.position='relative';
+  card.appendChild(copyBtn);
+  answerHolder.appendChild(card);
+  const downloadRow = el(`
+    <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+      <input type="text" id="aiDownloadName" value="${escapeHtml(baseName || 'result')}-result" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
+      <span style="font-size:13px; color:var(--sub);">.txt</span>
+      <button id="aiDownloadBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download</button>
+    </div>
+  `);
+  answerHolder.appendChild(downloadRow);
+  downloadRow.querySelector('#aiDownloadBtn').onclick = ()=>{
+    const name = (downloadRow.querySelector('#aiDownloadName').value.trim() || 'result') + '.txt';
+    const blob = new Blob([answerText], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  };
+}
+
 /* ===================== Shared: AI document-upload tool base =====================
    Powers all 6 "AI /" tools: handles upload (image OR PDF), preview, calling the
    backend's generic /api/ai/ask, and rendering the answer with a Copy button.
@@ -10776,11 +10871,12 @@ function mountAiUploadTool(container, config){
   function paint(){
     body.innerHTML = '';
     if(config.intro) body.appendChild(el(`<div class="note">${config.intro}</div>`));
-    mountUploader(body, { accept:'image/*,application/pdf', label: config.uploadLabel, sublabel: config.uploadSublabel || 'Image or PDF',
+    mountUploader(body, { accept: config.accept || 'image/*,application/pdf', label: config.uploadLabel, sublabel: config.uploadSublabel || 'Image or PDF',
       onAdd: async (fl)=>{
         file = fl[0];
         isPdf = file.type==='application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        previewUrl = isPdf ? null : await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+        const isImage = file.type.startsWith('image/');
+        previewUrl = isImage ? await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }) : null;
         paint();
       }});
     if(!file) return;
@@ -10797,32 +10893,8 @@ function mountAiUploadTool(container, config){
     body.appendChild(el(`<div id="aiAnswerHolder"></div>`));
   }
   function defaultRenderAnswer(answerHolder, answerText){
-    const card = el(`<div style="position:relative; margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(answerText)}</div>`);
-    const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
-    copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(answerText).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
-    card.style.position='relative';
-    card.appendChild(copyBtn);
-    answerHolder.appendChild(card);
-    // Download row — lets the user pick their own filename before saving,
-    // instead of only offering Copy with no way to save a file at all.
     const baseName = (file && file.name ? file.name.replace(/\.[^.]+$/,'') : (config.toolId || 'result'));
-    const downloadRow = el(`
-      <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-        <input type="text" id="aiDownloadName" value="${escapeHtml(baseName)}-result" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
-        <span style="font-size:13px; color:var(--sub);">.txt</span>
-        <button id="aiDownloadBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download</button>
-      </div>
-    `);
-    answerHolder.appendChild(downloadRow);
-    downloadRow.querySelector('#aiDownloadBtn').onclick = ()=>{
-      const name = (downloadRow.querySelector('#aiDownloadName').value.trim() || 'result') + '.txt';
-      const blob = new Blob([answerText], {type:'text/plain;charset=utf-8'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-    };
+    renderAiTextAnswer(answerHolder, answerText, baseName);
   }
   async function doAsk(){
     if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
@@ -10835,19 +10907,32 @@ function mountAiUploadTool(container, config){
     if(!ok) return;
     const prog = mountProgress(body);
     try{
-      prog.set(20, isPdf ? 'Reading your PDF…' : 'Reading your image…');
-      const form = new FormData();
-      form.append('file', file);
-      form.append('question', question);
-      form.append('toolId', config.toolId);
-      const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
-        method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
-      });
-      prog.set(80,'Thinking…');
-      if(result.error) throw new Error(result.error);
+      let answer;
+      // Some tools (config.tryTextExtraction) can work from plain text alone —
+      // no vision needed — so try reading the file as text first (free,
+      // client-side) and use the cheaper NVIDIA Llama-3 text path. Only a
+      // photo, or a PDF with no real text layer (a scan), falls through to
+      // the original Gemini vision path below.
+      const extractedText = config.tryTextExtraction ? await (async()=>{ prog.set(15,'Reading your document…'); return extractDocumentText(file); })() : null;
+      if(extractedText){
+        prog.set(55, 'Thinking…');
+        answer = await callNvidiaText(question, extractedText, config.toolId, 1);
+      } else {
+        prog.set(20, isPdf ? 'Reading your PDF…' : 'Reading your image…');
+        const form = new FormData();
+        form.append('file', file);
+        form.append('question', question);
+        form.append('toolId', config.toolId);
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+        });
+        prog.set(80,'Thinking…');
+        if(result.error) throw new Error(result.error);
+        answer = result.answer;
+      }
       prog.set(100,'Done'); prog.remove();
-      if(config.onAnswer) config.onAnswer(answerHolder, result.answer, body);
-      else defaultRenderAnswer(answerHolder, result.answer);
+      if(config.onAnswer) config.onAnswer(answerHolder, answer, body);
+      else defaultRenderAnswer(answerHolder, answer);
       updateCreditsBadgeInline();
       refreshProfile();
     }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
@@ -10890,30 +10975,79 @@ TOOL_IMPL.askai = {
 /* ===================== AI SUMMARIZE ===================== */
 TOOL_IMPL.aisummarize = {
   mount(container){
-    mountAiUploadTool(container, {
-      toolId: 'aisummarize',
-      intro: 'Upload a long document (report, article, notes) and get a clear, short summary — no reading required.',
-      uploadLabel: 'Drop a photo or PDF to summarize',
-      buttonLabel: '📋 Summarize',
-      renderExtraOptions(body){
-        body.appendChild(el(`
-          <div class="opts one">
-            <div class="field"><label>Summary length</label>
-              <select id="aiSumLen"><option value="brief">Brief (2-3 sentences)</option><option value="medium" selected>Medium (short paragraph)</option><option value="detailed">Detailed (key points list)</option></select>
-            </div>
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function instructionFor(len){
+      const map = {
+        brief: 'Summarize this document in exactly 2-3 sentences — the absolute key point only.',
+        medium: 'Summarize this document in one short, clear paragraph covering the main points.',
+        detailed: 'Summarize this document as a bulleted list of the key points, including any important dates, numbers, or names.'
+      };
+      return map[len];
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Upload a long document (PDF, Word, Excel, or a photo/scan) and get a clear, short summary — no reading required.</div>`));
+      mountUploader(body, {
+        accept: 'image/*,application/pdf,.docx,.xlsx,.xls,.csv',
+        label: 'Drop a PDF, Word, Excel file or photo to summarize',
+        sublabel: 'PDF, DOCX, XLSX/XLS/CSV or photo',
+        onAdd: (fl)=>{ file = fl[0]; paint(); }
+      });
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ file=null; paint(); });
+      body.appendChild(el(`
+        <div class="opts one">
+          <div class="field"><label>Summary length</label>
+            <select id="aiSumLen"><option value="brief">Brief (2-3 sentences)</option><option value="medium" selected>Medium (short paragraph)</option><option value="detailed">Detailed (key points list)</option></select>
           </div>
-        `));
-      },
-      buildQuestion(body){
-        const len = body.querySelector('#aiSumLen').value;
-        const map = {
-          brief: 'Summarize this document in exactly 2-3 sentences — the absolute key point only.',
-          medium: 'Summarize this document in one short, clear paragraph covering the main points.',
-          detailed: 'Summarize this document as a bulleted list of the key points, including any important dates, numbers, or names.'
-        };
-        return map[len];
-      }
-    });
+        </div>
+      `));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📋 Summarize</button>`);
+      btn.onclick = doSummarize;
+      row.appendChild(btn);
+      body.appendChild(row);
+      body.appendChild(el(`<div id="aiAnswerHolder"></div>`));
+    }
+    async function doSummarize(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
+      const instruction = instructionFor(body.querySelector('#aiSumLen').value);
+      const answerHolder = body.querySelector('#aiAnswerHolder');
+      answerHolder.innerHTML = '';
+      const ok = await confirmCreditSpend(answerHolder, '1 credit');
+      if(!ok) return;
+      const prog = mountProgress(body);
+      try{
+        prog.set(15, 'Reading your document…');
+        // PDF-with-real-text, Word, or Excel — no vision needed, extract the
+        // text for free client-side and summarize it cheaply via NVIDIA
+        // Llama-3. A photo, or a PDF that's actually a scan (no text layer),
+        // falls back to the original Gemini vision path below.
+        const extractedText = await extractDocumentText(file);
+        let answer;
+        if(extractedText){
+          prog.set(55, 'Summarizing…');
+          answer = await callNvidiaText(instruction, extractedText, 'aisummarize', 1);
+        } else {
+          prog.set(40, 'Reading with AI vision…');
+          const form = new FormData();
+          form.append('file', file);
+          form.append('question', instruction);
+          form.append('toolId', 'aisummarize');
+          const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/ask', {
+            method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+          });
+          if(result.error) throw new Error(result.error);
+          answer = result.answer;
+        }
+        prog.set(100,'Done'); prog.remove();
+        renderAiTextAnswer(answerHolder, answer, file.name.replace(/\.[^.]+$/,''));
+        updateCreditsBadgeInline();
+        refreshProfile();
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
+    }
+    paint();
   }
 };
 
@@ -11015,8 +11149,11 @@ TOOL_IMPL.airesume = {
   mount(container){
     mountAiUploadTool(container, {
       toolId: 'airesume',
-      intro: 'Upload your resume/CV as an image or PDF — get honest, specific feedback to make it stronger.',
+      intro: 'Upload your resume/CV (image, PDF or Word) — get honest, specific feedback to make it stronger.',
       uploadLabel: 'Drop your resume/CV',
+      uploadSublabel: 'Image, PDF or Word (.docx)',
+      accept: 'image/*,application/pdf,.docx',
+      tryTextExtraction: true, // most resumes are text-based PDF/Word — no vision needed, so this is cheaper via NVIDIA when possible
       buttonLabel: '📄 Review My Resume',
       buildQuestion(){
         return 'You are an expert career coach and resume reviewer. Review this resume/CV and give: 1) Overall impression (2-3 sentences), 2) Top 3 strengths, 3) Top 3 specific areas to improve, 4) One concrete rewrite suggestion for the summary/objective section. Be honest, specific, and constructive — avoid generic advice.';
