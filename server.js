@@ -945,7 +945,47 @@ function calculatePorutham(girl, boy) {
   };
   const items = PORUTHAM_NAMES.map(p => ({ ...p, matched: results[p.key].matched, detail: results[p.key].detail }));
   const matchedCount = items.filter(i => i.matched).length;
-  return { items, matchedCount, total: items.length };
+  return { items, matchedCount, total: items.length, verdict: poruthamVerdict(items) };
+}
+
+// A raw "7/10 matched" count treats every porutham as equally important,
+// which no classical source actually does — Rajju (spouse's longevity) and
+// Vedha (mutual affliction) are widely treated as far more serious than,
+// say, Vasya or Sthree Deergha. WEIGHT below encodes that well-documented
+// relative severity (Rajju/Vedha/Dina/Gana/Rasi carry more weight than the
+// remaining five) so the verdict reflects which poruthams matched, not just
+// how many. This is still 100% deterministic — same inputs always produce
+// the same verdict, no AI involved anywhere in this calculation.
+const PORUTHAM_WEIGHT = { rajju: 3, vedha: 2.5, dina: 2, gana: 2, rasi: 1.5, mahendra: 1, streeDeergha: 1, yoni: 1, rasiAdhipathi: 1, vasya: 1 };
+const PORUTHAM_WEIGHT_TOTAL = Object.values(PORUTHAM_WEIGHT).reduce((a, b) => a + b, 0);
+function poruthamVerdict(items) {
+  const byKey = Object.fromEntries(items.map(i => [i.key, i]));
+  const rajjuOk = byKey.rajju.matched;
+  const weightedScore = items.reduce((sum, i) => sum + (i.matched ? PORUTHAM_WEIGHT[i.key] : 0), 0);
+  const scorePct = Math.round((weightedScore / PORUTHAM_WEIGHT_TOTAL) * 100);
+  // The five poruthams classical sources treat as carrying the most weight —
+  // named explicitly if any of them didn't match, regardless of the overall tier.
+  const majorMisses = ['rajju', 'vedha', 'dina', 'gana', 'rasi']
+    .filter(k => !byKey[k].matched)
+    .map(k => byKey[k].en);
+  let tier, title;
+  if (!rajjuOk) {
+    // Rajju governs the spouse's longevity in classical texts — a mismatch here
+    // is treated as the single most serious dosha regardless of how many of the
+    // other nine poruthams agree, so it overrides the score-based tiers below.
+    tier = 'caution';
+    title = 'Rajju Porutham does not match — traditionally the most serious concern';
+  } else if (scorePct >= 80) {
+    tier = 'strong';
+    title = 'Strong compatibility';
+  } else if (scorePct >= 55) {
+    tier = 'moderate';
+    title = 'Moderate compatibility';
+  } else {
+    tier = 'weak';
+    title = 'Weak compatibility';
+  }
+  return { tier, title, scorePct, majorMisses };
 }
 // ============================================================
 // Planet names in Tamil, for showing inside the chart grid instead of English

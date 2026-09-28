@@ -174,16 +174,15 @@
 <body>
 <div id="app"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<!-- pdf-lib, pdf.js, jszip, tesseract.js, xlsx, mammoth, html2canvas, docx and
+     pptxgenjs used to load here, eagerly, on every visit — that was the main
+     cause of a slow first paint, since most visitors only ever use one tool
+     and most tools don't need most of these. They're now fetched on demand,
+     only when a tool that actually needs them is opened (ensurePdfLib(),
+     ensurePdfJs(), etc., defined near the other on-demand loaders below; see
+     TOOL_LIBS for which tool needs which). supabase-js stays eager below —
+     auth/credits are needed site-wide immediately, not tied to any one tool. -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <script>
 // Diagnostic safety-net: if ANY uncaught JS error happens anywhere below,
 // show it directly on the page instead of leaving a silent blank screen —
@@ -202,13 +201,49 @@ window.addEventListener('error', function(e){
 });
 </script>
 <script>
-if (window['pdfjsLib']) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
-</script>
-<script>
 /* ===================== Core shell ===================== */
-const { PDFDocument, degrees, rgb, StandardFonts, PDFName, PDFDict, PDFRawStream, PDFRef, PDFArray } = window.PDFLib || {};
+
+// --- Memory leak guard (blob: object URLs) -------------------------------
+// Every tool creates object URLs for previews (images, video, audio) via
+// URL.createObjectURL(). Most of the time that URL is only ever revoked if
+// the specific tool remembers to call URL.revokeObjectURL() itself — and
+// across ~120 tool implementations, many preview-only URLs never get
+// revoked at all. Since this is a single-page app (switching tools never
+// reloads the page), every un-revoked URL keeps its backing Blob pinned in
+// memory for the rest of the browser tab's life, and revisiting several
+// image/video tools in one sitting compounds this — this is the recurring
+// "browser gets slow / runs out of memory" pattern users hit.
+// Fix: transparently track every object URL created anywhere in the app,
+// and sweep all of them away every time the visible screen changes (tool
+// switch, or back to home/category) — render() is the one function every
+// such transition already goes through. A tool's own explicit
+// revokeObjectURL() calls still work exactly as before (harmless no-op if
+// this sweep already got to it first); this only catches what individual
+// tools forget to clean up themselves.
+(function(){
+  const nativeCreate = URL.createObjectURL.bind(URL);
+  const nativeRevoke = URL.revokeObjectURL.bind(URL);
+  const active = new Set();
+  URL.createObjectURL = function(obj){
+    const url = nativeCreate(obj);
+    active.add(url);
+    return url;
+  };
+  URL.revokeObjectURL = function(url){
+    active.delete(url);
+    return nativeRevoke(url);
+  };
+  window.__sweepObjectURLs = function(){
+    active.forEach(url => { try{ nativeRevoke(url); }catch(e){} });
+    active.clear();
+  };
+})();
+
+// pdf-lib is now lazy-loaded (see ensurePdfLib below, near the other on-demand
+// loaders) — these stay as plain top-level `let`s so every existing call site
+// below (PDFDocument.create(), rgb(...), degrees(...), etc.) keeps working
+// unchanged; ensurePdfLib() just fills them in once window.PDFLib exists.
+let PDFDocument, degrees, rgb, StandardFonts, PDFName, PDFDict, PDFRawStream, PDFRef, PDFArray;
 
 const TOOLS = [
   {id:'merge', name:'Merge PDF', desc:'Combine multiple PDFs into one', icon:'🧩', color:'#3752A6', cat:'pdf'},
@@ -280,6 +315,7 @@ const TOOLS = [
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'stmtcompare', name:'Statement Reconciliation', desc:'Compare Buyer vs Supplier statements (PDF/Excel/Text) — find mismatches automatically', icon:'🔍', color:'#B7410E', cat:'business'},
   {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
+  {id:'tnpropertycalc', name:'TN Property Registration Calculator', desc:'Stamp duty & registration fee for Sale, Gift, Settlement, Partition, Mortgage & POA deeds in Tamil Nadu', icon:'🏛️', color:'#0F2A4A', cat:'business'},
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'imgcompresskb', name:'Compress to Target KB', desc:'Compress to a target file size (auto quality search)', icon:'🗜️', color:'#A93226', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
@@ -332,6 +368,7 @@ const TOOLS = [
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'carrompuzzle', name:'Carrom Puzzle', desc:'Real physics carrom board — pocket a coin, solve a puzzle for bonus stars', icon:'🎯', color:'#8E44AD', cat:'education'},
+  {id:'typerace', name:'Type Race — Typing Practice Game', desc:'Self-paced typing speed & accuracy game — English words, sentences & Tamil words, with XP, levels & badges', icon:'🏁', color:'#FF5E5B', cat:'education'},
 
 ];
 
@@ -865,6 +902,7 @@ function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {vie
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
+  if(window.__sweepObjectURLs) window.__sweepObjectURLs(); // release any preview blob: URLs the screen we just cleared was holding
   app.appendChild(renderTopbar());
   if(state.view==='home'){
     app.appendChild(renderHero());
@@ -1545,6 +1583,11 @@ function renderToolPanel(toolId){
       return panelShell(toolId, `<div style="text-align:center; padding:50px 20px;"><div style="font-size:28px; margin-bottom:10px;">⏳</div><div class="tamil" style="color:var(--sub); font-size:13px;">Loading…</div></div>`);
     }
     return panelShell(toolId, `<div class="note">This tool is coming soon.</div>`);
+  }
+  const neededLibs = TOOL_LIBS[toolId];
+  if(neededLibs && !areLibsReady(neededLibs)){
+    ensureLibsThenRerender(toolId, neededLibs);
+    return panelShell(toolId, `<div style="text-align:center; padding:50px 20px;"><div style="font-size:28px; margin-bottom:10px;">⏳</div><div class="tamil" style="color:var(--sub); font-size:13px;">Loading…</div></div>`);
   }
   const wrap = panelShell(toolId, '');
   const body = wrap.querySelector('.panel-body');
@@ -2655,6 +2698,132 @@ function ensureQrLib(){
     document.head.appendChild(script);
   });
   return window.__qrReadyPromise;
+}
+
+/* ===================== Shared: heavy third-party libraries (lazy-loaded on demand) =====================
+   pdf-lib, pdf.js, jszip, tesseract.js, xlsx, mammoth, html2canvas, docx and
+   pptxgenjs used to load eagerly via <script> tags in <head> on every visit,
+   which was the main cause of a slow first paint — most visitors only want
+   one tool, and most tools don't need most of these. Each is now fetched
+   only the first time a tool that needs it is opened, using the same
+   on-demand pattern already used above for OpenCV.js and QR code. TOOL_LIBS
+   below says which tool needs which, and renderToolPanel() awaits them
+   before calling that tool's mount() — so every existing call site (
+   PDFDocument.create(), XLSX.read(), new JSZip(), etc.) keeps working
+   completely unchanged; it's guaranteed the library is already on window by
+   the time any tool code runs. pdf-lib's dedicated Worker copy (see
+   PDF_WORKER_SRC above) already loads its own copy independently via
+   importScripts(), so it's unaffected by this. FFmpeg (video tools) already
+   had its own on-demand loader before this change (see ensureFFmpeg above). */
+function loadExternalScript(url, errLabel){
+  return new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = url;
+    s.async = true;
+    s.onload = ()=> resolve();
+    s.onerror = ()=> reject(new Error(`Could not load ${errLabel} — check your internet connection and try again.`));
+    document.head.appendChild(s);
+  });
+}
+// One cache of in-flight/settled load promises, keyed by library. A failed
+// load is evicted from the cache (not left cached forever) so re-opening the
+// tool after fixing a connection issue actually retries, instead of
+// repeating the same stale error for the rest of the tab's life.
+window.__libReadyPromises = window.__libReadyPromises || {};
+function ensureLib(key, alreadyPresent, url, errLabel, onReady){
+  if(window.__libReadyPromises[key]) return window.__libReadyPromises[key];
+  const p = (alreadyPresent() ? Promise.resolve() : loadExternalScript(url, errLabel))
+    .then(()=>{ if(onReady) onReady(); })
+    .catch(err=>{ delete window.__libReadyPromises[key]; throw err; });
+  window.__libReadyPromises[key] = p;
+  return p;
+}
+function ensurePdfLib(){
+  return ensureLib('pdflib', ()=>!!window.PDFLib,
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', 'PDF library',
+    ()=>{ ({ PDFDocument, degrees, rgb, StandardFonts, PDFName, PDFDict, PDFRawStream, PDFRef, PDFArray } = window.PDFLib); });
+}
+function ensurePdfJs(){
+  return ensureLib('pdfjs', ()=>!!window.pdfjsLib,
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'PDF viewer engine',
+    ()=>{ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; });
+}
+function ensureJsZip(){
+  return ensureLib('jszip', ()=>!!window.JSZip,
+    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'ZIP library');
+}
+function ensureTesseractLib(){
+  return ensureLib('tesseract', ()=>!!window.Tesseract,
+    'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js', 'OCR engine');
+}
+function ensureXlsx(){
+  return ensureLib('xlsx', ()=>!!window.XLSX,
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'Excel library');
+}
+function ensureMammoth(){
+  return ensureLib('mammoth', ()=>!!window.mammoth,
+    'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', 'Word reader library');
+}
+function ensureHtml2Canvas(){
+  return ensureLib('html2canvas', ()=>!!window.html2canvas,
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'Page rendering library');
+}
+function ensureDocxLib(){
+  return ensureLib('docx', ()=>!!(window.docx && window.docx.Document),
+    'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js', 'Word (.docx) library');
+}
+function ensurePptxGenJs(){
+  return ensureLib('pptxgenjs', ()=>!!window.PptxGenJS,
+    'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js', 'PowerPoint library');
+}
+const LIB_LOADERS = {
+  pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
+  xlsx: ensureXlsx, mammoth: ensureMammoth, html2canvas: ensureHtml2Canvas, docx: ensureDocxLib,
+  pptxgenjs: ensurePptxGenJs
+};
+// Which of the 9 on-demand libraries above each tool needs before its
+// mount() can safely run — checked by renderToolPanel(). Covers tools
+// defined directly in this file AND in the lazy-loaded category-image.js /
+// category-education.js (those two also reference some of these libraries).
+// A tool not listed here needs none of the 9.
+const TOOL_LIBS = {
+  aiexcelcompare:['xlsx'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
+  compress:['pdfjs','pdflib'], emicalc:['xlsx'], excel2pdf:['pdflib','xlsx'], excel2word:['docx','xlsx'],
+  expensetracker:['xlsx'], extractpages:['pdflib'], gstinvoice:['pdflib'], img2pdf:['pdflib'],
+  leaveletter:['pdflib'], merge:['pdflib'], ocr:['docx','html2canvas','pdfjs','tesseract'], pagenum:['pdflib'],
+  paymentvoucher:['pdflib'], pdf2excel:['pdfjs','xlsx'], pdf2img:['jszip','pdfjs'], pdf2png:['jszip','pdfjs'],
+  pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
+  pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
+  pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'],
+  pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
+  pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
+  pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
+  readaloud:['pdfjs'], rentreceipt:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
+  split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], tuitionreceipt:['pdflib'], txt2pdf:['pdflib'],
+  vidsplit:['jszip'], watermark:['pdflib'], word2pdf:['jszip','mammoth','pdflib'],
+  // category-image.js
+  imgcompress:['jszip'], wmremove:['pdflib'], imgenhance:['jszip'], heic2jpg:['jszip'],
+  imgconvert:['jszip'], exifremove:['jszip'], imgwatermark:['jszip'], imgbatchresize:['jszip'],
+  imgcompresskb:['jszip'], imgborder:['jszip'], batchbgremove:['jszip'],
+  // category-education.js
+  mathpractice:['pdflib'], tamiltracing:['pdflib']
+};
+function areLibsReady(libs){
+  return libs.every(l => window.__loadedLibsSet && window.__loadedLibsSet.has(l));
+}
+window.__loadedLibsSet = window.__loadedLibsSet || new Set();
+function ensureLibsThenRerender(toolId, libs){
+  Promise.all(libs.map(l => LIB_LOADERS[l]()))
+    .then(()=>{
+      libs.forEach(l => window.__loadedLibsSet.add(l));
+      if(state.tool===toolId) render();
+    })
+    .catch(err=>{
+      if(state.tool!==toolId) return;
+      const body = document.querySelector('.panel-body');
+      if(body) body.innerHTML = `<div class="note" style="background:#FDEDEC;">${err.message}</div>`;
+    });
 }
 
 /* ===================== Shared: drag-to-select rectangle over an <img> preview (fractional coords) ===================== */
@@ -13534,6 +13703,7 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
+TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
 
 render();
 // Deep-link support: a URL like pdftoolsindia.com/?tool=merge opens that
