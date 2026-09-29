@@ -453,10 +453,12 @@ function showToast(message, kind){
   setTimeout(()=>{ toast.style.transition='opacity .4s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 400); }, 4200);
 }
 
+let __lastAuthUserId = null; // tracks the signed-in user across onAuthStateChange events — see below
 async function initAuth(){
   if(!sb) return;
   const { data } = await sb.auth.getSession();
   authState.session = data.session;
+  __lastAuthUserId = data.session ? data.session.user.id : null;
   if(authState.session) await refreshProfile();
   sb.auth.onAuthStateChange(async (event, session)=>{
     authState.session = session;
@@ -468,6 +470,18 @@ async function initAuth(){
     // events should rebuild the page.
     if(event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
     if(event === 'PASSWORD_RECOVERY'){ mountNewPasswordModal(); return; }
+    // The supabase-js client also re-validates the session whenever the tab
+    // regains focus/visibility — which happens EVERY time the native file/
+    // photo picker closes and the person returns to the tab, since opening
+    // it always blurs the page first. This re-validation can refire
+    // 'SIGNED_IN' for the SAME already-logged-in user (not a real new
+    // login), and without this check that would still hit the render()
+    // below — silently wiping whatever tool/file/in-progress work was on
+    // screen back to a blank re-render. This was reported as "select a
+    // file, the screen flashes/resets — only happens while signed in".
+    const newUserId = session ? session.user.id : null;
+    if(event === 'SIGNED_IN' && newUserId === __lastAuthUserId) return;
+    __lastAuthUserId = newUserId;
     if(session) await refreshProfile(); else authState.profile = null;
     render();
   });
