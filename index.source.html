@@ -169,6 +169,21 @@
   .scan-page .spnum{position:absolute; top:4px; left:4px; background:rgba(32,36,43,.75); color:white; font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:7px;}
   .scan-page .spdel{position:absolute; top:4px; right:4px; background:rgba(192,57,43,.9); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:12px; cursor:pointer;}
   footer{text-align:center; color:var(--sub); font-size:11.5px; padding:30px 0 10px;}
+  /* Quotation/Bill/PO/Performa item row (desc, HSN, qty, unit, rate, GST%,
+     remove) — 7 columns is too cramped on a ~375px phone screen, so it
+     stacks into a readable 2-column layout below 480px instead of squeezing
+     every field down to a sliver. */
+  .qp-item-row{display:grid; grid-template-columns:2fr 0.9fr 0.6fr 0.6fr 0.9fr 0.7fr auto; gap:6px; margin-bottom:8px; align-items:center;}
+  @media (max-width:480px){
+    .qp-item-row{grid-template-columns:1fr 1fr; grid-template-areas:"desc desc" "hsn unit" "qty rate" "gst remove"; gap:6px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed var(--line);}
+    .qp-item-row > div:nth-child(1){grid-area:desc;}
+    .qp-item-row > div:nth-child(2){grid-area:hsn;}
+    .qp-item-row > div:nth-child(3){grid-area:qty;}
+    .qp-item-row > div:nth-child(4){grid-area:unit;}
+    .qp-item-row > div:nth-child(5){grid-area:rate;}
+    .qp-item-row > div:nth-child(6){grid-area:gst;}
+    .qp-item-row > button{grid-area:remove; justify-self:end;}
+  }
 </style>
 </head>
 <body>
@@ -352,15 +367,15 @@ const TOOLS = [
   {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:0},
   {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:0},
   {id:'videothumb', name:'Video Thumbnail', desc:'Grab a frame at a chosen time as an image', icon:'🖼️', color:'#2E6F5E', cat:'video', cost:0},
-  {id:'askai', name:'Ask AI About Document', desc:'Upload any document and ask questions about it', icon:'💬', color:'#0E6655', cat:'ai', cost:1},
-  {id:'aisummarize', name:'AI Summarize', desc:'Long document → short, clear summary in seconds', icon:'📋', color:'#1F618D', cat:'ai', cost:1},
-  {id:'aitranslate', name:'AI Translate Document', desc:'Read a document in any language, get it in yours', icon:'🌐', color:'#117A65', cat:'ai', cost:1},
-  {id:'aireceipt', name:'Receipt/Invoice → Excel', desc:'Snap a bill, get vendor/date/amount in a spreadsheet', icon:'🧾', color:'#B7950B', cat:'ai', cost:1},
-  {id:'airesume', name:'AI Resume Reviewer', desc:'Upload your CV, get honest feedback to improve it', icon:'📄', color:'#C0392B', cat:'ai', cost:1},
-  {id:'aiexcelcompare', name:'AI Compare Excel Files', desc:'Upload up to 10 spreadsheets, ask a question — AI compares across all of them', icon:'📊', color:'#1F618D', cat:'ai', cost:1},
+  {id:'askai', name:'Ask AI About Document', desc:'Upload any document and ask questions about it', icon:'💬', color:'#0E6655', cat:'ai', cost:2},
+  {id:'aisummarize', name:'AI Summarize', desc:'Long document → short, clear summary in seconds', icon:'📋', color:'#1F618D', cat:'ai', cost:2},
+  {id:'aitranslate', name:'AI Translate Document', desc:'Read a document in any language, get it in yours', icon:'🌐', color:'#117A65', cat:'ai', cost:2},
+  {id:'aireceipt', name:'Receipt/Invoice → Excel', desc:'Snap a bill, get vendor/date/amount in a spreadsheet', icon:'🧾', color:'#B7950B', cat:'ai', cost:2},
+  {id:'airesume', name:'AI Resume Reviewer', desc:'Upload your CV, get honest feedback to improve it', icon:'📄', color:'#C0392B', cat:'ai', cost:2},
+  {id:'aiexcelcompare', name:'AI Compare Excel Files', desc:'Upload up to 10 spreadsheets, ask a question — AI compares across all of them', icon:'📊', color:'#1F618D', cat:'ai', cost:2},
   {id:'ocr', name:'Image → Text (OCR)', desc:'20+ languages — correct font rendering', icon:'🔎', color:'#1F6F78', cat:'ai', cost:0},
-  {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + OCR → multi-page PDF', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
-  {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:1},
+  {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
+  {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:2},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
@@ -873,6 +888,25 @@ async function downloadBlob(blob, filename){
       if(err.name === 'AbortError') return; // person cancelled the Save As dialog — respect that, don't silently download anyway
       // any other failure (permission denied, etc.) — fall through to the standard download below
     }
+  }
+  // Mobile fallback: on many mobile browsers (notably iOS Safari, and some
+  // Android Chrome/webview configurations), a plain <a download> click on a
+  // blob: URL doesn't reliably save to the device — instead the file just
+  // opens inline in an in-page viewer, leaving the person to dig for that
+  // viewer's own share/save icon. The Web Share API's native share sheet has
+  // an explicit "Save to Files"/"Save Image" action, which is the actual
+  // save behavior people expect — so prefer it wherever it's supported for
+  // files, before falling back to the plain anchor click below.
+  try{
+    const shareFile = new File([blob], filename, {type: blob.type || 'application/octet-stream'});
+    if(navigator.canShare && navigator.canShare({ files:[shareFile] })){
+      await navigator.share({ files:[shareFile] });
+      showDownloadToast(filename);
+      return;
+    }
+  }catch(err){
+    if(err && err.name === 'AbortError') return; // person cancelled the share sheet — respect that
+    // any other failure — fall through to the standard anchor-click download below
   }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1664,7 +1698,11 @@ function renderToolPanel(toolId){
 // compress's /api/video/compress, and the 6 AI tools' shared /api/ai/ask) —
 // for these, the unlock gate below only CHECKS affordability, it doesn't also
 // deduct, otherwise the first use of the tool would be charged twice.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume']);
+// texttoimage added here after a confirmed double-charge bug: /api/ai/image
+// deducts its own 5 credits server-side (see server.js), so the paid-gate
+// must only CHECK affordability (checkOnly:true) instead of also deducting
+// on unlock — otherwise a single image generation cost 10 credits, not 5.
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -2058,7 +2096,44 @@ function applyDocFilter(canvas, mode){
     }
   }
   ctx.putImageData(img,0,0);
+  // A dedicated phone scanner app's crisper look owes as much to sharpening
+  // as to contrast — apply an unsharp-mask pass on the two "processed
+  // document" modes so scanned text edges look genuinely crisper instead of
+  // just higher-contrast. Skipped for 'gray'/'original', which are meant to
+  // look like an unedited photo.
+  if(mode==='enhance' || mode==='bw') sharpenCanvas(canvas);
   return canvas;
+}
+// Simple 3x3 unsharp-mask convolution (a standard edge-enhancing kernel) —
+// see applyDocFilter above for why this runs on the scanned-document filters.
+function sharpenCanvas(canvas){
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const src = ctx.getImageData(0,0,w,h);
+  const s = src.data;
+  const out = ctx.createImageData(w,h);
+  const o = out.data;
+  const kernel = [0,-1,0, -1,5,-1, 0,-1,0];
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const di = (y*w+x)*4;
+      if(x===0||y===0||x===w-1||y===h-1){
+        o[di]=s[di]; o[di+1]=s[di+1]; o[di+2]=s[di+2]; o[di+3]=s[di+3];
+        continue;
+      }
+      for(let c=0;c<3;c++){
+        let sum = 0, k = 0;
+        for(let ky=-1;ky<=1;ky++){
+          for(let kx=-1;kx<=1;kx++){
+            sum += s[((y+ky)*w+(x+kx))*4+c] * kernel[k++];
+          }
+        }
+        o[di+c] = Math.max(0, Math.min(255, sum));
+      }
+      o[di+3] = s[di+3];
+    }
+  }
+  ctx.putImageData(out,0,0);
 }
 
 function getDocxLib(){
@@ -2848,6 +2923,12 @@ const LIB_LOADERS = {
 // category-education.js (those two also reference some of these libraries).
 // A tool not listed here needs none of the 9.
 const TOOL_LIBS = {
+  // These 5 share renderAiTextAnswer(), which now also offers Word/PDF export
+  // (added so a downloaded result reads correctly even without an Indic font
+  // installed — a plain .txt can't embed one, but Word/PDF can).
+  aihandwriting:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
+  aitranslate:['docx','html2canvas','pdflib'], askai:['docx','html2canvas','pdflib'],
+  airesume:['docx','html2canvas','pdflib'],
   aiexcelcompare:['xlsx'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
   compress:['pdfjs','pdflib'], emicalc:['xlsx'], excel2pdf:['pdflib','xlsx'], excel2word:['docx','xlsx'],
   expensetracker:['xlsx'], extractpages:['pdflib'], gstinvoice:['pdflib'], img2pdf:['pdflib'],
@@ -4230,7 +4311,7 @@ TOOL_IMPL.ocr = {
         const bTxt = el(`<button class="btn secondary">⬇️ .txt</button>`);
         const bDocx = el(`<button class="btn secondary">⬇️ Word (.docx)</button>`);
         const bPdf = el(`<button class="btn accent">⬇️ PDF (proper text)</button>`);
-        bTxt.onclick = ()=> downloadBlob(new Blob([recognizedText],{type:'text/plain;charset=utf-8'}), 'ocr-text.txt');
+        bTxt.onclick = ()=> downloadBlob(new Blob(['﻿' + recognizedText],{type:'text/plain;charset=utf-8'}), 'ocr-text.txt');
         bDocx.onclick = async ()=>{
           const { Document, Paragraph, TextRun, Packer } = getDocxLib();
           const paras = recognizedText.split('\n').map(line=> new Paragraph({ children:[ new TextRun(line || ' ') ] }));
@@ -7984,9 +8065,10 @@ TOOL_IMPL.texttoimage = {
         card.appendChild(cap);
         const dlRow = el(`<div style="padding:0 12px 12px;"></div>`);
         const dlBtn = el(`<button class="btn secondary" style="padding:7px 14px; font-size:12px;">📥 Download</button>`);
-        dlBtn.onclick = ()=>{
-          const a = document.createElement('a');
-          a.href = img.dataUrl; a.download = 'ai-image-'+Date.now()+'.png'; a.click();
+        dlBtn.onclick = async ()=>{
+          const res = await fetch(img.dataUrl);
+          const blob = await res.blob();
+          downloadBlob(blob, 'ai-image-'+Date.now()+'.png');
         };
         dlRow.appendChild(dlBtn);
         card.appendChild(dlRow);
@@ -10864,9 +10946,18 @@ async function callNvidiaText(instruction, text, toolId, creditCost){
   if(result.error) throw new Error(result.error);
   return result.answer;
 }
-// Renders an AI text answer with a Copy button and a "pick your own filename,
-// download as .txt" row — shared by every AI tool that returns free-form
-// text (used by mountAiUploadTool's default renderer and by aisummarize).
+// Broad multi-script font stack for AI-answer exports (Word/PDF) — the AI
+// tools that share this (Translate especially) can output any of a dozen
+// languages, so this isn't limited to just Tamil like a single-language tool
+// would need.
+const AI_ANSWER_FONT_STACK = "'Noto Sans Tamil','Noto Sans Devanagari','Noto Sans Telugu','Noto Sans Kannada','Noto Sans Malayalam','Noto Sans Bengali','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Oriya','Noto Sans Sinhala','Noto Sans Arabic','Noto Sans SC','Noto Sans JP','Noto Sans','Inter',sans-serif";
+// Renders an AI text answer with a Copy button and Download options (.txt,
+// Word .docx, and a proper font-embedded PDF) — shared by every AI tool that
+// returns free-form text (used by mountAiUploadTool's default renderer and
+// by aisummarize). The .docx/PDF options exist because a plain .txt file
+// can't carry its own font — opening it somewhere without a Tamil/Indic font
+// installed shows boxes/garbled text no matter what the file's bytes are;
+// Word and PDF embed the correct glyphs so the text reads correctly anywhere.
 function renderAiTextAnswer(answerHolder, answerText, baseName){
   const card = el(`<div style="position:relative; margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff; font-size:14px; line-height:1.7; white-space:pre-wrap;">${escapeHtml(answerText)}</div>`);
   const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
@@ -10875,21 +10966,38 @@ function renderAiTextAnswer(answerHolder, answerText, baseName){
   card.appendChild(copyBtn);
   answerHolder.appendChild(card);
   const downloadRow = el(`
-    <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-      <input type="text" id="aiDownloadName" value="${escapeHtml(baseName || 'result')}-result" style="flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
-      <span style="font-size:13px; color:var(--sub);">.txt</span>
-      <button id="aiDownloadBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 16px; font-size:13px;">⬇️ Download</button>
+    <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+      <input type="text" id="aiDownloadName" value="${escapeHtml(baseName || 'result')}-result" style="flex:1 1 140px; min-width:0; padding:9px 12px; border:1px solid var(--line); border-radius:10px; font-size:13px;">
+      <button id="aiDlTxtBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 14px; font-size:12.5px;">⬇️ .txt</button>
+      <button id="aiDlDocxBtn" class="btn secondary" style="flex:0 0 auto; padding:9px 14px; font-size:12.5px;">⬇️ Word (.docx)</button>
+      <button id="aiDlPdfBtn" class="btn accent" style="flex:0 0 auto; padding:9px 14px; font-size:12.5px;">⬇️ PDF (proper text)</button>
     </div>
   `);
   answerHolder.appendChild(downloadRow);
-  downloadRow.querySelector('#aiDownloadBtn').onclick = ()=>{
-    const name = (downloadRow.querySelector('#aiDownloadName').value.trim() || 'result') + '.txt';
-    const blob = new Blob([answerText], {type:'text/plain;charset=utf-8'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  function baseFileName(){ return downloadRow.querySelector('#aiDownloadName').value.trim() || 'result'; }
+  downloadRow.querySelector('#aiDlTxtBtn').onclick = ()=>{
+    // Leading ﻿ (UTF-8 BOM) so older text viewers that otherwise guess
+    // ANSI instead of UTF-8 (older Windows Notepad builds are the classic
+    // case) still show Tamil/Indic text correctly instead of garbled bytes.
+    const blob = new Blob(['﻿' + answerText], {type:'text/plain;charset=utf-8'});
+    downloadBlob(blob, baseFileName() + '.txt');
+  };
+  downloadRow.querySelector('#aiDlDocxBtn').onclick = async ()=>{
+    const { Document, Paragraph, TextRun, Packer } = getDocxLib();
+    const paras = answerText.split('\n').map(line=> new Paragraph({ children:[ new TextRun(line || ' ') ] }));
+    const doc = new Document({ sections:[{ children: paras }] });
+    const blob = await Packer.toBlob(doc);
+    downloadBlob(blob, baseFileName() + '.docx');
+  };
+  downloadRow.querySelector('#aiDlPdfBtn').onclick = async ()=>{
+    const prog = mountProgress(answerHolder);
+    try{
+      prog.set(30,'Preparing PDF…');
+      const bytes = await htmlToFontCorrectPdfBytes(answerText, {fontFamily: AI_ANSWER_FONT_STACK, fontSize:15});
+      prog.set(100,'Done');
+      downloadBlob(new Blob([bytes],{type:'application/pdf'}), baseFileName() + '.pdf');
+      prog.remove();
+    }catch(err){ prog.remove(); mountResult(answerHolder, 'Error: '+err.message).style.background='#FDEDEC'; }
   };
 }
 
@@ -10935,7 +11043,7 @@ function mountAiUploadTool(container, config){
     if(!question) return;
     const answerHolder = body.querySelector('#aiAnswerHolder');
     answerHolder.innerHTML = '';
-    const ok = await confirmCreditSpend(answerHolder, config.creditCost || '1 credit');
+    const ok = await confirmCreditSpend(answerHolder, config.creditCost || '2 credits');
     if(!ok) return;
     const prog = mountProgress(body);
     try{
@@ -10948,7 +11056,7 @@ function mountAiUploadTool(container, config){
       const extractedText = config.tryTextExtraction ? await (async()=>{ prog.set(15,'Reading your document…'); return extractDocumentText(file); })() : null;
       if(extractedText){
         prog.set(55, 'Thinking…');
-        answer = await callNvidiaText(question, extractedText, config.toolId, 1);
+        answer = await callNvidiaText(question, extractedText, config.toolId, 2);
       } else {
         prog.set(20, isPdf ? 'Reading your PDF…' : 'Reading your image…');
         const form = new FormData();
@@ -11050,7 +11158,7 @@ TOOL_IMPL.aisummarize = {
       const instruction = instructionFor(body.querySelector('#aiSumLen').value);
       const answerHolder = body.querySelector('#aiAnswerHolder');
       answerHolder.innerHTML = '';
-      const ok = await confirmCreditSpend(answerHolder, '1 credit');
+      const ok = await confirmCreditSpend(answerHolder, '2 credits');
       if(!ok) return;
       const prog = mountProgress(body);
       try{
@@ -11063,7 +11171,7 @@ TOOL_IMPL.aisummarize = {
         let answer;
         if(extractedText){
           prog.set(55, 'Summarizing…');
-          answer = await callNvidiaText(instruction, extractedText, 'aisummarize', 1);
+          answer = await callNvidiaText(instruction, extractedText, 'aisummarize', 2);
         } else {
           prog.set(40, 'Reading with AI vision…');
           const form = new FormData();
@@ -11152,12 +11260,21 @@ TOOL_IMPL.aireceipt = {
           return;
         }
         const summary = el(`
-          <div style="border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff;">
+          <div style="position:relative; border:1px solid var(--line); border-radius:14px; padding:16px; padding-top:38px; background:#fff;">
             <div style="font-weight:800; font-size:14px; margin-bottom:8px;">${escapeHtml(data.vendor||'Unknown vendor')}</div>
             <div style="font-size:12.5px; color:var(--sub); margin-bottom:10px;">${escapeHtml(data.date||'')} &nbsp;·&nbsp; ${escapeHtml(data.currency||'')} ${escapeHtml(String(data.total_amount||''))}</div>
             ${(data.items||[]).length ? `<div style="font-size:13px;">${(data.items||[]).map(it=>`<div style="display:flex; justify-content:space-between; padding:4px 0; border-top:1px solid var(--line);"><span>${escapeHtml(it.name||'')}</span><span>${escapeHtml(String(it.price||''))}</span></div>`).join('')}</div>` : ''}
           </div>
         `);
+        // Plain-text rendition for the Copy button — same fields as the card above.
+        const summaryPlainText = [
+          data.vendor || 'Unknown vendor',
+          [data.date, data.currency && data.total_amount ? `${data.currency} ${data.total_amount}` : ''].filter(Boolean).join('  ·  '),
+          ...(data.items||[]).map(it=> `${it.name||''}\t${it.price||''}`)
+        ].filter(Boolean).join('\n');
+        const copyBtn = el(`<button style="position:absolute; top:10px; right:10px; padding:5px 12px; font-size:11.5px; font-weight:700; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer;">📋 Copy</button>`);
+        copyBtn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(summaryPlainText).catch(()=>{}); copyBtn.textContent='✓ Copied'; setTimeout(()=>copyBtn.textContent='📋 Copy',1200); };
+        summary.appendChild(copyBtn);
         answerHolder.appendChild(summary);
         const downloadRow = el(`
           <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
@@ -11268,7 +11385,7 @@ TOOL_IMPL.aiexcelcompare = {
       if(!question){ mountResult(body,'Please type a question.').style.background='#FDEDEC'; return; }
       const answerHolder = body.querySelector('#excAnswerHolder');
       answerHolder.innerHTML = '';
-      const ok = await confirmCreditSpend(answerHolder, deepMode ? '3 credits' : '1 credit');
+      const ok = await confirmCreditSpend(answerHolder, deepMode ? '3 credits' : '2 credits');
       if(!ok) return;
       const prog = mountProgress(body);
       try{
@@ -11327,10 +11444,8 @@ TOOL_IMPL.aiexcelcompare = {
         answerHolder.appendChild(downloadRow);
         downloadRow.querySelector('#excDownloadBtn').onclick = ()=>{
           const name = (downloadRow.querySelector('#excDownloadName').value.trim() || 'result') + '.txt';
-          const blob = new Blob([result.answer], {type:'text/plain;charset=utf-8'});
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-          document.body.appendChild(a); a.click(); a.remove();
-          setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+          const blob = new Blob(['﻿' + result.answer], {type:'text/plain;charset=utf-8'});
+          downloadBlob(blob, name);
         };
         updateCreditsBadgeInline();
         refreshProfile();
@@ -13088,15 +13203,15 @@ TOOL_IMPL.quotepo = {
       body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:16px 0 8px;">Items</div>`));
       const itemsWrap = el(`<div></div>`);
       items.forEach((it,idx)=>{
-        const row = el(`<div style="display:grid; grid-template-columns:2fr 0.9fr 0.6fr 0.6fr 0.9fr 0.7fr auto; gap:6px; margin-bottom:8px; align-items:center;"></div>`);
+        const row = el(`<div class="qp-item-row"></div>`);
         const mk = (val, ph)=> `<input type="text" data-idx="${idx}" value="${esc(val)}" placeholder="${ph||''}" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">`;
         row.innerHTML = `
           <div>${mk(it.desc,'Item description')}</div>
           <div>${mk(it.hsn,'HSN/SAC')}</div>
-          <div><input type="number" data-idx="${idx}" data-field="qty" value="${it.qty}" min="0" step="1" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <div><input type="number" data-idx="${idx}" data-field="qty" value="${it.qty}" min="0" step="1" placeholder="Qty" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
           <div>${mk(it.unit,'Unit')}</div>
-          <div><input type="number" data-idx="${idx}" data-field="rate" value="${it.rate}" min="0" step="0.01" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
-          <div><input type="number" data-idx="${idx}" data-field="gst" value="${it.gst}" min="0" max="28" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <div><input type="number" data-idx="${idx}" data-field="rate" value="${it.rate}" min="0" step="0.01" placeholder="Rate ₹" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
+          <div><input type="number" data-idx="${idx}" data-field="gst" value="${it.gst}" min="0" max="28" placeholder="GST %" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;"></div>
           <button data-idx="${idx}" data-remove="1" style="border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px 10px; cursor:pointer; color:#B3261E;" ${items.length<=1?'disabled':''}>✕</button>
         `;
         itemsWrap.appendChild(row);

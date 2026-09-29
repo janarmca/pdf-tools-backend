@@ -416,18 +416,24 @@ app.post('/api/redeem', redeemLimiter, requireAuth, async (req, res) => {
 // clear "not configured" error instead of crashing.
 // body: multipart form — file (image), question (text)
 // ============================================================
+// These 7 tools were bumped from 1 to 2 credits per use (pricing decision,
+// 2026-09) — kept as an explicit set here (rather than a flat rate) because
+// /api/ai/ask is also shared by ocr's AI-upgrade path, livetranslate's paid
+// fallback, and pdfeditor's AI actions, which are NOT part of this price
+// change and must stay at 1 credit.
+const RAISED_PRICE_AI_TOOLS = new Set(['askai','aisummarize','aitranslate','aireceipt','airesume','aiexcelcompare','aihandwriting']);
 app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), async (req, res) => {
+  const toolId = req.body.toolId || 'askai'; // which of the AI tools called this — for usage_logs and pricing
   // Deep-analysis requests (untruncated large Excel data, etc.) send genuinely
   // more tokens to Gemini and cost more in real API terms — reflect that
-  // honestly in credits rather than charging the same flat 1 credit for a
-  // tiny question and a full untruncated spreadsheet dump.
-  const CREDIT_COST = req.body.deepAnalysis === 'true' ? 3 : 1;
+  // honestly in credits rather than charging the same flat rate for a tiny
+  // question and a full untruncated spreadsheet dump.
+  const CREDIT_COST = req.body.deepAnalysis === 'true' ? 3 : (RAISED_PRICE_AI_TOOLS.has(toolId) ? 2 : 1);
   let allowed = false;
   try {
     if (!process.env.GEMINI_API_KEY) {
       return res.status(501).json({ error: 'AI feature not set up yet — add GEMINI_API_KEY in Render env vars (see backend/README.md).' });
     }
-    const toolId = req.body.toolId || 'askai'; // which of the AI tools called this — for usage_logs
     allowed = await deductCredits(req.user.id, CREDIT_COST, toolId);
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
