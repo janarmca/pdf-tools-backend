@@ -502,32 +502,53 @@ app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
     if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
 
     const userContent = text.trim() ? `${instruction}\n\n---\nDocument content:\n${text}` : instruction;
-    const nvidiaRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        // meta/llama-3.3-70b-instruct reached end-of-life on NVIDIA's catalog
-        // (2026-08-26) and returns HTTP 410 — switched to NVIDIA's own
-        // Nemotron 3.5 Lightning, their fastest current free-endpoint model
-        // in this size class (30B, 1M context), well suited to plain
-        // summarize/translate/resume-review text tasks. Being NVIDIA's own
-        // flagship line (not a third-party checkpoint they merely host), it
-        // should also be less likely to be retired on short notice than a
-        // Meta model was. If this ever needs swapping again, the improved
-        // error handling above (HTTP status + real NVIDIA error message)
-        // will show exactly why, instead of a bare "AI request failed".
-        model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
-        messages: [
-          { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
-          { role: 'user', content: userContent }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500
-      })
-    });
+    // NVIDIA's free-tier endpoint has no guaranteed response time, and this
+    // fetch previously had NO timeout at all — if it ever hung (rate limit,
+    // upstream slowness, a dropped connection), the request just sat open
+    // until something outside our control eventually killed it (Cloud Run's
+    // own request timeout, or the phone's network stack going idle), which
+    // is exactly the "loads for a while, then a network error" symptom
+    // reported. Failing fast with a clear, actionable message is much better
+    // than an unbounded hang.
+    const nvidiaController = new AbortController();
+    const nvidiaTimeoutHandle = setTimeout(() => nvidiaController.abort(), 45000);
+    let nvidiaRes;
+    try {
+      nvidiaRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        signal: nvidiaController.signal,
+        headers: {
+          'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // meta/llama-3.3-70b-instruct reached end-of-life on NVIDIA's catalog
+          // (2026-08-26) and returns HTTP 410 — switched to NVIDIA's own
+          // Nemotron 3.5 Lightning, their fastest current free-endpoint model
+          // in this size class (30B, 1M context), well suited to plain
+          // summarize/translate/resume-review text tasks. Being NVIDIA's own
+          // flagship line (not a third-party checkpoint they merely host), it
+          // should also be less likely to be retired on short notice than a
+          // Meta model was. If this ever needs swapping again, the improved
+          // error handling above (HTTP status + real NVIDIA error message)
+          // will show exactly why, instead of a bare "AI request failed".
+          model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
+          messages: [
+            { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
+            { role: 'user', content: userContent }
+          ],
+          temperature: 0.3,
+          max_tokens: 1500
+        })
+      });
+    } catch (fetchErr) {
+      if (fetchErr.name === 'AbortError') {
+        throw new Error('The AI service took too long to respond (over 45 seconds) — please try again in a moment.');
+      }
+      throw new Error('Could not reach the AI service — please check your connection and try again. (' + fetchErr.message + ')');
+    } finally {
+      clearTimeout(nvidiaTimeoutHandle);
+    }
     const nvidiaJson = await nvidiaRes.json().catch(() => ({}));
     if (!nvidiaRes.ok) {
       // NVIDIA's error shape varies (error.message, a plain "detail" string on
