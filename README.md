@@ -7,7 +7,7 @@
 | Layer | Service | Notes |
 |---|---|---|
 | Frontend | **Cloudflare Pages** | Auto-deploys from this repo's `main` branch — pushing `index.html` here goes live. |
-| Backend | **Google Cloud Run** (`all-in-one-tools`, project `pdf-tools-506813`, region `asia-south1`) | Handles AI calls (Gemini vision + NVIDIA Llama-3 text), payment verification, and Fast Server Mode video processing (real ffmpeg). |
+| Backend | **Google Cloud Run** (`all-in-one-tools`, project `pdf-tools-506813`, region `asia-south1`) | Handles AI calls (Gemini vision + NVIDIA Nemotron text), payment verification, and Fast Server Mode video processing (real ffmpeg). |
 | Auth + DB | **Supabase** | Email + Google sign-in, credit balances. |
 | Payments | **Razorpay** (live mode) | Credit top-ups. |
 
@@ -66,7 +66,7 @@ npx terser <extracted-script>.js --compress --mangle --output <extracted-script>
 `sw.js` caches `index.html` for offline use, keyed by `CACHE_NAME`. Browsers only detect a new service worker (and re-cache) when **`sw.js` itself changes byte-for-byte** — editing `index.html` alone, however many times, never triggers this. A user's browser can keep running a service worker (and its cached app shell) from weeks ago even after many deploys, and hard refresh does **not** reliably force an active service worker to update in every browser. **Bump `CACHE_NAME` (e.g. `v2` → `v3`) whenever a change needs to reach service-worker-controlled clients promptly** — this was the actual cause of AI tool images not appearing for a user despite multiple confirmed-correct deploys and hard refreshes.
 
 ## ⚠️ New required env var: `NVIDIA_API_KEY`
-`server.js` now has a second AI endpoint, `/api/ai/text` (in addition to the existing `/api/ai/ask`), which calls NVIDIA's free Llama-3 API (`integrate.api.nvidia.com`) instead of Gemini. **This endpoint will fail until `NVIDIA_API_KEY` is added to Cloud Run** — add it with `--update-env-vars` (see the gotcha right below this one, never `--set-env-vars`):
+`server.js` now has a second AI endpoint, `/api/ai/text` (in addition to the existing `/api/ai/ask`), which calls NVIDIA's free Nemotron API (`integrate.api.nvidia.com`) instead of Gemini. **This endpoint will fail until `NVIDIA_API_KEY` is added to Cloud Run** — add it with `--update-env-vars` (see the gotcha right below this one, never `--set-env-vars`):
 ```bash
 gcloud run services update all-in-one-tools --project=pdf-tools-506813 --region=asia-south1 --update-env-vars NVIDIA_API_KEY=nvapi-...
 ```
@@ -78,8 +78,11 @@ Get a free key at build.nvidia.com (sign in → any model page → "Get API Key"
 gcloud run services describe all-in-one-tools --project=pdf-tools-506813 --region=asia-south1 --format="value(spec.template.spec.containers[0].env[].name)"
 ```
 
+## ⚠️ NVIDIA model end-of-life gotcha
+NVIDIA's build.nvidia.com catalog retires models on short notice — `meta/llama-3.3-70b-instruct` (the model `/api/ai/text` originally used) hit end-of-life on 2026-08-26 and started returning HTTP 410, which briefly broke Summarize/Resume Reviewer/Translate/Ask AI/Resume Builder in production with a bare "AI request failed" until the error handling was improved to show the real reason. Currently using `nvidia/nemotron-3.5-lightning-30b-a3b` (NVIDIA's own model line, likely more durable than a hosted third-party checkpoint, but not guaranteed forever). If this ever breaks again: check the error message first (it now includes the HTTP status and NVIDIA's real reason, e.g. "...has reached its end of life... (NVIDIA HTTP 410)"), then check build.nvidia.com for a current model with a "Free Endpoint" badge to swap in — the `model:` field is the only line in `/api/ai/text` (server.js) that needs to change.
+
 ## Recent major changes
-- **NVIDIA Llama-3 (free) now powers text-only AI work, saving Gemini cost for genuine photo/scan work**: a new shared client-side helper, `extractDocumentText(file)` in `index.source.html`, tries to pull real text out of an uploaded file first — using the already-lazy-loaded `pdf.js` (for a PDF that has an actual text layer, not a scan), `mammoth.js` (`.docx`), or `xlsx.js` (`.xlsx`/`.xls`/`.csv`) — entirely in the browser, at zero server cost. If that succeeds (more than ~20 characters of text), the extracted text is sent to the new `POST /api/ai/text` backend endpoint, which calls NVIDIA's free `meta/llama-3.3-70b-instruct` model instead of Gemini. If extraction fails or yields too little text (a photo, or a scanned/image-only PDF), the tool falls back to the original `/api/ai/ask` Gemini **vision** path unchanged — so nothing that worked before stops working. This hybrid routing is wired into:
+- **NVIDIA Nemotron (free) now powers text-only AI work, saving Gemini cost for genuine photo/scan work**: a new shared client-side helper, `extractDocumentText(file)` in `index.source.html`, tries to pull real text out of an uploaded file first — using the already-lazy-loaded `pdf.js` (for a PDF that has an actual text layer, not a scan), `mammoth.js` (`.docx`), or `xlsx.js` (`.xlsx`/`.xls`/`.csv`) — entirely in the browser, at zero server cost. If that succeeds (more than ~20 characters of text), the extracted text is sent to the new `POST /api/ai/text` backend endpoint, which calls NVIDIA's free `nvidia/nemotron-3.5-lightning-30b-a3b` model instead of Gemini. If extraction fails or yields too little text (a photo, or a scanned/image-only PDF), the tool falls back to the original `/api/ai/ask` Gemini **vision** path unchanged — so nothing that worked before stops working. This hybrid routing is wired into:
   - **AI Summarize** (`aisummarize`) — rewritten to accept PDF/DOCX/XLSX/XLS/CSV/photo (previously photo/PDF only), routing text-based files through NVIDIA and photos/scans through Gemini vision as before.
   - **AI Resume Reviewer** (`airesume`) — now also accepts `.docx` (previously image/PDF only), using the same hybrid routing.
   - **Resume Builder**'s "AI suggest" buttons (`Resume_build.html`) — switched outright to `/api/ai/text` (pure instruction, no file involved, so no vision was ever needed here).

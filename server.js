@@ -464,7 +464,8 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 
 // ============================================================
 // POST /api/ai/text — text-only AI tasks (summarize, rewrite, resume
-// suggestions) via NVIDIA Build's hosted Llama-3, instead of Gemini.
+// suggestions) via NVIDIA Build's hosted Nemotron 3.5 Lightning, instead of
+// Gemini.
 // These tools never need to actually SEE an image — the file (PDF/Excel/
 // Word) is read into plain text on the client first (pdf.js/xlsx/mammoth,
 // all free, no server cost), and only that text is sent here. Using a
@@ -502,7 +503,17 @@ app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'meta/llama-3.3-70b-instruct',
+        // meta/llama-3.3-70b-instruct reached end-of-life on NVIDIA's catalog
+        // (2026-08-26) and returns HTTP 410 — switched to NVIDIA's own
+        // Nemotron 3.5 Lightning, their fastest current free-endpoint model
+        // in this size class (30B, 1M context), well suited to plain
+        // summarize/translate/resume-review text tasks. Being NVIDIA's own
+        // flagship line (not a third-party checkpoint they merely host), it
+        // should also be less likely to be retired on short notice than a
+        // Meta model was. If this ever needs swapping again, the improved
+        // error handling above (HTTP status + real NVIDIA error message)
+        // will show exactly why, instead of a bare "AI request failed".
+        model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
         messages: [
           { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
           { role: 'user', content: userContent }
