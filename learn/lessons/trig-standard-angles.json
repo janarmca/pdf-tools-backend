@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "sin 30° மதிப்பு என்னவாக இருக்கும் என்று நினைக்கிறாய்? (கால்குலேட்டர் இல்லாமல் ஊகி)",
+    "en": "What do you think sin 30° is? (guess without a calculator)"
+   },
+   "options": [
+    {
+     "ta": "0.3",
+     "en": "0.3"
+    },
+    {
+     "ta": "0.5",
+     "en": "0.5"
+    },
+    {
+     "ta": "0.866",
+     "en": "0.866"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "சரியாக 1/2! 30° என்பது 90°-ன் மூன்றில் ஒரு பங்கு, ஆனால் sin 30° என்பது 1/3 அல்ல — கோணமும் விகிதமும் நேர் விகிதத்தில் இல்லை. ஏன் சரியாக 1/2 என்று கீழே ஒரு சமபக்க முக்கோணம் காட்டும்.",
+    "en": "Exactly 1/2! 30° is a third of 90°, yet sin 30° isn’t 1/3 — angle and ratio aren’t proportional. An equilateral triangle below shows why it’s exactly 1/2."
+   }
+  },
+  {
    "type": "widget",
    "name": "special",
    "text": {
@@ -261,6 +287,109 @@
    }
   },
   {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📐",
+     "title": {
+      "ta": "Set squares",
+      "en": "Set squares"
+     },
+     "text": {
+      "ta": "உன் ஜியாமெட்ரி பாக்ஸில் உள்ள இரண்டும் இந்தக் கோணங்களே.",
+      "en": "Both in your geometry box are exactly these angles."
+     }
+    },
+    {
+     "icon": "🏠",
+     "title": {
+      "ta": "கூரைகள்",
+      "en": "Roofs"
+     },
+     "text": {
+      "ta": "ஓட்டுக் கூரைகள் பெரும்பாலும் 30°–45° சாய்வில் — மழைநீர் வேகமாக வழிய.",
+      "en": "Tiled roofs are often 30°–45° — so rain runs off quickly."
+     }
+    },
+    {
+     "icon": "🪜",
+     "title": {
+      "ta": "ஏணி",
+      "en": "Ladders"
+     },
+     "text": {
+      "ta": "பாதுகாப்பான ஏணி ஏறக்குறைய 75° — மிகச் சாய்ந்தால் வழுக்கும், நேராக இருந்தால் பின்னால் விழும்.",
+      "en": "A safe ladder is about 75° — too flat and it slips, too upright and it tips back."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "sin 30° ஏன் சரியாக 1/2?",
+    "en": "Why is sin 30° exactly 1/2?"
+   },
+   "keywords": [
+    {
+     "ta": "சமபக்க",
+     "en": "equilateral"
+    },
+    {
+     "ta": "பாதி",
+     "en": "half"
+    },
+    {
+     "ta": "கர்ணம்",
+     "en": "hypotenuse"
+    }
+   ],
+   "model": {
+    "ta": "பக்கம் 2 உள்ள சமபக்க முக்கோணத்தைப் பாதியாக வெட்டினால், 30° கோணத்திற்கு எதிர்ப்பக்கம் 1, கர்ணம் 2. எனவே sin 30° = 1/2.",
+    "en": "Cut an equilateral triangle of side 2 in half: the side opposite 30° is 1 and the hypotenuse is 2. So sin 30° = 1/2."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "கணினிகள் sin 30° போன்றவற்றை அட்டவணையில் பார்ப்பதில்லை — சிறு கூட்டல்-பெருக்கல்களின் தொடர் மூலம் விநாடிக்குக் கோடிக்கணக்கில் கணக்கிடுகின்றன.",
+    "en": "Computers don’t look sin 30° up in a table — they compute such values millions of times a second using chains of small additions and multiplications."
+   },
+   "risk": {
+    "ta": "கணினி √2 போன்ற முடிவில்லா எண்களைச் சுருக்கி வைத்துக்கொள்கிறது; சிறு பிழைகள் சேர்ந்து பெரிதாகலாம்.",
+    "en": "A computer stores endless numbers like √2 in shortened form; tiny errors can add up."
+   },
+   "fix": {
+    "ta": "துல்லியம் முக்கியமான இடங்களில் (விண்வெளி, மருத்துவம்) பொறியாளர்கள் பிழை வரம்பைக் கணக்கிட்டு, சரியான மதிப்புகளோடு சோதிக்கிறார்கள் — நீ இந்தப் பாடத்தில் கற்ற சரியான மதிப்புகளோடு.",
+    "en": "Where precision matters (space, medicine), engineers calculate error bounds and test against exact values — like the ones you learnt here."
+   },
+   "q": {
+    "ta": "√2 = 1.41 என்று எடுத்துக்கொண்டால், 1000 m நீள மூலைவிட்டத்தில் எவ்வளவு பிழை?",
+    "en": "If you use √2 = 1.41, how big is the error over a 1000 m diagonal?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "அளவுகோல் இல்லாமல் 45°",
+    "en": "45° without a protractor"
+   },
+   "text": {
+    "ta": "ஒரு காகிதம் மட்டும் வைத்து 30°, 45°, 60° கோணங்களை மடித்து உருவாக்கும் முறையைக் கண்டுபிடி.",
+    "en": "Invent a way to fold exact 30°, 45° and 60° angles using only a sheet of paper."
+   },
+   "prompts": [
+    {
+     "ta": "சதுரம் மடித்தால் எந்தக் கோணம் கிடைக்கும்?",
+     "en": "Which angle do you get by folding a square?"
+    },
+    {
+     "ta": "சமபக்க முக்கோணத்தை காகிதத்தில் எப்படி மடிப்பது?",
+     "en": "How can you fold an equilateral triangle from paper?"
+    }
+   ]
+  },
+  {
    "type": "summary",
    "points": [
     {
@@ -447,6 +576,29 @@
    "explain": {
     "ta": "உயரம் = 100 × sin 30° = 50 m",
     "en": "height = 100 × sin 30° = 50 m"
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு, அத். 6",
+    "en": "Class 9, Ch. 6"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 8",
+    "en": "Class 10, Ch. 8"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Exact trig values",
+    "en": "Exact trig values"
    }
   }
  ]

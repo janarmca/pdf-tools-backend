@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "sin² 37° + cos² 37° = ? (கணக்கிடாமல் ஊகி!)",
+    "en": "sin² 37° + cos² 37° = ? (guess without calculating!)"
+   },
+   "options": [
+    {
+     "ta": "0.6 போல ஏதோ ஒன்று",
+     "en": "Something like 0.6"
+    },
+    {
+     "ta": "சரியாக 1",
+     "en": "Exactly 1"
+    },
+    {
+     "ta": "37-ஐப் பொறுத்தது",
+     "en": "It depends on 37"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "37° அல்ல, 12° அல்ல, எந்தக் கோணமானாலும் விடை 1! ஏன்? — இந்தப் பாடத்தின் முதல் 3 வரிகளில்.",
+    "en": "Not just for 37° — for any angle at all, the answer is 1! Why? — in the first 3 lines of this lesson."
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "நிரூபணம் — 3 வரிகளில்",
@@ -202,6 +228,113 @@
     "ta": "cosec²θ · sin²θ = 1",
     "en": "cosec²θ · sin²θ = 1"
    }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🔊",
+     "title": {
+      "ta": "ஒலி & இசை",
+      "en": "Sound & music"
+     },
+     "text": {
+      "ta": "ஒலி அலைகள் sin வடிவம்; முற்றொருமைகள் அவற்றைச் சேர்க்க, பிரிக்க உதவுகின்றன.",
+      "en": "Sound waves are sine shapes; identities help combine and separate them."
+     }
+    },
+    {
+     "icon": "📶",
+     "title": {
+      "ta": "மொபைல் சிக்னல்",
+      "en": "Mobile signals"
+     },
+     "text": {
+      "ta": "ஒரே அலைவரிசையில் பல அழைப்புகளை அனுப்ப sin, cos அலைகளின் பண்புகள் பயன்படுகின்றன.",
+      "en": "Properties of sin and cos waves let many calls share one frequency band."
+     }
+    },
+    {
+     "icon": "⚡",
+     "title": {
+      "ta": "வீட்டு மின்சாரம்",
+      "en": "Household electricity"
+     },
+     "text": {
+      "ta": "AC மின்சாரம் ஒரு sin அலை — விநாடிக்கு 50 முழுச் சுழற்சிகள் (50 Hz).",
+      "en": "AC electricity is a sine wave — 50 complete cycles every second (50 Hz)."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "sin²θ + cos²θ = 1 எங்கிருந்து வருகிறது?",
+    "en": "Where does sin²θ + cos²θ = 1 come from?"
+   },
+   "keywords": [
+    {
+     "ta": "பித்தகோரஸ்",
+     "en": "pythagoras"
+    },
+    {
+     "ta": "வகு",
+     "en": "divide"
+    },
+    {
+     "ta": "கர்ணம்",
+     "en": "hypotenuse"
+    }
+   ],
+   "model": {
+    "ta": "பித்தகோரஸ்: எதிர்² + அடுத்து² = கர்ணம்². இரு பக்கத்தையும் கர்ணம்²-ஆல் வகுத்தால் sin²θ + cos²θ = 1.",
+    "en": "Pythagoras: opp² + adj² = hyp². Divide both sides by hyp² and you get sin²θ + cos²θ = 1."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "கணினிகள் \"நிரூபி\" கணக்குகளைத் தானாகச் சரிபார்க்கத் தொடங்கியுள்ளன (proof assistants). ஆனால் எதை நிரூபிக்க வேண்டும் என்ற கேள்வியை இன்னும் மனிதர்களே கேட்கிறார்கள்.",
+    "en": "Computers have begun checking proofs automatically (proof assistants). But deciding what is worth proving is still a human question."
+   },
+   "risk": {
+    "ta": "ஒரு கோணத்தில் சரியாக வருவதால் அது எல்லாக் கோணத்திலும் சரி என்று நம்புதல் — இது பொதுவான தவறு.",
+    "en": "Believing something is true for all angles because it worked for one — a common mistake."
+   },
+   "fix": {
+    "ta": "சோதனை (சில கோணங்களில் சரிபார்த்தல்) ஒரு குறிப்பு மட்டுமே; நிரூபணமே உறுதி.",
+    "en": "Testing (checking a few angles) is a clue; only a proof gives certainty."
+   },
+   "q": {
+    "ta": "ஒரு AI \"இது எல்லாக் கோணத்திற்கும் உண்மை\" என்று சொன்னால், நீ எப்படிச் சரிபார்ப்பாய்?",
+    "en": "If an AI says \"this is true for every angle\", how would you check?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் சொந்த முற்றொருமை",
+    "en": "Your own identity"
+   },
+   "text": {
+    "ta": "a² + b² = c²-ஐ வேறு ஏதாவது ஒன்றால் வகுத்து அல்லது பெருக்கி, புதிய முற்றொருமையை உருவாக்க முடியுமா? அதை ஒரு கோணத்தில் (30°) சோதித்துப் பார்.",
+    "en": "Can you divide or multiply a² + b² = c² by something else to create a new identity? Test it at one angle (30°)."
+   },
+   "prompts": [
+    {
+     "ta": "எதால் வகுத்தாய்?",
+     "en": "What did you divide by?"
+    },
+    {
+     "ta": "என்ன கிடைத்தது?",
+     "en": "What did you get?"
+    },
+    {
+     "ta": "30°-ல் இரு பக்கமும் சமமா?",
+     "en": "Are both sides equal at 30°?"
+    }
+   ]
   },
   {
    "type": "summary",
@@ -390,6 +523,29 @@
    "explain": {
     "ta": "= cosec²θ − cot²θ = 1",
     "en": "= cosec²θ − cot²θ = 1"
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 6",
+    "en": "Class 10, Ch. 6"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 8",
+    "en": "Class 10, Ch. 8"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "A-level — Trig identities",
+    "en": "A-level — Trig identities"
    }
   }
  ]

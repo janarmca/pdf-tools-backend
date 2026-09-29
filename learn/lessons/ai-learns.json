@@ -1,0 +1,465 @@
+{
+ "id": "ai-learns",
+ "minutes": 35,
+ "title": {
+  "ta": "AI எப்படிக் கற்கிறது? — உன் சொந்த AI-க்கு நீயே கற்றுக்கொடு",
+  "en": "How does AI learn? — teach your own AI"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "AI திறன் பாடம் (417), 9–10 வகுப்பு",
+    "en": "Artificial Intelligence skill subject (417), Classes 9–10"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "மாணவர்களுக்கான AI திறன் கட்டமைப்பு (2024)",
+    "en": "AI competency framework for students (2024)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "AI \"யோசிக்கிறது\" அல்ல, எடுத்துக்காட்டுகளிலிருந்து pattern கற்கிறது என்று புரிந்துகொள்ள",
+   "en": "Understand that AI doesn’t \"think\" — it learns patterns from examples"
+  },
+  {
+   "ta": "ஒருபக்கச் சார்பு (bias) எப்படி வருகிறது, எப்படிச் சரிசெய்வது என்று நீயே பார்க்க",
+   "en": "See for yourself how bias creeps in and how to fix it"
+  },
+  {
+   "ta": "AI-ஐ புத்திசாலித்தனமாக, பாதுகாப்பாகப் பயன்படுத்த",
+   "en": "Use AI wisely and safely"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் முகத்தைப் பார்த்து போன் திறக்கிறது. நீ தமிழில் பேசினால் அது ஆங்கிலத்தில் மொழிபெயர்க்கிறது. விவசாயி இலையைப் புகைப்படம் எடுத்தால் என்ன நோய் என்று ஒரு app சொல்கிறது.\n\nயாரும் போனுக்குள் \"கண் இங்கே, மூக்கு இங்கே\" என்று விதிகள் எழுதவில்லை. அது **எடுத்துக்காட்டுகளிலிருந்து தானாகக் கற்றுக்கொண்டது.** எப்படி? இன்று நீயே ஒரு சிறிய AI-ஐ உருவாக்கிப் பார்க்கப் போகிறாய் — மாம்பழம் பழுத்ததா இல்லையா என்று சொல்லும் AI.",
+    "en": "Your phone unlocks when it sees your face. Speak Tamil and it translates into English. A farmer photographs a leaf and an app names the disease.\n\nNobody wrote rules inside the phone saying \"eyes here, nose there\". It **learnt by itself, from examples.** How? Today you will build a small AI yourself — one that tells whether a mango is ripe."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு AI-க்கு 10,000 பழுத்த மாம்பழப் படங்கள் காட்டப்பட்டன — எல்லாமே மஞ்சள் நிறம். இப்போது பழுத்தும் பச்சையாகவே இருக்கும் ஒரு வகை மாம்பழத்தைக் காட்டினால் AI என்ன சொல்லும்?",
+    "en": "An AI is shown 10,000 photos of ripe mangoes — every one of them yellow. Now it is shown a variety that stays green even when ripe. What will the AI say?"
+   },
+   "options": [
+    {
+     "ta": "பழுத்தது",
+     "en": "Ripe"
+    },
+    {
+     "ta": "பழுக்காதது",
+     "en": "Not ripe"
+    },
+    {
+     "ta": "\"எனக்குத் தெரியாது\" என்று சொல்லும்",
+     "en": "It will say \"I don’t know\""
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "AI-க்கு \"பழுத்தது\" என்றால் என்ன என்று உண்மையில் தெரியாது. அது கற்றது ஒன்றுதான்: \"மஞ்சள் = பழுத்தது\". பச்சையைப் பார்த்ததும் \"பழுக்காதது\" என்று **நம்பிக்கையுடன்** தவறாகச் சொல்லும். பெரும்பாலான AI-கள் \"தெரியாது\" என்று தானாகச் சொல்வதில்லை!",
+    "en": "The AI doesn’t really know what \"ripe\" means. All it learnt is \"yellow = ripe\". Seeing green, it will **confidently** say \"not ripe\" — and be wrong. Most AIs don’t say \"I don’t know\" on their own!"
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "aiTrainer",
+   "params": {
+    "start": "biased"
+   },
+   "text": {
+    "ta": "இந்த AI-க்கு ஏற்கனவே 14 மாம்பழங்கள் காட்டப்பட்டுள்ளன. மேலே \"பழுத்தது\" / \"பழுக்காதது\" தேர்ந்தெடுத்து, வரைபடத்தில் தொட்டு நீயும் எடுத்துக்காட்டுகளைச் சேர்க்கலாம். பிறகு **\"பச்சையான ஆனால் மென்மையான மாம்பழம்\"** சோதனையை அழுத்து.",
+    "en": "This AI has already been shown 14 mangoes. Choose \"Ripe\" / \"Not ripe\" above and tap the chart to add your own examples. Then press **\"Test: a green but soft mango\"**."
+   },
+   "q": {
+    "ta": "பச்சையான மென்மையான மாம்பழத்தை AI ஏன் \"பழுக்காதது\" என்கிறது?",
+    "en": "Why does the AI call the green, soft mango \"not ripe\"?"
+   },
+   "options": [
+    {
+     "ta": "AI சோம்பேறி",
+     "en": "The AI is lazy"
+    },
+    {
+     "ta": "இப்படிப்பட்ட மாம்பழத்தை அது பயிற்சியில் ஒருமுறைகூடப் பார்க்கவில்லை",
+     "en": "It never saw a mango like that during training"
+    },
+    {
+     "ta": "மாம்பழங்கள் குழப்பமானவை",
+     "en": "Mangoes are confusing"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "AI தனக்குக் கொடுத்த எடுத்துக்காட்டுகளிலிருந்து மட்டுமே கற்கிறது. எடுத்துக்காட்டுகள் ஒருபக்கமாக இருந்தால் AI-யும் ஒருபக்கமாகவே இருக்கும் — இதுதான் **சார்பு (bias)**. **சரிசெய்:** \"பழுத்தது\" தேர்ந்தெடுத்து, வரைபடத்தின் மேல்-இடது மூலையில் (பச்சை, மென்மை) 3–4 முறை தொடு. பிறகு மீண்டும் சோதி — AI மாறிவிட்டதா?",
+    "en": "An AI learns only from the examples it is given. One-sided examples make a one-sided AI — this is **bias**. **Fix it:** choose \"Ripe\" and tap the top-left corner of the chart (green but soft) 3–4 times. Then test again — has the AI changed?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "எல்லா AI-களும் இப்படித்தான் கற்கின்றன",
+    "en": "Every AI learns roughly like this"
+   },
+   "text": {
+    "ta": "**1. தரவு (data):** நிறைய எடுத்துக்காட்டுகள் — சரியான விடையுடன் (லேபிள்).\n**2. Pattern கண்டுபிடித்தல்:** எடுத்துக்காட்டுகளில் உள்ள ஒழுங்கை AI கணக்கிடுகிறது. நம் மாம்பழ AI: \"அருகிலுள்ள 3 எடுத்துக்காட்டுகள் என்ன சொல்கின்றன?\" (இதன் பெயர் k-nearest neighbours).\n**3. ஊகித்தல் (prediction):** புதிய ஒன்றைப் பார்த்ததும் pattern-ஐ வைத்து ஊகிக்கிறது.\n**4. திருத்தம்:** தவறு என்று சொன்னால், அதை வைத்து மீண்டும் கற்கிறது.\n\nChatGPT போன்ற பெரிய AI-களும் அடிப்படையில் இதேதான் — மிகப் பிரமாண்டமான அளவில். அவை கோடிக்கணக்கான பக்கங்களிலிருந்து **சொற்களின் pattern-ஐ** கற்று, \"அடுத்து வர வாய்ப்புள்ள சொல்\" என்ன என்று ஊகிக்கின்றன. அவற்றுக்குக் கண்கள் இல்லை, அனுபவம் இல்லை — அதனால் சில நேரம் முழு நம்பிக்கையுடன் தவறான தகவலைச் சொல்லும்.",
+    "en": "**1. Data:** lots of examples — with the right answer attached (a label).\n**2. Finding patterns:** the AI calculates the regularities in the examples. Our mango AI: \"what do the 3 nearest examples say?\" (this is called k-nearest neighbours).\n**3. Prediction:** shown something new, it guesses using the pattern.\n**4. Correction:** told it was wrong, it learns again.\n\nBig AIs like ChatGPT work on the same basic idea — at an enormous scale. They learn **patterns of words** from vast amounts of text and predict \"the word most likely to come next\". They have no eyes and no experience — so sometimes they state wrong information with complete confidence."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "**AI ஒரு pattern இயந்திரம் — சிந்திக்கும் உயிர் அல்ல.** மனிதர்கள் கொண்டுவருவது: ஆர்வம், சரி-தவறு உணர்வு, அக்கறை, பொறுப்பு, உண்மை உலகில் சோதித்துப் பார்த்தல். AI-ஐ ஒரு கருவியாகப் பயன்படுத்து — உன் மூளைக்குப் பதிலாக அல்ல.",
+    "en": "**AI is a pattern machine — not a thinking being.** What humans bring: curiosity, a sense of right and wrong, care, responsibility, and checking things in the real world. Use AI as a tool — not as a replacement for your brain."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "முக அடையாளம்",
+      "en": "Face unlock"
+     },
+     "text": {
+      "ta": "உன் முகத்தின் பல படங்களிலிருந்து கற்றுக்கொள்கிறது.",
+      "en": "Learns from many pictures of your face."
+     }
+    },
+    {
+     "icon": "📧",
+     "title": {
+      "ta": "Spam வடிகட்டி",
+      "en": "Spam filter"
+     },
+     "text": {
+      "ta": "கோடிக்கணக்கான \"spam / spam இல்லை\" மின்னஞ்சல்களிலிருந்து கற்றது.",
+      "en": "Learnt from millions of emails marked \"spam / not spam\"."
+     }
+    },
+    {
+     "icon": "🌾",
+     "title": {
+      "ta": "பயிர் நோய் app",
+      "en": "Crop-disease apps"
+     },
+     "text": {
+      "ta": "நோயுற்ற இலைகளின் படங்களிலிருந்து கற்று, விவசாயிக்கு உதவுகிறது.",
+      "en": "Learns from photos of diseased leaves to help farmers."
+     }
+    },
+    {
+     "icon": "🗺️",
+     "title": {
+      "ta": "போக்குவரத்து நெரிசல்",
+      "en": "Traffic on maps"
+     },
+     "text": {
+      "ta": "போன்களின் வேகத் தரவிலிருந்து நெரிசலை ஊகிக்கிறது.",
+      "en": "Guesses traffic jams from the speeds of many phones."
+     }
+    },
+    {
+     "icon": "🌦️",
+     "title": {
+      "ta": "வானிலை முன்னறிவிப்பு",
+      "en": "Weather forecasts"
+     },
+     "text": {
+      "ta": "பல ஆண்டுத் தரவுகளுடன் இயற்பியல் கணக்கீடுகளையும் இணைக்கிறது.",
+      "en": "Combines years of data with physics calculations."
+     }
+    },
+    {
+     "icon": "🗣️",
+     "title": {
+      "ta": "மொழிபெயர்ப்பு",
+      "en": "Translation"
+     },
+     "text": {
+      "ta": "தமிழ்-ஆங்கில இணை வாக்கியங்களிலிருந்து கற்றது — அதனால் அரிய சொற்களில் தவறும்.",
+      "en": "Learnt from paired Tamil–English sentences — so it slips on rare words."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "\"நான்தான் AI\" — குடும்ப விளையாட்டு",
+    "en": "\"I am the AI\" — a family game"
+   },
+   "text": {
+    "ta": "ஒருவர் ஒரு ரகசிய விதியை மனதில் வைத்துக்கொள்கிறார் (எ.கா. \"தண்ணீரில் மிதப்பவை\"). பொருட்களை ஒவ்வொன்றாகக் காட்டி \"ஆம்\" / \"இல்லை\" என்று மட்டும் சொல்கிறார். மற்றவர்கள் எடுத்துக்காட்டுகளிலிருந்து விதியைக் கண்டுபிடிக்க வேண்டும். எத்தனை எடுத்துக்காட்டுகளில் கண்டுபிடித்தீர்கள்? தவறான விதியை ஊகித்தது எப்போது? — இதுதான் machine learning!",
+    "en": "One person secretly picks a rule (e.g. \"things that float in water\"). They show objects one by one and only say \"yes\" or \"no\". The others must discover the rule from the examples. How many examples did it take? When did someone guess the wrong rule? — That is machine learning!"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "AI எப்படிக் கற்கிறது, அது ஏன் சில நேரம் தவறுகிறது?",
+    "en": "How does AI learn, and why does it sometimes get things wrong?"
+   },
+   "keywords": [
+    {
+     "ta": "எடுத்துக்காட்டு",
+     "en": "example",
+     "alt": [
+      "தரவு",
+      "data"
+     ]
+    },
+    {
+     "ta": "pattern",
+     "en": "pattern",
+     "alt": [
+      "ஒழுங்கு",
+      "முறை"
+     ]
+    },
+    {
+     "ta": "சார்பு",
+     "en": "bias",
+     "alt": [
+      "ஒருபக்க",
+      "one-sided"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "AI-க்கு நிறைய எடுத்துக்காட்டுகள் (தரவு) கொடுத்தால், அவற்றில் உள்ள pattern-ஐக் கண்டுபிடித்து புதியவற்றை ஊகிக்கும். எடுத்துக்காட்டுகள் ஒருபக்கமாக இருந்தால் (சார்பு), அது பார்க்காத வகைகளில் நம்பிக்கையுடன் தவறு செய்யும்.",
+    "en": "Give an AI lots of examples (data) and it finds the pattern in them to guess about new things. If the examples are one-sided (bias), it will confidently make mistakes on kinds it has never seen."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "அடுத்த 10 ஆண்டுகளில் பல வேலைகள் மாறும் — திரும்பத் திரும்ப ஒரே மாதிரி செய்யும் பணிகளை AI எடுத்துக்கொள்ளும்; புதிய வேலைகள் உருவாகும் (AI-ஐப் பயிற்றுவிப்பவர், சோதிப்பவர், அதனுடன் சேர்ந்து வடிவமைப்பவர்…).",
+    "en": "In the next 10 years many jobs will change — repetitive tasks will be taken over by AI, and new jobs will appear (people who train AI, test it, design with it…)."
+   },
+   "risk": {
+    "ta": "போலி வீடியோக்கள் (deepfake); வேலை, கடன் முடிவுகளில் சார்புடைய AI; நாமே சிந்திப்பதை நிறுத்திவிடுதல்.",
+    "en": "Fake videos (deepfakes); biased AI deciding jobs or loans; people stopping thinking for themselves."
+   },
+   "fix": {
+    "ta": "பல்வகை, நியாயமான தரவு; முக்கிய முடிவுகளில் மனிதர் இறுதி முடிவெடுத்தல்; AI சொன்னதைச் சரிபார்க்கும் பழக்கம்; நல்ல கேள்விகள் கேட்கக் கற்றல்.",
+    "en": "Varied, fair data; a human making the final call on important decisions; the habit of checking what AI says; learning to ask good questions."
+   },
+   "q": {
+    "ta": "ஒரு AI பள்ளி உதவித்தொகை யாருக்கு என்று முடிவெடுத்தால், அது எந்தத் தகவலைப் பயன்படுத்தக் கூடாது? ஏன்?",
+    "en": "If an AI decided who gets a school scholarship, what information should it NOT use? Why?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் ஊருக்கு ஒரு AI உதவியாளர்",
+    "en": "An AI helper for your village or town"
+   },
+   "text": {
+    "ta": "உன் ஊரில் உள்ள ஒரு உண்மையான பிரச்சனைக்கு ஒரு AI-ஐ வடிவமை (code தேவையில்லை — யோசனை மட்டும்).",
+    "en": "Design an AI for a real problem where you live (no code needed — just the idea)."
+   },
+   "prompts": [
+    {
+     "ta": "என்ன பிரச்சனை? யாருக்கு உதவும்?",
+     "en": "What problem? Who will it help?"
+    },
+    {
+     "ta": "அது கற்க என்ன எடுத்துக்காட்டுகள் (தரவு) வேண்டும்? யார் சேகரிப்பார்கள்?",
+     "en": "What examples (data) will it need to learn? Who will collect them?"
+    },
+    {
+     "ta": "யாருக்கு அநியாயம் நடக்கலாம்? எப்படிச் சோதிப்பாய்?",
+     "en": "Who might be treated unfairly? How will you check?"
+    },
+    {
+     "ta": "எந்த முடிவு எப்போதும் மனிதரிடமே இருக்க வேண்டும்?",
+     "en": "Which decision must always stay with a human?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "AI = எடுத்துக்காட்டுகளிலிருந்து pattern கற்று ஊகிக்கும் இயந்திரம்.",
+     "en": "AI = a machine that learns patterns from examples and makes guesses."
+    },
+    {
+     "ta": "ஒருபக்க எடுத்துக்காட்டுகள் → ஒருபக்க (சார்புடைய) AI. தீர்வு: பல்வகைத் தரவு.",
+     "en": "One-sided examples → a one-sided (biased) AI. Fix: varied data."
+    },
+    {
+     "ta": "AI நம்பிக்கையுடன் தவறும் — எப்போதும் சரிபார்.",
+     "en": "AI can be confidently wrong — always check."
+    },
+    {
+     "ta": "AI-ஐ நூலகம் போல, கேள்வி கேட்கும் நண்பன் போலப் பயன்படுத்து — உனக்குப் பதிலாகச் சிந்திப்பவனாக அல்ல.",
+     "en": "Use AI like a library or a friend who asks questions — not as something that thinks for you."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "AI பெரும்பாலும் எதிலிருந்து கற்கிறது?",
+    "en": "What does AI mostly learn from?"
+   },
+   "options": [
+    {
+     "ta": "மனிதர்கள் எழுதிய விதிகள் மட்டும்",
+     "en": "Only rules written by people"
+    },
+    {
+     "ta": "எடுத்துக்காட்டுகள் (தரவு)",
+     "en": "Examples (data)"
+    },
+    {
+     "ta": "தானாகவே, எதுவும் இல்லாமல்",
+     "en": "By itself, from nothing"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தரவிலிருந்து pattern கற்கிறது.",
+    "en": "It learns patterns from data."
+   }
+  },
+  {
+   "q": {
+    "ta": "AI-ல் \"bias\" என்றால்?",
+    "en": "What is \"bias\" in AI?"
+   },
+   "options": [
+    {
+     "ta": "AI மிக வேகமாக இருப்பது",
+     "en": "The AI being very fast"
+    },
+    {
+     "ta": "ஒருபக்கமான தரவால் சில வகைகளுக்கு எப்போதும் தவறாக முடிவெடுப்பது",
+     "en": "Consistently wrong decisions for some groups because of one-sided data"
+    },
+    {
+     "ta": "AI-க்கு மின்சாரம் போதாதது",
+     "en": "The AI not having enough power"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தரவு ஒருபக்கம் → முடிவும் ஒருபக்கம்.",
+    "en": "One-sided data → one-sided decisions."
+   }
+  },
+  {
+   "q": {
+    "ta": "project-க்கு AI-ஐப் பயன்படுத்த சிறந்த வழி?",
+    "en": "The best way to use AI for a school project?"
+   },
+   "options": [
+    {
+     "ta": "\"என் project-ஐ எழுதிக் கொடு\"",
+     "en": "\"Write my project for me\""
+    },
+    {
+     "ta": "\"நான் யோசிக்க வேண்டிய 5 கேள்விகள் கொடு\" — பிறகு நானே ஆராய்வது",
+     "en": "\"Give me 5 questions I should think about\" — then research it myself"
+    },
+    {
+     "ta": "AI-ஐப் பயன்படுத்தவே கூடாது",
+     "en": "Never use AI at all"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "AI உன் சிந்தனையைத் தூண்ட வேண்டும், மாற்ற அல்ல.",
+    "en": "AI should spark your thinking, not replace it."
+   }
+  },
+  {
+   "q": {
+    "ta": "ChatGPT போன்ற AI அடிப்படையில் என்ன செய்கிறது?",
+    "en": "What does an AI like ChatGPT basically do?"
+   },
+   "options": [
+    {
+     "ta": "இணையத்தில் உள்ள உண்மையை மட்டும் சொல்கிறது",
+     "en": "Tells only the truth from the internet"
+    },
+    {
+     "ta": "அடுத்து வர வாய்ப்புள்ள சொற்களை pattern வைத்து ஊகிக்கிறது",
+     "en": "Predicts likely next words from patterns"
+    },
+    {
+     "ta": "மனிதரைப் போல உணர்ந்து சிந்திக்கிறது",
+     "en": "Feels and thinks like a human"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "அதனால்தான் அது தவறையும் நம்பிக்கையுடன் சொல்லும்.",
+    "en": "That’s why it can say wrong things confidently."
+   }
+  },
+  {
+   "q": {
+    "ta": "மாம்பழ AI-ன் பச்சை-மென்மை தவறை எப்படிச் சரிசெய்தோம்?",
+    "en": "How did we fix the mango AI’s green-but-soft mistake?"
+   },
+   "options": [
+    {
+     "ta": "AI-ஐத் திட்டினோம்",
+     "en": "We scolded the AI"
+    },
+    {
+     "ta": "அப்படிப்பட்ட எடுத்துக்காட்டுகளைச் சேர்த்தோம்",
+     "en": "We added examples of that kind"
+    },
+    {
+     "ta": "வரைபடத்தை அழித்தோம்",
+     "en": "We deleted the chart"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "பல்வகைத் தரவு = நியாயமான AI.",
+    "en": "Varied data = fairer AI."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் எந்த முடிவு மனிதரிடமே இருக்க வேண்டும்?",
+    "en": "Which decision should stay with a human?"
+   },
+   "options": [
+    {
+     "ta": "பாடல் பரிந்துரை",
+     "en": "Recommending a song"
+    },
+    {
+     "ta": "ஒரு நோயாளிக்கு அறுவை சிகிச்சை செய்வதா இல்லையா",
+     "en": "Whether a patient should have surgery"
+    },
+    {
+     "ta": "spam மின்னஞ்சலை மறைப்பது",
+     "en": "Hiding a spam email"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "உயிர், உரிமை தொடர்பான முடிவுகளில் AI உதவலாம் — முடிவு மனிதருடையது.",
+    "en": "For life-and-rights decisions AI may help — but a human decides."
+   }
+  }
+ ]
+}

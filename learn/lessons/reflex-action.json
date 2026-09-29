@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "கை சூடான தோசைக்கல்லைத் தொடும்போது — முதலில் எது நடக்கிறது?",
+    "en": "When your hand touches a hot tawa — what happens first?"
+   },
+   "options": [
+    {
+     "ta": "வலி தெரிகிறது, பிறகு கை இழுக்கிறது",
+     "en": "You feel pain, then pull back"
+    },
+    {
+     "ta": "கை இழுக்கிறது, பிறகு வலி தெரிகிறது",
+     "en": "You pull back, then feel pain"
+    },
+    {
+     "ta": "இரண்டும் ஒரே நேரத்தில்",
+     "en": "Both at the same moment"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "கை முதலில் இழுக்கிறது! முடிவு மூளையில் அல்ல, தண்டுவடத்திலேயே எடுக்கப்படுகிறது — மூளைக்குச் செய்தி பிறகுதான் போகிறது. அடுத்த முறை கவனித்துப் பார்.",
+    "en": "You pull back first! The decision is made in the spinal cord, not the brain — the message reaches the brain afterwards. Notice it next time."
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "நரம்பு மண்டலம் — உடலின் தகவல் வலைப்பின்னல்",
@@ -185,6 +211,113 @@
     "ta": "• வாகனத்தில் **ஹெல்மெட், சீட் பெல்ட்** — மூளையும் தண்டுவடமும் காயமடைந்தால் பெரும்பாலும் மீண்டும் முழுமையாகக் குணமாவதில்லை.\n• போதுமான **தூக்கம்** — தூக்கமின்மை எதிர்வினை நேரத்தை அதிகரிக்கிறது (விபத்துகளுக்கு முக்கியக் காரணம்).\n• மது, போதைப் பொருட்கள் நரம்புச் செய்திகளை மெதுவாக்குகின்றன.\n• வைட்டமின் B12 குறைபாடு நரம்புகளைப் பாதிக்கும் — சைவ உணவு உண்பவர்கள் பால், தயிர் போன்றவற்றைச் சேர்த்துக்கொள்ளுங்கள்.",
     "en": "• **Helmets and seat belts** — injuries to the brain and spinal cord often never fully heal.\n• Enough **sleep** — lack of sleep increases reaction time (a major cause of accidents).\n• Alcohol and drugs slow down nerve messages.\n• Vitamin B12 deficiency harms nerves — vegetarians should include milk, curd and similar foods."
    }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🩺",
+     "title": {
+      "ta": "மருத்துவர் சோதனை",
+      "en": "Doctor’s check-up"
+     },
+     "text": {
+      "ta": "முழங்கால் தட்டிப் பார்ப்பது தண்டுவடம் சரியாக வேலை செய்கிறதா என்று அறிய.",
+      "en": "Tapping your knee checks whether the spinal cord is working properly."
+     }
+    },
+    {
+     "icon": "🚗",
+     "title": {
+      "ta": "ஓட்டுநர் பாதுகாப்பு",
+      "en": "Driver safety"
+     },
+     "text": {
+      "ta": "தூக்கக் கலக்கம், மது — எதிர்வினை நேரத்தை அதிகரிக்கின்றன; விபத்துக்கு முக்கியக் காரணம்.",
+      "en": "Drowsiness and alcohol increase reaction time — a major cause of accidents."
+     }
+    },
+    {
+     "icon": "🦾",
+     "title": {
+      "ta": "செயற்கைக் கைகள்",
+      "en": "Prosthetic hands"
+     },
+     "text": {
+      "ta": "தசையின் மின் சமிக்ஞைகளைப் படித்து நகரும் கைகள் உருவாகி வருகின்றன.",
+      "en": "Hands that move by reading the muscles’ electrical signals are being developed."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "அனிச்சைச் செயல் ஏன் அவ்வளவு வேகமாக நடக்கிறது?",
+    "en": "Why is a reflex action so fast?"
+   },
+   "keywords": [
+    {
+     "ta": "தண்டுவடம்",
+     "en": "spinal cord"
+    },
+    {
+     "ta": "மூளை",
+     "en": "brain"
+    },
+    {
+     "ta": "நியூரான்",
+     "en": "neuron"
+    }
+   ],
+   "model": {
+    "ta": "செய்தி மூளை வரை சென்று யோசிக்கப்படாமல், தண்டுவடத்திலேயே உணர்ச்சி நியூரானிலிருந்து இயக்க நியூரானுக்குத் திருப்பி அனுப்பப்படுகிறது. பாதை குறுகியது — அதனால் வேகம்.",
+    "en": "The message isn’t sent all the way to the brain to be thought about; the spinal cord passes it straight from the sensory neuron to the motor neuron. The route is short — hence the speed."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "மூளை-கணினி இணைப்புகள் (brain-computer interfaces) மூலம், நரம்புச் சமிக்ஞைகளை வைத்து கை-கால் செயலிழந்தவர்கள் கணினியையோ செயற்கைக் கையையோ இயக்கத் தொடங்கியுள்ளனர்.",
+    "en": "Through brain-computer interfaces, people who are paralysed have begun controlling computers or artificial hands using nerve signals."
+   },
+   "risk": {
+    "ta": "மூளைத் தரவு மிக அந்தரங்கமானது — யார் அதைப் பார்க்கலாம், விற்கலாம்?",
+    "en": "Brain data is deeply private — who may see it, or sell it?"
+   },
+   "fix": {
+    "ta": "கடுமையான தனியுரிமைச் சட்டங்கள், நோயாளியின் ஒப்புதல், மருத்துவப் பயன்பாட்டுக்கு மட்டும்.",
+    "en": "Strict privacy laws, the patient’s consent, medical use only."
+   },
+   "q": {
+    "ta": "ஒரு நிறுவனம் \"உன் மனதைப் படிக்கும் விளையாட்டு\" விற்றால், நீ என்ன கேள்விகள் கேட்பாய்?",
+    "en": "If a company sold a \"game that reads your mind\", what questions would you ask?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "தூங்கும் ஓட்டுநரை எழுப்பு",
+    "en": "Wake the drowsy driver"
+   },
+   "text": {
+    "ta": "லாரி ஓட்டுநர்கள் இரவில் தூங்கிவிடுவது பெரிய ஆபத்து. எதிர்வினை நேரம் பற்றி நீ கற்றதை வைத்து ஒரு எச்சரிக்கை அமைப்பை வடிவமை.",
+    "en": "Lorry drivers dozing off at night is a big danger. Using what you learnt about reaction time, design a warning system."
+   },
+   "prompts": [
+    {
+     "ta": "தூக்கம் வருவதை எப்படிக் கண்டுபிடிப்பது? (கண் இமை? தலை சாய்வு?)",
+     "en": "How do you detect sleepiness? (eyelids? head tilt?)"
+    },
+    {
+     "ta": "எப்படி எச்சரிப்பது — ஒலி, அதிர்வு, ஒளி?",
+     "en": "How to alert — sound, vibration, light?"
+    },
+    {
+     "ta": "தவறான எச்சரிக்கை அடிக்கடி வந்தால் ஓட்டுநர் என்ன செய்வார்?",
+     "en": "If false alarms keep going off, what will the driver do?"
+    }
+   ]
   },
   {
    "type": "summary",
@@ -369,6 +502,29 @@
    "explain": {
     "ta": "அவசர முடிவு தண்டுவடத்தில்; உணர்வு (வலி) மூளையில் — அது பிறகு.",
     "en": "The emergency decision is in the spinal cord; the feeling (pain) is in the brain — that comes later."
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 15",
+    "en": "Class 10, Ch. 15"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு — கட்டுப்பாடும் ஒருங்கிணைப்பும்",
+    "en": "Class 10 — Control and Coordination"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Biology — Coordination and response",
+    "en": "Biology — Coordination and response"
    }
   }
  ]

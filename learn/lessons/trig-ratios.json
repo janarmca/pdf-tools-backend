@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு சிறிய 30° முக்கோணமும், ஒரு பெரிய 30° முக்கோணமும் (10 மடங்கு பெரியது). \"எதிர்ப்பக்கம் ÷ கர்ணம்\" எதில் பெரியது?",
+    "en": "A small 30° right triangle and a big one (10 times larger). In which is \"opposite ÷ hypotenuse\" bigger?"
+   },
+   "options": [
+    {
+     "ta": "பெரிய முக்கோணத்தில்",
+     "en": "The big triangle"
+    },
+    {
+     "ta": "சிறிய முக்கோணத்தில்",
+     "en": "The small triangle"
+    },
+    {
+     "ta": "இரண்டிலும் சமம்",
+     "en": "Equal in both"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "பக்கங்கள் இரண்டும் 10 மடங்காவதால் அவற்றின் விகிதம் மாறுவதில்லை. இந்த ஒரு உண்மையின் மேல்தான் முக்கோணவியல் முழுவதும் கட்டப்பட்டுள்ளது — கீழே நீயே சோதித்துப் பார்!",
+    "en": "Both sides grow 10 times, so their ratio doesn’t change. All of trigonometry is built on this one fact — test it yourself below!"
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "முதலில்: செங்கோண முக்கோணத்தின் மூன்று பக்கங்கள்",
@@ -39,11 +65,35 @@
    }
   },
   {
-   "type": "widget",
-   "name": "trigTriangle",
+   "type": "discover",
+   "widget": "trigTriangle",
+   "params": {},
    "text": {
     "ta": "கோணத்தையும் முக்கோணத்தின் அளவையும் மாற்றிப் பாருங்கள். கீழே உள்ள மூன்று விகிதங்களை (ratio) கவனியுங்கள்.",
     "en": "Move the angle and the size of the triangle. Watch the three ratios below."
+   },
+   "q": {
+    "ta": "ஒரே கோணத்தில், முக்கோணத்தின் அளவை மாற்றும்போது sin, cos, tan என்ன ஆகின்றன?",
+    "en": "Keeping the angle fixed, what happens to sin, cos and tan as you change the size?"
+   },
+   "options": [
+    {
+     "ta": "அளவுடன் சேர்ந்து பெரிதாகின்றன",
+     "en": "They grow with the size"
+    },
+    {
+     "ta": "சிறிதாகின்றன",
+     "en": "They shrink"
+    },
+    {
+     "ta": "மாறவே இல்லை — கோணம் மாறினால் மட்டுமே மாறுகின்றன",
+     "en": "They don’t change at all — only the angle changes them"
+    }
+   ],
+   "correct": 2,
+   "insight": {
+    "ta": "விகிதங்கள் கோணத்தை மட்டுமே சார்ந்தவை. அதனால்தான் ஒரு கோணத்திற்கு sin, cos, tan என்று நிலையான \"அடையாள எண்கள்\" உண்டு.",
+    "en": "The ratios depend only on the angle. That’s why each angle has fixed \"identity numbers\" called sin, cos and tan."
    }
   },
   {
@@ -264,6 +314,133 @@
     "ta": "**tan அட்டவணை கூட தேவையில்லாத முறை:** ஒரு 1 மீட்டர் குச்சியை நேராக நிறுத்துங்கள். அதே நேரத்தில் குச்சியின் நிழலையும் மரத்தின் நிழலையும் அளவுங்கள்.\n\nஇரண்டுக்கும் சூரியக் கோணம் ஒன்றே, எனவே tan θ ஒன்றே:\n\n[[மரத்தின் உயரம் ÷ மரத்தின் நிழல் = குச்சியின் உயரம் ÷ குச்சியின் நிழல்]]\n\nஎ.கா: குச்சி 1 m, அதன் நிழல் 0.8 m; மரத்தின் நிழல் 12 m எனில் மரத்தின் உயரம் = 12 × 1 ÷ 0.8 = 15 m. உங்கள் வீட்டு மரம், தென்னை, மின்கம்பத்தை அளந்து பாருங்கள்!",
     "en": "**A method that doesn’t even need a tan table:** stand a 1-metre stick upright. At the same moment measure the stick’s shadow and the tree’s shadow.\n\nThe sun’s angle is the same for both, so tan θ is the same:\n\n[[tree height ÷ tree shadow = stick height ÷ stick shadow]]\n\ne.g. stick 1 m, its shadow 0.8 m; tree’s shadow 12 m → tree height = 12 × 1 ÷ 0.8 = 15 m. Measure a tree, coconut palm or electric pole near your home!"
    }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🛰️",
+     "title": {
+      "ta": "GPS",
+      "en": "GPS"
+     },
+     "text": {
+      "ta": "செயற்கைக்கோள்களின் தூரங்களிலிருந்து உன் இடத்தைக் கணக்கிட முக்கோண வடிவியல் பயன்படுகிறது.",
+      "en": "Uses triangle geometry to work out where you are from satellite distances."
+     }
+    },
+    {
+     "icon": "🎮",
+     "title": {
+      "ta": "வீடியோ கேம்கள்",
+      "en": "Video games"
+     },
+     "text": {
+      "ta": "ஒரு கதாபாத்திரம் திரும்பும்போது, ஒவ்வொரு புள்ளியின் புதிய இடமும் sin, cos மூலம் கணக்கிடப்படுகிறது.",
+      "en": "When a character turns, every point’s new position is computed with sin and cos."
+     }
+    },
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "போனின் சாய்வு உணரி",
+      "en": "Your phone’s tilt sensor"
+     },
+     "text": {
+      "ta": "போன் எவ்வளவு சாய்ந்துள்ளது என்பதைக் கோணமாக மாற்றுகிறது — screen rotate ஆவது இப்படித்தான்.",
+      "en": "Turns how much the phone leans into an angle — that’s how the screen rotates."
+     }
+    },
+    {
+     "icon": "🏗️",
+     "title": {
+      "ta": "கட்டுமானம்",
+      "en": "Construction"
+     },
+     "text": {
+      "ta": "கூரைச் சாய்வு, படிக்கட்டு, ramp — பொறியாளர்கள் tan-ஐப் பயன்படுத்துகிறார்கள்.",
+      "en": "Roof slopes, staircases, ramps — engineers use tan."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "sin, cos, tan என்பவை உண்மையில் என்ன?",
+    "en": "What really are sin, cos and tan?"
+   },
+   "keywords": [
+    {
+     "ta": "விகிதம்",
+     "en": "ratio"
+    },
+    {
+     "ta": "கோணம்",
+     "en": "angle"
+    },
+    {
+     "ta": "கர்ணம்",
+     "en": "hypotenuse"
+    },
+    {
+     "ta": "அளவு",
+     "en": "size",
+     "alt": [
+      "மாறாது",
+      "same",
+      "doesn't change"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "செங்கோண முக்கோணத்தில் இரண்டு பக்கங்களின் விகிதங்கள். அவை கோணத்தை மட்டுமே சார்ந்தவை — முக்கோணத்தின் அளவை அல்ல. sin = எதிர்/கர்ணம், cos = அடுத்து/கர்ணம், tan = எதிர்/அடுத்து.",
+    "en": "They are ratios of two sides of a right triangle. They depend only on the angle — not on the size of the triangle. sin = opp/hyp, cos = adj/hyp, tan = opp/adj."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "தானியங்கி கார்கள், ட்ரோன்கள், ரோபோக்கள் — ஒவ்வொரு விநாடியும் ஆயிரக்கணக்கான முக்கோணக் கணக்குகளைச் செய்து தம் இடத்தையும் தூரத்தையும் அறிகின்றன.",
+    "en": "Self-driving cars, drones and robots do thousands of triangle calculations every second to know where they are and how far things are."
+   },
+   "risk": {
+    "ta": "ஒரு சிறிய கோணப் பிழை தூரத்தில் பெரிய பிழையாகிறது — 1° தவறு, 100 m தூரத்தில் ஏறக்குறைய 1.7 m தவறு!",
+    "en": "A tiny angle error becomes a big distance error — 1° wrong at 100 m is about 1.7 m off!"
+   },
+   "fix": {
+    "ta": "பல சென்சார்களை ஒப்பிடுதல், மீண்டும் மீண்டும் அளந்து சராசரி எடுத்தல் — நீ கிளினோமீட்டரில் செய்வதைப் போலவே.",
+    "en": "Comparing several sensors, and measuring repeatedly and averaging — just as you would with a clinometer."
+   },
+   "q": {
+    "ta": "ஒரு ட்ரோன் மருந்து கொண்டு செல்கிறது. அதன் கோணச் சென்சார் பழுதானால் என்ன பாதுகாப்பு வேண்டும்?",
+    "en": "A drone is delivering medicine. If its angle sensor fails, what safety measure is needed?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "போனையே அளவுகோலாக்கு",
+    "en": "Turn a phone into a height meter"
+   },
+   "text": {
+    "ta": "போனின் சாய்வு உணரி கோணத்தைத் தரும். தரையிலிருந்து மர உச்சியைப் போனின் விளிம்பு வழியாகப் பார்த்தால் — மரத்தின் உயரத்தைக் காட்டும் ஒரு app-ஐ வடிவமை.",
+    "en": "A phone’s tilt sensor gives an angle. Design an app that shows a tree’s height when you sight its top along the phone’s edge."
+   },
+   "prompts": [
+    {
+     "ta": "app-க்கு வேறு என்ன தெரிய வேண்டும்? (குறிப்பு: மரம் எவ்வளவு தூரம்?)",
+     "en": "What else must the app know? (Hint: how far is the tree?)"
+    },
+    {
+     "ta": "எந்தச் சூத்திரம் பயன்படும்?",
+     "en": "Which formula will it use?"
+    },
+    {
+     "ta": "எங்கே தவறு வரலாம்? எப்படிக் குறைப்பாய்?",
+     "en": "Where can errors creep in? How will you reduce them?"
+    }
+   ]
   },
   {
    "type": "summary",
@@ -493,6 +670,29 @@
    "explain": {
     "ta": "tan 45° = 1, எனவே நிழல் = உயரம் ÷ 1 = 10 m.",
     "en": "tan 45° = 1, so shadow = height ÷ 1 = 10 m."
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு, அத். 6",
+    "en": "Class 9, Ch. 6"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 8",
+    "en": "Class 10, Ch. 8"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Maths — Trigonometry",
+    "en": "Maths — Trigonometry"
    }
   }
  ]

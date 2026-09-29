@@ -84,13 +84,36 @@ input.ans{width:130px;padding:9px 10px;border:1px solid #cfd4e2;border-radius:10
 .summary{background:#f3f1ff}
 .summary li{margin-bottom:4px}
 .tbl{border-collapse:collapse;width:100%;margin:6px 0;text-align:center;font-size:.95rem}.tbl th,.tbl td{border:1px solid #dcdff0;padding:7px 6px}.tbl tr:first-child th{background:#eeecff;color:#3b2fc9}.tbl td{color:#0b5d7a;font-weight:700}
+.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.door{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:transform .15s}
+.door:hover{transform:translateY(-2px)}
+.door b{display:block;font-size:1.05rem;margin-bottom:4px}.door span{font-size:.82rem;color:var(--sub)}
+.door.d1{border-top:5px solid #3b2fc9}.door.d2{border-top:5px solid #0b7a75}.door.d3{border-top:5px solid #b3541e}
+.predict{background:#fff4f8;border-color:#f6c6d8}
+.discover{background:#f1fbff;border-color:#bfe6f6}
+.world{background:#fff}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.wcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.88rem}
+.wcard b{display:block;margin-bottom:2px}
+.invent{background:#fffbea;border-color:#f2dc8a}
+.future{background:linear-gradient(135deg,#f5f3ff,#eefbf6);border-color:#d6d0ff}
+.fbox{border-radius:12px;padding:10px 12px;margin-top:8px;font-size:.9rem}
+.fbox.r{background:#fdecea}.fbox.f{background:#e8f8ee}.fbox.q{background:#fff}
+.explain{background:#f7f7ff}
+textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radius:12px;padding:10px;font:inherit;margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:.72rem;padding:4px 9px;border-radius:99px;background:#eef0f7;color:#334}
+.chip.b1{background:#fde2e1;color:#8a1c14}.chip.b2{background:#e0ecff;color:#1d4ed8}.chip.b3{background:#e8f8ee;color:#127a3e}
+.kw{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:99px;font-size:.78rem}
+.kw.y{background:var(--okbg);color:var(--ok)}.kw.n{background:#fff1cc;color:#7a4f00}
+@media(max-width:700px){.doors{grid-template-columns:1fr}}
 .done-card{text-align:center;padding:22px}
 .score{font-size:2rem;font-weight:800;color:var(--brand)}
 .nav{display:flex;justify-content:space-between;gap:10px;margin:16px 0 40px}
 .note{font-size:.82rem;color:var(--sub)}
 .soonbox{background:#fff;border:1px dashed #c9cde0;border-radius:16px;padding:18px;text-align:center;color:var(--sub)}
 @media(max-width:700px){.classes{grid-template-columns:repeat(5,1fr);gap:6px}.cls{padding:10px 2px;font-size:.72rem}.cls b{font-size:1.2rem}.pillars{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.2rem}.prog{top:53px}}
-@media print{.top,.nav,.prog,.btn{display:none!important}.blk{break-inside:avoid}}
+@media print{.top,.nav,.prog,.btn,.noprint,.crumbs{display:none!important}.blk{break-inside:avoid;border:0}}
 </style>
 </head>
 <body>
@@ -117,22 +140,36 @@ function md(s){
   }).join('');
 }
 const UI = {
-  ta:{hero:'புரிந்து படி — மனப்பாடம் அல்ல', heroP:'ஒவ்வொரு பாடமும் வாழ்க்கை எடுத்துக்காட்டுடன் தொடங்கி, கையால் இழுத்துப் பார்க்கும் animation, படிப்படியான விளக்கம், நீயே முயற்சி, கடைசியில் தேர்வு. முழுக்க இலவசம் — login இல்லை, கட்டணம் இல்லை.',
-    p1:'🌍 வாழ்க்கை எடுத்துக்காட்டு',p2:'🖐️ தொட்டுப் பார் animation',p3:'✍️ நீயே செய்',p4:'✅ பிறகு தேர்வு',
+  ta:{hero:'மனப்பாடம் செய்யாதே — கண்டுபிடி', heroP:'இங்கே விடைகள் முதலில் வராது. முதலில் நீ ஊகிப்பாய், விளையாடி விதியை நீயே கண்டுபிடிப்பாய், பிறகு புரிந்துகொள்வாய் — அதை வைத்து புதியது உருவாக்குவாய். முழுக்க இலவசம் — login இல்லை, கட்டணம் இல்லை.',
+    p1:'🤔 ஊகி',p2:'🔍 கண்டுபிடி',p3:'💡 உருவாக்கு',p4:'🚀 எதிர்காலம்',
+    d1:'📘 பாடம் புரிந்துகொள்', d1s:'வகுப்பு வாரியாக — ஊகி, கண்டுபிடி, புரிந்துகொள், உருவாக்கு', d2:'🧠 திட்ட வழிகாட்டி', d2s:'பள்ளி project? விடை அல்ல — உன்னைச் சிந்திக்க வைக்கும் கேள்விகள். நீயே செய்வாய்!', d3:'🚀 எதிர்கால சிந்தனையாளர்', d3s:'AI எப்படிக் கற்கிறது, கண்டுபிடிப்பது எப்படி, தொழில்நுட்பத்தின் பக்கவிளைவுகளைச் சரிசெய்வது எப்படி',
+    predict:'🤔 முதலில் ஊகி', predictSub:'சரியா தவறா என்பது முக்கியமல்ல — ஊகித்த பிறகு கற்றது மனதில் நிற்கும்.', yourGuess:'உன் ஊகம்', guessRight:'🎯 நீ ஊகித்தது சரி! ஏன் என்று பார்:', guessWrong:'💭 எதிர்பாராததா? அருமை — விஞ்ஞானிகள் இப்படித்தான் கற்கிறார்கள். ஏன் என்று பார்:', revealT:'என்ன நடக்கிறது?',
+    discover:'🔍 நீயே கண்டுபிடி', discoverWrong:'இன்னும் இல்லை — animation-ஐ மீண்டும் நகர்த்திப் பார், எது மாறுகிறது, எது மாறவில்லை?', insight:'💡 நீ கண்டுபிடித்தது:',
+    world:'🌍 உலகில் இது எங்கே வேலை செய்கிறது?', invent:'💡 கண்டுபிடிப்பாளராகு', inventPh:'உன் யோசனையை இங்கே எழுது (இந்த போனில் சேமிக்கப்படும்)…', toCoach:'🧠 இதை project ஆக்கு', saved:'✓ சேமிக்கப்பட்டது',
+    future:'🚀 எதிர்காலப் பார்வை', risk:'⚠️ ஆபத்து', fix:'🛠️ தீர்வு', think:'🤔 நீ என்ன நினைக்கிறாய்?',
+    explain:'🗣️ உன் வார்த்தைகளில் சொல்', explainSub:'உன் தம்பி/தங்கைக்குப் புரியும்படி 3 வரிகளில் எழுது. நீயே விளக்க முடிந்தால், உனக்கு உண்மையில் புரிந்திருக்கிறது.', explainChk:'என் விளக்கத்தைச் சோதி', explainHave:'✓ சேர்த்திருக்கிறாய்:', explainMiss:'இவற்றையும் சேர்க்க முயற்சி செய்:',
+    curric:'📍 பாடத்திட்டங்களில் இது:', futureHome:'எதிர்கால சிந்தனையாளர்', futureSub:'பாடப்புத்தகத்தில் இல்லாதவை — ஆனால் உன் எதிர்காலத்திற்கு மிக முக்கியமானவை.',
     pick:'வகுப்பைத் தேர்ந்தெடு', cls:'வகுப்பு', ready:'தயார்', soon:'விரைவில்', done:'முடிந்தது', lessons:'பாடங்கள்', chapters:'அத்தியாயங்கள்',
     soonSub:'இந்தப் பாடத்தின் அத்தியாயங்கள் விரைவில் சேர்க்கப்படும். இப்போது 9, 10 வகுப்பு கணிதம் & அறிவியல் பாருங்கள்.',
     soonLes:'இந்த அத்தியாயத்தின் பாடங்கள் தயாராகி வருகின்றன.', home:'முகப்பு',
-    hook:'🌍 வாழ்க்கையில் எங்கே?', learn:'📖 புரிந்து கொள்வோம்', key:'🔑 முக்கியம்', ex:'🧮 எடுத்துக்காட்டு', tryit:'✍️ நீயே முயற்சி செய்', act:'🖐️ வீட்டில் செய்து பார்', sum:'📝 சுருக்கம்', quiz:'✅ இப்போது தேர்வு', widget:'🖐️ தொட்டுப் பார்',
+    hook:'🧩 தொடங்குவோம்', learn:'📖 புரிந்து கொள்வோம்', key:'🔑 முக்கியம்', ex:'🧮 எடுத்துக்காட்டு', tryit:'✍️ நீயே முயற்சி செய்', act:'🖐️ வீட்டில் செய்து பார்', sum:'📝 சுருக்கம்', quiz:'✅ இப்போது தேர்வு', widget:'🖐️ தொட்டுப் பார்',
     showSol:'தீர்வைக் காட்டு', check:'சரிபார்', hint:'💡 குறிப்பு', correct:'✅ சரி! அருமை.', wrong:'❌ இன்னும் இல்லை — மீண்டும் முயற்சி செய் அல்லது குறிப்பைப் பார்.', answer:'விடை',
     quizIntro:'பாடம் புரிந்ததா? இப்போது உன்னை நீயே சோதித்துப் பார். ஒவ்வொரு விடைக்கும் விளக்கம் வரும்.', finish:'முடிவைப் பார்', retry:'மீண்டும் தேர்வு',
     great:'அருமை! இந்தப் பாடம் உனக்குப் புரிந்துவிட்டது.', ok:'நல்ல முயற்சி! தவறிய கேள்விகளின் விளக்கத்தை மீண்டும் படி.', low:'பரவாயில்லை — மேலே உள்ள animation-ஐ மீண்டும் செய்து பார், பிறகு மீண்டும் தேர்வு எழுது.',
     prev:'← முந்தைய பாடம்', next:'அடுத்த பாடம் →', back:'← அத்தியாயங்கள்', goal:'இந்தப் பாடம் முடிந்ததும் உன்னால்:', mins:'நிமிடம்', loading:'ஏற்றுகிறது…', loadErr:'பாடத்தை ஏற்ற முடியவில்லை — இணைய இணைப்பைச் சரிபார்க்கவும்.'},
-  en:{hero:'Understand, don’t memorise', heroP:'Every lesson starts with a real-life example, then a hands-on animation, step-by-step explanation, practice with hints, and a test at the end. Completely free — no login, no fees.',
-    p1:'🌍 Real-life example',p2:'🖐️ Touch-and-play animation',p3:'✍️ Practise yourself',p4:'✅ Then test',
+  en:{hero:'Don’t memorise — discover', heroP:'Here the answers don’t come first. First you guess, then you play and discover the rule yourself, then you understand it — and then you build something new with it. Completely free — no login, no fees.',
+    p1:'🤔 Guess',p2:'🔍 Discover',p3:'💡 Create',p4:'🚀 Future',
+    d1:'📘 Understand lessons', d1s:'By class — guess, discover, understand, create', d2:'🧠 Project Coach', d2s:'School project? Not answers — questions that make you think. You do it yourself!', d3:'🚀 Future Thinkers', d3s:'How AI learns, how to invent, how to fix the side-effects of technology',
+    predict:'🤔 First, make a guess', predictSub:'Right or wrong doesn’t matter — what you learn after guessing sticks.', yourGuess:'Your guess', guessRight:'🎯 You guessed right! Here’s why:', guessWrong:'💭 Surprised? Great — that’s exactly how scientists learn. Here’s why:', revealT:'What’s going on?',
+    discover:'🔍 Discover it yourself', discoverWrong:'Not yet — move the animation again. What changes, and what stays the same?', insight:'💡 What you discovered:',
+    world:'🌍 Where does this work in the world?', invent:'💡 Be an inventor', inventPh:'Write your idea here (saved on this phone)…', toCoach:'🧠 Turn this into a project', saved:'✓ Saved',
+    future:'🚀 Future lens', risk:'⚠️ Risk', fix:'🛠️ Fix', think:'🤔 What do you think?',
+    explain:'🗣️ Say it in your own words', explainSub:'Explain it in 3 lines so your younger brother or sister would understand. If you can explain it, you truly understand it.', explainChk:'Check my explanation', explainHave:'✓ You included:', explainMiss:'Try to also include:',
+    curric:'📍 Where this appears in syllabuses:', futureHome:'Future Thinkers', futureSub:'Not in your textbook — but vital for your future.',
     pick:'Choose your class', cls:'Class', ready:'Ready', soon:'Coming soon', done:'Done', lessons:'lessons', chapters:'chapters',
     soonSub:'Chapters for this subject are being added. For now, explore Class 9 & 10 Maths and Science.',
     soonLes:'Lessons for this chapter are being prepared.', home:'Home',
-    hook:'🌍 Where do we see this?', learn:'📖 Let’s understand', key:'🔑 Key idea', ex:'🧮 Worked example', tryit:'✍️ Try it yourself', act:'🖐️ Try at home', sum:'📝 Summary', quiz:'✅ Now, the test', widget:'🖐️ Play with it',
+    hook:'🧩 Let’s begin', learn:'📖 Let’s understand', key:'🔑 Key idea', ex:'🧮 Worked example', tryit:'✍️ Try it yourself', act:'🖐️ Try at home', sum:'📝 Summary', quiz:'✅ Now, the test', widget:'🖐️ Play with it',
     showSol:'Show solution', check:'Check', hint:'💡 Hint', correct:'✅ Correct! Well done.', wrong:'❌ Not yet — try again or open the hint.', answer:'Answer',
     quizIntro:'Understood the lesson? Now test yourself. Every answer comes with an explanation.', finish:'See result', retry:'Retake test',
     great:'Excellent! You have understood this lesson.', ok:'Good effort! Re-read the explanations of the ones you missed.', low:'That’s fine — play with the animation above again, then retake the test.',
@@ -157,6 +194,8 @@ async function route(){
   const app = $('#app'); app.innerHTML = `<p class="note">${U('loading')}</p>`;
   try{ await loadCatalog(); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
   const [, c, s, ch, les] = (location.hash || '#').replace(/^#\/?/, '#/').split('/');
+  if(c === 'project') return renderProject(s);
+  if(c === 'future') return s ? renderFutureLesson(s) : renderFutureHome();
   if(les) return renderLesson(c, s, ch, les);
   if(s) return renderSubject(c, s);
   return renderHome(c || (()=>{ try{ return localStorage.getItem('kalviClass'); }catch(e){ return null; } })() || '10');
@@ -171,7 +210,8 @@ function renderHome(c){
   $('#app').innerHTML = `
     <div class="hero"><h1>${U('hero')}</h1><p>${U('heroP')}</p>
       <div class="pillars"><div>${U('p1')}</div><div>${U('p2')}</div><div>${U('p3')}</div><div>${U('p4')}</div></div></div>
-    <h3 style="margin:18px 0 0">${U('pick')}</h3>
+    <div class="doors"><div class="door d1" data-door="#learn"><b>${U('d1')}</b><span>${U('d1s')}</span></div><div class="door d2" data-door="#/project"><b>${U('d2')}</b><span>${U('d2s')}</span></div><div class="door d3" data-door="#/future"><b>${U('d3')}</b><span>${U('d3s')}</span></div></div>
+    <h3 style="margin:18px 0 0" id="learnpick">${U('pick')}</h3>
     <div class="classes">${Object.keys(CATALOG.classes).map(k=>`<div class="cls ${k===c?'on':''}" data-c="${k}"><b>${k}</b>${U('cls')}</div>`).join('')}</div>
     <div class="subjects">${cls.subjects.map(sb=>{
       const ls = lessonsOf(sb), dn = ls.filter(l=>prog[l.id]&&prog[l.id].done).length, chN = (sb.chapters||[]).length;
@@ -180,8 +220,9 @@ function renderHome(c){
         <div class="meta">${chN?`${chN} ${U('chapters')} · `:''}${ls.length ? `${ls.length} ${U('lessons')} ${U('ready')}` : U('soon')}</div>
         ${ls.length?`<div class="bar"><i style="width:${Math.round(dn/ls.length*100)}%"></i></div>`:''}
       </div>`; }).join('')}</div>
-    <p class="note" style="margin-top:18px">${LANG==='ta'?'தமிழ்நாடு சமச்சீர் கல்வி பாடத்திட்ட அத்தியாயங்களின் அடிப்படையில் — விளக்கங்கள் அனைத்தும் எங்களால் புதிதாக எழுதப்பட்டவை. முன்னேற்றம் இந்த போனில் மட்டும் சேமிக்கப்படும்.':'Follows the chapters of the Tamil Nadu Samacheer Kalvi syllabus — all explanations are written afresh by us. Progress is saved on this device only.'}</p>`;
+    <p class="note" style="margin-top:18px">${LANG==='ta'?'அத்தியாயங்கள் சமச்சீர் பாடநூல் வரிசையில் உள்ளன (தேர்வுக்கு உதவ); ஒவ்வொரு பாடத்திலும் CBSE/உலகப் பாடத்திட்டங்களில் அது எங்கே வருகிறது என்றும் காட்டுகிறோம். விளக்கும் முறை முழுக்க நம்முடையது. முன்னேற்றம் இந்த போனில் மட்டும் சேமிக்கப்படும்.':'Chapters follow the Samacheer textbook order (to help with exams); each lesson also shows where the idea appears in CBSE and international syllabuses. The way we teach is entirely our own. Progress is saved on this device only.'}</p>`;
   document.querySelectorAll('.cls').forEach(n=> n.onclick = ()=> renderHome(n.dataset.c));
+  document.querySelectorAll('.door').forEach(n=> n.onclick = ()=>{ const t = n.dataset.door; if(t==='#learn') $('#learnpick').scrollIntoView({behavior:'smooth'}); else go(t); });
   document.querySelectorAll('.subj').forEach(n=> n.onclick = ()=> go(`#/${c}/${n.dataset.s}`));
 }
 
@@ -206,23 +247,49 @@ function renderSubject(c, s){
 }
 
 /* ---------------- lesson renderer ---------------- */
+let CUR = {id:null, n:0};
 async function renderLesson(c, s, ch, id){
   const sb = subjById(c, s); const app = $('#app');
-  let les; try{ les = await loadLesson(id); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
+  if(!sb){ return renderHome(c); }
   const all = lessonsOf(sb), idx = all.findIndex(x=>x.id===id), prev = all[idx-1], next = all[idx+1];
   const chap = sb.chapters[Number(ch)-1];
+  const crumbs = `<span data-go="#/${c}">${U('home')}</span> › <span data-go="#/${c}/${s}">${esc(L(sb.name))} ${c}</span> › ${esc(L(chap&&chap.title))}`;
+  const nav = `${prev?`<button class="btn" data-go="#/${c}/${s}/${prev.ch}/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}
+      ${next?`<button class="btn p" data-go="#/${c}/${s}/${next.ch}/${next.id}">${U('next')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}`;
+  return renderLessonCore(id, crumbs, nav);
+}
+async function renderFutureLesson(id){
+  const list = CATALOG.future || [], i = list.findIndex(x=>x.id===id), prev = list[i-1], next = list[i+1];
+  const crumbs = `<span data-go="#/">${U('home')}</span> › <span data-go="#/future">${U('futureHome')}</span>`;
+  const nav = `${prev?`<button class="btn" data-go="#/future/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/future">←</button>`}${next?`<button class="btn p" data-go="#/future/${next.id}">${U('next')}</button>`:`<button class="btn" data-go="#/project">${U('d2')}</button>`}`;
+  return renderLessonCore(id, crumbs, nav);
+}
+function renderFutureHome(){
+  const prog = getProg();
+  $('#app').innerHTML = `<div class="crumbs"><span data-go="#/">${U('home')}</span> › ${U('futureHome')}</div>
+    <div class="hero" style="background:linear-gradient(135deg,#b3541e,#7b2cbf)"><h1>🚀 ${U('futureHome')}</h1><p>${U('futureSub')}</p></div>
+    <div style="margin-top:14px">${(CATALOG.future||[]).map(m=>`<div class="chap"><div class="h" data-f="${m.id}"><div class="no" style="font-size:1.2rem">${m.icon}</div><div class="t">${esc(L(m.title))}<div class="note">${esc(L(m.desc))}</div></div>${prog[m.id]&&prog[m.id].done?`<span class="tag done">✓</span>`:''}</div></div>`).join('')}</div>`;
+  document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
+  document.querySelectorAll('[data-f]').forEach(n=> n.onclick = ()=> go('#/future/' + n.dataset.f));
+  window.scrollTo(0,0);
+}
+async function renderLessonCore(id, crumbs, nav){
+  const app = $('#app');
+  let les; try{ les = await loadLesson(id); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
+  CUR = {id, n:0};
+  const bcls = b => /samacheer|சமச்சீர்/i.test(b) ? 'b1' : /cbse|ncert/i.test(b) ? 'b2' : 'b3';
   app.innerHTML = `
-    <div class="crumbs"><span data-go="#/${c}">${U('home')}</span> › <span data-go="#/${c}/${s}">${esc(L(sb.name))} ${c}</span> › ${esc(L(chap&&chap.title))}</div>
+    <div class="crumbs">${crumbs}</div>
     <div class="lhead"><h1>${esc(L(les.title))}</h1>
       ${les.goals?`<div class="goal"><b>${U('goal')}</b><ul style="margin:4px 0 0;padding-left:20px">${les.goals.map(g=>`<li>${esc(L(g))}</li>`).join('')}</ul></div>`:''}
+      ${les.curriculum?`<div class="note" style="margin-top:8px">${U('curric')}</div><div class="chips">${les.curriculum.map(c=>`<span class="chip ${bcls(c.b)}"><b>${esc(c.b)}</b> · ${esc(L(c.w))}</span>`).join('')}</div>`:''}
       ${les.minutes?`<div class="note" style="margin-top:6px">⏱️ ~${les.minutes} ${U('mins')}</div>`:''}</div>
     <div class="prog"><i id="progbar"></i></div>
     <div id="blocks"></div>
     <div id="quiz"></div>
-    <div class="nav">${prev?`<button class="btn" data-go="#/${c}/${s}/${prev.ch}/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}
-      ${next?`<button class="btn p" data-go="#/${c}/${s}/${next.ch}/${next.id}">${U('next')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}</div>`;
+    <div class="nav">${nav}</div>`;
   const B = $('#blocks');
-  les.blocks.forEach(b=> B.appendChild(renderBlock(b)));
+  les.blocks.forEach(b=>{ CUR.n++; B.appendChild(renderBlock(b)); });
   if(les.quiz && les.quiz.length) renderQuiz($('#quiz'), les, id);
   document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
   const pb = $('#progbar');
@@ -230,6 +297,7 @@ async function renderLesson(c, s, ch, id){
   window.scrollTo(0,0);
   setProg(id, {opened: Date.now()});
 }
+function store(key, val){ try{ if(val===undefined) return localStorage.getItem(key)||''; localStorage.setItem(key, val); }catch(e){ return ''; } }
 function card(cls, title, inner){ const d = document.createElement('div'); d.className = 'blk ' + (cls||''); d.innerHTML = (title?`<h2>${title}</h2>`:'') + inner; return d; }
 function renderBlock(b){
   switch(b.type){
@@ -245,9 +313,60 @@ function renderBlock(b){
       if(b.open){ d.querySelector('.sol').style.display='block'; btn.remove(); }
       return d; }
     case 'try': return renderTry(b);
+    case 'predict': return renderPredict(b);
+    case 'discover': return renderDiscover(b);
+    case 'world': return card('world', b.title?esc(L(b.title)):U('world'), (b.text?md(b.text):'') + `<div class="wgrid">${b.items.map(it=>`<div class="wcard"><b>${it.icon||'•'} ${esc(L(it.title))}</b>${esc(L(it.text))}</div>`).join('')}</div>`);
+    case 'future': return card('future', b.title?`${U('future')} — ${esc(L(b.title))}`:U('future'), md(b.text) + (b.risk?`<div class="fbox r"><b>${U('risk')}:</b> ${md(b.risk).replace(/^<p>|<\/p>$/g,'')}</div>`:'') + (b.fix?`<div class="fbox f"><b>${U('fix')}:</b> ${md(b.fix).replace(/^<p>|<\/p>$/g,'')}</div>`:'') + (b.q?`<div class="fbox q"><b>${U('think')}</b> ${esc(L(b.q))}</div>`:''));
+    case 'invent': return renderInvent(b);
+    case 'explain': return renderExplain(b);
     case 'table': return card('', b.title?esc(L(b.title)):'', (b.text?md(b.text):'') + `<div style="overflow-x:auto"><table class="tbl"><tr>${b.head.map(h=>`<th>${esc(L(h))}</th>`).join('')}</tr>${b.rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${esc(L(c))}</td>`:`<th>${esc(L(c))}</th>`).join('')}</tr>`).join('')}</table></div>`);
     default: return card('', '', md(b.text||''));
   }
+}
+function renderPredict(b){
+  const d = card('predict', U('predict'), `<p class="note">${U('predictSub')}</p>` + md(b.q));
+  const box = document.createElement('div');
+  box.innerHTML = b.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(L(o))}</button>`).join('');
+  const out = document.createElement('div');
+  box.querySelectorAll('.opt').forEach(o=> o.onclick = ()=>{
+    const i = Number(o.dataset.i);
+    box.querySelectorAll('.opt').forEach((x,j)=>{ x.disabled = true; if(j===i) x.style.borderColor = '#3b2fc9'; if(b.answer!=null && j===b.answer) x.classList.add('ok'); });
+    const head = b.answer==null ? `<b>${U('revealT')}</b>` : (i===b.answer ? U('guessRight') : U('guessWrong'));
+    out.innerHTML = `<div class="fb hint"><div style="margin-bottom:6px"><b>${U('yourGuess')}:</b> ${esc(L(b.options[i]))}</div>${head}${md(b.reveal)}</div>`;
+  });
+  d.append(box, out); return d;
+}
+function renderDiscover(b){
+  const d = card('discover', b.title?esc(L(b.title)):U('discover'), md(b.text) + '<div class="widget"></div>');
+  const w = d.querySelector('.widget'); try{ WIDGETS[b.widget](w, b.params||{}); }catch(e){ w.textContent = 'Widget error: ' + e.message; }
+  const q = document.createElement('div'); q.innerHTML = `<div style="margin-top:12px">${md(b.q)}</div>` + b.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(L(o))}</button>`).join('');
+  const out = document.createElement('div');
+  q.querySelectorAll('.opt').forEach(o=> o.onclick = ()=>{
+    const i = Number(o.dataset.i);
+    if(i===b.correct){ o.classList.add('ok'); q.querySelectorAll('.opt').forEach(x=> x.disabled = true); out.innerHTML = `<div class="fb ok"><b>${U('insight')}</b> ${md(b.insight).replace(/^<p>|<\/p>$/g,'')}</div>`; }
+    else { o.classList.add('bad'); out.innerHTML = `<div class="fb bad">${U('discoverWrong')}</div>`; }
+  });
+  d.append(q, out); return d;
+}
+function renderInvent(b){
+  const key = `kalviInvent:${CUR.id}:${CUR.n}`;
+  const d = card('invent', b.title?`${U('invent')} — ${esc(L(b.title))}`:U('invent'), md(b.text) + (b.prompts?`<ol style="padding-left:20px;margin:6px 0">${b.prompts.map(p=>`<li>${esc(L(p))}</li>`).join('')}</ol>`:'') + `<textarea class="journal" placeholder="${U('inventPh')}"></textarea><div class="row" style="margin-top:6px"><button class="btn sm tc">${U('toCoach')}</button><span class="note sv"></span></div>`);
+  const ta = d.querySelector('textarea'); ta.value = store(key);
+  ta.oninput = ()=>{ store(key, ta.value); d.querySelector('.sv').textContent = U('saved'); };
+  d.querySelector('.tc').onclick = ()=>{ store('kalviCoachSeed', JSON.stringify({topic: L(b.title||b.text).slice(0,120), idea: ta.value})); go('#/project/new'); };
+  return d;
+}
+function renderExplain(b){
+  const key = `kalviExplain:${CUR.id}:${CUR.n}`;
+  const d = card('explain', U('explain'), `<p class="note">${U('explainSub')}</p>` + (b.q?md(b.q):'') + `<textarea class="journal"></textarea><button class="btn sm chk" style="margin-top:6px">${U('explainChk')}</button><div class="out"></div>`);
+  const ta = d.querySelector('textarea'); ta.value = store(key); ta.oninput = ()=> store(key, ta.value);
+  d.querySelector('.chk').onclick = ()=>{
+    const t = ta.value.toLowerCase();
+    const have = [], miss = [];
+    (b.keywords||[]).forEach(k=>{ const alts = [].concat(k.ta||[], k.en||[], k.alt||[]).map(x=>String(x).toLowerCase()); (alts.some(a=>a && t.includes(a)) ? have : miss).push(L(k)); });
+    d.querySelector('.out').innerHTML = `<div class="fb hint">${have.length?`${U('explainHave')} ${have.map(x=>`<span class="kw y">${esc(x)}</span>`).join('')}<br>`:''}${miss.length?`${U('explainMiss')} ${miss.map(x=>`<span class="kw n">${esc(x)}</span>`).join('')}`:'🌟'}${b.model?`<details style="margin-top:8px"><summary>${LANG==='ta'?'ஒரு மாதிரி விளக்கம் (உன்னுடையதை எழுதிய பிறகு மட்டும் பார்!)':'A model explanation (look only after writing yours!)'}</summary>${md(b.model)}</details>`:''}</div>`;
+  };
+  return d;
 }
 function numOk(val, b){
   const x = parseFloat(String(val).replace(/,/g,'').replace(/[^\d.\-eE]/g,''));
@@ -321,6 +440,62 @@ function svg(host, w, h){ const s = document.createElementNS(svgNS,'svg'); s.set
 const T = (ta, en) => LANG==='ta' ? ta : en;
 
 const WIDGETS = {
+  /* Train a tiny AI (k-nearest-neighbours) to sort mangoes: ripe vs not ripe */
+  aiTrainer(host, p){
+    // x = skin colour (0 green … 10 yellow), y = softness (0 hard … 10 soft)
+    const SETS = {
+      good: [[1,2,0],[2,1,0],[3,3,0],[2,4,0],[1,5,0],[3,5,0],[4,2,0],[7,7,1],[8,8,1],[9,6,1],[8,9,1],[6,8,1],[7,9,1],[2,8.5,1],[1,9,1],[3,9,1]],
+      biased: [[1,2,0],[2,1,0],[3,3,0],[2,4,0],[1,5,0],[3,5,0],[2,6,0],[4,2,0],[7,7,1],[8,8,1],[9,6,1],[8,9,1],[6,8,1],[7,9,1]]
+    };
+    let data = (SETS[p.start||'biased']).map(a=>a.slice()), label = 1, tests = [];
+    const bar = document.createElement('div'); bar.className = 'row'; host.appendChild(bar);
+    const S = svg(host, 320, 320); S.style.maxWidth = '420px'; S.style.margin = '8px auto 0';
+    const info = document.createElement('div'); info.className = 'fb hint'; host.appendChild(info);
+    const W = 300, O = 10, sc = W/10;
+    function predict(x, y){
+      if(!data.length) return null;
+      const d = data.map(([a,b,l])=>({l, d:(a-x)**2+(b-y)**2})).sort((u,v)=>u.d-v.d).slice(0,3);
+      return d.filter(z=>z.l===1).length >= 2 ? 1 : 0;
+    }
+    function draw(){
+      bar.innerHTML = `<button class="btn sm ${label===1?'p':''}" data-l="1">🥭 ${T('பழுத்தது','Ripe')}</button><button class="btn sm ${label===0?'p':''}" data-l="0">🟢 ${T('பழுக்காதது','Not ripe')}</button><button class="btn sm" data-a="test">🎲 ${T('புதிய மாம்பழத்தைச் சோதி','Test a new mango')}</button><button class="btn sm" data-a="clear">🧹 ${T('அழி','Clear')}</button>`;
+      bar.querySelectorAll('[data-l]').forEach(b=> b.onclick = ()=>{ label = Number(b.dataset.l); draw(); });
+      bar.querySelector('[data-a=test]').onclick = ()=>{ tests.push([Math.round(Math.random()*9+0.5), Math.round(Math.random()*9+0.5)]); draw(); };
+      bar.querySelector('[data-a=clear]').onclick = ()=>{ data = []; tests = []; draw(); };
+      let cells = '';
+      if(data.length) for(let i=0;i<20;i++) for(let j=0;j<20;j++){ const x=(i+0.5)/2, y=(j+0.5)/2, r=predict(x,y); cells += `<rect x="${O+i*W/20}" y="${O+W-(j+1)*W/20}" width="${W/20}" height="${W/20}" fill="${r?'#ffd166':'#b7e4c7'}" opacity=".55"/>`; }
+      S.innerHTML = `<rect x="${O}" y="${O}" width="${W}" height="${W}" fill="#fafafa" stroke="#ccd"/>${cells}
+        <text x="${O+W/2}" y="${O+W+0}" dy="-4" font-size="11" text-anchor="middle" fill="#555">${T('தோல் நிறம்: பச்சை → மஞ்சள்','Skin colour: green → yellow')}</text>
+        <text x="${O+12}" y="${O+W/2}" font-size="11" fill="#555" transform="rotate(-90 ${O+12} ${O+W/2})" text-anchor="middle">${T('மென்மை: கடினம் → மென்மை','Softness: hard → soft')}</text>
+        ${data.map(([a,b,l])=>`<text x="${O+a*sc}" y="${O+W-b*sc}" font-size="18" text-anchor="middle" dominant-baseline="middle">${l?'🥭':'🟢'}</text>`).join('')}
+        ${tests.map(([a,b])=>{ const r = predict(a,b); return `<circle cx="${O+a*sc}" cy="${O+W-b*sc}" r="11" fill="none" stroke="#14213d" stroke-width="2.5" stroke-dasharray="3 2"/><text x="${O+a*sc+13}" y="${O+W-b*sc-10}" font-size="11" fill="#14213d">${r==null?'?':(r?T('பழுத்தது','ripe'):T('பழுக்காதது','not ripe'))}</text>`; }).join('')}`;
+      const soft = data.filter(([a,b,l])=>a<=4 && b>=7 && l===1).length;
+      info.innerHTML = !data.length ? T('AI-க்கு எதுவும் தெரியாது! படத்தைத் தொட்டு எடுத்துக்காட்டுகளைக் கொடு.','The AI knows nothing yet! Tap the chart to give it examples.')
+        : T(`AI ${data.length} எடுத்துக்காட்டுகளிலிருந்து கற்றது. மஞ்சள் பகுதி = "பழுத்தது" என்று அது நினைக்கும் இடம்; பச்சைப் பகுதி = "பழுக்காதது". ஒரு புதிய மாம்பழத்திற்கு, அதற்கு மிக அருகில் உள்ள 3 எடுத்துக்காட்டுகளைப் பார்த்து வாக்கெடுப்பு நடத்துகிறது.`,
+            `The AI learnt from ${data.length} examples. Yellow area = where it thinks "ripe"; green area = "not ripe". For a new mango it looks at the 3 nearest examples and takes a vote.`)
+          + (soft ? '' : T(' <b>கவனி:</b> பச்சையாக இருந்தும் மென்மையான (பழுத்த) மாம்பழம் ஒன்றுகூட இதற்குக் காட்டப்படவில்லை!', ' <b>Notice:</b> it has never been shown a mango that is green but soft (ripe)!'));
+    }
+    S.addEventListener('click', e=>{
+      const r = S.getBoundingClientRect(), vb = S.viewBox.baseVal;
+      const x = ((e.clientX-r.left)/r.width*vb.width - O)/sc, y = (W - ((e.clientY-r.top)/r.height*vb.height - O))/sc;
+      if(x<0||x>10||y<0||y>10) return;
+      data.push([Math.round(x*2)/2, Math.round(y*2)/2, label]); draw();
+    });
+    const fix = document.createElement('div'); fix.className='row'; fix.style.marginTop='8px';
+    fix.innerHTML = `<button class="btn sm">🧪 ${T('சோதனை: பச்சையான ஆனால் மென்மையான மாம்பழம்','Test: a green but soft mango')}</button>`;
+    fix.querySelector('button').onclick = ()=>{ tests.push([2,8.5]); draw(); };
+    host.appendChild(fix);
+    draw();
+  },
+  /* Idea spinner: random everyday object × random SCAMPER move */
+  ideaSpinner(host){
+    const objs = [['பள்ளிப் பை','School bag'],['தோசைக்கல்','Dosa tawa'],['ஆட்டோ ரிக்ஷா','Auto rickshaw'],['குடை','Umbrella'],['தண்ணீர் பாட்டில்','Water bottle'],['சைக்கிள்','Bicycle'],['மண்பானை','Clay pot'],['துடைப்பம்','Broom'],['பேனா','Pen'],['மின்விசிறி','Ceiling fan'],['கொசுவலை','Mosquito net'],['செருப்பு','Slippers'],['காய்கறி வண்டி','Vegetable cart'],['டிபன் பாக்ஸ்','Tiffin box']];
+    const out = document.createElement('div'); out.className = 'fb hint'; out.style.fontSize = '1rem';
+    const b = document.createElement('button'); b.className = 'btn p'; b.textContent = T('🎡 சுழற்று!','🎡 Spin!');
+    b.onclick = ()=>{ const o = objs[Math.floor(Math.random()*objs.length)], s = SCAMPER[Math.floor(Math.random()*SCAMPER.length)];
+      out.innerHTML = `<b>${esc(LANG==='ta'?o[0]:o[1])}</b> + ${esc(L(s))}<div class="note" style="margin-top:6px">${T('2 நிமிடத்தில் குறைந்தது 3 யோசனைகள் எழுது — வேடிக்கையானவை கூட சரி!','Write at least 3 ideas in 2 minutes — silly ones count!')}</div>`; };
+    host.append(b, out); b.onclick();
+  },
   /* Right triangle: angle + size sliders; ratios stay the same for a given angle */
   trigTriangle(host){
     const S = svg(host, 360, 230);
@@ -524,6 +699,205 @@ const WIDGETS = {
     draw();
   }
 };
+
+/* ================= PROJECT COACH (திட்ட வழிகாட்டி) =================
+   Deterministic, free, no AI. It never gives answers — only questions,
+   structure and a place for the child's own thinking. Saved on this device. */
+const T2 = o => L(o);
+const SCAMPER = [
+  {k:'S', ta:'மாற்று (Substitute): இதில் ஒரு பொருளை / பாகத்தை வேறொன்றால் மாற்றினால்?', en:'Substitute: what if you replaced one material or part with something else?'},
+  {k:'C', ta:'இணை (Combine): இதை வேறொரு பொருளுடன் சேர்த்தால் என்ன புதியது கிடைக்கும்?', en:'Combine: what new thing do you get if you join it with something else?'},
+  {k:'A', ta:'தழுவு (Adapt): இயற்கையில் / வேறு துறையில் இதே பிரச்சனையை யார் தீர்த்திருக்கிறார்கள்?', en:'Adapt: who in nature or another field has already solved a problem like this?'},
+  {k:'M', ta:'மாற்றியமை (Modify): பெரிதாக்கினால்? சிறிதாக்கினால்? வேகமாக்கினால்? வடிவத்தை மாற்றினால்?', en:'Modify: make it bigger? smaller? faster? a different shape?'},
+  {k:'P', ta:'வேறு பயன் (Put to other use): இதை வேறு யாருக்கு, வேறு எதற்குப் பயன்படுத்தலாம்?', en:'Put to another use: who else, or what else, could this be used for?'},
+  {k:'E', ta:'நீக்கு (Eliminate): ஒரு பாகத்தை நீக்கினால் இன்னும் எளிதாகுமா, மலிவாகுமா?', en:'Eliminate: remove one part — does it become simpler or cheaper?'},
+  {k:'R', ta:'தலைகீழாக்கு (Reverse): வரிசையை மாற்றினால்? உள்ளே-வெளியே மாற்றினால்? எதிர்மாறாகச் செய்தால்?', en:'Reverse: change the order? turn it inside out? do the opposite?'}
+];
+const IDEA_BANK = [
+  {band:'1-3', kind:'experiment', ta:'எந்தத் துணி வேகமாகக் காய்கிறது? — பருத்தி, பாலியஸ்டர், துண்டு', en:'Which cloth dries fastest? — cotton, polyester, towel'},
+  {band:'1-3', kind:'experiment', ta:'விதை முளைக்க ஒளி தேவையா? — இருட்டிலும் வெளிச்சத்திலும் பச்சைப்பயறு', en:'Do seeds need light to sprout? — green gram in dark and light'},
+  {band:'1-3', kind:'survey', ta:'என் தெருவில் எத்தனை வகை மரங்கள், பறவைகள்?', en:'How many kinds of trees and birds are on my street?'},
+  {band:'1-3', kind:'model', ta:'காகிதக் கோப்பை தொலைபேசி — நூல் நீளமானால் ஒலி என்ன ஆகும்?', en:'Paper-cup telephone — what happens to the sound if the string is longer?'},
+  {band:'4-6', kind:'experiment', ta:'எந்த இடத்தில் வைத்தால் பால் சீக்கிரம் தயிராகிறது?', en:'Where in the house does milk turn to curd fastest?'},
+  {band:'4-6', kind:'invention', ta:'மண்பானை குளிர்விப்பான் — தண்ணீர் எவ்வளவு குளிர்கிறது?', en:'Clay-pot cooler — how much does the water cool?'},
+  {band:'4-6', kind:'survey', ta:'எங்கள் வீட்டில் ஒரு நாளில் எவ்வளவு தண்ணீர் பயன்படுகிறது? எங்கே சேமிக்கலாம்?', en:'How much water does our family use in a day? Where can we save?'},
+  {band:'4-6', kind:'model', ta:'மணல், கரி, கற்களால் தண்ணீர் வடிகட்டி — எது தெளிவாக்குகிறது?', en:'Water filter from sand, charcoal and pebbles — which layer clears it most?'},
+  {band:'4-6', kind:'invention', ta:'பள்ளிப் பை சுமை — தோள் வலியைக் குறைக்க ஒரு வடிவமைப்பு', en:'School-bag load — a design that reduces shoulder pain'},
+  {band:'7-10', kind:'experiment', ta:'சோலார் அடுப்பு — பெட்டி, அலுமினியத் தாள்; கோணம் மாறினால் வெப்பம்?', en:'Solar oven — box and foil; how does the angle change the heat?'},
+  {band:'7-10', kind:'experiment', ta:'எந்தப் பழத்தின் சாறு அதிக மின்சாரம் தருகிறது? (எலுமிச்சை பேட்டரி)', en:'Which fruit juice gives the most voltage? (lemon battery)'},
+  {band:'7-10', kind:'survey', ta:'என் வகுப்பு மாணவர்கள் தினமும் எத்தனை மணி நேரம் திரை பார்க்கிறார்கள்? தூக்கத்துடன் தொடர்பு உண்டா?', en:'How many hours of screen time do my classmates have? Is it linked to their sleep?'},
+  {band:'7-10', kind:'invention', ta:'மழைநீர் சேகரிப்பு — என் வீட்டுக் கூரையிலிருந்து ஒரு மழைக்கு எவ்வளவு லிட்டர்?', en:'Rainwater harvesting — how many litres from my roof in one rain?'},
+  {band:'7-10', kind:'model', ta:'நில அதிர்வைத் தாங்கும் கட்டடம் — குச்சி, களிமண்; எந்த வடிவம் வலிமையானது?', en:'Earthquake-resistant building — sticks and clay; which shape is strongest?'},
+  {band:'7-10', kind:'invention', ta:'விவசாயிக்கு உதவும் ஒரு எளிய கருவி — என் ஊரில் உள்ள ஒரு பிரச்சனையைத் தேர்ந்தெடு', en:'A simple tool to help a farmer — pick a real problem in your area'}
+];
+const KINDS = {experiment:{ta:'சோதனை',en:'Experiment'}, model:{ta:'மாதிரி',en:'Working model'}, survey:{ta:'கணக்கெடுப்பு',en:'Survey'}, invention:{ta:'கண்டுபிடிப்பு',en:'Invention'}, report:{ta:'அறிக்கை / சார்ட்',en:'Report / chart'}};
+const STEPS = [
+  {id:'topic', icon:'🎯', t:{ta:'தலைப்பு', en:'Topic'}, why:{ta:'நீ எதைப் பற்றி ஆர்வமாக இருக்கிறாய்? ஆசிரியர் தலைப்பு கொடுத்திருந்தாலும், அதில் உனக்குப் பிடித்த ஒரு கோணத்தைத் தேர்ந்தெடு.', en:'What are you curious about? Even if your teacher gave the topic, pick the angle of it that interests you.'},
+   fields:[{k:'topic', type:'text', l:{ta:'என் project தலைப்பு', en:'My project topic'}}, {k:'kind', type:'kind', l:{ta:'வகை', en:'Type'}}, {k:'due', type:'date', l:{ta:'சமர்ப்பிக்க வேண்டிய நாள்', en:'Due date'}}],
+   hints:[{ta:'கடந்த வாரம் உன்னை ஆச்சரியப்படுத்திய ஒரு விஷயம் என்ன?', en:'What surprised you last week?'}, {ta:'உன் வீட்டில் / தெருவில் எது உனக்கு எரிச்சல் தருகிறது? அதுவே நல்ல project ஆகலாம்.', en:'What annoys you at home or on your street? That can be a great project.'}, {ta:'கீழே உள்ள "யோசனை வங்கி"யைப் பார் — ஆனால் அதை உனக்கேற்ப மாற்று.', en:'Look at the "idea bank" below — but change it to make it yours.'}]},
+  {id:'know', icon:'📚', t:{ta:'தெரிந்தது & தெரிய வேண்டியது', en:'Know & wonder'}, why:{ta:'உனக்கு ஏற்கனவே தெரிந்ததிலிருந்து தொடங்கு. பிறகு உண்மையில் தெரிந்துகொள்ள விரும்பும் கேள்விகளை எழுது.', en:'Start from what you already know. Then write the questions you really want answered.'},
+   fields:[{k:'known', type:'area', l:{ta:'எனக்கு ஏற்கனவே தெரிந்தது', en:'What I already know'}}, {k:'wonder', type:'area', l:{ta:'நான் தெரிந்துகொள்ள விரும்பும் கேள்விகள் (குறைந்தது 3)', en:'Questions I want to answer (at least 3)'}}, {k:'sources', type:'area', l:{ta:'எங்கே தேடுவேன்? (பாடநூல் பக்கம், நூலகம், யாரிடம் கேட்பேன், நேரில் என்ன பார்ப்பேன்)', en:'Where will I look? (textbook page, library, whom I will ask, what I will observe)'}}],
+   hints:[{ta:'யார், என்ன, எங்கே, எப்போது, ஏன், எப்படி — ஒவ்வொன்றிலும் ஒரு கேள்வி எழுது.', en:'Who, what, where, when, why, how — write one question for each.'}, {ta:'உன் தாத்தா, பாட்டி, விவசாயி, கடைக்காரர் — இதைப் பற்றி யாருக்கு அனுபவம் இருக்கும்?', en:'Grandparents, a farmer, a shopkeeper — who has real experience of this?'}, {ta:'இது இல்லாவிட்டால் உலகம் எப்படி இருக்கும்?', en:'What would the world be like without this?'}]},
+  {id:'question', icon:'❓', t:{ta:'ஒரு கூர்மையான கேள்வி', en:'One sharp question'}, why:{ta:'நல்ல project = ஒரு தெளிவான கேள்விக்கு நீயே கண்டுபிடித்த விடை. பெரிய தலைப்பைச் சிறிய, சோதிக்கக்கூடிய கேள்வியாக மாற்று.', en:'A good project = your own answer to one clear question. Shrink the big topic into a small, testable question.'},
+   fields:[{k:'question', type:'text', l:{ta:'என் கேள்வி', en:'My question'}, templates:[{ta:'___ மாறினால் ___ என்ன ஆகும்?', en:'What happens to ___ when ___ changes?'}, {ta:'___ / ___ — எது சிறந்தது ___க்கு?', en:'Which is better for ___: ___ or ___?'}, {ta:'___ஐ ___க்கு எப்படி எளிதாக்கலாம்?', en:'How can we make ___ easier for ___?'}, {ta:'எங்கள் ___ல் எத்தனை / எவ்வளவு ___?', en:'How many / how much ___ in our ___?'}]}, {k:'qcheck', type:'check', l:{ta:'என் கேள்வியைச் சோதி', en:'Check my question'}, items:[{ta:'குறிப்பிட்டது — "மரங்கள்" அல்ல, "எங்கள் பள்ளியில் உள்ள வேப்ப மரங்கள்"', en:'Specific — not "trees" but "the neem trees in our school"'}, {ta:'விடையை நானே கண்டுபிடிக்க முடியும் (பார்த்து, அளந்து, சோதித்து, கேட்டு)', en:'I can find the answer myself (by observing, measuring, testing, asking)'}, {ta:'வீட்டில் உள்ள பொருட்களுடன், கொடுத்த நேரத்தில் முடியும்', en:'It can be done with things at home, in the time I have'}, {ta:'விடை எனக்கு இன்னும் தெரியாது!', en:'I don’t already know the answer!'}]}],
+   hints:[{ta:'"எப்படி வேலை செய்கிறது?" என்ற கேள்வியை "___ மாற்றினால் என்ன ஆகும்?" என்று மாற்று.', en:'Turn "how does it work?" into "what happens if I change ___?"'}, {ta:'எதை அளக்கப் போகிறாய்? நேரம், நீளம், வெப்பம், எண்ணிக்கை?', en:'What will you measure? Time, length, temperature, a count?'}]},
+  {id:'ideas', icon:'💡', t:{ta:'யோசனைகள் — குறைந்தது 5', en:'Ideas — at least 5'}, why:{ta:'முதல் யோசனை அரிதாகவே சிறந்தது. நிறைய எழுது — வேடிக்கையானதும் கூட. பிறகு மதிப்பெண் கொடுத்துத் தேர்ந்தெடு.', en:'The first idea is rarely the best. Write lots — even silly ones. Then score them and choose.'},
+   fields:[{k:'ideas', type:'ideas', l:{ta:'என் யோசனைகள்', en:'My ideas'}}],
+   hints:[{ta:'"யோசனை சக்கரம்" பொத்தானை அழுத்து — அது ஒரு புதிய கோணத்தைத் தரும்.', en:'Tap the "idea wheel" button — it gives you a new angle.'}, {ta:'இயற்கை இதை எப்படிச் செய்கிறது? (பறவை, இலை, எறும்பு…)', en:'How does nature do this? (a bird, a leaf, an ant…)'}, {ta:'பணம் இல்லை, பழைய பொருட்கள் மட்டும் — அப்போது எப்படிச் செய்வாய்?', en:'No money, only waste materials — how would you do it then?'}]},
+  {id:'plan', icon:'📝', t:{ta:'திட்டம் & பாதுகாப்பு', en:'Plan & safety'}, why:{ta:'என்ன வேண்டும், எந்த வரிசையில் செய்வாய், எப்படிப் பாதுகாப்பாகச் செய்வாய் — எழுதிவிட்டால் பாதி வேலை முடிந்தது.', en:'What you need, in what order, and how to do it safely — once written, the work is half done.'},
+   fields:[{k:'materials', type:'area', l:{ta:'தேவையான பொருட்கள் (வீட்டில் உள்ளவை / மறுசுழற்சி முதலில்)', en:'Materials (things at home / recycled first)'}}, {k:'method', type:'area', l:{ta:'படிகள் 1, 2, 3…', en:'Steps 1, 2, 3…'}}, {k:'fair', type:'area', l:{ta:'சோதனை என்றால்: எதை மாற்றுவேன்? எதை அளப்பேன்? எதை மாற்றாமல் வைப்பேன்?', en:'If it’s an experiment: what will I change? what will I measure? what will I keep the same?'}},
+     {k:'safety', type:'check', l:{ta:'பாதுகாப்புச் சோதனை', en:'Safety check'}, items:[{ta:'கத்தி, கத்தரி, ப்ளேடு → பெரியவர் அருகில் இருக்க வேண்டும்', en:'Knife, scissors, blade → an adult must be nearby'}, {ta:'நெருப்பு, அடுப்பு, சூடான நீர் → பெரியவர் செய்ய வேண்டும்', en:'Fire, stove, hot water → an adult does it'}, {ta:'சுவர் மின்சாரம் (230V) → ஒருபோதும் இல்லை. பேட்டரி (9V வரை) மட்டும்', en:'Wall electricity (230V) → never. Batteries (up to 9V) only'}, {ta:'வேதிப்பொருட்கள் → சமையலறையில் பாதுகாப்பானவை மட்டும் (உப்பு, வினிகர், சோடா)', en:'Chemicals → only kitchen-safe ones (salt, vinegar, baking soda)'}, {ta:'உயிரினங்கள் → துன்புறுத்தக் கூடாது; பார்த்துவிட்டு விடுவிக்க வேண்டும்', en:'Living things → no harm; observe and release'}]}],
+   hints:[{ta:'ஒரு நண்பர் உன் படிகளைப் படித்து, நீ இல்லாமலே அதைச் செய்ய முடியுமா?', en:'Could a friend follow your steps without you there?'}, {ta:'ஒவ்வொரு சோதனையையும் 3 முறை செய் — ஏன் என்று யோசி.', en:'Do each test 3 times — think about why.'}]},
+  {id:'test', icon:'🔬', t:{ta:'செய் & சோதி', en:'Build & test'}, why:{ta:'நடந்ததை உடனே எழுது — நினைவு ஏமாற்றும், குறிப்பேடு ஏமாற்றாது. எதிர்பாராதது நடந்தால் அதுதான் மிகச் சிறந்த பகுதி!', en:'Write down what happened right away — memory fools you, notes don’t. If something unexpected happens, that’s the best part!'},
+   fields:[{k:'obs', type:'table', l:{ta:'என் அளவீடுகள் / கவனிப்புகள்', en:'My measurements / observations'}, cols:[{ta:'முயற்சி', en:'Trial'}, {ta:'என்ன செய்தேன் / மாற்றினேன்', en:'What I did / changed'}, {ta:'என்ன பார்த்தேன் / அளந்தேன்', en:'What I saw / measured'}]}, {k:'surprise', type:'area', l:{ta:'என்னை ஆச்சரியப்படுத்தியது', en:'What surprised me'}}],
+   hints:[{ta:'எண்களை ஒரு வரைபடமாக வரைந்து பார் — ஒரு pattern தெரிகிறதா?', en:'Draw your numbers as a graph — do you see a pattern?'}, {ta:'போனில் புகைப்படம் எடு — "முன்" மற்றும் "பின்".', en:'Take photos — "before" and "after".'}]},
+  {id:'improve', icon:'🔁', t:{ta:'மேம்படுத்து', en:'Improve'}, why:{ta:'உலகின் எந்தக் கண்டுபிடிப்பும் முதல் முயற்சியில் சரியாக வரவில்லை. தோல்வி = தகவல்.', en:'No invention in the world worked on the first try. Failure = information.'},
+   fields:[{k:'wrong', type:'area', l:{ta:'எது சரியாக வேலை செய்யவில்லை? ஏன் என்று நினைக்கிறேன்?', en:'What didn’t work? Why do I think so?'}}, {k:'v2', type:'area', l:{ta:'இரண்டாம் முறை என்ன மாற்றுவேன்?', en:'What will I change in version 2?'}}],
+   hints:[{ta:'ஒரே ஒரு விஷயத்தை மட்டும் மாற்றி மீண்டும் சோதி — அப்போதுதான் காரணம் தெரியும்.', en:'Change only one thing and test again — that’s how you find the cause.'}]},
+  {id:'share', icon:'🎤', t:{ta:'பகிர்', en:'Share'}, why:{ta:'உன் கேள்விக்கு உன் விடை, உன் வார்த்தைகளில். இறுதியில் ஒரு புதிய கேள்வி — அதுதான் உண்மையான விஞ்ஞானி.', en:'Your answer to your question, in your own words. End with a new question — that’s a true scientist.'},
+   fields:[{k:'answer', type:'area', l:{ta:'என் கேள்விக்கு நான் கண்டுபிடித்த விடை', en:'The answer I found to my question'}}, {k:'learnt', type:'area', l:{ta:'நான் கற்றுக்கொண்டது', en:'What I learnt'}}, {k:'next', type:'area', l:{ta:'இப்போது எனக்கு வந்துள்ள புதிய கேள்வி', en:'The new question I now have'}}, {k:'helpers', type:'text', l:{ta:'எனக்கு உதவியவர்கள் (எப்படி உதவினார்கள்)', en:'People who helped me (and how)'}}],
+   hints:[{ta:'உன் விடை உன் அளவீடுகளுடன் ஒத்துப்போகிறதா? எந்த எண் அதை நிரூபிக்கிறது?', en:'Does your answer match your measurements? Which number proves it?'}]}
+];
+const COACH_UI = {
+  ta:{title:'🧠 திட்ட வழிகாட்டி', sub:'நான் விடை சொல்ல மாட்டேன் — உன்னைச் சிந்திக்க வைக்கும் கேள்விகள் மட்டும் கேட்பேன். project உன்னுடையது; அதனால் பெருமையும் உன்னுடையது!',
+    newP:'+ புதிய project', mine:'என் projects', none:'இன்னும் project இல்லை.', open:'திற', del:'நீக்கு', stuck:'🤔 மாட்டிக்கொண்டேனா? ஒரு கேள்வி கொடு', why:'ஏன் இந்தப் படி?', prevS:'← முந்தைய படி', nextS:'அடுத்த படி →', report:'📄 என் project அறிக்கை', print:'🖨️ Print', back:'← திருத்து',
+    bank:'💡 யோசனை வங்கி (உனக்கேற்ப மாற்று!)', use:'இதைப் பயன்படுத்து', spin:'🎡 யோசனை சக்கரம்', addIdea:'+ யோசனை', score:'மதிப்பெண் கொடு (1–3)', sSafe:'பாதுகாப்பு', sCheap:'செலவு குறைவு', sTime:'நேரத்தில் முடியும்', sWow:'புதுமை', best:'⭐ சிறந்தது', addRow:'+ வரி', pick:'தேர்ந்தெடு',
+    grown:'👪 பெற்றோர் / பெரியவர்களுக்கு', grownTxt:'• **செய்து கொடுக்காதீர்கள் — கேளுங்கள்.** "நீ என்ன நினைக்கிறாய்?", "அடுத்து என்ன செய்யலாம்?", "எப்படித் தெரிந்துகொள்வாய்?"\n• **உதவலாம்:** பாதுகாப்பு (கத்தி, நெருப்பு), பொருட்கள் வாங்குதல், நேரம் திட்டமிடுதல், ஊக்கம்.\n• **உதவக் கூடாது:** அவர்களுக்குப் பதிலாக யோசித்தல், எழுதுதல், செய்தல்.\n• **முடிவைப் பாராட்டாதீர்கள், முயற்சியைப் பாராட்டுங்கள்:** "அழகா இருக்கு" என்பதைவிட "3 முறை சோதித்தது அருமை".\n• தவறுகளைத் திருத்த அவசரப்படாதீர்கள் — தோல்வியிலிருந்து குழந்தை கற்கட்டும்.',
+    ai:'🤖 YouTube / AI-ஐ எப்படிப் பயன்படுத்துவது?', aiTxt:'இவற்றை **நூலகம் போல** பயன்படுத்து — உனக்குப் பதிலாக வேலை செய்யும் ஆளாக அல்ல.\n\n✅ நல்ல கேள்வி: "சோலார் அடுப்பு project-க்கு நான் யோசிக்க வேண்டிய 5 கேள்விகள் கொடு."\n❌ தவறான கேள்வி: "எனக்கு சோலார் அடுப்பு project எழுதிக் கொடு."\n\nஎதைப் பார்த்தாலும், படித்தாலும் — **கற்றதை உன் வார்த்தைகளில் எழுது**, எங்கிருந்து கற்றாய் என்றும் குறி. AI தவறான தகவலும் சொல்லும் — உன் சோதனையே இறுதி நீதிபதி.',
+    decl:'இந்த project-ஐ நானே சிந்தித்து, நானே செய்தேன்.', sig:'மாணவர் கையொப்பம்', talk:'🎤 1 நிமிடப் பேச்சு', talk1:'என் கேள்வி:', talk2:'நான் செய்தது:', talk3:'நான் கண்டுபிடித்தது:', talk4:'அடுத்து நான் அறிய விரும்புவது:', steps:'படிகள்', cls:'வகுப்பு', date:'தேதி'},
+  en:{title:'🧠 Project Coach', sub:'I won’t give you answers — only questions that make you think. The project is yours, so the pride is yours too!',
+    newP:'+ New project', mine:'My projects', none:'No projects yet.', open:'Open', del:'Delete', stuck:'🤔 Stuck? Give me a question', why:'Why this step?', prevS:'← Previous step', nextS:'Next step →', report:'📄 My project report', print:'🖨️ Print', back:'← Edit',
+    bank:'💡 Idea bank (change it to make it yours!)', use:'Use this', spin:'🎡 Idea wheel', addIdea:'+ Idea', score:'Score (1–3)', sSafe:'Safe', sCheap:'Low cost', sTime:'Doable in time', sWow:'New / wow', best:'⭐ Best', addRow:'+ Row', pick:'Choose',
+    grown:'👪 For parents & grown-ups', grownTxt:'• **Don’t do it for them — ask.** "What do you think?", "What could you try next?", "How will you find out?"\n• **You may help with:** safety (knives, fire), buying materials, planning time, encouragement.\n• **Please don’t:** think, write or build it for them.\n• **Praise the effort, not the result:** "Great that you tested it 3 times" beats "It looks nice".\n• Don’t rush to fix mistakes — let the child learn from failure.',
+    ai:'🤖 How to use YouTube / AI', aiTxt:'Use them **like a library** — not as someone who does the work for you.\n\n✅ Good question: "Give me 5 questions I should think about for a solar-oven project."\n❌ Bad question: "Write my solar-oven project for me."\n\nWhatever you watch or read — **write what you learnt in your own words**, and note where you learnt it. AI also says wrong things — your own test is the final judge.',
+    decl:'I thought of and did this project myself.', sig:'Student’s signature', talk:'🎤 1-minute talk', talk1:'My question:', talk2:'What I did:', talk3:'What I found:', talk4:'What I want to find out next:', steps:'Steps', cls:'Class', date:'Date'}
+};
+const CU = k => COACH_UI[LANG][k];
+function loadProjects(){ try{ return JSON.parse(localStorage.getItem('kalviProjects')||'{}'); }catch(e){ return {}; } }
+function saveProjects(p){ try{ localStorage.setItem('kalviProjects', JSON.stringify(p)); }catch(e){} }
+
+function renderProject(arg){
+  const app = $('#app'); const P = loadProjects();
+  if(arg === 'new'){
+    const id = 'p' + Date.now().toString(36); let seed = {};
+    try{ seed = JSON.parse(store('kalviCoachSeed')||'{}'); store('kalviCoachSeed',''); }catch(e){}
+    P[id] = {created: Date.now(), step: 0, data: {topic: seed.topic||'', ideas: seed.idea ? [{t: seed.idea}] : []}};
+    saveProjects(P); location.replace('#/project/' + id); return;
+  }
+  const [pid, sub] = (arg||'').split(':');
+  if(pid && P[pid]) return sub === 'report' ? renderReport(pid) : renderCoachStep(pid);
+  // list
+  const ids = Object.keys(P).sort((a,b)=>P[b].created-P[a].created);
+  app.innerHTML = `<div class="crumbs"><span data-go="#/">${U('home')}</span> › ${CU('title')}</div>
+    <div class="hero" style="background:linear-gradient(135deg,#0b7a75,#3b2fc9)"><h1>${CU('title')}</h1><p>${CU('sub')}</p></div>
+    <div class="row" style="margin:14px 0"><button class="btn p" id="np">${CU('newP')}</button></div>
+    <div class="blk"><h2>${CU('mine')}</h2>${ids.length ? ids.map(id=>{ const p=P[id]; return `<div class="les"><span class="ic">${STEPS[p.step||0].icon}</span><span style="flex:1" data-o="${id}">${esc(p.data.topic||'…')}<div class="note">${STEPS.map((s,i)=>i<= (p.step||0)?'●':'○').join(' ')}</div></span><button class="btn sm" data-o="${id}">${CU('open')}</button><button class="btn sm" data-x="${id}">✕</button></div>`; }).join('') : `<p class="note">${CU('none')}</p>`}</div>
+    ${grownBlocks()}`;
+  $('#np').onclick = ()=> go('#/project/new');
+  app.querySelectorAll('[data-o]').forEach(n=> n.onclick = ()=> go('#/project/' + n.dataset.o));
+  app.querySelectorAll('[data-x]').forEach(n=> n.onclick = ()=>{ if(!confirm(CU('del') + '?')) return; delete P[n.dataset.x]; saveProjects(P); renderProject(); });
+  app.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
+  window.scrollTo(0,0);
+}
+function grownBlocks(){
+  return `<div class="blk activity"><details><summary><b>${CU('grown')}</b></summary>${md({ta:COACH_UI.ta.grownTxt,en:COACH_UI.en.grownTxt})}</details></div>
+    <div class="blk key"><details><summary><b>${CU('ai')}</b></summary>${md({ta:COACH_UI.ta.aiTxt,en:COACH_UI.en.aiTxt})}</details></div>`;
+}
+function renderCoachStep(pid){
+  const P = loadProjects(), p = P[pid], k = p.step||0, S = STEPS[k], d = p.data;
+  const save = ()=>{ const all = loadProjects(); all[pid] = p; saveProjects(all); };
+  const app = $('#app');
+  app.innerHTML = `<div class="crumbs"><span data-go="#/project">${CU('title')}</span> › ${esc(d.topic||'…')}</div>
+    <div class="row" style="gap:4px;margin-bottom:10px;flex-wrap:nowrap;overflow-x:auto">${STEPS.map((s,i)=>`<button class="btn sm ${i===k?'p':''}" data-s="${i}" title="${esc(T2(s.t))}">${s.icon}</button>`).join('')}</div>
+    <div class="blk"><h2>${S.icon} ${k+1}. ${esc(T2(S.t))}</h2><p class="note">${esc(T2(S.why))}</p><div id="fields"></div>
+      <div class="row" style="margin-top:12px"><button class="btn sm" id="stuck">${CU('stuck')}</button></div><div id="hint"></div></div>
+    ${k===0?`<div class="blk"><h2>${CU('bank')}</h2><div id="bank"></div></div>`:''}
+    <div class="nav">${k>0?`<button class="btn" id="pv">${CU('prevS')}</button>`:'<span></span>'}${k<STEPS.length-1?`<button class="btn p" id="nx">${CU('nextS')}</button>`:`<button class="btn p" id="rp">${CU('report')}</button>`}</div>
+    ${k===0?grownBlocks():''}`;
+  const F = $('#fields');
+  S.fields.forEach(f=>{
+    const w = document.createElement('div'); w.style.marginTop = '10px';
+    const lab = `<label style="display:block;font-weight:700;font-size:.86rem">${esc(T2(f.l))}</label>`;
+    if(f.type==='text' || f.type==='date'){
+      w.innerHTML = lab + `<input class="ans" style="width:100%" type="${f.type==='date'?'date':'text'}" value="${esc(d[f.k]||'')}">` + (f.templates?`<div class="chips">${f.templates.map((t,i)=>`<button class="chip" data-t="${i}" style="border:0;cursor:pointer">${esc(T2(t))}</button>`).join('')}</div>`:'');
+      const inp = w.querySelector('input'); inp.oninput = ()=>{ d[f.k] = inp.value; save(); };
+      w.querySelectorAll('[data-t]').forEach(b=> b.onclick = ()=>{ inp.value = T2(f.templates[b.dataset.t]); d[f.k] = inp.value; save(); inp.focus(); });
+    } else if(f.type==='area'){
+      w.innerHTML = lab + `<textarea class="journal">${esc(d[f.k]||'')}</textarea>`;
+      const ta = w.querySelector('textarea'); ta.oninput = ()=>{ d[f.k] = ta.value; save(); };
+    } else if(f.type==='kind'){
+      w.innerHTML = lab + `<div class="chips">${Object.entries(KINDS).map(([kk,v])=>`<button class="chip" data-k="${kk}" style="border:0;cursor:pointer;${d.kind===kk?'background:#3b2fc9;color:#fff':''}">${esc(T2(v))}</button>`).join('')}</div>`;
+      w.querySelectorAll('[data-k]').forEach(b=> b.onclick = ()=>{ d.kind = b.dataset.k; save(); renderCoachStep(pid); });
+    } else if(f.type==='check'){
+      const on = d[f.k] || [];
+      w.innerHTML = lab + f.items.map((it,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;font-size:.88rem;margin:6px 0"><input type="checkbox" data-i="${i}" ${on.includes(i)?'checked':''} style="width:auto;margin-top:5px"> <span>${esc(T2(it))}</span></label>`).join('');
+      w.querySelectorAll('input').forEach(c=> c.onchange = ()=>{ d[f.k] = [...w.querySelectorAll('input:checked')].map(x=>Number(x.dataset.i)); save(); });
+    } else if(f.type==='ideas'){
+      d.ideas = d.ideas || [];
+      const paintIdeas = ()=>{
+        const tot = it => ['s','c','t','w'].reduce((a,x)=>a+(Number(it[x])||0),0);
+        const best = d.ideas.length ? Math.max(...d.ideas.map(tot)) : 0;
+        w.innerHTML = lab + `<div class="row"><button class="btn sm" id="spin">${CU('spin')}</button><span class="note" id="spinOut"></span></div>` +
+          `<div style="overflow-x:auto"><table class="tbl" style="margin-top:8px"><tr><th>#</th><th style="min-width:160px">💡</th><th>${CU('sSafe')}</th><th>${CU('sCheap')}</th><th>${CU('sTime')}</th><th>${CU('sWow')}</th><th>Σ</th></tr>` +
+          d.ideas.map((it,i)=>`<tr><th>${i+1}</th><td><input class="ans" style="width:100%" data-i="${i}" data-f="t" value="${esc(it.t||'')}"></td>${['s','c','t','w'].map(x=>`<td><select data-i="${i}" data-f="${x}">${['','1','2','3'].map(v=>`<option ${String(it[x]||'')===v?'selected':''}>${v}</option>`).join('')}</select></td>`).join('')}<td>${tot(it)||''}${best && tot(it)===best?' ⭐':''}</td></tr>`).join('') + `</table></div><button class="btn sm" id="addI" style="margin-top:6px">${CU('addIdea')}</button>`;
+        w.querySelectorAll('[data-f]').forEach(n=> n.onchange = n.oninput = ()=>{ d.ideas[n.dataset.i][n.dataset.f] = n.value; save(); if(n.tagName==='SELECT') paintIdeas(); });
+        w.querySelector('#addI').onclick = ()=>{ d.ideas.push({t:''}); save(); paintIdeas(); };
+        w.querySelector('#spin').onclick = ()=>{ const s = SCAMPER[Math.floor(Math.random()*SCAMPER.length)]; w.querySelector('#spinOut').textContent = T2(s); };
+      };
+      if(d.ideas.length < 5) while(d.ideas.length < 5) d.ideas.push({t:''});
+      paintIdeas();
+    } else if(f.type==='table'){
+      d[f.k] = d[f.k] || [['1','',''],['2','',''],['3','','']];
+      const paintT = ()=>{
+        w.innerHTML = lab + `<div style="overflow-x:auto"><table class="tbl"><tr>${f.cols.map(c=>`<th>${esc(T2(c))}</th>`).join('')}</tr>${d[f.k].map((r,i)=>`<tr>${r.map((c,j)=>`<td><input class="ans" style="width:100%" data-r="${i}" data-c="${j}" value="${esc(c)}"></td>`).join('')}</tr>`).join('')}</table></div><button class="btn sm" id="addR" style="margin-top:6px">${CU('addRow')}</button>`;
+        w.querySelectorAll('[data-r]').forEach(n=> n.oninput = ()=>{ d[f.k][n.dataset.r][n.dataset.c] = n.value; save(); });
+        w.querySelector('#addR').onclick = ()=>{ d[f.k].push([String(d[f.k].length+1),'','']); save(); paintT(); };
+      };
+      paintT();
+    }
+    F.appendChild(w);
+  });
+  let hi = 0;
+  $('#stuck').onclick = ()=>{ const h = S.hints[hi % S.hints.length]; hi++; $('#hint').innerHTML = `<div class="fb hint">${esc(T2(h))}</div>`; };
+  if(k===0){
+    const bands = {'1-3':'1–3','4-6':'4–6','7-10':'7–10'};
+    $('#bank').innerHTML = Object.entries(bands).map(([b,lb])=>`<div class="note" style="margin-top:8px"><b>${CU('cls')} ${lb}</b></div>` + IDEA_BANK.filter(x=>x.band===b).map((x,i)=>`<div class="les"><span class="ic">💡</span><span style="flex:1">${esc(T2(x))} <span class="chip">${esc(T2(KINDS[x.kind]))}</span></span><button class="btn sm" data-b="${IDEA_BANK.indexOf(x)}">${CU('use')}</button></div>`).join('')).join('');
+    $('#bank').querySelectorAll('[data-b]').forEach(n=> n.onclick = ()=>{ const x = IDEA_BANK[n.dataset.b]; d.topic = T2(x); d.kind = x.kind; save(); renderCoachStep(pid); });
+  }
+  app.querySelectorAll('[data-s]').forEach(n=> n.onclick = ()=>{ p.step = Number(n.dataset.s); save(); renderCoachStep(pid); });
+  if($('#pv')) $('#pv').onclick = ()=>{ p.step = k-1; save(); renderCoachStep(pid); };
+  if($('#nx')) $('#nx').onclick = ()=>{ p.step = k+1; save(); renderCoachStep(pid); };
+  if($('#rp')) $('#rp').onclick = ()=> go('#/project/' + pid + ':report');
+  app.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
+  window.scrollTo(0,0);
+}
+function renderReport(pid){
+  const p = loadProjects()[pid], d = p.data;
+  const para = v => v ? `<p>${esc(v).replace(/\n/g,'<br>')}</p>` : '<p class="note">—</p>';
+  const tot = it => ['s','c','t','w'].reduce((a,x)=>a+(Number(it[x])||0),0);
+  const ideas = (d.ideas||[]).filter(x=>x.t);
+  const chosen = ideas.length ? ideas.reduce((a,b)=> tot(b)>tot(a)?b:a) : null;
+  const H = (ta,en) => `<h3>${LANG==='ta'?ta:en}</h3>`;
+  $('#app').innerHTML = `<div class="row noprint" style="margin-bottom:10px"><button class="btn" id="bk">${CU('back')}</button><button class="btn p" id="pr">${CU('print')}</button></div>
+    <div class="blk" style="font-size:.95rem">
+      <h1 style="margin:0 0 4px;font-size:1.3rem">${esc(d.topic||'')}</h1>
+      <div class="note">${d.kind?esc(T2(KINDS[d.kind]))+' · ':''}${CU('date')}: ${new Date().toLocaleDateString('en-IN')}</div>
+      ${H('❓ என் கேள்வி','❓ My question')}${para(d.question)}
+      ${H('📚 எனக்கு முன்பே தெரிந்தது','📚 What I already knew')}${para(d.known)}
+      ${H('🔎 நான் கேட்ட கேள்விகள் & தேடிய இடங்கள்','🔎 Questions I asked & where I looked')}${para(d.wonder)}${para(d.sources)}
+      ${H('💡 நான் யோசித்த வழிகள்','💡 Ideas I considered')}${ideas.length?`<ol>${ideas.map(x=>`<li>${esc(x.t)}${x===chosen?' ⭐':''}</li>`).join('')}</ol>`:para('')}
+      ${H('📝 பொருட்கள் & செய்முறை','📝 Materials & method')}${para(d.materials)}${para(d.method)}${d.fair?para(d.fair):''}
+      ${H('🔬 முடிவுகள்','🔬 Results')}${(d.obs||[]).some(r=>r[1]||r[2])?`<table class="tbl">${(d.obs||[]).filter(r=>r[1]||r[2]).map(r=>`<tr>${r.map(c=>`<td style="color:#222;font-weight:400">${esc(c)}</td>`).join('')}</tr>`).join('')}</table>`:''}${para(d.surprise)}
+      ${H('🔁 தவறுகளும் மேம்பாடும்','🔁 What went wrong & how I improved')}${para(d.wrong)}${para(d.v2)}
+      ${H('✅ முடிவு','✅ Conclusion')}${para(d.answer)}${para(d.learnt)}
+      ${H('🚀 அடுத்த கேள்வி','🚀 My next question')}${para(d.next)}
+      <div style="margin-top:28px;border-top:1px dashed #bbb;padding-top:10px">${CU('decl')}${d.helpers?`<br><span class="note">${LANG==='ta'?'உதவியவர்கள்':'Helped by'}: ${esc(d.helpers)}</span>`:''}<div style="margin-top:34px">____________________<br><span class="note">${CU('sig')}</span></div></div>
+    </div>
+    <div class="blk key noprint"><h2>${CU('talk')}</h2><ol><li><b>${CU('talk1')}</b> ${esc(d.question||'')}</li><li><b>${CU('talk2')}</b> ${esc((d.method||'').split('\n')[0])}</li><li><b>${CU('talk3')}</b> ${esc((d.answer||'').split('\n')[0])}</li><li><b>${CU('talk4')}</b> ${esc(d.next||'')}</li></ol></div>`;
+  $('#bk').onclick = ()=> go('#/project/' + pid);
+  $('#pr').onclick = ()=> window.print();
+  window.scrollTo(0,0);
+}
 
 /* ---------------- language ---------------- */
 function paintLang(){ document.querySelectorAll('.lang button').forEach(b=> b.classList.toggle('on', b.dataset.l===LANG)); document.documentElement.lang = LANG; }

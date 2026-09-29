@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு கனமான கல்லும் ஒரு சிறிய கல்லும் ஒரே உயரத்திலிருந்து ஒரே நேரத்தில் விடப்படுகின்றன (காற்றுத் தடை புறக்கணி). எது முதலில் தரையைத் தொடும்?",
+    "en": "A heavy stone and a small stone are dropped from the same height at the same time (ignore air). Which lands first?"
+   },
+   "options": [
+    {
+     "ta": "கனமானது",
+     "en": "The heavy one"
+    },
+    {
+     "ta": "சிறியது",
+     "en": "The small one"
+    },
+    {
+     "ta": "இரண்டும் ஒரே நேரத்தில்",
+     "en": "Both together"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "இரண்டும் ஒரே நேரத்தில்! ஏறக்குறைய 2000 ஆண்டுகள் மக்கள் \"கனமானது வேகமாக விழும்\" என்று நம்பினார்கள். கலிலியோ போன்றவர்கள் சோதித்துப் பார்த்த பிறகே உண்மை தெரிந்தது — அனைத்துப் பொருட்களும் ஒரே முடுக்கத்தில் (≈ 9.8 m/s²) விழுகின்றன. (காகிதம் மெதுவாக விழுவது காற்றுத் தடையால்.) **சோதித்துப் பார் — நம்பிக்கை மட்டும் போதாது.**",
+    "en": "Both together! For nearly 2000 years people believed \"heavier falls faster\". Only when people like Galileo tested it did the truth emerge — everything falls with the same acceleration (≈ 9.8 m/s²). (Paper falls slowly only because of air.) **Test it — belief alone isn’t enough.**"
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "தூரம் vs இடப்பெயர்ச்சி",
@@ -246,6 +272,124 @@
    }
   },
   {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🚦",
+     "title": {
+      "ta": "போக்குவரத்து விதிகள்",
+      "en": "Road rules"
+     },
+     "text": {
+      "ta": "வேக வரம்புகள் பிரேக் தூரத்திலிருந்து (v² = u² + 2as) கணக்கிடப்படுகின்றன.",
+      "en": "Speed limits come from braking distance (v² = u² + 2as)."
+     }
+    },
+    {
+     "icon": "🚀",
+     "title": {
+      "ta": "ISRO ராக்கெட்டுகள்",
+      "en": "ISRO rockets"
+     },
+     "text": {
+      "ta": "சந்திரயான் பாதை ஒவ்வொரு கட்டத்திலும் திசைவேகம், முடுக்கக் கணக்குகளால் திட்டமிடப்பட்டது.",
+      "en": "Chandrayaan’s path was planned with velocity and acceleration calculations at every stage."
+     }
+    },
+    {
+     "icon": "🏏",
+     "title": {
+      "ta": "கிரிக்கெட்",
+      "en": "Cricket"
+     },
+     "text": {
+      "ta": "பந்தின் வேகத்தை speed gun அளக்கிறது; DRS பந்தின் பாதையைக் கணிக்கிறது.",
+      "en": "Speed guns measure the ball; DRS predicts its path."
+     }
+    },
+    {
+     "icon": "🛵",
+     "title": {
+      "ta": "Airbag",
+      "en": "Airbags"
+     },
+     "text": {
+      "ta": "மோதலில் நிற்கும் நேரத்தை அதிகரித்து, வேகக் குறைப்பை மென்மையாக்குகிறது.",
+      "en": "They lengthen the stopping time in a crash so the deceleration is gentler."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "வேகத்திற்கும் திசைவேகத்திற்கும் என்ன வேறுபாடு?",
+    "en": "What’s the difference between speed and velocity?"
+   },
+   "keywords": [
+    {
+     "ta": "திசை",
+     "en": "direction"
+    },
+    {
+     "ta": "இடப்பெயர்ச்சி",
+     "en": "displacement"
+    },
+    {
+     "ta": "தூரம்",
+     "en": "distance"
+    }
+   ],
+   "model": {
+    "ta": "வேகம் = தூரம் ÷ நேரம் — திசை இல்லை. திசைவேகம் = இடப்பெயர்ச்சி ÷ நேரம் — திசையும் உண்டு. வட்டப் பாதையில் சீரான வேகத்தில் ஓடினாலும் திசைவேகம் மாறிக்கொண்டே இருக்கும்.",
+    "en": "Speed = distance ÷ time — no direction. Velocity = displacement ÷ time — with direction. Running round a circle at steady speed, your velocity keeps changing."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "தானியங்கி கார்கள் ஒவ்வொரு நொடியும் சுற்றியுள்ள ஒவ்வொரு வாகனத்தின் திசைவேகத்தையும் முடுக்கத்தையும் கணித்து முடிவெடுக்கின்றன.",
+    "en": "Self-driving cars predict the velocity and acceleration of every vehicle around them, every fraction of a second."
+   },
+   "risk": {
+    "ta": "இந்திய சாலைகளில் மாடு, ஆட்டோ, சைக்கிள், நடைபாதை வியாபாரி — பயிற்சித் தரவில் இல்லாதவற்றை AI தவறாகக் கணிக்கலாம்.",
+    "en": "On Indian roads — cows, autos, cycles, street vendors — AI may mispredict things missing from its training data."
+   },
+   "fix": {
+    "ta": "உள்ளூர்த் தரவுகளுடன் பயிற்சி, மனித ஓட்டுநர் கட்டுப்பாட்டை எடுக்கும் வசதி, கடுமையான சோதனை.",
+    "en": "Training on local data, the ability for a human driver to take over, and strict testing."
+   },
+   "q": {
+    "ta": "ஒரு தானியங்கி கார் விபத்துக்குள்ளானால் யார் பொறுப்பு — நிறுவனமா, உரிமையாளரா, AI-யா?",
+    "en": "If a self-driving car crashes, who is responsible — the company, the owner, or the AI?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "பள்ளி வாசல் பாதுகாப்பு",
+    "en": "A safer school gate"
+   },
+   "text": {
+    "ta": "பள்ளி விடும் நேரத்தில் வாசலுக்கு அருகில் வாகனங்கள் வேகமாகச் செல்கின்றனவா? வாகனங்களின் வேகத்தை அளந்து (தூரம் ÷ நேரம்), ஒரு பாதுகாப்புத் தீர்வை வடிவமை.",
+    "en": "Do vehicles speed past your school gate at closing time? Measure their speed (distance ÷ time) and design a safety fix."
+   },
+   "prompts": [
+    {
+     "ta": "எப்படி அளப்பாய்? (இரண்டு குறிகள் + stopwatch)",
+     "en": "How will you measure? (two marks + a stopwatch)"
+    },
+    {
+     "ta": "பாதுகாப்பான வேகம் என்ன? பிரேக் தூரம் எவ்வளவு?",
+     "en": "What is a safe speed? What’s the braking distance?"
+    },
+    {
+     "ta": "உன் தீர்வு: speed breaker? பலகை? மாணவர் தன்னார்வலர்கள்?",
+     "en": "Your fix: speed breaker? sign board? student volunteers?"
+    }
+   ]
+  },
+  {
    "type": "summary",
    "points": [
     {
@@ -436,6 +580,29 @@
    "explain": {
     "ta": "s = u²/2a — u இரு மடங்கானால் u² நான்கு மடங்கு.",
     "en": "s = u²/2a — doubling u makes u² four times."
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு, அத். 2",
+    "en": "Class 9, Ch. 2"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு அறிவியல் — இயக்கம்",
+    "en": "Class 9 Science — Motion"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Physics — Motion",
+    "en": "Physics — Motion"
    }
   }
  ]

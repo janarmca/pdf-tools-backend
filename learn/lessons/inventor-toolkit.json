@@ -1,0 +1,425 @@
+{
+ "id": "inventor-toolkit",
+ "minutes": 30,
+ "title": {
+  "ta": "கண்டுபிடிப்பாளரின் கருவிப்பெட்டி — யோசனைகள் எங்கிருந்து வருகின்றன?",
+  "en": "The inventor’s toolkit — where do ideas come from?"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "கலை ஒருங்கிணைந்த & project அடிப்படைக் கற்றல் (NEP 2020)",
+    "en": "Art-integrated & project-based learning (NEP 2020)"
+   }
+  },
+  {
+   "b": "Stanford d.school",
+   "w": {
+    "ta": "Design Thinking முறை",
+    "en": "Design thinking method"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "பிரச்சனைகளைக் கவனிக்கும் பழக்கத்தை வளர்க்க",
+   "en": "Build the habit of noticing problems"
+  },
+  {
+   "ta": "SCAMPER மூலம் ஒரே பொருளிலிருந்து பல யோசனைகளை உருவாக்க",
+   "en": "Use SCAMPER to get many ideas from one object"
+  },
+  {
+   "ta": "சீக்கிரம் மாதிரி செய்து, சோதித்து, மேம்படுத்த",
+   "en": "Build a quick prototype, test it, improve it"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "**மன்சுக்பாய் பிரஜாபதி** — குஜராத்தின் ஒரு சாதாரண மண்பாண்டக் கலைஞர். 2001 நிலநடுக்கத்திற்குப் பிறகு, மின்சாரம் இல்லாமலே குளிர்விக்கும் மண் குளிர்சாதனப் பெட்டியை (\"Mitticool\") உருவாக்கினார்.\n\n**அருணாசலம் முருகானந்தம்** — கோயம்புத்தூர். பெண்கள் விலை உயர்ந்த சானிட்டரி நாப்கின் வாங்க முடியாமல் கஷ்டப்படுவதைப் பார்த்து, குறைந்த விலையில் அவற்றைத் தயாரிக்கும் இயந்திரத்தை உருவாக்கினார்.\n\n**ஜெய்ப்பூர் கால்** — ஒரு கைவினைஞர் ராம் சந்திர சர்மாவும் மருத்துவர் பி.கே. சேத்தியும் சேர்ந்து உருவாக்கிய மலிவான செயற்கைக் கால் — லட்சக்கணக்கானோர் மீண்டும் நடக்கிறார்கள்.\n\nஇவர்கள் யாரும் பெரிய ஆய்வகத்தில் தொடங்கவில்லை. ஒரு **பிரச்சனையைக் கவனித்ததில்** தொடங்கினார்கள்.",
+    "en": "**Mansukhbhai Prajapati** — an ordinary potter from Gujarat. After the 2001 earthquake he created a clay refrigerator (\"Mitticool\") that cools without electricity.\n\n**Arunachalam Muruganantham** — from Coimbatore. Seeing women struggle to afford expensive sanitary pads, he built a machine that makes them at low cost.\n\n**The Jaipur Foot** — a cheap artificial leg created by a craftsman, Ram Chandra Sharma, together with a doctor, P. K. Sethi — hundreds of thousands of people walk again.\n\nNone of them started in a big laboratory. They started by **noticing a problem**."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "பெரும்பாலான கண்டுபிடிப்பாளர்கள் எதிலிருந்து தொடங்குகிறார்கள்?",
+    "en": "What do most inventors start with?"
+   },
+   "options": [
+    {
+     "ta": "ஒரு பெரிய மேதைமை யோசனை",
+     "en": "A big genius idea"
+    },
+    {
+     "ta": "தங்களை எரிச்சலூட்டும் ஒரு பிரச்சனை",
+     "en": "A problem that bothers them"
+    },
+    {
+     "ta": "நிறைய பணம்",
+     "en": "A lot of money"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "யோசனைகள் வானத்திலிருந்து விழுவதில்லை. \"இது ஏன் இவ்வளவு கஷ்டமாக இருக்கிறது?\" என்று கேட்கும் பழக்கமே கண்டுபிடிப்பின் தொடக்கம். அதைப் பயிற்சி செய்யலாம் — யார் வேண்டுமானாலும்!",
+    "en": "Ideas don’t fall from the sky. The habit of asking \"why is this so hard?\" is where invention begins. And it can be practised — by anyone!"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "கண்டுபிடிப்பாளரின் 5 நகர்வுகள்",
+    "en": "The inventor’s 5 moves"
+   },
+   "text": {
+    "ta": "**1. கவனி:** 3 நாட்களுக்கு, நீ பார்க்கும் ஒவ்வொரு சிறிய பிரச்சனையையும் ஒரு \"பிரச்சனைப் பட்டியலில்\" எழுது.\n**2. \"ஏன்?\" என்று 5 முறை கேள்:** மேல் தோற்றத்தைத் தாண்டி உண்மையான காரணத்தைக் கண்டுபிடி.\n**3. நிறைய யோசனைகள்:** முதலில் அளவு, பிறகு தரம். SCAMPER உதவும் (கீழே).\n**4. சீக்கிரம் மாதிரி செய் (prototype):** அட்டை, டேப், பழைய பாட்டில் — 1 மணி நேரத்தில் ஒரு கரடுமுரடான மாதிரி.\n**5. உண்மையான ஆட்களிடம் சோதி, மேம்படுத்து:** பயன்படுத்தப் போகிறவர் என்ன சொல்கிறார்? மீண்டும் செய்.",
+    "en": "**1. Notice:** for 3 days, write every small problem you see in a \"bug list\".\n**2. Ask \"why?\" five times:** go beyond the surface to the real cause.\n**3. Many ideas:** quantity first, quality later. SCAMPER helps (below).\n**4. Prototype fast:** cardboard, tape, old bottles — a rough model in one hour.\n**5. Test with real people, improve:** what does the person who will use it say? Do it again."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "\"ஏன்?\" — 5 முறை",
+    "en": "\"Why?\" — five times"
+   },
+   "q": {
+    "ta": "பிரச்சனை: \"மாணவர்கள் தண்ணீர் குடிக்காமல் வகுப்பில் தலைவலியுடன் இருக்கிறார்கள்.\"",
+    "en": "Problem: \"Students sit in class with headaches because they don’t drink water.\""
+   },
+   "steps": [
+    {
+     "ta": "ஏன் குடிப்பதில்லை? → பாட்டில் காலியாகிவிடுகிறது.",
+     "en": "Why don’t they drink? → Their bottle runs empty."
+    },
+    {
+     "ta": "ஏன் நிரப்புவதில்லை? → குழாய் தொலைவில், இடைவேளை குறைவு.",
+     "en": "Why not refill? → The tap is far and breaks are short."
+    },
+    {
+     "ta": "ஏன் தொலைவில்? → ஒரே ஒரு குடிநீர்க் குழாய்தான் உள்ளது.",
+     "en": "Why is it far? → There is only one drinking-water tap."
+    },
+    {
+     "ta": "ஏன் ஒன்றுதான்? → சுத்திகரிப்பான் விலை அதிகம்.",
+     "en": "Why only one? → Purifiers are expensive."
+    },
+    {
+     "ta": "ஏன் ஒவ்வொரு வகுப்புக்கும் சுத்திகரிப்பான்? → தேவையில்லை! ஒவ்வொரு வகுப்பிலும் ஒரு மண்பானை, காலையில் ஒருமுறை நிரப்பினால் போதும்.",
+     "en": "Does each class need a purifier? → No! A clay pot in each class, filled once each morning, is enough."
+    }
+   ],
+   "answer": {
+    "ta": "உண்மையான பிரச்சனை \"தண்ணீர் இல்லை\" அல்ல — \"அருகில் இல்லை\". தீர்வு மலிவானது.",
+    "en": "The real problem isn’t \"no water\" — it’s \"not nearby\". The fix is cheap."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "SCAMPER — ஒரு பொருள், ஏழு கேள்விகள்",
+    "en": "SCAMPER — one object, seven questions"
+   },
+   "text": {
+    "ta": "**மாற்று (Substitute):** பெட்ரோலுக்குப் பதில் பேட்டரி → இ-ரிக்ஷா.\n**இணை (Combine):** போன் + கேமரா + வரைபடம் → இன்றைய smartphone.\n**தழுவு (Adapt):** முட்செடியின் கொக்கி விதைகள் நாயின் முடியில் ஒட்டியதைப் பார்த்து → வெல்க்ரோ (Velcro). மீன்கொத்திப் பறவையின் அலகு வடிவம் → ஜப்பானின் அதிவேக ரயிலின் முன்பகுதி, சத்தம் குறைந்தது.\n**மாற்றியமை (Modify):** பெரிய மேசைக் கணினியைச் சிறிதாக்கு → லேப்டாப்.\n**வேறு பயன் (Put to another use):** பழைய டயர் → பூந்தொட்டி, ஊஞ்சல்.\n**நீக்கு (Eliminate):** கம்பியை நீக்கு → wireless earphones.\n**தலைகீழாக்கு (Reverse):** நோயாளி மருத்துவரிடம் போவதற்குப் பதில், மருத்துவர் வீடியோவில் வருகிறார் → தொலை மருத்துவம்.",
+    "en": "**Substitute:** a battery instead of petrol → the e-rickshaw.\n**Combine:** phone + camera + map → today’s smartphone.\n**Adapt:** burr seeds stuck in a dog’s fur → Velcro. The shape of a kingfisher’s beak → the nose of Japan’s bullet train, which made it quieter.\n**Modify:** shrink the big desktop computer → the laptop.\n**Put to another use:** an old tyre → a flower pot or a swing.\n**Eliminate:** remove the wire → wireless earphones.\n**Reverse:** instead of the patient going to the doctor, the doctor comes on video → telemedicine."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "ideaSpinner",
+   "title": {
+    "ta": "🎡 யோசனை சக்கரம்",
+    "en": "🎡 Idea wheel"
+   },
+   "text": {
+    "ta": "சுழற்று → ஒரு பொருள் + ஒரு SCAMPER கேள்வி. 2 நிமிடத்தில் 3 யோசனைகள். மீண்டும் சுழற்று!",
+    "en": "Spin → one object + one SCAMPER question. 3 ideas in 2 minutes. Spin again!"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "வெல்க்ரோ எதிலிருந்து தூண்டப்பட்டது? இது SCAMPER-ன் எந்த நகர்வு?",
+    "en": "What inspired Velcro? Which SCAMPER move is this?"
+   },
+   "options": [
+    {
+     "ta": "இயற்கையைப் பார்த்து — Adapt (தழுவு)",
+     "en": "Looking at nature — Adapt"
+    },
+    {
+     "ta": "பொருளை நீக்கி — Eliminate",
+     "en": "Removing a part — Eliminate"
+    },
+    {
+     "ta": "இரண்டு பொருட்களைச் சேர்த்து — Combine",
+     "en": "Joining two things — Combine"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "முட்செடி விதைகள் நாயின் முடியில்…",
+    "en": "Burr seeds in a dog’s fur…"
+   },
+   "solution": {
+    "ta": "இயற்கையில் ஏற்கனவே உள்ள தீர்வைத் தழுவியது — Adapt. இதற்கு \"biomimicry\" என்றும் பெயர்.",
+    "en": "It adapted a solution already found in nature — Adapt. This is also called \"biomimicry\"."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "3 நாள் \"பிரச்சனைப் பட்டியல்\" சவால்",
+    "en": "The 3-day \"bug list\" challenge"
+   },
+   "text": {
+    "ta": "ஒரு சிறிய நோட்டுப் புத்தகம் வைத்துக்கொள். வீடு, பள்ளி, பேருந்து, கடை — எங்கே ஏதாவது கஷ்டமாக, எரிச்சலாக, வீணாக இருந்தாலும் ஒரு வரி எழுது. 3 நாளில் குறைந்தது 15. பிறகு ஒன்றைத் தேர்ந்தெடுத்து \"ஏன்?\" என்று 5 முறை கேள்.\n\nகவனி: பல பிரச்சனைகள் மற்றவர்களுடையவை — பாட்டி, தெருவோர வியாபாரி, பேருந்து ஓட்டுநர். அவர்களிடம் கேள்!",
+    "en": "Keep a small notebook. At home, school, on the bus, at a shop — whenever something is hard, annoying or wasteful, write one line. At least 15 in 3 days. Then pick one and ask \"why?\" five times.\n\nNotice: many problems belong to other people — grandma, the street vendor, the bus driver. Ask them!"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "ஒரு நல்ல யோசனையை எப்படிக் கண்டுபிடிப்பது?",
+    "en": "How do you find a good idea?"
+   },
+   "keywords": [
+    {
+     "ta": "பிரச்சனை",
+     "en": "problem",
+     "alt": [
+      "கவனி",
+      "notice"
+     ]
+    },
+    {
+     "ta": "ஏன்",
+     "en": "why"
+    },
+    {
+     "ta": "யோசனைகள்",
+     "en": "ideas",
+     "alt": [
+      "scamper"
+     ]
+    },
+    {
+     "ta": "மாதிரி",
+     "en": "prototype",
+     "alt": [
+      "சோதி",
+      "test"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "முதலில் ஒரு உண்மையான பிரச்சனையைக் கவனி, \"ஏன்?\" என்று பலமுறை கேட்டு உண்மையான காரணத்தைக் கண்டுபிடி. SCAMPER வைத்து நிறைய யோசனைகள் எழுது. சீக்கிரம் ஒரு மாதிரி செய்து சோதித்து மேம்படுத்து.",
+    "en": "First notice a real problem and ask \"why?\" several times to find the real cause. Use SCAMPER to write lots of ideas. Build a quick prototype, test it and improve it."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "அடுத்த தலைமுறைக் கண்டுபிடிப்புகள் பல துறைகள் சந்திக்கும் இடத்தில் பிறக்கின்றன: உயிரியல் + கணினி, விவசாயம் + சென்சார், மருத்துவம் + AI. நீ படிக்கும் எல்லாப் பாடங்களும் ஒரு நாள் ஒன்றோடொன்று இணையும்.",
+    "en": "Next-generation inventions are born where fields meet: biology + computers, farming + sensors, medicine + AI. Every subject you study will one day connect with the others."
+   },
+   "risk": {
+    "ta": "ஒவ்வொரு கண்டுபிடிப்புக்கும் பக்கவிளைவு உண்டு. பிளாஸ்டிக் ஒருகாலத்தில் \"அற்புதப் பொருள்\" என்று கொண்டாடப்பட்டது — இன்று கடலை நிரப்புகிறது.",
+    "en": "Every invention has side-effects. Plastic was once celebrated as a \"miracle material\" — today it fills the oceans."
+   },
+   "fix": {
+    "ta": "உருவாக்கும் முன்பே கேள்: \"இதனால் யாருக்குத் தீங்கு? பயன்படுத்தி முடித்துத் தூக்கி எறிந்தால் என்ன ஆகும்? பழுதுபார்க்க முடியுமா?\"",
+    "en": "Before you build, ask: \"Who could this harm? What happens when it is thrown away? Can it be repaired?\""
+   },
+   "q": {
+    "ta": "பிளாஸ்டிக் பையைக் கண்டுபிடித்தவர்கள் முதலிலேயே என்ன கேள்வி கேட்டிருக்க வேண்டும்?",
+    "en": "What question should the inventors of the plastic bag have asked at the start?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "₹100 சவால்",
+    "en": "The ₹100 challenge"
+   },
+   "text": {
+    "ta": "உன் \"பிரச்சனைப் பட்டியலில்\" இருந்து ஒன்றை, வீட்டிலுள்ள பழைய பொருட்களும் ₹100-க்குள் செலவும் மட்டும் வைத்துத் தீர்.",
+    "en": "Solve one problem from your bug list using only waste materials from home and at most ₹100."
+   },
+   "prompts": [
+    {
+     "ta": "பிரச்சனை யாருடையது?",
+     "en": "Whose problem is it?"
+    },
+    {
+     "ta": "உண்மையான காரணம் (\"ஏன்\" × 5)?",
+     "en": "The real cause (\"why\" × 5)?"
+    },
+    {
+     "ta": "உன் 5 யோசனைகள்?",
+     "en": "Your 5 ideas?"
+    },
+    {
+     "ta": "முதல் மாதிரியை யாரிடம் சோதிப்பாய்?",
+     "en": "Who will test your first prototype?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "கண்டுபிடிப்பு பிரச்சனையைக் கவனிப்பதில் தொடங்குகிறது.",
+     "en": "Invention starts with noticing a problem."
+    },
+    {
+     "ta": "\"ஏன்?\" × 5 → உண்மையான காரணம்.",
+     "en": "\"Why?\" × 5 → the real cause."
+    },
+    {
+     "ta": "SCAMPER: மாற்று, இணை, தழுவு, மாற்றியமை, வேறு பயன், நீக்கு, தலைகீழாக்கு.",
+     "en": "SCAMPER: Substitute, Combine, Adapt, Modify, Put to another use, Eliminate, Reverse."
+    },
+    {
+     "ta": "சீக்கிரம் மாதிரி → சோதனை → மேம்பாடு. தோல்வி = தகவல்.",
+     "en": "Prototype fast → test → improve. Failure = information."
+    },
+    {
+     "ta": "பக்கவிளைவுகளை முன்பே யோசி.",
+     "en": "Think about side-effects in advance."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "\"பிரச்சனைப் பட்டியல்\" எதற்கு?",
+    "en": "What is a \"bug list\" for?"
+   },
+   "options": [
+    {
+     "ta": "தவறுகளைத் தண்டிக்க",
+     "en": "To punish mistakes"
+    },
+    {
+     "ta": "தீர்க்க வேண்டிய உண்மையான பிரச்சனைகளைச் சேகரிக்க",
+     "en": "To collect real problems worth solving"
+    },
+    {
+     "ta": "பூச்சிகளை எண்ண",
+     "en": "To count insects"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஒவ்வொரு பிரச்சனையும் ஒரு கண்டுபிடிப்பின் விதை.",
+    "en": "Every problem is the seed of an invention."
+   }
+  },
+  {
+   "q": {
+    "ta": "இ-ரிக்ஷா (பெட்ரோலுக்குப் பதில் பேட்டரி) SCAMPER-ன் எந்த நகர்வு?",
+    "en": "The e-rickshaw (battery instead of petrol) is which SCAMPER move?"
+   },
+   "options": [
+    {
+     "ta": "Substitute (மாற்று)",
+     "en": "Substitute"
+    },
+    {
+     "ta": "Reverse (தலைகீழாக்கு)",
+     "en": "Reverse"
+    },
+    {
+     "ta": "Eliminate (நீக்கு)",
+     "en": "Eliminate"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "ஒரு பாகத்தை வேறொன்றால் மாற்றியது.",
+    "en": "One part replaced by another."
+   }
+  },
+  {
+   "q": {
+    "ta": "முதல் மாதிரி (prototype) எப்படி இருக்க வேண்டும்?",
+    "en": "What should a first prototype be like?"
+   },
+   "options": [
+    {
+     "ta": "முழுமையானதாக, அழகாக",
+     "en": "Perfect and beautiful"
+    },
+    {
+     "ta": "விரைவாக, மலிவாக, சோதிப்பதற்காக",
+     "en": "Quick, cheap, made for testing"
+    },
+    {
+     "ta": "கடையில் வாங்கியதாக",
+     "en": "Bought from a shop"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "சீக்கிரம் தோற்றால் சீக்கிரம் கற்கலாம்.",
+    "en": "Fail early, learn early."
+   }
+  },
+  {
+   "q": {
+    "ta": "மீன்கொத்தியின் அலகைப் பார்த்து ரயில் வடிவமைத்தது எதற்கு உதாரணம்?",
+    "en": "Designing a train nose from a kingfisher’s beak is an example of?"
+   },
+   "options": [
+    {
+     "ta": "Biomimicry — இயற்கையிடம் கற்றல்",
+     "en": "Biomimicry — learning from nature"
+    },
+    {
+     "ta": "விளம்பரம்",
+     "en": "Advertising"
+    },
+    {
+     "ta": "தற்செயல்",
+     "en": "Pure chance"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "இயற்கை கோடிக்கணக்கான ஆண்டுகளாக வடிவமைப்புப் பிரச்சனைகளைத் தீர்த்து வருகிறது.",
+    "en": "Nature has been solving design problems for millions of years."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"ஏன்?\" என்று பலமுறை கேட்பதன் பயன்?",
+    "en": "Why ask \"why?\" many times?"
+   },
+   "options": [
+    {
+     "ta": "மற்றவர்களை எரிச்சலூட்ட",
+     "en": "To annoy people"
+    },
+    {
+     "ta": "மேல் அறிகுறியைத் தாண்டி உண்மையான காரணத்தை அடைய",
+     "en": "To get past the symptom to the real cause"
+    },
+    {
+     "ta": "நேரத்தைக் கடத்த",
+     "en": "To pass time"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "உண்மையான காரணம் தெரிந்தால் தீர்வு பெரும்பாலும் எளிதாகும்.",
+    "en": "Once you know the real cause, the fix is often simple."
+   }
+  }
+ ]
+}

@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு மேஜைக் கரண்டி (≈ 18 g) நீரில் எத்தனை நீர் மூலக்கூறுகள் இருக்கும் என்று நினைக்கிறாய்?",
+    "en": "How many water molecules do you think are in a tablespoon (≈ 18 g) of water?"
+   },
+   "options": [
+    {
+     "ta": "ஏறக்குறைய 1 லட்சம்",
+     "en": "About a hundred thousand"
+    },
+    {
+     "ta": "ஏறக்குறைய 100 கோடி",
+     "en": "About a billion"
+    },
+    {
+     "ta": "6 க்குப் பின் 23 பூஜ்ஜியங்கள்",
+     "en": "6 followed by 23 zeros"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "6.022 × 10²³ — உலகின் அனைத்துக் கடற்கரைகளிலும் உள்ள மணல் துகள்களை விட அதிகம் என்று பல விஞ்ஞானிகள் மதிப்பிடுகிறார்கள். இவ்வளவு பெரிய எண்ணைக் கையாள வேதியியலாளர்கள் \"மோல்\" என்ற ஒரு பையைக் கண்டுபிடித்தார்கள்.",
+    "en": "6.022 × 10²³ — more, many scientists estimate, than all the grains of sand on all the world’s beaches. To handle numbers this big, chemists invented a \"bag\" called the mole."
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "டஜன் போல, மோல் ஒரு எண்ணிக்கை",
@@ -238,6 +264,128 @@
    }
   },
   {
+   "type": "world",
+   "items": [
+    {
+     "icon": "💊",
+     "title": {
+      "ta": "மருந்துகள்",
+      "en": "Medicines"
+     },
+     "text": {
+      "ta": "மாத்திரையில் எவ்வளவு மருந்து மூலக்கூறு வேண்டும் என்பது மோல் கணக்கால் தீர்மானிக்கப்படுகிறது.",
+      "en": "How much drug goes into a tablet is decided by mole calculations."
+     }
+    },
+    {
+     "icon": "🌾",
+     "title": {
+      "ta": "உரம்",
+      "en": "Fertiliser"
+     },
+     "text": {
+      "ta": "யூரியாவில் எவ்வளவு நைட்ரஜன் உள்ளது என்று விவசாயிக்குச் சொல்ல.",
+      "en": "To tell a farmer how much nitrogen is in urea."
+     }
+    },
+    {
+     "icon": "🚗",
+     "title": {
+      "ta": "காற்று மாசு",
+      "en": "Air pollution"
+     },
+     "text": {
+      "ta": "வாகனப் புகையில் உள்ள CO₂, NO₂ அளவுகள் மோல்களில் கணக்கிடப்படுகின்றன.",
+      "en": "CO₂ and NO₂ in vehicle exhaust are calculated in moles."
+     }
+    },
+    {
+     "icon": "🍳",
+     "title": {
+      "ta": "சமையல்",
+      "en": "Cooking"
+     },
+     "text": {
+      "ta": "சமையல் சோடா + எலுமிச்சை வாயு வெளியிடுவது — அளவு சரியாக இருந்தால்தான் ரவா இட்லி மாவு சரியாகப் பொங்கும்.",
+      "en": "Baking soda + lemon releases gas — only the right amounts make rava idli batter rise properly."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "மோல் என்றால் என்ன, அது ஏன் தேவை?",
+    "en": "What is a mole, and why do we need it?"
+   },
+   "keywords": [
+    {
+     "ta": "6.022",
+     "en": "6.022"
+    },
+    {
+     "ta": "எண்ண",
+     "en": "count"
+    },
+    {
+     "ta": "நிறை",
+     "en": "mass",
+     "alt": [
+      "எடை",
+      "weigh"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "மோல் என்பது 6.022 × 10²³ துகள்களின் ஒரு \"பை\". அணுக்களை ஒவ்வொன்றாக எண்ண முடியாததால், நிறையை அளந்து, மோலார் நிறையால் வகுத்து எண்ணிக்கையைக் கண்டுபிடிக்கிறோம்.",
+    "en": "A mole is a \"bag\" of 6.022 × 10²³ particles. Since atoms can’t be counted one by one, we weigh them and divide by the molar mass to find how many there are."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "புதிய மருந்துகளும் பேட்டரிப் பொருட்களும் இப்போது கணினியில் மூலக்கூறு அளவில் வடிவமைக்கப்படுகின்றன — ஆய்வகத்தில் உருவாக்கும் முன்பே.",
+    "en": "New medicines and battery materials are now designed on computers at the molecular level — before they are ever made in a lab."
+   },
+   "risk": {
+    "ta": "அளவில் ஒரு சிறிய பிழை — மருந்தில் அதிக அளவு விஷமாகலாம்; தொழிற்சாலையில் விபத்தாகலாம்.",
+    "en": "A small error in quantity — too much medicine can be poisonous; in a factory it can cause an accident."
+   },
+   "fix": {
+    "ta": "கணக்கை இருமுறை சரிபார்த்தல், அலகுகளை (g, mol) எப்போதும் எழுதுதல், இரண்டாவது நபர் சரிபார்த்தல்.",
+    "en": "Double-check calculations, always write units (g, mol), and have a second person check."
+   },
+   "q": {
+    "ta": "மருத்துவமனையில் மருந்து அளவுப் பிழைகளைக் குறைக்க என்ன அமைப்பு வடிவமைக்கலாம்?",
+    "en": "What system could you design to reduce dosage errors in a hospital?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "சரியான அளவு சுண்ணாம்பு",
+    "en": "Just the right amount"
+   },
+   "text": {
+    "ta": "ஒரு விவசாயிக்கு, மண்ணின் அமிலத்தன்மையைக் குறைக்க எவ்வளவு சுண்ணாம்பு (CaCO₃) போட வேண்டும் என்று கணக்கிடும் ஒரு எளிய அட்டையை வடிவமை.",
+    "en": "Design a simple card that helps a farmer work out how much lime (CaCO₃) to add to reduce soil acidity."
+   },
+   "prompts": [
+    {
+     "ta": "விவசாயி என்ன அளக்க முடியும்?",
+     "en": "What can the farmer measure?"
+    },
+    {
+     "ta": "கணக்கை எப்படி எளிதாக்குவாய் — அட்டவணை? வண்ணக் குறியீடு?",
+     "en": "How will you make the maths easy — a table? colour codes?"
+    },
+    {
+     "ta": "அதிகம் போட்டால் என்ன பக்கவிளைவு?",
+     "en": "What’s the side-effect of adding too much?"
+    }
+   ]
+  },
+  {
    "type": "summary",
    "points": [
     {
@@ -424,6 +572,29 @@
    "explain": {
     "ta": "ஒரு மோலுக்கு எத்தனை கிராம் → g/mol.",
     "en": "Grams per mole → g/mol."
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 7",
+    "en": "Class 10, Ch. 7"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "11-ஆம் வகுப்பு வேதியியல் — அலகு 1",
+    "en": "Class 11 Chemistry — Unit 1"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Chemistry — The mole",
+    "en": "Chemistry — The mole"
    }
   }
  ]

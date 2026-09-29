@@ -1,0 +1,443 @@
+{
+ "id": "tech-side-effects",
+ "minutes": 30,
+ "title": {
+  "ta": "தொழில்நுட்பத்தின் பக்கவிளைவுகள் — அவற்றைச் சரிசெய்வது எப்படி?",
+  "en": "Technology’s side-effects — and how to fix them"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "சைபர் பாதுகாப்பு & டிஜிட்டல் குடியுரிமை",
+    "en": "Cyber safety & digital citizenship"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "ஊடக & தகவல் எழுத்தறிவு",
+    "en": "Media & information literacy"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "ஒவ்வொரு தொழில்நுட்பத்துக்கும் நன்மை-தீமை இரண்டும் உண்டு என்று பார்க்க",
+   "en": "See that every technology has both benefits and costs"
+  },
+  {
+   "ta": "போலிச் செய்தி, மோசடி, திரைப் பழக்கம், மின்னணுக் கழிவு ஆகியவற்றிலிருந்து தன்னைக் காக்க",
+   "en": "Protect yourself from fake news, fraud, screen habits and e-waste"
+  },
+  {
+   "ta": "தீர்வுகளை வடிவமைப்பவனாக சிந்திக்க",
+   "en": "Think like someone who designs the fixes"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "மொபைல் போன் வெளிநாட்டில் உள்ள அப்பாவையும் வீட்டில் உள்ள குழந்தையையும் இணைக்கிறது. அதே போன் இரவு 1 மணிக்கும் குழந்தையைத் தூங்கவிடாமல் செய்கிறது.\n\nஒவ்வொரு தொழில்நுட்பமும் ஒரு பிரச்சனையைத் தீர்த்து, இன்னொன்றை உருவாக்குகிறது. அதைப் பயன்படுத்துபவனாக மட்டும் இல்லாமல், **பக்கவிளைவுகளைச் சரிசெய்பவனாக** இருப்பதுதான் அடுத்த தலைமுறையின் வேலை.",
+    "en": "A mobile phone connects a father working abroad with his child at home. The same phone keeps that child awake at 1 a.m.\n\nEvery technology solves one problem and creates another. The next generation’s job is not just to use it, but to **fix its side-effects**."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "நீண்ட நேரம் போன் பார்க்கும்போது கண்களுக்கு அதிக சோர்வு எதனால்?",
+    "en": "When using a phone for a long time, what tires your eyes most?"
+   },
+   "options": [
+    {
+     "ta": "திரையின் பிரகாசம் மட்டும்",
+     "en": "Only the screen brightness"
+    },
+    {
+     "ta": "இடைவேளை இல்லாமல் அருகில் பார்ப்பது, இமைக்க மறப்பது",
+     "en": "Looking close-up without breaks and forgetting to blink"
+    },
+    {
+     "ta": "போனிலிருந்து வரும் கதிர்வீச்சு",
+     "en": "Radiation from the phone"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "அருகில் உள்ள திரையை உற்றுப் பார்க்கும்போது நாம் குறைவாக இமைக்கிறோம்; கண் தசைகள் ஓய்வின்றி வேலை செய்கின்றன. எளிய தீர்வு — **20-20-20 விதி:** ஒவ்வொரு 20 நிமிடத்திற்கும், 20 அடி தூரத்தில் உள்ள ஒன்றை, 20 விநாடிகள் பார்.",
+    "en": "When staring at a nearby screen we blink less and the eye muscles work without rest. A simple fix — the **20-20-20 rule:** every 20 minutes, look at something 20 feet away for 20 seconds."
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "திரையும் தூக்கமும்",
+    "en": "Screens and sleep"
+   },
+   "text": {
+    "ta": "பல app-கள் நீ நீண்ட நேரம் பார்க்கும்படியே வடிவமைக்கப்பட்டுள்ளன — முடிவில்லாத scroll, தானாக அடுத்த வீடியோ, notification.",
+    "en": "Many apps are designed to keep you watching — endless scrolling, autoplaying the next video, notifications."
+   },
+   "risk": {
+    "ta": "தாமதமான தூக்கம், கவனக் குறைவு, குறைந்த விளையாட்டு, கண் சோர்வு.",
+    "en": "Late sleep, poor concentration, less outdoor play, tired eyes."
+   },
+   "fix": {
+    "ta": "தூங்கும் 1 மணி நேரம் முன் திரை வேண்டாம்; autoplay-ஐ அணை; 20-20-20; போனை படுக்கையறைக்கு வெளியே charge செய். வடிவமைப்பாளர்கள்: \"30 நிமிடம் ஆகிவிட்டது\" நினைவூட்டல்.",
+    "en": "No screens 1 hour before bed; turn off autoplay; 20-20-20; charge the phone outside the bedroom. Designers: add a \"you’ve been scrolling 30 minutes\" reminder."
+   },
+   "q": {
+    "ta": "ஒரு app குழந்தைகளை \"அதிகம்\" அல்ல, \"நன்றாக\" பயன்படுத்த வைக்க எப்படி வடிவமைக்கலாம்?",
+    "en": "How could an app be designed so children use it well, not more?"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "போலிச் செய்தியும் deepfake-உம்",
+    "en": "Fake news and deepfakes"
+   },
+   "text": {
+    "ta": "இன்று AI மூலம் யாருடைய குரலிலும் முகத்திலும் போலி வீடியோ செய்யலாம். WhatsApp forward-கள் உண்மையை விட வேகமாகப் பரவுகின்றன.",
+    "en": "Today AI can fake a video in anyone’s face and voice. WhatsApp forwards spread faster than the truth."
+   },
+   "risk": {
+    "ta": "தவறான மருத்துவ அறிவுரை, கலவரம், மோசடி, ஒருவரின் பெயர் கெடுதல்.",
+    "en": "Wrong medical advice, riots, scams, ruined reputations."
+   },
+   "fix": {
+    "ta": "**பகிரும் முன் நிறுத்து:** யார் அனுப்பியது? அரசு / நம்பகமான செய்தி நிறுவனம் இதைச் சொல்கிறதா? \"உடனே 10 பேருக்கு அனுப்பு\" என்றால் சந்தேகப்படு. படத்தை reverse image search செய்.",
+    "en": "**Pause before sharing:** who sent it? Does the government or a trusted news source say so? \"Forward to 10 people now\" is a red flag. Do a reverse image search."
+   },
+   "q": {
+    "ta": "ஒரு செய்தி உண்மையா என்று சோதிக்க நீ பின்பற்றும் 3 படிகள் என்ன?",
+    "en": "What 3 steps will you follow to check whether a message is true?"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு forward: \"சுடுநீர் குடித்தால் இந்த வைரஸ் செத்துவிடும் — உடனே 10 குழுக்களுக்கு அனுப்பு!\" முதலில் என்ன செய்வாய்?",
+    "en": "A forward says: \"Drinking hot water kills this virus — send to 10 groups now!\" What do you do first?"
+   },
+   "options": [
+    {
+     "ta": "உடனே அனுப்புவேன் — நல்ல விஷயம்தானே",
+     "en": "Forward it right away — it’s helpful"
+    },
+    {
+     "ta": "சுகாதாரத் துறை / நம்பகமான மூலத்தில் சரிபார்ப்பேன், அதுவரை அனுப்ப மாட்டேன்",
+     "en": "Check with the health department or a trusted source, and not forward until then"
+    },
+    {
+     "ta": "அனுப்பியவரைத் திட்டுவேன்",
+     "en": "Scold the sender"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "\"உடனே அனுப்பு\" — ஏன் இவ்வளவு அவசரம்?",
+    "en": "\"Send now\" — why the hurry?"
+   },
+   "solution": {
+    "ta": "அவசரப்படுத்துவது போலிச் செய்தியின் அடையாளம். சரிபார்த்த பிறகே பகிர்.",
+    "en": "Pressure to hurry is a sign of fake news. Share only after checking."
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "OTP மோசடி & தனியுரிமை",
+    "en": "OTP fraud & privacy"
+   },
+   "text": {
+    "ta": "\"உங்கள் வங்கிக் கணக்கு முடக்கப்படும் — OTP சொல்லுங்கள்\" என்று அழைப்புகள் வருகின்றன. சிறுவர்களையும் முதியவர்களையும் குறிவைக்கின்றனர்.",
+    "en": "Calls say \"your bank account will be blocked — tell us the OTP\". They target children and elderly people."
+   },
+   "risk": {
+    "ta": "ஒரே OTP-ல் குடும்பத்தின் சேமிப்பு முழுவதும் போகலாம்.",
+    "en": "One OTP can wipe out a family’s savings."
+   },
+   "fix": {
+    "ta": "**OTP, PIN, password — யாரிடமும் சொல்லாதே.** வங்கி ஒருபோதும் கேட்காது. தெரியாத link-ஐத் தொடாதே. சந்தேகம் என்றால் போனை வைத்து, பெரியவரிடம் சொல். மோசடி நடந்தால் உடனே 1930 (தேசிய சைபர் குற்ற உதவி எண்) அழை.",
+    "en": "**Never tell anyone an OTP, PIN or password.** Banks never ask. Don’t tap unknown links. If in doubt, hang up and tell an adult. If fraud happens, call 1930 (national cyber-crime helpline) at once."
+   },
+   "q": {
+    "ta": "உன் தாத்தா-பாட்டிக்கு OTP மோசடி பற்றி 3 வரிகளில் எப்படி விளக்குவாய்?",
+    "en": "How would you explain OTP fraud to your grandparents in 3 lines?"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "மின்னணுக் கழிவு (e-waste)",
+    "en": "E-waste"
+   },
+   "text": {
+    "ta": "பழைய போன், charger, பேட்டரிகளில் தங்கம், செம்பு போன்ற மதிப்புள்ள உலோகங்களும், ஈயம், பாதரசம் போன்ற நச்சுப் பொருட்களும் உள்ளன.",
+    "en": "Old phones, chargers and batteries contain valuable metals like gold and copper — and toxic ones like lead and mercury."
+   },
+   "risk": {
+    "ta": "எரித்தாலோ குப்பையில் போட்டாலோ நச்சு மண்ணிலும் நீரிலும் கலக்கிறது; எரிப்பவர்களின் உடல்நலம் பாதிக்கிறது.",
+    "en": "Burnt or dumped, the poisons enter soil and water; the people who burn them fall ill."
+   },
+   "fix": {
+    "ta": "முதலில் பழுதுபார், பிறகு மறுபயன்பாடு, கடைசியில் அங்கீகரிக்கப்பட்ட e-waste சேகரிப்பு மையம். ஒருபோதும் எரிக்காதே. வடிவமைப்பாளர்கள்: பழுதுபார்க்க எளிதான பொருட்கள்.",
+    "en": "First repair, then reuse, finally an authorised e-waste collection centre. Never burn it. Designers: make products easy to repair."
+   },
+   "q": {
+    "ta": "உன் பள்ளியில் ஒரு e-waste சேகரிப்புப் பெட்டி எப்படி நடத்தலாம்?",
+    "en": "How could you run an e-waste collection box at your school?"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "AI-உம் வேலைகளும்",
+    "en": "AI and jobs"
+   },
+   "text": {
+    "ta": "திரும்பத் திரும்ப ஒரே மாதிரி செய்யும் பல பணிகளை AI செய்யத் தொடங்கியுள்ளது.",
+    "en": "AI has started doing many repetitive tasks."
+   },
+   "risk": {
+    "ta": "சில வேலைகள் மறையலாம்; AI பயன்படுத்தத் தெரியாதவர்கள் பின்தங்கலாம்.",
+    "en": "Some jobs may disappear; people who can’t use AI may fall behind."
+   },
+   "fix": {
+    "ta": "AI-க்குக் கடினமானவற்றை வளர்த்துக்கொள்: படைப்பாற்றல், பிறரைப் புரிந்துகொள்ளுதல், குழுப்பணி, கைத்திறன், சரி-தவறு தீர்மானம். AI-ஐ ஒரு கருவியாகப் பயன்படுத்தவும் கற்றுக்கொள்.",
+    "en": "Grow what AI finds hard: creativity, understanding people, teamwork, hands-on skills, judging right from wrong. And learn to use AI as a tool."
+   },
+   "q": {
+    "ta": "10 ஆண்டுகளில் இல்லாமல் போகக்கூடிய ஒரு வேலை, புதிதாக வரக்கூடிய ஒரு வேலை — இரண்டையும் யோசி.",
+    "en": "Think of one job that may vanish in 10 years, and one new job that may appear."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "குடும்ப \"திரை தணிக்கை\"",
+    "en": "A family \"screen audit\""
+   },
+   "text": {
+    "ta": "ஒரு வாரம், வீட்டில் எல்லோரும் தினமும் எவ்வளவு நேரம் திரை பார்க்கிறார்கள் என்று போனின் Screen time / Digital Wellbeing அமைப்பிலிருந்து குறித்துக்கொள். எந்த app அதிக நேரம்? அது உங்களுக்கு என்ன கொடுத்தது, என்ன எடுத்துக்கொண்டது? குடும்பமாக ஒரு விதியை முடிவு செய்யுங்கள் (எ.கா. சாப்பிடும்போது போன் இல்லை) — ஒரு வாரம் கழித்து மீண்டும் அளவுங்கள்.",
+    "en": "For one week, note how long everyone at home spends on screens each day, using the phone’s Screen time / Digital Wellbeing setting. Which app takes the most time? What did it give you, and what did it take away? Agree on one family rule (e.g. no phones while eating) — and measure again a week later."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "ஒரு தொழில்நுட்பத்தின் பக்கவிளைவை ஒருவர் எப்படி சரிசெய்ய முடியும்? ஒரு உதாரணத்துடன் சொல்.",
+    "en": "How can a person fix a side-effect of technology? Give one example."
+   },
+   "keywords": [
+    {
+     "ta": "பக்கவிளைவு",
+     "en": "side-effect",
+     "alt": [
+      "தீமை",
+      "harm",
+      "side effect"
+     ]
+    },
+    {
+     "ta": "சரிபார்",
+     "en": "check",
+     "alt": [
+      "verify"
+     ]
+    },
+    {
+     "ta": "வடிவமை",
+     "en": "design",
+     "alt": [
+      "தீர்வு",
+      "fix"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "முதலில் பக்கவிளைவைக் கவனி, பிறகு பழக்கத்தையோ வடிவமைப்பையோ மாற்று. உதாரணம்: போலிச் செய்தியைப் பகிரும் முன் சரிபார்ப்பது; app-ல் நேர நினைவூட்டல் வடிவமைப்பது.",
+    "en": "First notice the side-effect, then change the habit or the design. Example: checking a message before sharing it; designing a time reminder into an app."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "பக்கவிளைவைத் தீர்க்கும் கண்டுபிடிப்பு",
+    "en": "An invention that fixes a side-effect"
+   },
+   "text": {
+    "ta": "மேலே உள்ள பிரச்சனைகளில் ஒன்றைத் தேர்ந்தெடு. அதைக் குறைக்கும் ஒரு app வசதி, பழக்கம், அல்லது பொருளை வடிவமை.",
+    "en": "Pick one of the problems above. Design an app feature, a habit or an object that reduces it."
+   },
+   "prompts": [
+    {
+     "ta": "யாருக்கு இந்தப் பிரச்சனை அதிகம்?",
+     "en": "Who suffers from this problem most?"
+    },
+    {
+     "ta": "உன் தீர்வு எப்படி வேலை செய்யும்?",
+     "en": "How will your fix work?"
+    },
+    {
+     "ta": "உன் தீர்வுக்கே ஒரு பக்கவிளைவு இருக்குமா?",
+     "en": "Could your fix have a side-effect of its own?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "ஒவ்வொரு தொழில்நுட்பமும் ஒரு பிரச்சனையைத் தீர்த்து இன்னொன்றை உருவாக்குகிறது.",
+     "en": "Every technology solves one problem and creates another."
+    },
+    {
+     "ta": "20-20-20 விதி; தூங்கும் முன் திரை வேண்டாம்.",
+     "en": "The 20-20-20 rule; no screens before sleep."
+    },
+    {
+     "ta": "பகிரும் முன் நிறுத்து, சரிபார்.",
+     "en": "Pause and check before sharing."
+    },
+    {
+     "ta": "OTP யாரிடமும் இல்லை; மோசடிக்கு 1930.",
+     "en": "Never share an OTP; call 1930 for fraud."
+    },
+    {
+     "ta": "பழுதுபார் → மறுபயன் → அங்கீகரிக்கப்பட்ட மறுசுழற்சி. எரிக்காதே.",
+     "en": "Repair → reuse → authorised recycling. Never burn."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "20-20-20 விதி என்ன?",
+    "en": "What is the 20-20-20 rule?"
+   },
+   "options": [
+    {
+     "ta": "20 நிமிடம் படி, 20 நிமிடம் விளையாடு",
+     "en": "Study 20 min, play 20 min"
+    },
+    {
+     "ta": "ஒவ்வொரு 20 நிமிடமும், 20 அடி தூரத்தை, 20 விநாடி பார்",
+     "en": "Every 20 minutes, look 20 feet away for 20 seconds"
+    },
+    {
+     "ta": "தினமும் 20 மணி நேரம் தூங்கு",
+     "en": "Sleep 20 hours a day"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "கண் தசைகளுக்கு ஓய்வு தருகிறது.",
+    "en": "It rests the eye muscles."
+   }
+  },
+  {
+   "q": {
+    "ta": "வங்கி அதிகாரி என்று சொல்லி ஒருவர் OTP கேட்கிறார். நீ?",
+    "en": "Someone claiming to be from the bank asks for your OTP. You?"
+   },
+   "options": [
+    {
+     "ta": "சொல்வேன் — வங்கிதானே",
+     "en": "Tell them — it’s the bank"
+    },
+    {
+     "ta": "சொல்ல மாட்டேன்; போனை வைத்து பெரியவரிடம் சொல்வேன்",
+     "en": "Won’t tell; hang up and tell an adult"
+    },
+    {
+     "ta": "பாதி மட்டும் சொல்வேன்",
+     "en": "Tell half of it"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "வங்கி ஒருபோதும் OTP கேட்காது.",
+    "en": "Banks never ask for OTPs."
+   }
+  },
+  {
+   "q": {
+    "ta": "பழைய போனை என்ன செய்வது சிறந்தது?",
+    "en": "What’s best to do with an old phone?"
+   },
+   "options": [
+    {
+     "ta": "எரிப்பது",
+     "en": "Burn it"
+    },
+    {
+     "ta": "குப்பையில் போடுவது",
+     "en": "Throw it in the bin"
+    },
+    {
+     "ta": "பழுதுபார்த்தல் / மறுபயன் / அங்கீகரிக்கப்பட்ட e-waste மையம்",
+     "en": "Repair / reuse / authorised e-waste centre"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "நச்சுப் பொருட்கள் மண்ணில் கலக்காமல், மதிப்புள்ள உலோகங்கள் மீட்கப்படும்.",
+    "en": "Toxins stay out of the soil and valuable metals are recovered."
+   }
+  },
+  {
+   "q": {
+    "ta": "போலிச் செய்தியின் ஒரு அடையாளம்?",
+    "en": "One sign of fake news?"
+   },
+   "options": [
+    {
+     "ta": "\"உடனே எல்லோருக்கும் அனுப்பு\" என்ற அவசரம்",
+     "en": "Pressure: \"forward to everyone now\""
+    },
+    {
+     "ta": "அரசு இணையதள இணைப்பு உள்ளது",
+     "en": "It links to a government website"
+    },
+    {
+     "ta": "தேதி குறிப்பிடப்பட்டுள்ளது",
+     "en": "It has a date on it"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அவசரம் உன்னை யோசிக்க விடாமல் தடுக்கிறது.",
+    "en": "Urgency stops you from thinking."
+   }
+  },
+  {
+   "q": {
+    "ta": "AI காலத்தில் மனிதருக்கு மிக முக்கியமான திறன்கள்?",
+    "en": "The most important human skills in the age of AI?"
+   },
+   "options": [
+    {
+     "ta": "மனப்பாடம் மட்டும்",
+     "en": "Memorising only"
+    },
+    {
+     "ta": "படைப்பாற்றல், பிறரைப் புரிதல், சரி-தவறு தீர்மானம், AI-ஐக் கருவியாகப் பயன்படுத்துதல்",
+     "en": "Creativity, understanding people, judging right and wrong, using AI as a tool"
+    },
+    {
+     "ta": "எதுவும் தேவையில்லை",
+     "en": "None are needed"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "AI-க்குக் கடினமானவற்றிலேயே மனிதரின் பலம் உள்ளது.",
+    "en": "Human strength lies in what AI finds hard."
+   }
+  }
+ ]
+}

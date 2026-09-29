@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு கட்டடத்திலிருந்து விலகிச் செல்லும்போது, அதன் உச்சியைப் பார்க்கும் கோணம்…",
+    "en": "As you walk away from a building, the angle to its top…"
+   },
+   "options": [
+    {
+     "ta": "அதிகரிக்கும்",
+     "en": "increases"
+    },
+    {
+     "ta": "குறையும்",
+     "en": "decreases"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "stays the same"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "தொலைவில் சென்றால் உச்சி \"தாழ்வாக\"த் தெரிகிறது — கோணம் குறைகிறது. அருகில் சென்றால் தலையை உயர்த்த வேண்டும். இரண்டு இடங்களிலிருந்து இந்த மாற்றத்தை அளந்தால், கட்டடத்தைத் தொடாமலே உயரம் கிடைக்கும்!",
+    "en": "Far away, the top looks \"lower\" — the angle shrinks. Up close you must tilt your head up. Measure this change from two places and you get the height without touching the building!"
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "இரண்டு புதிய சொற்கள்",
@@ -242,6 +268,117 @@
    }
   },
   {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🗻",
+     "title": {
+      "ta": "எவரெஸ்ட் உயரம்",
+      "en": "Height of Everest"
+     },
+     "text": {
+      "ta": "யாரும் ஏறாமலே, தொலைவிலிருந்து கோணங்களை அளந்து கணக்கிடப்பட்டது.",
+      "en": "Calculated from angles measured far away, before anyone climbed it."
+     }
+    },
+    {
+     "icon": "⛵",
+     "title": {
+      "ta": "கடல் பயணம்",
+      "en": "Navigation at sea"
+     },
+     "text": {
+      "ta": "கலங்கரை விளக்கத்தின் கோணத்திலிருந்து கரையிலிருந்து தூரம்.",
+      "en": "Distance from shore using the angle to a lighthouse."
+     }
+    },
+    {
+     "icon": "✈️",
+     "title": {
+      "ta": "விமானம் இறங்குதல்",
+      "en": "Aircraft landing"
+     },
+     "text": {
+      "ta": "ஏறக்குறைய 3° சாய்வில் இறங்க ஓடுபாதை விளக்குகள் வழிகாட்டுகின்றன.",
+      "en": "Runway lights guide planes down a roughly 3° slope."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "கட்டடத்தைத் தொடாமல் அதன் உயரத்தை எப்படிக் காண்பது?",
+    "en": "How do you find a building’s height without touching it?"
+   },
+   "keywords": [
+    {
+     "ta": "தூரம்",
+     "en": "distance"
+    },
+    {
+     "ta": "கோணம்",
+     "en": "angle",
+     "alt": [
+      "ஏற்றக்கோணம்",
+      "elevation"
+     ]
+    },
+    {
+     "ta": "tan",
+     "en": "tan"
+    }
+   ],
+   "model": {
+    "ta": "கட்டடத்திலிருந்து தூரத்தை அளந்து, உச்சியின் ஏற்றக்கோணத்தை அளக்க வேண்டும். உயரம் = தூரம் × tan(கோணம்) + கண் உயரம்.",
+    "en": "Measure your distance from the building and the angle of elevation of its top. Height = distance × tan(angle) + eye height."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று நில அளவையாளர்கள் lidar (லேசர்), ட்ரோன் கேமராக்கள் மூலம் ஒரு நகரம் முழுவதையும் 3D-ல் அளக்கிறார்கள் — அடிப்படை இதே முக்கோணவியல்தான்.",
+    "en": "Today surveyors map whole cities in 3D using lidar (lasers) and drone cameras — built on this same trigonometry."
+   },
+   "risk": {
+    "ta": "ட்ரோன்கள் மற்றவர்களின் வீடுகளைப் படம் பிடிக்கலாம் — தனியுரிமை மீறல்.",
+    "en": "Drones can photograph people’s homes — an invasion of privacy."
+   },
+   "fix": {
+    "ta": "அனுமதியுடன் மட்டும் பறத்தல், பறக்கக் கூடாத பகுதிகள், முகங்களை மங்கலாக்கும் மென்பொருள்.",
+    "en": "Fly only with permission, no-fly zones, software that blurs faces."
+   },
+   "q": {
+    "ta": "உன் தெருவில் ஒரு ட்ரோன் பறக்கும்போது அதற்கு என்ன விதிகள் இருக்க வேண்டும்?",
+    "en": "What rules should apply to a drone flying over your street?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் ஊரின் உயரமான பொருள்",
+    "en": "The tallest thing in your town"
+   },
+   "text": {
+    "ta": "கோயில் கோபுரம், நீர்த்தொட்டி, மொபைல் டவர் — உன் கிளினோமீட்டரால் அளந்து, இணையத்தில் / அதிகாரிகளிடம் உள்ள மதிப்புடன் ஒப்பிடு.",
+    "en": "A temple tower, water tank, mobile tower — measure it with your clinometer and compare with the official value."
+   },
+   "prompts": [
+    {
+     "ta": "எந்தப் பொருள்? ஏன்?",
+     "en": "Which object? Why?"
+    },
+    {
+     "ta": "எத்தனை இடங்களிலிருந்து அளப்பாய்?",
+     "en": "From how many places will you measure?"
+    },
+    {
+     "ta": "உன் விடைக்கும் உண்மை மதிப்புக்கும் உள்ள வேறுபாடு எதனால்?",
+     "en": "What caused the difference between your answer and the real value?"
+    }
+   ]
+  },
+  {
    "type": "summary",
    "points": [
     {
@@ -424,6 +561,29 @@
    "explain": {
     "ta": "90° − 50° = 40°",
     "en": "90° − 50° = 40°"
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 6",
+    "en": "Class 10, Ch. 6"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 9",
+    "en": "Class 10, Ch. 9"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Angles of elevation & depression",
+    "en": "Angles of elevation & depression"
    }
   }
  ]

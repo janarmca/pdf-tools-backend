@@ -1302,5 +1302,43 @@
     }
    ]
   }
- }
+ },
+ "future": [
+  {
+   "id": "ai-learns",
+   "icon": "🤖",
+   "title": {
+    "ta": "AI எப்படிக் கற்கிறது?",
+    "en": "How does AI learn?"
+   },
+   "desc": {
+    "ta": "உன் சொந்த மாம்பழ AI-ஐப் பயிற்றுவி — அது எங்கே தவறுகிறது என்றும் பார்",
+    "en": "Train your own mango AI — and see where it goes wrong"
+   }
+  },
+  {
+   "id": "inventor-toolkit",
+   "icon": "💡",
+   "title": {
+    "ta": "கண்டுபிடிப்பாளரின் கருவிப்பெட்டி",
+    "en": "The inventor’s toolkit"
+   },
+   "desc": {
+    "ta": "பிரச்சனைப் பட்டியல், \"ஏன்\" × 5, SCAMPER, ₹100 சவால்",
+    "en": "Bug list, \"why\" × 5, SCAMPER, the ₹100 challenge"
+   }
+  },
+  {
+   "id": "tech-side-effects",
+   "icon": "🛡️",
+   "title": {
+    "ta": "தொழில்நுட்பப் பக்கவிளைவுகள் & தீர்வுகள்",
+    "en": "Tech side-effects & fixes"
+   },
+   "desc": {
+    "ta": "திரை, போலிச் செய்தி, OTP மோசடி, e-waste, AI & வேலைகள்",
+    "en": "Screens, fake news, OTP fraud, e-waste, AI & jobs"
+   }
+  }
+ ]
 }

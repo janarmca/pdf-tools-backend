@@ -28,6 +28,32 @@
    }
   },
   {
+   "type": "predict",
+   "q": {
+    "ta": "sin 20° மற்றும் cos 70° — எது பெரியது?",
+    "en": "sin 20° or cos 70° — which is bigger?"
+   },
+   "options": [
+    {
+     "ta": "sin 20°",
+     "en": "sin 20°"
+    },
+    {
+     "ta": "cos 70°",
+     "en": "cos 70°"
+    },
+    {
+     "ta": "இரண்டும் சமம்",
+     "en": "They are equal"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "ஒரே முக்கோணத்தை இரண்டு மூலைகளிலிருந்து பார்க்கிறோம்! 20° + 70° = 90°. 20°-க்கு எதிர்ப்பக்கம் = 70°-க்கு அடுத்துள்ள பக்கம்.",
+    "en": "It’s the same triangle seen from two corners! 20° + 70° = 90°. The side opposite 20° is the side adjacent to 70°."
+   }
+  },
+  {
    "type": "text",
    "title": {
     "ta": "ஒரே முக்கோணம், இரண்டு பார்வைகள்",
@@ -249,6 +275,113 @@
    }
   },
   {
+   "type": "world",
+   "items": [
+    {
+     "icon": "♿",
+     "title": {
+      "ta": "சாய்தளங்கள்",
+      "en": "Ramps"
+     },
+     "text": {
+      "ta": "சக்கர நாற்காலிக்கு ஏற்ற சாய்வைக் கணக்கிட.",
+      "en": "To work out a wheelchair-friendly slope."
+     }
+    },
+    {
+     "icon": "🛣️",
+     "title": {
+      "ta": "மலைச் சாலைகள்",
+      "en": "Ghat roads"
+     },
+     "text": {
+      "ta": "கொடைக்கானல், ஊட்டி சாலைகளின் சாய்வு \"gradient\" ஆகக் குறிக்கப்படுகிறது — அது tan-தான்.",
+      "en": "The steepness of hill roads is given as a \"gradient\" — that’s tan."
+     }
+    },
+    {
+     "icon": "☀️",
+     "title": {
+      "ta": "சோலார் பலகைகள்",
+      "en": "Solar panels"
+     },
+     "text": {
+      "ta": "சூரியனை நோக்கி சரியான கோணத்தில் சாய்த்தால் அதிக மின்சாரம்.",
+      "en": "Tilted at the right angle to the sun, they give more power."
+     }
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "cos 60° = sin 30° ஏன்?",
+    "en": "Why is cos 60° = sin 30°?"
+   },
+   "keywords": [
+    {
+     "ta": "90",
+     "en": "90"
+    },
+    {
+     "ta": "எதிர்",
+     "en": "opposite"
+    },
+    {
+     "ta": "அடுத்து",
+     "en": "adjacent"
+    }
+   ],
+   "model": {
+    "ta": "30° + 60° = 90°, எனவே இரண்டும் ஒரே செங்கோண முக்கோணத்தின் இரு கோணங்கள். 30°-க்கு எதிர்ப்பக்கமே 60°-க்கு அடுத்துள்ள பக்கம்; கர்ணம் ஒன்றே.",
+    "en": "30° + 60° = 90°, so they are the two angles of the same right triangle. The side opposite 30° is the side adjacent to 60°; the hypotenuse is shared."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "ரோபோ கைகள் ஒவ்வொரு இணைப்பின் கோணத்தையும் கணக்கிட்டே பொருளைப் பிடிக்கின்றன — இதுதான் \"முக்கோணத்தைத் தீர்த்தல்\", ஒவ்வொரு விநாடியும்.",
+    "en": "Robot arms grip objects by calculating the angle of every joint — that’s \"solving triangles\", every second."
+   },
+   "risk": {
+    "ta": "தவறாகக் கணக்கிட்ட ரோபோ கை அருகில் உள்ளவரைத் தாக்கலாம்.",
+    "en": "A robot arm that miscalculates can hit someone nearby."
+   },
+   "fix": {
+    "ta": "பாதுகாப்பு வரம்புகள், அவசர நிறுத்தப் பொத்தான், மனிதர் அருகில் வந்தால் மெதுவாகும் சென்சார்கள்.",
+    "en": "Safety limits, emergency stop buttons, sensors that slow down when a person comes near."
+   },
+   "q": {
+    "ta": "உன் வீட்டில் ஒரு ரோபோ உதவியாளர் இருந்தால், அதற்கு என்ன பாதுகாப்பு விதிகள் வைப்பாய்?",
+    "en": "If you had a robot helper at home, what safety rules would you give it?"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "பள்ளிக்கு ஒரு ramp",
+    "en": "A ramp for your school"
+   },
+   "text": {
+    "ta": "உன் பள்ளியில் ஒரு படி அல்லது வாசல் சக்கர நாற்காலியில் வருபவருக்குக் கஷ்டமாக உள்ளதா? அளந்து, ஒரு சாய்தளத்தை வடிவமை.",
+    "en": "Is there a step or doorway at your school that’s hard for a wheelchair user? Measure it and design a ramp."
+   },
+   "prompts": [
+    {
+     "ta": "படியின் உயரம்?",
+     "en": "Height of the step?"
+    },
+    {
+     "ta": "எந்தக் கோணம் பாதுகாப்பானது — அதற்கு நீளம் எவ்வளவு?",
+     "en": "Which angle is safe — and how long must the ramp be?"
+    },
+    {
+     "ta": "இடம் போதவில்லையென்றால் என்ன செய்வாய்? (குறிப்பு: வளைந்த ramp)",
+     "en": "Not enough space? (Hint: a turning ramp)"
+    }
+   ]
+  },
+  {
    "type": "summary",
    "points": [
     {
@@ -431,6 +564,29 @@
    "explain": {
     "ta": "RAD mode-ல் 30 ரேடியன் என்று எடுத்துக்கொள்ளும். DEG mode-க்கு மாற்றுங்கள் — அப்போது 0.5 வரும்.",
     "en": "In RAD mode it treats 30 as radians. Switch to DEG mode and you’ll get 0.5."
+   }
+  }
+ ],
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு, அத். 6",
+    "en": "Class 9, Ch. 6"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு, அத். 8",
+    "en": "Class 10, Ch. 8"
+   }
+  },
+  {
+   "b": "IGCSE",
+   "w": {
+    "ta": "Right-angled trigonometry",
+    "en": "Right-angled trigonometry"
    }
   }
  ]
