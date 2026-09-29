@@ -511,8 +511,21 @@ app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
         max_tokens: 1500
       })
     });
-    const nvidiaJson = await nvidiaRes.json();
-    if (!nvidiaRes.ok) throw new Error(nvidiaJson.error?.message || nvidiaJson.message || 'AI request failed');
+    const nvidiaJson = await nvidiaRes.json().catch(() => ({}));
+    if (!nvidiaRes.ok) {
+      // NVIDIA's error shape varies (error.message, a plain "detail" string on
+      // an auth failure, etc.) — check every field we've seen before falling
+      // back to a generic message, and always include the HTTP status so a
+      // bad NVIDIA_API_KEY (401), a renamed/unavailable model (404), or a
+      // rate limit (429) are distinguishable from each other in the logs
+      // instead of all looking like the same unhelpful "AI request failed".
+      const detail = nvidiaJson.error?.message
+        || (typeof nvidiaJson.error === 'string' ? nvidiaJson.error : null)
+        || nvidiaJson.message
+        || nvidiaJson.detail;
+      console.error('[api/ai/text] NVIDIA request failed, HTTP', nvidiaRes.status, '— raw response:', JSON.stringify(nvidiaJson));
+      throw new Error(detail ? `${detail} (NVIDIA HTTP ${nvidiaRes.status})` : `AI request failed (NVIDIA HTTP ${nvidiaRes.status})`);
+    }
     const answer = nvidiaJson.choices?.[0]?.message?.content || 'No answer returned.';
     res.json({ ok: true, answer });
   } catch (e) {
