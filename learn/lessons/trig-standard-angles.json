@@ -1,0 +1,453 @@
+{
+ "id": "trig-standard-angles",
+ "minutes": 25,
+ "title": {
+  "ta": "30°, 45°, 60° — மனப்பாடம் இல்லாமல் மதிப்புகள்",
+  "en": "30°, 45°, 60° — values without memorising"
+ },
+ "goals": [
+  {
+   "ta": "30°, 45°, 60° ஆகியவற்றின் sin, cos, tan மதிப்புகளை வரைந்து கண்டுபிடிக்க",
+   "en": "Work out sin, cos, tan of 30°, 45°, 60° by drawing"
+  },
+  {
+   "ta": "0° மற்றும் 90° மதிப்புகள் ஏன் அப்படி என்று புரிந்துகொள்ள",
+   "en": "Understand why 0° and 90° have the values they do"
+  },
+  {
+   "ta": "இவற்றைப் பயன்படுத்தி கணக்குகளைத் தீர்க்க",
+   "en": "Use them to solve problems"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உங்கள் ஜியாமெட்ரி பாக்ஸைத் திறங்கள். அதில் இரண்டு முக்கோண அளவுகோல்கள் (set squares) இருக்கும்: ஒன்றில் 30°, 60°, 90°; மற்றொன்றில் 45°, 45°, 90°.\n\nஏன் இந்தக் கோணங்கள்? ஏனென்றால் இவைதான் உலகின் மிகச் சிறப்பான கோணங்கள் — இவற்றின் sin, cos, tan மதிப்புகளைக் கால்குலேட்டர் இல்லாமல், ஒரு சிறிய படம் வரைந்தே சரியாகக் கண்டுபிடிக்கலாம்.",
+    "en": "Open your geometry box. It has two set squares: one with 30°, 60°, 90°; the other with 45°, 45°, 90°.\n\nWhy these angles? Because they are the most special angles in the world — you can find their sin, cos, tan exactly, without a calculator, just by drawing a small picture."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "special",
+   "text": {
+    "ta": "இரண்டு பொத்தான்களையும் அழுத்திப் பாருங்கள்.",
+    "en": "Tap both buttons."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "அட்டவணை — ஒரு தந்திரத்துடன்",
+    "en": "The table — with a trick"
+   },
+   "text": {
+    "ta": "sin மதிப்புகளை இப்படி எழுதுங்கள்: 0, 1, 2, 3, 4 ஆகியவற்றின் வர்க்கமூலத்தை 2-ஆல் வகுங்கள்!\n\n[[√0/2, √1/2, √2/2, √3/2, √4/2]]\n\n**cos** = அதே வரிசை, தலைகீழ் திசையில் (90°-லிருந்து 0°-க்கு): cos 0° = 1, cos 30° = √3/2, cos 45° = 1/√2, cos 60° = 1/2, cos 90° = 0.\n\n**tan = sin ÷ cos**: tan 0° = 0, tan 30° = 1/√3, tan 45° = 1, tan 60° = √3, tan 90° = வரையறுக்கப்படவில்லை (0-ஆல் வகுக்க முடியாது).",
+    "en": "Write the sin values like this: the square roots of 0, 1, 2, 3, 4, each divided by 2!\n\n[[√0/2, √1/2, √2/2, √3/2, √4/2]]\n\n**cos** = the same row, in reverse (from 90° back to 0°): cos 0° = 1, cos 30° = √3/2, cos 45° = 1/√2, cos 60° = 1/2, cos 90° = 0.\n\n**tan = sin ÷ cos**: tan 0° = 0, tan 30° = 1/√3, tan 45° = 1, tan 60° = √3, tan 90° = not defined (can’t divide by 0)."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "முழு அட்டவணை",
+    "en": "The full table"
+   },
+   "head": [
+    "θ",
+    "0°",
+    "30°",
+    "45°",
+    "60°",
+    "90°"
+   ],
+   "rows": [
+    [
+     "sin θ",
+     "0",
+     "1/2",
+     "1/√2",
+     "√3/2",
+     "1"
+    ],
+    [
+     "cos θ",
+     "1",
+     "√3/2",
+     "1/√2",
+     "1/2",
+     "0"
+    ],
+    [
+     "tan θ",
+     "0",
+     "1/√3",
+     "1",
+     "√3",
+     {
+      "ta": "வரையறை இல்லை",
+      "en": "undefined"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "widget",
+   "name": "trigTriangle",
+   "title": {
+    "ta": "0° மற்றும் 90° ஏன் அப்படி?",
+    "en": "Why 0° and 90°?"
+   },
+   "text": {
+    "ta": "கோணத்தை 5°-க்குக் கொண்டு செல்லுங்கள்: எதிர்ப்பக்கம் கிட்டத்தட்ட மறைந்துவிடும் → sin ≈ 0, cos ≈ 1. இப்போது 85°-க்கு: அடுத்துள்ள பக்கம் மறையும் → sin ≈ 1, cos ≈ 0, tan மிகப் பெரியது.",
+    "en": "Take the angle down to 5°: the opposite side almost vanishes → sin ≈ 0, cos ≈ 1. Now to 85°: the adjacent side vanishes → sin ≈ 1, cos ≈ 0, and tan becomes huge."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "மதிப்பு காண்க: sin 30° + cos 60°",
+    "en": "Evaluate: sin 30° + cos 60°"
+   },
+   "steps": [
+    {
+     "ta": "sin 30° = 1/2",
+     "en": "sin 30° = 1/2"
+    },
+    {
+     "ta": "cos 60° = 1/2",
+     "en": "cos 60° = 1/2"
+    },
+    {
+     "ta": "1/2 + 1/2 = 1",
+     "en": "1/2 + 1/2 = 1"
+    }
+   ],
+   "answer": {
+    "ta": "1",
+    "en": "1"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "மதிப்பு காண்க: tan² 60° − 2 sin² 45°",
+    "en": "Evaluate: tan² 60° − 2 sin² 45°"
+   },
+   "steps": [
+    {
+     "ta": "tan 60° = √3, எனவே tan² 60° = 3",
+     "en": "tan 60° = √3, so tan² 60° = 3"
+    },
+    {
+     "ta": "sin 45° = 1/√2, எனவே sin² 45° = 1/2",
+     "en": "sin 45° = 1/√2, so sin² 45° = 1/2"
+    },
+    {
+     "ta": "3 − 2 × 1/2 = 3 − 1 = 2",
+     "en": "3 − 2 × 1/2 = 3 − 1 = 2"
+    }
+   ],
+   "answer": {
+    "ta": "2",
+    "en": "2"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "sin² 30° + cos² 30° = ?",
+    "en": "sin² 30° + cos² 30° = ?"
+   },
+   "answer": 1,
+   "tol": 0.001,
+   "hint": {
+    "ta": "(1/2)² + (√3/2)²",
+    "en": "(1/2)² + (√3/2)²"
+   },
+   "solution": {
+    "ta": "1/4 + 3/4 = 1. (அடுத்த ஆண்டு இது ஒவ்வொரு கோணத்திற்கும் உண்மை என்று பார்ப்போம்!)",
+    "en": "1/4 + 3/4 = 1. (Next year you will see this is true for every angle!)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "tan 45° + cos 0° + sin 90° = ?",
+    "en": "tan 45° + cos 0° + sin 90° = ?"
+   },
+   "answer": 3,
+   "tol": 0.001,
+   "hint": {
+    "ta": "மூன்றும் 1.",
+    "en": "All three equal 1."
+   },
+   "solution": {
+    "ta": "1 + 1 + 1 = 3",
+    "en": "1 + 1 + 1 = 3"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "2 sin 30° cos 30° = ? (தசமத்தில் 3 இலக்கம்). இது எந்தக் கோணத்தின் sin-க்குச் சமம் என்றும் கவனியுங்கள்.",
+    "en": "2 sin 30° cos 30° = ? (decimal, 3 places). Notice which angle’s sine it equals."
+   },
+   "answer": 0.866,
+   "tol": 0.003,
+   "hint": {
+    "ta": "2 × 1/2 × √3/2",
+    "en": "2 × 1/2 × √3/2"
+   },
+   "solution": {
+    "ta": "= √3/2 ≈ 0.866 = sin 60°. (2 × 30° = 60° — இது தற்செயல் அல்ல; மேல் வகுப்பில் இதற்கு ஒரு சூத்திரம் உண்டு.)",
+    "en": "= √3/2 ≈ 0.866 = sin 60°. (2 × 30° = 60° — not a coincidence; you’ll meet the formula in higher classes.)"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "ஏணி",
+    "en": "The ladder"
+   },
+   "q": {
+    "ta": "10 m நீள ஏணி தரையுடன் 60° கோணத்தில் சுவரில் சாய்த்து வைக்கப்பட்டுள்ளது. சுவரில் எவ்வளவு உயரத்தைத் தொடுகிறது?",
+    "en": "A 10 m ladder leans against a wall, making 60° with the ground. How high up the wall does it reach?"
+   },
+   "steps": [
+    {
+     "ta": "ஏணி = கர்ணம் (10 m). சுவர் உயரம் = 60°-க்கு எதிர்ப்பக்கம்.",
+     "en": "Ladder = hypotenuse (10 m). Height on wall = side opposite 60°."
+    },
+    {
+     "ta": "sin 60° = உயரம் ÷ 10",
+     "en": "sin 60° = height ÷ 10"
+    },
+    {
+     "ta": "உயரம் = 10 × √3/2 = 5√3 ≈ 8.66 m",
+     "en": "height = 10 × √3/2 = 5√3 ≈ 8.66 m"
+    }
+   ],
+   "answer": {
+    "ta": "≈ 8.66 m",
+    "en": "≈ 8.66 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "அதே ஏணி (10 m, 60°): ஏணியின் அடி சுவரிலிருந்து எவ்வளவு தூரம்?",
+    "en": "Same ladder (10 m, 60°): how far is its foot from the wall?"
+   },
+   "answer": 5,
+   "tol": 0.01,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "அடுத்துள்ள பக்கம் → cos 60°",
+    "en": "Adjacent side → cos 60°"
+   },
+   "solution": {
+    "ta": "10 × cos 60° = 10 × 1/2 = 5 m",
+    "en": "10 × cos 60° = 10 × 1/2 = 5 m"
+   }
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "ஒரு A4 தாளை எடுத்து ஒரு மூலையை மடித்து சதுரமாக்குங்கள் — மடிப்புக் கோடு 45°. சதுரத்தின் பக்கம், மூலைவிட்டத்தை அளவுங்கள். மூலைவிட்டம் ÷ பக்கம் ≈ 1.41 = √2 வருகிறதா? (தாளின் அளவு எதுவாக இருந்தாலும்!)",
+    "en": "Take an A4 sheet and fold one corner over to make a square — the fold is at 45°. Measure the side and the diagonal of the square. Is diagonal ÷ side ≈ 1.41 = √2? (Whatever the size of the paper!)"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "sin: 0, 1/2, 1/√2, √3/2, 1 (0°→90°). cos: அதே, தலைகீழ் வரிசையில்.",
+     "en": "sin: 0, 1/2, 1/√2, √3/2, 1 (0°→90°). cos: same, reversed."
+    },
+    {
+     "ta": "tan = sin/cos: 0, 1/√3, 1, √3, வரையறுக்கப்படவில்லை.",
+     "en": "tan = sin/cos: 0, 1/√3, 1, √3, undefined."
+    },
+    {
+     "ta": "30°, 60° → பாதியாக வெட்டிய சமபக்க முக்கோணம். 45° → பாதியாக வெட்டிய சதுரம்.",
+     "en": "30°, 60° → half an equilateral triangle. 45° → half a square."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "cos 60° = ?",
+    "en": "cos 60° = ?"
+   },
+   "options": [
+    {
+     "ta": "√3/2",
+     "en": "√3/2"
+    },
+    {
+     "ta": "1/2",
+     "en": "1/2"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "1/√2",
+     "en": "1/√2"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "cos 60° = sin 30° = 1/2",
+    "en": "cos 60° = sin 30° = 1/2"
+   }
+  },
+  {
+   "q": {
+    "ta": "tan 30° = ?",
+    "en": "tan 30° = ?"
+   },
+   "options": [
+    {
+     "ta": "√3",
+     "en": "√3"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "1/√3",
+     "en": "1/√3"
+    },
+    {
+     "ta": "1/2",
+     "en": "1/2"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "tan 30° = (1/2) ÷ (√3/2) = 1/√3",
+    "en": "tan 30° = (1/2) ÷ (√3/2) = 1/√3"
+   }
+  },
+  {
+   "q": {
+    "ta": "எந்தக் கோணத்திற்கு sin θ = cos θ?",
+    "en": "For which angle is sin θ = cos θ?"
+   },
+   "options": [
+    {
+     "ta": "30°",
+     "en": "30°"
+    },
+    {
+     "ta": "45°",
+     "en": "45°"
+    },
+    {
+     "ta": "60°",
+     "en": "60°"
+    },
+    {
+     "ta": "90°",
+     "en": "90°"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "45°-ல் எதிர், அடுத்து இரண்டும் சமம் (சதுரத்தின் பாதி).",
+    "en": "At 45° the opposite and adjacent are equal (half a square)."
+   }
+  },
+  {
+   "q": {
+    "ta": "sin 60° × cos 30° = ?",
+    "en": "sin 60° × cos 30° = ?"
+   },
+   "options": [
+    {
+     "ta": "3/4",
+     "en": "3/4"
+    },
+    {
+     "ta": "1/4",
+     "en": "1/4"
+    },
+    {
+     "ta": "√3/4",
+     "en": "√3/4"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "(√3/2) × (√3/2) = 3/4",
+    "en": "(√3/2) × (√3/2) = 3/4"
+   }
+  },
+  {
+   "q": {
+    "ta": "tan 90° ஏன் வரையறுக்கப்படவில்லை?",
+    "en": "Why is tan 90° undefined?"
+   },
+   "options": [
+    {
+     "ta": "ஏனென்றால் sin 90° = 0",
+     "en": "Because sin 90° = 0"
+    },
+    {
+     "ta": "ஏனென்றால் cos 90° = 0, 0-ஆல் வகுக்க முடியாது",
+     "en": "Because cos 90° = 0 and we cannot divide by 0"
+    },
+    {
+     "ta": "ஏனென்றால் 90° பெரிய கோணம்",
+     "en": "Because 90° is a big angle"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "tan = sin/cos = 1/0 — வரையறுக்கப்படாதது.",
+    "en": "tan = sin/cos = 1/0 — undefined."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு பட்டம் 100 m நூலுடன், நூல் தரையுடன் 30° கோணத்தில் உள்ளது (நூல் நேராக). பட்டத்தின் உயரம்?",
+    "en": "A kite flies on a 100 m string at 30° to the ground (string straight). Height of the kite?"
+   },
+   "options": [
+    {
+     "ta": "50 m",
+     "en": "50 m"
+    },
+    {
+     "ta": "86.6 m",
+     "en": "86.6 m"
+    },
+    {
+     "ta": "57.7 m",
+     "en": "57.7 m"
+    },
+    {
+     "ta": "100 m",
+     "en": "100 m"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "உயரம் = 100 × sin 30° = 50 m",
+    "en": "height = 100 × sin 30° = 50 m"
+   }
+  }
+ ]
+}

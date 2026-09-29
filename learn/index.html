@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>கல்வி களஞ்சியம் — Kalvi Kalanjiyam | Free lessons for TN students</title>
+<meta name="description" content="Free, world-class lessons for Tamil Nadu students (Samacheer Kalvi): understand first with real-life examples and hands-on animations, then practise and test. Tamil + English. No login, no fees.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--ink:#14213d;--sub:#5b6478;--line:#e2e6ef;--bg:#f6f7fb;--card:#fff;--brand:#3b2fc9;--brand2:#eeecff;--ok:#127a3e;--okbg:#e8f8ee;--bad:#b42318;--badbg:#fdecea;--warm:#fff7e3;--math:#0b5d7a;
+ --c-math:#3b2fc9;--c-phy:#0b7a75;--c-che:#b3541e;--c-bio:#2f7d32;--c-tam:#a4133c;--c-eng:#1d4ed8;--c-soc:#7c5e10;--c-evs:#2f7d32;--c-sci:#0b7a75}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.7}
+a{color:var(--brand)}
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.topin{max-width:980px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
+.logo{font-weight:800;font-size:1.05rem;cursor:pointer;white-space:nowrap}
+.logo small{display:block;font-size:.68rem;font-weight:600;color:var(--sub);line-height:1.2}
+.sp{flex:1}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.lang button{border:0;background:#fff;padding:7px 11px;font:inherit;font-size:.82rem;cursor:pointer}
+.lang button.on{background:var(--brand);color:#fff}
+.wrap{max-width:980px;margin:auto;padding:16px}
+.hero{background:linear-gradient(135deg,#3b2fc9,#7b2cbf);color:#fff;border-radius:22px;padding:22px}
+.hero h1{margin:0 0 6px;font-size:1.45rem;line-height:1.35}
+.hero p{margin:0;opacity:.92;font-size:.92rem}
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.pillars div{background:#ffffff1f;border-radius:12px;padding:8px 10px;font-size:.78rem;line-height:1.4}
+.classes{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}
+.cls{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;cursor:pointer;font-weight:800}
+.cls b{display:block;font-size:1.6rem;color:var(--brand)}
+.cls.on{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand2)}
+.subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.subj{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;border-top:5px solid var(--c,#888)}
+.subj h3{margin:0 0 2px;font-size:1rem}
+.subj .meta{font-size:.78rem;color:var(--sub)}
+.bar{height:6px;background:#eef0f5;border-radius:9px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.chap{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.chap>.h{padding:12px 14px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.chap .no{width:30px;height:30px;border-radius:9px;background:var(--brand2);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;font-size:.85rem}
+.chap .t{flex:1;font-weight:700}
+.tag{font-size:.68rem;padding:3px 8px;border-radius:99px;font-weight:800;white-space:nowrap}
+.tag.ready{background:var(--okbg);color:var(--ok)}.tag.soon{background:#f1f2f6;color:#7b8194}.tag.done{background:#dff3ff;color:#075985}
+.lessons{border-top:1px solid var(--line);padding:6px 14px 12px}
+.les{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+.les:last-child{border-bottom:0}
+.les .ic{font-size:1.2rem}
+.crumbs{font-size:.8rem;color:var(--sub);margin-bottom:8px;cursor:pointer}
+.crumbs span:hover{text-decoration:underline}
+/* lesson */
+.lhead{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:12px}
+.lhead h1{margin:0;font-size:1.3rem;line-height:1.4}
+.lhead .goal{margin-top:8px;font-size:.88rem;color:var(--sub)}
+.prog{position:sticky;top:57px;z-index:10;height:5px;background:#e8e9f3;border-radius:9px;margin-bottom:12px;overflow:hidden}.prog i{display:block;height:100%;background:var(--brand);width:0;transition:width .3s}
+.blk{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:12px}
+.blk h2{font-size:1.02rem;margin:0 0 8px;display:flex;gap:8px;align-items:center}
+.blk p{margin:0 0 10px}
+.blk p:last-child{margin-bottom:0}
+.hook{background:var(--warm);border-color:#f5dfa6}
+.key{background:var(--brand2);border-color:#d8d4ff}
+.formula{white-space:pre-wrap;font-family:'Noto Sans Tamil',Georgia,serif;background:#f4f6ff;border:1px dashed #b9b3ff;border-radius:12px;padding:10px 14px;margin:10px 0;font-size:1.05rem;text-align:center;color:var(--math);font-weight:700;overflow-x:auto}
+.steps{counter-reset:s;list-style:none;padding:0;margin:8px 0 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0 6px 36px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center;font-weight:800}
+.reveal{margin-top:8px}
+.btn{border:0;border-radius:11px;padding:10px 15px;font:inherit;font-weight:800;cursor:pointer;background:#eceef5;color:var(--ink)}
+.btn.p{background:var(--brand);color:#fff}
+.btn.sm{padding:6px 11px;font-size:.82rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input.ans{width:130px;padding:9px 10px;border:1px solid #cfd4e2;border-radius:10px;font:inherit}
+.fb{margin-top:8px;padding:9px 12px;border-radius:10px;font-size:.9rem}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.bad{background:var(--badbg);color:var(--bad)}.fb.hint{background:var(--warm);color:#7a5200}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.widget{background:#fbfbff;border:1px solid #e3e1fb;border-radius:14px;padding:12px;margin-top:8px}
+.widget svg{width:100%;height:auto;display:block;touch-action:none}
+.ctrl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:.85rem;margin-top:8px}
+.ctrl input[type=range]{width:100%}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.readout div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:.8rem}
+.readout b{display:block;font-size:1.05rem;color:var(--math)}
+.activity{background:#effaf3;border-color:#bfe8cc}
+.summary{background:#f3f1ff}
+.summary li{margin-bottom:4px}
+.tbl{border-collapse:collapse;width:100%;margin:6px 0;text-align:center;font-size:.95rem}.tbl th,.tbl td{border:1px solid #dcdff0;padding:7px 6px}.tbl tr:first-child th{background:#eeecff;color:#3b2fc9}.tbl td{color:#0b5d7a;font-weight:700}
+.done-card{text-align:center;padding:22px}
+.score{font-size:2rem;font-weight:800;color:var(--brand)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin:16px 0 40px}
+.note{font-size:.82rem;color:var(--sub)}
+.soonbox{background:#fff;border:1px dashed #c9cde0;border-radius:16px;padding:18px;text-align:center;color:var(--sub)}
+@media(max-width:700px){.classes{grid-template-columns:repeat(5,1fr);gap:6px}.cls{padding:10px 2px;font-size:.72rem}.cls b{font-size:1.2rem}.pillars{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:1.2rem}.prog{top:53px}}
+@media print{.top,.nav,.prog,.btn{display:none!important}.blk{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin">
+  <div class="logo" id="home">📚 கல்வி களஞ்சியம்<small>Kalvi Kalanjiyam · pdftoolsindia.com</small></div>
+  <div class="sp"></div>
+  <div class="lang"><button data-l="ta" class="on">தமிழ்</button><button data-l="en">EN</button></div>
+</div></div>
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+'use strict';
+const $ = (s, r) => (r||document).querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let LANG = (()=>{ try{ return localStorage.getItem('kalviLang') || 'ta'; }catch(e){ return 'ta'; } })();
+const L = o => o==null ? '' : (typeof o === 'string' ? o : (o[LANG] || o.ta || o.en || ''));
+// tiny markup: **bold**, blank line = new paragraph, [[formula]] on its own line
+function md(s){
+  return esc(L(s)).split(/\n\s*\n/).map(p=>{
+    p = p.trim();
+    const f = p.match(/^\[\[([\s\S]+)\]\]$/); if(f) return `<div class="formula">${f[1].replace(/\n/g,'<br>')}</div>`;
+    return '<p>' + p.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>') + '</p>';
+  }).join('');
+}
+const UI = {
+  ta:{hero:'புரிந்து படி — மனப்பாடம் அல்ல', heroP:'ஒவ்வொரு பாடமும் வாழ்க்கை எடுத்துக்காட்டுடன் தொடங்கி, கையால் இழுத்துப் பார்க்கும் animation, படிப்படியான விளக்கம், நீயே முயற்சி, கடைசியில் தேர்வு. முழுக்க இலவசம் — login இல்லை, கட்டணம் இல்லை.',
+    p1:'🌍 வாழ்க்கை எடுத்துக்காட்டு',p2:'🖐️ தொட்டுப் பார் animation',p3:'✍️ நீயே செய்',p4:'✅ பிறகு தேர்வு',
+    pick:'வகுப்பைத் தேர்ந்தெடு', cls:'வகுப்பு', ready:'தயார்', soon:'விரைவில்', done:'முடிந்தது', lessons:'பாடங்கள்', chapters:'அத்தியாயங்கள்',
+    soonSub:'இந்தப் பாடத்தின் அத்தியாயங்கள் விரைவில் சேர்க்கப்படும். இப்போது 9, 10 வகுப்பு கணிதம் & அறிவியல் பாருங்கள்.',
+    soonLes:'இந்த அத்தியாயத்தின் பாடங்கள் தயாராகி வருகின்றன.', home:'முகப்பு',
+    hook:'🌍 வாழ்க்கையில் எங்கே?', learn:'📖 புரிந்து கொள்வோம்', key:'🔑 முக்கியம்', ex:'🧮 எடுத்துக்காட்டு', tryit:'✍️ நீயே முயற்சி செய்', act:'🖐️ வீட்டில் செய்து பார்', sum:'📝 சுருக்கம்', quiz:'✅ இப்போது தேர்வு', widget:'🖐️ தொட்டுப் பார்',
+    showSol:'தீர்வைக் காட்டு', check:'சரிபார்', hint:'💡 குறிப்பு', correct:'✅ சரி! அருமை.', wrong:'❌ இன்னும் இல்லை — மீண்டும் முயற்சி செய் அல்லது குறிப்பைப் பார்.', answer:'விடை',
+    quizIntro:'பாடம் புரிந்ததா? இப்போது உன்னை நீயே சோதித்துப் பார். ஒவ்வொரு விடைக்கும் விளக்கம் வரும்.', finish:'முடிவைப் பார்', retry:'மீண்டும் தேர்வு',
+    great:'அருமை! இந்தப் பாடம் உனக்குப் புரிந்துவிட்டது.', ok:'நல்ல முயற்சி! தவறிய கேள்விகளின் விளக்கத்தை மீண்டும் படி.', low:'பரவாயில்லை — மேலே உள்ள animation-ஐ மீண்டும் செய்து பார், பிறகு மீண்டும் தேர்வு எழுது.',
+    prev:'← முந்தைய பாடம்', next:'அடுத்த பாடம் →', back:'← அத்தியாயங்கள்', goal:'இந்தப் பாடம் முடிந்ததும் உன்னால்:', mins:'நிமிடம்', loading:'ஏற்றுகிறது…', loadErr:'பாடத்தை ஏற்ற முடியவில்லை — இணைய இணைப்பைச் சரிபார்க்கவும்.'},
+  en:{hero:'Understand, don’t memorise', heroP:'Every lesson starts with a real-life example, then a hands-on animation, step-by-step explanation, practice with hints, and a test at the end. Completely free — no login, no fees.',
+    p1:'🌍 Real-life example',p2:'🖐️ Touch-and-play animation',p3:'✍️ Practise yourself',p4:'✅ Then test',
+    pick:'Choose your class', cls:'Class', ready:'Ready', soon:'Coming soon', done:'Done', lessons:'lessons', chapters:'chapters',
+    soonSub:'Chapters for this subject are being added. For now, explore Class 9 & 10 Maths and Science.',
+    soonLes:'Lessons for this chapter are being prepared.', home:'Home',
+    hook:'🌍 Where do we see this?', learn:'📖 Let’s understand', key:'🔑 Key idea', ex:'🧮 Worked example', tryit:'✍️ Try it yourself', act:'🖐️ Try at home', sum:'📝 Summary', quiz:'✅ Now, the test', widget:'🖐️ Play with it',
+    showSol:'Show solution', check:'Check', hint:'💡 Hint', correct:'✅ Correct! Well done.', wrong:'❌ Not yet — try again or open the hint.', answer:'Answer',
+    quizIntro:'Understood the lesson? Now test yourself. Every answer comes with an explanation.', finish:'See result', retry:'Retake test',
+    great:'Excellent! You have understood this lesson.', ok:'Good effort! Re-read the explanations of the ones you missed.', low:'That’s fine — play with the animation above again, then retake the test.',
+    prev:'← Previous lesson', next:'Next lesson →', back:'← Chapters', goal:'After this lesson you will be able to:', mins:'min', loading:'Loading…', loadErr:'Could not load the lesson — check your internet connection.'}
+};
+const U = k => UI[LANG][k];
+
+/* ---------------- progress (this device) ---------------- */
+function getProg(){ try{ return JSON.parse(localStorage.getItem('kalviProgress')||'{}'); }catch(e){ return {}; } }
+function setProg(id, v){ try{ const p = getProg(); p[id] = Object.assign(p[id]||{}, v); localStorage.setItem('kalviProgress', JSON.stringify(p)); }catch(e){} }
+
+/* ---------------- data ---------------- */
+let CATALOG = null;
+async function loadCatalog(){ if(CATALOG) return CATALOG; const r = await fetch('catalog.json?v=1'); CATALOG = await r.json(); return CATALOG; }
+const lessonCache = {};
+async function loadLesson(id){ if(lessonCache[id]) return lessonCache[id]; const r = await fetch('lessons/' + id + '.json?v=1'); if(!r.ok) throw new Error(r.status); return (lessonCache[id] = await r.json()); }
+
+/* ---------------- router (#/9/maths/6/l-id) ---------------- */
+function go(h){ location.hash = h; }
+window.addEventListener('hashchange', route);
+async function route(){
+  const app = $('#app'); app.innerHTML = `<p class="note">${U('loading')}</p>`;
+  try{ await loadCatalog(); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
+  const [, c, s, ch, les] = (location.hash || '#').replace(/^#\/?/, '#/').split('/');
+  if(les) return renderLesson(c, s, ch, les);
+  if(s) return renderSubject(c, s);
+  return renderHome(c || (()=>{ try{ return localStorage.getItem('kalviClass'); }catch(e){ return null; } })() || '10');
+}
+function subjById(c, s){ const k = CATALOG.classes[c]; return k && k.subjects.find(x=>x.id===s); }
+function lessonsOf(subj){ const out=[]; (subj.chapters||[]).forEach((ch,ci)=> (ch.lessons||[]).forEach(l=> out.push({ch:ci+1, id:l.id, title:l.title}))); return out; }
+
+function renderHome(c){
+  try{ localStorage.setItem('kalviClass', c); }catch(e){}
+  const prog = getProg();
+  const cls = CATALOG.classes[c];
+  $('#app').innerHTML = `
+    <div class="hero"><h1>${U('hero')}</h1><p>${U('heroP')}</p>
+      <div class="pillars"><div>${U('p1')}</div><div>${U('p2')}</div><div>${U('p3')}</div><div>${U('p4')}</div></div></div>
+    <h3 style="margin:18px 0 0">${U('pick')}</h3>
+    <div class="classes">${Object.keys(CATALOG.classes).map(k=>`<div class="cls ${k===c?'on':''}" data-c="${k}"><b>${k}</b>${U('cls')}</div>`).join('')}</div>
+    <div class="subjects">${cls.subjects.map(sb=>{
+      const ls = lessonsOf(sb), dn = ls.filter(l=>prog[l.id]&&prog[l.id].done).length, chN = (sb.chapters||[]).length;
+      return `<div class="subj" style="--c:var(--c-${sb.color||'math'})" data-s="${sb.id}">
+        <h3>${sb.icon||''} ${esc(L(sb.name))}</h3>
+        <div class="meta">${chN?`${chN} ${U('chapters')} · `:''}${ls.length ? `${ls.length} ${U('lessons')} ${U('ready')}` : U('soon')}</div>
+        ${ls.length?`<div class="bar"><i style="width:${Math.round(dn/ls.length*100)}%"></i></div>`:''}
+      </div>`; }).join('')}</div>
+    <p class="note" style="margin-top:18px">${LANG==='ta'?'தமிழ்நாடு சமச்சீர் கல்வி பாடத்திட்ட அத்தியாயங்களின் அடிப்படையில் — விளக்கங்கள் அனைத்தும் எங்களால் புதிதாக எழுதப்பட்டவை. முன்னேற்றம் இந்த போனில் மட்டும் சேமிக்கப்படும்.':'Follows the chapters of the Tamil Nadu Samacheer Kalvi syllabus — all explanations are written afresh by us. Progress is saved on this device only.'}</p>`;
+  document.querySelectorAll('.cls').forEach(n=> n.onclick = ()=> renderHome(n.dataset.c));
+  document.querySelectorAll('.subj').forEach(n=> n.onclick = ()=> go(`#/${c}/${n.dataset.s}`));
+}
+
+function renderSubject(c, s){
+  const sb = subjById(c, s); if(!sb) return renderHome(c);
+  const prog = getProg();
+  const chs = sb.chapters || [];
+  $('#app').innerHTML = `
+    <div class="crumbs"><span data-go="#/${c}">${U('home')}</span> › ${c} ${U('cls')} › ${esc(L(sb.name))}</div>
+    <h2 style="margin:0 0 12px">${sb.icon||''} ${esc(L(sb.name))} — ${c} ${U('cls')}</h2>
+    ${chs.length ? chs.map((ch,i)=>{
+      const ls = ch.lessons||[], dn = ls.filter(l=>prog[l.id]&&prog[l.id].done).length;
+      const tag = ls.length ? (dn===ls.length ? `<span class="tag done">✓ ${U('done')}</span>` : `<span class="tag ready">${ls.length} ${U('lessons')}</span>`) : `<span class="tag soon">${U('soon')}</span>`;
+      return `<div class="chap"><div class="h" data-i="${i}"><div class="no">${ch.no||i+1}</div><div class="t">${esc(L(ch.title))}${ch.part?`<div class="note">${esc(L(ch.part))}</div>`:''}</div>${tag}</div>
+        <div class="lessons" style="display:${ls.length?'block':'none'}">${ls.map(l=>{
+          const p = prog[l.id]; return `<div class="les" data-l="${l.id}" data-ch="${i+1}"><span class="ic">${p&&p.done?'✅':'▶️'}</span><span style="flex:1">${esc(L(l.title))}</span>${p&&p.score!=null?`<span class="tag done">${p.score}%</span>`:''}</div>`; }).join('')}</div></div>`;
+    }).join('') : `<div class="soonbox">${U('soonSub')}</div>`}`;
+  document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
+  document.querySelectorAll('.les').forEach(n=> n.onclick = ()=> go(`#/${c}/${s}/${n.dataset.ch}/${n.dataset.l}`));
+  document.querySelectorAll('.chap .h').forEach(n=> n.onclick = ()=>{ const b = n.nextElementSibling; if(!b.children.length){ b.style.display='block'; b.innerHTML = `<p class="note">${U('soonLes')}</p>`; return; } b.style.display = b.style.display==='none'?'block':'none'; });
+  window.scrollTo(0,0);
+}
+
+/* ---------------- lesson renderer ---------------- */
+async function renderLesson(c, s, ch, id){
+  const sb = subjById(c, s); const app = $('#app');
+  let les; try{ les = await loadLesson(id); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
+  const all = lessonsOf(sb), idx = all.findIndex(x=>x.id===id), prev = all[idx-1], next = all[idx+1];
+  const chap = sb.chapters[Number(ch)-1];
+  app.innerHTML = `
+    <div class="crumbs"><span data-go="#/${c}">${U('home')}</span> › <span data-go="#/${c}/${s}">${esc(L(sb.name))} ${c}</span> › ${esc(L(chap&&chap.title))}</div>
+    <div class="lhead"><h1>${esc(L(les.title))}</h1>
+      ${les.goals?`<div class="goal"><b>${U('goal')}</b><ul style="margin:4px 0 0;padding-left:20px">${les.goals.map(g=>`<li>${esc(L(g))}</li>`).join('')}</ul></div>`:''}
+      ${les.minutes?`<div class="note" style="margin-top:6px">⏱️ ~${les.minutes} ${U('mins')}</div>`:''}</div>
+    <div class="prog"><i id="progbar"></i></div>
+    <div id="blocks"></div>
+    <div id="quiz"></div>
+    <div class="nav">${prev?`<button class="btn" data-go="#/${c}/${s}/${prev.ch}/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}
+      ${next?`<button class="btn p" data-go="#/${c}/${s}/${next.ch}/${next.id}">${U('next')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}</div>`;
+  const B = $('#blocks');
+  les.blocks.forEach(b=> B.appendChild(renderBlock(b)));
+  if(les.quiz && les.quiz.length) renderQuiz($('#quiz'), les, id);
+  document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
+  const pb = $('#progbar');
+  window.onscroll = ()=>{ const h = document.documentElement; pb.style.width = Math.min(100, (h.scrollTop/(h.scrollHeight-h.clientHeight||1))*100) + '%'; };
+  window.scrollTo(0,0);
+  setProg(id, {opened: Date.now()});
+}
+function card(cls, title, inner){ const d = document.createElement('div'); d.className = 'blk ' + (cls||''); d.innerHTML = (title?`<h2>${title}</h2>`:'') + inner; return d; }
+function renderBlock(b){
+  switch(b.type){
+    case 'hook': return card('hook', b.title?esc(L(b.title)):U('hook'), md(b.text));
+    case 'text': return card('', b.title?esc(L(b.title)):U('learn'), md(b.text));
+    case 'key': return card('key', b.title?esc(L(b.title)):U('key'), md(b.text));
+    case 'activity': return card('activity', b.title?esc(L(b.title)):U('act'), md(b.text));
+    case 'summary': return card('summary', U('sum'), `<ul style="margin:0;padding-left:20px">${b.points.map(p=>`<li>${md(p).replace(/^<p>|<\/p>$/g,'')}</li>`).join('')}</ul>`);
+    case 'widget': { const d = card('', b.title?esc(L(b.title)):U('widget'), (b.text?md(b.text):'') + '<div class="widget"></div>'); const w = d.querySelector('.widget'); try{ WIDGETS[b.name](w, b.params||{}); }catch(e){ w.textContent = 'Widget error: ' + e.message; } return d; }
+    case 'example': {
+      const d = card('', b.title?`${U('ex')} — ${esc(L(b.title))}`:U('ex'), md(b.q) + `<button class="btn sm reveal">${U('showSol')}</button><div class="sol" style="display:none"><ol class="steps">${b.steps.map(s=>`<li>${md(s).replace(/^<p>|<\/p>$/g,'')}</li>`).join('')}</ol>${b.answer?`<div class="fb ok"><b>${U('answer')}:</b> ${esc(L(b.answer))}</div>`:''}</div>`);
+      const btn = d.querySelector('.reveal'); btn.onclick = ()=>{ d.querySelector('.sol').style.display='block'; btn.remove(); };
+      if(b.open){ d.querySelector('.sol').style.display='block'; btn.remove(); }
+      return d; }
+    case 'try': return renderTry(b);
+    case 'table': return card('', b.title?esc(L(b.title)):'', (b.text?md(b.text):'') + `<div style="overflow-x:auto"><table class="tbl"><tr>${b.head.map(h=>`<th>${esc(L(h))}</th>`).join('')}</tr>${b.rows.map(r=>`<tr>${r.map((c,i)=>i?`<td>${esc(L(c))}</td>`:`<th>${esc(L(c))}</th>`).join('')}</tr>`).join('')}</table></div>`);
+    default: return card('', '', md(b.text||''));
+  }
+}
+function numOk(val, b){
+  const x = parseFloat(String(val).replace(/,/g,'').replace(/[^\d.\-eE]/g,''));
+  if(!Number.isFinite(x)) return false;
+  const tol = b.tol != null ? b.tol : Math.max(0.01, Math.abs(b.answer)*0.01);
+  return Math.abs(x - b.answer) <= tol;
+}
+function renderTry(b){
+  const d = card('', U('tryit'), md(b.q));
+  const box = document.createElement('div');
+  if(b.options){
+    box.innerHTML = b.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(L(o))}</button>`).join('');
+    box.querySelectorAll('.opt').forEach(o=> o.onclick = ()=>{
+      const ok = Number(o.dataset.i) === b.correct;
+      o.classList.add(ok?'ok':'bad'); fb(ok);
+      if(ok) box.querySelectorAll('.opt').forEach(x=> x.disabled = true);
+    });
+  } else {
+    box.innerHTML = `<div class="row"><input class="ans" inputmode="decimal" placeholder="${U('answer')}">${b.unit?`<span>${esc(L(b.unit))}</span>`:''}<button class="btn p sm chk">${U('check')}</button></div>`;
+    const inp = box.querySelector('input');
+    const doCheck = ()=> fb(numOk(inp.value, b));
+    box.querySelector('.chk').onclick = doCheck; inp.onkeydown = e=>{ if(e.key==='Enter') doCheck(); };
+  }
+  const tools = document.createElement('div'); tools.className = 'row'; tools.style.marginTop = '8px';
+  tools.innerHTML = `${b.hint?`<button class="btn sm h">${U('hint')}</button>`:''}${b.solution?`<button class="btn sm s">${U('showSol')}</button>`:''}`;
+  const out = document.createElement('div');
+  function fb(ok){ out.innerHTML = `<div class="fb ${ok?'ok':'bad'}">${ok?U('correct'):U('wrong')}</div>` + (ok && b.solution ? `<div class="fb hint">${md(b.solution)}</div>` : ''); }
+  if(b.hint) tools.querySelector('.h').onclick = ()=>{ out.innerHTML = `<div class="fb hint">${md(b.hint)}</div>`; };
+  if(b.solution) tools.querySelector('.s').onclick = ()=>{ out.innerHTML = `<div class="fb hint">${md(b.solution)}</div>`; };
+  d.append(box, tools, out);
+  return d;
+}
+function renderQuiz(host, les, id){
+  const qs = les.quiz;
+  const ans = new Array(qs.length).fill(null);
+  host.innerHTML = '';
+  host.appendChild(card('key', U('quiz'), `<p>${U('quizIntro')}</p>`));
+  qs.forEach((q, qi)=>{
+    const d = card('', `${qi+1}.`, md(q.q) + q.options.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(L(o))}</button>`).join('') + '<div class="ex"></div>');
+    d.querySelectorAll('.opt').forEach(o=> o.onclick = ()=>{
+      if(ans[qi] != null) return;
+      const i = Number(o.dataset.i); ans[qi] = i;
+      d.querySelectorAll('.opt').forEach((x,j)=>{ if(j===q.correct) x.classList.add('ok'); else if(j===i) x.classList.add('bad'); x.disabled = true; });
+      d.querySelector('.ex').innerHTML = `<div class="fb ${i===q.correct?'ok':'bad'}">${i===q.correct?U('correct'):'❌'} ${md(q.explain).replace(/^<p>|<\/p>$/g,'')}</div>`;
+      if(ans.every(a=>a!=null)) finish();
+    });
+    host.appendChild(d);
+  });
+  function finish(){
+    const right = ans.filter((a,i)=>a===qs[i].correct).length, pct = Math.round(right/qs.length*100);
+    setProg(id, {done: pct>=60, score: pct});
+    const d = card('done-card', '', `<div class="score">${right} / ${qs.length}</div><p>${pct>=80?U('great'):pct>=60?U('ok'):U('low')}</p><button class="btn">${U('retry')}</button>`);
+    d.querySelector('button').onclick = ()=>{ renderQuiz(host, les, id); host.scrollIntoView({behavior:'smooth'}); };
+    host.appendChild(d); d.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+/* ================= WIDGETS ================= */
+const DEG = Math.PI/180;
+const f2 = (x, n) => (Math.round(x*Math.pow(10,n==null?2:n))/Math.pow(10,n==null?2:n)).toFixed(n==null?2:n);
+function slider(host, label, min, max, step, val, onInput, unit){
+  const r = document.createElement('div'); r.className = 'ctrl';
+  r.innerHTML = `<span>${label}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${val}"><b class="v"></b>`;
+  const inp = r.querySelector('input'), v = r.querySelector('.v');
+  const upd = ()=>{ v.textContent = inp.value + (unit||''); onInput(Number(inp.value)); };
+  inp.oninput = upd; host.appendChild(r); setTimeout(upd, 0); return inp;
+}
+function readout(host){ const d = document.createElement('div'); d.className = 'readout'; host.appendChild(d); return items => { d.innerHTML = items.map(([k,v])=>`<div>${k}<b>${v}</b></div>`).join(''); }; }
+const svgNS = 'http://www.w3.org/2000/svg';
+function svg(host, w, h){ const s = document.createElementNS(svgNS,'svg'); s.setAttribute('viewBox', `0 0 ${w} ${h}`); host.appendChild(s); return s; }
+const T = (ta, en) => LANG==='ta' ? ta : en;
+
+const WIDGETS = {
+  /* Right triangle: angle + size sliders; ratios stay the same for a given angle */
+  trigTriangle(host){
+    const S = svg(host, 360, 230);
+    const ro = readout(host);
+    let ang = 35, size = 1;
+    function draw(){
+      const H = 170*size, ax = 30, ay = 200;               // A = angle vertex (bottom-left), right angle at C (bottom-right)
+      const adj = H*Math.cos(ang*DEG), opp = H*Math.sin(ang*DEG);
+      const Cx = ax+adj, By = ay-opp;
+      S.innerHTML = `
+        <polygon points="${ax},${ay} ${Cx},${ay} ${Cx},${By}" fill="#eeecff" stroke="#3b2fc9" stroke-width="2.5"/>
+        <rect x="${Cx-12}" y="${ay-12}" width="12" height="12" fill="none" stroke="#3b2fc9"/>
+        <path d="M ${ax+30} ${ay} A 30 30 0 0 0 ${ax+30*Math.cos(ang*DEG)} ${ay-30*Math.sin(ang*DEG)}" fill="none" stroke="#b3541e" stroke-width="2"/>
+        <text x="${ax+36}" y="${ay-8}" font-size="13" fill="#b3541e">θ = ${ang}°</text>
+        <text x="${(ax+Cx)/2}" y="${ay+18}" font-size="12" text-anchor="middle" fill="#0b7a75">${T('அடுத்துள்ள பக்கம்','Adjacent')} ${f2(adj/34,1)}</text>
+        <text x="${Cx+6}" y="${(ay+By)/2}" font-size="12" fill="#a4133c">${T('எதிர்ப்பக்கம்','Opposite')} ${f2(opp/34,1)}</text>
+        <text x="${(ax+Cx)/2-18}" y="${(ay+By)/2-10}" font-size="12" text-anchor="end" fill="#3b2fc9" transform="rotate(${-ang} ${(ax+Cx)/2-18} ${(ay+By)/2-10})">${T('கர்ணம்','Hypotenuse')} ${f2(H/34,1)}</text>`;
+      ro([[`sin θ = ${T('எதிர்','opp')}/${T('கர்ணம்','hyp')}`, f2(Math.sin(ang*DEG),3)],[`cos θ = ${T('அடுத்து','adj')}/${T('கர்ணம்','hyp')}`, f2(Math.cos(ang*DEG),3)],[`tan θ = ${T('எதிர்','opp')}/${T('அடுத்து','adj')}`, f2(Math.tan(ang*DEG),3)]]);
+    }
+    slider(host, T('கோணம் θ','Angle θ'), 5, 85, 1, ang, v=>{ ang=v; draw(); }, '°');
+    slider(host, T('முக்கோண அளவு','Triangle size'), 0.4, 1, 0.05, size, v=>{ size=v; draw(); }, '×');
+    const n = document.createElement('p'); n.className='note'; n.textContent = T('👉 அளவை மாற்றிப் பார்: பக்கங்கள் மாறும், ஆனால் sin, cos, tan மாறாது! கோணத்தை மாற்றினால் மட்டுமே மாறும்.','👉 Change the size: the sides change, but sin, cos and tan do not! Only changing the angle changes them.');
+    host.appendChild(n);
+  },
+  /* Shadow of a pole: sun elevation → shadow = h / tan θ */
+  shadow(host, p){
+    const S = svg(host, 360, 210); const ro = readout(host);
+    let sun = 45, h = p.height || 6;
+    function draw(){
+      const sc = 14, base = 180, px = 70;
+      const shadow = h/Math.tan(sun*DEG), sx = Math.min(px + shadow*sc, 355);
+      const sunx = px - Math.cos(sun*DEG)*120 + 240, suny = base - Math.sin(sun*DEG)*140;
+      S.innerHTML = `<rect x="0" y="${base}" width="360" height="30" fill="#e9f5e1"/>
+        <circle cx="${Math.max(20,Math.min(340,sunx))}" cy="${Math.max(18,suny)}" r="14" fill="#f9c80e"/>
+        <line x1="${px}" y1="${base}" x2="${px}" y2="${base-h*sc}" stroke="#7c5e10" stroke-width="6"/>
+        <line x1="${px}" y1="${base}" x2="${sx}" y2="${base}" stroke="#333" stroke-width="7" opacity=".55"/>
+        <line x1="${px}" y1="${base-h*sc}" x2="${sx}" y2="${base}" stroke="#f0a202" stroke-dasharray="5 4"/>
+        <text x="${px-8}" y="${base-h*sc/2}" font-size="12" text-anchor="end">${h} m</text>
+        <text x="${(px+sx)/2}" y="${base+20}" font-size="12" text-anchor="middle">${T('நிழல்','shadow')} ${f2(shadow,2)} m</text>
+        <text x="${sx-40}" y="${base-6}" font-size="12" fill="#b3541e">${sun}°</text>`;
+      ro([[T('சூரியக் கோணம்','Sun angle'), sun+'°'],['tan θ', f2(Math.tan(sun*DEG),3)],[T('நிழல் = உயரம் ÷ tan θ','Shadow = height ÷ tan θ'), f2(shadow,2)+' m']]);
+    }
+    slider(host, T('சூரியன் உயரம் (கோணம்)','Sun elevation'), 10, 80, 1, sun, v=>{ sun=v; draw(); }, '°');
+    slider(host, T('கம்பத்தின் உயரம்','Pole height'), 2, 10, 1, h, v=>{ h=v; draw(); }, ' m');
+  },
+  /* Special triangles 30-60-90 and 45-45-90 */
+  special(host){
+    const S = svg(host, 360, 200);
+    let mode = 'eq';
+    const bar = document.createElement('div'); bar.className='row';
+    bar.innerHTML = `<button class="btn sm" data-m="eq">${T('சமபக்க முக்கோணம் → 30°, 60°','Equilateral → 30°, 60°')}</button><button class="btn sm" data-m="sq">${T('சதுரம் → 45°','Square → 45°')}</button>`;
+    host.insertBefore(bar, S);
+    const note = document.createElement('div'); note.className='note'; host.appendChild(note);
+    function draw(){
+      bar.querySelectorAll('button').forEach(b=> b.classList.toggle('p', b.dataset.m===mode));
+      if(mode==='eq'){
+        S.innerHTML = `<polygon points="60,180 300,180 180,${180-207.8}" fill="#eeecff" stroke="#3b2fc9" stroke-width="2"/>
+          <line x1="180" y1="180" x2="180" y2="${180-207.8+0.1}" stroke="#a4133c" stroke-dasharray="5 4" stroke-width="2"/>
+          <polygon points="180,180 300,180 180,${180-207.8}" fill="#ffe3ea" opacity=".6"/>
+          <text x="240" y="196" font-size="13" text-anchor="middle">1</text><text x="120" y="196" font-size="13" text-anchor="middle">1</text>
+          <text x="248" y="80" font-size="13">2</text><text x="186" y="120" font-size="13" fill="#a4133c">√3</text>
+          <text x="268" y="174" font-size="12" fill="#b3541e">60°</text><text x="184" y="${180-207.8+40}" font-size="12" fill="#b3541e">30°</text>`;
+        S.setAttribute('viewBox','0 -30 360 230');
+        note.innerHTML = T('பக்கம் 2 உள்ள சமபக்க முக்கோணத்தை நடுவில் வெட்டினால்: அடி 1, கர்ணம் 2, உயரம் √(2² − 1²) = √3. <b>sin 30° = 1/2, cos 30° = √3/2, tan 30° = 1/√3; sin 60° = √3/2, cos 60° = 1/2, tan 60° = √3</b>',
+          'Cut an equilateral triangle of side 2 down the middle: base 1, hypotenuse 2, height √(2² − 1²) = √3. <b>sin 30° = 1/2, cos 30° = √3/2, tan 30° = 1/√3; sin 60° = √3/2, cos 60° = 1/2, tan 60° = √3</b>');
+      } else {
+        S.setAttribute('viewBox','0 0 360 200');
+        S.innerHTML = `<rect x="100" y="20" width="160" height="160" fill="#eeecff" stroke="#3b2fc9" stroke-width="2"/>
+          <line x1="100" y1="180" x2="260" y2="20" stroke="#a4133c" stroke-width="2" stroke-dasharray="5 4"/>
+          <polygon points="100,180 260,180 260,20" fill="#ffe3ea" opacity=".6"/>
+          <text x="180" y="196" font-size="13" text-anchor="middle">1</text><text x="266" y="104" font-size="13">1</text><text x="160" y="92" font-size="13" fill="#a4133c">√2</text>
+          <text x="130" y="174" font-size="12" fill="#b3541e">45°</text>`;
+        note.innerHTML = T('பக்கம் 1 உள்ள சதுரத்தை மூலைவிட்டத்தில் வெட்டினால்: இரு பக்கங்கள் 1, கர்ணம் √(1² + 1²) = √2. <b>sin 45° = cos 45° = 1/√2, tan 45° = 1</b>',
+          'Cut a square of side 1 along its diagonal: two sides 1, hypotenuse √(1² + 1²) = √2. <b>sin 45° = cos 45° = 1/√2, tan 45° = 1</b>');
+      }
+    }
+    bar.querySelectorAll('button').forEach(b=> b.onclick = ()=>{ mode=b.dataset.m; draw(); });
+    draw();
+  },
+  /* Unit circle: point = (cos θ, sin θ); sin² + cos² = 1 */
+  unitCircle(host){
+    const S = svg(host, 300, 260); const ro = readout(host);
+    let a = 40;
+    function draw(){
+      const cx=150, cy=135, R=105, x=Math.cos(a*DEG), y=Math.sin(a*DEG);
+      const px=cx+R*x, py=cy-R*y;
+      S.innerHTML = `<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="#ccd"/><line x1="${cx}" y1="15" x2="${cx}" y2="255" stroke="#ccd"/>
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#9aa0c0"/>
+        <polygon points="${cx},${cy} ${px},${cy} ${px},${py}" fill="#eeecff" stroke="#3b2fc9"/>
+        <line x1="${px}" y1="${cy}" x2="${px}" y2="${py}" stroke="#a4133c" stroke-width="3"/>
+        <line x1="${cx}" y1="${cy}" x2="${px}" y2="${cy}" stroke="#0b7a75" stroke-width="3"/>
+        <circle cx="${px}" cy="${py}" r="6" fill="#3b2fc9"/>
+        <text x="${px+8}" y="${py-6}" font-size="12">(${f2(x)}, ${f2(y)})</text>
+        <text x="${cx+(px-cx)/2}" y="${cy+16}" font-size="12" fill="#0b7a75" text-anchor="middle">cos θ</text>
+        <text x="${px+6}" y="${(cy+py)/2}" font-size="12" fill="#a4133c">sin θ</text>
+        <text x="${cx+(px-cx)/2-14}" y="${(cy+py)/2-4}" font-size="12" fill="#3b2fc9">1</text>`;
+      ro([['sin θ', f2(y,3)],['cos θ', f2(x,3)],['sin²θ + cos²θ', f2(y*y+x*x,3)]]);
+    }
+    slider(host, 'θ', 0, 90, 1, a, v=>{ a=v; draw(); }, '°');
+  },
+  /* Height of a building from distance + angle of elevation */
+  heightDistance(host, p){
+    const S = svg(host, 360, 230); const ro = readout(host);
+    let d = p.d || 30, ang = p.angle || 40, eye = p.eye != null ? p.eye : 1.5;
+    function draw(){
+      const h = d*Math.tan(ang*DEG) + eye;
+      const sc = Math.min(4.5, 300/Math.max(d,1), 180/Math.max(h,1)), base=210, bx=40+d*sc;
+      S.innerHTML = `<rect x="0" y="${base}" width="360" height="20" fill="#e9f5e1"/>
+        <rect x="${bx}" y="${base-h*sc}" width="34" height="${h*sc}" fill="#c7d2fe" stroke="#3b2fc9"/>
+        <line x1="40" y1="${base}" x2="40" y2="${base-eye*sc}" stroke="#14213d" stroke-width="4"/>
+        <circle cx="40" cy="${base-eye*sc-5}" r="5" fill="#14213d"/>
+        <line x1="40" y1="${base-eye*sc}" x2="${bx}" y2="${base-eye*sc}" stroke="#0b7a75" stroke-dasharray="4 3"/>
+        <line x1="40" y1="${base-eye*sc}" x2="${bx}" y2="${base-h*sc}" stroke="#b3541e" stroke-width="2"/>
+        <text x="60" y="${base-eye*sc-6}" font-size="12" fill="#b3541e">${ang}°</text>
+        <text x="${(40+bx)/2}" y="${base+15}" font-size="12" text-anchor="middle">${d} m</text>
+        <text x="${bx+40}" y="${base-h*sc/2}" font-size="12">${f2(h,1)} m</text>`;
+      ro([[T('ஏற்றக்கோணம்','Angle of elevation'), ang+'°'],[T('தூரம்','Distance'), d+' m'],['tan θ', f2(Math.tan(ang*DEG),3)],[T('உயரம் = தூரம் × tan θ + கண் உயரம்','Height = distance × tan θ + eye height'), f2(h,1)+' m']]);
+    }
+    slider(host, T('தூரம்','Distance'), 5, 80, 1, d, v=>{ d=v; draw(); }, ' m');
+    slider(host, T('ஏற்றக்கோணம்','Elevation'), 5, 75, 1, ang, v=>{ ang=v; draw(); }, '°');
+  },
+  /* Bus journey: distance-time & velocity-time graphs */
+  motion(host){
+    const plans = {
+      uniform:{ta:'சீரான வேகம் (60 km/h)',en:'Uniform speed (60 km/h)', v:t=>60},
+      accel:{ta:'பேருந்து நிலையத்திலிருந்து புறப்படுதல் (சீரான முடுக்கம்)',en:'Leaving the bus stand (uniform acceleration)', v:t=>Math.min(80, 160*t)},
+      stop:{ta:'சிக்னலில் நின்று மீண்டும் புறப்படுதல்',en:'Stop at a signal, then go', v:t=> t<0.4?50: t<0.5?Math.max(0,50-500*(t-0.4)) : t<0.7?0 : Math.min(50,(t-0.7)*250)}
+    };
+    let key = 'uniform';
+    const bar = document.createElement('div'); bar.className='row'; host.appendChild(bar);
+    const S = svg(host, 360, 330); const ro = readout(host);
+    function draw(){
+      bar.innerHTML = Object.entries(plans).map(([k,p])=>`<button class="btn sm ${k===key?'p':''}" data-k="${k}">${esc(p[LANG])}</button>`).join('');
+      bar.querySelectorAll('button').forEach(b=> b.onclick = ()=>{ key=b.dataset.k; draw(); });
+      const P = plans[key], N = 100, dt = 1/N; let x=0; const xs=[0], vs=[P.v(0)];
+      for(let i=1;i<=N;i++){ const v = P.v(i*dt); x += (v + vs[i-1])/2*dt; xs.push(x); vs.push(v); }
+      const g = (y0, vals, max, col, lab, unit) => {
+        const pts = vals.map((v,i)=>`${40+i*3},${y0 - v/max*110}`).join(' ');
+        return `<line x1="40" y1="${y0}" x2="345" y2="${y0}" stroke="#99a"/><line x1="40" y1="${y0}" x2="40" y2="${y0-120}" stroke="#99a"/>
+          <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="3"/>
+          <text x="44" y="${y0-108}" font-size="12" fill="${col}">${lab} (${unit})</text><text x="300" y="${y0+14}" font-size="11">${T('நேரம் →','time →')}</text>`;
+      };
+      S.innerHTML = g(150, xs, Math.max(60, Math.ceil(xs[N]/10)*10), '#3b2fc9', T('தூரம்','Distance'), 'km') + g(310, vs, 90, '#b3541e', T('திசைவேகம்','Velocity'), 'km/h');
+      const acc = (vs[N]-vs[0])/1;
+      ro([[T('1 மணி நேரத்தில் தூரம்','Distance in 1 h'), f2(xs[N],1)+' km'],[T('சராசரி வேகம்','Average speed'), f2(xs[N],1)+' km/h'],[T('தொடக்க → இறுதி திசைவேகம்','Start → end velocity'), `${f2(vs[0],0)} → ${f2(vs[N],0)} km/h`]]);
+    }
+    draw();
+    const n = document.createElement('p'); n.className='note'; n.textContent = T('👉 தூர-நேர வரைபடம் நேர்கோடு = சீரான வேகம். வளைந்தால் வேகம் மாறுகிறது. திசைவேக-நேர வரைபடம் கிடைமட்டம் = முடுக்கம் பூஜ்ஜியம்.','👉 A straight distance–time line means uniform speed; a curve means the speed is changing. A flat velocity–time line means zero acceleration.');
+    host.appendChild(n);
+  },
+  /* Mole: grams ↔ moles ↔ particles */
+  mole(host){
+    const subs = [
+      {k:'water', ta:'தண்ணீர் H₂O', en:'Water H₂O', M:18},
+      {k:'salt', ta:'உப்பு NaCl', en:'Salt NaCl', M:58.5},
+      {k:'carbon', ta:'கரி C', en:'Carbon C', M:12},
+      {k:'sugar', ta:'சர்க்கரை C₁₂H₂₂O₁₁', en:'Sugar C₁₂H₂₂O₁₁', M:342},
+      {k:'co2', ta:'கார்பன் டை ஆக்சைடு CO₂', en:'Carbon dioxide CO₂', M:44}
+    ];
+    let si = 0, g = 18;
+    const sel = document.createElement('div'); sel.className='row'; host.appendChild(sel);
+    const S = svg(host, 360, 120); const ro = readout(host);
+    function draw(){
+      sel.innerHTML = subs.map((s,i)=>`<button class="btn sm ${i===si?'p':''}" data-i="${i}">${esc(s[LANG])}</button>`).join('');
+      sel.querySelectorAll('button').forEach(b=> b.onclick = ()=>{ si=Number(b.dataset.i); draw(); });
+      const s = subs[si], n = g/s.M, N = n*6.022e23;
+      const bags = Math.min(40, Math.round(n*10));
+      let dots=''; for(let i=0;i<bags;i++) dots += `<rect x="${10+(i%20)*17}" y="${14+Math.floor(i/20)*40}" width="14" height="30" rx="3" fill="#b3541e" opacity=".8"/>`;
+      S.innerHTML = dots + `<text x="10" y="112" font-size="11" fill="#555">${T('ஒவ்வொரு பெட்டி = 0.1 மோல்','each box = 0.1 mol')}</text>`;
+      const [m, e] = N.toExponential(3).split('e');
+      ro([[T('மோலார் நிறை','Molar mass'), s.M+' g/mol'],[T('மோல்கள் n = நிறை ÷ M','Moles n = mass ÷ M'), f2(n,3)],[T('துகள்கள் = n × 6.022×10²³','Particles = n × 6.022×10²³'), `${m} × 10^${Number(e)}`]]);
+    }
+    slider(host, T('நிறை','Mass'), 1, 400, 1, g, v=>{ g=v; draw(); }, ' g');
+  },
+  /* Reflex arc: hand on a hot tawa */
+  reflex(host){
+    const steps = [
+      {ta:'1. தூண்டல்: கை சூடான தோசைக்கல்லைத் தொடுகிறது', en:'1. Stimulus: hand touches a hot tawa', x:40, y:170},
+      {ta:'2. உணர்வேற்பி (தோலில்) வெப்பத்தை உணர்கிறது', en:'2. Receptor in the skin senses heat', x:75, y:150},
+      {ta:'3. உணர்ச்சி நரம்பு செல் (sensory neuron) செய்தியைத் தண்டுவடத்திற்குக் கொண்டு செல்கிறது', en:'3. Sensory neuron carries the message to the spinal cord', x:170, y:110},
+      {ta:'4. தண்டுவடம் (இணைப்பு நியூரான்) உடனே முடிவெடுக்கிறது — மூளைக்குக் காத்திருக்காமல்!', en:'4. Spinal cord (relay neuron) decides instantly — without waiting for the brain!', x:285, y:70},
+      {ta:'5. இயக்க நரம்பு செல் (motor neuron) தசைக்கு உத்தரவு அனுப்புகிறது', en:'5. Motor neuron sends the order to the muscle', x:200, y:190},
+      {ta:'6. தசை சுருங்குகிறது — கை பின்னால் இழுக்கப்படுகிறது. பிறகுதான் மூளை "சூடு!" என்று உணர்கிறது.', en:'6. Muscle contracts — the hand pulls back. Only afterwards does the brain feel "hot!"', x:120, y:205}
+    ];
+    const S = svg(host, 360, 230); const info = document.createElement('div'); info.className='fb hint'; host.appendChild(info);
+    const bar = document.createElement('div'); bar.className='row'; bar.style.marginTop='8px'; host.appendChild(bar);
+    let k = 0, timer = null;
+    function draw(){
+      S.innerHTML = `<rect x="20" y="180" width="70" height="14" rx="4" fill="#555"/><text x="24" y="210" font-size="11">${T('தோசைக்கல்','tawa')} 🔥</text>
+        <path d="M 60 178 C 70 150, 90 150, 110 150" stroke="#e0a96d" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <rect x="270" y="30" width="44" height="190" rx="18" fill="#fde2e1" stroke="#a4133c"/><text x="292" y="26" font-size="11" text-anchor="middle">${T('தண்டுவடம்','spinal cord')}</text>
+        <path d="M 80 150 C 150 110, 220 80, 285 70" stroke="#1d4ed8" stroke-width="3" fill="none" ${k>=2?'':'opacity=".25"'}/>
+        <path d="M 290 90 C 250 170, 190 200, 130 175" stroke="#127a3e" stroke-width="3" fill="none" ${k>=4?'':'opacity=".25"'}/>
+        <ellipse cx="140" cy="170" rx="30" ry="12" fill="#f6b8a0" ${k>=5?'':'opacity=".4"'}/><text x="140" y="174" font-size="10" text-anchor="middle">${T('தசை','muscle')}</text>
+        <circle cx="${steps[k].x}" cy="${steps[k].y}" r="9" fill="#f9c80e" stroke="#b3541e" stroke-width="2"/>`;
+      info.textContent = steps[k][LANG];
+    }
+    bar.innerHTML = `<button class="btn p sm pl">▶ ${T('இயக்கு','Play')}</button><button class="btn sm nx">${T('அடுத்த படி','Next step')}</button>`;
+    bar.querySelector('.nx').onclick = ()=>{ k = (k+1)%steps.length; draw(); };
+    bar.querySelector('.pl').onclick = ()=>{ clearInterval(timer); k=0; draw(); timer = setInterval(()=>{ if(k>=steps.length-1){ clearInterval(timer); return; } k++; draw(); }, 1300); };
+    draw();
+  }
+};
+
+/* ---------------- language ---------------- */
+function paintLang(){ document.querySelectorAll('.lang button').forEach(b=> b.classList.toggle('on', b.dataset.l===LANG)); document.documentElement.lang = LANG; }
+document.querySelectorAll('.lang button').forEach(b=> b.onclick = ()=>{ LANG = b.dataset.l; try{ localStorage.setItem('kalviLang', LANG); }catch(e){} paintLang(); route(); });
+$('#home').onclick = ()=> go('#/');
+paintLang(); route();
+})();
+</script>
+</body>
+</html>

@@ -383,6 +383,7 @@ const TOOLS = [
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
+  {id:'kalvi', name:'Kalvi Kalanjiyam — Learn by Understanding (கல்வி களஞ்சியம்)', desc:'Free Samacheer lessons, Class 1-10: real-life examples, touch-and-play animations, practice, then test — Tamil + English', icon:'📚', color:'#3B2FC9', cat:'education'},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
@@ -14118,6 +14119,7 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
+TOOL_IMPL.kalvi = { mount(container){ mountEmbeddedTool(container, 'learn/', 'Kalvi Kalanjiyam'); } };
 TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, 'tn-rent-agreement.html', 'TN Rent Agreement'); } };
 TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, 'tn-sale-deed.html', 'TN Sale Deed Draft'); } };
 TOOL_IMPL.healthcheck = { mount(container){ mountEmbeddedTool(container, 'health-check.html', 'Health Check', true); } };

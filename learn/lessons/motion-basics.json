@@ -1,0 +1,442 @@
+{
+ "id": "motion-basics",
+ "minutes": 35,
+ "title": {
+  "ta": "தூரம், இடப்பெயர்ச்சி, வேகம், திசைவேகம், முடுக்கம் — பேருந்துப் பயணத்தில்",
+  "en": "Distance, displacement, speed, velocity, acceleration — on a bus ride"
+ },
+ "goals": [
+  {
+   "ta": "தூரம் – இடப்பெயர்ச்சி, வேகம் – திசைவேகம் வேறுபாட்டை விளக்க",
+   "en": "Explain distance vs displacement, speed vs velocity"
+  },
+  {
+   "ta": "முடுக்கத்தைக் கணக்கிட்டு, இயக்கச் சமன்பாடுகளைப் பயன்படுத்த",
+   "en": "Calculate acceleration and use the equations of motion"
+  },
+  {
+   "ta": "தூர-நேர, திசைவேக-நேர வரைபடங்களைப் படிக்க",
+   "en": "Read distance–time and velocity–time graphs"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "காலையில் வீட்டிலிருந்து 2 km தூரத்திலுள்ள பள்ளிக்குச் செல்கிறீர்கள், மாலையில் திரும்பி வருகிறீர்கள். இன்று எவ்வளவு பயணம் செய்தீர்கள்? 4 km. ஆனால் இயற்பியல் சொல்கிறது: உங்கள் **இடப்பெயர்ச்சி பூஜ்ஜியம்!**\n\nஇது விளையாட்டுக் கேள்வி அல்ல. GPS, விமானம், ராக்கெட் — எல்லாமே இந்த வேறுபாட்டைச் சார்ந்துதான் இயங்குகின்றன.",
+    "en": "In the morning you go from home to school 2 km away; in the evening you come back. How far did you travel today? 4 km. But physics says: your **displacement is zero!**\n\nThis isn’t a trick question. GPS, aeroplanes, rockets — all depend on this difference."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தூரம் vs இடப்பெயர்ச்சி",
+    "en": "Distance vs displacement"
+   },
+   "text": {
+    "ta": "**தூரம் (distance):** நீங்கள் உண்மையில் பயணித்த பாதையின் மொத்த நீளம். திசை இல்லை — **ஸ்கேலார் (scalar)** அளவு.\n\n**இடப்பெயர்ச்சி (displacement):** தொடக்கப் புள்ளியிலிருந்து முடிவுப் புள்ளிக்கு **நேர்கோட்டு** தூரம் + **திசை**. திசை உள்ளதால் **வெக்டர் (vector)** அளவு.\n\nஎ.கா: 400 m ஓடுதளத்தை ஒருமுறை முழுமையாக ஓடினால் → தூரம் 400 m, இடப்பெயர்ச்சி 0 m (தொடங்கிய இடத்திற்கே வந்துவிட்டீர்கள்).\n\nஎப்போதும்: இடப்பெயர்ச்சியின் அளவு ≤ தூரம். நேர்கோட்டில் ஒரே திசையில் சென்றால் மட்டுமே சமம்.",
+    "en": "**Distance:** the total length of the path you actually travelled. No direction — a **scalar**.\n\n**Displacement:** the **straight-line** distance from start to finish, **plus the direction**. It has direction, so it is a **vector**.\n\ne.g. run one full lap of a 400 m track → distance 400 m, displacement 0 m (you are back where you started).\n\nAlways: size of displacement ≤ distance. They are equal only when you move in a straight line in one direction."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒருவர் 3 km கிழக்கே நடந்து, பிறகு 4 km வடக்கே நடக்கிறார். அவரது இடப்பெயர்ச்சியின் அளவு? (km)",
+    "en": "Someone walks 3 km east, then 4 km north. Size of the displacement? (km)"
+   },
+   "answer": 5,
+   "tol": 0.01,
+   "unit": {
+    "ta": "km",
+    "en": "km"
+   },
+   "hint": {
+    "ta": "கிழக்கும் வடக்கும் செங்குத்து — செங்கோண முக்கோணம்! பித்தகோரஸ்.",
+    "en": "East and north are at right angles — a right triangle! Pythagoras."
+   },
+   "solution": {
+    "ta": "√(3² + 4²) = 5 km (வடகிழக்குத் திசையில்). தூரம் 7 km.",
+    "en": "√(3² + 4²) = 5 km (towards the north-east). The distance is 7 km."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "வேகம் vs திசைவேகம்",
+    "en": "Speed vs velocity"
+   },
+   "text": {
+    "ta": "[[வேகம் (speed) = தூரம் ÷ நேரம்\nதிசைவேகம் (velocity) = இடப்பெயர்ச்சி ÷ நேரம்]]\n\nSI அலகு: m/s. சாலைகளில் km/h பயன்படுத்துகிறோம். மாற்றம்: **km/h → m/s: × 5/18**. (ஏனென்றால் 1 km/h = 1000 m ÷ 3600 s = 5/18 m/s.)\n\n**சராசரி வேகம்** = மொத்த தூரம் ÷ மொத்த நேரம். பேருந்து இடையில் நின்றாலும், வேகமாகச் சென்றாலும் — மொத்தத்தை மட்டுமே பார்க்கிறோம்.\n\nவண்டியின் speedometer காட்டுவது அந்தக் கணத்தின் வேகம் (instantaneous speed).",
+    "en": "[[speed = distance ÷ time\nvelocity = displacement ÷ time]]\n\nSI unit: m/s. On roads we use km/h. Conversion: **km/h → m/s: × 5/18**. (Because 1 km/h = 1000 m ÷ 3600 s = 5/18 m/s.)\n\n**Average speed** = total distance ÷ total time. Whether the bus stopped or sped up in between — only the totals matter.\n\nA vehicle’s speedometer shows the speed at that instant (instantaneous speed)."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு பேருந்து 120 km தூரத்தை 2 மணி 30 நிமிடத்தில் கடக்கிறது. சராசரி வேகம் km/h-லும் m/s-லும்?",
+    "en": "A bus covers 120 km in 2 h 30 min. Average speed in km/h and in m/s?"
+   },
+   "steps": [
+    {
+     "ta": "நேரம் = 2.5 h",
+     "en": "time = 2.5 h"
+    },
+    {
+     "ta": "சராசரி வேகம் = 120 ÷ 2.5 = 48 km/h",
+     "en": "average speed = 120 ÷ 2.5 = 48 km/h"
+    },
+    {
+     "ta": "m/s-ல்: 48 × 5/18 = 13.33 m/s",
+     "en": "in m/s: 48 × 5/18 = 13.33 m/s"
+    }
+   ],
+   "answer": {
+    "ta": "48 km/h ≈ 13.3 m/s",
+    "en": "48 km/h ≈ 13.3 m/s"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "72 km/h = ? m/s",
+    "en": "72 km/h = ? m/s"
+   },
+   "answer": 20,
+   "tol": 0.01,
+   "unit": {
+    "ta": "m/s",
+    "en": "m/s"
+   },
+   "hint": {
+    "ta": "× 5/18",
+    "en": "× 5/18"
+   },
+   "solution": {
+    "ta": "72 × 5/18 = 20 m/s",
+    "en": "72 × 5/18 = 20 m/s"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முடுக்கம் — வேகம் எவ்வளவு விரைவாக மாறுகிறது",
+    "en": "Acceleration — how fast the velocity changes"
+   },
+   "text": {
+    "ta": "[[முடுக்கம் a = (இறுதி திசைவேகம் v − தொடக்க திசைவேகம் u) ÷ நேரம் t]]\n\nஅலகு: m/s² (\"ஒவ்வொரு விநாடியும் எத்தனை m/s கூடுகிறது\").\n\n• வேகம் கூடினால் → நேர் முடுக்கம்.\n• வேகம் குறைந்தால் → எதிர் முடுக்கம் = **வேகக் குறைப்பு (retardation)**.\n• சீரான வேகத்தில் நேர்கோட்டில் சென்றால் → முடுக்கம் பூஜ்ஜியம்.\n\nதிசை மாறினாலும் திசைவேகம் மாறுகிறது — எனவே வளைவில் சீரான வேகத்தில் சென்றாலும் முடுக்கம் உண்டு!",
+    "en": "[[acceleration a = (final velocity v − initial velocity u) ÷ time t]]\n\nUnit: m/s² (\"how many m/s it gains every second\").\n\n• Speed increasing → positive acceleration.\n• Speed decreasing → negative acceleration = **retardation (deceleration)**.\n• Constant speed in a straight line → zero acceleration.\n\nChanging direction also changes velocity — so even at a steady speed around a bend, there is acceleration!"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "motion",
+   "text": {
+    "ta": "மூன்று பயணங்களையும் தேர்ந்தெடுத்து, இரண்டு வரைபடங்களும் எப்படி மாறுகின்றன என்று ஒப்பிடுங்கள்.",
+    "en": "Pick each of the three journeys and compare how the two graphs change."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு ஆட்டோ நின்ற நிலையிலிருந்து 5 விநாடியில் 36 km/h வேகத்தை அடைகிறது. முடுக்கம்?",
+    "en": "An auto starts from rest and reaches 36 km/h in 5 s. Acceleration?"
+   },
+   "steps": [
+    {
+     "ta": "u = 0; v = 36 km/h = 36 × 5/18 = 10 m/s; t = 5 s",
+     "en": "u = 0; v = 36 km/h = 36 × 5/18 = 10 m/s; t = 5 s"
+    },
+    {
+     "ta": "a = (10 − 0) ÷ 5 = 2 m/s²",
+     "en": "a = (10 − 0) ÷ 5 = 2 m/s²"
+    }
+   ],
+   "answer": {
+    "ta": "2 m/s²",
+    "en": "2 m/s²"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "20 m/s வேகத்தில் செல்லும் பைக், பிரேக் போட்டு 4 விநாடியில் நிற்கிறது. முடுக்கம்? (குறியுடன்)",
+    "en": "A bike at 20 m/s brakes and stops in 4 s. Acceleration? (with sign)"
+   },
+   "answer": -5,
+   "tol": 0.01,
+   "unit": {
+    "ta": "m/s²",
+    "en": "m/s²"
+   },
+   "hint": {
+    "ta": "v = 0. a = (v − u)/t",
+    "en": "v = 0. a = (v − u)/t"
+   },
+   "solution": {
+    "ta": "a = (0 − 20)/4 = −5 m/s² (வேகக் குறைப்பு 5 m/s²)",
+    "en": "a = (0 − 20)/4 = −5 m/s² (retardation of 5 m/s²)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மூன்று இயக்கச் சமன்பாடுகள் (சீரான முடுக்கத்திற்கு)",
+    "en": "The three equations of motion (uniform acceleration)"
+   },
+   "text": {
+    "ta": "[[v = u + at\ns = ut + ½at²\nv² = u² + 2as]]\n\nu = தொடக்கத் திசைவேகம், v = இறுதித் திசைவேகம், a = முடுக்கம், t = நேரம், s = இடப்பெயர்ச்சி.\n\nஎதைப் பயன்படுத்துவது? — கேள்வியில் **இல்லாத** அளவைப் பாருங்கள்: t இல்லையென்றால் மூன்றாவது; v இல்லையென்றால் இரண்டாவது; s இல்லையென்றால் முதலாவது.",
+    "en": "[[v = u + at\ns = ut + ½at²\nv² = u² + 2as]]\n\nu = initial velocity, v = final velocity, a = acceleration, t = time, s = displacement.\n\nWhich one? Look for the quantity that is **missing** from the question: no t → use the third; no v → the second; no s → the first."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "ஏன் \"இடைவெளி விடு\" என்று சாலையில் எழுதியிருக்கிறார்கள்?",
+    "en": "Why do road signs say \"keep distance\"?"
+   },
+   "q": {
+    "ta": "72 km/h (20 m/s) வேகத்தில் செல்லும் கார் −5 m/s² வேகக் குறைப்புடன் பிரேக் போடுகிறது. நிற்பதற்குள் எவ்வளவு தூரம் செல்லும்?",
+    "en": "A car at 72 km/h (20 m/s) brakes with an acceleration of −5 m/s². How far does it travel before stopping?"
+   },
+   "steps": [
+    {
+     "ta": "u = 20, v = 0, a = −5. t தெரியாது → v² = u² + 2as",
+     "en": "u = 20, v = 0, a = −5. t unknown → v² = u² + 2as"
+    },
+    {
+     "ta": "0 = 400 + 2(−5)s → 10s = 400 → s = 40 m",
+     "en": "0 = 400 + 2(−5)s → 10s = 400 → s = 40 m"
+    },
+    {
+     "ta": "வேகம் இரு மடங்கானால் (40 m/s) பிரேக் தூரம் 160 m — நான்கு மடங்கு! (u² இருப்பதால்.) அதனால்தான் அதிவேகம் ஆபத்து.",
+     "en": "Double the speed (40 m/s) and the braking distance is 160 m — four times! (Because of u².) That is why speeding is dangerous."
+    }
+   ],
+   "answer": {
+    "ta": "40 m",
+    "en": "40 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு கல் ஓய்வு நிலையிலிருந்து 10 m/s² முடுக்கத்துடன் கீழே விழுகிறது. 2 விநாடியில் எவ்வளவு தூரம் விழும்?",
+    "en": "A stone falls from rest with an acceleration of 10 m/s². How far does it fall in 2 s?"
+   },
+   "answer": 20,
+   "tol": 0.05,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "v தேவையில்லை → s = ut + ½at²",
+    "en": "v not needed → s = ut + ½at²"
+   },
+   "solution": {
+    "ta": "s = 0 + ½ × 10 × 2² = 20 m",
+    "en": "s = 0 + ½ × 10 × 2² = 20 m"
+   }
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "அடுத்த முறை பேருந்தில் செல்லும்போது, மொபைலில் stopwatch வைத்துக்கொள்ளுங்கள். சாலையோர km கற்கள் (milestone) இரண்டுக்கு இடையே 1 km கடக்க எவ்வளவு நேரம் ஆகிறது என்று அளவுங்கள். வேகம் = 1 km ÷ நேரம். 5 கற்களுக்கு அளந்து, ஒவ்வொரு km-க்கும் வேகத்தை ஒரு அட்டவணையில் எழுதி, சராசரி வேகத்தைக் கணக்கிடுங்கள். பேருந்து சீரான வேகத்தில் சென்றதா?",
+    "en": "Next time you travel by bus, keep a stopwatch on your phone. Time how long it takes to go between two roadside kilometre stones (1 km). Speed = 1 km ÷ time. Do this for 5 stones, write the speed for each kilometre in a table, and work out the average. Was the bus moving at a uniform speed?"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "தூரம் = பாதையின் நீளம் (ஸ்கேலார்); இடப்பெயர்ச்சி = நேர்கோட்டு மாற்றம் + திசை (வெக்டர்).",
+     "en": "Distance = path length (scalar); displacement = straight-line change + direction (vector)."
+    },
+    {
+     "ta": "வேகம் = தூரம்/நேரம்; திசைவேகம் = இடப்பெயர்ச்சி/நேரம். km/h × 5/18 = m/s.",
+     "en": "Speed = distance/time; velocity = displacement/time. km/h × 5/18 = m/s."
+    },
+    {
+     "ta": "a = (v − u)/t. எதிர் முடுக்கம் = வேகக் குறைப்பு.",
+     "en": "a = (v − u)/t. Negative acceleration = retardation."
+    },
+    {
+     "ta": "v = u + at, s = ut + ½at², v² = u² + 2as.",
+     "en": "v = u + at, s = ut + ½at², v² = u² + 2as."
+    },
+    {
+     "ta": "தூர-நேர வரைபடத்தின் சாய்வு = வேகம்; திசைவேக-நேர வரைபடத்தின் சாய்வு = முடுக்கம்.",
+     "en": "Slope of distance–time graph = speed; slope of velocity–time graph = acceleration."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "ஒரு வட்டப் பாதையில் ஒரு முழுச் சுற்று முடித்தால் இடப்பெயர்ச்சி?",
+    "en": "After one full lap of a circular track, the displacement is?"
+   },
+   "options": [
+    {
+     "ta": "சுற்றளவு",
+     "en": "The circumference"
+    },
+    {
+     "ta": "விட்டம்",
+     "en": "The diameter"
+    },
+    {
+     "ta": "பூஜ்ஜியம்",
+     "en": "Zero"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "தொடங்கிய இடத்திற்கே திரும்பியதால் 0.",
+    "en": "Back at the start, so 0."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் வெக்டர் அளவு எது?",
+    "en": "Which of these is a vector quantity?"
+   },
+   "options": [
+    {
+     "ta": "வேகம்",
+     "en": "Speed"
+    },
+    {
+     "ta": "தூரம்",
+     "en": "Distance"
+    },
+    {
+     "ta": "திசைவேகம்",
+     "en": "Velocity"
+    },
+    {
+     "ta": "நேரம்",
+     "en": "Time"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "திசைவேகத்திற்குத் திசை உண்டு.",
+    "en": "Velocity has a direction."
+   }
+  },
+  {
+   "q": {
+    "ta": "54 km/h = ? m/s",
+    "en": "54 km/h = ? m/s"
+   },
+   "options": [
+    {
+     "ta": "15",
+     "en": "15"
+    },
+    {
+     "ta": "18",
+     "en": "18"
+    },
+    {
+     "ta": "5.4",
+     "en": "5.4"
+    },
+    {
+     "ta": "194.4",
+     "en": "194.4"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "54 × 5/18 = 15",
+    "en": "54 × 5/18 = 15"
+   }
+  },
+  {
+   "q": {
+    "ta": "தூர-நேர வரைபடம் கிடைமட்டக் கோடாக இருந்தால் பொருள்…",
+    "en": "If the distance–time graph is a horizontal line, the object is…"
+   },
+   "options": [
+    {
+     "ta": "சீரான வேகத்தில் செல்கிறது",
+     "en": "moving at uniform speed"
+    },
+    {
+     "ta": "ஓய்வில் உள்ளது",
+     "en": "at rest"
+    },
+    {
+     "ta": "முடுக்கத்தில் உள்ளது",
+     "en": "accelerating"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "நேரம் ஓடினாலும் தூரம் மாறவில்லை → நிற்கிறது.",
+    "en": "Time passes but distance doesn’t change → it is standing still."
+   }
+  },
+  {
+   "q": {
+    "ta": "u = 5 m/s, a = 2 m/s², t = 3 s எனில் v = ?",
+    "en": "u = 5 m/s, a = 2 m/s², t = 3 s. v = ?"
+   },
+   "options": [
+    {
+     "ta": "6 m/s",
+     "en": "6 m/s"
+    },
+    {
+     "ta": "11 m/s",
+     "en": "11 m/s"
+    },
+    {
+     "ta": "10 m/s",
+     "en": "10 m/s"
+    },
+    {
+     "ta": "30 m/s",
+     "en": "30 m/s"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "v = u + at = 5 + 6 = 11 m/s",
+    "en": "v = u + at = 5 + 6 = 11 m/s"
+   }
+  },
+  {
+   "q": {
+    "ta": "வேகத்தை இரு மடங்காக்கினால் பிரேக் போட்டு நிற்கும் தூரம் (அதே வேகக் குறைப்புடன்)…",
+    "en": "If speed doubles, the braking distance (same deceleration) becomes…"
+   },
+   "options": [
+    {
+     "ta": "இரு மடங்கு",
+     "en": "twice"
+    },
+    {
+     "ta": "நான்கு மடங்கு",
+     "en": "four times"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "unchanged"
+    },
+    {
+     "ta": "பாதி",
+     "en": "half"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "s = u²/2a — u இரு மடங்கானால் u² நான்கு மடங்கு.",
+    "en": "s = u²/2a — doubling u makes u² four times."
+   }
+  }
+ ]
+}

@@ -1,0 +1,1306 @@
+{
+ "version": 1,
+ "classes": {
+  "1": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    }
+   ]
+  },
+  "2": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    }
+   ]
+  },
+  "3": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "4": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "5": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "6": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "7": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "8": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": []
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": []
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "9": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": [
+      {
+       "no": 1,
+       "title": {
+        "ta": "கணமொழி",
+        "en": "Set Language"
+       },
+       "lessons": []
+      },
+      {
+       "no": 2,
+       "title": {
+        "ta": "மெய்யெண்கள்",
+        "en": "Real Numbers"
+       },
+       "lessons": []
+      },
+      {
+       "no": 3,
+       "title": {
+        "ta": "இயற்கணிதம்",
+        "en": "Algebra"
+       },
+       "lessons": []
+      },
+      {
+       "no": 4,
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": []
+      },
+      {
+       "no": 5,
+       "title": {
+        "ta": "ஆயத்தொலை வடிவியல்",
+        "en": "Coordinate Geometry"
+       },
+       "lessons": []
+      },
+      {
+       "no": 6,
+       "title": {
+        "ta": "முக்கோணவியல்",
+        "en": "Trigonometry"
+       },
+       "lessons": [
+        {
+         "id": "trig-ratios",
+         "title": {
+          "ta": "sin, cos, tan என்றால் என்ன? — நிழலில் இருந்து தொடங்குவோம்",
+          "en": "What are sin, cos, tan? — starting with a shadow"
+         }
+        },
+        {
+         "id": "trig-standard-angles",
+         "title": {
+          "ta": "30°, 45°, 60° — மனப்பாடம் இல்லாமல் மதிப்புகள்",
+          "en": "30°, 45°, 60° — values without memorising"
+         }
+        },
+        {
+         "id": "trig-complementary",
+         "title": {
+          "ta": "நிரப்புக் கோணங்கள் & முக்கோணத்தைத் தீர்த்தல்",
+          "en": "Complementary angles & solving triangles"
+         }
+        }
+       ]
+      },
+      {
+       "no": 7,
+       "title": {
+        "ta": "அளவியல்",
+        "en": "Mensuration"
+       },
+       "lessons": []
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "புள்ளியியல்",
+        "en": "Statistics"
+       },
+       "lessons": []
+      },
+      {
+       "no": 9,
+       "title": {
+        "ta": "நிகழ்தகவு",
+        "en": "Probability"
+       },
+       "lessons": []
+      }
+     ]
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": [
+      {
+       "no": 1,
+       "title": {
+        "ta": "அளவீடு",
+        "en": "Measurement"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 2,
+       "title": {
+        "ta": "இயக்கம்",
+        "en": "Motion"
+       },
+       "lessons": [
+        {
+         "id": "motion-basics",
+         "title": {
+          "ta": "தூரம், இடப்பெயர்ச்சி, வேகம், திசைவேகம், முடுக்கம் — பேருந்துப் பயணத்தில்",
+          "en": "Distance, displacement, speed, velocity, acceleration — on a bus ride"
+         }
+        }
+       ],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 3,
+       "title": {
+        "ta": "பாய்மங்கள்",
+        "en": "Fluids"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 4,
+       "title": {
+        "ta": "மின்னூட்டமும் மின்னோட்டமும்",
+        "en": "Electric Charge and Electric Current"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 5,
+       "title": {
+        "ta": "காந்தவியலும் மின்காந்தவியலும்",
+        "en": "Magnetism and Electromagnetism"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 6,
+       "title": {
+        "ta": "ஒளி",
+        "en": "Light"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 7,
+       "title": {
+        "ta": "வெப்பம்",
+        "en": "Heat"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "ஒலி",
+        "en": "Sound"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 9,
+       "title": {
+        "ta": "அண்டம்",
+        "en": "Universe"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 10,
+       "title": {
+        "ta": "நம்மைச் சுற்றியுள்ள பருப்பொருட்கள்",
+        "en": "Matter Around Us"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 11,
+       "title": {
+        "ta": "அணு அமைப்பு",
+        "en": "Atomic Structure"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 12,
+       "title": {
+        "ta": "தனிமங்களின் வகைப்பாட்டு அட்டவணை",
+        "en": "Periodic Classification of Elements"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 13,
+       "title": {
+        "ta": "வேதிப்பிணைப்பு",
+        "en": "Chemical Bonding"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 14,
+       "title": {
+        "ta": "அமிலங்கள், காரங்கள், உப்புகள்",
+        "en": "Acids, Bases and Salts"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 15,
+       "title": {
+        "ta": "கார்பனும் அதன் சேர்மங்களும்",
+        "en": "Carbon and its Compounds"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 16,
+       "title": {
+        "ta": "பயன்பாட்டு வேதியியல்",
+        "en": "Applied Chemistry"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 17,
+       "title": {
+        "ta": "விலங்குலகம்",
+        "en": "Animal Kingdom"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 18,
+       "title": {
+        "ta": "திசுக்களின் அமைப்பு",
+        "en": "Organisation of Tissues"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 19,
+       "title": {
+        "ta": "தாவர செயலியல்",
+        "en": "Plant Physiology"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 20,
+       "title": {
+        "ta": "விலங்குகளின் உறுப்பு மண்டலங்கள்",
+        "en": "Organ Systems in Animals"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 21,
+       "title": {
+        "ta": "ஊட்டச்சத்தும் ஆரோக்கியமும்",
+        "en": "Nutrition and Health"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 22,
+       "title": {
+        "ta": "நுண்ணுயிரிகளின் உலகம்",
+        "en": "World of Microbes"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 23,
+       "title": {
+        "ta": "பொருளாதார உயிரியல்",
+        "en": "Economic Biology"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 24,
+       "title": {
+        "ta": "சுற்றுச்சூழல் அறிவியல்",
+        "en": "Environmental Science"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 25,
+       "title": {
+        "ta": "கணினி — ஓர் அறிமுகம்",
+        "en": "Computer – An Introduction"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "கணினி அறிவியல்",
+        "en": "Computer Science"
+       }
+      },
+      {
+       "no": 26,
+       "title": {
+        "ta": "கணினியின் பாகங்கள்",
+        "en": "Parts of Computer"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "கணினி அறிவியல்",
+        "en": "Computer Science"
+       }
+      },
+      {
+       "no": 27,
+       "title": {
+        "ta": "வன்பொருளும் மென்பொருளும்",
+        "en": "Hardware and Software"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "கணினி அறிவியல்",
+        "en": "Computer Science"
+       }
+      }
+     ]
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  },
+  "10": {
+   "subjects": [
+    {
+     "id": "tamil",
+     "name": {
+      "ta": "தமிழ்",
+      "en": "Tamil"
+     },
+     "icon": "அ",
+     "color": "tam",
+     "chapters": []
+    },
+    {
+     "id": "english",
+     "name": {
+      "ta": "ஆங்கிலம்",
+      "en": "English"
+     },
+     "icon": "🔤",
+     "color": "eng",
+     "chapters": []
+    },
+    {
+     "id": "maths",
+     "name": {
+      "ta": "கணக்கு",
+      "en": "Maths"
+     },
+     "icon": "➗",
+     "color": "math",
+     "chapters": [
+      {
+       "no": 1,
+       "title": {
+        "ta": "உறவுகளும் சார்புகளும்",
+        "en": "Relations and Functions"
+       },
+       "lessons": []
+      },
+      {
+       "no": 2,
+       "title": {
+        "ta": "எண்களும் தொடர்வரிசைகளும்",
+        "en": "Numbers and Sequences"
+       },
+       "lessons": []
+      },
+      {
+       "no": 3,
+       "title": {
+        "ta": "இயற்கணிதம்",
+        "en": "Algebra"
+       },
+       "lessons": []
+      },
+      {
+       "no": 4,
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": []
+      },
+      {
+       "no": 5,
+       "title": {
+        "ta": "ஆயத்தொலை வடிவியல்",
+        "en": "Coordinate Geometry"
+       },
+       "lessons": []
+      },
+      {
+       "no": 6,
+       "title": {
+        "ta": "முக்கோணவியல்",
+        "en": "Trigonometry"
+       },
+       "lessons": [
+        {
+         "id": "trig-identities",
+         "title": {
+          "ta": "முக்கோணவியல் முற்றொருமைகள் — பித்தகோரஸ் மறைந்திருக்கிறார்",
+          "en": "Trigonometric identities — Pythagoras in disguise"
+         }
+        },
+        {
+         "id": "heights-distances",
+         "title": {
+          "ta": "உயரங்களும் தூரங்களும் — தொடாமலே அளக்கலாம்",
+          "en": "Heights and distances — measure without touching"
+         }
+        }
+       ]
+      },
+      {
+       "no": 7,
+       "title": {
+        "ta": "அளவியல்",
+        "en": "Mensuration"
+       },
+       "lessons": []
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "புள்ளியியலும் நிகழ்தகவும்",
+        "en": "Statistics and Probability"
+       },
+       "lessons": []
+      }
+     ]
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "அறிவியல்",
+      "en": "Science"
+     },
+     "icon": "🔬",
+     "color": "sci",
+     "chapters": [
+      {
+       "no": 1,
+       "title": {
+        "ta": "இயக்க விதிகள்",
+        "en": "Laws of Motion"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 2,
+       "title": {
+        "ta": "ஒளியியல்",
+        "en": "Optics"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 3,
+       "title": {
+        "ta": "வெப்ப இயற்பியல்",
+        "en": "Thermal Physics"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 4,
+       "title": {
+        "ta": "மின்னோட்டவியல்",
+        "en": "Electricity"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 5,
+       "title": {
+        "ta": "ஒலியியல்",
+        "en": "Acoustics"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 6,
+       "title": {
+        "ta": "அணுக்கரு இயற்பியல்",
+        "en": "Nuclear Physics"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "இயற்பியல்",
+        "en": "Physics"
+       }
+      },
+      {
+       "no": 7,
+       "title": {
+        "ta": "அணுக்களும் மூலக்கூறுகளும்",
+        "en": "Atoms and Molecules"
+       },
+       "lessons": [
+        {
+         "id": "mole-concept",
+         "title": {
+          "ta": "மோல் — எண்ண முடியாததை எடை போட்டு எண்ணுவது",
+          "en": "The mole — counting the uncountable by weighing"
+         }
+        }
+       ],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "தனிமங்களின் வகைப்பாட்டு அட்டவணை",
+        "en": "Periodic Classification of Elements"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 9,
+       "title": {
+        "ta": "கரைசல்கள்",
+        "en": "Solutions"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 10,
+       "title": {
+        "ta": "வேதிவினைகளின் வகைகள்",
+        "en": "Types of Chemical Reactions"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 11,
+       "title": {
+        "ta": "கார்பனும் அதன் சேர்மங்களும்",
+        "en": "Carbon and its Compounds"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "வேதியியல்",
+        "en": "Chemistry"
+       }
+      },
+      {
+       "no": 12,
+       "title": {
+        "ta": "தாவர உள்ளமைப்பியல் மற்றும் தாவர செயலியல்",
+        "en": "Plant Anatomy and Plant Physiology"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 13,
+       "title": {
+        "ta": "விலங்குகளின் உள்ளமைப்பு",
+        "en": "Structural Organisation of Animals"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 14,
+       "title": {
+        "ta": "தாவரங்களில் கடத்துதல் & விலங்குகளில் சுழற்சி",
+        "en": "Transportation in Plants and Circulation in Animals"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 15,
+       "title": {
+        "ta": "நரம்பு மண்டலம்",
+        "en": "Nervous System"
+       },
+       "lessons": [
+        {
+         "id": "reflex-action",
+         "title": {
+          "ta": "அனிச்சைச் செயல் — மூளை யோசிக்கும் முன்பே கை இழுக்கிறது",
+          "en": "Reflex action — your hand moves before your brain thinks"
+         }
+        }
+       ],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 16,
+       "title": {
+        "ta": "தாவர மற்றும் விலங்கு ஹார்மோன்கள்",
+        "en": "Plant and Animal Hormones"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 17,
+       "title": {
+        "ta": "தாவரங்கள் மற்றும் விலங்குகளில் இனப்பெருக்கம்",
+        "en": "Reproduction in Plants and Animals"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 18,
+       "title": {
+        "ta": "மரபியல்",
+        "en": "Heredity"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 19,
+       "title": {
+        "ta": "உயிரின் தோற்றமும் பரிணாமமும்",
+        "en": "Origin and Evolution of Life"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 20,
+       "title": {
+        "ta": "இனக்கலப்பும் உயிரித் தொழில்நுட்பமும்",
+        "en": "Breeding and Biotechnology"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 21,
+       "title": {
+        "ta": "உடல்நலமும் நோய்களும்",
+        "en": "Health and Diseases"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 22,
+       "title": {
+        "ta": "சுற்றுச்சூழல் மேலாண்மை",
+        "en": "Environmental Management"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "உயிரியல்",
+        "en": "Biology"
+       }
+      },
+      {
+       "no": 23,
+       "title": {
+        "ta": "காட்சித் தொடர்பியல்",
+        "en": "Visual Communication"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "கணினி அறிவியல்",
+        "en": "Computer Science"
+       }
+      }
+     ]
+    },
+    {
+     "id": "social",
+     "name": {
+      "ta": "சமூக அறிவியல்",
+      "en": "Social Science"
+     },
+     "icon": "🌏",
+     "color": "soc",
+     "chapters": []
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,499 @@
+{
+ "id": "trig-ratios",
+ "minutes": 25,
+ "title": {
+  "ta": "sin, cos, tan என்றால் என்ன? — நிழலில் இருந்து தொடங்குவோம்",
+  "en": "What are sin, cos, tan? — starting with a shadow"
+ },
+ "goals": [
+  {
+   "ta": "செங்கோண முக்கோணத்தில் எதிர்ப்பக்கம், அடுத்துள்ள பக்கம், கர்ணம் ஆகியவற்றை அடையாளம் காண",
+   "en": "Identify the opposite side, adjacent side and hypotenuse of a right triangle"
+  },
+  {
+   "ta": "sin, cos, tan, cosec, sec, cot ஆகியவை உண்மையில் என்ன என்று புரிந்து கணக்கிட",
+   "en": "Understand what sin, cos, tan, cosec, sec, cot really are, and calculate them"
+  },
+  {
+   "ta": "கம்பத்தின் நிழலை வைத்து அதன் உயரத்தைக் கண்டுபிடிக்க",
+   "en": "Find the height of a pole from its shadow"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உங்கள் பள்ளிக் கொடிக்கம்பம் எவ்வளவு உயரம்? மேலே ஏறி அளக்க முடியாது. ஆனால் **அதன் நிழலை** தரையில் அளக்க முடியும்!\n\nசுமார் 2,600 ஆண்டுகளுக்கு முன் கிரேக்க அறிஞர் தேல்ஸ் (Thales), எகிப்தின் பிரமிடு உயரத்தை இப்படித்தான் — நிழலை வைத்து — கண்டுபிடித்தார் என்று ஒரு பழைய கதை சொல்கிறது.\n\nஇந்தப் பாடத்தின் முடிவில் நீங்களும் அதைச் செய்வீர்கள். அதற்குத் தேவையான கருவிதான் **sin, cos, tan**.",
+    "en": "How tall is your school flagpole? You can’t climb up to measure it. But you **can** measure its shadow on the ground!\n\nAn old story says that about 2,600 years ago the Greek thinker Thales found the height of an Egyptian pyramid exactly this way — from its shadow.\n\nBy the end of this lesson you will be able to do it too. The tool you need is **sin, cos, tan**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முதலில்: செங்கோண முக்கோணத்தின் மூன்று பக்கங்கள்",
+    "en": "First: the three sides of a right triangle"
+   },
+   "text": {
+    "ta": "ஒரு கோணம் 90° உள்ள முக்கோணம் **செங்கோண முக்கோணம்**. நாம் பார்க்கும் கோணத்தை θ (தீட்டா) என்று அழைப்போம். அந்தக் கோணத்தை வைத்து மூன்று பக்கங்களுக்கும் பெயர் வைக்கிறோம்:\n\n• **கர்ணம் (Hypotenuse):** 90° கோணத்திற்கு எதிரே உள்ள பக்கம். எப்போதும் மிக நீளமான பக்கம்.\n• **எதிர்ப்பக்கம் (Opposite):** θ கோணத்திற்கு நேர் எதிரே உள்ள பக்கம்.\n• **அடுத்துள்ள பக்கம் (Adjacent):** θ-வைத் தொட்டுக்கொண்டிருக்கும் பக்கம் (கர்ணம் அல்லாதது).\n\nமுக்கியம்: எதிர், அடுத்து என்பது **எந்தக் கோணத்தைப் பார்க்கிறோம்** என்பதைப் பொறுத்தது. மற்ற கோணத்திலிருந்து பார்த்தால் இவை இடம் மாறும்!",
+    "en": "A triangle with one 90° angle is a **right triangle**. We call the angle we are looking at θ (theta). We name the three sides with respect to that angle:\n\n• **Hypotenuse:** the side opposite the 90° angle. Always the longest side.\n• **Opposite:** the side directly across from angle θ.\n• **Adjacent:** the side that touches θ (other than the hypotenuse).\n\nImportant: \"opposite\" and \"adjacent\" depend on **which angle you are looking from**. Look from the other angle and they swap!"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "trigTriangle",
+   "text": {
+    "ta": "கோணத்தையும் முக்கோணத்தின் அளவையும் மாற்றிப் பாருங்கள். கீழே உள்ள மூன்று விகிதங்களை (ratio) கவனியுங்கள்.",
+    "en": "Move the angle and the size of the triangle. Watch the three ratios below."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "பெரிய ரகசியம்",
+    "en": "The big secret"
+   },
+   "text": {
+    "ta": "முக்கோணத்தை எவ்வளவு பெரிதாக்கினாலும் சிறிதாக்கினாலும், **கோணம் அதேதான் என்றால் பக்கங்களின் விகிதங்கள் மாறுவதில்லை**. (ஏனென்றால் அவை வடிவொத்த முக்கோணங்கள் — similar triangles.)\n\nஅதனால்தான் கணிதவியலாளர்கள் ஒவ்வொரு கோணத்திற்கும் இந்த விகிதங்களை ஒருமுறை கணக்கிட்டு, பெயர் வைத்தார்கள். **அவ்வளவுதான் sin, cos, tan — ஒரு கோணத்தின் \"அடையாள எண்கள்\".**\n\n[[sin θ = எதிர்ப்பக்கம் ÷ கர்ணம்\ncos θ = அடுத்துள்ள பக்கம் ÷ கர்ணம்\ntan θ = எதிர்ப்பக்கம் ÷ அடுத்துள்ள பக்கம்]]\n\nநினைவில் வைக்க: **\"சை-எ-க, கொ-அ-க, டே-எ-அ\"** (சைன் = எதிர்/கர்ணம், கொசைன் = அடுத்து/கர்ணம், டேன் = எதிர்/அடுத்து).",
+    "en": "However big or small you make the triangle, **if the angle stays the same, the ratios of the sides do not change**. (They are similar triangles.)\n\nSo mathematicians worked out these ratios once for every angle and gave them names. **That is all sin, cos and tan are — the \"identity numbers\" of an angle.**\n\n[[sin θ = opposite ÷ hypotenuse\ncos θ = adjacent ÷ hypotenuse\ntan θ = opposite ÷ adjacent]]\n\nTo remember: **SOH-CAH-TOA** (Sine = Opposite/Hypotenuse, Cosine = Adjacent/Hypotenuse, Tangent = Opposite/Adjacent)."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "3-4-5 முக்கோணம்",
+    "en": "The 3-4-5 triangle"
+   },
+   "q": {
+    "ta": "ஒரு செங்கோண முக்கோணத்தில் θ-க்கு எதிர்ப்பக்கம் 3 cm, அடுத்துள்ள பக்கம் 4 cm, கர்ணம் 5 cm. sin θ, cos θ, tan θ காண்க.",
+    "en": "In a right triangle the side opposite θ is 3 cm, the adjacent side is 4 cm and the hypotenuse is 5 cm. Find sin θ, cos θ, tan θ."
+   },
+   "steps": [
+    {
+     "ta": "sin θ = எதிர் ÷ கர்ணம் = 3 ÷ 5 = 0.6",
+     "en": "sin θ = opposite ÷ hypotenuse = 3 ÷ 5 = 0.6"
+    },
+    {
+     "ta": "cos θ = அடுத்து ÷ கர்ணம் = 4 ÷ 5 = 0.8",
+     "en": "cos θ = adjacent ÷ hypotenuse = 4 ÷ 5 = 0.8"
+    },
+    {
+     "ta": "tan θ = எதிர் ÷ அடுத்து = 3 ÷ 4 = 0.75",
+     "en": "tan θ = opposite ÷ adjacent = 3 ÷ 4 = 0.75"
+    },
+    {
+     "ta": "சோதனை: sin, cos இரண்டும் 1-ஐ விடக் குறைவு — ஏனென்றால் கர்ணமே மிக நீளமான பக்கம்.",
+     "en": "Check: sin and cos are both less than 1 — because the hypotenuse is the longest side."
+    }
+   ],
+   "answer": {
+    "ta": "sin θ = 3/5, cos θ = 4/5, tan θ = 3/4",
+    "en": "sin θ = 3/5, cos θ = 4/5, tan θ = 3/4"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "எதிர்ப்பக்கம் 5, அடுத்துள்ள பக்கம் 12. முதலில் பித்தகோரஸ் தேற்றம் மூலம் கர்ணத்தைக் காண்க, பிறகு sin θ-ஐ தசம எண்ணாக (3 இலக்கம்) எழுதுக.",
+    "en": "Opposite = 5, adjacent = 12. First find the hypotenuse using Pythagoras, then write sin θ as a decimal (3 places)."
+   },
+   "answer": 0.385,
+   "tol": 0.003,
+   "hint": {
+    "ta": "கர்ணம் = √(5² + 12²) = √169. பிறகு sin θ = 5 ÷ கர்ணம்.",
+    "en": "Hypotenuse = √(5² + 12²) = √169. Then sin θ = 5 ÷ hypotenuse."
+   },
+   "solution": {
+    "ta": "கர்ணம் = √(25 + 144) = √169 = 13. sin θ = 5/13 ≈ 0.385",
+    "en": "Hypotenuse = √(25 + 144) = √169 = 13. sin θ = 5/13 ≈ 0.385"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "அதே முக்கோணத்தில் (5, 12, 13) tan θ = ? (3 இலக்கம்)",
+    "en": "In the same triangle (5, 12, 13), tan θ = ? (3 places)"
+   },
+   "answer": 0.417,
+   "tol": 0.003,
+   "hint": {
+    "ta": "tan = எதிர் ÷ அடுத்து. கர்ணம் தேவையில்லை!",
+    "en": "tan = opposite ÷ adjacent. No hypotenuse needed!"
+   },
+   "solution": {
+    "ta": "tan θ = 5/12 ≈ 0.417",
+    "en": "tan θ = 5/12 ≈ 0.417"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "செங்கோண முக்கோணம் ABC-ல் ∠B = 90°. ∠A-வைப் பொறுத்து கர்ணம் எது?",
+    "en": "In right triangle ABC, ∠B = 90°. With respect to ∠A, which side is the hypotenuse?"
+   },
+   "options": [
+    {
+     "ta": "AB",
+     "en": "AB"
+    },
+    {
+     "ta": "BC",
+     "en": "BC"
+    },
+    {
+     "ta": "AC",
+     "en": "AC"
+    }
+   ],
+   "correct": 2,
+   "hint": {
+    "ta": "கர்ணம் 90° கோணத்திற்கு எதிரே இருக்கும். 90° எங்கே?",
+    "en": "The hypotenuse is opposite the 90° angle. Where is the 90°?"
+   },
+   "solution": {
+    "ta": "90° கோணம் B-ல் உள்ளது. B-க்கு எதிரே உள்ள பக்கம் AC — அதுவே கர்ணம்.",
+    "en": "The 90° angle is at B. The side opposite B is AC — that is the hypotenuse."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஒரு விகிதம் தெரிந்தால், மற்ற எல்லாம் தெரியும்",
+    "en": "Know one ratio, and you know them all"
+   },
+   "text": {
+    "ta": "sin θ = 8/17 என்று தெரிந்தால்: எதிர்ப்பக்கம் 8, கர்ணம் 17 உள்ள ஒரு முக்கோணத்தை வரைந்து கொள்ளலாம். அடுத்துள்ள பக்கம் = √(17² − 8²) = √(289 − 64) = √225 = 15.\n\nஅப்படியென்றால் cos θ = 15/17, tan θ = 8/15. ஒரு முக்கோணம் வரைந்தாலே போதும் — எந்த விதியையும் மனப்பாடம் செய்ய வேண்டாம்.",
+    "en": "If sin θ = 8/17: draw a triangle with opposite 8 and hypotenuse 17. Adjacent = √(17² − 8²) = √(289 − 64) = √225 = 15.\n\nSo cos θ = 15/17 and tan θ = 8/15. Just draw a triangle — no rules to memorise."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மேலும் மூன்று: cosec, sec, cot",
+    "en": "Three more: cosec, sec, cot"
+   },
+   "text": {
+    "ta": "மேலே உள்ள மூன்றையும் தலைகீழாக்கினால் (reciprocal) மேலும் மூன்று பெயர்கள் கிடைக்கும். புதிதாக எதுவும் இல்லை — வெறும் தலைகீழ்:\n\n[[cosec θ = 1 ÷ sin θ = கர்ணம் ÷ எதிர்\nsec θ = 1 ÷ cos θ = கர்ணம் ÷ அடுத்து\ncot θ = 1 ÷ tan θ = அடுத்து ÷ எதிர்]]\n\nஜோடிகள்: sin ↔ cosec, cos ↔ sec, tan ↔ cot. (ஒவ்வொரு ஜோடியிலும் ஒன்றில் மட்டும் \"co\" இருக்கும்.)",
+    "en": "Flip the three ratios upside down (take the reciprocal) and you get three more names. Nothing new — just flipped:\n\n[[cosec θ = 1 ÷ sin θ = hypotenuse ÷ opposite\nsec θ = 1 ÷ cos θ = hypotenuse ÷ adjacent\ncot θ = 1 ÷ tan θ = adjacent ÷ opposite]]\n\nPairs: sin ↔ cosec, cos ↔ sec, tan ↔ cot. (In each pair exactly one has \"co\".)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "sin θ = 3/5 எனில் cosec θ = ? (தசமத்தில், 3 இலக்கம்)",
+    "en": "If sin θ = 3/5, cosec θ = ? (decimal, 3 places)"
+   },
+   "answer": 1.667,
+   "tol": 0.003,
+   "hint": {
+    "ta": "cosec என்பது sin-ன் தலைகீழ்.",
+    "en": "cosec is the flip of sin."
+   },
+   "solution": {
+    "ta": "cosec θ = 1 ÷ (3/5) = 5/3 ≈ 1.667",
+    "en": "cosec θ = 1 ÷ (3/5) = 5/3 ≈ 1.667"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "shadow",
+   "params": {
+    "height": 6
+   },
+   "title": {
+    "ta": "இப்போது கொடிக்கம்பம்!",
+    "en": "Now the flagpole!"
+   },
+   "text": {
+    "ta": "கம்பம், அதன் நிழல், சூரியக் கதிர் — இவை ஒரு செங்கோண முக்கோணம். சூரியனின் கோணம் θ-க்கு: எதிர்ப்பக்கம் = கம்பத்தின் உயரம், அடுத்துள்ள பக்கம் = நிழல். எனவே:\n\n[[tan θ = உயரம் ÷ நிழல்   ⟹   உயரம் = நிழல் × tan θ]]\n\nசூரியனை உயர்த்தி இறக்கிப் பாருங்கள்: மதியம் நிழல் சிறியது, மாலையில் நீளமானது — ஏன் என்று இப்போது புரிகிறதா?",
+    "en": "The pole, its shadow and the sun’s ray make a right triangle. For the sun’s angle θ: opposite = height of the pole, adjacent = shadow. So:\n\n[[tan θ = height ÷ shadow   ⟹   height = shadow × tan θ]]\n\nMove the sun up and down: at noon the shadow is short, in the evening it is long — now you know why!"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "கொடிக்கம்பம்",
+    "en": "The flagpole"
+   },
+   "q": {
+    "ta": "சூரியக் கோணம் 45° இருக்கும்போது கொடிக்கம்பத்தின் நிழல் 8 m. கம்பத்தின் உயரம் என்ன? (tan 45° = 1)",
+    "en": "When the sun is at 45°, the flagpole’s shadow is 8 m. How tall is the pole? (tan 45° = 1)"
+   },
+   "steps": [
+    {
+     "ta": "tan θ = உயரம் ÷ நிழல்",
+     "en": "tan θ = height ÷ shadow"
+    },
+    {
+     "ta": "உயரம் = 8 × tan 45° = 8 × 1",
+     "en": "height = 8 × tan 45° = 8 × 1"
+    },
+    {
+     "ta": "45°-ல் உயரமும் நிழலும் சமம்!",
+     "en": "At 45° the height and shadow are equal!"
+    }
+   ],
+   "answer": {
+    "ta": "8 m",
+    "en": "8 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "சூரியக் கோணம் 60°-ல் ஒரு மரத்தின் நிழல் 5 m. மரத்தின் உயரம்? (tan 60° ≈ 1.732)",
+    "en": "At a sun angle of 60°, a tree’s shadow is 5 m. Height of the tree? (tan 60° ≈ 1.732)"
+   },
+   "answer": 8.66,
+   "tol": 0.02,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "உயரம் = நிழல் × tan θ",
+    "en": "height = shadow × tan θ"
+   },
+   "solution": {
+    "ta": "உயரம் = 5 × 1.732 = 8.66 m",
+    "en": "height = 5 × 1.732 = 8.66 m"
+   }
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "**tan அட்டவணை கூட தேவையில்லாத முறை:** ஒரு 1 மீட்டர் குச்சியை நேராக நிறுத்துங்கள். அதே நேரத்தில் குச்சியின் நிழலையும் மரத்தின் நிழலையும் அளவுங்கள்.\n\nஇரண்டுக்கும் சூரியக் கோணம் ஒன்றே, எனவே tan θ ஒன்றே:\n\n[[மரத்தின் உயரம் ÷ மரத்தின் நிழல் = குச்சியின் உயரம் ÷ குச்சியின் நிழல்]]\n\nஎ.கா: குச்சி 1 m, அதன் நிழல் 0.8 m; மரத்தின் நிழல் 12 m எனில் மரத்தின் உயரம் = 12 × 1 ÷ 0.8 = 15 m. உங்கள் வீட்டு மரம், தென்னை, மின்கம்பத்தை அளந்து பாருங்கள்!",
+    "en": "**A method that doesn’t even need a tan table:** stand a 1-metre stick upright. At the same moment measure the stick’s shadow and the tree’s shadow.\n\nThe sun’s angle is the same for both, so tan θ is the same:\n\n[[tree height ÷ tree shadow = stick height ÷ stick shadow]]\n\ne.g. stick 1 m, its shadow 0.8 m; tree’s shadow 12 m → tree height = 12 × 1 ÷ 0.8 = 15 m. Measure a tree, coconut palm or electric pole near your home!"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "செங்கோண முக்கோணத்தில், கோணம் θ-ஐப் பொறுத்து: எதிர், அடுத்து, கர்ணம்.",
+     "en": "In a right triangle, relative to θ: opposite, adjacent, hypotenuse."
+    },
+    {
+     "ta": "**sin = எதிர்/கர்ணம், cos = அடுத்து/கர்ணம், tan = எதிர்/அடுத்து.**",
+     "en": "**sin = opp/hyp, cos = adj/hyp, tan = opp/adj.**"
+    },
+    {
+     "ta": "இவை கோணத்தை மட்டுமே பொறுத்தவை — முக்கோணத்தின் அளவை அல்ல.",
+     "en": "They depend only on the angle — not on the size of the triangle."
+    },
+    {
+     "ta": "cosec, sec, cot = sin, cos, tan-ன் தலைகீழ்கள்.",
+     "en": "cosec, sec, cot are the reciprocals of sin, cos, tan."
+    },
+    {
+     "ta": "ஒரு விகிதம் தெரிந்தால் முக்கோணம் வரைந்து மற்றவற்றைக் காணலாம்.",
+     "en": "Know one ratio → draw a triangle → find all the others."
+    },
+    {
+     "ta": "உயரம் = நிழல் × tan(சூரியக் கோணம்).",
+     "en": "Height = shadow × tan(sun angle)."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "sin θ = ?",
+    "en": "sin θ = ?"
+   },
+   "options": [
+    {
+     "ta": "அடுத்து ÷ கர்ணம்",
+     "en": "adjacent ÷ hypotenuse"
+    },
+    {
+     "ta": "எதிர் ÷ கர்ணம்",
+     "en": "opposite ÷ hypotenuse"
+    },
+    {
+     "ta": "எதிர் ÷ அடுத்து",
+     "en": "opposite ÷ adjacent"
+    },
+    {
+     "ta": "கர்ணம் ÷ எதிர்",
+     "en": "hypotenuse ÷ opposite"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "சை-எ-க: sin = எதிர்/கர்ணம்.",
+    "en": "SOH: sin = opposite/hypotenuse."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு முக்கோணத்தை அதே கோணங்களுடன் இரு மடங்கு பெரிதாக்கினால் tan θ என்ன ஆகும்?",
+    "en": "If a triangle is made twice as big with the same angles, what happens to tan θ?"
+   },
+   "options": [
+    {
+     "ta": "இரு மடங்காகும்",
+     "en": "It doubles"
+    },
+    {
+     "ta": "பாதியாகும்",
+     "en": "It halves"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "It stays the same"
+    },
+    {
+     "ta": "நான்கு மடங்காகும்",
+     "en": "It becomes four times"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "எதிர், அடுத்து இரண்டும் இரு மடங்காவதால் விகிதம் மாறாது. விகிதங்கள் கோணத்தை மட்டுமே பொறுத்தவை.",
+    "en": "Opposite and adjacent both double, so their ratio is unchanged. The ratios depend only on the angle."
+   }
+  },
+  {
+   "q": {
+    "ta": "எதிர் = 8, அடுத்து = 6, கர்ணம் = 10. cos θ = ?",
+    "en": "Opposite = 8, adjacent = 6, hypotenuse = 10. cos θ = ?"
+   },
+   "options": [
+    {
+     "ta": "0.8",
+     "en": "0.8"
+    },
+    {
+     "ta": "0.6",
+     "en": "0.6"
+    },
+    {
+     "ta": "1.33",
+     "en": "1.33"
+    },
+    {
+     "ta": "0.75",
+     "en": "0.75"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "cos = அடுத்து/கர்ணம் = 6/10 = 0.6",
+    "en": "cos = adjacent/hypotenuse = 6/10 = 0.6"
+   }
+  },
+  {
+   "q": {
+    "ta": "tan θ = 4/3 எனில் cot θ = ?",
+    "en": "If tan θ = 4/3, cot θ = ?"
+   },
+   "options": [
+    {
+     "ta": "4/3",
+     "en": "4/3"
+    },
+    {
+     "ta": "3/5",
+     "en": "3/5"
+    },
+    {
+     "ta": "3/4",
+     "en": "3/4"
+    },
+    {
+     "ta": "5/3",
+     "en": "5/3"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "cot = 1/tan = 3/4",
+    "en": "cot = 1/tan = 3/4"
+   }
+  },
+  {
+   "q": {
+    "ta": "cos θ = 12/13 எனில் sin θ = ?",
+    "en": "If cos θ = 12/13, sin θ = ?"
+   },
+   "options": [
+    {
+     "ta": "5/13",
+     "en": "5/13"
+    },
+    {
+     "ta": "12/5",
+     "en": "12/5"
+    },
+    {
+     "ta": "13/12",
+     "en": "13/12"
+    },
+    {
+     "ta": "5/12",
+     "en": "5/12"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அடுத்து 12, கர்ணம் 13 → எதிர் = √(169 − 144) = 5. sin = 5/13.",
+    "en": "Adjacent 12, hypotenuse 13 → opposite = √(169 − 144) = 5. sin = 5/13."
+   }
+  },
+  {
+   "q": {
+    "ta": "sin θ-ன் மதிப்பு 1-ஐ விட அதிகமாக இருக்க முடியுமா (செங்கோண முக்கோணத்தில்)?",
+    "en": "Can sin θ be greater than 1 (in a right triangle)?"
+   },
+   "options": [
+    {
+     "ta": "ஆம், கோணம் பெரிதானால்",
+     "en": "Yes, if the angle is large"
+    },
+    {
+     "ta": "இல்லை — எதிர்ப்பக்கம் கர்ணத்தை விட நீளமாக இருக்க முடியாது",
+     "en": "No — the opposite side can never be longer than the hypotenuse"
+    },
+    {
+     "ta": "ஆம், முக்கோணம் பெரிதானால்",
+     "en": "Yes, if the triangle is large"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "கர்ணமே மிக நீளமான பக்கம், எனவே எதிர்/கர்ணம் ≤ 1.",
+    "en": "The hypotenuse is the longest side, so opposite/hypotenuse ≤ 1."
+   }
+  },
+  {
+   "q": {
+    "ta": "சூரியக் கோணம் 45°-ல் 10 m உயரக் கட்டடத்தின் நிழல்?",
+    "en": "At a sun angle of 45°, the shadow of a 10 m building is?"
+   },
+   "options": [
+    {
+     "ta": "5 m",
+     "en": "5 m"
+    },
+    {
+     "ta": "10 m",
+     "en": "10 m"
+    },
+    {
+     "ta": "14.1 m",
+     "en": "14.1 m"
+    },
+    {
+     "ta": "17.3 m",
+     "en": "17.3 m"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "tan 45° = 1, எனவே நிழல் = உயரம் ÷ 1 = 10 m.",
+    "en": "tan 45° = 1, so shadow = height ÷ 1 = 10 m."
+   }
+  }
+ ]
+}

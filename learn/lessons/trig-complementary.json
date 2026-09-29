@@ -1,0 +1,437 @@
+{
+ "id": "trig-complementary",
+ "minutes": 25,
+ "title": {
+  "ta": "நிரப்புக் கோணங்கள் & முக்கோணத்தைத் தீர்த்தல்",
+  "en": "Complementary angles & solving triangles"
+ },
+ "goals": [
+  {
+   "ta": "sin(90° − θ) = cos θ ஏன் என்று புரிந்து பயன்படுத்த",
+   "en": "Understand and use why sin(90° − θ) = cos θ"
+  },
+  {
+   "ta": "ஒரு கோணமும் ஒரு பக்கமும் தெரிந்தால் செங்கோண முக்கோணத்தின் மற்ற பக்கங்களைக் காண",
+   "en": "Find the missing sides of a right triangle from one angle and one side"
+  },
+  {
+   "ta": "விகிதம் தெரிந்தால் கோணத்தைக் காண",
+   "en": "Find an angle from a known ratio"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "\"Cosine\" என்ற பெயரில் உள்ள \"co\" எதைக் குறிக்கிறது? இது **complement** — நிரப்புக் கோணம். அதாவது cosine என்பது \"நிரப்புக் கோணத்தின் sine\". இந்த ஒரு வார்த்தையைப் புரிந்தால் பாடத்தின் பாதி முடிந்துவிடும்!",
+    "en": "What does the \"co\" in \"cosine\" stand for? **Complement** — the complementary angle. Cosine literally means \"the sine of the complement\". Understand this one word and half the lesson is done!"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஒரே முக்கோணம், இரண்டு பார்வைகள்",
+    "en": "One triangle, two viewpoints"
+   },
+   "text": {
+    "ta": "செங்கோண முக்கோணத்தில் மற்ற இரண்டு கோணங்களின் கூடுதல் 90° (ஏனென்றால் மொத்தம் 180°). ஒரு கோணம் θ என்றால், மற்றது (90° − θ). இவை **நிரப்புக் கோணங்கள்**.\n\nθ-விலிருந்து பார்க்கும்போது \"எதிர்ப்பக்கம்\" என்பது, (90° − θ)-விலிருந்து பார்க்கும்போது \"அடுத்துள்ள பக்கம்\" ஆகிவிடும்! கர்ணம் மட்டும் மாறாது. எனவே:\n\n[[sin(90° − θ) = cos θ      cos(90° − θ) = sin θ\ntan(90° − θ) = cot θ      cot(90° − θ) = tan θ\nsec(90° − θ) = cosec θ    cosec(90° − θ) = sec θ]]\n\nசோதனை: sin 30° = 1/2 = cos 60°. ✓ (30° + 60° = 90°)",
+    "en": "In a right triangle the other two angles add up to 90° (since the total is 180°). If one is θ, the other is (90° − θ). These are **complementary angles**.\n\nThe side that is \"opposite\" when you look from θ becomes \"adjacent\" when you look from (90° − θ)! Only the hypotenuse stays the same. So:\n\n[[sin(90° − θ) = cos θ      cos(90° − θ) = sin θ\ntan(90° − θ) = cot θ      cot(90° − θ) = tan θ\nsec(90° − θ) = cosec θ    cosec(90° − θ) = sec θ]]\n\nCheck: sin 30° = 1/2 = cos 60°. ✓ (30° + 60° = 90°)"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "trigTriangle",
+   "text": {
+    "ta": "கோணத்தை 30°-க்கு வைத்து sin-ஐக் குறித்துக்கொள்ளுங்கள். பிறகு 60°-க்கு மாற்றி cos-ஐப் பாருங்கள். 20° ↔ 70°, 35° ↔ 55° என்றும் முயற்சி செய்யுங்கள்.",
+    "en": "Set the angle to 30° and note sin. Then set it to 60° and look at cos. Try 20° ↔ 70° and 35° ↔ 55° too."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "மதிப்பு காண்க: sin 50° ÷ cos 40°",
+    "en": "Evaluate: sin 50° ÷ cos 40°"
+   },
+   "steps": [
+    {
+     "ta": "50° + 40° = 90° — நிரப்புக் கோணங்கள்!",
+     "en": "50° + 40° = 90° — complementary!"
+    },
+    {
+     "ta": "sin 50° = sin(90° − 40°) = cos 40°",
+     "en": "sin 50° = sin(90° − 40°) = cos 40°"
+    },
+    {
+     "ta": "cos 40° ÷ cos 40° = 1",
+     "en": "cos 40° ÷ cos 40° = 1"
+    }
+   ],
+   "answer": {
+    "ta": "1",
+    "en": "1"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "மதிப்பு காண்க: tan 35° × tan 55°",
+    "en": "Evaluate: tan 35° × tan 55°"
+   },
+   "steps": [
+    {
+     "ta": "tan 55° = tan(90° − 35°) = cot 35°",
+     "en": "tan 55° = tan(90° − 35°) = cot 35°"
+    },
+    {
+     "ta": "tan 35° × cot 35° = tan 35° × 1/tan 35° = 1",
+     "en": "tan 35° × cot 35° = tan 35° × 1/tan 35° = 1"
+    }
+   ],
+   "answer": {
+    "ta": "1",
+    "en": "1"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "cos 20° ÷ sin 70° = ?",
+    "en": "cos 20° ÷ sin 70° = ?"
+   },
+   "answer": 1,
+   "tol": 0.001,
+   "hint": {
+    "ta": "20° + 70° = ?",
+    "en": "20° + 70° = ?"
+   },
+   "solution": {
+    "ta": "sin 70° = cos 20°, எனவே விடை 1.",
+    "en": "sin 70° = cos 20°, so the answer is 1."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "sin 3A = cos (A − 26°) மற்றும் 3A குறுங்கோணம் எனில் A = ? (டிகிரியில்)",
+    "en": "If sin 3A = cos (A − 26°) and 3A is acute, A = ? (in degrees)"
+   },
+   "answer": 29,
+   "tol": 0.01,
+   "unit": {
+    "ta": "°",
+    "en": "°"
+   },
+   "hint": {
+    "ta": "sin x = cos y என்றால் x + y = 90°.",
+    "en": "If sin x = cos y then x + y = 90°."
+   },
+   "solution": {
+    "ta": "3A + (A − 26°) = 90° → 4A = 116° → A = 29°",
+    "en": "3A + (A − 26°) = 90° → 4A = 116° → A = 29°"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முக்கோணத்தைத் தீர்த்தல் — 3 படிகள்",
+    "en": "Solving a triangle — 3 steps"
+   },
+   "text": {
+    "ta": "**1. படம் வரை.** தெரிந்த கோணம், தெரிந்த பக்கம், தேவையான பக்கம் — மூன்றையும் குறி.\n**2. விகிதத்தைத் தேர்ந்தெடு.** தெரிந்த பக்கமும் தேவையான பக்கமும் கோணத்தைப் பொறுத்து எதிர்/அடுத்து/கர்ணம் — எந்த இரண்டு? அந்த இரண்டும் உள்ள விகிதம்: எதிர்+கர்ணம் → sin; அடுத்து+கர்ணம் → cos; எதிர்+அடுத்து → tan.\n**3. சமன்பாடு எழுதித் தீர்.** மதிப்பை அட்டவணை அல்லது கால்குலேட்டரில் பார்.\n\nகோணம் 30°, 45°, 60° இல்லாவிட்டால்: பாடப்புத்தகத்தின் பின்னுள்ள முக்கோணவியல் அட்டவணை அல்லது scientific calculator (DEG mode-ல்!) பயன்படுத்துங்கள். எ.கா. tan 25° ≈ 0.4663.",
+    "en": "**1. Draw it.** Mark the known angle, the known side and the side you want.\n**2. Choose the ratio.** Relative to the angle, which two are they — opposite/adjacent/hypotenuse? Pick the ratio with those two: opposite+hypotenuse → sin; adjacent+hypotenuse → cos; opposite+adjacent → tan.\n**3. Write the equation and solve.** Look up the value in the table or on a calculator.\n\nIf the angle isn’t 30°, 45° or 60°: use the trigonometric table at the back of your textbook, or a scientific calculator (in DEG mode!). e.g. tan 25° ≈ 0.4663."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "சக்கர நாற்காலி சாய்தளம்",
+    "en": "A wheelchair ramp"
+   },
+   "q": {
+    "ta": "பள்ளி வாசலில் 0.5 m உயரப் படிக்கு ஒரு சாய்தளம் (ramp) அமைக்க வேண்டும். சாய்தளம் தரையுடன் 5° கோணத்தில் இருக்க வேண்டும். சாய்தளத்தின் நீளம் எவ்வளவு? (sin 5° ≈ 0.0872)",
+    "en": "A ramp is needed for a 0.5 m step at the school entrance. The ramp must make 5° with the ground. How long must the ramp be? (sin 5° ≈ 0.0872)"
+   },
+   "steps": [
+    {
+     "ta": "தெரிந்தது: 5°-க்கு எதிர்ப்பக்கம் (உயரம்) 0.5 m. தேவை: சாய்தளம் = கர்ணம்.",
+     "en": "Known: side opposite 5° (height) = 0.5 m. Wanted: ramp = hypotenuse."
+    },
+    {
+     "ta": "எதிர் + கர்ணம் → sin: sin 5° = 0.5 ÷ நீளம்",
+     "en": "Opposite + hypotenuse → sin: sin 5° = 0.5 ÷ length"
+    },
+    {
+     "ta": "நீளம் = 0.5 ÷ 0.0872 ≈ 5.73 m",
+     "en": "length = 0.5 ÷ 0.0872 ≈ 5.73 m"
+    },
+    {
+     "ta": "சிறிய கோணம் = நீண்ட ஆனால் எளிதான சாய்தளம். அதனால்தான் மருத்துவமனை ramp-கள் நீளமாக இருக்கின்றன.",
+     "en": "Small angle = a long but gentle ramp. That’s why hospital ramps are long."
+    }
+   ],
+   "answer": {
+    "ta": "≈ 5.73 m",
+    "en": "≈ 5.73 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு சறுக்கு மரம் (slide) 4 m நீளம், தரையுடன் 30° கோணம். அதன் உச்சி தரையிலிருந்து எவ்வளவு உயரம்?",
+    "en": "A slide is 4 m long and makes 30° with the ground. How high is its top above the ground?"
+   },
+   "answer": 2,
+   "tol": 0.01,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "சறுக்கு = கர்ணம்; உயரம் = எதிர் → sin 30°",
+    "en": "Slide = hypotenuse; height = opposite → sin 30°"
+   },
+   "solution": {
+    "ta": "4 × sin 30° = 4 × 1/2 = 2 m",
+    "en": "4 × sin 30° = 4 × 1/2 = 2 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு மரத்திலிருந்து 20 m தூரத்தில் நின்றால், மர உச்சி 25° கோணத்தில் தெரிகிறது. மரத்தின் உயரம்? (tan 25° ≈ 0.4663, கண் உயரத்தைப் புறக்கணி)",
+    "en": "Standing 20 m from a tree, its top is seen at 25°. Height of the tree? (tan 25° ≈ 0.4663; ignore eye height)"
+   },
+   "answer": 9.33,
+   "tol": 0.02,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "அடுத்து (20) + எதிர் (உயரம்) → tan",
+    "en": "Adjacent (20) + opposite (height) → tan"
+   },
+   "solution": {
+    "ta": "20 × 0.4663 ≈ 9.33 m",
+    "en": "20 × 0.4663 ≈ 9.33 m"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தலைகீழாக: விகிதம் தெரிந்தால் கோணம்",
+    "en": "In reverse: from a ratio to the angle"
+   },
+   "text": {
+    "ta": "tan θ = 1 எனில் θ = 45°. sin θ = 1/2 எனில் θ = 30°. மற்ற மதிப்புகளுக்கு அட்டவணையில் பின்னோக்கித் தேடுங்கள், அல்லது கால்குலேட்டரில் sin⁻¹, cos⁻¹, tan⁻¹ (SHIFT + sin) பொத்தான்.\n\nஎ.கா: ஒரு சாலை 100 m கிடைமட்டத் தூரத்தில் 10 m உயர்கிறது. tan θ = 10/100 = 0.1 → θ ≈ 5.7°.",
+    "en": "If tan θ = 1 then θ = 45°. If sin θ = 1/2 then θ = 30°. For other values, search the table in reverse, or use sin⁻¹, cos⁻¹, tan⁻¹ on a calculator (SHIFT + sin).\n\ne.g. a road rises 10 m over 100 m of horizontal distance. tan θ = 10/100 = 0.1 → θ ≈ 5.7°."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு செங்கோண முக்கோணத்தில் எதிர்ப்பக்கம் = அடுத்துள்ள பக்கம் × √3. கோணம் θ = ?",
+    "en": "In a right triangle, opposite = adjacent × √3. Angle θ = ?"
+   },
+   "answer": 60,
+   "tol": 0.01,
+   "unit": {
+    "ta": "°",
+    "en": "°"
+   },
+   "hint": {
+    "ta": "tan θ = எதிர்/அடுத்து = √3",
+    "en": "tan θ = opposite/adjacent = √3"
+   },
+   "solution": {
+    "ta": "tan θ = √3 → θ = 60°",
+    "en": "tan θ = √3 → θ = 60°"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "நிரப்புக் கோணங்கள்: θ + (90° − θ) = 90°.",
+     "en": "Complementary angles: θ + (90° − θ) = 90°."
+    },
+    {
+     "ta": "sin(90° − θ) = cos θ, tan(90° − θ) = cot θ, sec(90° − θ) = cosec θ (மற்றும் தலைகீழாகவும்).",
+     "en": "sin(90° − θ) = cos θ, tan(90° − θ) = cot θ, sec(90° − θ) = cosec θ (and the other way round)."
+    },
+    {
+     "ta": "முக்கோணத்தைத் தீர்க்க: வரை → தெரிந்த & தேவையான பக்கத்தை வைத்து விகிதம் தேர்ந்தெடு → தீர்.",
+     "en": "To solve a triangle: draw → pick the ratio using the known and wanted sides → solve."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "cos 70° = ?",
+    "en": "cos 70° = ?"
+   },
+   "options": [
+    {
+     "ta": "sin 70°",
+     "en": "sin 70°"
+    },
+    {
+     "ta": "sin 20°",
+     "en": "sin 20°"
+    },
+    {
+     "ta": "cos 20°",
+     "en": "cos 20°"
+    },
+    {
+     "ta": "tan 20°",
+     "en": "tan 20°"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "cos 70° = sin(90° − 70°) = sin 20°",
+    "en": "cos 70° = sin(90° − 70°) = sin 20°"
+   }
+  },
+  {
+   "q": {
+    "ta": "tan 10° × tan 80° = ?",
+    "en": "tan 10° × tan 80° = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "10/80",
+     "en": "10/80"
+    },
+    {
+     "ta": "√3",
+     "en": "√3"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "tan 80° = cot 10°; tan × cot = 1",
+    "en": "tan 80° = cot 10°; tan × cot = 1"
+   }
+  },
+  {
+   "q": {
+    "ta": "கர்ணம் 10, ஒரு கோணம் 60°. அந்தக் கோணத்திற்கு அடுத்துள்ள பக்கம்?",
+    "en": "Hypotenuse 10, one angle 60°. The side adjacent to that angle?"
+   },
+   "options": [
+    {
+     "ta": "5",
+     "en": "5"
+    },
+    {
+     "ta": "8.66",
+     "en": "8.66"
+    },
+    {
+     "ta": "17.3",
+     "en": "17.3"
+    },
+    {
+     "ta": "10",
+     "en": "10"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "10 × cos 60° = 5",
+    "en": "10 × cos 60° = 5"
+   }
+  },
+  {
+   "q": {
+    "ta": "எதிர்ப்பக்கமும் அடுத்துள்ள பக்கமும் தெரியும், கோணம் தேவை. எந்த விகிதம்?",
+    "en": "You know the opposite and adjacent sides and want the angle. Which ratio?"
+   },
+   "options": [
+    {
+     "ta": "sin",
+     "en": "sin"
+    },
+    {
+     "ta": "cos",
+     "en": "cos"
+    },
+    {
+     "ta": "tan",
+     "en": "tan"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "எதிர் + அடுத்து → tan",
+    "en": "Opposite + adjacent → tan"
+   }
+  },
+  {
+   "q": {
+    "ta": "sec 40° − cosec 50° = ?",
+    "en": "sec 40° − cosec 50° = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "−1",
+     "en": "−1"
+    },
+    {
+     "ta": "2",
+     "en": "2"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "cosec 50° = sec 40°, எனவே 0.",
+    "en": "cosec 50° = sec 40°, so 0."
+   }
+  },
+  {
+   "q": {
+    "ta": "கால்குலேட்டரில் sin 30° = −0.988 என்று வந்தால் என்ன தவறு?",
+    "en": "Your calculator shows sin 30° = −0.988. What went wrong?"
+   },
+   "options": [
+    {
+     "ta": "கால்குலேட்டர் பழுது",
+     "en": "The calculator is broken"
+    },
+    {
+     "ta": "DEG-க்குப் பதிலாக RAD mode-ல் உள்ளது",
+     "en": "It is in RAD mode instead of DEG"
+    },
+    {
+     "ta": "sin 30° உண்மையில் −0.988",
+     "en": "sin 30° really is −0.988"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "RAD mode-ல் 30 ரேடியன் என்று எடுத்துக்கொள்ளும். DEG mode-க்கு மாற்றுங்கள் — அப்போது 0.5 வரும்.",
+    "en": "In RAD mode it treats 30 as radians. Switch to DEG mode and you’ll get 0.5."
+   }
+  }
+ ]
+}

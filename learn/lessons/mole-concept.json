@@ -1,0 +1,430 @@
+{
+ "id": "mole-concept",
+ "minutes": 35,
+ "title": {
+  "ta": "மோல் — எண்ண முடியாததை எடை போட்டு எண்ணுவது",
+  "en": "The mole — counting the uncountable by weighing"
+ },
+ "goals": [
+  {
+   "ta": "மோல் என்றால் என்ன, ஏன் தேவை என்று புரிந்துகொள்ள",
+   "en": "Understand what a mole is and why chemists need it"
+  },
+  {
+   "ta": "அணு நிறை, மூலக்கூறு நிறை, மோலார் நிறை கணக்கிட",
+   "en": "Calculate atomic mass, molecular mass and molar mass"
+  },
+  {
+   "ta": "நிறை ↔ மோல் ↔ துகள்கள் ↔ வாயுக் கனஅளவு மாற்றங்களைச் செய்ய",
+   "en": "Convert mass ↔ moles ↔ particles ↔ gas volume"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "ரேஷன் கடையில் அரிசியை மணி மணியாக எண்ணி விற்கிறார்களா? இல்லை — **எடை போட்டு** விற்கிறார்கள். வங்கியில் ஆயிரக்கணக்கான நாணயங்களையும் பல நேரங்களில் எடை போட்டே எண்ணுகிறார்கள்: ஒரு நாணயத்தின் எடை தெரிந்தால், மொத்த எடையிலிருந்து எண்ணிக்கை கிடைக்கும்.\n\nவேதியியலாளர்களின் பிரச்சனை இன்னும் பெரியது: ஒரு துளி நீரில் கோடிக்கணக்கான கோடிக்கணக்கான மூலக்கூறுகள். அவற்றை எண்ணவே முடியாது. எனவே அவர்களும் **எடை போட்டு எண்ணுகிறார்கள்**. அந்த \"எண்ணிக்கைப் பை\"யின் பெயர்தான் **மோல்**.",
+    "en": "Does the ration shop count rice grain by grain? No — they **weigh** it. Banks often count thousands of coins by weighing too: if you know the mass of one coin, the total mass tells you how many there are.\n\nChemists have a far bigger problem: a single drop of water holds an unimaginably huge number of molecules. They cannot be counted one by one. So chemists also **count by weighing**. The name of that \"counting bag\" is the **mole**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "டஜன் போல, மோல் ஒரு எண்ணிக்கை",
+    "en": "Like a dozen, a mole is a number"
+   },
+   "text": {
+    "ta": "1 டஜன் = 12. 1 கிராஸ் = 144. அதுபோலவே:\n\n[[1 மோல் = 6.022 × 10²³ துகள்கள்\n(அவகாட்ரோ எண், Nₐ)]]\n\n\"துகள்\" என்பது அணுவாகவோ, மூலக்கூறாகவோ, அயனியாகவோ இருக்கலாம் — எதை எண்ணுகிறோம் என்று எப்போதும் சொல்ல வேண்டும்.\n\nஇந்த எண் எவ்வளவு பெரியது? 6.022 × 10²³ அரிசி மணிகளை இந்தியா முழுவதும் பரப்பினால், நாடு முழுவதையும் பல கிலோமீட்டர் உயரத்திற்கு மூடிவிடும்! ஆனால் 6.022 × 10²³ நீர் மூலக்கூறுகள் வெறும் 18 g — ஒரு மேஜைக் கரண்டி அளவுதான். அணுக்கள் அவ்வளவு சிறியவை.",
+    "en": "1 dozen = 12. 1 gross = 144. In the same way:\n\n[[1 mole = 6.022 × 10²³ particles\n(Avogadro’s number, Nₐ)]]\n\nA \"particle\" can be an atom, a molecule or an ion — always say which one you are counting.\n\nHow big is this number? Spread 6.022 × 10²³ grains of rice over India and they would bury the whole country several kilometres deep! Yet 6.022 × 10²³ water molecules weigh just 18 g — about a tablespoon. Atoms are that small."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மந்திரப் பாலம்: மோலார் நிறை",
+    "en": "The magic bridge: molar mass"
+   },
+   "text": {
+    "ta": "ஒவ்வொரு தனிமத்தின் **அணு நிறை** (atomic mass) ஆவர்த்த அட்டவணையில் உள்ளது: H = 1, C = 12, N = 14, O = 16, Na = 23, Cl = 35.5 (கார்பன்-12 அணுவின் 1/12 பங்கை அலகாகக் கொண்டு ஒப்பிட்டது).\n\n**மூலக்கூறு நிறை** = மூலக்கூறிலுள்ள அணுக்களின் நிறைகளின் கூடுதல். H₂O = 2×1 + 16 = 18.\n\nஅற்புதமான உண்மை: **1 மோல் பொருளின் நிறை, கிராமில், அதன் அணு/மூலக்கூறு நிறைக்குச் சமம்.** இதுவே மோலார் நிறை (g/mol). 1 மோல் நீர் = 18 g; 1 மோல் கார்பன் = 12 g.\n\n[[மோல்கள் n = நிறை (g) ÷ மோலார் நிறை (g/mol)\nதுகள்கள் = n × 6.022 × 10²³]]",
+    "en": "Every element’s **atomic mass** is in the periodic table: H = 1, C = 12, N = 14, O = 16, Na = 23, Cl = 35.5 (compared using 1/12 of a carbon-12 atom as the unit).\n\n**Molecular mass** = the sum of the masses of the atoms in the molecule. H₂O = 2×1 + 16 = 18.\n\nThe wonderful fact: **the mass of 1 mole of a substance, in grams, equals its atomic/molecular mass.** This is the molar mass (g/mol). 1 mole of water = 18 g; 1 mole of carbon = 12 g.\n\n[[moles n = mass (g) ÷ molar mass (g/mol)\nparticles = n × 6.022 × 10²³]]"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "mole",
+   "text": {
+    "ta": "பொருளைத் தேர்ந்தெடுத்து, நிறையை மாற்றுங்கள். 18 g நீர், 12 g கரி, 58.5 g உப்பு — மூன்றிலும் 1 மோல்தான் என்று கவனியுங்கள்!",
+    "en": "Pick a substance and move the mass. Notice that 18 g of water, 12 g of carbon and 58.5 g of salt are each exactly 1 mole!"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "CO₂-ன் மோலார் நிறை காண்க. 88 g CO₂-ல் எத்தனை மோல்கள்? எத்தனை மூலக்கூறுகள்?",
+    "en": "Find the molar mass of CO₂. How many moles in 88 g of CO₂? How many molecules?"
+   },
+   "steps": [
+    {
+     "ta": "CO₂ = 12 + 2×16 = 44 g/mol",
+     "en": "CO₂ = 12 + 2×16 = 44 g/mol"
+    },
+    {
+     "ta": "n = 88 ÷ 44 = 2 மோல்",
+     "en": "n = 88 ÷ 44 = 2 mol"
+    },
+    {
+     "ta": "மூலக்கூறுகள் = 2 × 6.022 × 10²³ = 1.2044 × 10²⁴",
+     "en": "molecules = 2 × 6.022 × 10²³ = 1.2044 × 10²⁴"
+    }
+   ],
+   "answer": {
+    "ta": "2 மோல்; 1.2044 × 10²⁴ மூலக்கூறுகள்",
+    "en": "2 mol; 1.2044 × 10²⁴ molecules"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "36 g நீரில் எத்தனை மோல்கள்?",
+    "en": "How many moles in 36 g of water?"
+   },
+   "answer": 2,
+   "tol": 0.01,
+   "unit": {
+    "ta": "மோல்",
+    "en": "mol"
+   },
+   "hint": {
+    "ta": "H₂O = 18 g/mol",
+    "en": "H₂O = 18 g/mol"
+   },
+   "solution": {
+    "ta": "36 ÷ 18 = 2 மோல்",
+    "en": "36 ÷ 18 = 2 mol"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "3 மோல் கார்பனின் நிறை? (g)",
+    "en": "Mass of 3 moles of carbon? (g)"
+   },
+   "answer": 36,
+   "tol": 0.01,
+   "unit": {
+    "ta": "g",
+    "en": "g"
+   },
+   "hint": {
+    "ta": "நிறை = n × மோலார் நிறை",
+    "en": "mass = n × molar mass"
+   },
+   "solution": {
+    "ta": "3 × 12 = 36 g",
+    "en": "3 × 12 = 36 g"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "0.5 மோல் NaCl-ன் நிறை? (g)",
+    "en": "Mass of 0.5 mole of NaCl? (g)"
+   },
+   "answer": 29.25,
+   "tol": 0.02,
+   "unit": {
+    "ta": "g",
+    "en": "g"
+   },
+   "hint": {
+    "ta": "NaCl = 23 + 35.5",
+    "en": "NaCl = 23 + 35.5"
+   },
+   "solution": {
+    "ta": "0.5 × 58.5 = 29.25 g",
+    "en": "0.5 × 58.5 = 29.25 g"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "1 மோல் H₂O-ல் மொத்தம் எத்தனை மோல் **அணுக்கள்** உள்ளன?",
+    "en": "How many moles of **atoms** in total are there in 1 mole of H₂O?"
+   },
+   "answer": 3,
+   "tol": 0.01,
+   "unit": {
+    "ta": "மோல்",
+    "en": "mol"
+   },
+   "hint": {
+    "ta": "ஒவ்வொரு மூலக்கூறிலும் எத்தனை அணுக்கள்?",
+    "en": "How many atoms in each molecule?"
+   },
+   "solution": {
+    "ta": "ஒவ்வொரு H₂O-விலும் 2 H + 1 O = 3 அணுக்கள். எனவே 3 மோல் அணுக்கள் (3 × 6.022 × 10²³ அணுக்கள்).",
+    "en": "Each H₂O has 2 H + 1 O = 3 atoms. So 3 moles of atoms (3 × 6.022 × 10²³ atoms)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "வாயுக்களுக்கு ஒரு குறுக்குவழி",
+    "en": "A shortcut for gases"
+   },
+   "text": {
+    "ta": "STP-ல் (0 °C, 1 வளிமண்டல அழுத்தம்) **எந்த வாயுவாக இருந்தாலும் 1 மோல் = 22.4 லிட்டர்** (மோலார் கனஅளவு). ஹைட்ரஜனோ, ஆக்சிஜனோ, CO₂-வோ — அதே 22.4 L! (அவகாட்ரோ விதி: சம கனஅளவு வாயுக்களில் சம எண்ணிக்கை மூலக்கூறுகள்.)\n\n[[n = கனஅளவு (L, STP-ல்) ÷ 22.4]]",
+    "en": "At STP (0 °C, 1 atmosphere pressure) **1 mole of any gas occupies 22.4 litres** (the molar volume). Hydrogen, oxygen, CO₂ — the same 22.4 L! (Avogadro’s law: equal volumes of gases contain equal numbers of molecules.)\n\n[[n = volume (L, at STP) ÷ 22.4]]"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "STP-ல் 2 மோல் ஆக்சிஜன் வாயுவின் கனஅளவு? (L)",
+    "en": "Volume of 2 moles of oxygen gas at STP? (L)"
+   },
+   "answer": 44.8,
+   "tol": 0.05,
+   "unit": {
+    "ta": "L",
+    "en": "L"
+   },
+   "hint": {
+    "ta": "1 மோல் = 22.4 L",
+    "en": "1 mol = 22.4 L"
+   },
+   "solution": {
+    "ta": "2 × 22.4 = 44.8 L",
+    "en": "2 × 22.4 = 44.8 L"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "STP-ல் 11.2 L CO₂-ன் நிறை? (g)",
+    "en": "Mass of 11.2 L of CO₂ at STP? (g)"
+   },
+   "answer": 22,
+   "tol": 0.05,
+   "unit": {
+    "ta": "g",
+    "en": "g"
+   },
+   "hint": {
+    "ta": "முதலில் மோல் (÷ 22.4), பிறகு நிறை (× 44).",
+    "en": "First moles (÷ 22.4), then mass (× 44)."
+   },
+   "solution": {
+    "ta": "n = 11.2 ÷ 22.4 = 0.5; நிறை = 0.5 × 44 = 22 g",
+    "en": "n = 11.2 ÷ 22.4 = 0.5; mass = 0.5 × 44 = 22 g"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "ஒரே வரைபடம் — எல்லா மாற்றங்களும்",
+    "en": "One map — every conversion"
+   },
+   "text": {
+    "ta": "[[நிறை (g)  ⇄  மோல்  ⇄  துகள்கள்\n÷ M  →        × 6.022×10²³  →\n← × M         ← ÷ 6.022×10²³\n\nமோல்  ⇄  வாயுக் கனஅளவு (STP): × 22.4 / ÷ 22.4]]\n\nஎந்தக் கணக்கிலும் முதலில் **மோலுக்கு** மாற்றுங்கள். மோல்தான் மையம்.",
+    "en": "[[mass (g)  ⇄  moles  ⇄  particles\n÷ M  →        × 6.022×10²³  →\n← × M         ← ÷ 6.022×10²³\n\nmoles  ⇄  gas volume (STP): × 22.4 / ÷ 22.4]]\n\nIn any problem, convert to **moles** first. The mole is the hub."
+   }
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "சமையலறை மோல் சோதனை: ஒரு டீஸ்பூன் சர்க்கரையை எடை போடுங்கள் (சமையலறைத் தராசு இருந்தால்; இல்லையென்றால் ஒரு டீஸ்பூன் ≈ 4 g என்று கொள்ளுங்கள்). சர்க்கரை C₁₂H₂₂O₁₁ = 342 g/mol. உங்கள் டீஸ்பூனில் எத்தனை மோல்? எத்தனை சர்க்கரை மூலக்கூறுகள்? (4 g-க்கு: 4 ÷ 342 ≈ 0.0117 மோல் ≈ 7 × 10²¹ மூலக்கூறுகள் — ஒரே ஒரு ஸ்பூனில்!)",
+    "en": "Kitchen mole experiment: weigh a teaspoon of sugar (on a kitchen scale if you have one; otherwise take one teaspoon ≈ 4 g). Sugar C₁₂H₂₂O₁₁ = 342 g/mol. How many moles in your spoon? How many sugar molecules? (For 4 g: 4 ÷ 342 ≈ 0.0117 mol ≈ 7 × 10²¹ molecules — in one spoon!)"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "1 மோல் = 6.022 × 10²³ துகள்கள் (அவகாட்ரோ எண்).",
+     "en": "1 mole = 6.022 × 10²³ particles (Avogadro’s number)."
+    },
+    {
+     "ta": "மோலார் நிறை (g/mol) = அணு/மூலக்கூறு நிறை, கிராமில்.",
+     "en": "Molar mass (g/mol) = atomic/molecular mass, in grams."
+    },
+    {
+     "ta": "n = நிறை ÷ M; துகள்கள் = n × Nₐ; STP-ல் வாயு: n = கனஅளவு ÷ 22.4 L.",
+     "en": "n = mass ÷ M; particles = n × Nₐ; gas at STP: n = volume ÷ 22.4 L."
+    },
+    {
+     "ta": "எதை எண்ணுகிறோம் (அணு/மூலக்கூறு) என்பதைக் கவனி.",
+     "en": "Be careful what you are counting (atoms or molecules)."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "1 மோல் ஆக்சிஜன் அணுக்களின் நிறை?",
+    "en": "Mass of 1 mole of oxygen atoms?"
+   },
+   "options": [
+    {
+     "ta": "8 g",
+     "en": "8 g"
+    },
+    {
+     "ta": "16 g",
+     "en": "16 g"
+    },
+    {
+     "ta": "32 g",
+     "en": "32 g"
+    },
+    {
+     "ta": "6.022 × 10²³ g",
+     "en": "6.022 × 10²³ g"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "O-ன் அணு நிறை 16 → 16 g. (O₂ மூலக்கூறு என்றால் 32 g.)",
+    "en": "Atomic mass of O is 16 → 16 g. (For O₂ molecules it would be 32 g.)"
+   }
+  },
+  {
+   "q": {
+    "ta": "NH₃-ன் மோலார் நிறை? (N = 14, H = 1)",
+    "en": "Molar mass of NH₃? (N = 14, H = 1)"
+   },
+   "options": [
+    {
+     "ta": "15",
+     "en": "15"
+    },
+    {
+     "ta": "17",
+     "en": "17"
+    },
+    {
+     "ta": "42",
+     "en": "42"
+    },
+    {
+     "ta": "14",
+     "en": "14"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "14 + 3 × 1 = 17 g/mol",
+    "en": "14 + 3 × 1 = 17 g/mol"
+   }
+  },
+  {
+   "q": {
+    "ta": "9 g நீரில் எத்தனை மூலக்கூறுகள்?",
+    "en": "How many molecules in 9 g of water?"
+   },
+   "options": [
+    {
+     "ta": "6.022 × 10²³",
+     "en": "6.022 × 10²³"
+    },
+    {
+     "ta": "3.011 × 10²³",
+     "en": "3.011 × 10²³"
+    },
+    {
+     "ta": "1.2044 × 10²⁴",
+     "en": "1.2044 × 10²⁴"
+    },
+    {
+     "ta": "9",
+     "en": "9"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "9 ÷ 18 = 0.5 மோல் → 0.5 × 6.022 × 10²³",
+    "en": "9 ÷ 18 = 0.5 mol → 0.5 × 6.022 × 10²³"
+   }
+  },
+  {
+   "q": {
+    "ta": "STP-ல் 22.4 L ஹைட்ரஜனும் 22.4 L CO₂-வும்…",
+    "en": "At STP, 22.4 L of hydrogen and 22.4 L of CO₂…"
+   },
+   "options": [
+    {
+     "ta": "ஒரே நிறை கொண்டவை",
+     "en": "have the same mass"
+    },
+    {
+     "ta": "ஒரே எண்ணிக்கை மூலக்கூறுகள் கொண்டவை",
+     "en": "contain the same number of molecules"
+    },
+    {
+     "ta": "ஒரே அடர்த்தி கொண்டவை",
+     "en": "have the same density"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இரண்டும் 1 மோல் → ஒரே எண்ணிக்கை. நிறை வேறு: 2 g vs 44 g.",
+    "en": "Both are 1 mole → same number. Masses differ: 2 g vs 44 g."
+   }
+  },
+  {
+   "q": {
+    "ta": "அதிக அணுக்கள் எதில்? 12 g கார்பன் அல்லது 12 g மெக்னீசியம் (Mg = 24)?",
+    "en": "Which has more atoms: 12 g of carbon or 12 g of magnesium (Mg = 24)?"
+   },
+   "options": [
+    {
+     "ta": "கார்பன்",
+     "en": "Carbon"
+    },
+    {
+     "ta": "மெக்னீசியம்",
+     "en": "Magnesium"
+    },
+    {
+     "ta": "இரண்டும் சமம்",
+     "en": "Equal"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "C: 1 மோல்; Mg: 0.5 மோல். ஒரே நிறை, ஆனால் இலேசான அணுக்கள் அதிக எண்ணிக்கை.",
+    "en": "C: 1 mol; Mg: 0.5 mol. Same mass, but lighter atoms means more of them."
+   }
+  },
+  {
+   "q": {
+    "ta": "மோலார் நிறையின் அலகு?",
+    "en": "Unit of molar mass?"
+   },
+   "options": [
+    {
+     "ta": "g",
+     "en": "g"
+    },
+    {
+     "ta": "mol",
+     "en": "mol"
+    },
+    {
+     "ta": "g/mol",
+     "en": "g/mol"
+    },
+    {
+     "ta": "L/mol",
+     "en": "L/mol"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "ஒரு மோலுக்கு எத்தனை கிராம் → g/mol.",
+    "en": "Grams per mole → g/mol."
+   }
+  }
+ ]
+}

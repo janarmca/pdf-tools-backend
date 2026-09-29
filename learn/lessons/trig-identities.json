@@ -1,0 +1,396 @@
+{
+ "id": "trig-identities",
+ "minutes": 30,
+ "title": {
+  "ta": "முக்கோணவியல் முற்றொருமைகள் — பித்தகோரஸ் மறைந்திருக்கிறார்",
+  "en": "Trigonometric identities — Pythagoras in disguise"
+ },
+ "goals": [
+  {
+   "ta": "sin²θ + cos²θ = 1 எங்கிருந்து வருகிறது என்று நீங்களே நிரூபிக்க",
+   "en": "Prove for yourself where sin²θ + cos²θ = 1 comes from"
+  },
+  {
+   "ta": "மூன்று முற்றொருமைகளையும் பயன்படுத்த",
+   "en": "Use all three identities"
+  },
+  {
+   "ta": "\"நிரூபி\" கணக்குகளை ஒரு நிலையான முறையில் அணுக",
+   "en": "Tackle \"prove that\" questions with a fixed strategy"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "10-ஆம் வகுப்பு முக்கோணவியலில் பலருக்குப் பயம் தருவது \"நிரூபி\" (prove) கணக்குகள். ஆனால் உண்மை: கிட்டத்தட்ட எல்லாமே **ஒரே ஒரு** உண்மையிலிருந்து வருகின்றன — 8-ஆம் வகுப்பிலேயே தெரிந்த பித்தகோரஸ் தேற்றம்.\n\nஇந்தப் பாடத்தில் சூத்திரங்களை மனப்பாடம் செய்யப் போவதில்லை; அவற்றை **உருவாக்கப்** போகிறோம்.",
+    "en": "What scares many students in Class 10 trigonometry is the \"prove that\" questions. The truth: almost all of them come from **one single** fact — Pythagoras’ theorem, which you already knew in Class 8.\n\nIn this lesson we won’t memorise formulas; we will **build** them."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நிரூபணம் — 3 வரிகளில்",
+    "en": "The proof — in 3 lines"
+   },
+   "text": {
+    "ta": "செங்கோண முக்கோணத்தில் எதிர் = a, அடுத்து = b, கர்ணம் = c. பித்தகோரஸ்:\n\n[[a² + b² = c²]]\n\nஇரு பக்கத்தையும் c²-ஆல் வகுங்கள்:\n\n[[(a/c)² + (b/c)² = 1]]\n\nஆனால் a/c = sin θ, b/c = cos θ! எனவே:\n\n[[sin²θ + cos²θ = 1]]\n\nஅதே a² + b² = c²-ஐ b²-ஆல் வகுத்தால் → **1 + tan²θ = sec²θ**. a²-ஆல் வகுத்தால் → **1 + cot²θ = cosec²θ**. மூன்று முற்றொருமைகளும் ஒரே தேற்றத்திலிருந்து!",
+    "en": "In a right triangle let opposite = a, adjacent = b, hypotenuse = c. Pythagoras:\n\n[[a² + b² = c²]]\n\nDivide both sides by c²:\n\n[[(a/c)² + (b/c)² = 1]]\n\nBut a/c = sin θ and b/c = cos θ! So:\n\n[[sin²θ + cos²θ = 1]]\n\nDivide the same a² + b² = c² by b² → **1 + tan²θ = sec²θ**. Divide by a² → **1 + cot²θ = cosec²θ**. All three identities from one theorem!"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "unitCircle",
+   "text": {
+    "ta": "கர்ணம் = 1 என்று வைத்தால் (அலகு வட்டம்), எதிர்ப்பக்கமே sin θ, அடுத்துள்ள பக்கமே cos θ. கோணத்தை எப்படி மாற்றினாலும் sin²θ + cos²θ எப்போதும் 1 — பாருங்கள்!",
+    "en": "Make the hypotenuse 1 (the unit circle): then the opposite side IS sin θ and the adjacent side IS cos θ. However you move the angle, sin²θ + cos²θ is always 1 — see for yourself!"
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "\"முற்றொருமை\" (identity) = θ-க்கு **எந்த** மதிப்பு கொடுத்தாலும் உண்மையாக இருக்கும் சமன்பாடு. \"சமன்பாடு\" (equation) சில மதிப்புகளுக்கு மட்டுமே உண்மை (எ.கா. sin θ = 1/2, θ = 30°-க்கு மட்டும்).\n\nபயனுள்ள வடிவங்கள்: **sin²θ = 1 − cos²θ**, **cos²θ = 1 − sin²θ**, **sec²θ − tan²θ = 1**, **cosec²θ − cot²θ = 1**.",
+    "en": "An \"identity\" = an equation that is true for **every** value of θ. An \"equation\" is true only for some values (e.g. sin θ = 1/2 only for θ = 30°).\n\nUseful forms: **sin²θ = 1 − cos²θ**, **cos²θ = 1 − sin²θ**, **sec²θ − tan²θ = 1**, **cosec²θ − cot²θ = 1**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "\"நிரூபி\" கணக்குகளுக்கான முறை",
+    "en": "Strategy for \"prove that\" questions"
+   },
+   "text": {
+    "ta": "1. **சிக்கலான பக்கத்திலிருந்து** தொடங்கு (பொதுவாக இடப்பக்கம், LHS).\n2. எல்லாவற்றையும் **sin, cos ஆக** மாற்று (tan = sin/cos, sec = 1/cos, …).\n3. பின்னங்களைச் சேர், பொதுக் காரணி எடு.\n4. **sin²θ + cos²θ = 1** எங்கே ஒளிந்திருக்கிறது என்று தேடு.\n5. மறுபக்கம் (RHS) வரும் வரை சுருக்கு. இரு பக்கத்தையும் ஒரே நேரத்தில் மாற்றக் கூடாது.",
+    "en": "1. Start from the **more complicated side** (usually the left, LHS).\n2. Turn everything into **sin and cos** (tan = sin/cos, sec = 1/cos, …).\n3. Combine fractions, take common factors.\n4. Look for where **sin²θ + cos²θ = 1** is hiding.\n5. Simplify until you reach the other side (RHS). Don’t work on both sides at once."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "நிரூபி: sec θ − cos θ = tan θ · sin θ",
+    "en": "Prove: sec θ − cos θ = tan θ · sin θ"
+   },
+   "steps": [
+    {
+     "ta": "LHS = sec θ − cos θ = 1/cos θ − cos θ",
+     "en": "LHS = sec θ − cos θ = 1/cos θ − cos θ"
+    },
+    {
+     "ta": "= (1 − cos²θ) / cos θ   (பின்னங்களைச் சேர்த்தோம்)",
+     "en": "= (1 − cos²θ) / cos θ   (combined the fractions)"
+    },
+    {
+     "ta": "= sin²θ / cos θ   (1 − cos²θ = sin²θ)",
+     "en": "= sin²θ / cos θ   (1 − cos²θ = sin²θ)"
+    },
+    {
+     "ta": "= (sin θ / cos θ) · sin θ = tan θ · sin θ = RHS ✓",
+     "en": "= (sin θ / cos θ) · sin θ = tan θ · sin θ = RHS ✓"
+    }
+   ]
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "நிரூபி: (1 + tan²θ)(1 − sin²θ) = 1",
+    "en": "Prove: (1 + tan²θ)(1 − sin²θ) = 1"
+   },
+   "steps": [
+    {
+     "ta": "1 + tan²θ = sec²θ",
+     "en": "1 + tan²θ = sec²θ"
+    },
+    {
+     "ta": "1 − sin²θ = cos²θ",
+     "en": "1 − sin²θ = cos²θ"
+    },
+    {
+     "ta": "LHS = sec²θ · cos²θ = (1/cos²θ) · cos²θ = 1 = RHS ✓",
+     "en": "LHS = sec²θ · cos²θ = (1/cos²θ) · cos²θ = 1 = RHS ✓"
+    }
+   ]
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "நிரூபி: sin θ / (1 − cos θ) = (1 + cos θ) / sin θ",
+    "en": "Prove: sin θ / (1 − cos θ) = (1 + cos θ) / sin θ"
+   },
+   "steps": [
+    {
+     "ta": "தந்திரம்: LHS-ன் மேலும் கீழும் (1 + cos θ)-ஆல் பெருக்கு.",
+     "en": "Trick: multiply the top and bottom of the LHS by (1 + cos θ)."
+    },
+    {
+     "ta": "= sin θ (1 + cos θ) / (1 − cos²θ)   [(a−b)(a+b) = a² − b²]",
+     "en": "= sin θ (1 + cos θ) / (1 − cos²θ)   [(a−b)(a+b) = a² − b²]"
+    },
+    {
+     "ta": "= sin θ (1 + cos θ) / sin²θ",
+     "en": "= sin θ (1 + cos θ) / sin²θ"
+    },
+    {
+     "ta": "= (1 + cos θ) / sin θ = RHS ✓",
+     "en": "= (1 + cos θ) / sin θ = RHS ✓"
+    }
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "sec θ = 5/4 (θ குறுங்கோணம்) எனில் tan θ = ?",
+    "en": "If sec θ = 5/4 (θ acute), tan θ = ?"
+   },
+   "answer": 0.75,
+   "tol": 0.002,
+   "hint": {
+    "ta": "tan²θ = sec²θ − 1",
+    "en": "tan²θ = sec²θ − 1"
+   },
+   "solution": {
+    "ta": "tan²θ = 25/16 − 1 = 9/16 → tan θ = 3/4 = 0.75",
+    "en": "tan²θ = 25/16 − 1 = 9/16 → tan θ = 3/4 = 0.75"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "9 sec²A − 9 tan²A = ?",
+    "en": "9 sec²A − 9 tan²A = ?"
+   },
+   "answer": 9,
+   "tol": 0.001,
+   "hint": {
+    "ta": "9-ஐப் பொதுக் காரணியாக எடு.",
+    "en": "Take 9 out as a common factor."
+   },
+   "solution": {
+    "ta": "9(sec²A − tan²A) = 9 × 1 = 9",
+    "en": "9(sec²A − tan²A) = 9 × 1 = 9"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "sin² 25° + sin² 65° = ?",
+    "en": "sin² 25° + sin² 65° = ?"
+   },
+   "answer": 1,
+   "tol": 0.001,
+   "hint": {
+    "ta": "25° + 65° = 90°. sin 65° = ?",
+    "en": "25° + 65° = 90°. sin 65° = ?"
+   },
+   "solution": {
+    "ta": "sin 65° = cos 25°, எனவே sin²25° + cos²25° = 1",
+    "en": "sin 65° = cos 25°, so sin²25° + cos²25° = 1"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "(1 + cot²θ)(1 − cos θ)(1 + cos θ) = ?",
+    "en": "(1 + cot²θ)(1 − cos θ)(1 + cos θ) = ?"
+   },
+   "answer": 1,
+   "tol": 0.001,
+   "hint": {
+    "ta": "1 + cot²θ = cosec²θ; (1 − cos θ)(1 + cos θ) = 1 − cos²θ = sin²θ",
+    "en": "1 + cot²θ = cosec²θ; (1 − cos θ)(1 + cos θ) = 1 − cos²θ = sin²θ"
+   },
+   "solution": {
+    "ta": "cosec²θ · sin²θ = 1",
+    "en": "cosec²θ · sin²θ = 1"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "**sin²θ + cos²θ = 1**, **1 + tan²θ = sec²θ**, **1 + cot²θ = cosec²θ** — மூன்றும் பித்தகோரஸ் தேற்றத்தை வகுத்தால் வருபவை.",
+     "en": "**sin²θ + cos²θ = 1**, **1 + tan²θ = sec²θ**, **1 + cot²θ = cosec²θ** — all three are Pythagoras divided through."
+    },
+    {
+     "ta": "நிரூபணம்: சிக்கலான பக்கம் → sin/cos ஆக மாற்று → சுருக்கு → sin²+cos²=1-ஐத் தேடு.",
+     "en": "Proofs: complicated side → convert to sin/cos → simplify → look for sin²+cos²=1."
+    },
+    {
+     "ta": "(1 − cos θ)(1 + cos θ) = sin²θ போன்ற \"இணை\" பெருக்கல் தந்திரம் அடிக்கடி தேவைப்படும்.",
+     "en": "The \"conjugate\" trick (1 − cos θ)(1 + cos θ) = sin²θ is needed often."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "1 − sin²θ = ?",
+    "en": "1 − sin²θ = ?"
+   },
+   "options": [
+    {
+     "ta": "cos θ",
+     "en": "cos θ"
+    },
+    {
+     "ta": "cos²θ",
+     "en": "cos²θ"
+    },
+    {
+     "ta": "tan²θ",
+     "en": "tan²θ"
+    },
+    {
+     "ta": "sec²θ",
+     "en": "sec²θ"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "sin²θ + cos²θ = 1-லிருந்து.",
+    "en": "From sin²θ + cos²θ = 1."
+   }
+  },
+  {
+   "q": {
+    "ta": "sec²θ − tan²θ = ?",
+    "en": "sec²θ − tan²θ = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "−1",
+     "en": "−1"
+    },
+    {
+     "ta": "sec θ",
+     "en": "sec θ"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1 + tan²θ = sec²θ",
+    "en": "1 + tan²θ = sec²θ"
+   }
+  },
+  {
+   "q": {
+    "ta": "sin θ = 0.6 (குறுங்கோணம்) எனில் cos θ = ?",
+    "en": "If sin θ = 0.6 (acute), cos θ = ?"
+   },
+   "options": [
+    {
+     "ta": "0.4",
+     "en": "0.4"
+    },
+    {
+     "ta": "0.8",
+     "en": "0.8"
+    },
+    {
+     "ta": "0.64",
+     "en": "0.64"
+    },
+    {
+     "ta": "0.36",
+     "en": "0.36"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "cos²θ = 1 − 0.36 = 0.64 → cos θ = 0.8",
+    "en": "cos²θ = 1 − 0.36 = 0.64 → cos θ = 0.8"
+   }
+  },
+  {
+   "q": {
+    "ta": "tan θ · cos θ = ?",
+    "en": "tan θ · cos θ = ?"
+   },
+   "options": [
+    {
+     "ta": "sin θ",
+     "en": "sin θ"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "sec θ",
+     "en": "sec θ"
+    },
+    {
+     "ta": "cot θ",
+     "en": "cot θ"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "(sin θ/cos θ) · cos θ = sin θ",
+    "en": "(sin θ/cos θ) · cos θ = sin θ"
+   }
+  },
+  {
+   "q": {
+    "ta": "sin²θ + cos²θ = 1 முற்றொருமை எந்தத் தேற்றத்திலிருந்து வருகிறது?",
+    "en": "Which theorem does sin²θ + cos²θ = 1 come from?"
+   },
+   "options": [
+    {
+     "ta": "தேல்ஸ் தேற்றம்",
+     "en": "Thales’ theorem"
+    },
+    {
+     "ta": "பித்தகோரஸ் தேற்றம்",
+     "en": "Pythagoras’ theorem"
+    },
+    {
+     "ta": "கோண இருசமவெட்டித் தேற்றம்",
+     "en": "Angle bisector theorem"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "a² + b² = c²-ஐ c²-ஆல் வகுத்தால் கிடைக்கிறது.",
+    "en": "Divide a² + b² = c² by c²."
+   }
+  },
+  {
+   "q": {
+    "ta": "(cosec θ − cot θ)(cosec θ + cot θ) = ?",
+    "en": "(cosec θ − cot θ)(cosec θ + cot θ) = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "2 cosec θ",
+     "en": "2 cosec θ"
+    },
+    {
+     "ta": "cot²θ",
+     "en": "cot²θ"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "= cosec²θ − cot²θ = 1",
+    "en": "= cosec²θ − cot²θ = 1"
+   }
+  }
+ ]
+}

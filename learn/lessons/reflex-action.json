@@ -1,0 +1,375 @@
+{
+ "id": "reflex-action",
+ "minutes": 30,
+ "title": {
+  "ta": "அனிச்சைச் செயல் — மூளை யோசிக்கும் முன்பே கை இழுக்கிறது",
+  "en": "Reflex action — your hand moves before your brain thinks"
+ },
+ "goals": [
+  {
+   "ta": "நியூரானின் பகுதிகளையும் அவற்றின் வேலையையும் அறிய",
+   "en": "Know the parts of a neuron and what each does"
+  },
+  {
+   "ta": "அனிச்சைச் செயல் வில்லின் (reflex arc) 5 பகுதிகளை வரிசைப்படுத்த",
+   "en": "Put the 5 parts of a reflex arc in order"
+  },
+  {
+   "ta": "அனிச்சைச் செயலுக்கும் விருப்பச் செயலுக்கும் உள்ள வேறுபாட்டை விளக்க",
+   "en": "Explain the difference between reflex and voluntary actions"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "அம்மா தோசை சுடும்போது தவறுதலாகச் சூடான தோசைக்கல்லைத் தொட்டுவிட்டீர்களா? \"சூடு!\" என்று நினைப்பதற்கு **முன்பே** கை பின்னால் இழுத்துக்கொண்டது, இல்லையா?\n\nஅப்படியென்றால் அந்த முடிவை எடுத்தது யார்? மூளை இல்லை! இந்தப் பாடத்தில் அந்த ரகசிய \"அவசர வழி\"யைக் கண்டுபிடிப்போம்.",
+    "en": "Have you ever touched a hot dosa tawa by mistake? Your hand pulled back **before** you even thought \"hot!\", didn’t it?\n\nSo who made that decision? Not your brain! In this lesson we find that secret \"emergency route\"."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நரம்பு மண்டலம் — உடலின் தகவல் வலைப்பின்னல்",
+    "en": "The nervous system — the body’s communication network"
+   },
+   "text": {
+    "ta": "**மைய நரம்பு மண்டலம் (CNS):** மூளை + தண்டுவடம் (spinal cord). முடிவெடுக்கும் இடம்.\n\n**புற நரம்பு மண்டலம் (PNS):** CNS-லிருந்து உடல் முழுவதும் செல்லும் நரம்புகள் — மூளை நரம்புகள் 12 இணை, தண்டுவட நரம்புகள் 31 இணை.\n\nசெய்திகளைக் கடத்தும் செல்கள் **நியூரான்கள்** (நரம்பு செல்கள்). ஒரு நியூரானின் பகுதிகள்:\n• **டென்ட்ரைட்டுகள்:** கிளைகள் — செய்தியைப் பெறுகின்றன.\n• **செல் உடல் (சைட்டான்):** உட்கருவுடன் — செல்லின் கட்டுப்பாட்டு மையம்.\n• **ஆக்சான்:** நீண்ட நார் — செய்தியை மின் தூண்டலாக அடுத்த செல்லுக்குக் கொண்டு செல்கிறது. பல ஆக்சான்களைச் சுற்றி **மயலின் உறை** — இது செய்தியை மிக வேகமாக்குகிறது.\n• **சினாப்ஸ் (synapse):** இரண்டு நியூரான்களுக்கு இடையிலான சிறு இடைவெளி — இங்கே வேதிப் பொருட்கள் (நரம்புக் கடத்திகள்) மூலம் செய்தி தாவுகிறது.",
+    "en": "**Central nervous system (CNS):** brain + spinal cord. Where decisions are made.\n\n**Peripheral nervous system (PNS):** the nerves running from the CNS to the whole body — 12 pairs of cranial nerves and 31 pairs of spinal nerves.\n\nThe cells that carry messages are **neurons** (nerve cells). Parts of a neuron:\n• **Dendrites:** branches — receive the message.\n• **Cell body (cyton):** with the nucleus — the cell’s control centre.\n• **Axon:** a long fibre — carries the message as an electrical impulse to the next cell. Many axons are wrapped in a **myelin sheath**, which makes the message much faster.\n• **Synapse:** the tiny gap between two neurons — the message jumps across using chemicals (neurotransmitters)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மூன்று வகை நியூரான்கள்",
+    "en": "Three kinds of neurons"
+   },
+   "text": {
+    "ta": "**உணர்ச்சி நியூரான் (sensory):** உணர்வேற்பிகளிலிருந்து (தோல், கண், காது…) செய்தியை CNS-க்குக் கொண்டு செல்கிறது.\n\n**இயக்க நியூரான் (motor):** CNS-லிருந்து உத்தரவை தசைகள் அல்லது சுரப்பிகளுக்குக் கொண்டு செல்கிறது.\n\n**இணைப்பு நியூரான் (relay / interneuron):** CNS-க்குள் இருந்து மேலே உள்ள இரண்டையும் இணைக்கிறது.",
+    "en": "**Sensory neuron:** carries messages from receptors (skin, eyes, ears…) to the CNS.\n\n**Motor neuron:** carries orders from the CNS to muscles or glands.\n\n**Relay neuron (interneuron):** inside the CNS, connects the other two."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "reflex",
+   "title": {
+    "ta": "அவசர வழி — அனிச்சைச் செயல் வில்",
+    "en": "The emergency route — the reflex arc"
+   },
+   "text": {
+    "ta": "\"இயக்கு\" அழுத்தி ஒவ்வொரு படியையும் பாருங்கள்.",
+    "en": "Press \"Play\" and watch each step."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "**அனிச்சைச் செயல் (reflex action):** தூண்டலுக்கு, நம் விருப்பமோ சிந்தனையோ இல்லாமல், தானாக, மிக வேகமாக ஏற்படும் துலங்கல். பல அனிச்சைச் செயல்களில் முடிவு **தண்டுவடத்திலேயே** எடுக்கப்படுகிறது.\n\n[[தூண்டல் → உணர்வேற்பி → உணர்ச்சி நியூரான் → தண்டுவடம் (இணைப்பு நியூரான்) → இயக்க நியூரான் → செயல்படும் உறுப்பு (தசை)]]\n\nஇந்தப் பாதையே **அனிச்சைச் செயல் வில் (reflex arc)**. மூளைக்குச் செய்தி பிறகுதான் போகிறது — அதனால்தான் கையை இழுத்த **பிறகு** வலி தெரிகிறது.\n\n**ஏன் இப்படி?** மூளைக்குச் சென்று யோசித்து வர நேரம் ஆகும். அந்தச் சில நொடிப் பங்குகளில் தோல் இன்னும் அதிகமாக வெந்துவிடும். அனிச்சைச் செயல் நம் உடலின் பாதுகாப்பு அமைப்பு.",
+    "en": "**Reflex action:** an automatic, very fast response to a stimulus, without our will or thinking. In many reflexes the decision is made **in the spinal cord itself**.\n\n[[stimulus → receptor → sensory neuron → spinal cord (relay neuron) → motor neuron → effector (muscle)]]\n\nThis pathway is the **reflex arc**. The message reaches the brain only afterwards — that is why you feel the pain **after** pulling your hand away.\n\n**Why?** Going to the brain and thinking takes time. In those fractions of a second the skin would burn more. Reflexes are the body’s safety system."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "அனிச்சை vs விருப்பச் செயல்",
+    "en": "Reflex vs voluntary action"
+   },
+   "text": {
+    "ta": "**விருப்பச் செயல்:** நாம் சிந்தித்து, முடிவெடுத்துச் செய்வது — எழுதுவது, நடப்பது, பந்தை அடிப்பது. **பெருமூளை (cerebrum)** கட்டுப்படுத்துகிறது.\n\n**அனிச்சைச் செயல்:** தானாக, கட்டுப்படுத்த முடியாதது (அல்லது மிகக் கடினம்) — கண் சிமிட்டுதல், தும்மல், இருமல், முழங்கால் துள்ளல் (knee-jerk), சூடான பொருளிலிருந்து கை இழுத்தல், பிரகாசமான வெளிச்சத்தில் கண்மணி சுருங்குதல்.\n\nசில அனிச்சைகள் (கண் சிமிட்டுதல், தும்மல், இருமல்) மூளையின் பின் பகுதியான **முகுளம் (medulla)** வழியாகவும் நடக்கின்றன — ஆனால் அங்கும் \"யோசிப்பு\" இல்லை.",
+    "en": "**Voluntary action:** something we think about and decide to do — writing, walking, hitting a ball. Controlled by the **cerebrum**.\n\n**Reflex action:** automatic and not (or barely) controllable — blinking, sneezing, coughing, the knee-jerk, pulling your hand from something hot, the pupil shrinking in bright light.\n\nSome reflexes (blinking, sneezing, coughing) pass through the **medulla**, at the back of the brain — but there is no \"thinking\" there either."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் அனிச்சைச் செயல் எது?",
+    "en": "Which of these is a reflex action?"
+   },
+   "options": [
+    {
+     "ta": "கேள்விக்கு விடை எழுதுவது",
+     "en": "Writing an answer to a question"
+    },
+    {
+     "ta": "தூசி பட்டதும் தும்முவது",
+     "en": "Sneezing when dust gets in your nose"
+    },
+    {
+     "ta": "சைக்கிள் ஓட்டுவது",
+     "en": "Riding a bicycle"
+    },
+    {
+     "ta": "பாட்டுப் பாடுவது",
+     "en": "Singing a song"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "எதை நம்மால் நிறுத்த முடியாது?",
+    "en": "Which one can you not stop yourself doing?"
+   },
+   "solution": {
+    "ta": "தும்மல் தானாக நடக்கும் — அனிச்சைச் செயல்.",
+    "en": "Sneezing happens by itself — a reflex."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "அனிச்சைச் செயல் வில்லில், தண்டுவடத்திலிருந்து தசைக்கு உத்தரவைக் கொண்டு செல்லும் நியூரான் எது?",
+    "en": "In a reflex arc, which neuron carries the order from the spinal cord to the muscle?"
+   },
+   "options": [
+    {
+     "ta": "உணர்ச்சி நியூரான்",
+     "en": "Sensory neuron"
+    },
+    {
+     "ta": "இணைப்பு நியூரான்",
+     "en": "Relay neuron"
+    },
+    {
+     "ta": "இயக்க நியூரான்",
+     "en": "Motor neuron"
+    }
+   ],
+   "correct": 2,
+   "hint": {
+    "ta": "\"இயக்கம்\" = தசையை இயக்குவது.",
+    "en": "\"Motor\" = moves the muscle."
+   },
+   "solution": {
+    "ta": "இயக்க நியூரான் (motor neuron).",
+    "en": "The motor neuron."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உங்கள் எதிர்வினை நேரத்தை அளவுங்கள் — ஒரு அளவுகோல் போதும்!",
+    "en": "Measure your reaction time — all you need is a ruler!"
+   },
+   "text": {
+    "ta": "1) நண்பர் 30 cm அளவுகோலை 0 cm கீழே இருக்கும்படி செங்குத்தாகப் பிடிக்கட்டும். உங்கள் பெருவிரலும் சுட்டுவிரலும் 0 cm-க்கு அருகில், தொடாமல் திறந்திருக்கட்டும்.\n2) எச்சரிக்கை இல்லாமல் நண்பர் அளவுகோலை விடுவார் — நீங்கள் உடனே பிடியுங்கள். எந்த cm-ல் பிடித்தீர்கள் என்று பாருங்கள் (d).\n3) இயற்பியல் உதவுகிறது: விழும் பொருள் s = ½gt². எனவே **நேரம் t = √(2d ÷ g)**, g ≈ 9.8 m/s², d மீட்டரில்.\n\nஎ.கா: d = 20 cm = 0.2 m → t = √(0.4 ÷ 9.8) ≈ 0.20 s.\n\n5 முறை செய்து சராசரி எடுங்கள். கவனியுங்கள்: இது **விருப்பச்** செயல் — கண் பார்த்து, மூளை முடிவெடுத்துப் பிடிக்கிறது. உண்மையான அனிச்சைச் செயல் இதைவிட வேகமானது!",
+    "en": "1) Let a friend hold a 30 cm ruler vertically with 0 cm at the bottom. Keep your thumb and finger open near the 0 cm mark, not touching.\n2) Without warning your friend lets go — catch it as fast as you can. Read the mark where you caught it (d).\n3) Physics helps: a falling object obeys s = ½gt². So **time t = √(2d ÷ g)**, with g ≈ 9.8 m/s² and d in metres.\n\ne.g. d = 20 cm = 0.2 m → t = √(0.4 ÷ 9.8) ≈ 0.20 s.\n\nDo it 5 times and average. Note: this is a **voluntary** action — your eyes see, your brain decides, then you catch. A true reflex is even faster than this!"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "அளவுகோல் 45 cm (0.45 m) விழுந்த பிறகு பிடித்தீர்கள் என்றால் எதிர்வினை நேரம்? (விநாடி, 2 தசம இடம்; g = 9.8)",
+    "en": "If the ruler fell 45 cm (0.45 m) before you caught it, your reaction time? (seconds, 2 decimals; g = 9.8)"
+   },
+   "answer": 0.3,
+   "tol": 0.01,
+   "unit": {
+    "ta": "s",
+    "en": "s"
+   },
+   "hint": {
+    "ta": "t = √(2 × 0.45 ÷ 9.8)",
+    "en": "t = √(2 × 0.45 ÷ 9.8)"
+   },
+   "solution": {
+    "ta": "t = √(0.9 ÷ 9.8) = √0.0918 ≈ 0.30 s",
+    "en": "t = √(0.9 ÷ 9.8) = √0.0918 ≈ 0.30 s"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நலம் — நரம்புகளைப் பாதுகாக்க",
+    "en": "Health — protecting your nerves"
+   },
+   "text": {
+    "ta": "• வாகனத்தில் **ஹெல்மெட், சீட் பெல்ட்** — மூளையும் தண்டுவடமும் காயமடைந்தால் பெரும்பாலும் மீண்டும் முழுமையாகக் குணமாவதில்லை.\n• போதுமான **தூக்கம்** — தூக்கமின்மை எதிர்வினை நேரத்தை அதிகரிக்கிறது (விபத்துகளுக்கு முக்கியக் காரணம்).\n• மது, போதைப் பொருட்கள் நரம்புச் செய்திகளை மெதுவாக்குகின்றன.\n• வைட்டமின் B12 குறைபாடு நரம்புகளைப் பாதிக்கும் — சைவ உணவு உண்பவர்கள் பால், தயிர் போன்றவற்றைச் சேர்த்துக்கொள்ளுங்கள்.",
+    "en": "• **Helmets and seat belts** — injuries to the brain and spinal cord often never fully heal.\n• Enough **sleep** — lack of sleep increases reaction time (a major cause of accidents).\n• Alcohol and drugs slow down nerve messages.\n• Vitamin B12 deficiency harms nerves — vegetarians should include milk, curd and similar foods."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "CNS = மூளை + தண்டுவடம்; PNS = உடல் முழுவதும் உள்ள நரம்புகள்.",
+     "en": "CNS = brain + spinal cord; PNS = nerves throughout the body."
+    },
+    {
+     "ta": "நியூரான்: டென்ட்ரைட் (பெறும்) → செல் உடல் → ஆக்சான் (அனுப்பும்) → சினாப்ஸ்.",
+     "en": "Neuron: dendrite (receives) → cell body → axon (sends) → synapse."
+    },
+    {
+     "ta": "அனிச்சைச் செயல் வில்: தூண்டல் → உணர்வேற்பி → உணர்ச்சி நியூரான் → தண்டுவடம் → இயக்க நியூரான் → தசை.",
+     "en": "Reflex arc: stimulus → receptor → sensory neuron → spinal cord → motor neuron → muscle."
+    },
+    {
+     "ta": "அனிச்சை = தானாக, வேகமாக, பாதுகாப்புக்காக. விருப்பச் செயல் = பெருமூளை கட்டுப்பாடு.",
+     "en": "Reflex = automatic, fast, protective. Voluntary = controlled by the cerebrum."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "நியூரானின் எந்தப் பகுதி செய்தியைப் பெறுகிறது?",
+    "en": "Which part of a neuron receives the message?"
+   },
+   "options": [
+    {
+     "ta": "ஆக்சான்",
+     "en": "Axon"
+    },
+    {
+     "ta": "டென்ட்ரைட்",
+     "en": "Dendrite"
+    },
+    {
+     "ta": "மயலின் உறை",
+     "en": "Myelin sheath"
+    },
+    {
+     "ta": "சினாப்ஸ்",
+     "en": "Synapse"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "டென்ட்ரைட்டுகள் பெறுகின்றன; ஆக்சான் அனுப்புகிறது.",
+    "en": "Dendrites receive; the axon sends."
+   }
+  },
+  {
+   "q": {
+    "ta": "கையை சூடான பொருளிலிருந்து இழுக்கும் முடிவு பெரும்பாலும் எங்கே எடுக்கப்படுகிறது?",
+    "en": "Where is the decision to pull your hand from something hot mainly made?"
+   },
+   "options": [
+    {
+     "ta": "பெருமூளை",
+     "en": "Cerebrum"
+    },
+    {
+     "ta": "தண்டுவடம்",
+     "en": "Spinal cord"
+    },
+    {
+     "ta": "இதயம்",
+     "en": "Heart"
+    },
+    {
+     "ta": "கை தசை",
+     "en": "Hand muscle"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தண்டுவடத்தில் உள்ள இணைப்பு நியூரான் — மூளைக்குக் காத்திருக்காமல்.",
+    "en": "The relay neuron in the spinal cord — without waiting for the brain."
+   }
+  },
+  {
+   "q": {
+    "ta": "அனிச்சைச் செயல் வில்லின் சரியான வரிசை?",
+    "en": "The correct order of a reflex arc?"
+   },
+   "options": [
+    {
+     "ta": "உணர்வேற்பி → இயக்க நியூரான் → தண்டுவடம் → உணர்ச்சி நியூரான் → தசை",
+     "en": "Receptor → motor neuron → spinal cord → sensory neuron → muscle"
+    },
+    {
+     "ta": "உணர்வேற்பி → உணர்ச்சி நியூரான் → தண்டுவடம் → இயக்க நியூரான் → தசை",
+     "en": "Receptor → sensory neuron → spinal cord → motor neuron → muscle"
+    },
+    {
+     "ta": "தசை → இயக்க நியூரான் → மூளை → உணர்வேற்பி",
+     "en": "Muscle → motor neuron → brain → receptor"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "உணர்ச்சி உள்ளே (CNS-க்கு), இயக்கம் வெளியே (தசைக்கு).",
+    "en": "Sensory goes in (to the CNS), motor goes out (to the muscle)."
+   }
+  },
+  {
+   "q": {
+    "ta": "மயலின் உறையின் வேலை?",
+    "en": "What does the myelin sheath do?"
+   },
+   "options": [
+    {
+     "ta": "செய்தியை வேகமாக்குகிறது",
+     "en": "Makes the impulse faster"
+    },
+    {
+     "ta": "இரத்தத்தைக் கொண்டு செல்கிறது",
+     "en": "Carries blood"
+    },
+    {
+     "ta": "செய்தியை நிறுத்துகிறது",
+     "en": "Stops the impulse"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "மின் காப்பு போல் செயல்பட்டு, தூண்டலை வேகமாகக் கடத்த உதவுகிறது.",
+    "en": "It acts like insulation and speeds up the impulse."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் விருப்பச் செயல் எது?",
+    "en": "Which of these is voluntary?"
+   },
+   "options": [
+    {
+     "ta": "கண் சிமிட்டுதல்",
+     "en": "Blinking"
+    },
+    {
+     "ta": "முழங்கால் துள்ளல்",
+     "en": "Knee-jerk"
+    },
+    {
+     "ta": "பேனாவை எடுப்பது",
+     "en": "Picking up a pen"
+    },
+    {
+     "ta": "இருமல்",
+     "en": "Coughing"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "பேனா எடுப்பது சிந்தித்துச் செய்வது — பெருமூளை கட்டுப்பாடு.",
+    "en": "Picking up a pen is a decision — cerebrum-controlled."
+   }
+  },
+  {
+   "q": {
+    "ta": "கையை இழுத்த பிறகுதான் வலி தெரிவது ஏன்?",
+    "en": "Why do you feel the pain only after pulling your hand away?"
+   },
+   "options": [
+    {
+     "ta": "வலி நரம்புகள் மெதுவானவை என்பதால் மட்டும்",
+     "en": "Only because pain nerves are slow"
+    },
+    {
+     "ta": "கை இழுக்கும் முடிவு தண்டுவடத்தில் முன்பே எடுக்கப்பட்டு, மூளைக்குச் செய்தி பிறகு சேர்வதால்",
+     "en": "Because the spinal cord already made the pull-back decision, and the message reaches the brain later"
+    },
+    {
+     "ta": "மூளை தூங்குவதால்",
+     "en": "Because the brain is asleep"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "அவசர முடிவு தண்டுவடத்தில்; உணர்வு (வலி) மூளையில் — அது பிறகு.",
+    "en": "The emergency decision is in the spinal cord; the feeling (pain) is in the brain — that comes later."
+   }
+  }
+ ]
+}

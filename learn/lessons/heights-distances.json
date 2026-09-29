@@ -1,0 +1,430 @@
+{
+ "id": "heights-distances",
+ "minutes": 35,
+ "title": {
+  "ta": "உயரங்களும் தூரங்களும் — தொடாமலே அளக்கலாம்",
+  "en": "Heights and distances — measure without touching"
+ },
+ "goals": [
+  {
+   "ta": "ஏற்றக்கோணம், இறக்கக்கோணம் என்றால் என்ன என்று அறிய",
+   "en": "Know what angles of elevation and depression are"
+  },
+  {
+   "ta": "கோபுரம், கலங்கரை விளக்கம், பட்டம் போன்ற நிஜக் கணக்குகளைத் தீர்க்க",
+   "en": "Solve real problems — towers, lighthouses, kites"
+  },
+  {
+   "ta": "ஒரு கிளினோமீட்டர் செய்து, உங்கள் பள்ளிக் கட்டடத்தை அளக்க",
+   "en": "Make a clinometer and measure your school building"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "மலையின் உயரம், நதியின் அகலம், கடலில் உள்ள கப்பலின் தூரம் — இவற்றை யாரும் டேப் வைத்து அளப்பதில்லை. நில அளவையாளர்கள், கடற்படை, விமானிகள் எல்லோரும் ஒரு கோணத்தையும் ஒரு தூரத்தையும் அளந்து, மீதியை tan கணக்கிடுகிறது.\n\n19-ஆம் நூற்றாண்டில் இந்தியா முழுவதும் நடந்த \"மாபெரும் முக்கோணவியல் அளவீடு\" (Great Trigonometrical Survey) — அதன் தொடக்கப் புள்ளிகளில் ஒன்று சென்னைக்கு அருகில் இருந்தது — இதே முறையில்தான் எவரெஸ்ட் சிகரத்தின் உயரத்தையும் கணக்கிட்டது.",
+    "en": "The height of a mountain, the width of a river, the distance of a ship at sea — nobody measures these with a tape. Surveyors, navies and pilots all measure one angle and one distance, and let tan calculate the rest.\n\nThe Great Trigonometrical Survey of India in the 19th century — one of whose starting baselines was near Madras (Chennai) — used exactly this method, and it is how the height of Mount Everest was worked out."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இரண்டு புதிய சொற்கள்",
+    "en": "Two new words"
+   },
+   "text": {
+    "ta": "**பார்வைக் கோடு (line of sight):** கண்ணிலிருந்து பொருளுக்கு வரையும் நேர்கோடு.\n\n**ஏற்றக்கோணம் (angle of elevation):** மேலே உள்ள பொருளைப் பார்க்க **தலையை உயர்த்தும்** போது, கிடைமட்டக் கோட்டுக்கும் பார்வைக் கோட்டுக்கும் இடையிலான கோணம்.\n\n**இறக்கக்கோணம் (angle of depression):** உயரத்திலிருந்து கீழே உள்ள பொருளைப் பார்க்க **தலையைத் தாழ்த்தும்** போது உள்ள கோணம்.\n\nமுக்கிய உண்மை: A-விலிருந்து B-யின் ஏற்றக்கோணம் = B-யிலிருந்து A-வின் இறக்கக்கோணம் (இணைகோடுகளின் ஒன்றுவிட்ட கோணங்கள்). இரண்டு கோணமும் **கிடைமட்டக் கோட்டிலிருந்தே** அளக்கப்படும் — செங்குத்திலிருந்து அல்ல!",
+    "en": "**Line of sight:** the straight line from your eye to the object.\n\n**Angle of elevation:** when you **raise your head** to look at something above, the angle between the horizontal and your line of sight.\n\n**Angle of depression:** when you **lower your head** from a height to look at something below, the angle between the horizontal and your line of sight.\n\nKey fact: the angle of elevation of B from A = the angle of depression of A from B (alternate angles between parallel lines). Both are always measured **from the horizontal** — never from the vertical!"
+   }
+  },
+  {
+   "type": "widget",
+   "name": "heightDistance",
+   "params": {
+    "d": 30,
+    "angle": 40,
+    "eye": 1.5
+   },
+   "text": {
+    "ta": "நீங்கள் கட்டடத்திலிருந்து தூரத்தை மாற்றும்போது, அதே கட்டடத்தின் உச்சியைப் பார்க்கும் கோணமும் மாற வேண்டும். உங்கள் கண் உயரம் 1.5 m என்று எடுத்துக்கொண்டுள்ளோம் — அதைக் கூட்ட மறக்காதீர்கள்!",
+    "en": "As you change your distance from the building, the angle to its top changes too. Your eye height is taken as 1.5 m — don’t forget to add it!"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "கோயில் கோபுரம்",
+    "en": "A temple tower"
+   },
+   "q": {
+    "ta": "ஒரு கோபுரத்தின் அடியிலிருந்து 50 m தூரத்தில் நிற்கும் ஒருவருக்கு (கண் உயரம் 1.5 m) கோபுர உச்சி 60° ஏற்றக்கோணத்தில் தெரிகிறது. கோபுரத்தின் உயரம்?",
+    "en": "A person (eye height 1.5 m) standing 50 m from the foot of a tower sees its top at an angle of elevation of 60°. Height of the tower?"
+   },
+   "steps": [
+    {
+     "ta": "படம்: கண் மட்டத்தில் கிடைமட்டக் கோடு 50 m. அதற்கு மேலே கோபுரத்தின் பகுதி = h.",
+     "en": "Picture: a horizontal line 50 m long at eye level. The part of the tower above it = h."
+    },
+    {
+     "ta": "tan 60° = h ÷ 50 → h = 50√3 ≈ 86.6 m",
+     "en": "tan 60° = h ÷ 50 → h = 50√3 ≈ 86.6 m"
+    },
+    {
+     "ta": "கோபுர உயரம் = 86.6 + 1.5 = 88.1 m",
+     "en": "Tower height = 86.6 + 1.5 = 88.1 m"
+    }
+   ],
+   "answer": {
+    "ta": "≈ 88.1 m",
+    "en": "≈ 88.1 m"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "கலங்கரை விளக்கம்",
+    "en": "The lighthouse"
+   },
+   "q": {
+    "ta": "60 m உயரக் கலங்கரை விளக்கத்தின் உச்சியிலிருந்து ஒரு படகு 30° இறக்கக்கோணத்தில் தெரிகிறது. படகு விளக்கத்தின் அடியிலிருந்து எவ்வளவு தூரம்?",
+    "en": "From the top of a 60 m lighthouse, a boat is seen at an angle of depression of 30°. How far is the boat from the foot of the lighthouse?"
+   },
+   "steps": [
+    {
+     "ta": "இறக்கக்கோணம் 30° = படகிலிருந்து உச்சியின் ஏற்றக்கோணம் 30°.",
+     "en": "Depression 30° = elevation of the top from the boat, 30°."
+    },
+    {
+     "ta": "tan 30° = 60 ÷ d",
+     "en": "tan 30° = 60 ÷ d"
+    },
+    {
+     "ta": "d = 60 ÷ (1/√3) = 60√3 ≈ 103.9 m",
+     "en": "d = 60 ÷ (1/√3) = 60√3 ≈ 103.9 m"
+    }
+   ],
+   "answer": {
+    "ta": "≈ 103.9 m",
+    "en": "≈ 103.9 m"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "இரண்டு கோணங்கள் — நடந்து அருகில் சென்றால்",
+    "en": "Two angles — walking closer"
+   },
+   "q": {
+    "ta": "ஒரு புள்ளி A-விலிருந்து ஒரு கம்பத்தின் உச்சி 30°-ல் தெரிகிறது. கம்பத்தை நோக்கி 20 m நடந்து B-க்கு வந்தால் 60°-ல் தெரிகிறது. கம்பத்தின் உயரம்?",
+    "en": "From point A the top of a pole is at 30°. After walking 20 m towards the pole to point B, it is at 60°. Height of the pole?"
+   },
+   "steps": [
+    {
+     "ta": "B-யிலிருந்து கம்பத்தின் தூரம் = x, உயரம் = h.",
+     "en": "Let the distance from B to the pole be x and the height h."
+    },
+    {
+     "ta": "B-யிலிருந்து: tan 60° = h/x → h = √3 x",
+     "en": "From B: tan 60° = h/x → h = √3 x"
+    },
+    {
+     "ta": "A-விலிருந்து: tan 30° = h/(x + 20) → h = (x + 20)/√3",
+     "en": "From A: tan 30° = h/(x + 20) → h = (x + 20)/√3"
+    },
+    {
+     "ta": "√3 x = (x + 20)/√3 → 3x = x + 20 → x = 10 m",
+     "en": "√3 x = (x + 20)/√3 → 3x = x + 20 → x = 10 m"
+    },
+    {
+     "ta": "h = 10√3 ≈ 17.32 m",
+     "en": "h = 10√3 ≈ 17.32 m"
+    }
+   ],
+   "answer": {
+    "ta": "≈ 17.32 m",
+    "en": "≈ 17.32 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு மரத்திலிருந்து 30 m தூரத்தில், மர உச்சி 45°-ல் தெரிகிறது (கண் உயரம் புறக்கணி). மரத்தின் உயரம்?",
+    "en": "From 30 m away, the top of a tree is at 45° (ignore eye height). Height of the tree?"
+   },
+   "answer": 30,
+   "tol": 0.05,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "tan 45° = 1",
+    "en": "tan 45° = 1"
+   },
+   "solution": {
+    "ta": "h = 30 × tan 45° = 30 m",
+    "en": "h = 30 × tan 45° = 30 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு பட்டத்தின் நூல் 60 m, தரையுடன் 60° கோணம் (நூல் நேராக). பட்டத்தின் உயரம்? (2 தசம இடம்)",
+    "en": "A kite string is 60 m long and makes 60° with the ground (string straight). Height of the kite? (2 decimals)"
+   },
+   "answer": 51.96,
+   "tol": 0.05,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "நூல் = கர்ணம் → sin",
+    "en": "String = hypotenuse → sin"
+   },
+   "solution": {
+    "ta": "h = 60 × sin 60° = 30√3 ≈ 51.96 m",
+    "en": "h = 60 × sin 60° = 30√3 ≈ 51.96 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "100 m உயரக் குன்றின் உச்சியிலிருந்து ஒரு காரின் இறக்கக்கோணம் 45°. கார் குன்றின் அடியிலிருந்து எவ்வளவு தூரம்?",
+    "en": "From the top of a 100 m cliff, the angle of depression of a car is 45°. How far is the car from the foot of the cliff?"
+   },
+   "answer": 100,
+   "tol": 0.05,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "இறக்கக்கோணம் = காரிலிருந்து ஏற்றக்கோணம்.",
+    "en": "Depression = elevation from the car."
+   },
+   "solution": {
+    "ta": "d = 100 ÷ tan 45° = 100 m",
+    "en": "d = 100 ÷ tan 45° = 100 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு கட்டடத்தின் உச்சி A-விலிருந்து 45°, கட்டடத்தை நோக்கி 10 m நடந்த பின் 60°. கட்டடத்தின் உயரம்? (2 தசம இடம்)",
+    "en": "The top of a building is at 45° from A, and at 60° after walking 10 m towards it. Height of the building? (2 decimals)"
+   },
+   "answer": 23.66,
+   "tol": 0.05,
+   "unit": {
+    "ta": "m",
+    "en": "m"
+   },
+   "hint": {
+    "ta": "h = √3 x மற்றும் h = x + 10 (tan 45° = 1). இரண்டையும் சமப்படுத்து.",
+    "en": "h = √3 x and h = x + 10 (tan 45° = 1). Set them equal."
+   },
+   "solution": {
+    "ta": "√3 x = x + 10 → x = 10/(√3 − 1) ≈ 13.66 → h = x + 10 ≈ 23.66 m",
+    "en": "√3 x = x + 10 → x = 10/(√3 − 1) ≈ 13.66 → h = x + 10 ≈ 23.66 m"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உங்கள் சொந்த கிளினோமீட்டர் செய்யுங்கள்",
+    "en": "Make your own clinometer"
+   },
+   "text": {
+    "ta": "**தேவை:** ஜியாமெட்ரி பாக்ஸ் கோணமானி (protractor), ஒரு உறிஞ்சுகுழல் (straw), 20 cm நூல், ஒரு சிறிய கல் அல்லது அழிப்பான், செல்லோடேப்.\n\n**செய்முறை:** 1) straw-ஐ கோணமானியின் நேர்விளிம்பில் ஒட்டுங்கள். 2) நூலை கோணமானியின் நடுப்புள்ளியில் கட்டி, கீழ் முனையில் கல்லைத் தொங்கவிடுங்கள் — நூல் எப்போதும் நேர் செங்குத்தாகத் தொங்கும்.\n\n**அளவிடுதல்:** straw வழியாகக் கட்டட உச்சியைப் பாருங்கள். நண்பர் நூல் காட்டும் அளவைப் படிக்கட்டும். **ஏற்றக்கோணம் = 90° − அந்த அளவு** (அளவு 90°-க்கு மேல் இருந்தால் அளவு − 90°).\n\n**கணக்கிடுதல்:** கட்டடத்திலிருந்து உங்கள் தூரத்தை அடியால் அளவுங்கள் (ஒரு அடி ≈ 0.6 m — முதலில் உங்கள் அடியை டேப்பால் சரிபாருங்கள்). உயரம் = தூரம் × tan(கோணம்) + உங்கள் கண் உயரம். வெவ்வேறு தூரங்களிலிருந்து அளந்து சராசரி எடுங்கள் — உண்மையான விஞ்ஞானிகள் அப்படித்தான் செய்கிறார்கள்!",
+    "en": "**You need:** the protractor from your geometry box, a drinking straw, 20 cm of thread, a small stone or eraser, sticky tape.\n\n**Build:** 1) Tape the straw along the straight edge of the protractor. 2) Tie the thread at the protractor’s centre point and hang the stone from it — the thread always hangs straight down.\n\n**Measure:** look at the top of the building through the straw. Let a friend read where the thread crosses the scale. **Angle of elevation = 90° − that reading** (if the reading is above 90°, reading − 90°).\n\n**Calculate:** pace out your distance from the building (one step ≈ 0.6 m — check your own step with a tape first). Height = distance × tan(angle) + your eye height. Measure from several distances and take the average — that is exactly what real scientists do!"
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "ஏற்றக்கோணம்: கீழிருந்து மேலே; இறக்கக்கோணம்: மேலிருந்து கீழே — இரண்டும் கிடைமட்டத்திலிருந்து.",
+     "en": "Elevation: looking up; depression: looking down — both from the horizontal."
+    },
+    {
+     "ta": "பெரும்பாலான கணக்குகள்: உயரம் = தூரம் × tan θ.",
+     "en": "Most problems: height = distance × tan θ."
+    },
+    {
+     "ta": "கண் உயரம் கொடுக்கப்பட்டால் கூட்ட மறக்காதே.",
+     "en": "If an eye height is given, remember to add it."
+    },
+    {
+     "ta": "இரண்டு கோணக் கணக்குகள்: தெரியாத தூரத்திற்கு x வைத்து இரண்டு சமன்பாடுகள் எழுதித் தீர்.",
+     "en": "Two-angle problems: call the unknown distance x, write two equations, solve."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "இறக்கக்கோணம் எதிலிருந்து அளக்கப்படுகிறது?",
+    "en": "The angle of depression is measured from?"
+   },
+   "options": [
+    {
+     "ta": "செங்குத்துக் கோடு",
+     "en": "The vertical"
+    },
+    {
+     "ta": "கிடைமட்டக் கோடு",
+     "en": "The horizontal"
+    },
+    {
+     "ta": "தரை",
+     "en": "The ground at the object"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "கண் மட்டத்திலுள்ள கிடைமட்டக் கோட்டிலிருந்து.",
+    "en": "From the horizontal line at eye level."
+   }
+  },
+  {
+   "q": {
+    "ta": "கட்டடத்திலிருந்து நீங்கள் தொலைவில் செல்லச் செல்ல, உச்சியின் ஏற்றக்கோணம்…",
+    "en": "As you walk away from a building, the angle of elevation of its top…"
+   },
+   "options": [
+    {
+     "ta": "அதிகரிக்கும்",
+     "en": "increases"
+    },
+    {
+     "ta": "குறையும்",
+     "en": "decreases"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "stays the same"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தூரம் அதிகமானால் tan θ = h/d குறையும், எனவே θ குறையும்.",
+    "en": "Larger d makes tan θ = h/d smaller, so θ decreases."
+   }
+  },
+  {
+   "q": {
+    "ta": "10√3 m உயரக் கம்பத்தின் உச்சி 60°-ல் தெரிகிறது. கம்பத்திலிருந்து தூரம்?",
+    "en": "The top of a 10√3 m pole is seen at 60°. Distance from the pole?"
+   },
+   "options": [
+    {
+     "ta": "10 m",
+     "en": "10 m"
+    },
+    {
+     "ta": "30 m",
+     "en": "30 m"
+    },
+    {
+     "ta": "10√3 m",
+     "en": "10√3 m"
+    },
+    {
+     "ta": "20 m",
+     "en": "20 m"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "d = h/tan 60° = 10√3/√3 = 10 m",
+    "en": "d = h/tan 60° = 10√3/√3 = 10 m"
+   }
+  },
+  {
+   "q": {
+    "ta": "கோபுரத்தின் உயரமும் அதன் நிழலும் சமமானால் சூரியனின் ஏற்றக்கோணம்?",
+    "en": "If a tower’s height equals its shadow, the sun’s elevation is?"
+   },
+   "options": [
+    {
+     "ta": "30°",
+     "en": "30°"
+    },
+    {
+     "ta": "45°",
+     "en": "45°"
+    },
+    {
+     "ta": "60°",
+     "en": "60°"
+    },
+    {
+     "ta": "90°",
+     "en": "90°"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "tan θ = 1 → 45°",
+    "en": "tan θ = 1 → 45°"
+   }
+  },
+  {
+   "q": {
+    "ta": "A-விலிருந்து B-யின் ஏற்றக்கோணம் 35° எனில் B-யிலிருந்து A-வின் இறக்கக்கோணம்?",
+    "en": "If the elevation of B from A is 35°, the depression of A from B is?"
+   },
+   "options": [
+    {
+     "ta": "55°",
+     "en": "55°"
+    },
+    {
+     "ta": "35°",
+     "en": "35°"
+    },
+    {
+     "ta": "145°",
+     "en": "145°"
+    },
+    {
+     "ta": "90°",
+     "en": "90°"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஒன்றுவிட்ட கோணங்கள் சமம்.",
+    "en": "Alternate angles are equal."
+   }
+  },
+  {
+   "q": {
+    "ta": "கிளினோமீட்டரில் நூல் 50°-ல் காட்டுகிறது. ஏற்றக்கோணம்?",
+    "en": "The clinometer thread reads 50°. Angle of elevation?"
+   },
+   "options": [
+    {
+     "ta": "50°",
+     "en": "50°"
+    },
+    {
+     "ta": "40°",
+     "en": "40°"
+    },
+    {
+     "ta": "140°",
+     "en": "140°"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "90° − 50° = 40°",
+    "en": "90° − 50° = 40°"
+   }
+  }
+ ]
+}
