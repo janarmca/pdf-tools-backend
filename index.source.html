@@ -376,6 +376,7 @@ const TOOLS = [
   {id:'ocr', name:'Image → Text (OCR)', desc:'20+ languages — correct font rendering', icon:'🔎', color:'#1F6F78', cat:'ai', cost:0},
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:2},
+  {id:'audiototext', name:'Audio / Video → Text', desc:'Transcribe Tamil, English & 90+ languages from MP3, WAV, M4A or video — AI speech-to-text', icon:'🎧', color:'#0E6655', cat:'ai', cost:2},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
@@ -1702,7 +1703,7 @@ function renderToolPanel(toolId){
 // deducts its own 5 credits server-side (see server.js), so the paid-gate
 // must only CHECK affordability (checkOnly:true) instead of also deducting
 // on unlock — otherwise a single image generation cost 10 credits, not 5.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage']);
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','audiototext']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -2926,7 +2927,7 @@ const TOOL_LIBS = {
   // These 5 share renderAiTextAnswer(), which now also offers Word/PDF export
   // (added so a downloaded result reads correctly even without an Indic font
   // installed — a plain .txt can't embed one, but Word/PDF can).
-  aihandwriting:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
+  aihandwriting:['docx','html2canvas','pdflib'], audiototext:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
   aitranslate:['docx','html2canvas','pdflib'], askai:['docx','html2canvas','pdflib'],
   airesume:['docx','html2canvas','pdflib'],
   aiexcelcompare:['xlsx'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
@@ -11079,6 +11080,98 @@ function mountAiUploadTool(container, config){
   }
   paint();
 }
+
+/* ===================== AUDIO / VIDEO → TEXT (NVIDIA Whisper) =====================
+   Uploads the audio/video to /api/ai/transcribe (server converts it with
+   ffmpeg and sends it to NVIDIA's hosted Whisper Large-v3 over gRPC).
+   Cost: 2 credits per started 5 minutes (charged server-side, refunded on
+   failure), max 30 minutes / 60 MB per file. */
+TOOL_IMPL.audiototext = {
+  mount(container){
+    let file = null, durationSec = 0;
+    const MAX_MB = 60, MAX_SEC = 30*60;
+    const body = el(`<div></div>`); container.appendChild(body);
+    const costFor = (sec)=> Math.max(2, Math.ceil((sec||1)/300)*2);
+    function readDuration(f){
+      return new Promise(resolve=>{
+        const url = URL.createObjectURL(f);
+        const m = document.createElement(f.type.startsWith('video/') ? 'video' : 'audio');
+        m.preload = 'metadata';
+        const done = (d)=>{ URL.revokeObjectURL(url); resolve(Number.isFinite(d) ? d : 0); };
+        m.onloadedmetadata = ()=> done(m.duration);
+        m.onerror = ()=> done(0);
+        setTimeout(()=> done(m.duration), 8000);
+        m.src = url;
+      });
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Upload a voice recording, song, meeting, WhatsApp voice note or video — AI writes out everything that is said. Works for Tamil, English, Hindi and 90+ languages. Cost: 2 credits per 5 minutes of audio (max 30 minutes, ${MAX_MB} MB).</div>`));
+      mountUploader(body, { accept:'audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.opus,.flac,.amr,.webm,.mp4,.mov,.mkv', label:'Drop an audio or video file', sublabel:'MP3 / WAV / M4A / OGG / OPUS / MP4 / MOV',
+        onAdd: async (fl)=>{
+          file = fl[0];
+          durationSec = await readDuration(file);
+          paint();
+        }});
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ file=null; durationSec=0; paint(); });
+      const tooBig = file.size > MAX_MB*1024*1024, tooLong = durationSec > MAX_SEC;
+      const mins = durationSec ? `${Math.floor(durationSec/60)}m ${Math.round(durationSec%60)}s` : 'unknown length';
+      body.appendChild(el(`<div class="note" style="margin-top:10px;">Length: <b>${mins}</b> · Cost: <b>${costFor(durationSec)} credits</b>${tooBig?`<br>⚠️ File is larger than ${MAX_MB} MB — please trim or compress it first.`:''}${tooLong?'<br>⚠️ Longer than 30 minutes — please split it into parts.':''}</div>`));
+      body.appendChild(el(`<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+        <label style="flex:1; min-width:160px; font-size:12.5px; font-weight:700;">Spoken language
+          <select id="attLang" style="width:100%; margin-top:4px;">
+            <option value="multi">Auto-detect</option>
+            <option value="ta">Tamil</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+          </select></label>
+        <label style="flex:1; min-width:160px; font-size:12.5px; font-weight:700;">Output
+          <select id="attTask" style="width:100%; margin-top:4px;">
+            <option value="transcribe">Same language (transcribe)</option>
+            <option value="translate">Translate to English</option>
+          </select></label>
+      </div>`));
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">🎧 Convert to Text</button>`);
+      if(tooBig || tooLong) btn.disabled = true;
+      btn.onclick = run;
+      row.appendChild(btn); body.appendChild(row);
+      body.appendChild(el(`<div id="aiAnswerHolder"></div>`));
+    }
+    async function run(){
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
+      const answerHolder = body.querySelector('#aiAnswerHolder');
+      answerHolder.innerHTML = '';
+      const cost = costFor(durationSec);
+      const ok = await confirmCreditSpend(answerHolder, cost + ' credits');
+      if(!ok) return;
+      const prog = mountProgress(body);
+      try{
+        prog.set(15, 'Uploading…');
+        const form = new FormData();
+        form.append('file', file);
+        form.append('language', body.querySelector('#attLang').value);
+        form.append('task', body.querySelector('#attTask').value);
+        form.append('toolId', 'audiototext');
+        const t = setTimeout(()=> prog.set(55, 'Listening & writing… (about 10–30 seconds per minute of audio)'), 2500);
+        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/transcribe', {
+          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
+        }, { retry:false });
+        clearTimeout(t);
+        if(result.error) throw new Error(result.error);
+        prog.set(100,'Done'); prog.remove();
+        renderAiTextAnswer(answerHolder, result.text, (file.name||'audio').replace(/\.[^.]+$/,'') + '-transcript');
+        updateCreditsBadgeInline();
+        refreshProfile();
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
+    }
+    paint();
+  }
+};
 
 /* ===================== ASK AI ABOUT DOCUMENT ===================== */
 TOOL_IMPL.askai = {

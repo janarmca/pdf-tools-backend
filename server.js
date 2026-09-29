@@ -19,6 +19,9 @@ import ffmpeg from 'fluent-ffmpeg';
 import { createClient } from '@supabase/supabase-js';
 import Razorpay from 'razorpay';
 import rateLimit from 'express-rate-limit';
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -469,6 +472,69 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
+// Shared NVIDIA chat helper (integrate.api.nvidia.com, OpenAI-compatible).
+// Tries each model in order; moves to the next one only for "this model is
+// unusable" errors (403 not enabled for key, 404 unknown, 410 retired, 5xx,
+// timeout). 401 (bad key) and 429 (rate limit) are returned immediately.
+// Override the list with env NVIDIA_TEXT_MODELS="model1,model2".
+// ============================================================
+const NVIDIA_TEXT_MODELS = (process.env.NVIDIA_TEXT_MODELS || [
+  'nvidia/nemotron-3.5-lightning-30b-a3b',
+  'nvidia/nemotron-3-super-120b-a12b',
+  'nvidia/nemotron-nano-3-30b-a3b'
+].join(',')).split(',').map(m => m.trim()).filter(Boolean);
+
+function cleanNvidiaAnswer(msg) {
+  let out = (msg?.content || '').toString();
+  // Some reasoning checkpoints still inline their thoughts — remove them.
+  out = out.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^[\s\S]*?<\/think>/i, '').trim();
+  return out;
+}
+
+async function callNvidiaChat(messages, { maxTokens = 4096, temperature = 0.3, timeoutMs = 60000 } = {}) {
+  let lastErr = null;
+  for (const model of NVIDIA_TEXT_MODELS) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    let r, j;
+    try {
+      r = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          model, messages, temperature, top_p: 0.95, max_tokens: maxTokens, stream: false,
+          chat_template_kwargs: { enable_thinking: false }
+        })
+      });
+      j = await r.json().catch(() => ({}));
+    } catch (e) {
+      clearTimeout(t);
+      lastErr = new Error(e.name === 'AbortError'
+        ? `The AI service took too long to respond (over ${Math.round(timeoutMs / 1000)} seconds) — please try again in a moment.`
+        : 'Could not reach the AI service — please try again. (' + e.message + ')');
+      console.error('[nvidia]', model, 'network/timeout:', e.message);
+      continue;
+    }
+    clearTimeout(t);
+    if (r.ok) {
+      const answer = cleanNvidiaAnswer(j.choices?.[0]?.message);
+      if (answer) return answer;
+      console.error('[nvidia]', model, 'returned empty content, finish_reason =', j.choices?.[0]?.finish_reason);
+      lastErr = new Error('The AI returned an empty answer — please try again.');
+      continue;
+    }
+    const detail = j.error?.message || (typeof j.error === 'string' ? j.error : null) || j.message || j.detail;
+    console.error('[nvidia]', model, 'HTTP', r.status, JSON.stringify(j));
+    lastErr = new Error(detail ? `${detail} (NVIDIA HTTP ${r.status})` : `AI request failed (NVIDIA HTTP ${r.status})`);
+    if (r.status === 401) throw new Error('NVIDIA API key is invalid or expired — create a new key at build.nvidia.com and update NVIDIA_API_KEY in Cloud Run. (NVIDIA HTTP 401)');
+    if (r.status === 429) throw new Error('AI is busy right now (NVIDIA free-tier rate limit) — please wait a minute and try again.');
+    if (r.status === 400 && !/model|thinking|chat_template/i.test(detail || '')) throw lastErr;
+  }
+  throw lastErr || new Error('AI request failed.');
+}
+
+// ============================================================
 // POST /api/ai/text — text-only AI tasks (summarize, rewrite, resume
 // suggestions) via NVIDIA Build's hosted Nemotron 3.5 Lightning, instead of
 // Gemini.
@@ -510,65 +576,153 @@ app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
     // is exactly the "loads for a while, then a network error" symptom
     // reported. Failing fast with a clear, actionable message is much better
     // than an unbounded hang.
-    const nvidiaController = new AbortController();
-    const nvidiaTimeoutHandle = setTimeout(() => nvidiaController.abort(), 45000);
-    let nvidiaRes;
-    try {
-      nvidiaRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        signal: nvidiaController.signal,
-        headers: {
-          'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          // meta/llama-3.3-70b-instruct reached end-of-life on NVIDIA's catalog
-          // (2026-08-26) and returns HTTP 410 — switched to NVIDIA's own
-          // Nemotron 3.5 Lightning, their fastest current free-endpoint model
-          // in this size class (30B, 1M context), well suited to plain
-          // summarize/translate/resume-review text tasks. Being NVIDIA's own
-          // flagship line (not a third-party checkpoint they merely host), it
-          // should also be less likely to be retired on short notice than a
-          // Meta model was. If this ever needs swapping again, the improved
-          // error handling above (HTTP status + real NVIDIA error message)
-          // will show exactly why, instead of a bare "AI request failed".
-          model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
-          messages: [
-            { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
-            { role: 'user', content: userContent }
-          ],
-          temperature: 0.3,
-          max_tokens: 1500
-        })
-      });
-    } catch (fetchErr) {
-      if (fetchErr.name === 'AbortError') {
-        throw new Error('The AI service took too long to respond (over 45 seconds) — please try again in a moment.');
-      }
-      throw new Error('Could not reach the AI service — please check your connection and try again. (' + fetchErr.message + ')');
-    } finally {
-      clearTimeout(nvidiaTimeoutHandle);
-    }
-    const nvidiaJson = await nvidiaRes.json().catch(() => ({}));
-    if (!nvidiaRes.ok) {
-      // NVIDIA's error shape varies (error.message, a plain "detail" string on
-      // an auth failure, etc.) — check every field we've seen before falling
-      // back to a generic message, and always include the HTTP status so a
-      // bad NVIDIA_API_KEY (401), a renamed/unavailable model (404), or a
-      // rate limit (429) are distinguishable from each other in the logs
-      // instead of all looking like the same unhelpful "AI request failed".
-      const detail = nvidiaJson.error?.message
-        || (typeof nvidiaJson.error === 'string' ? nvidiaJson.error : null)
-        || nvidiaJson.message
-        || nvidiaJson.detail;
-      console.error('[api/ai/text] NVIDIA request failed, HTTP', nvidiaRes.status, '— raw response:', JSON.stringify(nvidiaJson));
-      throw new Error(detail ? `${detail} (NVIDIA HTTP ${nvidiaRes.status})` : `AI request failed (NVIDIA HTTP ${nvidiaRes.status})`);
-    }
-    const answer = nvidiaJson.choices?.[0]?.message?.content || 'No answer returned.';
+    // FIX (2026-09-30): nemotron-3.5-lightning is a REASONING model. Without
+    // chat_template_kwargs.enable_thinking=false it spends its whole token
+    // budget "thinking", so `content` came back empty/cut off ("No answer
+    // returned." / half answers). callNvidiaChat() now turns thinking off,
+    // strips any leftover <think> block, and falls back to other NVIDIA models
+    // if one is retired (404/410), not enabled for this key (403) or down (5xx).
+    const answer = await callNvidiaChat([
+      { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
+      { role: 'user', content: userContent }
+    ]);
     res.json({ ok: true, answer });
   } catch (e) {
     if (allowed) refundCredits(req.user.id, CREDIT_COST, req.body.toolId || 'aisummarize');
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================
+// POST /api/ai/transcribe — Audio/Video → Text (NVIDIA hosted Whisper
+// Large-v3 via Riva gRPC on grpc.nvcf.nvidia.com — same free NVIDIA_API_KEY).
+// NVIDIA's speech models are NOT on the REST chat endpoint: they only accept
+// gRPC (Riva ASR proto, vendored in ./proto) with a `function-id` header.
+// Flow: upload (audio or video, ≤60MB) → ffprobe duration → deduct credits
+// (2 per started 5 minutes, max 30 min) → ffmpeg converts to 16 kHz mono
+// 16-bit PCM in 60-second chunks (keeps each gRPC message ~2 MB) → each chunk
+// sent to Whisper → joined text. Credits refunded on any failure.
+// body (multipart): file, language ('ta' | 'en' | 'multi' | any Whisper
+// code; default 'multi' = auto-detect), task ('transcribe' | 'translate' →
+// English), toolId.
+// ============================================================
+const NVIDIA_ASR_FUNCTION_ID = process.env.NVIDIA_ASR_FUNCTION_ID || 'b702f636-f60c-4a3d-a6f4-f3568c13bd7d'; // openai/whisper-large-v3 on build.nvidia.com
+const NVIDIA_ASR_SERVER = process.env.NVIDIA_ASR_SERVER || 'grpc.nvcf.nvidia.com:443';
+let rivaAsrClient = null;
+function getRivaAsrClient() {
+  if (rivaAsrClient) return rivaAsrClient;
+  const protoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), 'proto');
+  const def = protoLoader.loadSync(path.join(protoRoot, 'riva/proto/riva_asr.proto'), {
+    includeDirs: [protoRoot], keepCase: true, longs: String, enums: String, defaults: true, oneofs: true
+  });
+  const pkg = grpc.loadPackageDefinition(def);
+  rivaAsrClient = new pkg.nvidia.riva.asr.RivaSpeechRecognition(NVIDIA_ASR_SERVER, (process.env.NVIDIA_ASR_INSECURE === '1' ? grpc.credentials.createInsecure() : grpc.credentials.createSsl()), {
+    'grpc.max_send_message_length': 32 * 1024 * 1024,
+    'grpc.max_receive_message_length': 32 * 1024 * 1024
+  });
+  return rivaAsrClient;
+}
+
+function rivaRecognize(pcmBuffer, language, task) {
+  return new Promise((resolve, reject) => {
+    const md = new grpc.Metadata();
+    md.add('function-id', NVIDIA_ASR_FUNCTION_ID);
+    md.add('authorization', `Bearer ${process.env.NVIDIA_API_KEY}`);
+    const config = {
+      encoding: 'LINEAR_PCM', sample_rate_hertz: 16000, audio_channel_count: 1,
+      language_code: language, max_alternatives: 1, enable_automatic_punctuation: true
+    };
+    if (task === 'translate') config.custom_configuration = { task: 'translate' };
+    getRivaAsrClient().Recognize({ config, audio: pcmBuffer }, md, { deadline: Date.now() + 120000 }, (err, resp) => {
+      if (err) return reject(err);
+      const text = (resp.results || []).map(r => r.alternatives?.[0]?.transcript || '').join(' ').replace(/\s+/g, ' ').trim();
+      resolve(text);
+    });
+  });
+}
+
+function probeDurationSec(file) {
+  return new Promise((resolve, reject) => ffmpeg.ffprobe(file, (err, data) => {
+    if (err) return reject(new Error('Could not read this audio/video file — is it a valid audio or video?'));
+    const d = Number(data?.format?.duration);
+    const hasAudio = (data?.streams || []).some(st => st.codec_type === 'audio');
+    if (!hasAudio) return reject(new Error('This file has no audio track.'));
+    resolve(Number.isFinite(d) ? d : 0);
+  }));
+}
+
+// Converts any audio/video to one raw 16 kHz mono s16le PCM file, then slices
+// it in memory into chunkSec pieces (16000 samples/s × 2 bytes = 32000 B/s).
+function toPcmChunks(input, outDir, chunkSec) {
+  const out = path.join(outDir, 'audio.raw');
+  return new Promise((resolve, reject) => {
+    ffmpeg(input).noVideo().audioChannels(1).audioFrequency(16000).audioCodec('pcm_s16le').format('s16le')
+      .output(out)
+      .on('end', () => {
+        const all = fs.readFileSync(out);
+        const size = 32000 * chunkSec, chunks = [];
+        for (let i = 0; i < all.length; i += size) chunks.push(all.subarray(i, Math.min(i + size, all.length)));
+        resolve(chunks);
+      })
+      .on('error', e => reject(new Error('Audio conversion failed: ' + e.message)))
+      .run();
+  });
+}
+
+app.post('/api/ai/transcribe', creditLimiter, requireAuth, uploadVideo.single('file'), async (req, res) => {
+  let allowed = false, cost = 0, workDir = null;
+  const toolId = req.body?.toolId || 'audiototext';
+  try {
+    if (!process.env.NVIDIA_API_KEY) return res.status(501).json({ error: 'AI feature not set up yet — add NVIDIA_API_KEY in Cloud Run env vars.' });
+    if (!req.file) return res.status(400).json({ error: 'Please upload an audio or video file.' });
+    const language = (req.body.language || 'multi').toString().trim().slice(0, 10) || 'multi';
+    const task = req.body.task === 'translate' ? 'translate' : 'transcribe';
+
+    const duration = await probeDurationSec(req.file.path);
+    const MAX_SEC = 30 * 60;
+    if (duration > MAX_SEC) return res.status(400).json({ error: 'Audio is longer than 30 minutes — please trim it and upload in parts.' });
+    cost = Math.max(2, Math.ceil((duration || 1) / 300) * 2);
+    allowed = await deductCredits(req.user.id, cost, toolId);
+    if (!allowed) return res.status(402).json({ error: `Not enough credits — this audio needs ${cost} credits. Please buy more or upgrade to Pro.` });
+
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asr-'));
+    const chunks = await toPcmChunks(req.file.path, workDir, 60);
+    if (!chunks.length) throw new Error('No audio found in this file.');
+
+    const parts = new Array(chunks.length).fill('');
+    let next = 0;
+    const worker = async () => {
+      while (next < chunks.length) {
+        const i = next++;
+        const buf = chunks[i];
+        if (buf.length < 3200) continue; // <0.1 s of audio — skip
+        let lastErr;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try { parts[i] = await rivaRecognize(buf, language, task); lastErr = null; break; }
+          catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 1500)); }
+        }
+        if (lastErr) throw lastErr;
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    const text = parts.filter(Boolean).join('\n').trim();
+    if (!text) throw new Error('No speech could be recognized in this audio.');
+    res.json({ ok: true, text, durationSec: Math.round(duration), creditsUsed: cost });
+  } catch (e) {
+    if (allowed) refundCredits(req.user.id, cost, toolId);
+    let msg = e.message || 'Transcription failed.';
+    // gRPC status codes → clear messages
+    if (e.code === 16) msg = 'NVIDIA API key is invalid or expired — update NVIDIA_API_KEY in Cloud Run. (gRPC UNAUTHENTICATED)';
+    else if (e.code === 7) msg = 'This NVIDIA API key is not allowed to use the speech model — open build.nvidia.com/openai/whisper-large-v3 once while logged in to enable it. (gRPC PERMISSION_DENIED)';
+    else if (e.code === 8) msg = 'AI is busy right now (NVIDIA free-tier rate limit) — please wait a minute and try again.';
+    else if (e.code === 4) msg = 'The speech service took too long — please try a shorter audio.';
+    else if (e.code === 5) msg = 'NVIDIA speech model not found — its function-id may have changed; update NVIDIA_ASR_FUNCTION_ID. (gRPC NOT_FOUND)';
+    else if (typeof e.code === 'number') msg = `Speech service error: ${e.details || e.message} (gRPC ${e.code})`;
+    console.error('[api/ai/transcribe]', e.code, e.details || e.message);
+    res.status(500).json({ error: msg });
+  } finally {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    if (workDir) fs.rm(workDir, { recursive: true, force: true }, () => {});
   }
 });
 
