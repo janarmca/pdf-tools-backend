@@ -727,6 +727,107 @@ app.post('/api/ai/transcribe', creditLimiter, requireAuth, uploadVideo.single('f
 });
 
 // ============================================================
+// POST /api/ai/health — "Health Check" symptom analysis (NVIDIA Nemotron,
+// 2 credits). NOT a diagnosis: it lists possible causes from several angles
+// (infection, diet, sleep, stress, environment, chronic illness, medicines),
+// safe home care, a few classical Siddha home remedies from a FIXED vetted
+// list (the model may not invent others), what tests/when to see a doctor.
+// Emergency red flags are screened on the client BEFORE this is called and
+// re-checked here; a flagged request is refused without charging.
+// No name is collected, and the request body is never logged.
+// body: { lang:'ta'|'en', profile:{age,sex,pregnant}, complaint, details,
+//         durationValue, durationUnit, severity, context:{...}, redFlags:[] }
+// ============================================================
+const SIDDHA_WHITELIST = `
+- Nilavembu kudineer (நிலவேம்பு குடிநீர்) — fever support. Caution: avoid in pregnancy; NOT a substitute for dengue/typhoid/malaria testing.
+- Kabasura kudineer (கபசுர குடிநீர்) — fever with cold/cough/body ache. Caution: avoid in pregnancy; short course only.
+- Chukku malli kaapi (சுக்கு மல்லி காபி — dry ginger + coriander seed decoction) — cold, mild headache, indigestion. Caution: less for acidity/ulcer.
+- Milagu–thulasi kashayam (மிளகு துளசி கஷாயம் — pepper + holy basil) — cold, sore throat, cough.
+- Adathodai leaf decoction with honey (ஆடாதோடை) — cough with phlegm. Caution: avoid in pregnancy.
+- Thoothuvalai rasam/soup (தூதுவளை) — cold, cough, chest congestion.
+- Karpooravalli leaf juice with honey (கற்பூரவல்லி / ஓமவல்லி) — cold/cough; honey not for infants under 1 year.
+- Nochi / turmeric steam inhalation (நொச்சி / மஞ்சள் ஆவி பிடித்தல்) — blocked nose, sinus headache. Caution: burns — adults supervise children.
+- Omam (ajwain) water (ஓம தண்ணீர்) — gas, bloating, indigestion.
+- Seeraga thanneer (சீரகத் தண்ணீர் — cumin water) — indigestion, mild acidity, body heat.
+- Mor (salted buttermilk with cumin, curry leaves) (மோர்) — body heat, dehydration, mild acidity.
+- Vendhayam (fenugreek) soaked water (வெந்தயம்) — body heat, acidity. Caution: can lower blood sugar — diabetics on medicine be careful.
+- Manathakkali keerai (மணத்தக்காளி கீரை) — mouth ulcers, stomach heat.
+- Rice kanji with salt / tender coconut water / homemade ORS (அரிசிக் கஞ்சி / இளநீர்) — diarrhoea, vomiting, fever dehydration.
+- Triphala powder in warm water at night (திரிபலா) — constipation. Caution: not in pregnancy, not with diarrhoea.
+- Nallennai (sesame oil) oil bath, weekly (நல்லெண்ணெய் குளியல்) — body heat, body pain, sleep. Caution: not during fever/cold.
+- Ginger–honey–lemon warm water (இஞ்சி தேன் எலுமிச்சை) — sore throat, nausea.
+`;
+const HEALTH_SYSTEM_PROMPT = `You are a careful health-information assistant for people in Tamil Nadu, India. You are NOT a doctor and you do NOT diagnose.
+Your job: from the person's details, reason from several angles (infection/seasonal, food & water, sleep, stress & mental load, work & environment such as sun, mosquitoes, dust, screens, chronic conditions, current medicines and side-effects, hormonal/age factors) and explain the most likely everyday causes in simple words, linking every cause to something the person actually told you. Say plainly when information is insufficient.
+Rules you must follow:
+1. Never state a definite diagnosis. Use "possible", "may be", "commonly".
+2. Always consider dangerous causes relevant to Tamil Nadu (dengue, malaria, typhoid, leptospirosis during rain/flood, UTI, dehydration, uncontrolled sugar/BP) and say which test would rule them out. If fever has lasted 2+ days in the rainy season, recommend CBC with platelet count and dengue NS1/IgM.
+3. Discourage unnecessary medicines: no self-started antibiotics, no repeated painkillers, no leftover or shop-counter antibiotics or steroids. Explain that many mild problems settle with rest, fluids, food and home care, and that a doctor should decide when medicine IS needed — do not tell anyone to avoid or stop modern (allopathic) medicine or any medicine a doctor prescribed.
+4. Siddha home remedies: suggest at most 3, ONLY from this vetted list, with the caution text, and only if suitable for the person (check pregnancy, age, diabetes, the complaint):${SIDDHA_WHITELIST}
+   Never suggest any other herb, metal or mineral preparation (no parpam/chendooram), and never give doses of medicines.
+5. Pregnant women, children under 5 and adults over 65: be extra conservative and recommend seeing a doctor sooner.
+6. If anything suggests an emergency, set urgency to "emergency".
+7. Reply in the language requested (Tamil in simple spoken-style Tamil script, or English).
+Return ONLY valid JSON, no markdown, with exactly these keys:
+{"urgency":"self_care|see_doctor_soon|see_doctor_today|emergency","urgency_reason":"...","summary":"2-3 sentence plain summary","possible_causes":[{"cause":"...","angle":"infection|food_water|sleep|stress|environment|chronic|medicine|other","likelihood":"high|medium|low","why":"linked to their details"}],"root_cause_insight":"the most likely underlying pattern behind the symptoms and what to change","self_care":["..."],"siddha_remedies":[{"name":"...","how":"simple preparation/use","caution":"..."}],"medicine_advice":"when medicine is and is not needed; avoid self-medication","tests_to_consider":["..."],"see_doctor_if":["warning signs to watch"],"questions_for_doctor":["..."],"missing_info":["what else would help"]}`;
+
+function extractJson(text) {
+  let t = (text || '').replace(/```(?:json)?/gi, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0 || b <= a) throw new Error('bad json');
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+app.post('/api/ai/health', creditLimiter, requireAuth, async (req, res) => {
+  const CREDIT_COST = 2;
+  let allowed = false;
+  try {
+    if (!process.env.NVIDIA_API_KEY) return res.status(501).json({ error: 'AI feature not set up yet — add NVIDIA_API_KEY in Cloud Run env vars.' });
+    const b = req.body || {};
+    const clip = (x, n) => (x == null ? '' : String(x)).slice(0, n);
+    if (Array.isArray(b.redFlags) && b.redFlags.length) {
+      return res.status(400).json({ error: 'EMERGENCY_SIGNS', emergency: true });
+    }
+    const complaint = clip(b.complaint, 200), details = clip(b.details, 1500);
+    if (!complaint.trim() && !details.trim()) return res.status(400).json({ error: 'Please describe the problem first.' });
+    const lang = b.lang === 'en' ? 'English' : 'Tamil';
+    const p = b.profile || {}, c = b.context || {};
+    const facts = {
+      age: clip(p.age, 5), sex: clip(p.sex, 10), pregnant: !!p.pregnant,
+      main_problem: complaint, description: details,
+      duration: `${clip(b.durationValue, 5)} ${clip(b.durationUnit, 10)}`, severity_1_to_10: clip(b.severity, 3),
+      temperature_if_measured: clip(c.temp, 10),
+      other_symptoms: Array.isArray(c.symptoms) ? c.symptoms.slice(0, 25).map(x => clip(x, 60)) : [],
+      sleep_hours: clip(c.sleep, 10), water_glasses_per_day: clip(c.water, 10), food: clip(c.food, 200),
+      stress_level: clip(c.stress, 20), work: clip(c.work, 200), screen_hours: clip(c.screen, 10),
+      environment: Array.isArray(c.env) ? c.env.slice(0, 12).map(x => clip(x, 60)) : [],
+      others_at_home_same_symptoms: clip(c.contacts, 10),
+      existing_conditions: clip(c.conditions, 300), current_medicines: clip(c.meds, 300),
+      medicines_taken_for_this: clip(c.tookForThis, 300), allergies: clip(c.allergies, 200)
+    };
+    allowed = await deductCredits(req.user.id, CREDIT_COST, 'healthcheck');
+    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
+    const ask = async (extra) => extractJson(await callNvidiaChat([
+      { role: 'system', content: HEALTH_SYSTEM_PROMPT },
+      { role: 'user', content: `Reply language: ${lang}.${extra || ''}\nPerson's details (JSON):\n${JSON.stringify(facts)}` }
+    ], { maxTokens: 3000, temperature: 0.2, timeoutMs: 75000 }));
+    let out;
+    try { out = await ask(); }
+    catch (e) { if (e.message !== 'bad json' && !(e instanceof SyntaxError)) throw e; out = await ask(' Your previous reply was not valid JSON — return ONLY the JSON object.'); }
+    const okU = ['self_care', 'see_doctor_soon', 'see_doctor_today', 'emergency'];
+    if (!okU.includes(out.urgency)) out.urgency = 'see_doctor_soon';
+    // Safety floor: vulnerable groups never get plain "self care".
+    const ageN = Number(facts.age);
+    if (out.urgency === 'self_care' && (facts.pregnant || (ageN && (ageN < 5 || ageN > 65)))) out.urgency = 'see_doctor_soon';
+    res.json({ ok: true, result: out });
+  } catch (e) {
+    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'healthcheck');
+    const msg = (e instanceof SyntaxError || e.message === 'bad json') ? 'The AI reply could not be read — your credits were refunded, please try again.' : e.message;
+    res.status(500).json({ error: msg });
+  }
+});
+
+// ============================================================
 // POST /api/ai/image — Text-to-Image generation (Cloudflare Workers AI —
 // FLUX.1-schnell)
 // body: { prompt: string }

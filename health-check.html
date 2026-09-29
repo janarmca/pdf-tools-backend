@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Health Check — Find the Real Cause | PDF Tools India</title>
+<meta name="description" content="Understand what may be causing your fever, headache, cough or stomach trouble — looked at from every angle (food, sleep, stress, environment, infection), with safe home care and classical Siddha remedies. Emergency signs checked first. Not a diagnosis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--ink:#10231c;--sub:#5a6b64;--line:#dce6e1;--bg:#f3f8f5;--card:#fff;--brand:#0d5c46;--brand2:#e7f4ee;--red:#b42318;--redbg:#fdecea;--amber:#8a5a00;--amberbg:#fff6e0;--green:#166534;--greenbg:#eafaf0}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.app{max-width:860px;margin:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 6px 24px #0b2a1d0d}
+h1{margin:0 0 4px;font-size:1.35rem}
+.sub{color:var(--sub);font-size:.86rem;line-height:1.55}
+.sec{font-weight:800;margin:0 0 12px;font-size:1rem;display:flex;gap:8px;align-items:center}
+.stepno{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;align-items:center;justify-content:center;font-size:.8rem}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;font-size:.76rem;font-weight:700;color:#3f524b;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cfdcd5;border-radius:11px;font:inherit;font-size:.92rem;background:#fff;color:var(--ink)}
+textarea{min-height:74px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font:inherit;font-size:.84rem}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.flag{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:10px;border:1px solid #f1d4d0;background:#fffafa;margin-bottom:7px;font-size:.86rem;cursor:pointer}
+.flag input{width:auto;margin-top:3px}
+.btn{padding:13px 16px;border:0;border-radius:12px;cursor:pointer;background:#e7eeea;color:#15392d;font:inherit;font-weight:800}
+.btn.primary{background:var(--brand);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.note{padding:11px 13px;border-radius:12px;background:#eef3f1;color:#2f433c;font-size:.85rem;line-height:1.6}
+.banner{padding:16px;border-radius:14px;font-size:.95rem;line-height:1.6}
+.banner.red{background:var(--redbg);color:var(--red);border:2px solid #f3b4ad}
+.banner.amber{background:var(--amberbg);color:var(--amber);border:1px solid #f5d98f}
+.banner.green{background:var(--greenbg);color:var(--green);border:1px solid #b9ebca}
+.banner h2{margin:0 0 6px;font-size:1.1rem}
+.callrow a{display:inline-block;margin:8px 8px 0 0;padding:10px 14px;border-radius:10px;font-weight:800;text-decoration:none}
+.call108{background:var(--red);color:#fff}
+.callx{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.cause{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+.cause .top{display:flex;justify-content:space-between;gap:8px;font-weight:800}
+.pill{font-size:.7rem;padding:3px 8px;border-radius:999px;font-weight:800;white-space:nowrap}
+.p-high{background:#fde2e1;color:#9f1c14}.p-medium{background:#fff1cc;color:#7a4f00}.p-low{background:#e7eef9;color:#23457a}
+.why{font-size:.85rem;color:#3c4f48;margin-top:4px;line-height:1.55}
+.res h3{font-size:.98rem;margin:18px 0 8px}
+.res ul{padding-left:20px;margin:0}
+.res li{margin-bottom:6px;line-height:1.6}
+.siddha{border-left:4px solid #7a9a2a;background:#f7fbef;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.siddha .c{font-size:.8rem;color:#7a4f00;margin-top:4px}
+.disc{margin-top:16px;padding:12px 14px;border-radius:12px;background:#10231c;color:#e6f2ec;font-size:.86rem;line-height:1.6}
+.langtabs{display:flex;gap:8px;margin-top:10px}.langtabs button{flex:1}.langtabs button.on{background:var(--brand);color:#fff}
+.hidden{display:none!important}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid #cfe3da;border-top-color:var(--brand);border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.closebtn{position:fixed;top:10px;right:10px;z-index:99;width:34px;height:34px;border-radius:50%;border:0;background:#0f172a;color:#fff;cursor:pointer}
+@media(max-width:700px){.grid,.grid3{grid-template-columns:1fr}}
+@media print{.closebtn,.noprint{display:none!important}body{background:#fff}.card{box-shadow:none;border:0}}
+</style>
+</head>
+<body>
+<button class="closebtn noprint" title="Close" onclick="try{window.close()}catch(e){};setTimeout(function(){location.href='https://pdftoolsindia.com/'},300)">✕</button>
+<div class="app">
+
+<div class="card noprint">
+  <h1 data-t="title"></h1>
+  <div class="sub" data-t="intro"></div>
+  <div class="langtabs"><button class="btn on" data-lang="ta">தமிழ்</button><button class="btn" data-lang="en">English</button></div>
+</div>
+
+<!-- STEP 1: emergency screen (free, runs in the browser) -->
+<div class="card noprint" id="s1">
+  <div class="sec"><span class="stepno">1</span><span data-t="s1"></span></div>
+  <div class="sub" style="margin-bottom:10px" data-t="s1sub"></div>
+  <div id="flags"></div>
+  <div class="row" style="margin-top:10px"><button class="btn primary" id="s1next" data-t="s1btn"></button></div>
+</div>
+
+<div class="card hidden" id="emergency">
+  <div class="banner red">
+    <h2 data-t="emTitle"></h2>
+    <div data-t="emBody"></div>
+    <div class="callrow"><a class="call108" href="tel:108">📞 108 Ambulance</a><a class="callx" href="tel:104">📞 104 Health helpline</a></div>
+    <div id="emExtra" style="margin-top:10px"></div>
+  </div>
+  <div class="row noprint" style="margin-top:12px"><button class="btn" id="emBack" data-t="emBack"></button></div>
+</div>
+
+<!-- STEP 2: the problem -->
+<div class="card noprint hidden" id="s2">
+  <div class="sec"><span class="stepno">2</span><span data-t="s2"></span></div>
+  <div class="grid3">
+    <div><label data-t="age"></label><input id="age" type="number" min="0" max="110" inputmode="numeric"></div>
+    <div><label data-t="sex"></label><select id="sex"><option value="" data-t="choose"></option><option value="female" data-t="female"></option><option value="male" data-t="male"></option><option value="other" data-t="other"></option></select></div>
+    <div id="pregWrap" class="hidden"><label data-t="preg"></label><select id="preg"><option value="no" data-t="no"></option><option value="yes" data-t="yes"></option></select></div>
+  </div>
+  <label style="margin-top:14px" data-t="main"></label>
+  <div class="chips" id="mainChips"></div>
+  <label style="margin-top:14px" data-t="describe"></label>
+  <textarea id="details" data-tp="describePh"></textarea>
+  <div class="grid3" style="margin-top:12px">
+    <div><label data-t="since"></label><div class="row" style="flex-wrap:nowrap"><input id="durV" type="number" min="0" style="flex:1"><select id="durU" style="flex:1"><option value="hours" data-t="hours"></option><option value="days" data-t="days" selected></option><option value="weeks" data-t="weeks"></option><option value="months" data-t="months"></option></select></div></div>
+    <div><label data-t="sev"></label><input id="sev" type="range" min="1" max="10" value="4" style="padding:0"><div class="sub" id="sevOut"></div></div>
+    <div><label data-t="temp"></label><input id="temp" placeholder="100.4 °F / 38 °C"></div>
+  </div>
+  <label style="margin-top:14px" data-t="also"></label>
+  <div class="chips" id="symChips"></div>
+</div>
+
+<!-- STEP 3: life & surroundings — the "angles" -->
+<div class="card noprint hidden" id="s3">
+  <div class="sec"><span class="stepno">3</span><span data-t="s3"></span></div>
+  <div class="sub" style="margin-bottom:10px" data-t="s3sub"></div>
+  <div class="grid3">
+    <div><label data-t="sleep"></label><select id="sleep"><option value="">—</option><option>&lt;5</option><option>5-6</option><option>7-8</option><option>&gt;8</option></select></div>
+    <div><label data-t="water"></label><select id="water"><option value="">—</option><option>&lt;4</option><option>4-7</option><option>8-10</option><option>&gt;10</option></select></div>
+    <div><label data-t="stress"></label><select id="stress"><option value="">—</option><option value="low" data-t="low"></option><option value="medium" data-t="medium"></option><option value="high" data-t="high"></option></select></div>
+    <div><label data-t="screen"></label><select id="screen"><option value="">—</option><option>&lt;2</option><option>2-5</option><option>6-9</option><option>&gt;9</option></select></div>
+    <div><label data-t="contacts"></label><select id="contacts"><option value="">—</option><option value="no" data-t="no"></option><option value="yes" data-t="yes"></option></select></div>
+    <div><label data-t="work"></label><input id="work" data-tp="workPh"></div>
+  </div>
+  <label style="margin-top:12px" data-t="food"></label><input id="food" data-tp="foodPh">
+  <label style="margin-top:12px" data-t="env"></label>
+  <div class="chips" id="envChips"></div>
+  <div class="grid" style="margin-top:12px">
+    <div><label data-t="cond"></label><input id="conditions" data-tp="condPh"></div>
+    <div><label data-t="meds"></label><input id="meds" data-tp="medsPh"></div>
+    <div><label data-t="took"></label><input id="took" data-tp="tookPh"></div>
+    <div><label data-t="allergy"></label><input id="allergies"></div>
+  </div>
+  <div id="amber" class="banner amber hidden" style="margin-top:14px"></div>
+  <div class="note" style="margin-top:14px" data-t="privacy"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn primary" id="analyse" style="flex:1"></button>
+  </div>
+  <div id="status" class="note hidden" style="margin-top:10px"></div>
+</div>
+
+<!-- RESULT -->
+<div class="card hidden res" id="result"></div>
+
+</div>
+
+<script>
+(function(){
+const BACKEND = 'https://all-in-one-tools-22743935825.asia-south1.run.app';
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let LANG = 'ta';
+
+/* ---------- auth: token from the main site (postMessage) or its saved Supabase session (same origin) ---------- */
+let TOKEN = null;
+window.addEventListener('message', e=>{ if(e.data && e.data.type==='jamtaris-auth' && e.data.token){ TOKEN = e.data.token; paintBtn(); } });
+function storedToken(){
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(/^sb-.*-auth-token$/.test(k)){
+        const o = JSON.parse(localStorage.getItem(k)); const s = o && (o.access_token ? o : (o.currentSession||o.session));
+        if(s && s.access_token && (!s.expires_at || s.expires_at*1000 > Date.now())) return s.access_token;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+const token = () => TOKEN || storedToken();
+
+/* ---------- text ---------- */
+const TX = {
+ ta:{
+  title:'🩺 உடல்நல ஆய்வு — உண்மையான காரணம் என்ன?',
+  intro:'காய்ச்சல், தலைவலி, இருமல், வயிற்று வலி… ஏன் வருகிறது என்று உணவு, தூக்கம், மன அழுத்தம், சுற்றுச்சூழல், தொற்று என எல்லாக் கோணங்களிலும் ஆராய்ந்து, எளிய வீட்டு பராமரிப்பு, சித்த மருத்துவக் குறிப்புகள், எந்தப் பரிசோதனை தேவை, எப்போது மருத்துவரைப் பார்க்க வேண்டும் என்று சொல்லும். இது மருத்துவ நோயறிதல் அல்ல.',
+  s1:'முதலில் — அவசர அறிகுறிகள் ஏதும் உள்ளதா?', s1sub:'இவற்றில் ஏதாவது இருந்தால் டிக் செய்யுங்கள். எதுவும் இல்லையென்றால் நேரடியாக அடுத்த படிக்குச் செல்லுங்கள்.',
+  s1btn:'தொடரவும் →',
+  emTitle:'🚨 உடனே மருத்துவமனைக்குச் செல்லுங்கள்',
+  emBody:'நீங்கள் குறிப்பிட்ட அறிகுறி(கள்) அவசர சிகிச்சை தேவைப்படக்கூடியவை. இணையத்தில் ஆராய்ந்து நேரம் வீணாக்க வேண்டாம் — அருகிலுள்ள அரசு / தனியார் மருத்துவமனைக்கு உடனே செல்லுங்கள் அல்லது 108 அழையுங்கள். வீட்டு வைத்தியம் இப்போது வேண்டாம்.',
+  emBack:'← தவறுதலாக டிக் செய்தேன்',
+  s2:'என்ன பிரச்சனை?', age:'வயது', sex:'பாலினம்', choose:'தேர்வு', female:'பெண்', male:'ஆண்', other:'மற்றவை', preg:'கர்ப்பமாக உள்ளீர்களா?', yes:'ஆம்', no:'இல்லை',
+  main:'முக்கியப் பிரச்சனை', describe:'உங்கள் வார்த்தைகளில் விவரியுங்கள்', describePh:'எ.கா: மூன்று நாளாக மாலையில் காய்ச்சல், உடல் வலி, சாப்பிட பிடிக்கவில்லை. முன் நெற்றியில் தலைவலி…',
+  since:'எவ்வளவு நாளாக?', hours:'மணி நேரம்', days:'நாட்கள்', weeks:'வாரங்கள்', months:'மாதங்கள்', sev:'எவ்வளவு கடுமை? (1–10)', temp:'காய்ச்சல் அளவு (அளந்திருந்தால்)', also:'வேறு அறிகுறிகள்',
+  s3:'உங்கள் வாழ்க்கை முறை & சுற்றுச்சூழல்', s3sub:'உண்மையான காரணம் பெரும்பாலும் இங்கேதான் இருக்கும். தெரிந்தவரை நிரப்புங்கள் — தெரியாதவற்றை விட்டுவிடலாம்.',
+  sleep:'தினசரி தூக்கம் (மணி)', water:'தண்ணீர் (டம்ளர்/நாள்)', stress:'மன அழுத்தம்', low:'குறைவு', medium:'நடுத்தரம்', high:'அதிகம்', screen:'போன்/கணினி (மணி/நாள்)', contacts:'வீட்டில் மற்றவர்களுக்கும் இதே பிரச்சனை?',
+  work:'வேலை', workPh:'எ.கா: வெயிலில் வேலை / இரவு ஷிப்ட் / அலுவலகம் / மாணவர்',
+  food:'சமீபத்திய உணவு', foodPh:'எ.கா: 2 நாள் முன் ஹோட்டல் பிரியாணி; தினமும் டீ 4 முறை; காலை உணவு தவிர்ப்பு',
+  env:'சுற்றுச்சூழல் / சமீபத்திய நிகழ்வுகள்',
+  cond:'ஏற்கனவே உள்ள நோய்கள்', condPh:'சர்க்கரை, BP, தைராய்டு, ஆஸ்துமா…', meds:'தினமும் எடுக்கும் மருந்துகள்', medsPh:'பெயர்கள்', took:'இந்தப் பிரச்சனைக்கு ஏற்கனவே எடுத்தவை', tookPh:'எ.கா: Paracetamol 2 நாள், நிலவேம்பு', allergy:'ஒவ்வாமை (Allergy)',
+  privacy:'🔒 உங்கள் பெயர் கேட்கப்படவில்லை. இந்த விவரங்கள் பதில் தயாரிக்க மட்டுமே AI-க்கு அனுப்பப்படும்; நாங்கள் சேமிப்பதில்லை.',
+  analyse:'🔍 காரணத்தைக் கண்டுபிடி (2 credits)', signin:'🔐 Sign in செய்து பின் முயற்சிக்கவும்',
+  signinMsg:'இந்த AI ஆய்வுக்கு sign in தேவை (2 credits). pdftoolsindia.com-ல் sign in செய்து, அங்கிருந்து இந்த tool-ஐத் திறக்கவும்.',
+  working:'எல்லாக் கோணங்களிலும் ஆராய்கிறது… (20–40 வினாடி)',
+  amberHead:'⚠️ இன்றே மருத்துவரைப் பார்ப்பது நல்லது',
+  u:{self_care:['🟢 வீட்டிலேயே கவனித்துக்கொள்ளலாம்','green'], see_doctor_soon:['🟡 1–2 நாளில் மருத்துவரைப் பாருங்கள்','amber'], see_doctor_today:['🟠 இன்றே மருத்துவரைப் பாருங்கள்','amber'], emergency:['🔴 உடனே மருத்துவமனை / 108','red']},
+  rSummary:'சுருக்கம்', rCauses:'சாத்தியமான காரணங்கள் (பல கோணங்களில்)', rRoot:'💡 அடிப்படைக் காரணம் — என்ன மாற்ற வேண்டும்', rSelf:'🏠 வீட்டில் செய்ய வேண்டியவை', rSiddha:'🌿 சித்த மருத்துவக் குறிப்புகள்', rMed:'💊 மருந்து பற்றிய அறிவுரை', rTests:'🧪 செய்து பார்க்க வேண்டிய பரிசோதனைகள்', rWatch:'🚩 இவை இருந்தால் உடனே மருத்துவரிடம்', rAsk:'🗣️ மருத்துவரிடம் கேட்க வேண்டியவை', rMissing:'இன்னும் தெளிவாகச் சொல்ல உதவும் தகவல்',
+  like:{high:'அதிக வாய்ப்பு',medium:'நடுத்தர வாய்ப்பு',low:'குறைந்த வாய்ப்பு'},
+  angle:{infection:'🦠 தொற்று',food_water:'🍛 உணவு/நீர்',sleep:'😴 தூக்கம்',stress:'🧠 மன அழுத்தம்',environment:'🌦️ சுற்றுச்சூழல்',chronic:'🩸 நீண்டகால நோய்',medicine:'💊 மருந்து',other:'• மற்றவை'},
+  siddhaNote:'சித்த மருந்துகள் (சூரணம், லேகியம், பஸ்பம் போன்றவை) தேவைப்பட்டால் பதிவு பெற்ற சித்த மருத்துவரை (BSMS) அணுகுங்கள்; அரசு அனுமதி பெற்ற நிறுவனத் தயாரிப்புகளை மட்டும் வாங்குங்கள்.',
+  disc:'⚠️ <b>இது AI உருவாக்கிய தகவல் மட்டுமே — மருத்துவ நோயறிதல் அல்ல.</b> எந்த முடிவும் எடுப்பதற்கு முன் தகுதி பெற்ற மருத்துவரை (MBBS அல்லது பதிவு பெற்ற சித்த மருத்துவர் BSMS) அணுகுங்கள். மருத்துவர் கொடுத்த மருந்தை நீங்களாக நிறுத்த வேண்டாம்.',
+  free:'இலவச அரசு மருத்துவர் ஆலோசனை (வீட்டிலிருந்தே வீடியோ அழைப்பு):',
+  again:'🔄 புதிய ஆய்வு', print:'🖨️ Print / Save PDF'
+ },
+ en:{
+  title:'🩺 Health Check — what is really causing it?',
+  intro:'Fever, headache, cough, stomach trouble… looks at every angle — food, sleep, stress, surroundings, infection — and gives simple home care, classical Siddha tips, which tests to consider and when to see a doctor. This is not a diagnosis.',
+  s1:'First — any emergency signs?', s1sub:'Tick any that apply. If none, just continue.', s1btn:'Continue →',
+  emTitle:'🚨 Go to a hospital now', emBody:'The sign(s) you ticked can need emergency care. Don\'t spend time researching online — go to the nearest government or private hospital now, or call 108. No home remedies for now.',
+  emBack:'← I ticked by mistake',
+  s2:'What is the problem?', age:'Age', sex:'Sex', choose:'Choose', female:'Female', male:'Male', other:'Other', preg:'Are you pregnant?', yes:'Yes', no:'No',
+  main:'Main problem', describe:'Describe it in your own words', describePh:'e.g. Evening fever for 3 days, body ache, no appetite. Headache in the forehead…',
+  since:'Since how long?', hours:'hours', days:'days', weeks:'weeks', months:'months', sev:'How bad? (1–10)', temp:'Temperature (if measured)', also:'Other symptoms',
+  s3:'Your routine & surroundings', s3sub:'The real cause is often here. Fill what you know — skip the rest.',
+  sleep:'Sleep per night (hours)', water:'Water (glasses/day)', stress:'Stress', low:'Low', medium:'Medium', high:'High', screen:'Phone/computer (hours/day)', contacts:'Others at home with the same problem?',
+  work:'Work', workPh:'e.g. outdoor in sun / night shift / office / student',
+  food:'Recent food', foodPh:'e.g. hotel biryani 2 days ago; tea 4 times a day; skip breakfast',
+  env:'Surroundings / recent events',
+  cond:'Existing conditions', condPh:'Diabetes, BP, thyroid, asthma…', meds:'Regular medicines', medsPh:'Names', took:'Already taken for this', tookPh:'e.g. Paracetamol for 2 days, nilavembu', allergy:'Allergies',
+  privacy:'🔒 We don\'t ask your name. These details are sent to the AI only to prepare this answer; we don\'t store them.',
+  analyse:'🔍 Find the cause (2 credits)', signin:'🔐 Please sign in first',
+  signinMsg:'This AI check needs you to be signed in (2 credits). Sign in on pdftoolsindia.com and open this tool from there.',
+  working:'Looking at every angle… (20–40 seconds)',
+  amberHead:'⚠️ Better to see a doctor today',
+  u:{self_care:['🟢 Can be managed at home','green'], see_doctor_soon:['🟡 See a doctor in 1–2 days','amber'], see_doctor_today:['🟠 See a doctor today','amber'], emergency:['🔴 Go to hospital now / call 108','red']},
+  rSummary:'Summary', rCauses:'Possible causes (from every angle)', rRoot:'💡 Root cause — what to change', rSelf:'🏠 What to do at home', rSiddha:'🌿 Siddha medicine tips', rMed:'💊 About medicines', rTests:'🧪 Tests worth considering', rWatch:'🚩 See a doctor at once if', rAsk:'🗣️ Questions to ask your doctor', rMissing:'Information that would help',
+  like:{high:'More likely',medium:'Possible',low:'Less likely'},
+  angle:{infection:'🦠 Infection',food_water:'🍛 Food/water',sleep:'😴 Sleep',stress:'🧠 Stress',environment:'🌦️ Surroundings',chronic:'🩸 Chronic',medicine:'💊 Medicine',other:'• Other'},
+  siddhaNote:'For Siddha medicines (chooranam, legiyam, parpam etc.) consult a registered Siddha doctor (BSMS) and buy only licensed products.',
+  disc:'⚠️ <b>This is AI-generated information only — not a medical diagnosis.</b> Before making any decision, consult a qualified doctor (MBBS, or a registered Siddha doctor — BSMS). Do not stop any medicine your doctor prescribed on your own.',
+  free:'Free government doctor consultation (video call from home):',
+  again:'🔄 New check', print:'🖨️ Print / Save PDF'
+ }
+};
+const FLAGS = [
+ ['breath','மூச்சுத் திணறல் / ஓய்வில் இருக்கும்போதே மூச்சு வாங்குதல்','Difficulty breathing / breathless even at rest'],
+ ['chest','நெஞ்சு வலி, அழுத்தம், இடது கை/தாடைக்குப் பரவும் வலி','Chest pain or pressure, pain spreading to left arm/jaw'],
+ ['stroke','முகம் கோணுதல், ஒரு பக்க கை/கால் பலவீனம், பேச்சு குழறல்','Face drooping, weakness on one side, slurred speech'],
+ ['head','திடீர் கடும் தலைவலி ("வாழ்நாளில் மோசமானது"), அல்லது கழுத்து விறைப்பு / குழப்பம் / மயக்கத்துடன் தலைவலி','Sudden worst-ever headache, or headache with stiff neck / confusion / fainting'],
+ ['fits','வலிப்பு, சுயநினைவு இழப்பு, எழுப்ப முடியாத அளவு தூக்கக் கலக்கம்','Fits, unconsciousness, or too drowsy to wake properly'],
+ ['bleed','ஈறு/மூக்கில் இரத்தம், கருப்பு மலம், இரத்த வாந்தி, தோலில் சிவப்புப் புள்ளிகள்','Bleeding gums/nose, black stools, vomiting blood, red spots on skin'],
+ ['dehyd','தொடர் வாந்தி, தண்ணீர் கூட தங்கவில்லை, சிறுநீர் மிகக் குறைவு','Repeated vomiting, can\'t keep water down, very little urine'],
+ ['abd','தாங்க முடியாத வயிற்று வலி','Severe, unbearable abdominal pain'],
+ ['infant','3 மாதத்திற்குக் குறைந்த குழந்தைக்குக் காய்ச்சல்','Fever in a baby under 3 months'],
+ ['pregnancy','கர்ப்ப காலத்தில் இரத்தப்போக்கு, கடும் வலி, குழந்தை அசைவு குறைதல்','In pregnancy: bleeding, severe pain, or reduced baby movements'],
+ ['bite','பாம்பு / நாய் கடி, விஷம் அல்லது அதிக மாத்திரை உட்கொண்டது','Snake/dog bite, poisoning, or overdose of tablets'],
+ ['selfharm','தன்னைத் தானே காயப்படுத்திக்கொள்ளும் / உயிரை மாய்த்துக்கொள்ளும் எண்ணம்','Thoughts of harming yourself or ending your life']
+];
+const MAIN = [['fever','காய்ச்சல்','Fever'],['headache','தலைவலி','Headache'],['cold','சளி / இருமல்','Cold / cough'],['throat','தொண்டை வலி','Sore throat'],['stomach','வயிற்று வலி','Stomach pain'],['loose','வயிற்றுப்போக்கு / வாந்தி','Loose motions / vomiting'],['acidity','நெஞ்செரிச்சல் / அஜீரணம்','Acidity / indigestion'],['constip','மலச்சிக்கல்','Constipation'],['body','உடல் / மூட்டு வலி','Body / joint pain'],['tired','சோர்வு / களைப்பு','Tiredness'],['skin','தோல் அரிப்பு / தடிப்பு','Skin itch / rash'],['sleepp','தூக்கமின்மை','Can\'t sleep'],['urine','சிறுநீர் எரிச்சல்','Burning urine'],['dizzy','தலைச்சுற்றல்','Dizziness'],['otherp','மற்றவை','Other']];
+const SYM = [['chills','குளிர் நடுக்கம்','Chills'],['bodyache','உடல் வலி','Body ache'],['eyepain','கண்ணுக்குப் பின் வலி','Pain behind eyes'],['rash','தோலில் தடிப்பு','Rash'],['nausea','குமட்டல்','Nausea'],['noappetite','பசியின்மை','No appetite'],['runny','மூக்கு ஒழுகல்','Runny nose'],['cough','இருமல்','Cough'],['phlegm','சளியுடன் இருமல்','Cough with phlegm'],['sneeze','தும்மல்','Sneezing'],['jointpain','மூட்டு வலி','Joint pain'],['yellow','கண் / சிறுநீர் மஞ்சள்','Yellow eyes / urine'],['calf','கெண்டைக்கால் வலி','Calf muscle pain'],['gas','வயிறு உப்புசம்','Bloating'],['palp','படபடப்பு','Palpitations'],['light','வெளிச்சம் கண்ணைக் கூசுதல்','Light hurts eyes'],['weightloss','எடை குறைவு','Weight loss']];
+const ENV = [['rain','மழை / வெள்ளம் / தேங்கிய நீர்','Rain / flood / stagnant water'],['mosq','கொசுக்கடி அதிகம்','Lots of mosquitoes'],['sun','வெயிலில் அதிக நேரம்','Long hours in sun'],['travel','சமீபத்தில் வெளியூர் பயணம்','Recent travel'],['dust','தூசி / புகை / ரசாயனம்','Dust / smoke / chemicals'],['outfood','வெளி உணவு / சாலையோர உணவு','Outside / street food'],['water','காய்ச்சாத தண்ணீர்','Unboiled water'],['ac','AC-யில் அதிக நேரம்','Long hours in AC'],['pets','செல்லப் பிராணிகள் / கால்நடைகள்','Pets / cattle'],['newmed','புதிய மருந்து தொடங்கியது','Started a new medicine']];
+
+function chip(list, holder, multi){
+  holder.innerHTML='';
+  list.forEach(([k,ta,en])=>{
+    const b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.k=k; b.dataset.label=en; b.textContent = LANG==='ta'?ta:en;
+    b.onclick=()=>{ if(!multi) holder.querySelectorAll('.chip').forEach(x=>{ if(x!==b) x.classList.remove('on'); }); b.classList.toggle('on'); refreshAmber(); };
+    holder.appendChild(b);
+  });
+}
+function sel(holder){ return [...holder.querySelectorAll('.chip.on')].map(b=>b.dataset.label); }
+
+function paintText(){
+  const t = TX[LANG];
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(n=>{ const k=n.dataset.t; if(t[k]!=null) n.innerHTML = t[k]; });
+  document.querySelectorAll('[data-tp]').forEach(n=>{ n.placeholder = t[n.dataset.tp]||''; });
+  const keep = { main:sel($('mainChips')), sym:sel($('symChips')), env:sel($('envChips')), flags:[...document.querySelectorAll('#flags input:checked')].map(i=>i.value) };
+  $('flags').innerHTML = FLAGS.map(([k,ta,en])=>`<label class="flag"><input type="checkbox" value="${k}" ${keep.flags.includes(k)?'checked':''}><span>${LANG==='ta'?ta:en}</span></label>`).join('');
+  chip(MAIN, $('mainChips'), false); chip(SYM, $('symChips'), true); chip(ENV, $('envChips'), true);
+  [['mainChips',keep.main],['symChips',keep.sym],['envChips',keep.env]].forEach(([id,arr])=> $(id).querySelectorAll('.chip').forEach(b=>{ if(arr.includes(b.dataset.label)) b.classList.add('on'); }));
+  $('sevOut').textContent = $('sev').value + '/10';
+  paintBtn(); refreshAmber();
+  if(LAST) renderResult(LAST);
+}
+function paintBtn(){ $('analyse').textContent = TX[LANG].analyse; }
+document.querySelectorAll('.langtabs button').forEach(b=> b.onclick=()=>{ LANG=b.dataset.lang; document.querySelectorAll('.langtabs button').forEach(x=>x.classList.toggle('on',x===b)); paintText(); });
+
+/* ---------- step flow ---------- */
+function showEmergency(flags){
+  const t = TX[LANG];
+  $('s1').classList.add('hidden'); $('s2').classList.add('hidden'); $('s3').classList.add('hidden'); $('result').classList.add('hidden');
+  $('emergency').classList.remove('hidden');
+  $('emExtra').innerHTML = flags.includes('selfharm')
+    ? (LANG==='ta' ? '💬 நீங்கள் தனியாக இல்லை. இப்போதே பேச: <b>Tele-MANAS 14416</b> (இலவசம், 24 மணி நேரமும், தமிழில்) — <a href="tel:14416"><b>📞 14416</b></a>. நம்பிக்கையான ஒருவரிடம் இப்போதே சொல்லுங்கள்.'
+                   : '💬 You are not alone. Talk to someone now: <b>Tele-MANAS 14416</b> (free, 24×7, in Tamil) — <a href="tel:14416"><b>📞 14416</b></a>. Please tell someone you trust right now.')
+    : '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$('s1next').onclick = ()=>{
+  const flags = [...document.querySelectorAll('#flags input:checked')].map(i=>i.value);
+  if(flags.length) return showEmergency(flags);
+  $('s1').classList.add('hidden'); $('s2').classList.remove('hidden'); $('s3').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+$('emBack').onclick = ()=>{ document.querySelectorAll('#flags input').forEach(i=>i.checked=false); $('emergency').classList.add('hidden'); $('s1').classList.remove('hidden'); };
+$('sex').onchange = ()=>{ $('pregWrap').classList.toggle('hidden', $('sex').value!=='female'); refreshAmber(); };
+$('sev').oninput = ()=>{ $('sevOut').textContent = $('sev').value + '/10'; refreshAmber(); };
+['age','durV','durU','temp','preg'].forEach(id=> $(id).addEventListener('input', refreshAmber));
+
+function durationDays(){ const n=Number($('durV').value)||0, u=$('durU').value; return u==='hours'?n/24:u==='weeks'?n*7:u==='months'?n*30:n; }
+function tempF(){ const m = ($('temp').value||'').match(/(\d+(?:\.\d+)?)/); if(!m) return 0; const x=Number(m[1]); return x<50 ? x*9/5+32 : x; }
+function amberReasons(){
+  const r=[], age=Number($('age').value), main=sel($('mainChips')), fever = main.includes('Fever') || tempF()>=100.4, ta = LANG==='ta';
+  if(fever && age && (age<5 || age>65)) r.push(ta?'5 வயதுக்குக் குறைந்த குழந்தை / 65 வயதுக்கு மேல் — காய்ச்சல்':'Fever in a child under 5 or an adult over 65');
+  if($('sex').value==='female' && $('preg').value==='yes') r.push(ta?'கர்ப்ப காலம்':'Pregnancy');
+  if(fever && durationDays()>=3) r.push(ta?'3 நாளுக்கு மேல் காய்ச்சல் — டெங்கு/டைபாய்டு பரிசோதனை தேவைப்படலாம்':'Fever for 3+ days — dengue/typhoid tests may be needed');
+  if(tempF()>=103) r.push(ta?'103°F-க்கு மேல் காய்ச்சல்':'Temperature 103°F or higher');
+  if(Number($('sev').value)>=8) r.push(ta?'மிகக் கடுமையான வலி/பாதிப்பு (8/10+)':'Severity 8/10 or more');
+  if(sel($('symChips')).includes('Yellow eyes / urine')) r.push(ta?'கண் / சிறுநீர் மஞ்சள் — மஞ்சள் காமாலை சாத்தியம்':'Yellow eyes/urine — possible jaundice');
+  return r;
+}
+function refreshAmber(){
+  const r = amberReasons(), box = $('amber');
+  if(!r.length){ box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  box.innerHTML = `<b>${TX[LANG].amberHead}</b><ul style="margin:6px 0 0;padding-left:18px">${r.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${LANG==='ta'?'கீழே உள்ள ஆய்வு உதவும், ஆனால் மருத்துவரைப் பார்ப்பதைத் தள்ளிப் போட வேண்டாம்.':'The check below can still help, but please don\'t delay seeing a doctor.'}`;
+}
+
+/* ---------- analyse ---------- */
+let LAST = null;
+$('analyse').onclick = async ()=>{
+  const t = TX[LANG], st = $('status');
+  const main = sel($('mainChips'));
+  if(!main.length && !$('details').value.trim()){ st.classList.remove('hidden'); st.textContent = LANG==='ta'?'முக்கியப் பிரச்சனையைத் தேர்வு செய்யுங்கள் அல்லது விவரியுங்கள்.':'Pick the main problem or describe it.'; return; }
+  const tk = token();
+  if(!tk){ st.classList.remove('hidden'); st.innerHTML = t.signinMsg + ' <a href="https://pdftoolsindia.com/" target="_blank" rel="noopener">pdftoolsindia.com</a>'; return; }
+  $('analyse').disabled = true; st.classList.remove('hidden'); st.innerHTML = `<span class="spinner"></span>${t.working}`;
+  const body = {
+    lang: LANG, redFlags: [],
+    profile: { age: $('age').value, sex: $('sex').value, pregnant: $('sex').value==='female' && $('preg').value==='yes' },
+    complaint: main.join(', '), details: $('details').value, durationValue: $('durV').value, durationUnit: $('durU').value, severity: $('sev').value,
+    context: { temp: $('temp').value, symptoms: sel($('symChips')), sleep: $('sleep').value, water: $('water').value, stress: $('stress').value, screen: $('screen').value,
+      contacts: $('contacts').value, work: $('work').value, food: $('food').value, env: sel($('envChips')), conditions: $('conditions').value, meds: $('meds').value,
+      tookForThis: $('took').value, allergies: $('allergies').value }
+  };
+  try{
+    const r = await fetch(BACKEND + '/api/ai/health', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+tk}, body: JSON.stringify(body) });
+    const j = await r.json().catch(()=>({error:'Server is starting up — please try again in a moment.'}));
+    if(r.status===401){ TOKEN=null; throw new Error(t.signinMsg); }
+    if(j.error) throw new Error(j.error);
+    LAST = j.result; st.classList.add('hidden'); renderResult(LAST);
+    try{ window.opener && window.opener.postMessage({type:'jamtaris-credits-changed'}, '*'); }catch(e){}
+  }catch(e){ st.innerHTML = '❌ ' + esc(e.message || 'Something went wrong.'); }
+  finally{ $('analyse').disabled = false; }
+};
+
+function list(arr){ return (arr&&arr.length) ? `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>` : ''; }
+function renderResult(o){
+  const t = TX[LANG], u = t.u[o.urgency] || t.u.see_doctor_soon, R = $('result');
+  if(o.urgency==='emergency'){ showEmergency([]); return; }
+  R.innerHTML = `
+    <div class="banner ${u[1]}"><h2>${u[0]}</h2>${esc(o.urgency_reason||'')}</div>
+    <h3>${t.rSummary}</h3><div>${esc(o.summary||'')}</div>
+    ${(o.possible_causes||[]).length?`<h3>${t.rCauses}</h3>${o.possible_causes.map(c=>`<div class="cause"><div class="top"><span>${esc(c.cause)}</span><span class="pill p-${esc(c.likelihood||'medium')}">${t.like[c.likelihood]||esc(c.likelihood||'')}</span></div><div class="why"><b>${t.angle[c.angle]||t.angle.other}</b> · ${esc(c.why||'')}</div></div>`).join('')}`:''}
+    ${o.root_cause_insight?`<h3>${t.rRoot}</h3><div class="note">${esc(o.root_cause_insight)}</div>`:''}
+    ${(o.self_care||[]).length?`<h3>${t.rSelf}</h3>${list(o.self_care)}`:''}
+    ${(o.siddha_remedies||[]).length?`<h3>${t.rSiddha}</h3>${o.siddha_remedies.map(s=>`<div class="siddha"><b>${esc(s.name)}</b><div>${esc(s.how||'')}</div>${s.caution?`<div class="c">⚠️ ${esc(s.caution)}</div>`:''}</div>`).join('')}<div class="sub">${t.siddhaNote}</div>`:''}
+    ${o.medicine_advice?`<h3>${t.rMed}</h3><div>${esc(o.medicine_advice)}</div>`:''}
+    ${(o.tests_to_consider||[]).length?`<h3>${t.rTests}</h3>${list(o.tests_to_consider)}`:''}
+    ${(o.see_doctor_if||[]).length?`<h3>${t.rWatch}</h3>${list(o.see_doctor_if)}`:''}
+    ${(o.questions_for_doctor||[]).length?`<h3>${t.rAsk}</h3>${list(o.questions_for_doctor)}`:''}
+    ${(o.missing_info||[]).length?`<h3 class="sub">${t.rMissing}</h3><div class="sub">${list(o.missing_info)}</div>`:''}
+    <div class="disc">${t.disc}<br><br>${t.free} <a href="https://esanjeevani.mohfw.gov.in/" target="_blank" rel="noopener" style="color:#9ff0cc"><b>eSanjeevani OPD</b></a> · 📞 <a href="tel:104" style="color:#9ff0cc">104</a> · 🚑 <a href="tel:108" style="color:#9ff0cc">108</a></div>
+    <div class="row noprint" style="margin-top:14px"><button class="btn" id="again">${t.again}</button><button class="btn" id="printR">${t.print}</button></div>`;
+  R.classList.remove('hidden');
+  $('again').onclick = ()=> location.reload();
+  $('printR').onclick = ()=> window.print();
+  R.scrollIntoView({behavior:'smooth'});
+}
+
+paintText();
+})();
+</script>
+</body>
+</html>
