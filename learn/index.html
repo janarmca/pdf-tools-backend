@@ -107,6 +107,54 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 .kw{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:99px;font-size:.78rem}
 .kw.y{background:var(--okbg);color:var(--ok)}.kw.n{background:#fff1cc;color:#7a4f00}
 @media(max-width:700px){.doors{grid-template-columns:1fr}}
+
+/* ===== games ===== */
+.gcard{background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:12px}
+.ghead{display:flex;gap:12px;align-items:center}.ghead h1{margin:0;font-size:1.15rem}
+.gicon{width:48px;height:48px;border-radius:14px;background:var(--brand2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--brand)}
+.gstage{margin-top:12px}
+.mrow{display:flex;gap:10px;align-items:flex-end}
+.mayilu{width:78px;height:78px;flex:0 0 auto;animation:bob 2.4s ease-in-out infinite}
+.mayilu .tail{transform-origin:60px 78px;animation:fan 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}} @keyframes fan{50%{transform:scale(1.06)}}
+.bubble{background:#fff7e3;border:1px solid #f5dfa6;border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:.92rem;line-height:1.6}
+.demo{margin-top:12px;border:2px dashed #d8d4ff;border-radius:16px;padding:10px 12px;background:#fbfaff}
+.demo-t{font-weight:800;font-size:.85rem;color:var(--brand);margin-bottom:6px}
+.gopt.will{border-style:dashed}
+.big-btn{font-size:1.1rem;padding:14px 26px;border-radius:16px}
+.gq{font-size:1.15rem;font-weight:800;text-align:center;margin:6px 0 4px}
+.scene{display:flex;flex-direction:column;align-items:center;gap:6px;margin:8px 0;min-height:40px}
+.scene .pic{width:100%;max-width:420px;height:auto}
+.emo{font-size:30px;line-height:1.35;text-align:center}
+.two{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}.two>div{text-align:center}
+.nl{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.nl span{min-width:48px;padding:8px 6px;border-radius:12px;background:#eef0f7;font-weight:800;font-size:1.05rem;text-align:center}.nl span.on{background:#3b2fc9;color:#fff}
+.nl.ta span{font-size:1.4rem}
+.big{font-size:2.2rem;font-weight:800;letter-spacing:.04em;text-align:center}.big .hl{color:#b3541e;text-decoration:underline}
+.big.ta{font-size:2.4rem}
+.col{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.7rem;font-weight:800;text-align:right;display:inline-block}.col .bar{border-top:3px solid #14213d;margin:2px 0}
+.qbox{display:inline-block;min-width:40px;border:3px dashed #b3541e;border-radius:10px;color:#b3541e;text-align:center}
+.gopts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+.gopt{border:2px solid #d6d9ea;background:#fff;border-radius:16px;padding:14px 10px;font:inherit;font-size:1.1rem;font-weight:800;cursor:pointer;min-height:58px;transition:transform .1s}
+.gopt:active{transform:scale(.97)}
+.gopt.ok{border-color:#127a3e;background:#e8f8ee;color:#0d5c2e}.gopt.bad{border-color:#b42318;background:#fdecea;color:#8a1c14}
+.ta-big{font-size:1.9rem}.ta-mid{font-size:1.3rem}
+.pop{animation:pop .45s}.shake{animation:shake .45s}
+@keyframes pop{40%{transform:scale(1.12)}} @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.cheer{display:flex;align-items:center;justify-content:center;gap:8px;font-size:1.3rem;color:#127a3e;animation:pop .5s}.cheer .mayilu{width:54px;height:54px}
+.dots{display:flex;gap:5px;justify-content:center;margin-bottom:6px}.dots span{width:10px;height:10px;border-radius:50%;background:#e2e6ef}.dots .d-done{background:#3b2fc9}.dots .d-now{background:#f59e0b;transform:scale(1.25)}
+.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
+.chipi{display:inline-flex;gap:6px;align-items:center;border:2px solid #d6d9ea;background:#fff;border-radius:14px;padding:8px 10px;font:inherit;cursor:pointer;text-align:left}
+.chipi .it-e{font-size:1.6rem}.chipi small,.bin small{display:block;font-size:.7rem;color:var(--sub);font-weight:600}.chipi .it-t{font-weight:700;font-size:.9rem;line-height:1.25}
+.chipi.sel{border-color:#3b2fc9;box-shadow:0 0 0 3px #d8d4ff;transform:translateY(-2px)}
+.chipi.placed{border-color:#127a3e;background:#e8f8ee;cursor:default;padding:4px 8px;pointer-events:none}.chipi.placed .it-e{font-size:1.2rem}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px}
+.bin{border:3px dashed #b9b3ff;background:#faf9ff;border-radius:18px;padding:10px;min-height:120px;cursor:pointer;font:inherit;text-align:center}
+.bin-h{font-weight:800;font-size:1rem}.bin-in{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.map table{border-collapse:separate;border-spacing:6px;margin:auto}.map td{width:84px;height:74px;border-radius:12px;background:#f1f5f9;text-align:center;vertical-align:middle}.map small{font-size:.7rem}.compass{text-align:center;font-weight:800;color:#b42318}
+.finish{text-align:center;position:relative;overflow:hidden;padding:10px 0}.finish .mayilu{width:110px;height:110px}.stars{font-size:2.2rem;letter-spacing:.1em}
+.confetti{position:absolute;inset:0;pointer-events:none}.confetti i{position:absolute;top:-30px;font-style:normal;font-size:22px;animation:fall 2.2s ease-in forwards}
+@keyframes fall{to{transform:translateY(420px) rotate(360deg);opacity:0}}
+@media(max-width:700px){.gopts{grid-template-columns:1fr 1fr}.big{font-size:1.8rem}}
 .done-card{text-align:center;padding:22px}
 .score{font-size:2rem;font-weight:800;color:var(--brand)}
 .nav{display:flex;justify-content:space-between;gap:10px;margin:16px 0 40px}
@@ -123,7 +171,9 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
   <div class="lang"><button data-l="ta" class="on">தமிழ்</button><button data-l="en">EN</button></div>
 </div></div>
 <div class="wrap" id="app"></div>
-
+<script src="games-math.js?v=1"></script>
+<script src="games-lang.js?v=1"></script>
+<script src="play.js?v=1"></script>
 <script>
 (function(){
 'use strict';
@@ -150,7 +200,7 @@ const UI = {
     explain:'🗣️ உன் வார்த்தைகளில் சொல்', explainSub:'உன் தம்பி/தங்கைக்குப் புரியும்படி 3 வரிகளில் எழுது. நீயே விளக்க முடிந்தால், உனக்கு உண்மையில் புரிந்திருக்கிறது.', explainChk:'என் விளக்கத்தைச் சோதி', explainHave:'✓ சேர்த்திருக்கிறாய்:', explainMiss:'இவற்றையும் சேர்க்க முயற்சி செய்:',
     curric:'📍 பாடத்திட்டங்களில் இது:', futureHome:'எதிர்கால சிந்தனையாளர்', futureSub:'பாடப்புத்தகத்தில் இல்லாதவை — ஆனால் உன் எதிர்காலத்திற்கு மிக முக்கியமானவை.',
     pick:'வகுப்பைத் தேர்ந்தெடு', cls:'வகுப்பு', ready:'தயார்', soon:'விரைவில்', done:'முடிந்தது', lessons:'பாடங்கள்', chapters:'அத்தியாயங்கள்',
-    soonSub:'இந்தப் பாடத்தின் அத்தியாயங்கள் விரைவில் சேர்க்கப்படும். இப்போது 9, 10 வகுப்பு கணிதம் & அறிவியல் பாருங்கள்.',
+    soonSub:'இந்தப் பாடத்தின் அத்தியாயங்கள் விரைவில் சேர்க்கப்படும். இப்போது 1–5 வகுப்புகள் அல்லது 9, 10 வகுப்பு கணிதம் & அறிவியல் பாருங்கள்.',
     soonLes:'இந்த அத்தியாயத்தின் பாடங்கள் தயாராகி வருகின்றன.', home:'முகப்பு',
     hook:'🧩 தொடங்குவோம்', learn:'📖 புரிந்து கொள்வோம்', key:'🔑 முக்கியம்', ex:'🧮 எடுத்துக்காட்டு', tryit:'✍️ நீயே முயற்சி செய்', act:'🖐️ வீட்டில் செய்து பார்', sum:'📝 சுருக்கம்', quiz:'✅ இப்போது தேர்வு', widget:'🖐️ தொட்டுப் பார்',
     showSol:'தீர்வைக் காட்டு', check:'சரிபார்', hint:'💡 குறிப்பு', correct:'✅ சரி! அருமை.', wrong:'❌ இன்னும் இல்லை — மீண்டும் முயற்சி செய் அல்லது குறிப்பைப் பார்.', answer:'விடை',
@@ -167,7 +217,7 @@ const UI = {
     explain:'🗣️ Say it in your own words', explainSub:'Explain it in 3 lines so your younger brother or sister would understand. If you can explain it, you truly understand it.', explainChk:'Check my explanation', explainHave:'✓ You included:', explainMiss:'Try to also include:',
     curric:'📍 Where this appears in syllabuses:', futureHome:'Future Thinkers', futureSub:'Not in your textbook — but vital for your future.',
     pick:'Choose your class', cls:'Class', ready:'Ready', soon:'Coming soon', done:'Done', lessons:'lessons', chapters:'chapters',
-    soonSub:'Chapters for this subject are being added. For now, explore Class 9 & 10 Maths and Science.',
+    soonSub:'Chapters for this subject are being added. For now, explore Classes 1–5 or Class 9 & 10 Maths and Science.',
     soonLes:'Lessons for this chapter are being prepared.', home:'Home',
     hook:'🧩 Let’s begin', learn:'📖 Let’s understand', key:'🔑 Key idea', ex:'🧮 Worked example', tryit:'✍️ Try it yourself', act:'🖐️ Try at home', sum:'📝 Summary', quiz:'✅ Now, the test', widget:'🖐️ Play with it',
     showSol:'Show solution', check:'Check', hint:'💡 Hint', correct:'✅ Correct! Well done.', wrong:'❌ Not yet — try again or open the hint.', answer:'Answer',
@@ -238,7 +288,7 @@ function renderSubject(c, s){
       const tag = ls.length ? (dn===ls.length ? `<span class="tag done">✓ ${U('done')}</span>` : `<span class="tag ready">${ls.length} ${U('lessons')}</span>`) : `<span class="tag soon">${U('soon')}</span>`;
       return `<div class="chap"><div class="h" data-i="${i}"><div class="no">${ch.no||i+1}</div><div class="t">${esc(L(ch.title))}${ch.part?`<div class="note">${esc(L(ch.part))}</div>`:''}</div>${tag}</div>
         <div class="lessons" style="display:${ls.length?'block':'none'}">${ls.map(l=>{
-          const p = prog[l.id]; return `<div class="les" data-l="${l.id}" data-ch="${i+1}"><span class="ic">${p&&p.done?'✅':'▶️'}</span><span style="flex:1">${esc(L(l.title))}</span>${p&&p.score!=null?`<span class="tag done">${p.score}%</span>`:''}</div>`; }).join('')}</div></div>`;
+          const p = prog[l.id]; const st = p && p.stars; return `<div class="les" data-l="${l.id}" data-ch="${i+1}"><span class="ic">${l.game ? (window.KALVI_GAMES && KALVI_GAMES[l.game] ? KALVI_GAMES[l.game].icon : '🎮') : (p&&p.done?'✅':'▶️')}</span><span style="flex:1">${esc(L(l.title))}${l.game?`<div class="note">🎮 ${LANG==='ta'?'விளையாட்டு':'Game'}</div>`:''}</span>${l.game ? `<span class="tag done">${'⭐'.repeat(st||0)}${'☆'.repeat(3-(st||0))}</span>` : (p&&p.score!=null?`<span class="tag done">${p.score}%</span>`:'')}</div>`; }).join('')}</div></div>`;
     }).join('') : `<div class="soonbox">${U('soonSub')}</div>`}`;
   document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
   document.querySelectorAll('.les').forEach(n=> n.onclick = ()=> go(`#/${c}/${s}/${n.dataset.ch}/${n.dataset.l}`));
@@ -254,9 +304,11 @@ async function renderLesson(c, s, ch, id){
   const all = lessonsOf(sb), idx = all.findIndex(x=>x.id===id), prev = all[idx-1], next = all[idx+1];
   const chap = sb.chapters[Number(ch)-1];
   const crumbs = `<span data-go="#/${c}">${U('home')}</span> › <span data-go="#/${c}/${s}">${esc(L(sb.name))} ${c}</span> › ${esc(L(chap&&chap.title))}`;
-  const nav = `${prev?`<button class="btn" data-go="#/${c}/${s}/${prev.ch}/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}
+  const entry = chap && (chap.lessons||[]).find(l=>l.id===id);
+  const nav0 = `${prev?`<button class="btn" data-go="#/${c}/${s}/${prev.ch}/${prev.id}">${U('prev')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}
       ${next?`<button class="btn p" data-go="#/${c}/${s}/${next.ch}/${next.id}">${U('next')}</button>`:`<button class="btn" data-go="#/${c}/${s}">${U('back')}</button>`}`;
-  return renderLessonCore(id, crumbs, nav);
+  if(entry && entry.game && window.KALVI_PLAY){ return window.KALVI_PLAY.render($('#app'), entry, crumbs, nav0); }
+  return renderLessonCore(id, crumbs, nav0);
 }
 async function renderFutureLesson(id){
   const list = CATALOG.future || [], i = list.findIndex(x=>x.id===id), prev = list[i-1], next = list[i+1];
@@ -903,6 +955,7 @@ function renderReport(pid){
 function paintLang(){ document.querySelectorAll('.lang button').forEach(b=> b.classList.toggle('on', b.dataset.l===LANG)); document.documentElement.lang = LANG; }
 document.querySelectorAll('.lang button').forEach(b=> b.onclick = ()=>{ LANG = b.dataset.l; try{ localStorage.setItem('kalviLang', LANG); }catch(e){} paintLang(); route(); });
 $('#home').onclick = ()=> go('#/');
+if(window.KALVI_PLAY) KALVI_PLAY.init({lang:()=>LANG, esc, go, getProg, setProg});
 paintLang(); route();
 })();
 </script>

@@ -11,7 +11,107 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "உயிர் எழுத்துகள்",
+        "en": "Vowels"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-uyir-start",
+         "title": {
+          "ta": "படம் பார், முதல் எழுத்து சொல்",
+          "en": "Picture → first vowel"
+         },
+         "game": "uyirStart",
+         "level": {}
+        },
+        {
+         "id": "g-c1-uyir-order",
+         "title": {
+          "ta": "உயிர் எழுத்து வரிசை",
+          "en": "Vowel order"
+         },
+         "game": "uyirOrder",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "மெய் எழுத்துகள்",
+        "en": "Consonants"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-mei-order",
+         "title": {
+          "ta": "மெய் எழுத்து வரிசை",
+          "en": "Consonant order"
+         },
+         "game": "uyirOrder",
+         "level": {
+          "mei": true
+         }
+        },
+        {
+         "id": "g-c1-mei-spot",
+         "title": {
+          "ta": "மெய் எழுத்தைக் கண்டுபிடி",
+          "en": "Spot the consonant"
+         },
+         "game": "meiSpot",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "உயிர்மெய் எழுத்துகள்",
+        "en": "Vowel-consonants"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-um-build",
+         "title": {
+          "ta": "க் + அ = க — உருவாக்கு",
+          "en": "Build: க் + அ = க"
+         },
+         "game": "uyirmeiBuild",
+         "level": {
+          "v": [
+           0,
+           1,
+           2,
+           3
+          ]
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "சொற்கள்",
+        "en": "Words"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-word-start",
+         "title": {
+          "ta": "படம் — முதல் எழுத்து",
+          "en": "Picture — first letter"
+         },
+         "game": "wordStart",
+         "level": {}
+        }
+       ],
+       "no": 4
+      }
+     ]
     },
     {
      "id": "english",
@@ -21,7 +121,53 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "ABC",
+        "en": "The alphabet"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-abc-order",
+         "title": {
+          "ta": "ABC order",
+          "en": "ABC order"
+         },
+         "game": "abcOrder",
+         "level": {}
+        },
+        {
+         "id": "g-c1-abc-case",
+         "title": {
+          "ta": "Capital & small",
+          "en": "Capital & small"
+         },
+         "game": "abcCase",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "ஒலிகள்",
+        "en": "Sounds"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-first-letter",
+         "title": {
+          "ta": "Picture → first letter",
+          "en": "Picture → first letter"
+         },
+         "game": "firstLetter",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "maths",
@@ -31,7 +177,258 @@
      },
      "icon": "➗",
      "color": "math",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "எண்கள் 1–10",
+        "en": "Numbers 1–10"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-count10",
+         "title": {
+          "ta": "எண்ணிப் பார் (1–10)",
+          "en": "Count (1–10)"
+         },
+         "game": "count",
+         "level": {
+          "max": 10
+         }
+        },
+        {
+         "id": "g-c1-numwords",
+         "title": {
+          "ta": "எண் சொற்கள்",
+          "en": "Number words"
+         },
+         "game": "numWordsTa",
+         "level": {}
+        },
+        {
+         "id": "g-c1-compare10",
+         "title": {
+          "ta": "எது அதிகம்?",
+          "en": "Which has more?"
+         },
+         "game": "compare",
+         "level": {
+          "max": 10
+         }
+        },
+        {
+         "id": "g-c1-nb10",
+         "title": {
+          "ta": "முன்னும் பின்னும் (1–10)",
+          "en": "Before & after (1–10)"
+         },
+         "game": "neighbours",
+         "level": {
+          "max": 10
+         }
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "எண்கள் 11–20",
+        "en": "Numbers 11–20"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-count20",
+         "title": {
+          "ta": "எண்ணிப் பார் (1–20)",
+          "en": "Count (1–20)"
+         },
+         "game": "count",
+         "level": {
+          "max": 20
+         }
+        },
+        {
+         "id": "g-c1-nb20",
+         "title": {
+          "ta": "முன்னும் பின்னும் (1–20)",
+          "en": "Before & after (1–20)"
+         },
+         "game": "neighbours",
+         "level": {
+          "max": 20
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "கூட்டலும் கழித்தலும்",
+        "en": "Adding & taking away"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-add",
+         "title": {
+          "ta": "படங்களுடன் கூட்டல் (10 வரை)",
+          "en": "Picture addition (to 10)"
+         },
+         "game": "add",
+         "level": {
+          "pic": true,
+          "max": 10
+         }
+        },
+        {
+         "id": "g-c1-sub",
+         "title": {
+          "ta": "படங்களுடன் கழித்தல் (10 வரை)",
+          "en": "Picture subtraction (to 10)"
+         },
+         "game": "sub",
+         "level": {
+          "pic": true,
+          "max": 10
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "வடிவங்களும் அமைப்புகளும்",
+        "en": "Shapes & patterns"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-shapes",
+         "title": {
+          "ta": "வடிவங்களின் பெயர்",
+          "en": "Name the shape"
+         },
+         "game": "shapes",
+         "level": {
+          "keys": [
+           "circle",
+           "square",
+           "triangle",
+           "rectangle"
+          ]
+         }
+        },
+        {
+         "id": "g-c1-pattern",
+         "title": {
+          "ta": "வடிவ வரிசை",
+          "en": "Shape patterns"
+         },
+         "game": "shapePattern",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "அளவைகள்",
+        "en": "Measures"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-longer",
+         "title": {
+          "ta": "எது நீளம்?",
+          "en": "Which is longer?"
+         },
+         "game": "longer",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "சூழ்நிலையியல்",
+      "en": "Environmental Studies"
+     },
+     "icon": "🌱",
+     "color": "sci",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நானும் என் உடலும்",
+        "en": "Me and my body"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-senses",
+         "title": {
+          "ta": "ஐம்புலன்கள்",
+          "en": "Five senses"
+         },
+         "game": "senses",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "என்னைச் சுற்றி",
+        "en": "Around me"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-living",
+         "title": {
+          "ta": "உயிருள்ளவை / உயிரற்றவை",
+          "en": "Living / non-living"
+         },
+         "game": "living",
+         "level": {}
+        },
+        {
+         "id": "g-c1-homes",
+         "title": {
+          "ta": "விலங்குகளின் வீடு",
+          "en": "Animal homes"
+         },
+         "game": "animalHomes",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "பாதுகாப்பு",
+        "en": "Safety"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-safety",
+         "title": {
+          "ta": "பாதுகாப்பானதா?",
+          "en": "Safe or unsafe?"
+         },
+         "game": "safety",
+         "level": {}
+        },
+        {
+         "id": "g-c1-traffic",
+         "title": {
+          "ta": "போக்குவரத்து விளக்கு",
+          "en": "Traffic lights"
+         },
+         "game": "traffic",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
     }
    ]
   },
@@ -45,7 +442,71 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "உயிர்மெய் எழுத்துகள்",
+        "en": "Vowel-consonants"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-um-build",
+         "title": {
+          "ta": "உயிர்மெய் உருவாக்கு",
+          "en": "Build vowel-consonants"
+         },
+         "game": "uyirmeiBuild",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சொற்கள்",
+        "en": "Words"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-word-start",
+         "title": {
+          "ta": "படம் — முதல் எழுத்து",
+          "en": "Picture — first letter"
+         },
+         "game": "wordStart",
+         "level": {}
+        },
+        {
+         "id": "g-c2-missing",
+         "title": {
+          "ta": "விடுபட்ட எழுத்து",
+          "en": "Missing letter"
+         },
+         "game": "missingLetter",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "சொல் விளையாட்டு",
+        "en": "Word play"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-opposite",
+         "title": {
+          "ta": "எதிர்ச்சொல்",
+          "en": "Opposites"
+         },
+         "game": "opposite",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
     },
     {
      "id": "english",
@@ -55,7 +516,62 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "ஒலிகளும் சொற்களும்",
+        "en": "Sounds & words"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-first-letter",
+         "title": {
+          "ta": "Picture → first letter",
+          "en": "Picture → first letter"
+         },
+         "game": "firstLetter",
+         "level": {}
+        },
+        {
+         "id": "g-c2-cvc",
+         "title": {
+          "ta": "Missing vowel",
+          "en": "Missing vowel"
+         },
+         "game": "cvc",
+         "level": {}
+        },
+        {
+         "id": "g-c2-rhyme",
+         "title": {
+          "ta": "Rhyming words",
+          "en": "Rhyming words"
+         },
+         "game": "rhyme",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சொல் விளையாட்டு",
+        "en": "Word play"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-opposite-en",
+         "title": {
+          "ta": "Opposites",
+          "en": "Opposites"
+         },
+         "game": "enOpposite",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "maths",
@@ -65,7 +581,315 @@
      },
      "icon": "➗",
      "color": "math",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "எண்கள் 1–100",
+        "en": "Numbers to 100"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-blocks",
+         "title": {
+          "ta": "பத்துகளும் ஒன்றுகளும்",
+          "en": "Tens and ones"
+         },
+         "game": "placeBlocks",
+         "level": {}
+        },
+        {
+         "id": "g-c2-nb100",
+         "title": {
+          "ta": "முன்னும் பின்னும் (1–100)",
+          "en": "Before & after (to 100)"
+         },
+         "game": "neighbours",
+         "level": {
+          "max": 100
+         }
+        },
+        {
+         "id": "g-c2-words-en",
+         "title": {
+          "ta": "Number names",
+          "en": "Number names"
+         },
+         "game": "numWordsEn",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "கூட்டலும் கழித்தலும்",
+        "en": "Addition & subtraction"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-add",
+         "title": {
+          "ta": "கூட்டல் (100 வரை)",
+          "en": "Addition (to 100)"
+         },
+         "game": "add",
+         "level": {
+          "lo": 10,
+          "hi": 89,
+          "sumMax": 99
+         }
+        },
+        {
+         "id": "g-c2-sub",
+         "title": {
+          "ta": "கழித்தல் (100 வரை)",
+          "en": "Subtraction (to 100)"
+         },
+         "game": "sub",
+         "level": {
+          "lo": 10,
+          "hi": 99
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகள்",
+        "en": "Patterns"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-skip",
+         "title": {
+          "ta": "தாவும் தவளை (2, 5, 10)",
+          "en": "Skip counting (2, 5, 10)"
+         },
+         "game": "skip",
+         "level": {
+          "steps": [
+           2,
+           5,
+           10
+          ],
+          "startMax": 20
+         }
+        },
+        {
+         "id": "g-c2-pattern",
+         "title": {
+          "ta": "வடிவ வரிசை",
+          "en": "Shape patterns"
+         },
+         "game": "shapePattern",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-shapes",
+         "title": {
+          "ta": "வடிவங்கள்",
+          "en": "Shapes"
+         },
+         "game": "shapes",
+         "level": {
+          "keys": [
+           "circle",
+           "square",
+           "triangle",
+           "rectangle"
+          ]
+         }
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "காலம்",
+        "en": "Time"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-clock",
+         "title": {
+          "ta": "மணி பார் (மணி, அரை மணி)",
+          "en": "Tell the time (hour, half hour)"
+         },
+         "game": "clock",
+         "level": {
+          "step": 30
+         }
+        },
+        {
+         "id": "g-c2-days",
+         "title": {
+          "ta": "வாரத்தின் நாட்கள்",
+          "en": "Days of the week"
+         },
+         "game": "calendar",
+         "level": {}
+        }
+       ],
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "பணம்",
+        "en": "Money"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-money",
+         "title": {
+          "ta": "நாணயங்களை எண்ணு",
+          "en": "Count the coins"
+         },
+         "game": "money",
+         "level": {
+          "kinds": [
+           {
+            "t": "c",
+            "v": 1
+           },
+           {
+            "t": "c",
+            "v": 2
+           },
+           {
+            "t": "c",
+            "v": 5
+           },
+           {
+            "t": "c",
+            "v": 10
+           }
+          ],
+          "count": 4
+         }
+        }
+       ],
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "தகவல் செயலாக்கம்",
+        "en": "Information processing"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-graph",
+         "title": {
+          "ta": "படவரைபடம்",
+          "en": "Picture graph"
+         },
+         "game": "graph",
+         "level": {
+          "n": 3,
+          "max": 10,
+          "types": [
+           "most",
+           "least",
+           "value"
+          ]
+         }
+        }
+       ],
+       "no": 7
+      }
+     ]
+    },
+    {
+     "id": "science",
+     "name": {
+      "ta": "சூழ்நிலையியல்",
+      "en": "Environmental Studies"
+     },
+     "icon": "🌱",
+     "color": "sci",
+     "chapters": [
+      {
+       "title": {
+        "ta": "தாவரங்களும் விலங்குகளும்",
+        "en": "Plants & animals"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-living",
+         "title": {
+          "ta": "உயிருள்ளவை / உயிரற்றவை",
+          "en": "Living / non-living"
+         },
+         "game": "living",
+         "level": {}
+        },
+        {
+         "id": "g-c2-homes",
+         "title": {
+          "ta": "விலங்குகளின் வீடு",
+          "en": "Animal homes"
+         },
+         "game": "animalHomes",
+         "level": {}
+        },
+        {
+         "id": "g-c2-plantparts",
+         "title": {
+          "ta": "எந்தப் பகுதியை உண்கிறோம்?",
+          "en": "Which part do we eat?"
+         },
+         "game": "plantParts",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "நீர்",
+        "en": "Water"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-water",
+         "title": {
+          "ta": "நீரைச் சேமி",
+          "en": "Save water"
+         },
+         "game": "water",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "போக்குவரத்து",
+        "en": "Transport"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-transport",
+         "title": {
+          "ta": "நிலம், நீர், வான்",
+          "en": "Land, water, air"
+         },
+         "game": "transport",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
     }
    ]
   },
@@ -79,7 +903,80 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "எழுத்துகள்",
+        "en": "Letters"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-letter-facts",
+         "title": {
+          "ta": "எழுத்துக் கணக்கு",
+          "en": "Counting Tamil letters"
+         },
+         "game": "letterFacts",
+         "level": {}
+        },
+        {
+         "id": "g-c3-missing",
+         "title": {
+          "ta": "விடுபட்ட எழுத்து",
+          "en": "Missing letter"
+         },
+         "game": "missingLetter",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இலக்கணம்",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-plural",
+         "title": {
+          "ta": "ஒருமை — பன்மை",
+          "en": "Singular — plural"
+         },
+         "game": "plural",
+         "level": {}
+        },
+        {
+         "id": "g-c3-opposite",
+         "title": {
+          "ta": "எதிர்ச்சொல்",
+          "en": "Opposites"
+         },
+         "game": "opposite",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தமிழ் மாதங்கள்",
+        "en": "Tamil months"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-months",
+         "title": {
+          "ta": "தமிழ் மாதங்கள்",
+          "en": "Tamil months"
+         },
+         "game": "tamilMonths",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
     },
     {
      "id": "english",
@@ -89,7 +986,71 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "Grammar",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-plural-en",
+         "title": {
+          "ta": "Plurals",
+          "en": "Plurals"
+         },
+         "game": "enPlural",
+         "level": {}
+        },
+        {
+         "id": "g-c3-article",
+         "title": {
+          "ta": "a or an?",
+          "en": "a or an?"
+         },
+         "game": "article",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Words",
+        "en": "Words"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-dict",
+         "title": {
+          "ta": "Dictionary order",
+          "en": "Dictionary order"
+         },
+         "game": "dictOrder",
+         "level": {}
+        },
+        {
+         "id": "g-c3-rhyme",
+         "title": {
+          "ta": "Rhyming words",
+          "en": "Rhyming words"
+         },
+         "game": "rhyme",
+         "level": {}
+        },
+        {
+         "id": "g-c3-opp",
+         "title": {
+          "ta": "Opposites",
+          "en": "Opposites"
+         },
+         "game": "enOpposite",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "maths",
@@ -99,7 +1060,377 @@
      },
      "icon": "➗",
      "color": "math",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-sides",
+         "title": {
+          "ta": "பக்கங்களை எண்ணு",
+          "en": "Count the sides"
+         },
+         "game": "shapes",
+         "level": {
+          "keys": [
+           "circle",
+           "square",
+           "triangle",
+           "rectangle",
+           "pentagon",
+           "hexagon"
+          ],
+          "sides": true
+         }
+        },
+        {
+         "id": "g-c3-solids",
+         "title": {
+          "ta": "திண்ம வடிவங்கள்",
+          "en": "Solid shapes"
+         },
+         "game": "solids",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "எண்கள்",
+        "en": "Numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-blocks",
+         "title": {
+          "ta": "நூறுகள், பத்துகள், ஒன்றுகள்",
+          "en": "Hundreds, tens, ones"
+         },
+         "game": "placeBlocks",
+         "level": {
+          "hundreds": 9
+         }
+        },
+        {
+         "id": "g-c3-pv",
+         "title": {
+          "ta": "இடமதிப்பு (3 இலக்கம்)",
+          "en": "Place value (3 digits)"
+         },
+         "game": "placeValue",
+         "level": {
+          "digits": 3
+         }
+        },
+        {
+         "id": "g-c3-add",
+         "title": {
+          "ta": "கூட்டல் (1000 வரை)",
+          "en": "Addition (to 1000)"
+         },
+         "game": "add",
+         "level": {
+          "lo": 100,
+          "hi": 899,
+          "sumMax": 999
+         }
+        },
+        {
+         "id": "g-c3-sub",
+         "title": {
+          "ta": "கழித்தல் (1000 வரை)",
+          "en": "Subtraction (to 1000)"
+         },
+         "game": "sub",
+         "level": {
+          "lo": 100,
+          "hi": 999
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகள்",
+        "en": "Patterns"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-skip",
+         "title": {
+          "ta": "எண் வரிசைப் புதிர்",
+          "en": "Number patterns"
+         },
+         "game": "skip",
+         "level": {
+          "steps": [
+           3,
+           4,
+           5,
+           10,
+           100
+          ],
+          "startMax": 100,
+          "down": true
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அளவைகள்",
+        "en": "Measurements"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-cm",
+         "title": {
+          "ta": "மீட்டர் ↔ சென்டிமீட்டர்",
+          "en": "Metres ↔ centimetres"
+         },
+         "game": "convert",
+         "level": {
+          "units": [
+           "m"
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "காலம்",
+        "en": "Time"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-clock",
+         "title": {
+          "ta": "மணி பார் (கால் மணி)",
+          "en": "Tell the time (quarter hours)"
+         },
+         "game": "clock",
+         "level": {
+          "step": 15
+         }
+        },
+        {
+         "id": "g-c3-cal",
+         "title": {
+          "ta": "நாட்காட்டி",
+          "en": "Calendar"
+         },
+         "game": "calendar",
+         "level": {
+          "months": true
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "தகவல் செயலாக்கம்",
+        "en": "Information processing"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-graph",
+         "title": {
+          "ta": "வரைபடம் படி",
+          "en": "Read the graph"
+         },
+         "game": "graph",
+         "level": {
+          "n": 4,
+          "max": 10
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "எண்கள் — பெருக்கல், வகுத்தல்",
+        "en": "Numbers — multiplying & sharing"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-tables",
+         "title": {
+          "ta": "வாய்ப்பாடு 2–5",
+          "en": "Tables 2–5"
+         },
+         "game": "multiply",
+         "level": {
+          "table": true,
+          "tmin": 2,
+          "tmax": 5
+         }
+        },
+        {
+         "id": "g-c3-share",
+         "title": {
+          "ta": "சமமாகப் பகிர்",
+          "en": "Share equally"
+         },
+         "game": "share",
+         "level": {
+          "dmin": 2,
+          "dmax": 5,
+          "qmax": 6
+         }
+        },
+        {
+         "id": "g-c3-oddeven",
+         "title": {
+          "ta": "ஒற்றை / இரட்டை",
+          "en": "Odd or even"
+         },
+         "game": "oddEven",
+         "level": {
+          "max": 100
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "பணம்",
+        "en": "Money"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-money",
+         "title": {
+          "ta": "பணம் எண்ணு",
+          "en": "Count the money"
+         },
+         "game": "money",
+         "level": {
+          "kinds": [
+           {
+            "t": "c",
+            "v": 1
+           },
+           {
+            "t": "c",
+            "v": 2
+           },
+           {
+            "t": "c",
+            "v": 5
+           },
+           {
+            "t": "c",
+            "v": 10
+           },
+           {
+            "t": "n",
+            "v": 10
+           },
+           {
+            "t": "n",
+            "v": 20
+           },
+           {
+            "t": "n",
+            "v": 50
+           },
+           {
+            "t": "n",
+            "v": 100
+           }
+          ],
+          "count": 5
+         }
+        },
+        {
+         "id": "g-c3-change",
+         "title": {
+          "ta": "கடை விளையாட்டு",
+          "en": "Shop game"
+         },
+         "game": "change",
+         "level": {
+          "notes": [
+           20,
+           50,
+           100
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "அளவைகள் — எடை, கொள்ளளவு",
+        "en": "Measurements — weight & capacity"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-kgl",
+         "title": {
+          "ta": "கிலோ, லிட்டர் மாற்றம்",
+          "en": "Kilograms & litres"
+         },
+         "game": "convert",
+         "level": {
+          "units": [
+           "kg",
+           "L"
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      }
+     ]
     },
     {
      "id": "science",
@@ -109,7 +1440,227 @@
      },
      "icon": "🔬",
      "color": "sci",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் உடல்",
+        "en": "My Body"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-senses",
+         "title": {
+          "ta": "ஐம்புலன்கள்",
+          "en": "Five senses"
+         },
+         "game": "senses",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பொருட்களின் நிலைகள்",
+        "en": "States of Matter"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-matter",
+         "title": {
+          "ta": "திண்மம், திரவம், வாயு",
+          "en": "Solid, liquid, gas"
+         },
+         "game": "matter",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "விசை",
+        "en": "Force"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-push",
+         "title": {
+          "ta": "தள்ளுதல் / இழுத்தல்",
+          "en": "Push or pull"
+         },
+         "game": "pushPull",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அன்றாட வாழ்வில் அறிவியல்",
+        "en": "Science in Everyday Life"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-float",
+         "title": {
+          "ta": "மிதக்குமா, மூழ்குமா?",
+          "en": "Float or sink?"
+         },
+         "game": "floatSink",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "உணவு",
+        "en": "Food"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-food",
+         "title": {
+          "ta": "உணவு வகைகள்",
+          "en": "Food groups"
+         },
+         "game": "foodGroups",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "நீர்",
+        "en": "Water"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-water",
+         "title": {
+          "ta": "நீரைச் சேமி",
+          "en": "Save water"
+         },
+         "game": "water",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "தாவரங்கள்",
+        "en": "Plants"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-parts",
+         "title": {
+          "ta": "எந்தப் பகுதியை உண்கிறோம்?",
+          "en": "Which part do we eat?"
+         },
+         "game": "plantParts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "நமது சுற்றுச்சூழல்",
+        "en": "Our Environment"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-living",
+         "title": {
+          "ta": "உயிருள்ளவை / உயிரற்றவை",
+          "en": "Living / non-living"
+         },
+         "game": "living",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "விலங்குகளின் வாழ்க்கை",
+        "en": "Animal Life"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-homes",
+         "title": {
+          "ta": "விலங்குகளின் வீடு",
+          "en": "Animal homes"
+         },
+         "game": "animalHomes",
+         "level": {}
+        },
+        {
+         "id": "g-c3-habit",
+         "title": {
+          "ta": "எதை உண்ணும்?",
+          "en": "What do they eat?"
+         },
+         "game": "foodHabit",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "காற்று",
+        "en": "Air"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     },
     {
      "id": "social",
@@ -119,7 +1670,216 @@
      },
      "icon": "🌏",
      "color": "soc",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "குடும்பம்",
+        "en": "Family"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "நம் நண்பர்கள்",
+        "en": "Our Friends"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "ஊராட்சி",
+        "en": "Panchayat"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-localgov",
+         "title": {
+          "ta": "உள்ளாட்சி",
+          "en": "Local government"
+         },
+         "game": "localGov",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "பாதுகாப்பு",
+        "en": "Safety"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-safety",
+         "title": {
+          "ta": "பாதுகாப்பானதா?",
+          "en": "Safe or unsafe?"
+         },
+         "game": "safety",
+         "level": {}
+        },
+        {
+         "id": "g-c3-help",
+         "title": {
+          "ta": "அவசர உதவி எண்கள்",
+          "en": "Emergency numbers"
+         },
+         "game": "helplines",
+         "level": {}
+        },
+        {
+         "id": "g-c3-traffic",
+         "title": {
+          "ta": "போக்குவரத்து விளக்கு",
+          "en": "Traffic lights"
+         },
+         "game": "traffic",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "வரலாற்றுச் சிறப்புமிக்க இடங்கள்",
+        "en": "Historical Places"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "சரணாலயங்கள்",
+        "en": "Sanctuaries"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-tn",
+         "title": {
+          "ta": "நம் தமிழ்நாடு",
+          "en": "Our Tamil Nadu"
+         },
+         "game": "tnFacts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "மாவட்ட நிர்வாகம்",
+        "en": "District Administration"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-localgov2",
+         "title": {
+          "ta": "யார் தலைமை?",
+          "en": "Who is in charge?"
+         },
+         "game": "localGov",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "தமிழ்நாட்டின் விடுதலை வீரர்கள்",
+        "en": "Freedom Fighters of Tamil Nadu"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-freedom",
+         "title": {
+          "ta": "விடுதலை வீரர்கள்",
+          "en": "Freedom fighters"
+         },
+         "game": "freedom",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "கனிம வளங்கள்",
+        "en": "Mineral Resources"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-tn2",
+         "title": {
+          "ta": "நம் தமிழ்நாடு",
+          "en": "Our Tamil Nadu"
+         },
+         "game": "tnFacts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "குழந்தைகள் பாதுகாப்பு",
+        "en": "Child Safety"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-help2",
+         "title": {
+          "ta": "உதவி எண்கள்",
+          "en": "Helplines"
+         },
+         "game": "helplines",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     }
    ]
   },
@@ -133,7 +1893,71 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "இலக்கணம்",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-plural",
+         "title": {
+          "ta": "ஒருமை — பன்மை",
+          "en": "Singular — plural"
+         },
+         "game": "plural",
+         "level": {}
+        },
+        {
+         "id": "g-c4-opposite",
+         "title": {
+          "ta": "எதிர்ச்சொல்",
+          "en": "Opposites"
+         },
+         "game": "opposite",
+         "level": {}
+        },
+        {
+         "id": "g-c4-um",
+         "title": {
+          "ta": "உயிர்மெய் — பிரித்தும் சேர்த்தும்",
+          "en": "Vowel-consonants — split & join"
+         },
+         "game": "uyirmeiBuild",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "தமிழ் அறிவு",
+        "en": "Tamil knowledge"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-months",
+         "title": {
+          "ta": "தமிழ் மாதங்கள்",
+          "en": "Tamil months"
+         },
+         "game": "tamilMonths",
+         "level": {}
+        },
+        {
+         "id": "g-c4-letters",
+         "title": {
+          "ta": "எழுத்துக் கணக்கு",
+          "en": "Counting Tamil letters"
+         },
+         "game": "letterFacts",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "english",
@@ -143,7 +1967,62 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "Grammar",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-plural-en",
+         "title": {
+          "ta": "Plurals",
+          "en": "Plurals"
+         },
+         "game": "enPlural",
+         "level": {}
+        },
+        {
+         "id": "g-c4-article",
+         "title": {
+          "ta": "a or an?",
+          "en": "a or an?"
+         },
+         "game": "article",
+         "level": {}
+        },
+        {
+         "id": "g-c4-past",
+         "title": {
+          "ta": "Past tense",
+          "en": "Past tense"
+         },
+         "game": "pastTense",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Words",
+        "en": "Words"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-dict",
+         "title": {
+          "ta": "Dictionary order",
+          "en": "Dictionary order"
+         },
+         "game": "dictOrder",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "maths",
@@ -153,7 +2032,384 @@
      },
      "icon": "➗",
      "color": "math",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-perim",
+         "title": {
+          "ta": "சுற்றளவு",
+          "en": "Perimeter"
+         },
+         "game": "perimeter",
+         "level": {}
+        },
+        {
+         "id": "g-c4-solids",
+         "title": {
+          "ta": "திண்ம வடிவங்கள்",
+          "en": "Solid shapes"
+         },
+         "game": "solids",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "எண்கள்",
+        "en": "Numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-pv",
+         "title": {
+          "ta": "இடமதிப்பு (4 இலக்கம்)",
+          "en": "Place value (4 digits)"
+         },
+         "game": "placeValue",
+         "level": {
+          "digits": 4
+         }
+        },
+        {
+         "id": "g-c4-add",
+         "title": {
+          "ta": "கூட்டல் (4 இலக்கம்)",
+          "en": "Addition (4 digits)"
+         },
+         "game": "add",
+         "level": {
+          "lo": 1000,
+          "hi": 8999,
+          "sumMax": 9999
+         }
+        },
+        {
+         "id": "g-c4-sub",
+         "title": {
+          "ta": "கழித்தல் (4 இலக்கம்)",
+          "en": "Subtraction (4 digits)"
+         },
+         "game": "sub",
+         "level": {
+          "lo": 1000,
+          "hi": 9999
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகள்",
+        "en": "Patterns"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-skip",
+         "title": {
+          "ta": "எண் வரிசைப் புதிர்",
+          "en": "Number patterns"
+         },
+         "game": "skip",
+         "level": {
+          "steps": [
+           25,
+           50,
+           100,
+           250
+          ],
+          "startMax": 500,
+          "down": true
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அளவைகள்",
+        "en": "Measurements"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-convert",
+         "title": {
+          "ta": "அலகு மாற்றம்",
+          "en": "Converting units"
+         },
+         "game": "convert",
+         "level": {
+          "units": [
+           "m",
+           "kg",
+           "L",
+           "km"
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "காலம்",
+        "en": "Time"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-clock",
+         "title": {
+          "ta": "மணி பார் (5 நிமிடம்)",
+          "en": "Tell the time (5 minutes)"
+         },
+         "game": "clock",
+         "level": {
+          "step": 5
+         }
+        },
+        {
+         "id": "g-c4-cal",
+         "title": {
+          "ta": "நாட்காட்டி",
+          "en": "Calendar"
+         },
+         "game": "calendar",
+         "level": {
+          "months": true,
+          "far": true
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "எண்கள் — பெருக்கல், வகுத்தல்",
+        "en": "Numbers — multiplication & division"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-tables",
+         "title": {
+          "ta": "வாய்ப்பாடு 6–10",
+          "en": "Tables 6–10"
+         },
+         "game": "multiply",
+         "level": {
+          "table": true,
+          "tmin": 6,
+          "tmax": 10
+         }
+        },
+        {
+         "id": "g-c4-mult",
+         "title": {
+          "ta": "பெருக்கல் (2 இலக்கம் × 1 இலக்கம்)",
+          "en": "Multiply (2-digit × 1-digit)"
+         },
+         "game": "multiply",
+         "level": {
+          "alo": 11,
+          "ahi": 99,
+          "blo": 2,
+          "bhi": 9
+         }
+        },
+        {
+         "id": "g-c4-div",
+         "title": {
+          "ta": "வகுத்தல் — மீதியுடன்",
+          "en": "Division with remainder"
+         },
+         "game": "share",
+         "level": {
+          "rem": true,
+          "dmin": 2,
+          "dmax": 9,
+          "qmin": 2,
+          "qmax": 20
+         }
+        },
+        {
+         "id": "g-c4-round",
+         "title": {
+          "ta": "அருகிலுள்ள 10-க்கு",
+          "en": "Round to the nearest 10"
+         },
+         "game": "rounding",
+         "level": {
+          "to": 10
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "பின்னங்கள்",
+        "en": "Fractions"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-frac",
+         "title": {
+          "ta": "பின்னம் — பங்கு",
+          "en": "Fractions — parts"
+         },
+         "game": "fractionName",
+         "level": {
+          "dens": [
+           2,
+           3,
+           4,
+           5,
+           6,
+           8
+          ]
+         }
+        },
+        {
+         "id": "g-c4-fcmp",
+         "title": {
+          "ta": "பெரிய பின்னம் எது?",
+          "en": "Which fraction is bigger?"
+         },
+         "game": "fractionCompare",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "பணம்",
+        "en": "Money"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-money",
+         "title": {
+          "ta": "பணம் எண்ணு",
+          "en": "Count the money"
+         },
+         "game": "money",
+         "level": {
+          "kinds": [
+           {
+            "t": "n",
+            "v": 10
+           },
+           {
+            "t": "n",
+            "v": 20
+           },
+           {
+            "t": "n",
+            "v": 50
+           },
+           {
+            "t": "n",
+            "v": 100
+           },
+           {
+            "t": "n",
+            "v": 100
+           },
+           {
+            "t": "n",
+            "v": 200
+           },
+           {
+            "t": "n",
+            "v": 500
+           }
+          ],
+          "count": 5
+         }
+        },
+        {
+         "id": "g-c4-change",
+         "title": {
+          "ta": "கடை விளையாட்டு",
+          "en": "Shop game"
+         },
+         "game": "change",
+         "level": {
+          "notes": [
+           100,
+           200,
+           500
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "தகவல் செயலாக்கம்",
+        "en": "Information processing"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-graph",
+         "title": {
+          "ta": "வரைபடம் படி",
+          "en": "Read the graph"
+         },
+         "game": "graph",
+         "level": {
+          "n": 5,
+          "max": 20
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      }
+     ]
     },
     {
      "id": "science",
@@ -163,7 +2419,235 @@
      },
      "icon": "🔬",
      "color": "sci",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் உடல்",
+        "en": "My Body"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-senses",
+         "title": {
+          "ta": "ஐம்புலன்கள்",
+          "en": "Five senses"
+         },
+         "game": "senses",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பருப்பொருளும் பொருட்களும்",
+        "en": "Matter and Materials"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-matter",
+         "title": {
+          "ta": "திண்மம், திரவம், வாயு",
+          "en": "Solid, liquid, gas"
+         },
+         "game": "matter",
+         "level": {}
+        },
+        {
+         "id": "g-c4-float",
+         "title": {
+          "ta": "மிதக்குமா, மூழ்குமா?",
+          "en": "Float or sink?"
+         },
+         "game": "floatSink",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வேலையும் ஆற்றலும்",
+        "en": "Work and Energy"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-energy",
+         "title": {
+          "ta": "ஆற்றல் மூலங்கள்",
+          "en": "Energy sources"
+         },
+         "game": "energy",
+         "level": {}
+        },
+        {
+         "id": "g-c4-push",
+         "title": {
+          "ta": "தள்ளுதல் / இழுத்தல்",
+          "en": "Push or pull"
+         },
+         "game": "pushPull",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அன்றாட வாழ்வில் அறிவியல்",
+        "en": "Science in Everyday Life"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "உணவு",
+        "en": "Food"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-food",
+         "title": {
+          "ta": "உணவு வகைகள்",
+          "en": "Food groups"
+         },
+         "game": "foodGroups",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "நீர்",
+        "en": "Water"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-water",
+         "title": {
+          "ta": "நீரைச் சேமி",
+          "en": "Save water"
+         },
+         "game": "water",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "தாவரங்கள்",
+        "en": "Plants"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-parts",
+         "title": {
+          "ta": "எந்தப் பகுதியை உண்கிறோம்?",
+          "en": "Which part do we eat?"
+         },
+         "game": "plantParts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "பசுமைச் சுற்றுச்சூழல்",
+        "en": "Green Environment"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-living",
+         "title": {
+          "ta": "உயிருள்ளவை / உயிரற்றவை",
+          "en": "Living / non-living"
+         },
+         "game": "living",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "விலங்குகளின் வாழ்க்கை",
+        "en": "Life of Animals"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-habit",
+         "title": {
+          "ta": "எதை உண்ணும்?",
+          "en": "What do they eat?"
+         },
+         "game": "foodHabit",
+         "level": {}
+        },
+        {
+         "id": "g-c4-homes",
+         "title": {
+          "ta": "விலங்குகளின் வீடு",
+          "en": "Animal homes"
+         },
+         "game": "animalHomes",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "நாம் சுவாசிக்கும் காற்று",
+        "en": "Air We Breathe"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     },
     {
      "id": "social",
@@ -173,7 +2657,185 @@
      },
      "icon": "🌏",
      "color": "soc",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "நதிக்கரை அரசுகள்",
+        "en": "Kingdoms of Rivers"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "ஐவகை நிலங்கள்",
+        "en": "Five Landforms"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-land",
+         "title": {
+          "ta": "ஐவகை நிலங்கள்",
+          "en": "The five landscapes"
+         },
+         "game": "landforms",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நகராட்சியும் மாநகராட்சியும்",
+        "en": "Municipality and Corporation"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-localgov",
+         "title": {
+          "ta": "உள்ளாட்சி",
+          "en": "Local government"
+         },
+         "game": "localGov",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "சங்க கால வள்ளல்கள்",
+        "en": "Philanthropists of Sangam Age"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-vallal",
+         "title": {
+          "ta": "கடையெழு வள்ளல்கள்",
+          "en": "Great givers"
+         },
+         "game": "vallal",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "தமிழ்நாட்டின் இயற்கை அமைப்பு",
+        "en": "Physical Features of Tamil Nadu"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-tn",
+         "title": {
+          "ta": "நம் தமிழ்நாடு",
+          "en": "Our Tamil Nadu"
+         },
+         "game": "tnFacts",
+         "level": {}
+        },
+        {
+         "id": "g-c4-dir",
+         "title": {
+          "ta": "திசைகள்",
+          "en": "Directions"
+         },
+         "game": "directions",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "போக்குவரத்து",
+        "en": "Transport"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-transport",
+         "title": {
+          "ta": "நிலம், நீர், வான்",
+          "en": "Land, water, air"
+         },
+         "game": "transport",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "உலகெங்கும் தமிழர்கள்",
+        "en": "Tamils Around the World"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "மதராஸ் மாகாணத்தின் கதை",
+        "en": "Story of Madras Presidency"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "குழந்தைகளின் உரிமைகளும் கடமைகளும்",
+        "en": "Rights and Duties of Children"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-help",
+         "title": {
+          "ta": "உதவி எண்கள்",
+          "en": "Helplines"
+         },
+         "game": "helplines",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      }
+     ]
     }
    ]
   },
@@ -187,7 +2849,71 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "இலக்கணம்",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-plural",
+         "title": {
+          "ta": "ஒருமை — பன்மை",
+          "en": "Singular — plural"
+         },
+         "game": "plural",
+         "level": {}
+        },
+        {
+         "id": "g-c5-opposite",
+         "title": {
+          "ta": "எதிர்ச்சொல்",
+          "en": "Opposites"
+         },
+         "game": "opposite",
+         "level": {}
+        },
+        {
+         "id": "g-c5-um",
+         "title": {
+          "ta": "உயிர்மெய் — பிரித்தும் சேர்த்தும்",
+          "en": "Vowel-consonants — split & join"
+         },
+         "game": "uyirmeiBuild",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "தமிழ் அறிவு",
+        "en": "Tamil knowledge"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-months",
+         "title": {
+          "ta": "தமிழ் மாதங்கள்",
+          "en": "Tamil months"
+         },
+         "game": "tamilMonths",
+         "level": {}
+        },
+        {
+         "id": "g-c5-letters",
+         "title": {
+          "ta": "எழுத்துக் கணக்கு",
+          "en": "Counting Tamil letters"
+         },
+         "game": "letterFacts",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "english",
@@ -197,7 +2923,73 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "Grammar",
+        "en": "Grammar"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-past",
+         "title": {
+          "ta": "Past tense",
+          "en": "Past tense"
+         },
+         "game": "pastTense",
+         "level": {}
+        },
+        {
+         "id": "g-c5-article",
+         "title": {
+          "ta": "a or an? (tricky ones)",
+          "en": "a or an? (tricky ones)"
+         },
+         "game": "article",
+         "level": {
+          "hard": true
+         }
+        },
+        {
+         "id": "g-c5-plural-en",
+         "title": {
+          "ta": "Plurals",
+          "en": "Plurals"
+         },
+         "game": "enPlural",
+         "level": {}
+        }
+       ],
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Words",
+        "en": "Words"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-dict",
+         "title": {
+          "ta": "Dictionary order",
+          "en": "Dictionary order"
+         },
+         "game": "dictOrder",
+         "level": {}
+        },
+        {
+         "id": "g-c5-opp",
+         "title": {
+          "ta": "Opposites",
+          "en": "Opposites"
+         },
+         "game": "enOpposite",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     },
     {
      "id": "maths",
@@ -207,7 +2999,330 @@
      },
      "icon": "➗",
      "color": "math",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "வடிவியல்",
+        "en": "Geometry"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-angles",
+         "title": {
+          "ta": "கோணங்கள்",
+          "en": "Angles"
+         },
+         "game": "angles",
+         "level": {}
+        },
+        {
+         "id": "g-c5-area",
+         "title": {
+          "ta": "சுற்றளவு & பரப்பு",
+          "en": "Perimeter & area"
+         },
+         "game": "perimeter",
+         "level": {
+          "area": "mix"
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "எண்கள்",
+        "en": "Numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-pv",
+         "title": {
+          "ta": "இடமதிப்பு (5 இலக்கம்)",
+          "en": "Place value (5 digits)"
+         },
+         "game": "placeValue",
+         "level": {
+          "digits": 5
+         }
+        },
+        {
+         "id": "g-c5-add",
+         "title": {
+          "ta": "கூட்டல் (5 இலக்கம்)",
+          "en": "Addition (5 digits)"
+         },
+         "game": "add",
+         "level": {
+          "lo": 10000,
+          "hi": 89999,
+          "sumMax": 99999
+         }
+        },
+        {
+         "id": "g-c5-sub",
+         "title": {
+          "ta": "கழித்தல் (5 இலக்கம்)",
+          "en": "Subtraction (5 digits)"
+         },
+         "game": "sub",
+         "level": {
+          "lo": 10000,
+          "hi": 99999
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகள்",
+        "en": "Patterns"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-skip",
+         "title": {
+          "ta": "எண் வரிசைப் புதிர்",
+          "en": "Number patterns"
+         },
+         "game": "skip",
+         "level": {
+          "steps": [
+           125,
+           250,
+           500,
+           1000
+          ],
+          "startMax": 2000,
+          "down": true
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அளவைகள்",
+        "en": "Measurements"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-convert",
+         "title": {
+          "ta": "கலப்பு அலகுகள்",
+          "en": "Mixed units"
+         },
+         "game": "convert",
+         "level": {
+          "mixed": true,
+          "units": [
+           "m",
+           "kg",
+           "L",
+           "km"
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "காலம்",
+        "en": "Time"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-duration",
+         "title": {
+          "ta": "எவ்வளவு நேரம்?",
+          "en": "How long?"
+         },
+         "game": "duration",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "எண்கள் — பெருக்கல், வகுத்தல்",
+        "en": "Numbers — multiplication & division"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-mult",
+         "title": {
+          "ta": "பெருக்கல் (3 இலக்கம் × 2 இலக்கம்)",
+          "en": "Multiply (3-digit × 2-digit)"
+         },
+         "game": "multiply",
+         "level": {
+          "alo": 101,
+          "ahi": 999,
+          "blo": 11,
+          "bhi": 99
+         }
+        },
+        {
+         "id": "g-c5-div",
+         "title": {
+          "ta": "வகுத்தல்",
+          "en": "Division"
+         },
+         "game": "share",
+         "level": {
+          "dmin": 2,
+          "dmax": 9,
+          "qmin": 12,
+          "qmax": 120
+         }
+        },
+        {
+         "id": "g-c5-round",
+         "title": {
+          "ta": "அருகிலுள்ள 100-க்கு",
+          "en": "Round to the nearest 100"
+         },
+         "game": "rounding",
+         "level": {
+          "to": 100
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "இயற்கணிதம்",
+        "en": "Algebra"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-missing",
+         "title": {
+          "ta": "மறைந்த எண்",
+          "en": "The missing number"
+         },
+         "game": "missing",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "பணம்",
+        "en": "Money"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-change",
+         "title": {
+          "ta": "கடை விளையாட்டு",
+          "en": "Shop game"
+         },
+         "game": "change",
+         "level": {
+          "notes": [
+           200,
+           500
+          ]
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "பின்னங்கள்",
+        "en": "Fractions"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-fadd",
+         "title": {
+          "ta": "பின்னக் கூட்டல்",
+          "en": "Adding fractions"
+         },
+         "game": "fractionAdd",
+         "level": {}
+        },
+        {
+         "id": "g-c5-fcmp",
+         "title": {
+          "ta": "பெரிய பின்னம் எது?",
+          "en": "Which fraction is bigger?"
+         },
+         "game": "fractionCompare",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "தகவல் செயலாக்கம்",
+        "en": "Information processing"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-graph",
+         "title": {
+          "ta": "வரைபடம் படி",
+          "en": "Read the graph"
+         },
+         "game": "graph",
+         "level": {
+          "n": 5,
+          "max": 20
+         }
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     },
     {
      "id": "science",
@@ -217,7 +3332,217 @@
      },
      "icon": "🔬",
      "color": "sci",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "உறுப்பு மண்டலங்கள்",
+        "en": "Organ Systems"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-organs",
+         "title": {
+          "ta": "உறுப்பு மண்டலங்கள்",
+          "en": "Organ systems"
+         },
+         "game": "organs",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பருப்பொருளும் பொருட்களும்",
+        "en": "Matter and Materials"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-matter",
+         "title": {
+          "ta": "திண்மம், திரவம், வாயு",
+          "en": "Solid, liquid, gas"
+         },
+         "game": "matter",
+         "level": {}
+        },
+        {
+         "id": "g-c5-float",
+         "title": {
+          "ta": "மிதக்குமா, மூழ்குமா?",
+          "en": "Float or sink?"
+         },
+         "game": "floatSink",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "ஆற்றல்",
+        "en": "Energy"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-energy",
+         "title": {
+          "ta": "ஆற்றல் மூலங்கள்",
+          "en": "Energy sources"
+         },
+         "game": "energy",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "அன்றாட வாழ்வில் அறிவியல்",
+        "en": "Science in Everyday Life"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "உணவு",
+        "en": "Food"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-food",
+         "title": {
+          "ta": "உணவு வகைகள்",
+          "en": "Food groups"
+         },
+         "game": "foodGroups",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "நீர்",
+        "en": "Water"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-water",
+         "title": {
+          "ta": "நீரைச் சேமி",
+          "en": "Save water"
+         },
+         "game": "water",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "தாவரங்கள்",
+        "en": "Plants"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-parts",
+         "title": {
+          "ta": "எந்தப் பகுதியை உண்கிறோம்?",
+          "en": "Which part do we eat?"
+         },
+         "game": "plantParts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "நமது சுற்றுச்சூழல்",
+        "en": "Our Environment"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-living",
+         "title": {
+          "ta": "உயிருள்ளவை / உயிரற்றவை",
+          "en": "Living / non-living"
+         },
+         "game": "living",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "விலங்குகள்",
+        "en": "Animals"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-habit",
+         "title": {
+          "ta": "எதை உண்ணும்?",
+          "en": "What do they eat?"
+         },
+         "game": "foodHabit",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "காற்று",
+        "en": "Air"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     },
     {
      "id": "social",
@@ -227,7 +3552,196 @@
      },
      "icon": "🌏",
      "color": "soc",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் பூமி",
+        "en": "Our Earth"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-earth",
+         "title": {
+          "ta": "நம் பூமி",
+          "en": "Our Earth"
+         },
+         "game": "worldFacts",
+         "level": {}
+        },
+        {
+         "id": "g-c5-dir",
+         "title": {
+          "ta": "திசைகள்",
+          "en": "Directions"
+         },
+         "game": "directions",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "வரலாற்றை நோக்கி",
+        "en": "Towards History"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "Good Citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-traffic",
+         "title": {
+          "ta": "போக்குவரத்து விளக்கு",
+          "en": "Traffic lights"
+         },
+         "game": "traffic",
+         "level": {}
+        },
+        {
+         "id": "g-c5-help",
+         "title": {
+          "ta": "அவசர உதவி எண்கள்",
+          "en": "Emergency numbers"
+         },
+         "game": "helplines",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "வளிமண்டலம்",
+        "en": "Atmosphere"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 1",
+        "en": "Term 1"
+       },
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "தொல்லியல் அகழாய்வு",
+        "en": "Ancient Excavation"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "நீர்க்கோளம்",
+        "en": "Hydrosphere"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-hydro",
+         "title": {
+          "ta": "பெருங்கடல்கள்",
+          "en": "Oceans"
+         },
+         "game": "worldFacts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "உலகின் கண்டங்கள்",
+        "en": "Continents of the World"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-cont",
+         "title": {
+          "ta": "கண்டங்கள்",
+          "en": "Continents"
+         },
+         "game": "worldFacts",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 2",
+        "en": "Term 2"
+       },
+       "no": 7
+      },
+      {
+       "title": {
+        "ta": "கோட்டைகளும் அரண்மனைகளும்",
+        "en": "Forts and Palaces"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 8
+      },
+      {
+       "title": {
+        "ta": "வேளாண்மை",
+        "en": "Agriculture"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-land",
+         "title": {
+          "ta": "ஐவகை நிலங்கள்",
+          "en": "The five landscapes"
+         },
+         "game": "landforms",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 9
+      },
+      {
+       "title": {
+        "ta": "கல்வி உரிமைகள்",
+        "en": "Educational Rights"
+       },
+       "lessons": [],
+       "part": {
+        "ta": "பருவம் 3",
+        "en": "Term 3"
+       },
+       "no": 10
+      }
+     ]
     }
    ]
   },

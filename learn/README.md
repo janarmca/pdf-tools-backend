@@ -15,3 +15,12 @@ Block types: `hook`, `predict` (`q`, `options`, optional `answer`, `reveal`), `d
 Widgets (in `index.html` → `WIDGETS`): `trigTriangle`, `shadow`, `special`, `unitCircle`, `heightDistance`, `motion`, `mole`, `reflex`, `aiTrainer` (k-nearest-neighbours mango classifier with a bias demo), `ideaSpinner` (object × SCAMPER).
 
 Rules: explanations are written fresh (never copied from the textbook or guides); every numeric answer is checked independently before publishing; no AI and no fees on this page.
+
+## Classes 1–5: game-based learning (`games-math.js`, `games-lang.js`, `play.js`)
+
+Every Class 1–5 chapter (Samacheer term chapters; Ennum Ezhuthum skills for 1–3) holds **game** entries in `catalog.json`: `{id: 'g-…', title, game, level}`. Each game = Mayilu the peacock explains → an animated worked example → 10 rounds (choice or tap-to-sort) → stars. Wrong answers always show the correct answer and why.
+
+- **Maths** questions are generated, never typed: the answer is computed from the same numbers that are drawn (blocks, clock hands, coins, fraction slices, bar graphs). Infinite fresh practice.
+- **Tamil / English / Science / Social** use small curated, fact-checked datasets; Tamil words are stored pre-split into letters and verified by code (uyirmei = consonant + vowel sign).
+- **Tests:** `node learn/tests/games.test.cjs` (env `N` = questions per game, default 3000) generates questions for every game at its catalog level and checks: answer present exactly once, no duplicate options, no `undefined/NaN`, the generator’s own check, an **independent re-computation from the question text** (45 arithmetic/time/Tamil games), and a **picture check** that what the child sees (emoji count, coins, blocks, clock hands, fraction slices, number sequence) matches the answer. Run it before every push.
+- Chapters with no game yet (e.g. history-heavy Social chapters, "Air") show as "coming soon" rather than risk wrong facts.
