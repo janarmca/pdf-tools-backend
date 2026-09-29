@@ -35,7 +35,59 @@
   .related a:hover{background:var(--line);}
   footer{margin-top:28px;text-align:center;font-size:12.5px;color:var(--sub);}
   footer a{color:var(--sub);}
+  .faq-item{margin-top:14px;}
+  .faq-item:first-child{margin-top:0;}
+  .faq-item h3{font-size:14.5px;margin:0 0 4px;color:var(--ink);}
+  .faq-item p{font-size:14px;line-height:1.7;color:#333;margin:0;}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is the GST Invoice Generator free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, completely free with no signup required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it calculate CGST, SGST and IGST automatically?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — GST amounts are calculated automatically based on the rate and transaction type (intra-state or inter-state) you select."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my invoice data saved on a server?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The invoice is generated directly in your browser, and your business or customer details are not uploaded anywhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I download the invoice as a PDF?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can download the generated invoice as a PDF ready to send to your customer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this invoice format valid for GST compliance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The generator follows the standard GST invoice format with the fields typically required (GSTIN, HSN/SAC, tax breakup). For your specific compliance or audit needs, please confirm the format with your accountant or tax advisor."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="wrap">
@@ -58,6 +110,29 @@
         <li>Follow the simple on-screen steps — add a file, type your input, or record, depending on the tool.</li>
         <li>Download or copy your result — that's it.</li>
       </ol>
+    </div>
+    <div class="section faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <h3>Is the GST Invoice Generator free?</h3>
+        <p>Yes, completely free with no signup required.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does it calculate CGST, SGST and IGST automatically?</h3>
+        <p>Yes — GST amounts are calculated automatically based on the rate and transaction type (intra-state or inter-state) you select.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is my invoice data saved on a server?</h3>
+        <p>No. The invoice is generated directly in your browser, and your business or customer details are not uploaded anywhere.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I download the invoice as a PDF?</h3>
+        <p>Yes, you can download the generated invoice as a PDF ready to send to your customer.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is this invoice format valid for GST compliance?</h3>
+        <p>The generator follows the standard GST invoice format with the fields typically required (GSTIN, HSN/SAC, tax breakup). For your specific compliance or audit needs, please confirm the format with your accountant or tax advisor.</p>
+      </div>
     </div>
     <div class="section related">
       <h2>Related tools</h2>
