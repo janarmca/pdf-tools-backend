@@ -19,9 +19,6 @@ import ffmpeg from 'fluent-ffmpeg';
 import { createClient } from '@supabase/supabase-js';
 import Razorpay from 'razorpay';
 import rateLimit from 'express-rate-limit';
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
-import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -472,69 +469,6 @@ app.post('/api/ai/ask', creditLimiter, requireAuth, uploadImage.single('file'), 
 });
 
 // ============================================================
-// Shared NVIDIA chat helper (integrate.api.nvidia.com, OpenAI-compatible).
-// Tries each model in order; moves to the next one only for "this model is
-// unusable" errors (403 not enabled for key, 404 unknown, 410 retired, 5xx,
-// timeout). 401 (bad key) and 429 (rate limit) are returned immediately.
-// Override the list with env NVIDIA_TEXT_MODELS="model1,model2".
-// ============================================================
-const NVIDIA_TEXT_MODELS = (process.env.NVIDIA_TEXT_MODELS || [
-  'nvidia/nemotron-3.5-lightning-30b-a3b',
-  'nvidia/nemotron-3-super-120b-a12b',
-  'nvidia/nemotron-nano-3-30b-a3b'
-].join(',')).split(',').map(m => m.trim()).filter(Boolean);
-
-function cleanNvidiaAnswer(msg) {
-  let out = (msg?.content || '').toString();
-  // Some reasoning checkpoints still inline their thoughts — remove them.
-  out = out.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^[\s\S]*?<\/think>/i, '').trim();
-  return out;
-}
-
-async function callNvidiaChat(messages, { maxTokens = 4096, temperature = 0.3, timeoutMs = 60000 } = {}) {
-  let lastErr = null;
-  for (const model of NVIDIA_TEXT_MODELS) {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs);
-    let r, j;
-    try {
-      r = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-        method: 'POST',
-        signal: ctrl.signal,
-        headers: { 'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          model, messages, temperature, top_p: 0.95, max_tokens: maxTokens, stream: false,
-          chat_template_kwargs: { enable_thinking: false }
-        })
-      });
-      j = await r.json().catch(() => ({}));
-    } catch (e) {
-      clearTimeout(t);
-      lastErr = new Error(e.name === 'AbortError'
-        ? `The AI service took too long to respond (over ${Math.round(timeoutMs / 1000)} seconds) — please try again in a moment.`
-        : 'Could not reach the AI service — please try again. (' + e.message + ')');
-      console.error('[nvidia]', model, 'network/timeout:', e.message);
-      continue;
-    }
-    clearTimeout(t);
-    if (r.ok) {
-      const answer = cleanNvidiaAnswer(j.choices?.[0]?.message);
-      if (answer) return answer;
-      console.error('[nvidia]', model, 'returned empty content, finish_reason =', j.choices?.[0]?.finish_reason);
-      lastErr = new Error('The AI returned an empty answer — please try again.');
-      continue;
-    }
-    const detail = j.error?.message || (typeof j.error === 'string' ? j.error : null) || j.message || j.detail;
-    console.error('[nvidia]', model, 'HTTP', r.status, JSON.stringify(j));
-    lastErr = new Error(detail ? `${detail} (NVIDIA HTTP ${r.status})` : `AI request failed (NVIDIA HTTP ${r.status})`);
-    if (r.status === 401) throw new Error('NVIDIA API key is invalid or expired — create a new key at build.nvidia.com and update NVIDIA_API_KEY in Cloud Run. (NVIDIA HTTP 401)');
-    if (r.status === 429) throw new Error('AI is busy right now (NVIDIA free-tier rate limit) — please wait a minute and try again.');
-    if (r.status === 400 && !/model|thinking|chat_template/i.test(detail || '')) throw lastErr;
-  }
-  throw lastErr || new Error('AI request failed.');
-}
-
-// ============================================================
 // POST /api/ai/text — text-only AI tasks (summarize, rewrite, resume
 // suggestions) via NVIDIA Build's hosted Nemotron 3.5 Lightning, instead of
 // Gemini.
@@ -576,254 +510,65 @@ app.post('/api/ai/text', creditLimiter, requireAuth, async (req, res) => {
     // is exactly the "loads for a while, then a network error" symptom
     // reported. Failing fast with a clear, actionable message is much better
     // than an unbounded hang.
-    // FIX (2026-09-30): nemotron-3.5-lightning is a REASONING model. Without
-    // chat_template_kwargs.enable_thinking=false it spends its whole token
-    // budget "thinking", so `content` came back empty/cut off ("No answer
-    // returned." / half answers). callNvidiaChat() now turns thinking off,
-    // strips any leftover <think> block, and falls back to other NVIDIA models
-    // if one is retired (404/410), not enabled for this key (403) or down (5xx).
-    const answer = await callNvidiaChat([
-      { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
-      { role: 'user', content: userContent }
-    ]);
+    const nvidiaController = new AbortController();
+    const nvidiaTimeoutHandle = setTimeout(() => nvidiaController.abort(), 45000);
+    let nvidiaRes;
+    try {
+      nvidiaRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+        method: 'POST',
+        signal: nvidiaController.signal,
+        headers: {
+          'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // meta/llama-3.3-70b-instruct reached end-of-life on NVIDIA's catalog
+          // (2026-08-26) and returns HTTP 410 — switched to NVIDIA's own
+          // Nemotron 3.5 Lightning, their fastest current free-endpoint model
+          // in this size class (30B, 1M context), well suited to plain
+          // summarize/translate/resume-review text tasks. Being NVIDIA's own
+          // flagship line (not a third-party checkpoint they merely host), it
+          // should also be less likely to be retired on short notice than a
+          // Meta model was. If this ever needs swapping again, the improved
+          // error handling above (HTTP status + real NVIDIA error message)
+          // will show exactly why, instead of a bare "AI request failed".
+          model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
+          messages: [
+            { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
+            { role: 'user', content: userContent }
+          ],
+          temperature: 0.3,
+          max_tokens: 1500
+        })
+      });
+    } catch (fetchErr) {
+      if (fetchErr.name === 'AbortError') {
+        throw new Error('The AI service took too long to respond (over 45 seconds) — please try again in a moment.');
+      }
+      throw new Error('Could not reach the AI service — please check your connection and try again. (' + fetchErr.message + ')');
+    } finally {
+      clearTimeout(nvidiaTimeoutHandle);
+    }
+    const nvidiaJson = await nvidiaRes.json().catch(() => ({}));
+    if (!nvidiaRes.ok) {
+      // NVIDIA's error shape varies (error.message, a plain "detail" string on
+      // an auth failure, etc.) — check every field we've seen before falling
+      // back to a generic message, and always include the HTTP status so a
+      // bad NVIDIA_API_KEY (401), a renamed/unavailable model (404), or a
+      // rate limit (429) are distinguishable from each other in the logs
+      // instead of all looking like the same unhelpful "AI request failed".
+      const detail = nvidiaJson.error?.message
+        || (typeof nvidiaJson.error === 'string' ? nvidiaJson.error : null)
+        || nvidiaJson.message
+        || nvidiaJson.detail;
+      console.error('[api/ai/text] NVIDIA request failed, HTTP', nvidiaRes.status, '— raw response:', JSON.stringify(nvidiaJson));
+      throw new Error(detail ? `${detail} (NVIDIA HTTP ${nvidiaRes.status})` : `AI request failed (NVIDIA HTTP ${nvidiaRes.status})`);
+    }
+    const answer = nvidiaJson.choices?.[0]?.message?.content || 'No answer returned.';
     res.json({ ok: true, answer });
   } catch (e) {
     if (allowed) refundCredits(req.user.id, CREDIT_COST, req.body.toolId || 'aisummarize');
     res.status(500).json({ error: e.message });
-  }
-});
-
-// ============================================================
-// POST /api/ai/transcribe — Audio/Video → Text (NVIDIA hosted Whisper
-// Large-v3 via Riva gRPC on grpc.nvcf.nvidia.com — same free NVIDIA_API_KEY).
-// NVIDIA's speech models are NOT on the REST chat endpoint: they only accept
-// gRPC (Riva ASR proto, vendored in ./proto) with a `function-id` header.
-// Flow: upload (audio or video, ≤60MB) → ffprobe duration → deduct credits
-// (2 per started 5 minutes, max 30 min) → ffmpeg converts to 16 kHz mono
-// 16-bit PCM in 60-second chunks (keeps each gRPC message ~2 MB) → each chunk
-// sent to Whisper → joined text. Credits refunded on any failure.
-// body (multipart): file, language ('ta' | 'en' | 'multi' | any Whisper
-// code; default 'multi' = auto-detect), task ('transcribe' | 'translate' →
-// English), toolId.
-// ============================================================
-const NVIDIA_ASR_FUNCTION_ID = process.env.NVIDIA_ASR_FUNCTION_ID || 'b702f636-f60c-4a3d-a6f4-f3568c13bd7d'; // openai/whisper-large-v3 on build.nvidia.com
-const NVIDIA_ASR_SERVER = process.env.NVIDIA_ASR_SERVER || 'grpc.nvcf.nvidia.com:443';
-let rivaAsrClient = null;
-function getRivaAsrClient() {
-  if (rivaAsrClient) return rivaAsrClient;
-  const protoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), 'proto');
-  const def = protoLoader.loadSync(path.join(protoRoot, 'riva/proto/riva_asr.proto'), {
-    includeDirs: [protoRoot], keepCase: true, longs: String, enums: String, defaults: true, oneofs: true
-  });
-  const pkg = grpc.loadPackageDefinition(def);
-  rivaAsrClient = new pkg.nvidia.riva.asr.RivaSpeechRecognition(NVIDIA_ASR_SERVER, (process.env.NVIDIA_ASR_INSECURE === '1' ? grpc.credentials.createInsecure() : grpc.credentials.createSsl()), {
-    'grpc.max_send_message_length': 32 * 1024 * 1024,
-    'grpc.max_receive_message_length': 32 * 1024 * 1024
-  });
-  return rivaAsrClient;
-}
-
-function rivaRecognize(pcmBuffer, language, task) {
-  return new Promise((resolve, reject) => {
-    const md = new grpc.Metadata();
-    md.add('function-id', NVIDIA_ASR_FUNCTION_ID);
-    md.add('authorization', `Bearer ${process.env.NVIDIA_API_KEY}`);
-    const config = {
-      encoding: 'LINEAR_PCM', sample_rate_hertz: 16000, audio_channel_count: 1,
-      language_code: language, max_alternatives: 1, enable_automatic_punctuation: true
-    };
-    if (task === 'translate') config.custom_configuration = { task: 'translate' };
-    getRivaAsrClient().Recognize({ config, audio: pcmBuffer }, md, { deadline: Date.now() + 120000 }, (err, resp) => {
-      if (err) return reject(err);
-      const text = (resp.results || []).map(r => r.alternatives?.[0]?.transcript || '').join(' ').replace(/\s+/g, ' ').trim();
-      resolve(text);
-    });
-  });
-}
-
-function probeDurationSec(file) {
-  return new Promise((resolve, reject) => ffmpeg.ffprobe(file, (err, data) => {
-    if (err) return reject(new Error('Could not read this audio/video file — is it a valid audio or video?'));
-    const d = Number(data?.format?.duration);
-    const hasAudio = (data?.streams || []).some(st => st.codec_type === 'audio');
-    if (!hasAudio) return reject(new Error('This file has no audio track.'));
-    resolve(Number.isFinite(d) ? d : 0);
-  }));
-}
-
-// Converts any audio/video to one raw 16 kHz mono s16le PCM file, then slices
-// it in memory into chunkSec pieces (16000 samples/s × 2 bytes = 32000 B/s).
-function toPcmChunks(input, outDir, chunkSec) {
-  const out = path.join(outDir, 'audio.raw');
-  return new Promise((resolve, reject) => {
-    ffmpeg(input).noVideo().audioChannels(1).audioFrequency(16000).audioCodec('pcm_s16le').format('s16le')
-      .output(out)
-      .on('end', () => {
-        const all = fs.readFileSync(out);
-        const size = 32000 * chunkSec, chunks = [];
-        for (let i = 0; i < all.length; i += size) chunks.push(all.subarray(i, Math.min(i + size, all.length)));
-        resolve(chunks);
-      })
-      .on('error', e => reject(new Error('Audio conversion failed: ' + e.message)))
-      .run();
-  });
-}
-
-app.post('/api/ai/transcribe', creditLimiter, requireAuth, uploadVideo.single('file'), async (req, res) => {
-  let allowed = false, cost = 0, workDir = null;
-  const toolId = req.body?.toolId || 'audiototext';
-  try {
-    if (!process.env.NVIDIA_API_KEY) return res.status(501).json({ error: 'AI feature not set up yet — add NVIDIA_API_KEY in Cloud Run env vars.' });
-    if (!req.file) return res.status(400).json({ error: 'Please upload an audio or video file.' });
-    const language = (req.body.language || 'multi').toString().trim().slice(0, 10) || 'multi';
-    const task = req.body.task === 'translate' ? 'translate' : 'transcribe';
-
-    const duration = await probeDurationSec(req.file.path);
-    const MAX_SEC = 30 * 60;
-    if (duration > MAX_SEC) return res.status(400).json({ error: 'Audio is longer than 30 minutes — please trim it and upload in parts.' });
-    cost = Math.max(2, Math.ceil((duration || 1) / 300) * 2);
-    allowed = await deductCredits(req.user.id, cost, toolId);
-    if (!allowed) return res.status(402).json({ error: `Not enough credits — this audio needs ${cost} credits. Please buy more or upgrade to Pro.` });
-
-    workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asr-'));
-    const chunks = await toPcmChunks(req.file.path, workDir, 60);
-    if (!chunks.length) throw new Error('No audio found in this file.');
-
-    const parts = new Array(chunks.length).fill('');
-    let next = 0;
-    const worker = async () => {
-      while (next < chunks.length) {
-        const i = next++;
-        const buf = chunks[i];
-        if (buf.length < 3200) continue; // <0.1 s of audio — skip
-        let lastErr;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          try { parts[i] = await rivaRecognize(buf, language, task); lastErr = null; break; }
-          catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 1500)); }
-        }
-        if (lastErr) throw lastErr;
-      }
-    };
-    await Promise.all([worker(), worker()]);
-    const text = parts.filter(Boolean).join('\n').trim();
-    if (!text) throw new Error('No speech could be recognized in this audio.');
-    res.json({ ok: true, text, durationSec: Math.round(duration), creditsUsed: cost });
-  } catch (e) {
-    if (allowed) refundCredits(req.user.id, cost, toolId);
-    let msg = e.message || 'Transcription failed.';
-    // gRPC status codes → clear messages
-    if (e.code === 16) msg = 'NVIDIA API key is invalid or expired — update NVIDIA_API_KEY in Cloud Run. (gRPC UNAUTHENTICATED)';
-    else if (e.code === 7) msg = 'This NVIDIA API key is not allowed to use the speech model — open build.nvidia.com/openai/whisper-large-v3 once while logged in to enable it. (gRPC PERMISSION_DENIED)';
-    else if (e.code === 8) msg = 'AI is busy right now (NVIDIA free-tier rate limit) — please wait a minute and try again.';
-    else if (e.code === 4) msg = 'The speech service took too long — please try a shorter audio.';
-    else if (e.code === 5) msg = 'NVIDIA speech model not found — its function-id may have changed; update NVIDIA_ASR_FUNCTION_ID. (gRPC NOT_FOUND)';
-    else if (typeof e.code === 'number') msg = `Speech service error: ${e.details || e.message} (gRPC ${e.code})`;
-    console.error('[api/ai/transcribe]', e.code, e.details || e.message);
-    res.status(500).json({ error: msg });
-  } finally {
-    if (req.file) fs.unlink(req.file.path, () => {});
-    if (workDir) fs.rm(workDir, { recursive: true, force: true }, () => {});
-  }
-});
-
-// ============================================================
-// POST /api/ai/health — "Health Check" symptom analysis (NVIDIA Nemotron,
-// 2 credits). NOT a diagnosis: it lists possible causes from several angles
-// (infection, diet, sleep, stress, environment, chronic illness, medicines),
-// safe home care, a few classical Siddha home remedies from a FIXED vetted
-// list (the model may not invent others), what tests/when to see a doctor.
-// Emergency red flags are screened on the client BEFORE this is called and
-// re-checked here; a flagged request is refused without charging.
-// No name is collected, and the request body is never logged.
-// body: { lang:'ta'|'en', profile:{age,sex,pregnant}, complaint, details,
-//         durationValue, durationUnit, severity, context:{...}, redFlags:[] }
-// ============================================================
-const SIDDHA_WHITELIST = `
-- Nilavembu kudineer (நிலவேம்பு குடிநீர்) — fever support. Caution: avoid in pregnancy; NOT a substitute for dengue/typhoid/malaria testing.
-- Kabasura kudineer (கபசுர குடிநீர்) — fever with cold/cough/body ache. Caution: avoid in pregnancy; short course only.
-- Chukku malli kaapi (சுக்கு மல்லி காபி — dry ginger + coriander seed decoction) — cold, mild headache, indigestion. Caution: less for acidity/ulcer.
-- Milagu–thulasi kashayam (மிளகு துளசி கஷாயம் — pepper + holy basil) — cold, sore throat, cough.
-- Adathodai leaf decoction with honey (ஆடாதோடை) — cough with phlegm. Caution: avoid in pregnancy.
-- Thoothuvalai rasam/soup (தூதுவளை) — cold, cough, chest congestion.
-- Karpooravalli leaf juice with honey (கற்பூரவல்லி / ஓமவல்லி) — cold/cough; honey not for infants under 1 year.
-- Nochi / turmeric steam inhalation (நொச்சி / மஞ்சள் ஆவி பிடித்தல்) — blocked nose, sinus headache. Caution: burns — adults supervise children.
-- Omam (ajwain) water (ஓம தண்ணீர்) — gas, bloating, indigestion.
-- Seeraga thanneer (சீரகத் தண்ணீர் — cumin water) — indigestion, mild acidity, body heat.
-- Mor (salted buttermilk with cumin, curry leaves) (மோர்) — body heat, dehydration, mild acidity.
-- Vendhayam (fenugreek) soaked water (வெந்தயம்) — body heat, acidity. Caution: can lower blood sugar — diabetics on medicine be careful.
-- Manathakkali keerai (மணத்தக்காளி கீரை) — mouth ulcers, stomach heat.
-- Rice kanji with salt / tender coconut water / homemade ORS (அரிசிக் கஞ்சி / இளநீர்) — diarrhoea, vomiting, fever dehydration.
-- Triphala powder in warm water at night (திரிபலா) — constipation. Caution: not in pregnancy, not with diarrhoea.
-- Nallennai (sesame oil) oil bath, weekly (நல்லெண்ணெய் குளியல்) — body heat, body pain, sleep. Caution: not during fever/cold.
-- Ginger–honey–lemon warm water (இஞ்சி தேன் எலுமிச்சை) — sore throat, nausea.
-`;
-const HEALTH_SYSTEM_PROMPT = `You are a careful health-information assistant for people in Tamil Nadu, India. You are NOT a doctor and you do NOT diagnose.
-Your job: from the person's details, reason from several angles (infection/seasonal, food & water, sleep, stress & mental load, work & environment such as sun, mosquitoes, dust, screens, chronic conditions, current medicines and side-effects, hormonal/age factors) and explain the most likely everyday causes in simple words, linking every cause to something the person actually told you. Say plainly when information is insufficient.
-Rules you must follow:
-1. Never state a definite diagnosis. Use "possible", "may be", "commonly".
-2. Always consider dangerous causes relevant to Tamil Nadu (dengue, malaria, typhoid, leptospirosis during rain/flood, UTI, dehydration, uncontrolled sugar/BP) and say which test would rule them out. If fever has lasted 2+ days in the rainy season, recommend CBC with platelet count and dengue NS1/IgM.
-3. Discourage unnecessary medicines: no self-started antibiotics, no repeated painkillers, no leftover or shop-counter antibiotics or steroids. Explain that many mild problems settle with rest, fluids, food and home care, and that a doctor should decide when medicine IS needed — do not tell anyone to avoid or stop modern (allopathic) medicine or any medicine a doctor prescribed.
-4. Siddha home remedies: suggest at most 3, ONLY from this vetted list, with the caution text, and only if suitable for the person (check pregnancy, age, diabetes, the complaint):${SIDDHA_WHITELIST}
-   Never suggest any other herb, metal or mineral preparation (no parpam/chendooram), and never give doses of medicines.
-5. Pregnant women, children under 5 and adults over 65: be extra conservative and recommend seeing a doctor sooner.
-6. If anything suggests an emergency, set urgency to "emergency".
-7. Reply in the language requested (Tamil in simple spoken-style Tamil script, or English).
-Return ONLY valid JSON, no markdown, with exactly these keys:
-{"urgency":"self_care|see_doctor_soon|see_doctor_today|emergency","urgency_reason":"...","summary":"2-3 sentence plain summary","possible_causes":[{"cause":"...","angle":"infection|food_water|sleep|stress|environment|chronic|medicine|other","likelihood":"high|medium|low","why":"linked to their details"}],"root_cause_insight":"the most likely underlying pattern behind the symptoms and what to change","self_care":["..."],"siddha_remedies":[{"name":"...","how":"simple preparation/use","caution":"..."}],"medicine_advice":"when medicine is and is not needed; avoid self-medication","tests_to_consider":["..."],"see_doctor_if":["warning signs to watch"],"questions_for_doctor":["..."],"missing_info":["what else would help"]}`;
-
-function extractJson(text) {
-  let t = (text || '').replace(/```(?:json)?/gi, '').trim();
-  const a = t.indexOf('{'), b = t.lastIndexOf('}');
-  if (a < 0 || b <= a) throw new Error('bad json');
-  return JSON.parse(t.slice(a, b + 1));
-}
-
-app.post('/api/ai/health', creditLimiter, requireAuth, async (req, res) => {
-  const CREDIT_COST = 2;
-  let allowed = false;
-  try {
-    if (!process.env.NVIDIA_API_KEY) return res.status(501).json({ error: 'AI feature not set up yet — add NVIDIA_API_KEY in Cloud Run env vars.' });
-    const b = req.body || {};
-    const clip = (x, n) => (x == null ? '' : String(x)).slice(0, n);
-    if (Array.isArray(b.redFlags) && b.redFlags.length) {
-      return res.status(400).json({ error: 'EMERGENCY_SIGNS', emergency: true });
-    }
-    const complaint = clip(b.complaint, 200), details = clip(b.details, 1500);
-    if (!complaint.trim() && !details.trim()) return res.status(400).json({ error: 'Please describe the problem first.' });
-    const lang = b.lang === 'en' ? 'English' : 'Tamil';
-    const p = b.profile || {}, c = b.context || {};
-    const facts = {
-      age: clip(p.age, 5), sex: clip(p.sex, 10), pregnant: !!p.pregnant,
-      main_problem: complaint, description: details,
-      duration: `${clip(b.durationValue, 5)} ${clip(b.durationUnit, 10)}`, severity_1_to_10: clip(b.severity, 3),
-      temperature_if_measured: clip(c.temp, 10),
-      other_symptoms: Array.isArray(c.symptoms) ? c.symptoms.slice(0, 25).map(x => clip(x, 60)) : [],
-      sleep_hours: clip(c.sleep, 10), water_glasses_per_day: clip(c.water, 10), food: clip(c.food, 200),
-      stress_level: clip(c.stress, 20), work: clip(c.work, 200), screen_hours: clip(c.screen, 10),
-      environment: Array.isArray(c.env) ? c.env.slice(0, 12).map(x => clip(x, 60)) : [],
-      others_at_home_same_symptoms: clip(c.contacts, 10),
-      existing_conditions: clip(c.conditions, 300), current_medicines: clip(c.meds, 300),
-      medicines_taken_for_this: clip(c.tookForThis, 300), allergies: clip(c.allergies, 200)
-    };
-    allowed = await deductCredits(req.user.id, CREDIT_COST, 'healthcheck');
-    if (!allowed) return res.status(402).json({ error: 'Not enough credits — please buy more or upgrade to Pro.' });
-    const ask = async (extra) => extractJson(await callNvidiaChat([
-      { role: 'system', content: HEALTH_SYSTEM_PROMPT },
-      { role: 'user', content: `Reply language: ${lang}.${extra || ''}\nPerson's details (JSON):\n${JSON.stringify(facts)}` }
-    ], { maxTokens: 3000, temperature: 0.2, timeoutMs: 75000 }));
-    let out;
-    try { out = await ask(); }
-    catch (e) { if (e.message !== 'bad json' && !(e instanceof SyntaxError)) throw e; out = await ask(' Your previous reply was not valid JSON — return ONLY the JSON object.'); }
-    const okU = ['self_care', 'see_doctor_soon', 'see_doctor_today', 'emergency'];
-    if (!okU.includes(out.urgency)) out.urgency = 'see_doctor_soon';
-    // Safety floor: vulnerable groups never get plain "self care".
-    const ageN = Number(facts.age);
-    if (out.urgency === 'self_care' && (facts.pregnant || (ageN && (ageN < 5 || ageN > 65)))) out.urgency = 'see_doctor_soon';
-    res.json({ ok: true, result: out });
-  } catch (e) {
-    if (allowed) refundCredits(req.user.id, CREDIT_COST, 'healthcheck');
-    const msg = (e instanceof SyntaxError || e.message === 'bad json') ? 'The AI reply could not be read — your credits were refunded, please try again.' : e.message;
-    res.status(500).json({ error: msg });
   }
 });
 
