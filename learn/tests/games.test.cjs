@@ -6,7 +6,8 @@ const root = path.join(__dirname, '..');
 const vm = require('vm'), fs = require('fs');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'games-math.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'games-lang.js'), 'utf8'));
-const GAMES = Object.assign({}, globalThis.KALVI_MATH, globalThis.KALVI_LANG);
+vm.runInThisContext(fs.readFileSync(path.join(root, 'games-think.js'), 'utf8'));
+const GAMES = Object.assign({}, globalThis.KALVI_MATH, globalThis.KALVI_LANG, globalThis.KALVI_THINK);
 const cat = JSON.parse(fs.readFileSync(path.join(root, 'catalog.json'), 'utf8'));
 const N = Number(process.env.N || 3000);
 let fails = 0, total = 0;
@@ -35,6 +36,35 @@ const INDEP = {
   calendar: q => { const D = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']; let m = q.p.en.match(/^Today is (\w+)\. What day is it (\d+) days? later\?$/); if(m) return (D.indexOf(m[1]) + +m[2]) % 7;
     m = q.p.en.match(/^How many days are there in (\w+)\?$/); if(m) return {January:31,March:31,April:30,May:31,June:30,July:31,August:31,September:30,October:31,November:30,December:31}[m[1]]; },
   duration: q => { const m = q.p.en.match(/from (\d+):(\d\d) (AM|PM) to (\d+):(\d\d) (AM|PM)\?/); if(!m) return; const t = (h, mm, ap) => ((+h % 12) + (ap === 'PM' ? 12 : 0)) * 60 + +mm; const d = t(m[4], m[5], m[6]) - t(m[1], m[2], m[3]); return `${Math.floor(d / 60)} h ${d % 60} min`; },
+  // ---- Thinking Lab: solved again here, independently of the generator ----
+  robot: q => { const d = q.data, walls = new Set(d.walls), M = {'↑':[0,-1],'↓':[0,1],'←':[-1,0],'→':[1,0]};
+    const run = s => { let [x, y] = d.start; for(const m of s.split(' ')){ const v = M[m]; if(!v) return false; x += v[0]; y += v[1]; if(x < 0 || y < 0 || x >= d.W || y >= d.H || walls.has(x + ',' + y)) return false; } return x === d.goal[0] && y === d.goal[1]; };
+    const good = q.opts.filter(o => run(o.v)); return good.length === 1 ? good[0].v : 'reaching programs: ' + good.length; },
+  magicSquare: q => { const m = q.data.m, sums = [...m.map(r => r[0] + r[1] + r[2]), ...[0,1,2].map(j => m[0][j] + m[1][j] + m[2][j]), m[0][0] + m[1][1] + m[2][2], m[0][2] + m[1][1] + m[2][0]];
+    if(new Set(sums).size !== 1) return 'not magic'; if(new Set(m.flat()).size !== 9) return 'repeated number';
+    const cells = [...q.scene.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map(x => x[1]); if(cells.filter(x => x === '?').length !== 1) return 'bad grid';
+    const i = cells.indexOf('?'), row = [0,1,2].map(j => cells[Math.floor(i / 3) * 3 + j]).filter(x => x !== '?').map(Number); return sums[0] - row[0] - row[1]; },
+  balance: q => { const lines = [...q.scene.matchAll(/<div>([^<]*)<\/div>/g)].map(x => x[1]).filter(l => /=\s*\d/.test(l));
+    const first = lines[0].split(' = '), n = first[0].split(' + ').length, a = +first[1] / n; if(lines.length === 1) return a;
+    return +lines[1].split(' = ')[1] - a; },
+  sequence: q => { const n = [...q.scene.matchAll(/<span>([\d,]+)<\/span>/g)].map(x => num(x[1])), L = n.length;
+    const d = n.map((x, i) => i ? x - n[i - 1] : null).slice(1);
+    if(d.every(x => x === d[0])) return n[L - 1] + d[0];
+    if(n.slice(1).every((x, i) => x === n[i] * 2)) return n[L - 1] * 2;
+    if(n.slice(1).every((x, i) => x === n[i] * 3)) return n[L - 1] * 3;
+    if(n.slice(2).every((x, i) => x === n[i] + n[i + 1])) return n[L - 1] + n[L - 2];
+    if(n.every(x => Number.isInteger(Math.sqrt(x))) && d.every((x, i) => !i || x === d[i - 1] + 2)) return Math.pow(Math.sqrt(n[L - 1]) + 1, 2);
+    if(d.every((x, i) => !i || x === d[i - 1] + 1)) return n[L - 1] + d[d.length - 1] + 1; return 'no rule'; },
+  oddOut: q => { const k = +q.p.en.match(/multiple of (\d+)/)[1], odd = q.opts.filter(o => o.v % k !== 0); return odd.length === 1 ? odd[0].v : 'odd count ' + odd.length; },
+  logic: q => { const pairs = [...q.scene.matchAll(/<small>(\w+) is taller than (\w+)\.<\/small>/g)].map(x => [x[1], x[2]]);
+    const names = [...new Set(pairs.flat())], shorter = new Set(pairs.map(x => x[1])), taller = new Set(pairs.map(x => x[0]));
+    const top = names.filter(x => !shorter.has(x)), bot = names.filter(x => !taller.has(x)); if(top.length !== 1 || bot.length !== 1) return 'ambiguous';
+    return /tallest/.test(q.p.en) ? top[0] : bot[0]; },
+  hindiWord: q => { const w = q.p.en.match(/is "(.+)" in Hindi/)[1]; const H = globalThis.KALVI_HINDI; return H.HI_SWAR.concat(H.HI_VYAN).includes(w[0]) ? w[0] : 'not a letter ' + w[0]; },
+  hindiNum: q => ['', 'एक', 'दो', 'तीन', 'चार', 'पाँच', 'छह', 'सात', 'आठ', 'नौ', 'दस'][+q.p.en.match(/^(\d+) —/)[1]],
+  greetings: q => { const w = q.scene.replace(/<[^>]+>/g, ''), c = w.codePointAt(0);
+    const B = [[0x0B80, 0x0BFF, 'தமிழ்'], [0x0900, 0x097F, 'இந்தி'], [0x0D00, 0x0D7F, 'மலையாளம்'], [0x0C00, 0x0C7F, 'தெலுங்கு'], [0x0C80, 0x0CFF, 'கன்னடம்'], [0x0980, 0x09FF, 'வங்காளம்'], [0x0A80, 0x0AFF, 'குஜராத்தி'], [0x0A00, 0x0A7F, 'பஞ்சாபி'], [0x0B00, 0x0B7F, 'ஒடியா'], [0x0600, 0x06FF, 'உருது'], [0x41, 0x7A, 'ஆங்கிலம்']];
+    const b = B.find(x => c >= x[0] && c <= x[1]); return b ? b[2] : 'unknown script'; },
   uyirmeiBuild: q => { const T = globalThis.KALVI_TAMIL; let m = q.p.en.match(/^(.+) \+ (.+) = \?$/); if(m){ const c = T.MEI.indexOf(m[1][0]), v = T.UYIR.indexOf(m[2]); return T.MEI[c] + T.SIGN[v]; }
     m = q.p.en.match(/^"(.+)" = \? \+ \?$/); if(m){ const p = T.parseLetter(m[1]); return `${T.MEI[p.c]}்` + ` + ${T.UYIR[p.v]}`; } }
 };
@@ -56,6 +86,7 @@ const HITS = {}, WANT = {}; let SEENOK = 0;
 for(const [cls, C] of Object.entries(cat.classes)){
   if(+cls > 5) continue;
   for(const s of C.subjects) for(const ch of s.chapters) for(const L of ch.lessons){
+    if(!L.game){ const f = path.join(root, 'lessons', L.id + '.json'); if(!fs.existsSync(f)) fail(L.id, 'lesson file missing'); else { const j = JSON.parse(fs.readFileSync(f, 'utf8')); if(!j.blocks || !j.quiz) fail(L.id, 'lesson incomplete'); } continue; }
     const G = GAMES[L.game];
     if(INDEP[L.game]) WANT[L.id] = true;
     if(!G){ fail(L.id, 'unknown game ' + L.game); continue; }

@@ -345,4 +345,5 @@ TX.tnFacts = pairGame({title:S('நம் தமிழ்நாடு', 'Our Tam
 ]);
 
 G.KALVI_LANG = TX;
+G.KALVI_BUILD = {pairGame, sortGame};
 })(typeof window !== 'undefined' ? window : globalThis);

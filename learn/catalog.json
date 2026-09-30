@@ -429,6 +429,261 @@
        "no": 3
       }
      ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: Robot-க்கு வழி சொல்",
+        "en": "Coding: guide the robot"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 3,
+          "rocks": 1,
+          "minLen": 2,
+          "maxLen": 4
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023 & CBSE: கணினிச் சிந்தனை, புதிர் தீர்த்தல் • Cambridge Primary: Thinking & Working Mathematically • IB PYP: சிந்தனைத் திறன்கள்",
+        "en": "NCF 2023 & CBSE: computational thinking, problem solving • Cambridge Primary: Thinking & Working Mathematically • IB PYP: thinking skills"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளைக் கண்டுபிடி",
+        "en": "Spot the pattern"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-seq",
+         "title": {
+          "ta": "அடுத்த எண் எது?",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {
+          "kinds": [
+           "add"
+          ],
+          "s0": 10,
+          "dMin": 1,
+          "dMax": 2
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தராசுப் புதிர் (algebra-வின் தொடக்கம்)",
+        "en": "Balance puzzles (first algebra)"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-bal",
+         "title": {
+          "ta": "தராசைச் சமன் செய்",
+          "en": "Balance the scale"
+         },
+         "game": "balance",
+         "level": {
+          "maxN": 2,
+          "maxV": 5
+         }
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் குடும்பம் — உறவுப் பெயர்கள்",
+        "en": "My family — relation names"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-rel",
+         "title": {
+          "ta": "யார் இவர்?",
+          "en": "Who is this?"
+         },
+         "game": "relations",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி • CBSE: வாழ்க்கைத் திறன்கள் • IB PYP: கற்பவர் பண்புகள் (அக்கறை, நேர்மை)",
+        "en": "NCF 2023: values education • CBSE: life skills • IB PYP: learner profile (caring, principled)"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பெற்றோரையும் பெரியவர்களையும் பேணுதல்",
+        "en": "Caring for parents and elders"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வீட்டில் என் பங்கு",
+        "en": "My part at home"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-home",
+         "title": {
+          "ta": "நான் உதவக்கூடியவை",
+          "en": "Jobs I can help with"
+         },
+         "game": "homeHelper",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் தேசியச் சின்னங்கள்",
+        "en": "Our national symbols"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-sym",
+         "title": {
+          "ta": "தேசியச் சின்னங்கள்",
+          "en": "National symbols"
+         },
+         "game": "symbols",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT சமூக அறிவியல் • IB PYP: \"நாம் எப்படி ஒழுங்கமைக்கிறோம்\" • Cambridge: Global Perspectives",
+        "en": "Samacheer & NCERT Social Science • IB PYP: \"How we organise ourselves\" • Cambridge: Global Perspectives"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி — உயிர் எழுத்துகள் (स्वर)",
+        "en": "Hindi — vowels (स्वर)"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-hswar",
+         "title": {
+          "ta": "அடுத்த எழுத்து",
+          "en": "Next letter"
+         },
+         "game": "hindiSwar",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 / NCF 2023: மும்மொழி வாய்ப்பு • IB PYP & Cambridge: இரண்டாம் மொழி கற்றல்",
+        "en": "NEP 2020 / NCF 2023: multilingual learning • IB PYP & Cambridge: learning an additional language"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தி — எண்கள்",
+        "en": "Hindi — numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c1-hnum",
+         "title": {
+          "ta": "एक, दो, तीन…",
+          "en": "एक, दो, तीन…"
+         },
+         "game": "hindiNum",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
     }
    ]
   },
@@ -888,6 +1143,341 @@
         }
        ],
        "no": 3
+      }
+     ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: Robot-க்கு வழி சொல்",
+        "en": "Coding: guide the robot"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 4,
+          "rocks": 2,
+          "minLen": 3,
+          "maxLen": 5
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023 & CBSE: கணினிச் சிந்தனை, புதிர் தீர்த்தல் • Cambridge Primary: Thinking & Working Mathematically • IB PYP: சிந்தனைத் திறன்கள்",
+        "en": "NCF 2023 & CBSE: computational thinking, problem solving • Cambridge Primary: Thinking & Working Mathematically • IB PYP: thinking skills"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளைக் கண்டுபிடி",
+        "en": "Spot the pattern"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-seq",
+         "title": {
+          "ta": "அடுத்த எண் எது?",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {
+          "kinds": [
+           "add",
+           "double"
+          ],
+          "s0": 10,
+          "dMin": 2,
+          "dMax": 5
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தராசுப் புதிர் (algebra-வின் தொடக்கம்)",
+        "en": "Balance puzzles (first algebra)"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-bal",
+         "title": {
+          "ta": "தராசைச் சமன் செய்",
+          "en": "Balance the scale"
+         },
+         "game": "balance",
+         "level": {
+          "maxN": 2,
+          "maxV": 5
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "பொருந்தாதது எது?",
+        "en": "Odd one out"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-odd",
+         "title": {
+          "ta": "மடங்குகள் — பொருந்தாதது",
+          "en": "Multiples — odd one out"
+         },
+         "game": "oddOut",
+         "level": {
+          "ks": [
+           2,
+           5,
+           10
+          ],
+          "max": 10
+         }
+        }
+       ],
+       "no": 4
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் குடும்பம் — உறவுப் பெயர்கள்",
+        "en": "My family — relation names"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-rel",
+         "title": {
+          "ta": "யார் இவர்?",
+          "en": "Who is this?"
+         },
+         "game": "relations",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி • CBSE: வாழ்க்கைத் திறன்கள் • IB PYP: கற்பவர் பண்புகள் (அக்கறை, நேர்மை)",
+        "en": "NCF 2023: values education • CBSE: life skills • IB PYP: learner profile (caring, principled)"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பெற்றோரையும் பெரியவர்களையும் பேணுதல்",
+        "en": "Caring for parents and elders"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வீட்டில் என் பங்கு",
+        "en": "My part at home"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-home",
+         "title": {
+          "ta": "நான் உதவக்கூடியவை",
+          "en": "Jobs I can help with"
+         },
+         "game": "homeHelper",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் தேசியச் சின்னங்கள்",
+        "en": "Our national symbols"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-sym",
+         "title": {
+          "ta": "தேசியச் சின்னங்கள்",
+          "en": "National symbols"
+         },
+         "game": "symbols",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT சமூக அறிவியல் • IB PYP: \"நாம் எப்படி ஒழுங்கமைக்கிறோம்\" • Cambridge: Global Perspectives",
+        "en": "Samacheer & NCERT Social Science • IB PYP: \"How we organise ourselves\" • Cambridge: Global Perspectives"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சிறப்பு நாள்கள்",
+        "en": "Special days"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-natdays",
+         "title": {
+          "ta": "எந்த நாள்?",
+          "en": "Which day?"
+         },
+         "game": "days",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி — உயிர் எழுத்துகள் (स्वर)",
+        "en": "Hindi — vowels (स्वर)"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-hswar",
+         "title": {
+          "ta": "அடுத்த எழுத்து",
+          "en": "Next letter"
+         },
+         "game": "hindiSwar",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 / NCF 2023: மும்மொழி வாய்ப்பு • IB PYP & Cambridge: இரண்டாம் மொழி கற்றல்",
+        "en": "NEP 2020 / NCF 2023: multilingual learning • IB PYP & Cambridge: learning an additional language"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தி — எண்கள்",
+        "en": "Hindi — numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-hnum",
+         "title": {
+          "ta": "एक, दो, तीन…",
+          "en": "एक, दो, तीन…"
+         },
+         "game": "hindiNum",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இந்தி — சொற்கள்",
+        "en": "Hindi — words"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-hword",
+         "title": {
+          "ta": "முதல் எழுத்து",
+          "en": "First letter"
+         },
+         "game": "hindiWord",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஒரு சொல், மூன்று மொழி",
+        "en": "One word, three languages"
+       },
+       "lessons": [
+        {
+         "id": "g-c2-3lang",
+         "title": {
+          "ta": "தமிழ் – इंदी – English",
+          "en": "Tamil – Hindi – English"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "no": 4
       }
      ]
     }
@@ -1880,6 +2470,423 @@
        "no": 10
       }
      ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: Robot-க்கு வழி சொல்",
+        "en": "Coding: guide the robot"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 4,
+          "rocks": 3,
+          "minLen": 4,
+          "maxLen": 6
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023 & CBSE: கணினிச் சிந்தனை, புதிர் தீர்த்தல் • Cambridge Primary: Thinking & Working Mathematically • IB PYP: சிந்தனைத் திறன்கள்",
+        "en": "NCF 2023 & CBSE: computational thinking, problem solving • Cambridge Primary: Thinking & Working Mathematically • IB PYP: thinking skills"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளைக் கண்டுபிடி",
+        "en": "Spot the pattern"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-seq",
+         "title": {
+          "ta": "அடுத்த எண் எது?",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {
+          "kinds": [
+           "add",
+           "double",
+           "triple"
+          ]
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தராசுப் புதிர் (algebra-வின் தொடக்கம்)",
+        "en": "Balance puzzles (first algebra)"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-bal",
+         "title": {
+          "ta": "தராசைச் சமன் செய்",
+          "en": "Balance the scale"
+         },
+         "game": "balance",
+         "level": {
+          "maxN": 3,
+          "maxV": 10
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "பொருந்தாதது எது?",
+        "en": "Odd one out"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-odd",
+         "title": {
+          "ta": "மடங்குகள் — பொருந்தாதது",
+          "en": "Multiples — odd one out"
+         },
+         "game": "oddOut",
+         "level": {
+          "ks": [
+           2,
+           3,
+           5,
+           10
+          ],
+          "max": 10
+         }
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "மாயச் சதுரம் & தர்க்கம்",
+        "en": "Magic squares & logic"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-magic",
+         "title": {
+          "ta": "மாயச் சதுரம்",
+          "en": "Magic square"
+         },
+         "game": "magicSquare",
+         "level": {}
+        },
+        {
+         "id": "g-c3-logic",
+         "title": {
+          "ta": "துப்பறியும் புதிர்",
+          "en": "Detective puzzle"
+         },
+         "game": "logic",
+         "level": {
+          "n": 3
+         }
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் குடும்பம் — உறவுப் பெயர்கள்",
+        "en": "My family — relation names"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-rel",
+         "title": {
+          "ta": "யார் இவர்?",
+          "en": "Who is this?"
+         },
+         "game": "relations",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி • CBSE: வாழ்க்கைத் திறன்கள் • IB PYP: கற்பவர் பண்புகள் (அக்கறை, நேர்மை)",
+        "en": "NCF 2023: values education • CBSE: life skills • IB PYP: learner profile (caring, principled)"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பெற்றோரையும் பெரியவர்களையும் பேணுதல்",
+        "en": "Caring for parents and elders"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வீட்டில் என் பங்கு",
+        "en": "My part at home"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-home",
+         "title": {
+          "ta": "நான் உதவக்கூடியவை",
+          "en": "Jobs I can help with"
+         },
+         "game": "homeHelper",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் தேசியச் சின்னங்கள்",
+        "en": "Our national symbols"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-sym",
+         "title": {
+          "ta": "தேசியச் சின்னங்கள்",
+          "en": "National symbols"
+         },
+         "game": "symbols",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT சமூக அறிவியல் • IB PYP: \"நாம் எப்படி ஒழுங்கமைக்கிறோம்\" • Cambridge: Global Perspectives",
+        "en": "Samacheer & NCERT Social Science • IB PYP: \"How we organise ourselves\" • Cambridge: Global Perspectives"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சிறப்பு நாள்கள்",
+        "en": "Special days"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-natdays",
+         "title": {
+          "ta": "எந்த நாள்?",
+          "en": "Which day?"
+         },
+         "game": "days",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஜனநாயகம் — மக்களின் ஆட்சி",
+        "en": "Democracy — rule by the people"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-demo",
+         "title": {
+          "ta": "ஜனநாயக வினாடி வினா",
+          "en": "Democracy quiz"
+         },
+         "game": "democracy",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் பெருமை — அறிவியலும் மேதைகளும்",
+        "en": "India’s pride — science and geniuses"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-proud",
+         "title": {
+          "ta": "இந்தியச் சாதனைகள்",
+          "en": "Indian achievements"
+         },
+         "game": "proudIndia",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி — உயிர் எழுத்துகள் (स्वर)",
+        "en": "Hindi — vowels (स्वर)"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-hswar",
+         "title": {
+          "ta": "அடுத்த எழுத்து",
+          "en": "Next letter"
+         },
+         "game": "hindiSwar",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 / NCF 2023: மும்மொழி வாய்ப்பு • IB PYP & Cambridge: இரண்டாம் மொழி கற்றல்",
+        "en": "NEP 2020 / NCF 2023: multilingual learning • IB PYP & Cambridge: learning an additional language"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தி — எண்கள்",
+        "en": "Hindi — numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-hnum",
+         "title": {
+          "ta": "एक, दो, तीन…",
+          "en": "एक, दो, तीन…"
+         },
+         "game": "hindiNum",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இந்தி — சொற்கள்",
+        "en": "Hindi — words"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-hword",
+         "title": {
+          "ta": "முதல் எழுத்து",
+          "en": "First letter"
+         },
+         "game": "hindiWord",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஒரு சொல், மூன்று மொழி",
+        "en": "One word, three languages"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-3lang",
+         "title": {
+          "ta": "தமிழ் – इंदी – English",
+          "en": "Tamil – Hindi – English"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் மொழிகள் — வணக்கம்!",
+        "en": "Languages of India — hello!"
+       },
+       "lessons": [
+        {
+         "id": "g-c3-greet",
+         "title": {
+          "ta": "எந்த மொழியில் வணக்கம்?",
+          "en": "Hello in which language?"
+         },
+         "game": "greetings",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
     }
    ]
   },
@@ -2836,6 +3843,430 @@
        "no": 9
       }
      ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: Robot-க்கு வழி சொல்",
+        "en": "Coding: guide the robot"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 5,
+          "rocks": 4,
+          "minLen": 5,
+          "maxLen": 7
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023 & CBSE: கணினிச் சிந்தனை, புதிர் தீர்த்தல் • Cambridge Primary: Thinking & Working Mathematically • IB PYP: சிந்தனைத் திறன்கள்",
+        "en": "NCF 2023 & CBSE: computational thinking, problem solving • Cambridge Primary: Thinking & Working Mathematically • IB PYP: thinking skills"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளைக் கண்டுபிடி",
+        "en": "Spot the pattern"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-seq",
+         "title": {
+          "ta": "அடுத்த எண் எது?",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {
+          "kinds": [
+           "add",
+           "double",
+           "triple",
+           "squares",
+           "grow"
+          ]
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தராசுப் புதிர் (algebra-வின் தொடக்கம்)",
+        "en": "Balance puzzles (first algebra)"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-bal",
+         "title": {
+          "ta": "தராசைச் சமன் செய்",
+          "en": "Balance the scale"
+         },
+         "game": "balance",
+         "level": {
+          "maxN": 4,
+          "maxV": 10
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "பொருந்தாதது எது?",
+        "en": "Odd one out"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-odd",
+         "title": {
+          "ta": "மடங்குகள் — பொருந்தாதது",
+          "en": "Multiples — odd one out"
+         },
+         "game": "oddOut",
+         "level": {
+          "ks": [
+           2,
+           3,
+           4,
+           5,
+           6,
+           9,
+           10
+          ],
+          "max": 12
+         }
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "மாயச் சதுரம் & தர்க்கம்",
+        "en": "Magic squares & logic"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-magic",
+         "title": {
+          "ta": "மாயச் சதுரம்",
+          "en": "Magic square"
+         },
+         "game": "magicSquare",
+         "level": {
+          "shift": 3
+         }
+        },
+        {
+         "id": "g-c4-logic",
+         "title": {
+          "ta": "துப்பறியும் புதிர்",
+          "en": "Detective puzzle"
+         },
+         "game": "logic",
+         "level": {
+          "n": 4
+         }
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் குடும்பம் — உறவுப் பெயர்கள்",
+        "en": "My family — relation names"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-rel",
+         "title": {
+          "ta": "யார் இவர்?",
+          "en": "Who is this?"
+         },
+         "game": "relations",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி • CBSE: வாழ்க்கைத் திறன்கள் • IB PYP: கற்பவர் பண்புகள் (அக்கறை, நேர்மை)",
+        "en": "NCF 2023: values education • CBSE: life skills • IB PYP: learner profile (caring, principled)"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பெற்றோரையும் பெரியவர்களையும் பேணுதல்",
+        "en": "Caring for parents and elders"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வீட்டில் என் பங்கு",
+        "en": "My part at home"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-home",
+         "title": {
+          "ta": "நான் உதவக்கூடியவை",
+          "en": "Jobs I can help with"
+         },
+         "game": "homeHelper",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் தேசியச் சின்னங்கள்",
+        "en": "Our national symbols"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-sym",
+         "title": {
+          "ta": "தேசியச் சின்னங்கள்",
+          "en": "National symbols"
+         },
+         "game": "symbols",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT சமூக அறிவியல் • IB PYP: \"நாம் எப்படி ஒழுங்கமைக்கிறோம்\" • Cambridge: Global Perspectives",
+        "en": "Samacheer & NCERT Social Science • IB PYP: \"How we organise ourselves\" • Cambridge: Global Perspectives"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சிறப்பு நாள்கள்",
+        "en": "Special days"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-natdays",
+         "title": {
+          "ta": "எந்த நாள்?",
+          "en": "Which day?"
+         },
+         "game": "days",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஜனநாயகம் — மக்களின் ஆட்சி",
+        "en": "Democracy — rule by the people"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-demo",
+         "title": {
+          "ta": "ஜனநாயக வினாடி வினா",
+          "en": "Democracy quiz"
+         },
+         "game": "democracy",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் பெருமை — அறிவியலும் மேதைகளும்",
+        "en": "India’s pride — science and geniuses"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-proud",
+         "title": {
+          "ta": "இந்தியச் சாதனைகள்",
+          "en": "Indian achievements"
+         },
+         "game": "proudIndia",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி — உயிர் எழுத்துகள் (स्वर)",
+        "en": "Hindi — vowels (स्वर)"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-hswar",
+         "title": {
+          "ta": "அடுத்த எழுத்து",
+          "en": "Next letter"
+         },
+         "game": "hindiSwar",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 / NCF 2023: மும்மொழி வாய்ப்பு • IB PYP & Cambridge: இரண்டாம் மொழி கற்றல்",
+        "en": "NEP 2020 / NCF 2023: multilingual learning • IB PYP & Cambridge: learning an additional language"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தி — எண்கள்",
+        "en": "Hindi — numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-hnum",
+         "title": {
+          "ta": "एक, दो, तीन…",
+          "en": "एक, दो, तीन…"
+         },
+         "game": "hindiNum",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இந்தி — சொற்கள்",
+        "en": "Hindi — words"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-hword",
+         "title": {
+          "ta": "முதல் எழுத்து",
+          "en": "First letter"
+         },
+         "game": "hindiWord",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஒரு சொல், மூன்று மொழி",
+        "en": "One word, three languages"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-3lang",
+         "title": {
+          "ta": "தமிழ் – इंदी – English",
+          "en": "Tamil – Hindi – English"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் மொழிகள் — வணக்கம்!",
+        "en": "Languages of India — hello!"
+       },
+       "lessons": [
+        {
+         "id": "g-c4-greet",
+         "title": {
+          "ta": "எந்த மொழியில் வணக்கம்?",
+          "en": "Hello in which language?"
+         },
+         "game": "greetings",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
     }
    ]
   },
@@ -3740,6 +5171,473 @@
         "en": "Term 3"
        },
        "no": 10
+      }
+     ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: Robot-க்கு வழி சொல்",
+        "en": "Coding: guide the robot"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 5,
+          "rocks": 5,
+          "minLen": 6,
+          "maxLen": 8
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023 & CBSE: கணினிச் சிந்தனை, புதிர் தீர்த்தல் • Cambridge Primary: Thinking & Working Mathematically • IB PYP: சிந்தனைத் திறன்கள்",
+        "en": "NCF 2023 & CBSE: computational thinking, problem solving • Cambridge Primary: Thinking & Working Mathematically • IB PYP: thinking skills"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளைக் கண்டுபிடி",
+        "en": "Spot the pattern"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-seq",
+         "title": {
+          "ta": "அடுத்த எண் எது?",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தராசுப் புதிர் (algebra-வின் தொடக்கம்)",
+        "en": "Balance puzzles (first algebra)"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-bal",
+         "title": {
+          "ta": "தராசைச் சமன் செய்",
+          "en": "Balance the scale"
+         },
+         "game": "balance",
+         "level": {
+          "two": true
+         }
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "பொருந்தாதது எது?",
+        "en": "Odd one out"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-odd",
+         "title": {
+          "ta": "மடங்குகள் — பொருந்தாதது",
+          "en": "Multiples — odd one out"
+         },
+         "game": "oddOut",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "மாயச் சதுரம் & தர்க்கம்",
+        "en": "Magic squares & logic"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-magic",
+         "title": {
+          "ta": "மாயச் சதுரம்",
+          "en": "Magic square"
+         },
+         "game": "magicSquare",
+         "level": {
+          "shift": 10
+         }
+        },
+        {
+         "id": "g-c5-logic",
+         "title": {
+          "ta": "துப்பறியும் புதிர்",
+          "en": "Detective puzzle"
+         },
+         "game": "logic",
+         "level": {
+          "n": 5
+         }
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "என் குடும்பம் — உறவுப் பெயர்கள்",
+        "en": "My family — relation names"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-rel",
+         "title": {
+          "ta": "யார் இவர்?",
+          "en": "Who is this?"
+         },
+         "game": "relations",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி • CBSE: வாழ்க்கைத் திறன்கள் • IB PYP: கற்பவர் பண்புகள் (அக்கறை, நேர்மை)",
+        "en": "NCF 2023: values education • CBSE: life skills • IB PYP: learner profile (caring, principled)"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பெற்றோரையும் பெரியவர்களையும் பேணுதல்",
+        "en": "Caring for parents and elders"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "வீட்டில் என் பங்கு",
+        "en": "My part at home"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-home",
+         "title": {
+          "ta": "நான் உதவக்கூடியவை",
+          "en": "Jobs I can help with"
+         },
+         "game": "homeHelper",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "நம் தேசியச் சின்னங்கள்",
+        "en": "Our national symbols"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-sym",
+         "title": {
+          "ta": "தேசியச் சின்னங்கள்",
+          "en": "National symbols"
+         },
+         "game": "symbols",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT சமூக அறிவியல் • IB PYP: \"நாம் எப்படி ஒழுங்கமைக்கிறோம்\" • Cambridge: Global Perspectives",
+        "en": "Samacheer & NCERT Social Science • IB PYP: \"How we organise ourselves\" • Cambridge: Global Perspectives"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "சிறப்பு நாள்கள்",
+        "en": "Special days"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-natdays",
+         "title": {
+          "ta": "எந்த நாள்?",
+          "en": "Which day?"
+         },
+         "game": "days",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஜனநாயகம் — மக்களின் ஆட்சி",
+        "en": "Democracy — rule by the people"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-demo",
+         "title": {
+          "ta": "ஜனநாயக வினாடி வினா",
+          "en": "Democracy quiz"
+         },
+         "game": "democracy",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் பெருமை — அறிவியலும் மேதைகளும்",
+        "en": "India’s pride — science and geniuses"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-proud",
+         "title": {
+          "ta": "இந்தியச் சாதனைகள்",
+          "en": "Indian achievements"
+         },
+         "game": "proudIndia",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி — உயிர் எழுத்துகள் (स्वर)",
+        "en": "Hindi — vowels (स्वर)"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-hswar",
+         "title": {
+          "ta": "அடுத்த எழுத்து",
+          "en": "Next letter"
+         },
+         "game": "hindiSwar",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 / NCF 2023: மும்மொழி வாய்ப்பு • IB PYP & Cambridge: இரண்டாம் மொழி கற்றல்",
+        "en": "NEP 2020 / NCF 2023: multilingual learning • IB PYP & Cambridge: learning an additional language"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தி — எண்கள்",
+        "en": "Hindi — numbers"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-hnum",
+         "title": {
+          "ta": "एक, दो, तीन…",
+          "en": "एक, दो, तीन…"
+         },
+         "game": "hindiNum",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இந்தி — சொற்கள்",
+        "en": "Hindi — words"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-hword",
+         "title": {
+          "ta": "முதல் எழுத்து",
+          "en": "First letter"
+         },
+         "game": "hindiWord",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "ஒரு சொல், மூன்று மொழி",
+        "en": "One word, three languages"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-3lang",
+         "title": {
+          "ta": "தமிழ் – इंदी – English",
+          "en": "Tamil – Hindi – English"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் மொழிகள் — வணக்கம்!",
+        "en": "Languages of India — hello!"
+       },
+       "lessons": [
+        {
+         "id": "g-c5-greet",
+         "title": {
+          "ta": "எந்த மொழியில் வணக்கம்?",
+          "en": "Hello in which language?"
+         },
+         "game": "greetings",
+         "level": {}
+        }
+       ],
+       "no": 5
+      }
+     ]
+    },
+    {
+     "id": "beyond",
+     "name": {
+      "ta": "பாடநூலுக்கு அப்பால்",
+      "en": "Beyond the Textbook"
+     },
+     "icon": "🚀",
+     "color": "beyond",
+     "chapters": [
+      {
+       "title": {
+        "ta": "விஞ்ஞானி போலச் சிந்தி",
+        "en": "Think like a scientist"
+       },
+       "lessons": [
+        {
+         "id": "eratosthenes",
+         "title": {
+          "ta": "குச்சியின் நிழலால் பூமியை அளந்தவர்",
+          "en": "Measuring the Earth with a shadow"
+         }
+        }
+       ],
+       "part": {
+        "ta": "பாடநூலுக்கு அப்பால் — CBSE/NCERT, NCF 2023, IB PYP, Cambridge கருத்துகளுடன்",
+        "en": "Beyond the textbook — ideas from CBSE/NCERT, NCF 2023, IB PYP and Cambridge"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Coder போலச் சிந்தி",
+        "en": "Think like a coder"
+       },
+       "lessons": [
+        {
+         "id": "think-like-coder",
+         "title": {
+          "ta": "Algorithm, bug, loop",
+          "en": "Algorithm, bug, loop"
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "குடிமகன் போலச் சிந்தி",
+        "en": "Think like a citizen"
+       },
+       "lessons": [
+        {
+         "id": "power-of-vote",
+         "title": {
+          "ta": "ஒரு ஓட்டின் சக்தி",
+          "en": "The power of one vote"
+         }
+        }
+       ],
+       "no": 3
       }
      ]
     }

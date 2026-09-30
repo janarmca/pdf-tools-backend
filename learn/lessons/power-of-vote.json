@@ -1,0 +1,393 @@
+{
+ "id": "power-of-vote",
+ "minutes": 20,
+ "title": {
+  "ta": "ஒரு ஓட்டின் சக்தி — ஜனநாயகம் எப்படி இயங்குகிறது?",
+  "en": "The power of one vote — how democracy works"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "5-ஆம் வகுப்பு — நல்ல குடிமகன்",
+    "en": "Class 5 — Good Citizen"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "சமூக & அரசியல் வாழ்க்கை — அரசு என்றால் என்ன?",
+    "en": "Social & Political Life — What is Government?"
+   }
+  },
+  {
+   "b": "IB PYP",
+   "w": {
+    "ta": "\"நாம் எப்படி ஒழுங்கமைக்கிறோம்\"",
+    "en": "\"How we organise ourselves\""
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Global Perspectives",
+    "en": "Global Perspectives"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "ஜனநாயகம் என்றால் என்ன என்று எளிமையாகச் சொல்ல",
+   "en": "Say simply what democracy is"
+  },
+  {
+   "ta": "ஒவ்வொரு ஓட்டும் ஏன் முக்கியம் என்று நீயே பார்க்க",
+   "en": "See for yourself why every vote matters"
+  },
+  {
+   "ta": "உரிமைகளும் கடமைகளும் சேர்ந்தே வருகின்றன என்று புரிந்துகொள்ள",
+   "en": "Understand that rights and duties come together"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் வகுப்புக்குத் தலைவரைத் தேர்ந்தெடுக்க வேண்டும். ஆசிரியர் தானே ஒருவரைத் தேர்ந்தெடுக்கலாம், அல்லது **எல்லோரும் ஓட்டு போடலாம்**. இரண்டாவது முறையின் பெயர்தான் **ஜனநாயகம்** — மக்களே முடிவெடுக்கும் முறை. இந்தியா உலகின் மிகப் பெரிய ஜனநாயக நாடு!",
+    "en": "Your class must choose a class leader. The teacher could pick one — or **everyone could vote**. The second way is called **democracy** — the people decide. India is the world’s largest democracy!"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "30 பேர் உள்ள வகுப்பில், 4 நண்பர்கள் ஓட்டு போடாவிட்டால் ஏதாவது மாறுமா?",
+    "en": "In a class of 30, does it matter if 4 friends don’t vote?"
+   },
+   "options": [
+    {
+     "ta": "இல்லை — 4 ஓட்டு ஒன்றுமே இல்லை",
+     "en": "No — 4 votes are nothing"
+    },
+    {
+     "ta": "முடிவையே மாற்றலாம்",
+     "en": "It could change the result"
+    },
+    {
+     "ta": "ஆசிரியருக்கு மட்டுமே தெரியும்",
+     "en": "Only the teacher knows"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "போட்டி நெருக்கமாக இருக்கும்போது, சில ஓட்டுகளே வெற்றியாளரை மாற்றிவிடும். கீழே நீயே சோதித்துப் பார்!",
+    "en": "When a contest is close, just a few votes can change the winner. Try it yourself below!"
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "classVote",
+   "text": {
+    "ta": "அருண், பிரியா, கவின் — மூவரும் போட்டியிடுகிறார்கள். உன்னுடன் 4 நண்பர்கள் உள்ளனர். நீங்கள் ஓட்டு போடுகிறீர்களா இல்லையா?",
+    "en": "Arun, Priya and Kavin are standing. You have 4 friends. Do you vote or not?"
+   },
+   "q": {
+    "ta": "தேர்தல் முடிவை மாற்றியது எது?",
+    "en": "What changed the result?"
+   },
+   "options": [
+    {
+     "ta": "4 நண்பர்கள் ஓட்டு போட்டது",
+     "en": "The 4 friends voting"
+    },
+    {
+     "ta": "ஆசிரியரின் விருப்பம்",
+     "en": "The teacher’s wish"
+    },
+    {
+     "ta": "அதிர்ஷ்டம்",
+     "en": "Luck"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "உன் ஓட்டு = உன் குரல். ஓட்டு போடாவிட்டால், மற்றவர்கள் உனக்காக முடிவெடுப்பார்கள்.",
+    "en": "Your vote = your voice. If you don’t vote, others decide for you."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நம் நாட்டில் இது எப்படி நடக்கிறது?",
+    "en": "How it works in our country"
+   },
+   "text": {
+    "ta": "• 18 வயதான ஒவ்வொரு இந்தியருக்கும் **ஒரே ஒரு ஓட்டு** — பணக்காரருக்கும் ஏழைக்கும் சமம்.\n• ஓட்டு **ரகசியமானது** — யாருக்கு ஓட்டளித்தாய் என்று யாரும் கேட்க முடியாது.\n• **இந்தியத் தேர்தல் ஆணையம்** தேர்தலை நியாயமாக நடத்துகிறது; மின்னணு வாக்குப்பதிவு இயந்திரம் (EVM) பயன்படுகிறது.\n• ஊராட்சி முதல் நாடாளுமன்றம் வரை — ஒவ்வொரு நிலையிலும் மக்கள் தங்கள் பிரதிநிதிகளைத் தேர்ந்தெடுக்கிறார்கள்.\n• நம் **அரசியலமைப்பு** நமக்கு உரிமைகள் (பேச்சு, கல்வி, சமத்துவம்) தருகிறது; கடமைகளும் (சட்டத்தை மதித்தல், பொதுச் சொத்தைக் காத்தல், சுற்றுச்சூழலைப் பாதுகாத்தல்) தருகிறது.",
+    "en": "• Every Indian aged 18 has **exactly one vote** — equal for rich and poor.\n• The vote is **secret** — nobody may ask whom you voted for.\n• The **Election Commission of India** runs elections fairly, using electronic voting machines (EVMs).\n• From the panchayat to Parliament, people choose their representatives at every level.\n• Our **Constitution** gives us rights (speech, education, equality) — and duties (respecting the law, protecting public property, caring for the environment)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு நல்ல தலைவரைத் தேர்ந்தெடுக்க எதைப் பார்க்க வேண்டும்?",
+    "en": "What should you look at when choosing a good leader?"
+   },
+   "options": [
+    {
+     "ta": "அவர் என்ன செய்வார் என்பதையும், இதுவரை என்ன செய்தார் என்பதையும்",
+     "en": "What they promise to do and what they have actually done"
+    },
+    {
+     "ta": "யார் அதிக இனிப்பு கொடுக்கிறார் என்பதை",
+     "en": "Who gives out the most sweets"
+    },
+    {
+     "ta": "யாருடைய சட்டை அழகாக இருக்கிறது என்பதை",
+     "en": "Whose shirt looks nicest"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "தலைவர் நமக்காக உழைக்க வேண்டியவர்.",
+    "en": "A leader must work for all of us."
+   },
+   "solution": {
+    "ta": "திட்டங்களும் செயல்களுமே முக்கியம்; பரிசுகளுக்காக ஓட்டைக் கொடுக்கக் கூடாது.",
+    "en": "Plans and actions matter; a vote must never be traded for gifts."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🏫",
+     "title": {
+      "ta": "பள்ளி நாடாளுமன்றம்",
+      "en": "School parliament"
+     },
+     "text": {
+      "ta": "பல பள்ளிகளில் மாணவர்களே தலைவர், அமைச்சர்களைத் தேர்ந்தெடுக்கிறார்கள்.",
+      "en": "In many schools, students elect their own leaders and ministers."
+     }
+    },
+    {
+     "icon": "🏡",
+     "title": {
+      "ta": "கிராம சபை",
+      "en": "Grama Sabha"
+     },
+     "text": {
+      "ta": "கிராம மக்கள் ஒன்றுகூடி ஊருக்கு என்ன வேண்டும் என்று பேசி முடிவெடுக்கிறார்கள்.",
+      "en": "Villagers meet together to discuss and decide what the village needs."
+     }
+    },
+    {
+     "icon": "🏛️",
+     "title": {
+      "ta": "நாடாளுமன்றம்",
+      "en": "Parliament"
+     },
+     "text": {
+      "ta": "நாம் தேர்ந்தெடுத்தவர்கள் நாட்டுக்கான சட்டங்களை இயற்றுகிறார்கள்.",
+      "en": "The people we elect make laws for the country."
+     }
+    }
+   ]
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "நியாயமான தேர்தல்",
+    "en": "A fair election"
+   },
+   "text": {
+    "ta": "உன் வகுப்புத் தலைவர் தேர்தலை நியாயமாக நடத்த ஒரு திட்டம் வடிவமை.",
+    "en": "Design a plan to run your class leader election fairly."
+   },
+   "prompts": [
+    {
+     "ta": "யார் போட்டியிடலாம்?",
+     "en": "Who can stand?"
+    },
+    {
+     "ta": "ஓட்டு ரகசியமாக இருக்க என்ன செய்வாய்?",
+     "en": "How will you keep votes secret?"
+    },
+    {
+     "ta": "சமமாக வந்தால் என்ன செய்வாய்?",
+     "en": "What if there’s a tie?"
+    },
+    {
+     "ta": "தோற்றவர்களையும் எப்படி மதிப்பாய்?",
+     "en": "How will you respect those who lose?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று பலர் செய்திகளை போனில் பார்த்து முடிவெடுக்கிறார்கள்.",
+    "en": "Today many people decide based on what they see on their phones."
+   },
+   "risk": {
+    "ta": "போலிச் செய்திகள் மக்களைத் தவறாக வழிநடத்தலாம்; மாற்றுக் கருத்து உள்ளவர்களை வெறுப்பதும் ஜனநாயகத்துக்குக் கேடு.",
+    "en": "Fake news can mislead people; hating those who think differently harms democracy."
+   },
+   "fix": {
+    "ta": "செய்தியைச் சரிபார்த்தல், எல்லாப் பக்கத்தையும் கேட்டல், மரியாதையுடன் விவாதித்தல்.",
+    "en": "Check facts, listen to all sides, disagree respectfully."
+   },
+   "q": {
+    "ta": "உன் நண்பன் வேறு கருத்து வைத்திருந்தால், நீ எப்படிப் பேசுவாய்?",
+    "en": "If your friend holds a different opinion, how will you talk with them?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "ஜனநாயகம் என்றால் என்ன? ஏன் ஓட்டு போட வேண்டும்?",
+    "en": "What is democracy? Why should people vote?"
+   },
+   "keywords": [
+    {
+     "ta": "மக்கள்",
+     "en": "people"
+    },
+    {
+     "ta": "ஓட்டு",
+     "en": "vote"
+    },
+    {
+     "ta": "சமம்",
+     "en": "equal"
+    }
+   ],
+   "model": {
+    "ta": "ஜனநாயகம் என்பது மக்களே தலைவர்களைத் தேர்ந்தெடுக்கும் ஆட்சி. ஒவ்வொருவருக்கும் சமமான ஒரு ஓட்டு. ஓட்டு போடாவிட்டால் நம் குரல் கேட்கப்படாது.",
+    "en": "Democracy is rule where the people choose their leaders. Everyone has one equal vote. If we don’t vote, our voice isn’t heard."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "ஜனநாயகம் = மக்களின் ஆட்சி.",
+     "en": "Democracy = rule by the people."
+    },
+    {
+     "ta": "18 வயதில் ஒவ்வொருவருக்கும் ஒரு ஓட்டு; ஓட்டு ரகசியமானது.",
+     "en": "At 18 everyone gets one secret vote."
+    },
+    {
+     "ta": "உரிமைகளுடன் கடமைகளும் உண்டு.",
+     "en": "Rights come with duties."
+    },
+    {
+     "ta": "சரிபார், கேள், மரியாதையுடன் விவாதி.",
+     "en": "Check, listen, disagree respectfully."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "இந்தியாவில் ஓட்டளிக்கும் வயது?",
+    "en": "Voting age in India?"
+   },
+   "options": [
+    {
+     "ta": "16",
+     "en": "16"
+    },
+    {
+     "ta": "18",
+     "en": "18"
+    },
+    {
+     "ta": "21",
+     "en": "21"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "18 வயது நிறைந்த ஒவ்வொரு குடிமகனும்.",
+    "en": "Every citizen who has turned 18."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஓட்டு ஏன் ரகசியமாக இருக்க வேண்டும்?",
+    "en": "Why must a vote be secret?"
+   },
+   "options": [
+    {
+     "ta": "யாருக்கும் பயப்படாமல் ஓட்டளிக்க",
+     "en": "So people can vote without fear"
+    },
+    {
+     "ta": "ஓட்டை எண்ணாமல் இருக்க",
+     "en": "So votes aren’t counted"
+    },
+    {
+     "ta": "தேர்தலைத் தாமதப்படுத்த",
+     "en": "To delay the election"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "ரகசியம் = சுதந்திரமான தேர்வு.",
+    "en": "Secrecy = free choice."
+   }
+  },
+  {
+   "q": {
+    "ta": "தேர்தலை நடத்துவது யார்?",
+    "en": "Who conducts elections in India?"
+   },
+   "options": [
+    {
+     "ta": "இந்தியத் தேர்தல் ஆணையம்",
+     "en": "Election Commission of India"
+    },
+    {
+     "ta": "ஒவ்வொரு கட்சியும்",
+     "en": "Each political party"
+    },
+    {
+     "ta": "பள்ளி ஆசிரியர்கள்",
+     "en": "School teachers"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "சுதந்திரமான அமைப்பு நியாயமாக நடத்துகிறது.",
+    "en": "An independent body runs them fairly."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் குடிமகனின் கடமை எது?",
+    "en": "Which is a citizen’s duty?"
+   },
+   "options": [
+    {
+     "ta": "பொதுச் சொத்தைக் காத்தல்",
+     "en": "Protecting public property"
+    },
+    {
+     "ta": "ஓட்டை விற்பது",
+     "en": "Selling one’s vote"
+    },
+    {
+     "ta": "மாற்றுக் கருத்தை வெறுப்பது",
+     "en": "Hating other opinions"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "பொதுச் சொத்து நம் அனைவருடையது.",
+    "en": "Public property belongs to all of us."
+   }
+  }
+ ]
+}

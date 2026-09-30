@@ -10,7 +10,7 @@
 <style>
 *{box-sizing:border-box}
 :root{--ink:#14213d;--sub:#5b6478;--line:#e2e6ef;--bg:#f6f7fb;--card:#fff;--brand:#3b2fc9;--brand2:#eeecff;--ok:#127a3e;--okbg:#e8f8ee;--bad:#b42318;--badbg:#fdecea;--warm:#fff7e3;--math:#0b5d7a;
- --c-math:#3b2fc9;--c-phy:#0b7a75;--c-che:#b3541e;--c-bio:#2f7d32;--c-tam:#a4133c;--c-eng:#1d4ed8;--c-soc:#7c5e10;--c-evs:#2f7d32;--c-sci:#0b7a75}
+ --c-math:#3b2fc9;--c-phy:#0b7a75;--c-che:#b3541e;--c-bio:#2f7d32;--c-tam:#a4133c;--c-eng:#1d4ed8;--c-soc:#7c5e10;--c-evs:#2f7d32;--c-sci:#0b7a75;--c-think:#6d28d9;--c-val:#be185d;--c-nat:#c2410c;--c-lang:#0369a1;--c-beyond:#0f766e}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.7}
 a{color:var(--brand)}
 .top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
@@ -171,9 +171,10 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
   <div class="lang"><button data-l="ta" class="on">தமிழ்</button><button data-l="en">EN</button></div>
 </div></div>
 <div class="wrap" id="app"></div>
-<script src="games-math.js?v=1"></script>
-<script src="games-lang.js?v=1"></script>
-<script src="play.js?v=1"></script>
+<script src="games-math.js?v=2"></script>
+<script src="games-lang.js?v=2"></script>
+<script src="games-think.js?v=2"></script>
+<script src="play.js?v=2"></script>
 <script>
 (function(){
 'use strict';
@@ -492,6 +493,76 @@ function svg(host, w, h){ const s = document.createElementNS(svgNS,'svg'); s.set
 const T = (ta, en) => LANG==='ta' ? ta : en;
 
 const WIDGETS = {
+  /* Eratosthenes: shadow angle at Alexandria → Earth's circumference */
+  eratosthenes(host){
+    const S = svg(host, 360, 250); const ro = readout(host);
+    let ang = 12; const dist = 800;
+    function draw(){
+      const cx = 180, cy = 330, R = 250, a1 = -90, a2 = -90 - ang * 1.6; // exaggerate for visibility
+      const p = a => [cx + R * Math.cos(a * DEG), cy + R * Math.sin(a * DEG)];
+      const [x1, y1] = p(a1), [x2, y2] = p(a2);
+      const tip = (a, len) => [cx + (R + len) * Math.cos(a * DEG), cy + (R + len) * Math.sin(a * DEG)];
+      const [t1x, t1y] = tip(a1, 38), [t2x, t2y] = tip(a2, 38);
+      S.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="#bfdbfe" stroke="#1d4ed8"/>
+        ${[0, 1, 2, 3, 4].map(i => `<line x1="${20 + i * 80}" y1="0" x2="${20 + i * 80}" y2="${cy - R - 10}" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 5"/>`).join('')}
+        <line x1="${x1}" y1="${y1}" x2="${t1x}" y2="${t1y}" stroke="#14213d" stroke-width="4"/><text x="${t1x + 6}" y="${t1y + 4}" font-size="11">${T('சயீன் — நிழல் இல்லை','Syene — no shadow')}</text>
+        <line x1="${x2}" y1="${y2}" x2="${t2x}" y2="${t2y}" stroke="#14213d" stroke-width="4"/><line x1="${t2x}" y1="${t2y}" x2="${t2x}" y2="${y2 - 2}" stroke="#f59e0b" stroke-width="2"/>
+        <text x="${t2x - 8}" y="${t2y - 6}" font-size="11" text-anchor="end">${T('அலெக்சாந்திரியா','Alexandria')} ${ang}°</text>
+        <text x="${cx}" y="${cy - 40}" font-size="12" text-anchor="middle">🌍 ${T('பூமி (படம் அளவில் அல்ல)','Earth (not to scale)')}</text>`;
+      const circ = dist * 360 / ang;
+      ro([[T('நிழல் கோணம்','Shadow angle'), ang + '°'], [T('முழு வட்டத்தில் எத்தனை பங்கு?','Fraction of a full circle'), `1/${fmtN(360 / ang)}`], [T('இரு நகரங்களுக்கு இடையே','Between the cities'), dist + ' km'], [T('பூமியின் சுற்றளவு','Earth’s circumference'), Math.round(circ).toLocaleString('en-IN') + ' km']]);
+    }
+    const fmtN = x => Number.isInteger(x) ? x : x.toFixed(1);
+    slider(host, T('நிழல் கோணம்','Shadow angle'), 3, 20, 0.2, ang, v => { ang = Math.round(v * 10) / 10; draw(); }, '°');
+  },
+  /* Build a program for the robot and run it */
+  robotProgram(host, p){
+    const W = 5, H = 5, start = [0, 4], goal = p.goal || [4, 0], walls = new Set(p.walls || ['1,4', '1,3', '3,1', '2,2']);
+    let prog = [], pos = start.slice(), msg = '';
+    const S = svg(host, 250, 250); S.style.maxWidth = '300px'; S.style.margin = 'auto';
+    const pr = document.createElement('div'); pr.className = 'big'; pr.style.fontSize = '1.4rem'; pr.style.minHeight = '40px'; host.appendChild(pr);
+    const pad = document.createElement('div'); pad.className = 'row'; pad.style.justifyContent = 'center'; host.appendChild(pad);
+    const out = document.createElement('div'); host.appendChild(out);
+    const D = {'↑':[0,-1], '↓':[0,1], '←':[-1,0], '→':[1,0]};
+    function draw(){
+      const c = 50; let cells = '';
+      for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const k = x + ',' + y; cells += `<rect x="${x * c + 2}" y="${y * c + 2}" width="${c - 4}" height="${c - 4}" rx="8" fill="${(x + y) % 2 ? '#eef2ff' : '#f8fafc'}" stroke="#c7d2fe"/>` + (walls.has(k) ? `<text x="${x * c + 25}" y="${y * c + 34}" font-size="26" text-anchor="middle">🪨</text>` : ''); }
+      cells += `<text x="${goal[0] * c + 25}" y="${goal[1] * c + 34}" font-size="26" text-anchor="middle">⭐</text><text x="${pos[0] * c + 25}" y="${pos[1] * c + 34}" font-size="28" text-anchor="middle">🤖</text>`;
+      S.innerHTML = cells; pr.textContent = prog.length ? prog.join(' ') : T('(program காலியாக உள்ளது)', '(program is empty)');
+      out.innerHTML = msg;
+    }
+    ['↑', '↓', '←', '→'].forEach(a => { const b = document.createElement('button'); b.className = 'btn'; b.style.fontSize = '1.4rem'; b.textContent = a; b.onclick = () => { if(prog.length < 14){ prog.push(a); msg = ''; draw(); } }; pad.appendChild(b); });
+    const run = document.createElement('button'); run.className = 'btn p'; run.textContent = T('▶ இயக்கு', '▶ Run'); pad.appendChild(run);
+    const undo = document.createElement('button'); undo.className = 'btn'; undo.textContent = '⌫'; undo.onclick = () => { prog.pop(); msg = ''; pos = start.slice(); draw(); }; pad.appendChild(undo);
+    const clr = document.createElement('button'); clr.className = 'btn'; clr.textContent = T('அழி', 'Clear'); clr.onclick = () => { prog = []; msg = ''; pos = start.slice(); draw(); }; pad.appendChild(clr);
+    run.onclick = () => {
+      pos = start.slice(); let i = 0; msg = ''; draw();
+      const iv = setInterval(() => {
+        if(i >= prog.length){ clearInterval(iv); const win = pos[0] === goal[0] && pos[1] === goal[1];
+          msg = win ? `<div class="fb ok">🎉 ${T(`வெற்றி! ${prog.length} கட்டளைகளில் ⭐-ஐ அடைந்தாய். இதுதான் மிகக் குறுகிய வழியா? ஏன் என்று யோசி!`, `You did it in ${prog.length} steps! Is this the shortest way? Think about why!`)}</div>` : `<div class="fb bad">🐞 ${T('Robot ⭐-ஐ அடையவில்லை — இது ஒரு "bug". program-ஐத் திருத்தி (debug) மீண்டும் இயக்கு!', 'The robot didn’t reach the ⭐ — that’s a "bug". Fix (debug) the program and run again!')}</div>`; draw(); return; }
+        const d = D[prog[i]], nx = pos[0] + d[0], ny = pos[1] + d[1];
+        if(nx < 0 || ny < 0 || nx >= W || ny >= H || walls.has(nx + ',' + ny)){ clearInterval(iv); msg = `<div class="fb bad">💥 ${T(`கட்டளை ${i + 1}-ல் (${prog[i]}) மோதல்! இதுதான் bug இருக்கும் இடம்.`, `Crash at step ${i + 1} (${prog[i]})! That’s where the bug is.`)}</div>`; draw(); return; }
+        pos = [nx, ny]; i++; draw();
+      }, 450);
+    };
+    draw();
+  },
+  /* One vote: a class election where your group decides whether to vote */
+  classVote(host){
+    let voteGroup = false;
+    const base = {A: 9, B: 8, C: 7}, names = {A: T('அருண்', 'Arun'), B: T('பிரியா', 'Priya'), C: T('கவின்', 'Kavin')};
+    const bar = document.createElement('div'); bar.className = 'row'; host.appendChild(bar);
+    const box = document.createElement('div'); host.appendChild(box);
+    function draw(){
+      bar.innerHTML = `<button class="btn ${!voteGroup ? 'p' : ''}" data-v="0">😴 ${T('நாங்கள் 4 பேர் ஓட்டு போடவில்லை', 'Our 4 friends don’t vote')}</button><button class="btn ${voteGroup ? 'p' : ''}" data-v="1">🗳️ ${T('நாங்கள் 4 பேரும் கவினுக்கு ஓட்டு போடுகிறோம்', 'All 4 of us vote for Kavin')}</button>`;
+      bar.querySelectorAll('button').forEach(b => b.onclick = () => { voteGroup = b.dataset.v === '1'; draw(); });
+      const v = Object.assign({}, base); if(voteGroup) v.C += 4;
+      const max = Math.max(...Object.values(v)), win = Object.keys(v).find(k => v[k] === max);
+      box.innerHTML = Object.keys(v).map(k => `<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><b style="width:70px">${names[k]}</b><div style="height:24px;border-radius:6px;background:${k === win ? '#127a3e' : '#94a3b8'};width:${v[k] * 18}px"></div><b>${v[k]}</b>${k === win ? ' 🏆' : ''}</div>`).join('') +
+        `<div class="fb ${voteGroup ? 'ok' : 'hint'}">${voteGroup ? T('4 ஓட்டுகள் முடிவையே மாற்றிவிட்டன! கவின் வென்றார்.', 'Just 4 votes changed the result! Kavin wins.') : T('நீங்கள் ஓட்டு போடாதபோது, உங்கள் விருப்பம் எண்ணப்படவில்லை — அருண் வென்றார்.', 'When you don’t vote, your choice isn’t counted — Arun wins.')}</div>`;
+    }
+    draw();
+  },
   /* Train a tiny AI (k-nearest-neighbours) to sort mangoes: ripe vs not ripe */
   aiTrainer(host, p){
     // x = skin colour (0 green … 10 yellow), y = softness (0 hard … 10 soft)

@@ -3,7 +3,7 @@
    stars. Wrong answers always show the correct answer and WHY. */
 (function(G){
 'use strict';
-const GAMES = Object.assign({}, G.KALVI_MATH, G.KALVI_LANG);
+const GAMES = Object.assign({}, G.KALVI_MATH, G.KALVI_LANG, G.KALVI_THINK || {});
 G.KALVI_GAMES = GAMES;
 let H = null; // host helpers: {L, lang, esc, go, getProg, setProg}
 const T = (ta, en) => H.lang() === 'ta' ? ta : en;

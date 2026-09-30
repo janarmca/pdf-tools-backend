@@ -1,0 +1,387 @@
+{
+ "id": "eratosthenes",
+ "minutes": 25,
+ "title": {
+  "ta": "ஒரு குச்சியின் நிழலை வைத்து பூமியை அளந்தவர்",
+  "en": "The man who measured the Earth with a stick’s shadow"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "5-ஆம் வகுப்பு சமூக அறிவியல் — நம் பூமி",
+    "en": "Class 5 Social — Our Earth"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "புவியியல் — பூமி & சூரியக் குடும்பம்",
+    "en": "Geography — Earth in the Solar System"
+   }
+  },
+  {
+   "b": "IB PYP",
+   "w": {
+    "ta": "\"உலகம் எப்படி இயங்குகிறது\"",
+    "en": "\"How the world works\""
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Primary Science — Earth and space",
+    "en": "Primary Science — Earth and space"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "ஒரு பெரிய கேள்விக்கு எளிய அளவீடுகளால் விடை காண்பது எப்படி என்று பார்க்க",
+   "en": "See how simple measurements can answer a giant question"
+  },
+  {
+   "ta": "கோணம் என்பது வட்டத்தின் ஒரு \"துண்டு\" என்று புரிந்துகொள்ள",
+   "en": "Understand an angle as a \"slice\" of a circle"
+  },
+  {
+   "ta": "உன் பள்ளியிலேயே இந்தச் சோதனையைச் செய்ய",
+   "en": "Do this experiment at your own school"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "சுமார் 2,200 ஆண்டுகளுக்கு முன், எகிப்தின் அலெக்சாந்திரியா நகரில் **எரடோஸ்தனிஸ்** என்ற நூலகர் இருந்தார். அவருக்கு ஒரு செய்தி கிடைத்தது: தெற்கே உள்ள **சயீன்** நகரில், ஆண்டின் நீண்ட பகலில், மதியம் சூரிய ஒளி ஆழமான கிணற்றின் அடி வரை நேராக விழுகிறது — நிழலே இல்லை!\n\nஆனால் அதே நேரத்தில் அவருடைய அலெக்சாந்திரியாவில் குச்சிகளுக்குச் சிறிய நிழல் இருந்தது. \"ஏன் இந்த வேறுபாடு?\" என்று அவர் கேட்ட ஒரு கேள்வி, மனித வரலாற்றில் முதன்முறையாக **பூமியின் அளவை** அளக்க உதவியது. விமானமோ செயற்கைக்கோளோ இல்லாமல்!",
+    "en": "About 2,200 years ago, a librarian named **Eratosthenes** lived in Alexandria, Egypt. He heard something curious: in **Syene**, a city to the south, at noon on the longest day of the year, sunlight fell straight to the bottom of a deep well — no shadow at all!\n\nBut at the same moment in his own Alexandria, sticks did cast a small shadow. The question he asked — \"why the difference?\" — let humans measure **the size of the Earth** for the first time. Without aeroplanes or satellites!"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "பூமியைச் சுற்றி வராமலே அதன் சுற்றளவை அளக்க முடியுமா?",
+    "en": "Can you measure the distance around the Earth without travelling around it?"
+   },
+   "options": [
+    {
+     "ta": "முடியாது — சுற்றி வந்தால்தான் தெரியும்",
+     "en": "No — you must go all the way round"
+    },
+    {
+     "ta": "முடியும் — ஒரு நிழலும் ஒரு தூரமும் போதும்",
+     "en": "Yes — one shadow and one distance are enough"
+    },
+    {
+     "ta": "செயற்கைக்கோள் இருந்தால் மட்டுமே",
+     "en": "Only with a satellite"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "ஒரு நிழலின் கோணமும், இரு நகரங்களுக்கு இடையிலான தூரமும் போதும்! புத்திசாலித்தனமான கேள்வியும் சிறிய அளவீடும் சேர்ந்தால் மாபெரும் விடை கிடைக்கும்.",
+    "en": "One shadow angle and the distance between two cities are enough! A clever question plus a small measurement gives a giant answer."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "eratosthenes",
+   "text": {
+    "ta": "சூரியக் கதிர்கள் இணையாக (ஒன்றுக்கொன்று நேராக) வருகின்றன. பூமி வளைந்திருப்பதால்தான் அலெக்சாந்திரியாவில் நிழல் விழுகிறது. இரு நகரங்களுக்கு இடையே 800 km. நிழல் கோணத்தை மாற்றிப் பார் — பூமியின் சுற்றளவு எப்படி மாறுகிறது?",
+    "en": "The Sun’s rays arrive parallel to each other. The shadow in Alexandria appears only because the Earth is curved. The two cities are 800 km apart. Move the shadow angle — how does the Earth’s circumference change?"
+   },
+   "q": {
+    "ta": "எந்தக் கோணம் பூமியின் உண்மையான அளவை (ஏறக்குறைய 40,000 km) தருகிறது?",
+    "en": "Which angle gives the Earth’s real size (about 40,000 km)?"
+   },
+   "options": [
+    {
+     "ta": "3.6°",
+     "en": "3.6°"
+    },
+    {
+     "ta": "7.2°",
+     "en": "7.2°"
+    },
+    {
+     "ta": "14.4°",
+     "en": "14.4°"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "7.2° என்பது முழு வட்டத்தின் (360°) 50-ல் ஒரு பங்கு. அப்படியென்றால் 800 km என்பது பூமியைச் சுற்றும் தூரத்தின் 50-ல் ஒரு பங்கு! 800 × 50 = 40,000 km. எரடோஸ்தனிஸ் அளந்ததும் ஏறக்குறைய இதுவே. இன்றைய செயற்கைக்கோள் அளவு: சுமார் 40,075 km.",
+    "en": "7.2° is one-fiftieth of a full circle (360°). So 800 km is one-fiftieth of the way round the Earth! 800 × 50 = 40,000 km — very close to what Eratosthenes found. Satellites today measure about 40,075 km."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "பீட்சாத் துண்டு யோசனை",
+    "en": "The pizza-slice idea"
+   },
+   "text": {
+    "ta": "ஒரு வட்டமான தோசையை 50 சம துண்டுகளாக வெட்டு. ஒரு துண்டின் ஓரம் 800 cm என்றால், முழுத் தோசையின் ஓரம் 800 × 50. பூமியும் அப்படியே — கோணம் எவ்வளவு சிறிய துண்டு என்று சொல்கிறது, தூரம் அந்தத் துண்டின் நீளத்தைச் சொல்கிறது.\n\n[[சுற்றளவு = தூரம் × (360 ÷ கோணம்)]]",
+    "en": "Cut a round dosa into 50 equal slices. If one slice’s edge is 800 cm, the whole edge is 800 × 50. The Earth works the same way — the angle tells you how small a slice it is, the distance tells you that slice’s length.\n\n[[circumference = distance × (360 ÷ angle)]]"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "நிழல் கோணம் 10°, இரு நகரங்களுக்கு இடையே 1000 km என்றால், சுற்றளவு எவ்வளவு? (km)",
+    "en": "If the shadow angle is 10° and the cities are 1000 km apart, what is the circumference? (km)"
+   },
+   "answer": 36000,
+   "tol": 1,
+   "unit": {
+    "ta": "km",
+    "en": "km"
+   },
+   "hint": {
+    "ta": "360 ÷ 10 = ? துண்டுகள்",
+    "en": "360 ÷ 10 = how many slices?"
+   },
+   "solution": {
+    "ta": "360 ÷ 10 = 36; 1000 × 36 = 36,000 km",
+    "en": "360 ÷ 10 = 36; 1000 × 36 = 36,000 km"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🛰️",
+     "title": {
+      "ta": "GPS",
+      "en": "GPS"
+     },
+     "text": {
+      "ta": "இன்றும் கோணங்களும் தூரங்களுமே உன் இடத்தைக் கண்டுபிடிக்கின்றன.",
+      "en": "Angles and distances still find your location today."
+     }
+    },
+    {
+     "icon": "🌏",
+     "title": {
+      "ta": "ஆரியபட்டர்",
+      "en": "Aryabhata"
+     },
+     "text": {
+      "ta": "கி.பி. 5-ஆம் நூற்றாண்டில் இந்திய அறிஞர் ஆரியபட்டர், பூமி தன் அச்சில் சுழல்கிறது என்று எழுதினார்.",
+      "en": "In the 5th century CE, the Indian scholar Aryabhata wrote that the Earth spins on its axis."
+     }
+    },
+    {
+     "icon": "🧭",
+     "title": {
+      "ta": "கடல் பயணம்",
+      "en": "Sea voyages"
+     },
+     "text": {
+      "ta": "மாலுமிகள் சூரியன், நட்சத்திரங்களின் கோணத்தை வைத்துத் தங்கள் இடத்தைக் கணித்தனர்.",
+      "en": "Sailors worked out their position from the angle of the Sun and stars."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "உன் பள்ளி மைதானத்தில் ஒரு 1 மீட்டர் குச்சியை நேராக நிறுத்து. மதியம் 12 மணியளவில் அதன் நிழலின் நீளத்தை அளவு, அதே நேரத்தில் வேறொரு ஊரில் உள்ள உறவினரையும் அளக்கச் சொல். இரு நிழல்களும் வேறுபடுவதைப் பார்! உலகெங்கும் உள்ள பள்ளிகள் ஒவ்வோர் ஆண்டும் இதே \"எரடோஸ்தனிஸ் சோதனையைச்\" சேர்ந்து செய்கின்றன.",
+    "en": "Stand a 1-metre stick upright in your school ground. Around 12 noon measure its shadow, and ask a relative in another town to do the same at the same time. See how the two shadows differ! Schools around the world do this same \"Eratosthenes experiment\" together every year."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் சொந்த அளவைக் கருவி",
+    "en": "Your own measuring tool"
+   },
+   "text": {
+    "ta": "ஒரு பெரிய கேள்வியைத் தேர்ந்தெடு: \"என் பள்ளிக் கட்டடம் எவ்வளவு உயரம்?\", \"என் தெரு எவ்வளவு நீளம்?\" — நேரடியாக அளக்காமல், நிழல், காலடி, நேரம் போன்றவற்றை வைத்து அளக்க ஒரு புத்திசாலித்தனமான வழியை வடிவமை.",
+    "en": "Pick a big question: \"How tall is my school building?\", \"How long is my street?\" — design a clever way to measure it without measuring it directly, using shadows, footsteps or time."
+   },
+   "prompts": [
+    {
+     "ta": "எதை நேரடியாக அளக்க முடியும்?",
+     "en": "What can you measure directly?"
+    },
+    {
+     "ta": "அதிலிருந்து பெரியதை எப்படிக் கணக்கிடுவாய்?",
+     "en": "How will you calculate the big thing from it?"
+    },
+    {
+     "ta": "உன் விடை சரியா என்று எப்படிச் சோதிப்பாய்?",
+     "en": "How will you check your answer?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று செயற்கைக்கோள்கள் பூமியின் வடிவத்தை மில்லிமீட்டர் அளவில் அளக்கின்றன — கடல் மட்டம் உயர்வதையும், பனிப்பாறைகள் உருகுவதையும் கண்காணிக்க.",
+    "en": "Today satellites measure the Earth’s shape to the millimetre — to watch sea levels rise and glaciers melt."
+   },
+   "risk": {
+    "ta": "அளவீடுகள் தவறானால் முடிவுகளும் தவறாகும்.",
+    "en": "Wrong measurements lead to wrong conclusions."
+   },
+   "fix": {
+    "ta": "பல முறை அளந்து சராசரி எடுத்தல், வெவ்வேறு முறைகளில் சரிபார்த்தல் — எரடோஸ்தனிஸ் முதல் இன்றைய விஞ்ஞானிகள் வரை.",
+    "en": "Measure many times and average, check with different methods — from Eratosthenes to today’s scientists."
+   },
+   "q": {
+    "ta": "எரடோஸ்தனிஸிடம் இருந்த ஒரே கருவி அவர் மூளை. உன் மூளையை வைத்து நீ எதை அளக்க விரும்புகிறாய்?",
+    "en": "Eratosthenes’ main tool was his mind. What would you like to measure with yours?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "எரடோஸ்தனிஸ் பூமியை எப்படி அளந்தார்?",
+    "en": "How did Eratosthenes measure the Earth?"
+   },
+   "keywords": [
+    {
+     "ta": "நிழல்",
+     "en": "shadow"
+    },
+    {
+     "ta": "கோணம்",
+     "en": "angle"
+    },
+    {
+     "ta": "தூரம்",
+     "en": "distance"
+    },
+    {
+     "ta": "50",
+     "en": "50"
+    }
+   ],
+   "model": {
+    "ta": "சயீனில் நிழல் இல்லாத அதே நேரத்தில் அலெக்சாந்திரியாவில் நிழல் கோணம் 7.2° — இது வட்டத்தின் 50-ல் ஒரு பங்கு. இரு நகரங்களுக்கு இடையிலான தூரத்தை 50-ஆல் பெருக்கினார்.",
+    "en": "When Syene had no shadow, Alexandria’s shadow angle was 7.2° — one-fiftieth of a circle. He multiplied the distance between the cities by 50."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "பெரிய கேள்வி + சிறிய அளவீடு + தெளிவான சிந்தனை = மாபெரும் கண்டுபிடிப்பு.",
+     "en": "Big question + small measurement + clear thinking = a giant discovery."
+    },
+    {
+     "ta": "கோணம் = வட்டத்தின் ஒரு துண்டு. 7.2° = 360°-ன் 1/50.",
+     "en": "An angle is a slice of a circle. 7.2° = 1/50 of 360°."
+    },
+    {
+     "ta": "சுற்றளவு = தூரம் × (360 ÷ கோணம்) ≈ 40,000 km.",
+     "en": "Circumference = distance × (360 ÷ angle) ≈ 40,000 km."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "சயீனில் மதியம் நிழல் இல்லாதது எதைக் காட்டுகிறது?",
+    "en": "What did the missing shadow at Syene show?"
+   },
+   "options": [
+    {
+     "ta": "சூரியன் நேர் மேலே இருந்தது",
+     "en": "The Sun was straight overhead"
+    },
+    {
+     "ta": "அன்று மேகமூட்டம்",
+     "en": "It was cloudy"
+    },
+    {
+     "ta": "குச்சி உடைந்திருந்தது",
+     "en": "The stick was broken"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "சூரியன் நேர் மேலே இருந்தால் நிழல் விழாது.",
+    "en": "With the Sun straight overhead there is no shadow."
+   }
+  },
+  {
+   "q": {
+    "ta": "360° ÷ 7.2° = ?",
+    "en": "360° ÷ 7.2° = ?"
+   },
+   "options": [
+    {
+     "ta": "36",
+     "en": "36"
+    },
+    {
+     "ta": "50",
+     "en": "50"
+    },
+    {
+     "ta": "72",
+     "en": "72"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "7.2 × 50 = 360",
+    "en": "7.2 × 50 = 360"
+   }
+  },
+  {
+   "q": {
+    "ta": "அலெக்சாந்திரியாவில் நிழல் விழுந்ததற்குக் காரணம்?",
+    "en": "Why was there a shadow in Alexandria?"
+   },
+   "options": [
+    {
+     "ta": "பூமி வளைந்திருப்பதால்",
+     "en": "Because the Earth is curved"
+    },
+    {
+     "ta": "அங்கு சூரியன் பெரியது",
+     "en": "The Sun is bigger there"
+    },
+    {
+     "ta": "குச்சி நீளமானது",
+     "en": "The stick was longer"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "தட்டையான பூமியில் இரு இடங்களிலும் நிழல் ஒன்றாக இருக்கும்.",
+    "en": "On a flat Earth both places would have the same shadow."
+   }
+  },
+  {
+   "q": {
+    "ta": "கோணம் பாதியானால் (தூரம் அதே), கணக்கிட்ட சுற்றளவு…",
+    "en": "If the angle were half as big (same distance), the calculated circumference would…"
+   },
+   "options": [
+    {
+     "ta": "பாதியாகும்",
+     "en": "halve"
+    },
+    {
+     "ta": "இரு மடங்காகும்",
+     "en": "double"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "stay the same"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "சிறிய துண்டு → அதிக துண்டுகள் → பெரிய வட்டம்.",
+    "en": "Smaller slice → more slices → bigger circle."
+   }
+  }
+ ]
+}

@@ -1,0 +1,415 @@
+{
+ "id": "think-like-coder",
+ "minutes": 25,
+ "title": {
+  "ta": "Coder போலச் சிந்தி — algorithm என்றால் என்ன?",
+  "en": "Think like a coder — what is an algorithm?"
+ },
+ "curriculum": [
+  {
+   "b": "NCF 2023",
+   "w": {
+    "ta": "கணினிச் சிந்தனை (computational thinking)",
+    "en": "Computational thinking"
+   }
+  },
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "Coding & AI திறன் பாடங்கள்",
+    "en": "Coding & AI skill subjects"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Primary Computing",
+    "en": "Primary Computing"
+   }
+  },
+  {
+   "b": "IB PYP",
+   "w": {
+    "ta": "\"உலகம் எப்படி இயங்குகிறது\"",
+    "en": "\"How the world works\""
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "algorithm, bug, debug, loop — இவற்றை எளிமையாக விளக்க",
+   "en": "Explain algorithm, bug, debug and loop simply"
+  },
+  {
+   "ta": "ஒரு robot-க்கு program எழுதி, பிழை திருத்த",
+   "en": "Write a program for a robot and fix its bugs"
+  },
+  {
+   "ta": "அன்றாட வாழ்க்கையில் algorithm-களைக் கண்டுபிடிக்க",
+   "en": "Spot algorithms in everyday life"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "அம்மா டீ போடுகிறார்: தண்ணீர் கொதிக்க வை → டீத்தூள் போடு → பால் சேர் → சர்க்கரை போடு → வடிகட்டு. வரிசை மாறினால்? (பால் இல்லாமல் வடிகட்டினால்?) டீ கெட்டுவிடும்!\n\nசரியான வரிசையில், தெளிவான படிகளாக எழுதிய கட்டளைகளுக்குப் பெயர் **algorithm**. கணினி, robot, போன் — எல்லாமே algorithm-களைப் பின்பற்றுகின்றன.",
+    "en": "Mother makes tea: boil water → add tea leaves → add milk → add sugar → strain. Change the order (strain before adding milk?) and the tea is ruined!\n\nClear steps written in the right order are called an **algorithm**. Computers, robots and phones all follow algorithms."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "\"⭐-க்குப் போ\" என்று சொன்னால் robot புரிந்துகொள்ளுமா?",
+    "en": "If you tell a robot \"go to the star\", will it understand?"
+   },
+   "options": [
+    {
+     "ta": "ஆம், robot புத்திசாலி",
+     "en": "Yes, robots are clever"
+    },
+    {
+     "ta": "இல்லை — ஒவ்வொரு அடியையும் தெளிவாகச் சொல்ல வேண்டும்",
+     "en": "No — you must tell it every single step"
+    },
+    {
+     "ta": "robot-க்குத் தமிழ் தெரிந்தால் மட்டும்",
+     "en": "Only if it knows Tamil"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "கணினிகள் மிக வேகமானவை, ஆனால் நீ சொன்னதை மட்டுமே சரியாகச் செய்யும். \"எப்படி\" என்று ஒவ்வொரு அடியாகச் சொல்வதுதான் coder-ன் வேலை.",
+    "en": "Computers are very fast but do exactly what you say. Telling them \"how\", step by step, is a coder’s job."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "robotProgram",
+   "text": {
+    "ta": "அம்புக்குறிகளை அழுத்தி program எழுது, பிறகு ▶ இயக்கு. பாறையில் மோதினால் அது ஒரு \"bug\" — எங்கே என்று கண்டுபிடித்துத் திருத்து!",
+    "en": "Tap arrows to write a program, then press ▶ Run. Hitting a rock is a \"bug\" — find where and fix it!"
+   },
+   "q": {
+    "ta": "இந்த வரைபடத்தில் ⭐-ஐ அடைய மிகக் குறைந்த கட்டளைகள் எத்தனை?",
+    "en": "On this map, what is the smallest number of steps to reach the ⭐?"
+   },
+   "options": [
+    {
+     "ta": "6",
+     "en": "6"
+    },
+    {
+     "ta": "8",
+     "en": "8"
+    },
+    {
+     "ta": "10",
+     "en": "10"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "↑ ↑ ↑ ↑ → → → → — 8 கட்டளைகள். robot 4 கட்டம் மேலேயும் 4 கட்டம் வலதுபுறமும் போக வேண்டும், எனவே 8-க்குக் குறைவாக முடியாது. குறுகிய, தெளிவான program = நல்ல program.",
+    "en": "↑ ↑ ↑ ↑ → → → → — 8 steps. The robot must go 4 up and 4 right, so fewer than 8 is impossible. Short, clear programs are good programs."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "Coder-ன் 4 சொற்கள்",
+    "en": "Four coder words"
+   },
+   "text": {
+    "ta": "**Algorithm** — ஒரு வேலையைச் செய்யும் தெளிவான படிகள்.\n**Bug** — program-ல் உள்ள தவறு.\n**Debug** — தவறைக் கண்டுபிடித்துத் திருத்துதல். நல்ல coder-கள் தவறுகளுக்குப் பயப்படுவதில்லை; அவற்றிலிருந்து கற்கிறார்கள்!\n**Loop** — மீண்டும் மீண்டும் செய்தல்: \"↑ ↑ ↑ ↑\" என்பதை \"4 முறை [↑]\" என்று சுருக்கலாம்.",
+    "en": "**Algorithm** — clear steps that do a job.\n**Bug** — a mistake in a program.\n**Debug** — finding and fixing the mistake. Good coders aren’t afraid of mistakes; they learn from them!\n**Loop** — repeating: \"↑ ↑ ↑ ↑\" can be shortened to \"repeat 4 times [↑]\"."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "நடனம்: கைதட்டு, குதி, கைதட்டு, குதி, கைதட்டு, குதி. இதை loop ஆக எழுதினால்?",
+    "en": "A dance: clap, jump, clap, jump, clap, jump. Written as a loop?"
+   },
+   "options": [
+    {
+     "ta": "3 முறை [கைதட்டு, குதி]",
+     "en": "repeat 3 times [clap, jump]"
+    },
+    {
+     "ta": "6 முறை [கைதட்டு]",
+     "en": "repeat 6 times [clap]"
+    },
+    {
+     "ta": "2 முறை [குதி]",
+     "en": "repeat 2 times [jump]"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "எந்தப் பகுதி திரும்பத் திரும்ப வருகிறது?",
+    "en": "Which part repeats?"
+   },
+   "solution": {
+    "ta": "[கைதட்டு, குதி] 3 முறை வருகிறது.",
+    "en": "[clap, jump] happens 3 times."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🚦",
+     "title": {
+      "ta": "போக்குவரத்து விளக்கு",
+      "en": "Traffic lights"
+     },
+     "text": {
+      "ta": "பச்சை → மஞ்சள் → சிவப்பு → மீண்டும் — ஒரு loop!",
+      "en": "Green → yellow → red → again — a loop!"
+     }
+    },
+    {
+     "icon": "🧺",
+     "title": {
+      "ta": "சலவை இயந்திரம்",
+      "en": "Washing machine"
+     },
+     "text": {
+      "ta": "ஊறவை → கழுவு → அலசு → பிழி — ஒரு algorithm.",
+      "en": "Soak → wash → rinse → spin — an algorithm."
+     }
+    },
+    {
+     "icon": "🗺️",
+     "title": {
+      "ta": "வரைபட app",
+      "en": "Map apps"
+     },
+     "text": {
+      "ta": "நம் robot போலவே, மிகக் குறுகிய பாதையைக் கணக்கிடுகிறது.",
+      "en": "Like our robot, it computes the shortest route."
+     }
+    },
+    {
+     "icon": "🚀",
+     "title": {
+      "ta": "ராக்கெட் ஏவுதல்",
+      "en": "Rocket launch"
+     },
+     "text": {
+      "ta": "10, 9, 8… ஒவ்வொரு படியும் சரியான வரிசையில் நடக்க வேண்டும்.",
+      "en": "10, 9, 8… every step must happen in the right order."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "கணினி இல்லாத coding",
+    "en": "Coding without a computer"
+   },
+   "text": {
+    "ta": "இட்லிக்குச் சட்னி அரைக்கும் வழிமுறையை ஒரு தாளில் படிப்படியாக எழுது. பிறகு வீட்டில் ஒருவர் (பாதுகாப்பாக, பெரியவருடன்) நீ எழுதியதை **அப்படியே** பின்பற்றட்டும். எதையாவது விட்டுவிட்டாயா? அதுதான் bug! திருத்தி மீண்டும் முயற்சி செய்.",
+    "en": "Write step-by-step instructions for making chutney for idli. Then let someone at home follow **exactly** what you wrote (safely, with an adult). Did you miss something? That’s a bug! Fix it and try again."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "காலை algorithm",
+    "en": "Your morning algorithm"
+   },
+   "text": {
+    "ta": "பள்ளிக்குத் தயாராகும் உன் காலை வழக்கத்தை ஒரு algorithm ஆக எழுது. எங்கே loop உள்ளது? எங்கே \"என்றால்\" (மழை பெய்தால் குடை) வருகிறது?",
+    "en": "Write your morning routine for school as an algorithm. Where is there a loop? Where is there an \"if\" (if it rains, take an umbrella)?"
+   },
+   "prompts": [
+    {
+     "ta": "முதல் படி என்ன?",
+     "en": "What’s the first step?"
+    },
+    {
+     "ta": "எந்தப் படி திரும்ப வருகிறது?",
+     "en": "Which step repeats?"
+    },
+    {
+     "ta": "எந்த \"என்றால்\" முடிவுகள் உள்ளன?",
+     "en": "Which \"if\" decisions are there?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று AI கூட code எழுதுகிறது. ஆனால் எந்தப் பிரச்சனையைத் தீர்க்க வேண்டும், code சரியாக வேலை செய்கிறதா, அது யாருக்காவது தீங்கு செய்யுமா — இவற்றை முடிவு செய்வது மனிதர்கள்தான்.",
+    "en": "Today even AI writes code. But humans decide which problem to solve, whether the code really works, and whether it could harm anyone."
+   },
+   "risk": {
+    "ta": "சோதிக்காத code-ல் உள்ள bug பெரிய விபத்தை ஏற்படுத்தலாம்.",
+    "en": "An untested bug in code can cause big accidents."
+   },
+   "fix": {
+    "ta": "சிறிய படிகளாக எழுது, ஒவ்வொன்றையும் சோதி, மற்றவரையும் சரிபார்க்கச் சொல்.",
+    "en": "Write in small steps, test each one, and ask someone else to check."
+   },
+   "q": {
+    "ta": "உன் ஊருக்கு உதவும் ஒரு app-ஐ எழுத முடிந்தால், அது என்ன செய்யும்?",
+    "en": "If you could write an app to help your town, what would it do?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "Algorithm என்றால் என்ன? ஒரு எடுத்துக்காட்டுடன் சொல்.",
+    "en": "What is an algorithm? Give an example."
+   },
+   "keywords": [
+    {
+     "ta": "படி",
+     "en": "step"
+    },
+    {
+     "ta": "வரிசை",
+     "en": "order"
+    },
+    {
+     "ta": "bug",
+     "en": "bug",
+     "alt": [
+      "தவறு",
+      "mistake"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "ஒரு வேலையைச் செய்யத் தெளிவான படிகளைச் சரியான வரிசையில் எழுதுவது algorithm. உதா: டீ போடுதல். ஒரு படி தவறினால் அது bug; அதைத் திருத்துவது debug.",
+    "en": "An algorithm is clear steps in the right order to do a job — like making tea. A wrong step is a bug; fixing it is debugging."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "Algorithm = தெளிவான படிகள், சரியான வரிசையில்.",
+     "en": "Algorithm = clear steps in the right order."
+    },
+    {
+     "ta": "Bug = தவறு; debug = திருத்துதல்.",
+     "en": "Bug = mistake; debug = fix it."
+    },
+    {
+     "ta": "Loop = மீண்டும் மீண்டும்.",
+     "en": "Loop = repeat."
+    },
+    {
+     "ta": "கணினி சொன்னதை மட்டுமே செய்யும் — சிந்திப்பது நீ!",
+     "en": "The computer only does what it’s told — the thinking is yours!"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "Program-ல் உள்ள தவறுக்குப் பெயர்?",
+    "en": "A mistake in a program is called a…?"
+   },
+   "options": [
+    {
+     "ta": "Bug",
+     "en": "Bug"
+    },
+    {
+     "ta": "Loop",
+     "en": "Loop"
+    },
+    {
+     "ta": "Robot",
+     "en": "Robot"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "தவறு = bug; திருத்துவது = debug.",
+    "en": "Mistake = bug; fixing = debug."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"→ → → →\" என்பதைச் சுருக்கமாக?",
+    "en": "A shorter way to write \"→ → → →\"?"
+   },
+   "options": [
+    {
+     "ta": "4 முறை [→]",
+     "en": "repeat 4 times [→]"
+    },
+    {
+     "ta": "→ ←",
+     "en": "→ ←"
+    },
+    {
+     "ta": "4 [↑]",
+     "en": "repeat 4 [↑]"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "ஒரே கட்டளை 4 முறை → loop.",
+    "en": "The same command 4 times → a loop."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் algorithm எது?",
+    "en": "Which of these is an algorithm?"
+   },
+   "options": [
+    {
+     "ta": "சமையல் செய்முறை",
+     "en": "A cooking recipe"
+    },
+    {
+     "ta": "ஒரு நிறம்",
+     "en": "A colour"
+    },
+    {
+     "ta": "ஒரு பாட்டின் பெயர்",
+     "en": "The name of a song"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "செய்முறை = வரிசையான படிகள்.",
+    "en": "A recipe = ordered steps."
+   }
+  },
+  {
+   "q": {
+    "ta": "Robot பாறையில் மோதினால் முதலில் என்ன செய்வாய்?",
+    "en": "If your robot hits a rock, what do you do first?"
+   },
+   "options": [
+    {
+     "ta": "எந்தக் கட்டளையில் மோதியது என்று பார்ப்பேன்",
+     "en": "Find which step it crashed on"
+    },
+    {
+     "ta": "விளையாட்டை மூடுவேன்",
+     "en": "Quit the game"
+    },
+    {
+     "ta": "robot-ஐத் திட்டுவேன்",
+     "en": "Scold the robot"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "bug இருக்கும் இடத்தைக் கண்டுபிடிப்பதே debug-ன் முதல் படி.",
+    "en": "Finding where the bug is, is the first step of debugging."
+   }
+  }
+ ]
+}
