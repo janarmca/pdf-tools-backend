@@ -1,0 +1,397 @@
+{
+ "id": "zero-place-value",
+ "minutes": 20,
+ "title": {
+  "ta": "பூஜ்யம் — இந்தியா உலகுக்குத் தந்த பரிசு",
+  "en": "Zero — India’s gift to the world"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "6-ஆம் வகுப்பு — எண்கள்",
+    "en": "Class 6 — Numbers"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "Ganita Prakash — எண்கள், இட மதிப்பு",
+    "en": "Ganita Prakash — numbers & place value"
+   }
+  },
+  {
+   "b": "IB MYP",
+   "w": {
+    "ta": "கணிதம் — எண் முறைகள்",
+    "en": "Mathematics — number systems"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Lower Secondary — Number",
+    "en": "Lower Secondary — Number"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "இட மதிப்பில் பூஜ்யத்தின் வேலையைப் புரிந்துகொள்ள",
+   "en": "Understand the job zero does in place value"
+  },
+  {
+   "ta": "பூஜ்யத்தின் பயணம் — இந்தியாவிலிருந்து உலகுக்கு",
+   "en": "Follow zero’s journey from India to the world"
+  },
+  {
+   "ta": "0, 1 மட்டும் வைத்துக் கணினி எப்படி எண்ணுகிறது என்று பார்க்க",
+   "en": "See how computers count with only 0 and 1"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "ரோமானியர்கள் 2025-ஐ **MMXXV** என்று எழுதினார்கள். இப்போது MMXXV × XII கணக்கிட்டுப் பார் — மிகக் கடினம்! நாம் எழுதும் 2025 × 12 எளிது. ஏன்? நம் எண்களில் இரண்டு ரகசியங்கள் உள்ளன: **இட மதிப்பு**, **பூஜ்யம்**. இவை இரண்டும் இந்தியாவில் வளர்ந்து உலகம் முழுவதும் பரவின.",
+    "en": "The Romans wrote 2025 as **MMXXV**. Now try MMXXV × XII — very hard! Our 2025 × 12 is easy. Why? Our numbers hide two secrets: **place value** and **zero**. Both grew up in India and spread across the world."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "507-ல் உள்ள 0-ன் மதிப்பு ஒன்றுமில்லை என்றால், அதை எடுத்துவிடலாமா?",
+    "en": "If the 0 in 507 is worth nothing, can we just remove it?"
+   },
+   "options": [
+    {
+     "ta": "ஆம் — 507 = 57",
+     "en": "Yes — 507 = 57"
+    },
+    {
+     "ta": "இல்லை — 0 பத்தின் இடத்தைக் காலியாகக் காக்கிறது",
+     "en": "No — 0 holds the tens place empty"
+    },
+    {
+     "ta": "0 இருந்தாலும் இல்லாவிட்டாலும் ஒன்றுதான்",
+     "en": "It makes no difference"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "0 இல்லாவிட்டால் 5 \"நூறு\" என்ற இடத்திலிருந்து \"பத்து\" என்ற இடத்துக்கு நகர்ந்து 57 ஆகிவிடும்! 0 = \"இந்த இடம் காலி\" என்று சொல்லும் காவலர்.",
+    "en": "Without the 0, the 5 slides from the hundreds place to the tens place and becomes 57! Zero is the guard that says \"this place is empty\"."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "இட மதிப்பு",
+    "en": "Place value"
+   },
+   "text": {
+    "ta": "ஒரு இலக்கத்தின் மதிப்பு அது **எந்த இடத்தில்** இருக்கிறது என்பதைப் பொறுத்தது. 3,049 = 3 × 1000 + 0 × 100 + 4 × 10 + 9 × 1. பத்து குறிகள் (0–9) மட்டும் வைத்து எவ்வளவு பெரிய எண்ணையும் எழுதலாம் — அதுதான் இந்த முறையின் மாயம்.\n\n[[507 = 5 × 100 + 0 × 10 + 7 × 1]]",
+    "en": "A digit’s value depends on **which place** it sits in. 3,049 = 3 × 1000 + 0 × 100 + 4 × 10 + 9 × 1. With just ten symbols (0–9) you can write any number, however big — that is the magic of this system.\n\n[[507 = 5 × 100 + 0 × 10 + 7 × 1]]"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "7 × 1000 + 0 × 100 + 6 × 10 + 2 = ?",
+    "en": "7 × 1000 + 0 × 100 + 6 × 10 + 2 = ?"
+   },
+   "answer": 7062,
+   "tol": 0,
+   "hint": {
+    "ta": "நூறுகள் இடத்தில் ஒன்றும் இல்லை → 0",
+    "en": "Nothing in the hundreds place → 0"
+   },
+   "solution": {
+    "ta": "7 ஆயிரம், 0 நூறு, 6 பத்து, 2 ஒன்று = 7,062",
+    "en": "7 thousands, 0 hundreds, 6 tens, 2 ones = 7,062"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பூஜ்யத்தின் பயணம்",
+    "en": "Zero’s journey"
+   },
+   "text": {
+    "ta": "• **கி.பி. 628** — இந்தியக் கணிதமேதை **பிரம்மகுப்தர்** பூஜ்யத்தை ஒரு எண்ணாகவே கருதிக் கணக்கு விதிகள் எழுதினார்: எண் + 0 = அதே எண்; எண் − 0 = அதே எண்; எண் × 0 = 0.\n• **கி.பி. 876** — குவாலியர் சதுர்புஜ் கோயில் கல்வெட்டில் \"270\" என்ற எண்ணில் பூஜ்யம் வட்டமாக எழுதப்பட்டுள்ளது.\n• **கி.பி. 9-ஆம் நூற்றாண்டு** — பாக்தாத் அறிஞர் அல்-குவாரிஸ்மி இந்திய எண்முறை பற்றி எழுதினார் — இதிலிருந்தே \"algorithm\" என்ற சொல் வந்தது!\n• **கி.பி. 1202** — இத்தாலியின் ஃபிபனாச்சி \"Liber Abaci\" நூல் மூலம் ஐரோப்பாவுக்கு அறிமுகப்படுத்தினார். இன்று உலகம் இவற்றை \"இந்து-அரபு எண்கள்\" என்று அழைக்கிறது.",
+    "en": "• **628 CE** — the Indian mathematician **Brahmagupta** treated zero as a number and wrote rules for it: number + 0 = the same number; number − 0 = the same number; number × 0 = 0.\n• **876 CE** — an inscription in the Chaturbhuj temple at Gwalior writes the number \"270\" with a round zero.\n• **9th century CE** — the Baghdad scholar al-Khwarizmi wrote about the Indian numerals — the word \"algorithm\" comes from his name!\n• **1202 CE** — Fibonacci of Italy brought them to Europe in his book \"Liber Abaci\". Today the world calls them \"Hindu–Arabic numerals\"."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "மேதைகளும் தவறு செய்வார்கள்!",
+    "en": "Even geniuses make mistakes!"
+   },
+   "text": {
+    "ta": "பிரம்மகுப்தர் 0 ÷ 0 = 0 என்றும் எழுதினார். இன்றைய கணிதம் இதை ஏற்கவில்லை — **பூஜ்யத்தால் வகுத்தல் வரையறுக்கப்படவில்லை**. ஏன்? 6 ÷ 0 = ? என்றால் \"? × 0 = 6\" ஆக வேண்டும் — எந்த எண்ணும் அப்படி இல்லை! பெரிய அறிஞர்களின் கருத்தையும் கேள்வி கேட்பதுதான் அறிவியலின் வழி.",
+    "en": "Brahmagupta also wrote 0 ÷ 0 = 0. Modern maths does not accept this — **division by zero is undefined**. Why? If 6 ÷ 0 = ?, then \"? × 0 = 6\" — and no number does that! Questioning even great scholars is how knowledge grows."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு எண்ணைப் பூஜ்யத்தால் பெருக்கினால் என்ன கிடைக்கும்?",
+    "en": "What do you get when you multiply any number by zero?"
+   },
+   "options": [
+    {
+     "ta": "அதே எண்",
+     "en": "The same number"
+    },
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "5 × 0 = 0 முறை 5 எடுத்தல்",
+    "en": "5 × 0 = taking 5 zero times"
+   },
+   "solution": {
+    "ta": "எந்த எண் × 0 = 0",
+    "en": "Any number × 0 = 0"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "💻",
+     "title": {
+      "ta": "கணினிகள்",
+      "en": "Computers"
+     },
+     "text": {
+      "ta": "எல்லாப் படம், பாடல், செய்தியும் 0, 1 என்ற இரண்டு இலக்கங்களில் சேமிக்கப்படுகின்றன (இரும எண் முறை).",
+      "en": "Every photo, song and message is stored with just two digits, 0 and 1 (binary)."
+     }
+    },
+    {
+     "icon": "🌡️",
+     "title": {
+      "ta": "வெப்பமானி",
+      "en": "Thermometer"
+     },
+     "text": {
+      "ta": "0°C-க்குக் கீழே எதிர்ம எண்கள் — பூஜ்யம் நேர், எதிர் எண்களைப் பிரிக்கும் கோடு.",
+      "en": "Below 0°C come negative numbers — zero divides positive from negative."
+     }
+    },
+    {
+     "icon": "🏦",
+     "title": {
+      "ta": "வங்கி",
+      "en": "Banks"
+     },
+     "text": {
+      "ta": "₹5,00,000 என்பதில் உள்ள பூஜ்யங்களை நீக்கினால் ₹5 ஆகிவிடும்!",
+      "en": "Remove the zeros in ₹5,00,000 and it becomes ₹5!"
+     }
+    }
+   ]
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் சொந்த எண் முறை",
+    "en": "Your own number system"
+   },
+   "text": {
+    "ta": "0, 1, 2 என்ற மூன்று குறிகளை மட்டும் வைத்து ஒரு எண் முறையை உருவாக்கு (இடங்கள்: 1, 3, 9, 27…). 5-ஐ எப்படி எழுதுவாய்? (குறிப்பு: 5 = 1 × 3 + 2 → \"12\")",
+    "en": "Build a number system with only three symbols: 0, 1, 2 (places: 1, 3, 9, 27…). How would you write 5? (Hint: 5 = 1 × 3 + 2 → \"12\")"
+   },
+   "prompts": [
+    {
+     "ta": "10-ஐ உன் முறையில் எழுது",
+     "en": "Write 10 in your system"
+    },
+    {
+     "ta": "பூஜ்யம் இல்லாவிட்டால் என்ன சிக்கல் வரும்?",
+     "en": "What goes wrong if you have no zero?"
+    },
+    {
+     "ta": "கணினிகள் ஏன் இரண்டு குறிகளை (0, 1) மட்டும் பயன்படுத்துகின்றன?",
+     "en": "Why do computers use only two symbols (0, 1)?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்றைய செயற்கை நுண்ணறிவு (AI) கோடிக்கணக்கான 0, 1-களைக் கணக்கிடுகிறது — இவை அனைத்தும் இட மதிப்பு என்ற ஒரே யோசனையின் மேல் கட்டப்பட்டவை.",
+    "en": "Today’s AI crunches billions of 0s and 1s — all built on the single idea of place value."
+   },
+   "risk": {
+    "ta": "ஒரு இலக்கம் தவறினால் பெரிய பிழை: ₹1,000 என்பது ₹10,000 ஆகலாம்.",
+    "en": "One wrong digit can be a huge error: ₹1,000 can become ₹10,000."
+   },
+   "fix": {
+    "ta": "எண்களை இருமுறை சரிபார், மதிப்பீடு செய்து \"இது சரியாகத் தோன்றுகிறதா?\" என்று கேள்.",
+    "en": "Check numbers twice and estimate: \"does this look right?\""
+   },
+   "q": {
+    "ta": "பூஜ்யம் கண்டுபிடிக்கப்படாவிட்டால் உன் போன் வேலை செய்யுமா?",
+    "en": "If zero had never been invented, would your phone work?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "507-ல் 0 ஏன் முக்கியம்?",
+    "en": "Why is the 0 in 507 important?"
+   },
+   "keywords": [
+    {
+     "ta": "இடம்",
+     "en": "place"
+    },
+    {
+     "ta": "பத்து",
+     "en": "tens"
+    },
+    {
+     "ta": "காலி",
+     "en": "empty"
+    }
+   ],
+   "model": {
+    "ta": "0 பத்தின் இடம் காலி என்று காட்டுகிறது. அது இல்லாவிட்டால் 5 நூறுகளின் இடத்திலிருந்து நகர்ந்து எண் 57 ஆகிவிடும்.",
+    "en": "The 0 shows the tens place is empty. Without it, the 5 would move out of the hundreds place and the number would become 57."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "இலக்கத்தின் மதிப்பு அதன் இடத்தைப் பொறுத்தது.",
+     "en": "A digit’s value depends on its place."
+    },
+    {
+     "ta": "பூஜ்யம் காலி இடத்தைக் காக்கிறது; அதுவும் ஒரு எண்.",
+     "en": "Zero guards empty places — and is a number itself."
+    },
+    {
+     "ta": "பிரம்மகுப்தர் (628) → அல்-குவாரிஸ்மி → ஃபிபனாச்சி (1202) → உலகம்.",
+     "en": "Brahmagupta (628) → al-Khwarizmi → Fibonacci (1202) → the world."
+    },
+    {
+     "ta": "பூஜ்யத்தால் வகுத்தல் வரையறுக்கப்படவில்லை.",
+     "en": "Division by zero is undefined."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "3,406-ல் 4-ன் இட மதிப்பு?",
+    "en": "Place value of 4 in 3,406?"
+   },
+   "options": [
+    {
+     "ta": "4",
+     "en": "4"
+    },
+    {
+     "ta": "40",
+     "en": "40"
+    },
+    {
+     "ta": "400",
+     "en": "400"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "4 நூறுகளின் இடத்தில் → 400",
+    "en": "4 is in the hundreds place → 400"
+   }
+  },
+  {
+   "q": {
+    "ta": "பூஜ்யத்துக்குக் கணக்கு விதிகள் எழுதிய இந்தியக் கணிதமேதை?",
+    "en": "Which Indian mathematician wrote rules for calculating with zero?"
+   },
+   "options": [
+    {
+     "ta": "பிரம்மகுப்தர்",
+     "en": "Brahmagupta"
+    },
+    {
+     "ta": "ஃபிபனாச்சி",
+     "en": "Fibonacci"
+    },
+    {
+     "ta": "ஆர்க்கிமிடிஸ்",
+     "en": "Archimedes"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "கி.பி. 628-ல் பிரம்மகுப்தர்.",
+    "en": "Brahmagupta, in 628 CE."
+   }
+  },
+  {
+   "q": {
+    "ta": "12 × 0 = ?",
+    "en": "12 × 0 = ?"
+   },
+   "options": [
+    {
+     "ta": "12",
+     "en": "12"
+    },
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "எந்த எண் × 0 = 0",
+    "en": "Any number × 0 = 0"
+   }
+  },
+  {
+   "q": {
+    "ta": "\"algorithm\" என்ற சொல் யாருடைய பெயரிலிருந்து வந்தது?",
+    "en": "The word \"algorithm\" comes from whose name?"
+   },
+   "options": [
+    {
+     "ta": "அல்-குவாரிஸ்மி",
+     "en": "al-Khwarizmi"
+    },
+    {
+     "ta": "ஆரியபட்டர்",
+     "en": "Aryabhata"
+    },
+    {
+     "ta": "பித்தாகரஸ்",
+     "en": "Pythagoras"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "பாக்தாத் அறிஞர் அல்-குவாரிஸ்மி.",
+    "en": "The Baghdad scholar al-Khwarizmi."
+   }
+  }
+ ]
+}

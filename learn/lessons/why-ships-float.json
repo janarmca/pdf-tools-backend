@@ -1,0 +1,404 @@
+{
+ "id": "why-ships-float",
+ "minutes": 25,
+ "title": {
+  "ta": "இரும்புக் கப்பல் ஏன் மிதக்கிறது?",
+  "en": "Why does an iron ship float?"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "7-ஆம் வகுப்பு — அளவீடுகள் (அடர்த்தி)",
+    "en": "Class 7 — Measurement (density)"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "விசை, அழுத்தம்; மிதத்தல்",
+    "en": "Force & pressure; floating"
+   }
+  },
+  {
+   "b": "IB MYP",
+   "w": {
+    "ta": "அறிவியல் — பொருள்களும் விசைகளும்",
+    "en": "Sciences — matter & forces"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Lower Secondary Science — density",
+    "en": "Lower Secondary Science — density"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "அடர்த்தியைக் கணக்கிட",
+   "en": "Calculate density"
+  },
+  {
+   "ta": "மிதத்தல் அடர்த்தியையும் வடிவத்தையும் பொறுத்தது என்று புரிந்துகொள்ள",
+   "en": "Understand that floating depends on density and shape"
+  },
+  {
+   "ta": "ஆர்க்கிமிடிஸ் தத்துவத்தை எளிமையாகச் சொல்ல",
+   "en": "State Archimedes’ principle simply"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "ஒரு சிறிய இரும்பு ஆணியை நீரில் போடு — மூழ்கிவிடும். ஆனால் ஆயிரக்கணக்கான டன் இரும்பால் செய்த கப்பல் கடலில் மிதக்கிறது! இது எப்படி? விடை சுமார் 2,200 ஆண்டுகளுக்கு முன் கிரேக்க அறிஞர் **ஆர்க்கிமிடிஸ்** கண்டுபிடித்த ஒரு யோசனையில் உள்ளது.",
+    "en": "Drop a small iron nail into water — it sinks. Yet a ship made of thousands of tonnes of iron floats on the sea! How? The answer lies in an idea found about 2,200 years ago by the Greek thinker **Archimedes**."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரே அளவு களிமண் — உருண்டையாகவும், படகு வடிவிலும். எது மிதக்கும்?",
+    "en": "The same lump of clay — as a ball and as a boat shape. Which floats?"
+   },
+   "options": [
+    {
+     "ta": "உருண்டை",
+     "en": "The ball"
+    },
+    {
+     "ta": "படகு வடிவம்",
+     "en": "The boat shape"
+    },
+    {
+     "ta": "இரண்டும் மூழ்கும் — எடை ஒன்றுதானே",
+     "en": "Both sink — same weight"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "எடை ஒன்றுதான், ஆனால் படகு வடிவம் அதிக நீரைத் தள்ளுகிறது. தள்ளப்பட்ட நீரின் எடை களிமண்ணின் எடைக்குச் சமமானதும் அது மிதக்கிறது!",
+    "en": "The weight is the same, but the boat shape pushes aside much more water. Once the pushed-aside water weighs as much as the clay, it floats!"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "அடர்த்தி",
+    "en": "Density"
+   },
+   "text": {
+    "ta": "ஒரு பொருள் எவ்வளவு \"நெருக்கமாக\" உள்ளது என்பதே அடர்த்தி.\n\n[[அடர்த்தி = நிறை ÷ கனஅளவு]]\n\nநீரின் அடர்த்தி 1 g/cm³. அதைவிட அடர்த்தி குறைந்தவை மிதக்கும் (மரம், எண்ணெய், பனிக்கட்டி); அதிகமானவை மூழ்கும் (இரும்பு சுமார் 7.9 g/cm³, கல்).",
+    "en": "Density tells how \"tightly packed\" something is.\n\n[[density = mass ÷ volume]]\n\nWater’s density is 1 g/cm³. Things less dense than water float (wood, oil, ice); denser things sink (iron is about 7.9 g/cm³, stone)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு மரக்கட்டையின் நிறை 600 g, கனஅளவு 1000 cm³. அடர்த்தி = ? (g/cm³)",
+    "en": "A wooden block has mass 600 g and volume 1000 cm³. Density = ? (g/cm³)"
+   },
+   "answer": 0.6,
+   "tol": 0.001,
+   "unit": {
+    "ta": "g/cm³",
+    "en": "g/cm³"
+   },
+   "hint": {
+    "ta": "600 ÷ 1000",
+    "en": "600 ÷ 1000"
+   },
+   "solution": {
+    "ta": "600 ÷ 1000 = 0.6 g/cm³ — 1-ஐ விடக் குறைவு, எனவே மிதக்கும்",
+    "en": "600 ÷ 1000 = 0.6 g/cm³ — less than 1, so it floats"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "ஆர்க்கிமிடிஸ் தத்துவம்",
+    "en": "Archimedes’ principle"
+   },
+   "text": {
+    "ta": "நீரில் ஒரு பொருளை வைத்தால், நீர் அதை மேல்நோக்கித் தள்ளுகிறது (மிதப்பு விசை). அந்த விசை = **அந்தப் பொருள் தள்ளிய நீரின் எடை**. கப்பல் உள்ளே பெரும்பாலும் காற்று நிறைந்த வெற்றிடம் — எனவே அதன் மொத்த (சராசரி) அடர்த்தி நீரைவிடக் குறைவு, அது பெருமளவு நீரைத் தள்ளுகிறது.",
+    "en": "When something is placed in water, the water pushes it up (the buoyant force). That force = **the weight of the water it pushes aside**. A ship is mostly hollow and full of air — so its overall (average) density is less than water’s, and it pushes aside a lot of water."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு பொருளின் அடர்த்தி 2.5 g/cm³. நீரில் போட்டால்?",
+    "en": "An object’s density is 2.5 g/cm³. In water it will…"
+   },
+   "options": [
+    {
+     "ta": "மிதக்கும்",
+     "en": "float"
+    },
+    {
+     "ta": "மூழ்கும்",
+     "en": "sink"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "நீர் = 1 g/cm³",
+    "en": "Water = 1 g/cm³"
+   },
+   "solution": {
+    "ta": "2.5 > 1 → மூழ்கும்",
+    "en": "2.5 > 1 → it sinks"
+   }
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "ஒரு பக்கெட் நீர், இரண்டு சம அளவு களிமண் (அல்லது அலுமினியத் தாள்) எடுத்துக்கொள். ஒன்றை இறுக்கமான உருண்டையாக்கு, மற்றதைப் படகாக்கு. இரண்டையும் நீரில் விடு. பிறகு படகில் ஒவ்வொரு நாணயமாக வை — எத்தனை நாணயத்தில் மூழ்குகிறது? படகின் வடிவத்தை மாற்றி மீண்டும் முயற்சி செய்.",
+    "en": "Take a bucket of water and two equal lumps of clay (or aluminium foil). Squeeze one into a tight ball and shape the other into a boat. Put both in the water. Then load the boat one coin at a time — how many coins before it sinks? Change the boat’s shape and try again."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🚢",
+     "title": {
+      "ta": "கப்பல்கள்",
+      "en": "Ships"
+     },
+     "text": {
+      "ta": "கப்பலின் பக்கத்தில் உள்ள \"பிளிம்சால் கோடு\" அதிகபட்சம் எவ்வளவு ஏற்றலாம் என்று காட்டுகிறது.",
+      "en": "The \"Plimsoll line\" on a ship’s side shows how much it can safely load."
+     }
+    },
+    {
+     "icon": "🌊",
+     "title": {
+      "ta": "கடல் நீர்",
+      "en": "Sea water"
+     },
+     "text": {
+      "ta": "உப்பு நீரின் அடர்த்தி சற்று அதிகம் (சுமார் 1.025 g/cm³), அதனால் கடலில் மிதப்பது எளிது.",
+      "en": "Salt water is slightly denser (about 1.025 g/cm³), so floating in the sea is easier."
+     }
+    },
+    {
+     "icon": "🐟",
+     "title": {
+      "ta": "நீர்மூழ்கிக் கப்பல்",
+      "en": "Submarines"
+     },
+     "text": {
+      "ta": "தொட்டிகளில் நீரை நிரப்பி மூழ்குகிறது, காற்றால் நீரை வெளியேற்றி மேலே வருகிறது.",
+      "en": "They fill tanks with water to dive and blow the water out with air to rise."
+     }
+    },
+    {
+     "icon": "🛟",
+     "title": {
+      "ta": "உயிர்காப்பு மிதவை",
+      "en": "Life jackets"
+     },
+     "text": {
+      "ta": "காற்று/நுரை நிறைந்தவை — நம் மொத்த அடர்த்தியைக் குறைக்கின்றன.",
+      "en": "Filled with air or foam, they lower our overall density."
+     }
+    }
+   ]
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "அதிகச் சுமை தாங்கும் படகு",
+    "en": "The strongest boat"
+   },
+   "text": {
+    "ta": "ஒரே அளவு அலுமினியத் தாளைக் கொண்டு அதிக நாணயங்களைத் தாங்கும் படகை வடிவமை.",
+    "en": "Using one fixed sheet of aluminium foil, design the boat that holds the most coins."
+   },
+   "prompts": [
+    {
+     "ta": "எந்த வடிவம் அதிக நீரைத் தள்ளும்?",
+     "en": "Which shape pushes aside the most water?"
+    },
+    {
+     "ta": "நாணயங்களை எப்படி வைத்தால் கவிழாது?",
+     "en": "How should you place the coins so it doesn’t tip?"
+    },
+    {
+     "ta": "உன் சோதனையை எப்படி நியாயமாக்குவாய்?",
+     "en": "How will you keep your test fair?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று பொறியாளர்கள் கணினியில் கப்பல்களை வடிவமைத்து, கட்டும் முன்பே மிதக்குமா என்று சோதிக்கிறார்கள்.",
+    "en": "Today engineers design ships on computers and test whether they float before building them."
+   },
+   "risk": {
+    "ta": "அதிக சுமை ஏற்றினால் படகுகள் கவிழ்கின்றன — ஒவ்வோர் ஆண்டும் விபத்துகள் நடக்கின்றன.",
+    "en": "Overloaded boats capsize — accidents happen every year."
+   },
+   "fix": {
+    "ta": "சுமை வரம்பை மதித்தல், உயிர்காப்பு மிதவை அணிதல், பாதுகாப்பு விதிகளைப் பின்பற்றுதல்.",
+    "en": "Respect load limits, wear life jackets and follow safety rules."
+   },
+   "q": {
+    "ta": "ஒரு மீனவருக்கு உதவ நீ என்ன மிதவைக் கருவியைக் கண்டுபிடிப்பாய்?",
+    "en": "What floating invention would you make to help a fisher?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "இரும்புக் கப்பல் ஏன் மிதக்கிறது, இரும்பு ஆணி ஏன் மூழ்குகிறது?",
+    "en": "Why does an iron ship float while an iron nail sinks?"
+   },
+   "keywords": [
+    {
+     "ta": "அடர்த்தி",
+     "en": "density"
+    },
+    {
+     "ta": "நீர்",
+     "en": "water"
+    },
+    {
+     "ta": "காற்று",
+     "en": "air",
+     "alt": [
+      "வெற்றிடம்",
+      "hollow"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "கப்பல் உள்ளே காற்று நிறைந்திருப்பதால் அதன் சராசரி அடர்த்தி நீரைவிடக் குறைவு; அது தன் எடைக்குச் சமமான நீரைத் தள்ளுகிறது. ஆணி திடமானது, அடர்த்தி நீரைவிட அதிகம்.",
+    "en": "The ship is hollow and full of air, so its average density is less than water’s; it pushes aside water equal to its own weight. The nail is solid and denser than water."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "அடர்த்தி = நிறை ÷ கனஅளவு; நீர் = 1 g/cm³.",
+     "en": "Density = mass ÷ volume; water = 1 g/cm³."
+    },
+    {
+     "ta": "மிதப்பு விசை = தள்ளப்பட்ட நீரின் எடை.",
+     "en": "Buoyant force = weight of the water pushed aside."
+    },
+    {
+     "ta": "வடிவம் முக்கியம்: வெற்றிடமான வடிவம் அதிக நீரைத் தள்ளும்.",
+     "en": "Shape matters: a hollow shape pushes aside more water."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "நிறை 200 g, கனஅளவு 100 cm³ — அடர்த்தி?",
+    "en": "Mass 200 g, volume 100 cm³ — density?"
+   },
+   "options": [
+    {
+     "ta": "2 g/cm³",
+     "en": "2 g/cm³"
+    },
+    {
+     "ta": "0.5 g/cm³",
+     "en": "0.5 g/cm³"
+    },
+    {
+     "ta": "20,000 g/cm³",
+     "en": "20,000 g/cm³"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "200 ÷ 100 = 2",
+    "en": "200 ÷ 100 = 2"
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் நீரில் மிதப்பது?",
+    "en": "Which of these floats in water?"
+   },
+   "options": [
+    {
+     "ta": "அடர்த்தி 0.9 g/cm³ உள்ள பனிக்கட்டி",
+     "en": "Ice, density 0.9 g/cm³"
+    },
+    {
+     "ta": "அடர்த்தி 2.7 g/cm³ உள்ள அலுமினியக் கட்டி",
+     "en": "A block of aluminium, 2.7 g/cm³"
+    },
+    {
+     "ta": "அடர்த்தி 7.9 g/cm³ உள்ள இரும்பு",
+     "en": "Iron, 7.9 g/cm³"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "0.9 < 1",
+    "en": "0.9 < 1"
+   }
+  },
+  {
+   "q": {
+    "ta": "மிதப்பு விசை எதற்குச் சமம்?",
+    "en": "The buoyant force equals…"
+   },
+   "options": [
+    {
+     "ta": "தள்ளப்பட்ட நீரின் எடை",
+     "en": "the weight of water pushed aside"
+    },
+    {
+     "ta": "பொருளின் நீளம்",
+     "en": "the object’s length"
+    },
+    {
+     "ta": "நீரின் வெப்பநிலை",
+     "en": "the water’s temperature"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "ஆர்க்கிமிடிஸ் தத்துவம்.",
+    "en": "Archimedes’ principle."
+   }
+  },
+  {
+   "q": {
+    "ta": "கடலில் மிதப்பது ஆற்றைவிட எளிது, ஏனெனில்…",
+    "en": "Floating is easier in the sea than in a river because…"
+   },
+   "options": [
+    {
+     "ta": "உப்பு நீரின் அடர்த்தி அதிகம்",
+     "en": "salt water is denser"
+    },
+    {
+     "ta": "கடலில் அலைகள் உண்டு",
+     "en": "the sea has waves"
+    },
+    {
+     "ta": "கடல் நீர் சூடானது",
+     "en": "sea water is warmer"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "சுமார் 1.025 g/cm³",
+    "en": "About 1.025 g/cm³"
+   }
+  }
+ ]
+}

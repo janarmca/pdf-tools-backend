@@ -174,7 +174,9 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 <script src="games-math.js?v=2"></script>
 <script src="games-lang.js?v=2"></script>
 <script src="games-think.js?v=2"></script>
-<script src="play.js?v=2"></script>
+<script src="games-mid.js?v=1"></script>
+<script src="games-mid2.js?v=1"></script>
+<script src="play.js?v=3"></script>
 <script>
 (function(){
 'use strict';
@@ -546,6 +548,23 @@ const WIDGETS = {
       }, 450);
     };
     draw();
+  },
+  /* Right triangle with squares on each side: a² + b² = c² */
+  pythagoras(host){
+    const S = svg(host, 360, 260); const ro = readout(host);
+    let a = 3, b = 4;
+    function draw(){
+      const k = 150 / Math.max(a + b, 7), ox = 140, oy = 150, A = a * k, B = b * k; // right angle at (ox,oy); a along x, b up
+      const P1 = [ox, oy], P2 = [ox + A, oy], P3 = [ox, oy - B];
+      const sq = (p, q, col) => { const dx = q[0] - p[0], dy = q[1] - p[1]; const r = [q[0] + dy, q[1] - dx], s2 = [p[0] + dy, p[1] - dx]; return `<polygon points="${[p, q, r, s2].map(t => t.map(v => v.toFixed(1)).join(',')).join(' ')}" fill="${col}" fill-opacity=".35" stroke="${col}"/>`; };
+      const c2 = a * a + b * b, c = Math.sqrt(c2);
+      S.innerHTML = sq(P2, P1, '#3b82f6') + sq(P1, P3, '#16a34a') + sq(P3, P2, '#dc2626') +
+        `<polygon points="${P1.join(',')} ${P2.join(',')} ${P3.join(',')}" fill="#fff7d6" stroke="#14213d" stroke-width="2.5"/><rect x="${ox}" y="${oy - 10}" width="10" height="10" fill="none" stroke="#14213d"/>` +
+        `<text x="${ox + A / 2}" y="${oy + 16}" font-size="13" text-anchor="middle">a = ${a}</text><text x="${ox - 8}" y="${oy - B / 2}" font-size="13" text-anchor="end">b = ${b}</text>`;
+      ro([[T('a² (நீலம்)','a² (blue)'), a * a], [T('b² (பச்சை)','b² (green)'), b * b], [T('a² + b²','a² + b²'), c2], [T('c² (சிவப்பு சதுரம்)','c² (red square)'), c2], [T('கர்ணம் c','hypotenuse c'), Number.isInteger(c) ? c + ' ✨' : c.toFixed(2)]]);
+    }
+    slider(host, 'a', 1, 12, 1, a, v => { a = Math.round(v); draw(); });
+    slider(host, 'b', 1, 12, 1, b, v => { b = Math.round(v); draw(); });
   },
   /* One vote: a class election where your group decides whether to vote */
   classVote(host){

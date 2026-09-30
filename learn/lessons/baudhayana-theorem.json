@@ -1,0 +1,470 @@
+{
+ "id": "baudhayana-theorem",
+ "minutes": 25,
+ "title": {
+  "ta": "போதாயனர் – பித்தாகரஸ் தேற்றம்",
+  "en": "The Baudhayana–Pythagoras theorem"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "8-ஆம் வகுப்பு — வடிவியல்",
+    "en": "Class 8 — Geometry"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "வர்க்கங்கள், வர்க்கமூலங்கள்; 10-ஆம் வகுப்பு முக்கோணங்கள்",
+    "en": "Squares & square roots; Class 10 Triangles"
+   }
+  },
+  {
+   "b": "IB MYP",
+   "w": {
+    "ta": "கணிதம் — வடிவியல்",
+    "en": "Mathematics — geometry"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "Lower Secondary / IGCSE — Pythagoras",
+    "en": "Lower Secondary / IGCSE — Pythagoras"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "செங்கோண முக்கோணத்தின் பக்கங்களுக்கு இடையிலான தொடர்பைக் கண்டுபிடிக்க",
+   "en": "Discover the link between the sides of a right triangle"
+  },
+  {
+   "ta": "தெரியாத பக்கத்தைக் கணக்கிட",
+   "en": "Calculate a missing side"
+  },
+  {
+   "ta": "இந்த யோசனை பல நாகரிகங்களில் தோன்றியது என்று அறிய",
+   "en": "Learn that this idea appeared in many civilisations"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "கொத்தனார் ஒரு சுவரின் மூலை சரியாக 90° உள்ளதா என்று எப்படிப் பார்க்கிறார்? ஒரு கயிற்றில் 3, 4, 5 அடி என்று குறியிட்டு முக்கோணம் அமைக்கிறார் — அது எப்போதும் செங்கோணம்! இந்த ரகசியத்தை இந்தியாவில் **போதாயனர்** (சுல்ப சூத்திரம்), கிரேக்கத்தில் **பித்தாகரஸ்**, அதற்கும் முன் பாபிலோனியர்கள், சீனர்கள் — எல்லோரும் அறிந்திருந்தனர்.",
+    "en": "How does a mason check that a wall’s corner is exactly 90°? He marks 3, 4 and 5 feet on a rope and makes a triangle — it is always a right angle! This secret was known to **Baudhayana** in India (the Sulba Sutras), **Pythagoras** in Greece, and even earlier to the Babylonians and the Chinese."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "செங்கோண முக்கோணத்தின் இரு சிறிய பக்கங்கள் 3, 4. நீண்ட பக்கம்?",
+    "en": "A right triangle’s two short sides are 3 and 4. The long side?"
+   },
+   "options": [
+    {
+     "ta": "7",
+     "en": "7"
+    },
+    {
+     "ta": "5",
+     "en": "5"
+    },
+    {
+     "ta": "6",
+     "en": "6"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "5! 3 + 4 = 7 அல்ல. பக்கங்களின் **வர்க்கங்களைப்** பார்: 3² + 4² = 9 + 16 = 25 = 5².",
+    "en": "5! Not 3 + 4 = 7. Look at the **squares** of the sides: 3² + 4² = 9 + 16 = 25 = 5²."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "pythagoras",
+   "text": {
+    "ta": "a, b-ஐ மாற்று. ஒவ்வொரு பக்கத்திலும் ஒரு சதுரம் உள்ளது. நீலம் + பச்சை சதுரங்களின் பரப்பை சிவப்புச் சதுரத்துடன் ஒப்பிடு.",
+    "en": "Change a and b. Each side has a square on it. Compare the blue + green areas with the red square."
+   },
+   "q": {
+    "ta": "a = 5, b = 12 என வை. கர்ணம் c = ?",
+    "en": "Set a = 5, b = 12. What is the hypotenuse c?"
+   },
+   "options": [
+    {
+     "ta": "17",
+     "en": "17"
+    },
+    {
+     "ta": "13",
+     "en": "13"
+    },
+    {
+     "ta": "15",
+     "en": "15"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "25 + 144 = 169 = 13². எப்போதும்: இரு சிறிய சதுரங்களின் கூடுதல் = பெரிய சதுரம்!",
+    "en": "25 + 144 = 169 = 13². Always: the two small squares add up to the big square!"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "தேற்றம்",
+    "en": "The theorem"
+   },
+   "text": {
+    "ta": "செங்கோண முக்கோணத்தில், செங்கோணத்துக்கு எதிரே உள்ள நீண்ட பக்கம் **கர்ணம்** (c). மற்ற இரு பக்கங்கள் a, b.\n\n[[a² + b² = c²]]\n\nபோதாயனர் சொன்னது: \"ஒரு செவ்வகத்தின் மூலைவிட்டம் உருவாக்கும் சதுரம், நீளமும் அகலமும் தனித்தனியே உருவாக்கும் சதுரங்களின் கூடுதலுக்குச் சமம்.\"",
+    "en": "In a right triangle, the longest side, opposite the right angle, is the **hypotenuse** (c). The other two sides are a and b.\n\n[[a² + b² = c²]]\n\nBaudhayana put it like this: \"The square made by the diagonal of a rectangle equals the squares made by its length and breadth together.\""
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு ஏணி 13 m நீளம். அதன் அடி சுவரிலிருந்து 5 m தொலைவில் உள்ளது. ஏணி சுவரில் எவ்வளவு உயரம் தொடும்?",
+    "en": "A ladder is 13 m long. Its foot is 5 m from the wall. How high up the wall does it reach?"
+   },
+   "steps": [
+    {
+     "ta": "ஏணி = கர்ணம் c = 13; தரை a = 5; உயரம் b = ?",
+     "en": "Ladder = hypotenuse c = 13; ground a = 5; height b = ?"
+    },
+    {
+     "ta": "b² = c² − a² = 169 − 25 = 144",
+     "en": "b² = c² − a² = 169 − 25 = 144"
+    },
+    {
+     "ta": "b = √144 = 12",
+     "en": "b = √144 = 12"
+    }
+   ],
+   "answer": {
+    "ta": "12 m",
+    "en": "12 m"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "செங்கோண முக்கோணத்தின் இரு பக்கங்கள் 6 cm, 8 cm. கர்ணம் = ? (cm)",
+    "en": "A right triangle has sides 6 cm and 8 cm. Hypotenuse = ? (cm)"
+   },
+   "answer": 10,
+   "tol": 0,
+   "unit": {
+    "ta": "cm",
+    "en": "cm"
+   },
+   "hint": {
+    "ta": "36 + 64 = ?",
+    "en": "36 + 64 = ?"
+   },
+   "solution": {
+    "ta": "6² + 8² = 36 + 64 = 100 → √100 = 10",
+    "en": "6² + 8² = 36 + 64 = 100 → √100 = 10"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "கர்ணம் 13 cm, ஒரு பக்கம் 5 cm. மற்ற பக்கம் = ? (cm)",
+    "en": "Hypotenuse 13 cm, one side 5 cm. The other side = ? (cm)"
+   },
+   "answer": 12,
+   "tol": 0,
+   "unit": {
+    "ta": "cm",
+    "en": "cm"
+   },
+   "hint": {
+    "ta": "169 − 25",
+    "en": "169 − 25"
+   },
+   "solution": {
+    "ta": "13² − 5² = 169 − 25 = 144 → 12",
+    "en": "13² − 5² = 169 − 25 = 144 → 12"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "7, 24, 25 — இவை செங்கோண முக்கோணத்தின் பக்கங்களா?",
+    "en": "Are 7, 24, 25 the sides of a right triangle?"
+   },
+   "options": [
+    {
+     "ta": "ஆம்",
+     "en": "Yes"
+    },
+    {
+     "ta": "இல்லை",
+     "en": "No"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "7² + 24² = ? , 25² = ?",
+    "en": "7² + 24² = ? , 25² = ?"
+   },
+   "solution": {
+    "ta": "49 + 576 = 625 = 25² → ஆம்",
+    "en": "49 + 576 = 625 = 25² → yes"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🧱",
+     "title": {
+      "ta": "கட்டுமானம்",
+      "en": "Building"
+     },
+     "text": {
+      "ta": "3-4-5 கயிற்று முறை இன்றும் செங்கோணம் அமைக்கப் பயன்படுகிறது.",
+      "en": "The 3-4-5 rope trick is still used to set right angles."
+     }
+    },
+    {
+     "icon": "📺",
+     "title": {
+      "ta": "TV அளவு",
+      "en": "TV size"
+     },
+     "text": {
+      "ta": "\"55 அங்குல TV\" என்பது திரையின் மூலைவிட்ட நீளம்!",
+      "en": "A \"55-inch TV\" is measured along the screen’s diagonal!"
+     }
+    },
+    {
+     "icon": "🗺️",
+     "title": {
+      "ta": "வரைபடம், GPS",
+      "en": "Maps & GPS"
+     },
+     "text": {
+      "ta": "இரு இடங்களுக்கு இடையிலான நேர்கோட்டுத் தூரம் இதே தேற்றத்தால் கணக்கிடப்படுகிறது.",
+      "en": "Straight-line distance between two places uses this same theorem."
+     }
+    },
+    {
+     "icon": "🎮",
+     "title": {
+      "ta": "வீடியோ கேம்",
+      "en": "Video games"
+     },
+     "text": {
+      "ta": "எதிரி உன்னிடமிருந்து எவ்வளவு தூரம் என்று கேம் ஒவ்வொரு நொடியும் கணக்கிடுகிறது.",
+      "en": "Games compute how far an enemy is from you every second."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "ஒரு கயிற்றில் 12 சம இடைவெளிகளில் முடிச்சுப் போடு. அதை 3, 4, 5 இடைவெளிகளாக முக்கோணமாக விரி. மூலையை ஒரு புத்தகத்தின் மூலையுடன் ஒப்பிடு — சரியாக 90°!",
+    "en": "Tie 12 equally spaced knots in a rope. Stretch it into a triangle with sides of 3, 4 and 5 spaces. Compare the corner with the corner of a book — exactly 90°!"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "புதிய முக்கூறுகளைக் கண்டுபிடி",
+    "en": "Hunt for new triples"
+   },
+   "text": {
+    "ta": "3-4-5, 5-12-13, 8-15-17 போன்ற முழு எண் முக்கூறுகள் \"பித்தாகரஸ் முக்கூறுகள்\". புதியவற்றைக் கண்டுபிடிக்க ஒரு வழியை உருவாக்கு.",
+    "en": "Whole-number sets like 3-4-5, 5-12-13, 8-15-17 are \"Pythagorean triples\". Invent a way to find new ones."
+   },
+   "prompts": [
+    {
+     "ta": "3-4-5-ஐ 2-ஆல் பெருக்கினால்? இன்னும் செங்கோணமா?",
+     "en": "Multiply 3-4-5 by 2 — still a right triangle?"
+    },
+    {
+     "ta": "ஒற்றை எண்ணின் வர்க்கத்தை இரண்டாகப் பிரித்துப் பார் (5² = 25 = 12 + 13)",
+     "en": "Split the square of an odd number in two (5² = 25 = 12 + 13)"
+    },
+    {
+     "ta": "உன் முறை எப்போதும் வேலை செய்கிறதா? எப்படிச் சோதிப்பாய்?",
+     "en": "Does your method always work? How will you test it?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "ரோபோக் கைகள், ட்ரோன்கள், தானியங்கிக் கார்கள் — இவை ஒவ்வொரு நொடியும் இந்தத் தேற்றத்தைப் பயன்படுத்தித் தூரங்களைக் கணக்கிடுகின்றன.",
+    "en": "Robot arms, drones and self-driving cars use this theorem to compute distances every second."
+   },
+   "risk": {
+    "ta": "அளவீட்டுப் பிழை சிறிதாக இருந்தாலும், பெரிய கட்டடங்களில் சுவர் சாய்ந்துவிடும்.",
+    "en": "Even a small measuring error can tilt a wall in a big building."
+   },
+   "fix": {
+    "ta": "இருமுறை அளத்தல், 3-4-5 போன்ற எளிய சோதனைகளால் சரிபார்த்தல்.",
+    "en": "Measure twice and check with simple tests like 3-4-5."
+   },
+   "q": {
+    "ta": "போதாயனரும் பித்தாகரஸும் சந்தித்திருந்தால் என்ன பேசியிருப்பார்கள்?",
+    "en": "If Baudhayana and Pythagoras had met, what might they have talked about?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "தேற்றத்தை உன் சொந்த வார்த்தைகளில் சொல், ஒரு எடுத்துக்காட்டுடன்.",
+    "en": "State the theorem in your own words, with an example."
+   },
+   "keywords": [
+    {
+     "ta": "செங்கோண",
+     "en": "right"
+    },
+    {
+     "ta": "வர்க்க",
+     "en": "square"
+    },
+    {
+     "ta": "கர்ணம்",
+     "en": "hypotenuse",
+     "alt": [
+      "நீண்ட",
+      "longest"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "செங்கோண முக்கோணத்தில் இரு சிறிய பக்கங்களின் வர்க்கங்களின் கூடுதல் = கர்ணத்தின் வர்க்கம். 3² + 4² = 9 + 16 = 25 = 5².",
+    "en": "In a right triangle, the squares of the two shorter sides add up to the square of the hypotenuse. 3² + 4² = 9 + 16 = 25 = 5²."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "a² + b² = c² — செங்கோண முக்கோணங்களுக்கு மட்டும்.",
+     "en": "a² + b² = c² — only for right triangles."
+    },
+    {
+     "ta": "c = கர்ணம், செங்கோணத்துக்கு எதிரே உள்ள நீண்ட பக்கம்.",
+     "en": "c = hypotenuse, the longest side, opposite the right angle."
+    },
+    {
+     "ta": "போதாயனர், பித்தாகரஸ், பாபிலோனியர், சீனர் — பலர் அறிந்த உண்மை.",
+     "en": "Baudhayana, Pythagoras, the Babylonians and the Chinese all knew it."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "பக்கங்கள் 9, 12 — கர்ணம்?",
+    "en": "Sides 9 and 12 — hypotenuse?"
+   },
+   "options": [
+    {
+     "ta": "15",
+     "en": "15"
+    },
+    {
+     "ta": "21",
+     "en": "21"
+    },
+    {
+     "ta": "13",
+     "en": "13"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "81 + 144 = 225 = 15²",
+    "en": "81 + 144 = 225 = 15²"
+   }
+  },
+  {
+   "q": {
+    "ta": "கர்ணம் எந்தப் பக்கம்?",
+    "en": "Which side is the hypotenuse?"
+   },
+   "options": [
+    {
+     "ta": "செங்கோணத்துக்கு எதிரே உள்ள நீண்ட பக்கம்",
+     "en": "The longest side, opposite the right angle"
+    },
+    {
+     "ta": "மிகச் சிறிய பக்கம்",
+     "en": "The shortest side"
+    },
+    {
+     "ta": "அடிப்பக்கம்",
+     "en": "The base"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "கர்ணம் எப்போதும் மிக நீளமானது.",
+    "en": "The hypotenuse is always the longest."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்க்கண்டவற்றில் செங்கோண முக்கோணம் எது?",
+    "en": "Which of these is a right triangle?"
+   },
+   "options": [
+    {
+     "ta": "8, 15, 17",
+     "en": "8, 15, 17"
+    },
+    {
+     "ta": "4, 5, 6",
+     "en": "4, 5, 6"
+    },
+    {
+     "ta": "2, 3, 4",
+     "en": "2, 3, 4"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "64 + 225 = 289 = 17²",
+    "en": "64 + 225 = 289 = 17²"
+   }
+  },
+  {
+   "q": {
+    "ta": "இந்தியாவில் இந்தத் தொடர்பை எழுதியவர்?",
+    "en": "Who wrote this relationship in ancient India?"
+   },
+   "options": [
+    {
+     "ta": "போதாயனர்",
+     "en": "Baudhayana"
+    },
+    {
+     "ta": "ஃபிபனாச்சி",
+     "en": "Fibonacci"
+    },
+    {
+     "ta": "ஆர்க்கிமிடிஸ்",
+     "en": "Archimedes"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "போதாயனரின் சுல்ப சூத்திரம்.",
+    "en": "Baudhayana’s Sulba Sutra."
+   }
+  }
+ ]
+}
