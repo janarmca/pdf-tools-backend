@@ -1,0 +1,414 @@
+{
+ "id": "birthday-surprise",
+ "minutes": 25,
+ "title": {
+  "ta": "பிறந்தநாள் ஆச்சரியம் — நிகழ்தகவின் மாயம்",
+  "en": "The birthday surprise — the magic of probability"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9, 10-ஆம் வகுப்பு — நிகழ்தகவு",
+    "en": "Classes 9 & 10 — Probability"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "நிகழ்தகவு",
+    "en": "Probability"
+   }
+  },
+  {
+   "b": "IB MYP",
+   "w": {
+    "ta": "கணிதம் — நிகழ்தகவு, மாதிரி உருவாக்கல்",
+    "en": "Mathematics — probability & modelling"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "IGCSE — probability",
+    "en": "IGCSE — probability"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "\"எதிர் நிகழ்ச்சி\" முறையில் நிகழ்தகவைக் கணக்கிட",
+   "en": "Use the complement to calculate a probability"
+  },
+  {
+   "ta": "நம் உள்ளுணர்வு ஏன் சில நேரம் தவறுகிறது என்று பார்க்க",
+   "en": "See why intuition sometimes fails"
+  },
+  {
+   "ta": "கணினியில் போலி சோதனை (simulation) செய்து சரிபார்க்க",
+   "en": "Check the maths with a computer simulation"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் வகுப்பில் 30 பேர். இருவருக்காவது ஒரே பிறந்தநாள் இருக்க வாய்ப்பு எவ்வளவு? ஆண்டில் 365 நாள்கள், நாமோ 30 பேர் மட்டுமே — வாய்ப்பு குறைவு என்று தோன்றும். ஆனால் விடை உன்னை ஆச்சரியப்படுத்தும்!",
+    "en": "Your class has 30 students. What is the chance that at least two share a birthday? There are 365 days and only 30 of you — it sounds unlikely. The answer will surprise you!"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "30 பேரில் இருவருக்காவது ஒரே பிறந்தநாள் இருக்க வாய்ப்பு?",
+    "en": "Chance that at least two of 30 people share a birthday?"
+   },
+   "options": [
+    {
+     "ta": "சுமார் 8%",
+     "en": "About 8%"
+    },
+    {
+     "ta": "சுமார் 30%",
+     "en": "About 30%"
+    },
+    {
+     "ta": "சுமார் 70%",
+     "en": "About 70%"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "சுமார் 70.6%! 23 பேர் இருந்தாலே 50%-க்கு மேல். ஏன்? நாம் \"என் பிறந்தநாள்\" என்று மட்டும் யோசிக்கிறோம்; ஆனால் 30 பேரில் 435 சோடிகள் உள்ளன!",
+    "en": "About 70.6%! With just 23 people it is already over 50%. Why? We think only about \"my birthday\", but 30 people make 435 different pairs!"
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "birthday",
+   "text": {
+    "ta": "மாணவர் எண்ணிக்கையை மாற்று. பிறகு \"வகுப்பை உருவாக்கிப் பார்\" பொத்தானைப் பலமுறை அழுத்து — கணிதம் சொன்னது நடக்கிறதா?",
+    "en": "Change the number of people. Then press \"Simulate a class\" many times — does it match the maths?"
+   },
+   "q": {
+    "ta": "வாய்ப்பு முதன்முதலில் 50%-ஐத் தாண்டுவது எத்தனை பேரில்?",
+    "en": "At how many people does the chance first pass 50%?"
+   },
+   "options": [
+    {
+     "ta": "23",
+     "en": "23"
+    },
+    {
+     "ta": "183",
+     "en": "183"
+    },
+    {
+     "ta": "365",
+     "en": "365"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "23 பேர் → 50.7%. 50 பேர் → 97%. 70 பேர் → 99.9%. பெரும்பாலானோர் 183 (365-ன் பாதி) என்று ஊகிப்பார்கள் — உள்ளுணர்வு தவறும் இடம் இதுதான்!",
+    "en": "23 people → 50.7%. 50 → 97%. 70 → 99.9%. Most people guess 183 (half of 365) — this is exactly where intuition fails!"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "எதிர் நிகழ்ச்சி தந்திரம்",
+    "en": "The complement trick"
+   },
+   "text": {
+    "ta": "\"குறைந்தது இருவர் ஒரே நாள்\" என்பதை நேரடியாக எண்ணுவது கடினம். எதிர் நிகழ்ச்சியைக் கணக்கிடு: \"எல்லோருக்கும் வெவ்வேறு நாள்\".\n\n[[P(ஒரே நாள்) = 1 − (365/365 × 364/365 × 363/365 × …)]]\n\nஇரண்டாமவர் முதலாமவரின் நாளைத் தவிர்க்க 364/365, மூன்றாமவர் 363/365… — (லீப் ஆண்டைக் கணக்கில் எடுக்கவில்லை).",
+    "en": "\"At least two share a day\" is hard to count directly. Work out the opposite: \"everyone has a different day\".\n\n[[P(shared) = 1 − (365/365 × 364/365 × 363/365 × …)]]\n\nThe second person avoids the first’s day with 364/365, the third with 363/365… (ignoring leap years)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "இரண்டு நாணயங்களைச் சுண்டும்போது குறைந்தது ஒரு தலை விழ நிகழ்தகவு? (தசமத்தில்)",
+    "en": "Two coins are tossed. Probability of at least one head? (as a decimal)"
+   },
+   "answer": 0.75,
+   "tol": 0.001,
+   "hint": {
+    "ta": "எதிர் நிகழ்ச்சி: இரண்டும் பூ = 1/4",
+    "en": "Complement: both tails = 1/4"
+   },
+   "solution": {
+    "ta": "1 − 1/4 = 3/4 = 0.75",
+    "en": "1 − 1/4 = 3/4 = 0.75"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "3 பேரில் சோடிகள் எத்தனை? (அ-ஆ, அ-இ, ஆ-இ…) 30 பேருக்கு 30 × 29 ÷ 2 = ?",
+    "en": "How many pairs among 30 people? 30 × 29 ÷ 2 = ?"
+   },
+   "answer": 435,
+   "tol": 0,
+   "hint": {
+    "ta": "ஒவ்வொருவரும் மற்ற 29 பேருடன்; ஒவ்வொரு சோடியும் இருமுறை எண்ணப்படுகிறது",
+    "en": "Each person pairs with 29 others; each pair is counted twice"
+   },
+   "solution": {
+    "ta": "30 × 29 ÷ 2 = 435",
+    "en": "30 × 29 ÷ 2 = 435"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🔐",
+     "title": {
+      "ta": "இணையப் பாதுகாப்பு",
+      "en": "Cyber security"
+     },
+     "text": {
+      "ta": "இதே கணிதம் \"birthday attack\" எனப்படுகிறது — பாதுகாப்பு நிபுணர்கள் அதைத் தடுக்கப் பெரிய குறியீடுகளைப் பயன்படுத்துகிறார்கள்.",
+      "en": "The same maths is behind the \"birthday attack\" — security experts use long codes to defeat it."
+     }
+    },
+    {
+     "icon": "🌦️",
+     "title": {
+      "ta": "வானிலை முன்னறிவிப்பு",
+      "en": "Weather forecasts"
+     },
+     "text": {
+      "ta": "\"70% மழை வாய்ப்பு\" — இது நிகழ்தகவின் மொழி.",
+      "en": "\"70% chance of rain\" — that’s the language of probability."
+     }
+    },
+    {
+     "icon": "💊",
+     "title": {
+      "ta": "மருத்துவம்",
+      "en": "Medicine"
+     },
+     "text": {
+      "ta": "புதிய மருந்து உண்மையில் வேலை செய்கிறதா, தற்செயலா என்று நிகழ்தகவு சொல்கிறது.",
+      "en": "Probability tells whether a new medicine really works or it was just chance."
+     }
+    },
+    {
+     "icon": "🏏",
+     "title": {
+      "ta": "விளையாட்டு",
+      "en": "Sport"
+     },
+     "text": {
+      "ta": "அணிகள் தரவை வைத்து எந்தப் பந்துவீச்சாளரைப் போடுவது என்று முடிவெடுக்கின்றன.",
+      "en": "Teams use data to decide which bowler to bring on."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "text": {
+    "ta": "உன் வகுப்பில் எல்லோருடைய பிறந்த நாள், மாதத்தை (ஆண்டு வேண்டாம்) கேட்டு எழுது. ஒரே நாள் உள்ளவர்கள் இருக்கிறார்களா? பக்கத்து வகுப்புகளிலும் செய். எத்தனை வகுப்புகளில் ஒரே நாள் கிடைத்தது? கணிதம் சொன்னதுடன் ஒப்பிடு.",
+    "en": "Ask everyone in your class for their birthday (day and month only) and write them down. Is there a shared one? Try other classes too. In how many classes did you find a match? Compare with the maths."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் சொந்த ஆச்சரியம்",
+    "en": "Your own surprise"
+   },
+   "text": {
+    "ta": "உள்ளுணர்வை ஏமாற்றும் ஒரு நிகழ்தகவுப் புதிரை நீயே உருவாக்கு, பிறகு சோதனையால் சரிபார்.",
+    "en": "Create your own probability puzzle that fools intuition, then test it with an experiment."
+   },
+   "prompts": [
+    {
+     "ta": "எதை எண்ணுவாய்? (பிறந்த மாதம், போன் எண்ணின் கடைசி இலக்கம்…)",
+     "en": "What will you count? (birth month, last digit of a phone number…)"
+    },
+    {
+     "ta": "எதிர் நிகழ்ச்சியைப் பயன்படுத்து",
+     "en": "Use the complement"
+    },
+    {
+     "ta": "எத்தனை முறை சோதிப்பாய்?",
+     "en": "How many times will you test it?"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "AI மாதிரிகள் \"அடுத்த சொல் எது?\" என்பதை நிகழ்தகவால் ஊகிக்கின்றன.",
+    "en": "AI models guess \"what is the next word?\" using probability."
+   },
+   "risk": {
+    "ta": "நிகழ்தகவைத் தவறாகப் புரிந்தால் லாட்டரி, சூதாட்டத்தில் பணம் இழப்பார்கள் — \"வீடு எப்போதும் வெல்லும்\".",
+    "en": "Misreading probability makes people lose money on lotteries and gambling — \"the house always wins\"."
+   },
+   "fix": {
+    "ta": "உள்ளுணர்வை நம்பாதே — கணக்கிடு, சோதனை செய்.",
+    "en": "Don’t trust gut feeling — calculate and experiment."
+   },
+   "q": {
+    "ta": "ஒரு லாட்டரியில் வெல்லும் வாய்ப்பு 1 கோடியில் 1 என்றால், அது \"நியாயமான\" விளையாட்டா?",
+    "en": "If a lottery gives a 1 in 10 million chance, is it a \"fair\" game?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "23 பேரில் 50%-க்கு மேல் வாய்ப்பு ஏன்?",
+    "en": "Why is the chance over 50% with just 23 people?"
+   },
+   "keywords": [
+    {
+     "ta": "சோடி",
+     "en": "pair"
+    },
+    {
+     "ta": "எதிர்",
+     "en": "complement",
+     "alt": [
+      "opposite"
+     ]
+    },
+    {
+     "ta": "365",
+     "en": "365"
+    }
+   ],
+   "model": {
+    "ta": "23 பேரில் 253 சோடிகள் உள்ளன. எல்லோருக்கும் வெவ்வேறு நாள் இருக்கும் வாய்ப்பு 365/365 × 364/365 × … ≈ 49.3%; எனவே ஒரே நாள் வாய்ப்பு ≈ 50.7%.",
+    "en": "23 people make 253 pairs. The chance all birthdays differ is 365/365 × 364/365 × … ≈ 49.3%, so the chance of a match is ≈ 50.7%."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "நிகழ்தகவு = சாதகமானவை ÷ மொத்தம்.",
+     "en": "Probability = favourable ÷ total."
+    },
+    {
+     "ta": "P(நிகழ்ச்சி) = 1 − P(எதிர் நிகழ்ச்சி).",
+     "en": "P(event) = 1 − P(opposite)."
+    },
+    {
+     "ta": "23 பேர் → ≈ 50.7%; 30 பேர் → ≈ 70.6%.",
+     "en": "23 people → ≈ 50.7%; 30 → ≈ 70.6%."
+    },
+    {
+     "ta": "உள்ளுணர்வைச் சோதனையால் சரிபார்.",
+     "en": "Check intuition with experiments."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "P(A) = 0.3 எனில் P(A நிகழாமை)?",
+    "en": "If P(A) = 0.3, P(not A) = ?"
+   },
+   "options": [
+    {
+     "ta": "0.7",
+     "en": "0.7"
+    },
+    {
+     "ta": "0.3",
+     "en": "0.3"
+    },
+    {
+     "ta": "1.3",
+     "en": "1.3"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "1 − 0.3 = 0.7",
+    "en": "1 − 0.3 = 0.7"
+   }
+  },
+  {
+   "q": {
+    "ta": "10 பேரில் சோடிகள் எத்தனை?",
+    "en": "How many pairs among 10 people?"
+   },
+   "options": [
+    {
+     "ta": "45",
+     "en": "45"
+    },
+    {
+     "ta": "100",
+     "en": "100"
+    },
+    {
+     "ta": "20",
+     "en": "20"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "10 × 9 ÷ 2 = 45",
+    "en": "10 × 9 ÷ 2 = 45"
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு பகடையை இருமுறை உருட்டும்போது குறைந்தது ஒரு 6 விழ நிகழ்தகவு?",
+    "en": "Rolling a die twice, probability of at least one 6?"
+   },
+   "options": [
+    {
+     "ta": "11/36",
+     "en": "11/36"
+    },
+    {
+     "ta": "1/3",
+     "en": "1/3"
+    },
+    {
+     "ta": "1/6",
+     "en": "1/6"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "1 − (5/6 × 5/6) = 1 − 25/36 = 11/36",
+    "en": "1 − (5/6 × 5/6) = 1 − 25/36 = 11/36"
+   }
+  },
+  {
+   "q": {
+    "ta": "நிகழ்தகவின் மதிப்பு எப்போதும்…",
+    "en": "A probability is always…"
+   },
+   "options": [
+    {
+     "ta": "0 முதல் 1 வரை",
+     "en": "between 0 and 1"
+    },
+    {
+     "ta": "1-ஐ விடப் பெரியது",
+     "en": "greater than 1"
+    },
+    {
+     "ta": "எதிர்மம்",
+     "en": "negative"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "0 = நடக்காது, 1 = உறுதி.",
+    "en": "0 = impossible, 1 = certain."
+   }
+  }
+ ]
+}

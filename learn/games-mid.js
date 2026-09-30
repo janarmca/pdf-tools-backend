@@ -13,7 +13,7 @@ const P = n => n < 0 ? `(${N(n)})` : N(n);                  // (−7) inside exp
 const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while(b){ [a, b] = [b, a % b]; } return a; };
 const lcm = (a, b) => a / gcd(a, b) * b;
 const isPrime = n => { if(n < 2) return false; for(let i = 2; i * i <= n; i++) if(n % i === 0) return false; return true; };
-function fr(n, d){ if(d < 0){ n = -n; d = -d; } const g = gcd(n, d) || 1; return {n: n / g, d: d / g}; }
+function fr(n, d){ if(n === 0) return {n: 0, d: 1}; if(d < 0){ n = -n; d = -d; } const g = gcd(n, d) || 1; return {n: n / g, d: d / g}; }
 const fs = f => f.d === 1 ? N(f.n) : `${f.n < 0 ? '−' : ''}${Math.abs(f.n)}/${f.d}`;
 // any-type options: answer + distinct distractors
 function opts(ans, cands, lab, n){
@@ -27,7 +27,7 @@ const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶',
 const sup = n => String(n).split('').map(c => SUP[c]).join('');
 // decimals held as integer hundredths — no floating-point error
 const dstr = h => { const s = h < 0 ? '−' : '', a = Math.abs(h), i = Math.floor(a / 100), f = a % 100; return s + fmt(i) + (f ? '.' + String(f).padStart(2, '0').replace(/0$/, '') : ''); };
-G.KALVI_MID_UTIL = {gcd, lcm, isPrime, fr, fs, N, dstr};
+G.KALVI_MID_UTIL = {gcd, lcm, isPrime, fr, fs, N, P, dstr, opts, sup};
 
 /* ================= NUMBERS ================= */
 M.intAdd = { title:S('முழுக்களைக் கூட்டு, கழி', 'Add & subtract integers'), icon:'➖',

@@ -9,8 +9,10 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'games-lang.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'games-think.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'games-mid.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'games-mid2.js'), 'utf8'));
-const GAMES = Object.assign({}, globalThis.KALVI_MATH, globalThis.KALVI_LANG, globalThis.KALVI_THINK, globalThis.KALVI_MID);
-const MAXCLASS = 8;
+vm.runInThisContext(fs.readFileSync(path.join(root, 'games-high.js'), 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root, 'games-high2.js'), 'utf8'));
+const GAMES = Object.assign({}, globalThis.KALVI_MATH, globalThis.KALVI_LANG, globalThis.KALVI_THINK, globalThis.KALVI_MID, globalThis.KALVI_HIGH);
+const MAXCLASS = 10;
 const cat = JSON.parse(fs.readFileSync(path.join(root, 'catalog.json'), 'utf8'));
 const N = Number(process.env.N || 3000);
 let fails = 0, total = 0;
@@ -137,6 +139,95 @@ Object.assign(INDEP, {
   agreement: q => { const m = q.p.en.match(/^(.+) ___ /); const one = ['He', 'She', 'It', 'Priya', 'My father', 'The dog'].includes(m[1]); const v = q.opts.map(o => o.v).find(v => one ? /(s|es)$/.test(v) && !v.startsWith('to ') && !/ing$/.test(v) : !/(s|es|ing)$/.test(v) && !v.startsWith('to ')); return v; }
 });
 
+// ---- Classes 9–10: independent solvers ----
+const minus = t => t.replace(/−/g, '-');
+const SUBD = {'₀':0,'₁':1,'₂':2,'₃':3,'₄':4,'₅':5,'₆':6,'₇':7,'₈':8,'₉':9};
+const polyParse = t => { t = minus(t).replace(/\s/g, ''); const c = {}; for(const term of t.match(/[+-]?[^+-]+/g)){ const m = term.match(/^([+-]?)(\d*)(x([²³]?))?$/); if(!m) return null; const coef = (m[1] === '-' ? -1 : 1) * (m[2] === '' ? 1 : Number(m[2])), pw = m[3] ? (m[4] === '³' ? 3 : m[4] === '²' ? 2 : 1) : 0; c[pw] = (c[pw] || 0) + coef; } return c; };
+const pev = (c, x) => Object.entries(c).reduce((s, [p, k]) => s + k * x ** p, 0);
+const fracStr = (n, d) => rstr([BigInt(n), BigInt(d)]);
+const fnum = t => { t = minus(t).trim(); const m = t.match(/^(-?[\d.]+)\/(\d+)$/); if(m) return m[1] / m[2]; return Number(t); };
+const surdVal = t => { t = minus(t).replace(/ m$/, ''); let m = t.match(/^(-?[\d.]*)√(\d+)$/); if(m) return (m[1] === '' ? 1 : Number(m[1])) * Math.sqrt(+m[2]); m = t.match(/^1\/√(\d+)$/); if(m) return 1 / Math.sqrt(+m[1]); m = t.match(/^√(\d+)\/(\d+)$/); if(m) return Math.sqrt(+m[1]) / m[2]; if(t === 'not defined') return Infinity; return fnum(t); };
+const AMT = {H:1, C:12, N:14, O:16, Na:23, Mg:24, Al:27, S:32, Cl:35.5, K:39, Ca:40};
+const formulaMass = f => { f = f.replace(/[₀-₉]/g, c => SUBD[c]); let tot = 0; for(const m of f.matchAll(/([A-Z][a-z]?)(\d*)/g)) tot += AMT[m[1]] * (m[2] ? +m[2] : 1); return tot; };
+const cfg = z => { const out = []; for(const cap of [2, 8, 8, 2]){ if(z <= 0) break; out.push(Math.min(cap, z)); z -= cap; } return out; };
+const DECK = []; for(const su of ['♥','♦','♣','♠']) for(const r of ['A','2','3','4','5','6','7','8','9','10','J','Q','K']) DECK.push({su, r, red: su === '♥' || su === '♦'});
+Object.assign(INDEP, {
+  setsCount: q => { const e = q.p.en; let m = e.match(/set with (\d+) elements/); if(m) return 2 ** m[1]; m = e.match(/n\(A\) = (\d+) and n\(B\) = (\d+), then n\(A × B\)/); if(m) return m[1] * m[2];
+    m = e.match(/n\(A\) = (\d+) and n\(B\) = (\d+), how many relations/); if(m) return 2 ** (m[1] * m[2]); m = e.match(/(\d+) play cricket, (\d+) play football and (\d+) play both/); if(m) return +m[1] + +m[2] - m[3];
+    m = e.match(/n\(A\) = (\d+), n\(B\) = (\d+), n\(A ∩ B\) = (\d+)\. How many are in A only/); if(m) return m[1] - m[3]; },
+  surds: q => { const n = +q.p.en.match(/^√(\d+)/)[1]; let a = 1; for(let k = 1; k * k <= n; k++) if(n % (k * k) === 0) a = k; return `${a}√${n / (a * a)}`; },
+  scientific: q => { const t = q.p.en.match(/^Write ([\d.,]+) in/)[1].replace(/(\d),(?=\d)/g, '$1'); const digs = t.replace('.', '').replace(/^0+/, ''), firstIdx = t.replace('.', '').search(/[1-9]/), intLen = t.indexOf('.') === -1 ? t.length : t.indexOf('.');
+    const e = intLen - 1 - firstIdx; const sig = digs.replace(/0+$/, ''), mant = sig.length > 1 ? sig[0] + '.' + sig.slice(1) : sig; const sp = x => (x < 0 ? '⁻' : '') + String(Math.abs(x)).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]).join(''); return `${mant} × 10${sp(e)}`; },
+  recurring: q => { const m = q.p.en.match(/^0\.(\d+)…/); const d = m[1]; const unit = d[0] === d[1] && d[1] === d[2] ? d[0] : d.slice(0, 2); if(d !== unit.repeat(d.length / unit.length)) return 'bad'; return fracStr(+unit, unit.length === 1 ? 9 : 99); },
+  modular: q => { const m = q.p.en.match(/^(\d+) mod (\d+)/); return m[1] % m[2]; },
+  ap: q => { const m = q.p.en.match(/^(.+), … — (?:the (\d+)(?:st|nd|rd|th) term|sum of the first (\d+) terms)\?$/); if(!m) return; const t = m[1].split(', ').map(pn); const d = t[1] - t[0], r = t[1] / t[0];
+    const isAP = t[2] - t[1] === d; if(m[2]){ const n = +m[2]; return isAP ? t[0] + (n - 1) * d : t[0] * r ** (n - 1); } const n = +m[3]; let s = 0; for(let i = 0; i < n; i++) s += t[0] + i * d; return s; },
+  remainder: q => { const m = q.p.en.match(/p\(x\) = (.+) is divided by \(x ([−+]) (\d+)\)/); const c = polyParse(m[1]); const a = m[2] === '−' ? +m[3] : -m[3]; return pev(c, a); },
+  factorise: q => { const c = polyParse(q.p.en.replace('Factorise ', '')); const ok = q.opts.filter(o => { const f = [...o.v.matchAll(/\(x ([+−]) (\d+)\)/g)].map(x => (x[1] === '+' ? 1 : -1) * x[2]); return f.length === 2 && f[0] + f[1] === (c[1] || 0) && f[0] * f[1] === (c[0] || 0) && c[2] === 1; }); return ok.length === 1 ? ok[0].v : 'matches ' + ok.length; },
+  quadRoots: q => { let m = q.p.en.match(/^Roots of (.+) = 0\?$/); if(m){ const c = polyParse(m[1]); const r = []; for(let x = -30; x <= 30; x++) if(pev(c, x) === 0) r.push(x); return r.map(N_).join(', '); }
+    m = q.p.en.match(/^Nature of the roots of (.+) = 0\?$/); const c = polyParse(m[1]); const D = (c[1] || 0) ** 2 - 4 * (c[2] || 0) * (c[0] || 0); return D > 0 ? 'two' : D === 0 ? 'equal' : 'none'; },
+  simultaneous: q => { const eqs = q.p.en.replace('Solve: ', '').split(';  ').map(e => { const [l, r] = minus(e).replace(/\s/g, '').split('='); let a = 0, b = 0; for(const term of l.match(/[+-]?[^+-]+/g)){ const k = term.slice(0, -1); const v = k === '' || k === '+' ? 1 : k === '-' ? -1 : +k; if(term.endsWith('x')) a += v; else b += v; } return [a, b, +r]; });
+    const sol = []; for(let x = -30; x <= 30; x++) for(let y = -30; y <= 30; y++) if(eqs.every(([a, b, c]) => a * x + b * y === c)) sol.push(`x = ${N_(x)}, y = ${N_(y)}`); return sol.length === 1 ? sol[0] : 'sols ' + sol.length; },
+  identity: q => { let m = q.p.en.match(/^(\d+) × (\d+) = /); if(m) return m[1] * m[2]; m = q.p.en.match(/^(\d+)² = /); if(m) return m[1] ** 2; },
+  circleAngles: q => { const e = q.p.en; let m = e.match(/makes (\d+)° at the circle\. What angle does it make at the centre/); if(m) return 2 * m[1]; m = e.match(/makes (\d+)° at the centre\. What angle does it make at the circle/); if(m) return m[1] / 2;
+    m = e.match(/∠A = (\d+)°\. ∠C/); if(m) return 180 - m[1]; m = e.match(/∠CAB = (\d+)°/); if(m) return 90 - m[1]; },
+  coord: q => { const e = minus(q.p.en), pts = [...e.matchAll(/\((-?\d+), (-?\d+)\)/g)].map(m => [+m[1], +m[2]]);
+    if(/^Distance/.test(e)){ const d = Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]); return Number.isInteger(d) ? d : 'not whole'; }
+    if(/^Midpoint/.test(e)) return `(${N_((pts[0][0] + pts[1][0]) / 2)}, ${N_((pts[0][1] + pts[1][1]) / 2)})`;
+    if(/^Slope/.test(e)) return fracStr(pts[1][1] - pts[0][1], pts[1][0] - pts[0][0]);
+    if(/^Area/.test(e)){ const [[a, b], [c, d], [f, g]] = pts; return Math.abs(a * (d - g) + c * (g - b) + f * (b - d)) / 2; }
+    const [x, y] = pts[0]; return x > 0 ? (y > 0 ? 'I' : 'IV') : (y > 0 ? 'II' : 'III'); },
+  similar: q => { let m = q.p.en.match(/AD = (\d+) cm, DB = (\d+) cm, AE = (\d+) cm/); if(m) return m[3] * m[2] / m[1]; m = q.p.en.match(/A (\d+) m stick casts a (\d+) m shadow\. At the same time a tower casts a (\d+) m shadow/); if(m) return m[1] * m[3] / m[2]; },
+  tangent: q => { const m = q.p.en.match(/point (\d+) cm from the centre of a circle of radius (\d+) cm/); return Math.sqrt(m[1] ** 2 - m[2] ** 2); },
+  trigValues: q => { const m = q.p.en.match(/^(sin|cos|tan) (\d+)° = \?$/); const r = m[2] * Math.PI / 180; const want = m[1] === 'tan' && +m[2] === 90 ? Infinity : Math[m[1]](r);
+    const ok = q.opts.filter(o => { const v = surdVal(o.v); return want === Infinity ? v === Infinity : Math.abs(v - want) < 1e-9; }); return ok.length === 1 ? ok[0].v : 'matches ' + ok.length; },
+  heights: q => { const m = q.p.en.match(/From a point (\d+) m .* elevation of the top is (\d+)°/); const want = m[1] * Math.tan(m[2] * Math.PI / 180); const ok = q.opts.filter(o => Math.abs(surdVal(o.v) - want) < 1e-6); return ok.length === 1 ? ok[0].v : 'matches ' + ok.length; },
+  solids: q => { const e = q.p.en, r = +(e.match(/r = (\d+) cm/) || [])[1], h = +(e.match(/h = (\d+) cm/) || [0, 0])[1], pi = 22 / 7; let v;
+    if(/volume of a cylinder/.test(e)) v = pi * r * r * h; else if(/curved surface area of a cylinder/.test(e)) v = 2 * pi * r * h; else if(/volume of a cone/.test(e)) v = pi * r * r * h / 3;
+    else if(/volume of a sphere/.test(e)) v = 4 / 3 * pi * r ** 3; else if(/surface area of a sphere/.test(e)) v = 4 * pi * r * r; else if(/volume of a hemisphere/.test(e)) v = 2 / 3 * pi * r ** 3; return Math.round(v * 1e6) / 1e6; },
+  heron: q => { const [a, b, c] = q.p.en.match(/sides (\d+) m, (\d+) m, (\d+) m/).slice(1).map(Number), s = (a + b + c) / 2, A = Math.sqrt(s * (s - a) * (s - b) * (s - c)); return Number.isInteger(A) ? A : 'not whole'; },
+  probability: q => { const e = q.p.en; let fav = 0, tot = 0, m;
+    if(/roll of a die/.test(e)){ tot = 6; for(let x = 1; x <= 6; x++){ if(/even/.test(e) && x % 2 === 0) fav++; else if((m = e.match(/greater than (\d+)/)) && x > +m[1]) fav++; else if(/prime/.test(e) && prime_(x)) fav++; else if(/multiple of 3/.test(e) && x % 3 === 0) fav++; } }
+    else if((m = e.match(/Two dice are rolled\. Probability that the total is (\d+)/))){ tot = 36; for(let a = 1; a <= 6; a++) for(let b = 1; b <= 6; b++) if(a + b === +m[1]) fav++; }
+    else if((m = e.match(/A bag has (\d+) red, (\d+) blue(?: and (\d+) green)? balls\. Probability of drawing a (red|blue)/))){ tot = +m[1] + +m[2] + +(m[3] || 0); fav = m[4] === 'red' ? +m[1] : +m[2]; }
+    else if(/pack of 52/.test(e)){ tot = 52; fav = DECK.filter(c => /king/.test(e) ? c.r === 'K' : /red card/.test(e) ? c.red : /heart/.test(e) ? c.su === '♥' : /face card/.test(e) ? 'JQK'.includes(c.r) && c.r !== '1' : /ace/.test(e) ? c.r === 'A' : false).length; }
+    else if((m = e.match(/^(\d+) coins are tossed\. Probability of exactly (\d+) head/))){ const n = +m[1]; tot = 2 ** n; for(let i = 0; i < tot; i++){ let h = 0; for(let b = 0; b < n; b++) if(i >> b & 1) h++; if(h === +m[2]) fav++; } }
+    else return; return fracStr(fav, tot); },
+  spread: q => { let m = q.p.en.match(/^Standard deviation σ of ([\d, ]+) = /); if(m){ const d = m[1].split(', ').map(Number), mu = d.reduce((a, b) => a + b) / d.length; return Math.sqrt(d.reduce((a, x) => a + (x - mu) ** 2, 0) / d.length); }
+    m = q.p.en.match(/^Mean (\d+), standard deviation (\d+)\./); if(m) return m[2] * 100 / m[1]; },
+  kinematics: q => { const e = q.p.en; let m = e.match(/u = (\d+) m\/s, a = (\d+) m\/s², t = (\d+) s\. (Final|Displacement)/); if(m){ const [u, a, t] = [+m[1], +m[2], +m[3]]; return m[4] === 'Final' ? u + a * t : u * t + a * t * t / 2; }
+    m = e.match(/from (\d+) m\/s to (\d+) m\/s in (\d+) s/); if(m) return (m[2] - m[1]) / m[3]; },
+  forceEnergy: q => { const e = q.p.en.replace(/(\d),(?=\d)/g, '$1'); let m;
+    if((m = e.match(/^Mass (\d+) kg, acceleration (\d+)/))) return m[1] * m[2]; if((m = e.match(/^Mass (\d+) kg, velocity (\d+) m\/s\. Momentum/))) return m[1] * m[2];
+    if((m = e.match(/force of (\d+) N moves an object (\d+) m/))) return m[1] * m[2]; if((m = e.match(/^Mass (\d+) kg, velocity (\d+) m\/s\. Kinetic/))) return m[1] * m[2] ** 2 / 2;
+    if((m = e.match(/^A (\d+) kg mass at a height of (\d+) m/))) return m[1] * 10 * m[2]; if((m = e.match(/^(\d+) J of work is done in (\d+) s/))) return m[1] / m[2]; },
+  electricity: q => { const e = q.p.en.replace(/(\d),(?=\d)/g, '$1'); let m;
+    if((m = e.match(/^I = (\d+) A, R = (\d+) Ω\. Voltage/))) return m[1] * m[2]; if((m = e.match(/^V = (\d+) V, R = (\d+) Ω\. Current/))) return m[1] / m[2];
+    if((m = e.match(/^(\d+) Ω and (\d+) Ω in series/))) return +m[1] + +m[2]; if((m = e.match(/^(\d+) Ω and (\d+) Ω in parallel/))) return Math.round(m[1] * m[2] / (+m[1] + +m[2]) * 1e9) / 1e9;
+    if((m = e.match(/^V = (\d+) V, I = (\d+) A\. Power/))) return m[1] * m[2];
+    if((m = e.match(/^A (\d+) W appliance runs (\d+) hours a day for (\d+) days\. At ₹(\d+) per unit/))) return Math.round(m[1] / 1000 * m[2] * m[3] * m[4] * 1e6) / 1e6; },
+  waves: q => { const e = q.p.en.replace(/(\d),(?=\d)/g, '$1'); let m;
+    if((m = e.match(/^Frequency (\d+) Hz, wavelength (\d+) m/))) return m[1] * m[2]; if((m = e.match(/travels at (\d+) m\/s\. The echo is heard after (\d+) s/))) return m[1] * m[2] / 2;
+    if((m = e.match(/(convex|concave) lens has focal length (−?)(\d+) cm/))){ const P2 = 100 / (m[2] ? -m[3] : +m[3]); return String(P2).replace('-', '−') + ' D'; }
+    if((m = e.match(/Light travels at ([\d.]+) × 10⁸ m\/s/))){ const n = 3 / m[1]; const ok = q.opts.filter(o => Math.abs(+o.v - n) < 0.005); return ok.length === 1 ? ok[0].v : 'matches ' + ok.length; }
+    if((m = e.match(/warm (\d+) kg of water by (\d+)°C/))) return m[1] * 4200 * m[2]; },
+  fluidPressure: q => +q.p.en.match(/at (\d+) m depth/)[1] * 1000 * 10,
+  halfLife: q => { const m = q.p.en.replace(/(\d),(?=\d)/g, '$1').match(/Half-life (\d+) days\. Starting with (\d+) g, how much is left after (\d+) days/); return m[2] / 2 ** (m[3] / m[1]); },
+  molarMass: q => { let m = q.p.en.match(/^Molar mass of .* \((.+)\)\? \(g\/mol\)$/); if(m) return formulaMass(m[1]); m = q.p.en.replace(/(\d),(?=\d)/g, '$1').match(/^How many moles are in ([\d.]+) g of .* \((.+)\)\?$/); if(m) return String(Math.round(m[1] / formulaMass(m[2]) * 1e9) / 1e9); },
+  atoms: q => { const e = q.p.en; let m = e.match(/Z = (\d+), A = (\d+)\. How many neutrons/); if(m) return m[2] - m[1]; m = e.match(/atomic number (\d+)\. How many electrons/); if(m) return +m[1];
+    m = e.match(/configuration of .* \(Z = (\d+)\)/); if(m) return cfg(+m[1]).join(', '); m = e.match(/^Valency of .* \(([\d, ]+)\)\?$/); if(m){ const c = m[1].split(', ').map(Number), v = c[c.length - 1]; if(v === 8 || (c.length === 1 && v === 2)) return 0; return Math.min(v, 8 - v); } },
+  pH: q => { let m = q.p.en.match(/10⁻([⁰¹²³⁴⁵⁶⁷⁸⁹]+) mol\/L, pH/); if(m) return unsup(m[1]); m = q.p.en.match(/has pH (\d+)\./); if(m) return +m[1] < 7 ? 'acid' : +m[1] === 7 ? 'neutral' : 'base'; },
+  solutions: q => { const m = q.p.en.match(/^(\d+) g of sugar is dissolved in (\d+) g of water/); return m[1] * 100 / (+m[1] + +m[2]); },
+  alkanes: q => { const NM = ['methane','ethane','propane','butane','pentane','hexane','heptane','octane','nonane','decane']; let m = q.p.en.match(/^Molecular formula of (\w+)\?$/);
+    const f = n => `C${n > 1 ? String(n).split('').map(d => '₀₁₂₃₄₅₆₇₈₉'[+d]).join('') : ''}H${String(2 * n + 2).split('').map(d => '₀₁₂₃₄₅₆₇₈₉'[+d]).join('')}`; if(m) return f(NM.indexOf(m[1]) + 1);
+    m = q.p.en.match(/^Name of C([₀-₉]*)H/); if(m) return NM[(m[1] ? +m[1].split('').map(c => SUBD[c]).join('') : 1) - 1]; },
+  binary: q => { let m = q.p.en.match(/^([01]+)₂ = \?/); if(m) return parseInt(m[1], 2); m = q.p.en.match(/^(\d+) in binary\?$/); if(m) return (+m[1]).toString(2); },
+  punnett: q => { const m = q.p.en.match(/^(\w\w) × (\w\w) — probability an offspring is (tall|short)/); let fav = 0; for(const a of m[1]) for(const b of m[2]){ const tall = a === 'T' || b === 'T'; if(tall === (m[3] === 'tall')) fav++; } return fracStr(fav, 4); },
+  questionTag: q => { const m = q.p.en.match(/^(.+?) (isn't|aren't|wasn't|weren't|can't|won't|hasn't|haven't|is|are|was|were|can|will|has|have) .+, ___$/); const PR = {He:'he', She:'she', They:'they', You:'you', We:'we', It:'it', Priya:'she', 'The boys':'they'};
+    const POS = {"isn't":'is', "aren't":'are', "wasn't":'was', "weren't":'were', "can't":'can', "won't":'will', "hasn't":'has', "haven't":'have'}, NEG = Object.fromEntries(Object.entries(POS).map(([k, v]) => [v, k])); const a = m[2]; return `${POS[a] || NEG[a]} ${PR[m[1]]}?`; }
+});
+const N_ = n => n < 0 ? '−' + Math.abs(n).toLocaleString('en-IN') : n.toLocaleString('en-IN');
+
 
 // checks based on what the child actually SEES in the picture
 const SCENE = {
@@ -163,7 +254,7 @@ for(const [cls, C] of Object.entries(cat.classes)){
       total++;
       let q; try { q = G.gen(L.level || {}); } catch(e){ fail(L.id, 'gen threw ' + e.message); break; }
       const t = txt(q);
-      if(/undefined|NaN|null\b|\[object/.test(t.replace(/"say":null/g, ''))){ fail(L.id, 'bad text', q); break; }
+      if(/undefined|NaN(?!O₃)|null\b|\[object/.test(t.replace(/"say":null/g, ''))){ fail(L.id, 'bad text', q); break; }
       if(!q.p || !q.p.ta || !q.p.en){ fail(L.id, 'missing prompt', q); break; }
       if(q.kind === 'sort'){
         const ids = q.bins.map(b => b.id);

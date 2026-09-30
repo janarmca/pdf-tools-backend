@@ -1,0 +1,414 @@
+{
+ "id": "rice-chessboard",
+ "minutes": 25,
+ "title": {
+  "ta": "சதுரங்கப் பலகையும் அரிசியும் — அடுக்குப் பெருக்கம்",
+  "en": "Rice on a chessboard — exponential growth"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "9-ஆம் வகுப்பு — மெய்யெண்கள், அடுக்குகள்; 10 — பெருக்குத் தொடர்",
+    "en": "Class 9 — real numbers, exponents; Class 10 — geometric progressions"
+   }
+  },
+  {
+   "b": "CBSE/NCERT",
+   "w": {
+    "ta": "அடுக்குகள்; தொடர்வரிசைகள்",
+    "en": "Exponents; progressions"
+   }
+  },
+  {
+   "b": "IB MYP",
+   "w": {
+    "ta": "கணிதம் — வடிவங்களும் மாற்றமும்",
+    "en": "Mathematics — patterns & change"
+   }
+  },
+  {
+   "b": "Cambridge",
+   "w": {
+    "ta": "IGCSE — exponential growth",
+    "en": "IGCSE — exponential growth"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "இரட்டிப்பு எவ்வளவு வேகமாகப் பெருகும் என்று உணர",
+   "en": "Feel how fast doubling grows"
+  },
+  {
+   "ta": "1 + 2 + 4 + … = 2ⁿ − 1 என்று கண்டுபிடிக்க",
+   "en": "Discover that 1 + 2 + 4 + … = 2ⁿ − 1"
+  },
+  {
+   "ta": "கூட்டு வட்டி, நோய்ப் பரவல், தொழில்நுட்ப வளர்ச்சியில் இதைக் காண",
+   "en": "See it in compound interest, spreading diseases and technology"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "சதுரங்கம் இந்தியாவில் \"சதுரங்கா\" என்ற பெயரில் பிறந்தது. ஒரு பழைய கதை: அதைக் கண்டுபிடித்தவரிடம் அரசர் \"என்ன பரிசு வேண்டும்?\" என்று கேட்டார். அவர் சொன்னார்: \"முதல் கட்டத்தில் 1 அரிசி, இரண்டாவதில் 2, மூன்றாவதில் 4 — ஒவ்வொரு கட்டத்திலும் இரு மடங்கு, 64 கட்டங்கள் வரை.\" அரசர் சிரித்தார் — \"இவ்வளவுதானா?\" ஆனால் அவரது களஞ்சியம் முழுவதும் போதவில்லை! ஏன்?",
+    "en": "Chess was born in India as \"chaturanga\". An old story: a king asked its inventor, \"What reward do you want?\" The inventor said: \"1 grain of rice on the first square, 2 on the second, 4 on the third — double on every square, up to 64.\" The king laughed — \"Is that all?\" But his whole granary was not enough! Why?"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "64-ஆவது கட்டத்தில் எவ்வளவு அரிசி இருக்கும்?",
+    "en": "How much rice would be on the 64th square?"
+   },
+   "options": [
+    {
+     "ta": "ஒரு மூட்டை",
+     "en": "One sack"
+    },
+    {
+     "ta": "ஒரு லாரி நிறைய",
+     "en": "A lorry-load"
+    },
+    {
+     "ta": "உலகம் முழுவதும் பல நூறு ஆண்டுகள் விளையும் அரிசியை விட அதிகம்",
+     "en": "More than the whole world grows in hundreds of years"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "64-ஆவது கட்டத்தில் மட்டும் 2⁶³ ≈ 9.2 × 10¹⁸ அரிசி! இரட்டிப்பு தொடக்கத்தில் மெதுவாகத் தெரியும், பிறகு வெடிக்கும் — இதுவே அடுக்குப் பெருக்கம் (exponential growth).",
+    "en": "The 64th square alone holds 2⁶³ ≈ 9.2 quintillion grains! Doubling looks slow at first, then explodes — that is exponential growth."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "doubling",
+   "text": {
+    "ta": "கட்டம் n-ஐ மாற்று. \"இந்தக் கட்டத்தில்\" மற்றும் \"இதுவரை மொத்தம்\" எண்களைக் கவனி.",
+    "en": "Change square n. Watch \"on this square\" and \"total so far\"."
+   },
+   "q": {
+    "ta": "முதல் 10 கட்டங்களின் மொத்தம் எவ்வளவு?",
+    "en": "What is the total on the first 10 squares?"
+   },
+   "options": [
+    {
+     "ta": "512",
+     "en": "512"
+    },
+    {
+     "ta": "1023",
+     "en": "1023"
+    },
+    {
+     "ta": "1024",
+     "en": "1024"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "10-ஆவது கட்டம் 512; மொத்தம் 1023 = 2¹⁰ − 1. எப்போதும்: மொத்தம் = அடுத்த கட்டத்தில் வருவதைவிட ஒன்று குறைவு! 64 கட்டங்களுக்கு: 2⁶⁴ − 1 = 18,446,744,073,709,551,615 அரிசி.",
+    "en": "Square 10 has 512; the total is 1023 = 2¹⁰ − 1. Always: the total is one less than the next square! For 64 squares: 2⁶⁴ − 1 = 18,446,744,073,709,551,615 grains."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "விதி",
+    "en": "The rule"
+   },
+   "text": {
+    "ta": "n-ஆவது கட்டம்: 2ⁿ⁻¹. முதல் n கட்டங்களின் கூடுதல்:\n\n[[1 + 2 + 4 + … + 2ⁿ⁻¹ = 2ⁿ − 1]]\n\nஇது பொது விகிதம் 2 உள்ள பெருக்குத் தொடர் (GP).",
+    "en": "Square n holds 2ⁿ⁻¹. The first n squares add to:\n\n[[1 + 2 + 4 + … + 2ⁿ⁻¹ = 2ⁿ − 1]]\n\nThis is a geometric progression (GP) with common ratio 2."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "20-ஆவது கட்டத்தில் எத்தனை அரிசி? (2¹⁹)",
+    "en": "How many grains on square 20? (2¹⁹)"
+   },
+   "answer": 524288,
+   "tol": 0,
+   "hint": {
+    "ta": "2¹⁰ = 1024; 2¹⁹ = 2¹⁰ × 2⁹",
+    "en": "2¹⁰ = 1024; 2¹⁹ = 2¹⁰ × 2⁹"
+   },
+   "solution": {
+    "ta": "1024 × 512 = 5,24,288",
+    "en": "1024 × 512 = 524,288"
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "காகிதத்தை மடித்தால்",
+    "en": "Folding paper"
+   },
+   "text": {
+    "ta": "0.1 mm தடிமனான காகிதத்தை 42 முறை மடிக்க முடிந்தால் (உண்மையில் முடியாது!) தடிமன் 0.1 mm × 2⁴² ≈ 4,39,800 km — பூமியிலிருந்து நிலாவுக்கு உள்ள தூரத்தை (சுமார் 3,84,400 km) விட அதிகம்!",
+    "en": "If you could fold a 0.1 mm sheet of paper 42 times (you really can’t!), it would be 0.1 mm × 2⁴² ≈ 439,800 km thick — more than the distance from the Earth to the Moon (about 384,400 km)!"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு பாக்டீரியா ஒவ்வொரு 20 நிமிடத்துக்கும் இரண்டாகப் பிரிகிறது. 1 பாக்டீரியாவிலிருந்து 2 மணி நேரத்தில் எத்தனை?",
+    "en": "A bacterium splits in two every 20 minutes. Starting with 1, how many after 2 hours?"
+   },
+   "answer": 64,
+   "tol": 0,
+   "hint": {
+    "ta": "2 மணி = 6 முறை இரட்டிப்பு",
+    "en": "2 hours = 6 doublings"
+   },
+   "solution": {
+    "ta": "2⁶ = 64",
+    "en": "2⁶ = 64"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🏦",
+     "title": {
+      "ta": "கூட்டு வட்டி",
+      "en": "Compound interest"
+     },
+     "text": {
+      "ta": "\"72 விதி\": 72 ÷ வட்டி வீதம் ≈ பணம் இரட்டிப்பாக ஆகும் ஆண்டுகள். 8% → சுமார் 9 ஆண்டுகள்.",
+      "en": "\"Rule of 72\": 72 ÷ interest rate ≈ years to double. 8% → about 9 years."
+     }
+    },
+    {
+     "icon": "🦠",
+     "title": {
+      "ta": "நோய்ப் பரவல்",
+      "en": "Spreading diseases"
+     },
+     "text": {
+      "ta": "ஒவ்வொருவரும் இருவருக்குப் பரப்பினால் வேகமாகப் பெருகும் — அதனால்தான் தடுப்பூசியும் முகக்கவசமும் முக்கியம்.",
+      "en": "If each person infects two, cases multiply fast — that’s why vaccines and masks matter."
+     }
+    },
+    {
+     "icon": "💻",
+     "title": {
+      "ta": "கணினி சக்தி",
+      "en": "Computer power"
+     },
+     "text": {
+      "ta": "சில்லுகளில் உள்ள டிரான்சிஸ்டர்கள் பல ஆண்டுகளாகச் சுமார் இரண்டு ஆண்டுகளுக்கு ஒருமுறை இரட்டிப்பாயின (மூர் விதி).",
+      "en": "Transistors on chips roughly doubled every two years for decades (Moore’s law)."
+     }
+    },
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "வதந்தி",
+      "en": "Rumours"
+     },
+     "text": {
+      "ta": "ஒவ்வொருவரும் இருவருக்கு forward செய்தால், 30 படிகளில் 100 கோடிக்கு மேல் பேரை அடையும்!",
+      "en": "If everyone forwards to two people, in 30 steps it reaches over a billion people!"
+     }
+    }
+   ]
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "இரட்டிப்பால் நல்லது",
+    "en": "Doubling for good"
+   },
+   "text": {
+    "ta": "ஒரு நல்ல பழக்கத்தை (மரம் நடுதல், புத்தகம் பகிர்தல்) அடுக்குப் பெருக்கமாகப் பரவ வைக்கும் திட்டத்தை வடிவமை.",
+    "en": "Design a plan that spreads a good habit (planting trees, sharing books) through exponential growth."
+   },
+   "prompts": [
+    {
+     "ta": "ஒவ்வொருவரும் எத்தனை பேரை ஊக்குவிப்பார்கள்?",
+     "en": "How many people will each person inspire?"
+    },
+    {
+     "ta": "10 படிகளில் எத்தனை பேர்?",
+     "en": "How many after 10 steps?"
+    },
+    {
+     "ta": "எது இந்தப் பெருக்கத்தை நிறுத்தும்? (உண்மை உலகில் எதுவும் முடிவில்லாமல் இரட்டிப்பதில்லை)",
+     "en": "What would stop the growth? (Nothing doubles forever in the real world)"
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "AI மாதிரிகளின் அளவும் கணினித் திறனும் அடுக்குப் பெருக்கமாக வளர்ந்துள்ளன.",
+    "en": "AI model sizes and computing power have grown exponentially."
+   },
+   "risk": {
+    "ta": "அடுக்குப் பெருக்கத்தை மனிதர்கள் எப்போதும் குறைத்து மதிப்பிடுவார்கள் — கடன் வட்டி, மாசுபாடு, போலிச் செய்தி.",
+    "en": "People always underestimate exponential growth — loan interest, pollution, fake news."
+   },
+   "fix": {
+    "ta": "கணக்கிட்டுப் பார், வரைபடம் வரை, \"இது இரட்டிப்பானால்?\" என்று கேள்.",
+    "en": "Calculate, draw a graph, ask \"what if this doubles?\""
+   },
+   "q": {
+    "ta": "ஒரு கடனுக்கு மாதம் 3% கூட்டு வட்டி — ஆண்டுக்கு எவ்வளவு ஆகும் என்று நினைக்கிறாய்? (36%-ஐ விட அதிகமா?)",
+    "en": "A loan charges 3% compound interest a month — what is that per year? (More than 36%?)"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "அரசரின் களஞ்சியம் ஏன் போதவில்லை?",
+    "en": "Why was the king’s granary not enough?"
+   },
+   "keywords": [
+    {
+     "ta": "இரு மடங்கு",
+     "en": "double",
+     "alt": [
+      "இரட்டிப்பு"
+     ]
+    },
+    {
+     "ta": "2",
+     "en": "2"
+    },
+    {
+     "ta": "64",
+     "en": "64"
+    }
+   ],
+   "model": {
+    "ta": "ஒவ்வொரு கட்டத்திலும் இரு மடங்கு ஆனதால் மொத்தம் 2⁶⁴ − 1 அரிசி — உலகில் விளையும் அரிசியைவிடப் பல மடங்கு அதிகம்.",
+    "en": "Doubling on every square gives 2⁶⁴ − 1 grains in total — many times more rice than the world grows."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "இரட்டிப்பு: 1, 2, 4, 8… — n-ஆவது = 2ⁿ⁻¹.",
+     "en": "Doubling: 1, 2, 4, 8… — the nth is 2ⁿ⁻¹."
+    },
+    {
+     "ta": "கூடுதல் = 2ⁿ − 1.",
+     "en": "Total = 2ⁿ − 1."
+    },
+    {
+     "ta": "அடுக்குப் பெருக்கம் தொடக்கத்தில் மெதுவாக, பிறகு வெடிக்கும்.",
+     "en": "Exponential growth starts slow, then explodes."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "8-ஆவது கட்டத்தில் அரிசி?",
+    "en": "Grains on square 8?"
+   },
+   "options": [
+    {
+     "ta": "128",
+     "en": "128"
+    },
+    {
+     "ta": "256",
+     "en": "256"
+    },
+    {
+     "ta": "16",
+     "en": "16"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "2⁷ = 128",
+    "en": "2⁷ = 128"
+   }
+  },
+  {
+   "q": {
+    "ta": "முதல் 8 கட்டங்களின் மொத்தம்?",
+    "en": "Total on the first 8 squares?"
+   },
+   "options": [
+    {
+     "ta": "255",
+     "en": "255"
+    },
+    {
+     "ta": "256",
+     "en": "256"
+    },
+    {
+     "ta": "128",
+     "en": "128"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "2⁸ − 1 = 255",
+    "en": "2⁸ − 1 = 255"
+   }
+  },
+  {
+   "q": {
+    "ta": "10% வட்டியில் பணம் இரட்டிப்பாக ஏறக்குறைய எத்தனை ஆண்டுகள்? (72 விதி)",
+    "en": "At 10% interest, roughly how many years to double? (Rule of 72)"
+   },
+   "options": [
+    {
+     "ta": "சுமார் 7",
+     "en": "About 7"
+    },
+    {
+     "ta": "10",
+     "en": "10"
+    },
+    {
+     "ta": "72",
+     "en": "72"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "72 ÷ 10 ≈ 7.2",
+    "en": "72 ÷ 10 ≈ 7.2"
+   }
+  },
+  {
+   "q": {
+    "ta": "சதுரங்கம் பிறந்த நாடு?",
+    "en": "Where was chess born?"
+   },
+   "options": [
+    {
+     "ta": "இந்தியா",
+     "en": "India"
+    },
+    {
+     "ta": "கிரீஸ்",
+     "en": "Greece"
+    },
+    {
+     "ta": "எகிப்து",
+     "en": "Egypt"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "\"சதுரங்கா\" என்ற பெயரில் இந்தியாவில்.",
+    "en": "In India, as \"chaturanga\"."
+   }
+  }
+ ]
+}

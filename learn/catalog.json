@@ -9197,7 +9197,102 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "இலக்கணம் — வேற்றுமை",
+        "en": "Grammar — case markers"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c9-vet",
+         "title": {
+          "ta": "வேற்றுமை உருபுகள்",
+          "en": "Case markers"
+         },
+         "game": "vetrumai",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer தமிழ் இலக்கணம் & இலக்கியம்",
+        "en": "Samacheer Tamil grammar & literature"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இலக்கணம் — எழுத்தும் சொல்லும்",
+        "en": "Grammar — letters & words"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c9-inam",
+         "title": {
+          "ta": "வல்லினம், மெல்லினம், இடையினம்",
+          "en": "Hard, soft, medium"
+         },
+         "game": "meiInam",
+         "level": {}
+        },
+        {
+         "id": "g-tami-c9-kaalam",
+         "title": {
+          "ta": "முக்காலம்",
+          "en": "Three tenses"
+         },
+         "game": "kaalam",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இலக்கிய வரலாறு",
+        "en": "History of Tamil literature"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c9-lit2",
+         "title": {
+          "ta": "தமிழ் இலக்கியச் செல்வம்",
+          "en": "Treasures of Tamil literature"
+         },
+         "game": "tamilLit2",
+         "level": {}
+        },
+        {
+         "id": "g-tami-c9-lit",
+         "title": {
+          "ta": "யார் எழுதியது?",
+          "en": "Who wrote it?"
+         },
+         "game": "tamilLit",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "தமிழ் எண்கள்",
+        "en": "Tamil numerals"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c9-tnum",
+         "title": {
+          "ta": "தமிழ் எண்கள்",
+          "en": "Tamil numerals"
+         },
+         "game": "tamilNumerals",
+         "level": {}
+        }
+       ],
+       "no": 4
+      }
+     ]
     },
     {
      "id": "english",
@@ -9207,7 +9302,102 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "Voice",
+        "en": "Voice"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c9-pass",
+         "title": {
+          "ta": "Active → Passive",
+          "en": "Active → Passive"
+         },
+         "game": "passive",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer English • CBSE English • Cambridge IGCSE English",
+        "en": "Samacheer English • CBSE English • Cambridge IGCSE English"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Question tags",
+        "en": "Question tags"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c9-tag",
+         "title": {
+          "ta": "Question tags",
+          "en": "Question tags"
+         },
+         "game": "questionTag",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "Verbs & agreement",
+        "en": "Verbs & agreement"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c9-v3",
+         "title": {
+          "ta": "Verb forms V1–V2–V3",
+          "en": "Verb forms V1–V2–V3"
+         },
+         "game": "verbForms",
+         "level": {}
+        },
+        {
+         "id": "g-engl-c9-agree",
+         "title": {
+          "ta": "Subject–verb agreement",
+          "en": "Subject–verb agreement"
+         },
+         "game": "agreement",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "Vocabulary",
+        "en": "Vocabulary"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c9-pre",
+         "title": {
+          "ta": "Opposites with prefixes",
+          "en": "Opposites with prefixes"
+         },
+         "game": "prefix",
+         "level": {}
+        },
+        {
+         "id": "g-engl-c9-deg",
+         "title": {
+          "ta": "Degrees of comparison",
+          "en": "Degrees of comparison"
+         },
+         "game": "degrees",
+         "level": {}
+        }
+       ],
+       "no": 4
+      }
+     ]
     },
     {
      "id": "maths",
@@ -9224,7 +9414,23 @@
         "ta": "கணமொழி",
         "en": "Set Language"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-sets",
+         "title": {
+          "ta": "கணங்கள் — எண்ணிக்கை",
+          "en": "Counting with sets"
+         },
+         "game": "setsCount",
+         "level": {
+          "kinds": [
+           "union",
+           "subsets",
+           "venn"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 2,
@@ -9232,7 +9438,35 @@
         "ta": "மெய்யெண்கள்",
         "en": "Real Numbers"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-surd",
+         "title": {
+          "ta": "வர்க்கமூலம் சுருக்கு",
+          "en": "Simplify surds"
+         },
+         "game": "surds",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-rec",
+         "title": {
+          "ta": "சுழல் தசமம் → பின்னம்",
+          "en": "Recurring decimals"
+         },
+         "game": "recurring",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-sci",
+         "title": {
+          "ta": "அறிவியல் குறியீடு",
+          "en": "Scientific notation"
+         },
+         "game": "scientific",
+         "level": {}
+        }
+       ]
       },
       {
        "no": 3,
@@ -9240,7 +9474,44 @@
         "ta": "இயற்கணிதம்",
         "en": "Algebra"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-rem",
+         "title": {
+          "ta": "மீதித் தேற்றம்",
+          "en": "Remainder theorem"
+         },
+         "game": "remainder",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-fac",
+         "title": {
+          "ta": "காரணிப்படுத்து",
+          "en": "Factorise"
+         },
+         "game": "factorise",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-iden",
+         "title": {
+          "ta": "முற்றொருமைகள்",
+          "en": "Identities"
+         },
+         "game": "identity",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-sim",
+         "title": {
+          "ta": "ஒருங்கமைச் சமன்பாடுகள்",
+          "en": "Simultaneous equations"
+         },
+         "game": "simultaneous",
+         "level": {}
+        }
+       ]
       },
       {
        "no": 4,
@@ -9248,7 +9519,28 @@
         "ta": "வடிவியல்",
         "en": "Geometry"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-circ",
+         "title": {
+          "ta": "வட்டக் கோணங்கள்",
+          "en": "Angles in circles"
+         },
+         "game": "circleAngles",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-poly",
+         "title": {
+          "ta": "பலகோணக் கோணங்கள்",
+          "en": "Polygon angles"
+         },
+         "game": "angleCalc",
+         "level": {
+          "poly": true
+         }
+        }
+       ]
       },
       {
        "no": 5,
@@ -9256,7 +9548,23 @@
         "ta": "ஆயத்தொலை வடிவியல்",
         "en": "Coordinate Geometry"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-coord",
+         "title": {
+          "ta": "தூரம், நடுப்புள்ளி, கால்பகுதி",
+          "en": "Distance, midpoint, quadrant"
+         },
+         "game": "coord",
+         "level": {
+          "kinds": [
+           "dist",
+           "mid",
+           "quad"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 6,
@@ -9285,6 +9593,15 @@
           "ta": "நிரப்புக் கோணங்கள் & முக்கோணத்தைத் தீர்த்தல்",
           "en": "Complementary angles & solving triangles"
          }
+        },
+        {
+         "id": "g-math-c9-trig",
+         "title": {
+          "ta": "திட்டக் கோண மதிப்புகள்",
+          "en": "Standard angle values"
+         },
+         "game": "trigValues",
+         "level": {}
         }
        ]
       },
@@ -9294,7 +9611,31 @@
         "ta": "அளவியல்",
         "en": "Mensuration"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-heron",
+         "title": {
+          "ta": "ஹெரான் சூத்திரம்",
+          "en": "Heron’s formula"
+         },
+         "game": "heron",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-cube",
+         "title": {
+          "ta": "கனச்செவ்வகம், கனசதுரம்",
+          "en": "Cuboid & cube"
+         },
+         "game": "area",
+         "level": {
+          "kinds": [
+           "cuboid",
+           "cube"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 8,
@@ -9302,7 +9643,17 @@
         "ta": "புள்ளியியல்",
         "en": "Statistics"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-stats",
+         "title": {
+          "ta": "சராசரி, இடைநிலை, முகடு",
+          "en": "Mean, median, mode"
+         },
+         "game": "stats",
+         "level": {}
+        }
+       ]
       },
       {
        "no": 9,
@@ -9310,7 +9661,17 @@
         "ta": "நிகழ்தகவு",
         "en": "Probability"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c9-prob",
+         "title": {
+          "ta": "நிகழ்தகவு",
+          "en": "Probability"
+         },
+         "game": "probability",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -9329,7 +9690,26 @@
         "ta": "அளவீடு",
         "en": "Measurement"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-si",
+         "title": {
+          "ta": "SI அலகுகள்",
+          "en": "SI units"
+         },
+         "game": "siUnits",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-sci",
+         "title": {
+          "ta": "அறிவியல் குறியீடு",
+          "en": "Scientific notation"
+         },
+         "game": "scientific",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9348,6 +9728,15 @@
           "ta": "தூரம், இடப்பெயர்ச்சி, வேகம், திசைவேகம், முடுக்கம் — பேருந்துப் பயணத்தில்",
           "en": "Distance, displacement, speed, velocity, acceleration — on a bus ride"
          }
+        },
+        {
+         "id": "g-scie-c9-kin",
+         "title": {
+          "ta": "இயக்கச் சமன்பாடுகள்",
+          "en": "Equations of motion"
+         },
+         "game": "kinematics",
+         "level": {}
         }
        ],
        "part": {
@@ -9361,7 +9750,26 @@
         "ta": "பாய்மங்கள்",
         "en": "Fluids"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-fp",
+         "title": {
+          "ta": "திரவ அழுத்தம்",
+          "en": "Fluid pressure"
+         },
+         "game": "fluidPressure",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-dens",
+         "title": {
+          "ta": "அடர்த்தி, அழுத்தம்",
+          "en": "Density & pressure"
+         },
+         "game": "pressure",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9373,7 +9781,17 @@
         "ta": "மின்னூட்டமும் மின்னோட்டமும்",
         "en": "Electric Charge and Electric Current"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-elec",
+         "title": {
+          "ta": "ஓம் விதி, மின்தடை",
+          "en": "Ohm’s law & resistance"
+         },
+         "game": "electricity",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9385,7 +9803,17 @@
         "ta": "காந்தவியலும் மின்காந்தவியலும்",
         "en": "Magnetism and Electromagnetism"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-mag",
+         "title": {
+          "ta": "மின்காந்தவியல்",
+          "en": "Electromagnetism"
+         },
+         "game": "physicsFacts",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9397,7 +9825,17 @@
         "ta": "ஒளி",
         "en": "Light"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-light",
+         "title": {
+          "ta": "லென்ஸ், ஒளிவிலகல்",
+          "en": "Lenses & refraction"
+         },
+         "game": "waves",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9409,7 +9847,17 @@
         "ta": "வெப்பம்",
         "en": "Heat"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-temp",
+         "title": {
+          "ta": "வெப்பநிலை மாற்றம்",
+          "en": "Temperature scales"
+         },
+         "game": "temperature",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9421,7 +9869,17 @@
         "ta": "ஒலி",
         "en": "Sound"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-sound",
+         "title": {
+          "ta": "அலைகள், எதிரொலி",
+          "en": "Waves & echoes"
+         },
+         "game": "waves",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9433,7 +9891,17 @@
         "ta": "அண்டம்",
         "en": "Universe"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-pl",
+         "title": {
+          "ta": "சூரியக் குடும்பம்",
+          "en": "The solar system"
+         },
+         "game": "planets",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9445,7 +9913,26 @@
         "ta": "நம்மைச் சுற்றியுள்ள பருப்பொருட்கள்",
         "en": "Matter Around Us"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-sol",
+         "title": {
+          "ta": "கரைசல் செறிவு",
+          "en": "Concentration"
+         },
+         "game": "solutions",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-chg",
+         "title": {
+          "ta": "இயற்பியல் / வேதியியல் மாற்றம்",
+          "en": "Physical or chemical change"
+         },
+         "game": "changes",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9457,7 +9944,17 @@
         "ta": "அணு அமைப்பு",
         "en": "Atomic Structure"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-atom",
+         "title": {
+          "ta": "புரோட்டான், நியூட்ரான், எலக்ட்ரான்",
+          "en": "Protons, neutrons, electrons"
+         },
+         "game": "atoms",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9469,7 +9966,26 @@
         "ta": "தனிமங்களின் வகைப்பாட்டு அட்டவணை",
         "en": "Periodic Classification of Elements"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-pt",
+         "title": {
+          "ta": "தனிம வரிசை அட்டவணை",
+          "en": "The periodic table"
+         },
+         "game": "periodic",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-sym",
+         "title": {
+          "ta": "தனிமக் குறியீடுகள்",
+          "en": "Element symbols"
+         },
+         "game": "elements",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9481,7 +9997,17 @@
         "ta": "வேதிப்பிணைப்பு",
         "en": "Chemical Bonding"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-val",
+         "title": {
+          "ta": "இணைதிறன், எலக்ட்ரான் அமைப்பு",
+          "en": "Valency & configuration"
+         },
+         "game": "atoms",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9493,7 +10019,26 @@
         "ta": "அமிலங்கள், காரங்கள், உப்புகள்",
         "en": "Acids, Bases and Salts"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-ph",
+         "title": {
+          "ta": "pH அளவு",
+          "en": "The pH scale"
+         },
+         "game": "pH",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-ab",
+         "title": {
+          "ta": "அமிலம், காரம், நடுநிலை",
+          "en": "Acid, base, neutral"
+         },
+         "game": "acidBase",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9505,7 +10050,26 @@
         "ta": "கார்பனும் அதன் சேர்மங்களும்",
         "en": "Carbon and its Compounds"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-alk",
+         "title": {
+          "ta": "ஆல்கேன்கள்",
+          "en": "Alkanes"
+         },
+         "game": "alkanes",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-fg",
+         "title": {
+          "ta": "வினைச்செயல் தொகுதிகள்",
+          "en": "Functional groups"
+         },
+         "game": "functionalGroups",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9517,7 +10081,17 @@
         "ta": "பயன்பாட்டு வேதியியல்",
         "en": "Applied Chemistry"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-hl",
+         "title": {
+          "ta": "அரை ஆயுள் (கதிரியக்க வேதியியல்)",
+          "en": "Half-life (radiochemistry)"
+         },
+         "game": "halfLife",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9529,7 +10103,17 @@
         "ta": "விலங்குலகம்",
         "en": "Animal Kingdom"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-phyla",
+         "title": {
+          "ta": "விலங்குலகத் தொகுதிகள்",
+          "en": "Animal phyla"
+         },
+         "game": "phyla",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9541,7 +10125,26 @@
         "ta": "திசுக்களின் அமைப்பு",
         "en": "Organisation of Tissues"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-cell",
+         "title": {
+          "ta": "செல்லின் பகுதிகள்",
+          "en": "Parts of a cell"
+         },
+         "game": "cellParts",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-pac",
+         "title": {
+          "ta": "தாவர செல், விலங்கு செல்",
+          "en": "Plant or animal cell"
+         },
+         "game": "plantAnimalCell",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9553,7 +10156,17 @@
         "ta": "தாவர செயலியல்",
         "en": "Plant Physiology"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-trop",
+         "title": {
+          "ta": "தாவர இயக்கங்கள்",
+          "en": "Tropisms"
+         },
+         "game": "tropism",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9565,7 +10178,26 @@
         "ta": "விலங்குகளின் உறுப்பு மண்டலங்கள்",
         "en": "Organ Systems in Animals"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-body",
+         "title": {
+          "ta": "உடல் மண்டலங்கள்",
+          "en": "Body systems"
+         },
+         "game": "bodySystems",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-brain",
+         "title": {
+          "ta": "மூளையின் பகுதிகள்",
+          "en": "Parts of the brain"
+         },
+         "game": "brain",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9577,7 +10209,17 @@
         "ta": "ஊட்டச்சத்தும் ஆரோக்கியமும்",
         "en": "Nutrition and Health"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-def",
+         "title": {
+          "ta": "குறைபாட்டு நோய்கள்",
+          "en": "Deficiency diseases"
+         },
+         "game": "deficiency",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9589,7 +10231,26 @@
         "ta": "நுண்ணுயிரிகளின் உலகம்",
         "en": "World of Microbes"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-mic",
+         "title": {
+          "ta": "நோய்களும் நுண்ணுயிரிகளும்",
+          "en": "Diseases & microbes"
+         },
+         "game": "microbes",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-sci2",
+         "title": {
+          "ta": "கண்டுபிடிப்பாளர்கள்",
+          "en": "Discoverers"
+         },
+         "game": "scientists",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9601,7 +10262,17 @@
         "ta": "பொருளாதார உயிரியல்",
         "en": "Economic Biology"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-eco",
+         "title": {
+          "ta": "பொருளாதார உயிரியல்",
+          "en": "Economic biology"
+         },
+         "game": "econBio",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9613,7 +10284,17 @@
         "ta": "சுற்றுச்சூழல் அறிவியல்",
         "en": "Environmental Science"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-en",
+         "title": {
+          "ta": "புதுப்பிக்கத்தக்க ஆற்றல்",
+          "en": "Renewable energy"
+         },
+         "game": "energySources",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9625,7 +10306,17 @@
         "ta": "கணினி — ஓர் அறிமுகம்",
         "en": "Computer – An Introduction"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-bin",
+         "title": {
+          "ta": "இரும எண்கள்",
+          "en": "Binary numbers"
+         },
+         "game": "binary",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
@@ -9637,7 +10328,17 @@
         "ta": "கணினியின் பாகங்கள்",
         "en": "Parts of Computer"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-io",
+         "title": {
+          "ta": "உள்ளீடு, வெளியீடு, சேமிப்பு",
+          "en": "Input, output, storage"
+         },
+         "game": "ioDevices",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
@@ -9649,7 +10350,17 @@
         "ta": "வன்பொருளும் மென்பொருளும்",
         "en": "Hardware and Software"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c9-hw",
+         "title": {
+          "ta": "வன்பொருள், மென்பொருள்",
+          "en": "Hardware & software"
+         },
+         "game": "hwSw",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
@@ -9665,7 +10376,566 @@
      },
      "icon": "🌏",
      "color": "soc",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "வரலாறு — பண்டைய நாகரிகங்கள்",
+        "en": "History — early civilisations"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-sites",
+         "title": {
+          "ta": "அகழாய்வுகள்",
+          "en": "Excavations"
+         },
+         "game": "ancientSites",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer சமூக அறிவியல் • NCERT வரலாறு, புவியியல், அரசியல் அறிவியல், பொருளியல்",
+        "en": "Samacheer Social Science • NCERT History, Geography, Political Science, Economics"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "வரலாறு — மறுமலர்ச்சி, புரட்சிகள்",
+        "en": "History — Renaissance & revolutions"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-wh",
+         "title": {
+          "ta": "உலக வரலாறு — ஆண்டுகள்",
+          "en": "World history — dates"
+         },
+         "game": "worldHistory",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — நிலக்கோளம்",
+        "en": "Geography — lithosphere"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-rocks",
+         "title": {
+          "ta": "பாறைகளின் வகைகள்",
+          "en": "Types of rocks"
+         },
+         "game": "rocks",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c9-layers",
+         "title": {
+          "ta": "புவியின் அடுக்குகள்",
+          "en": "Earth’s layers"
+         },
+         "game": "earthLayers",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — வளிமண்டலம்",
+        "en": "Geography — atmosphere"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-atm",
+         "title": {
+          "ta": "வளிமண்டல அடுக்குகள்",
+          "en": "Layers of the atmosphere"
+         },
+         "game": "earthLayers",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — இந்தியா",
+        "en": "Geography — India"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-cap",
+         "title": {
+          "ta": "மாநிலங்களும் தலைநகரங்களும்",
+          "en": "States & capitals"
+         },
+         "game": "capitals",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c9-riv",
+         "title": {
+          "ta": "கிழக்கே / மேற்கே பாயும் ஆறுகள்",
+          "en": "East- or west-flowing rivers"
+         },
+         "game": "riversFlow",
+         "level": {}
+        }
+       ],
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "குடிமையியல் — ஜனநாயகம், மனித உரிமைகள்",
+        "en": "Civics — democracy & human rights"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-const",
+         "title": {
+          "ta": "நம் அரசியலமைப்பு",
+          "en": "Our Constitution"
+         },
+         "game": "constitution",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c9-intl",
+         "title": {
+          "ta": "உலக அமைப்புகள்",
+          "en": "World bodies"
+         },
+         "game": "intlBodies",
+         "level": {}
+        }
+       ],
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "பொருளியல் — வளர்ச்சி",
+        "en": "Economics — development"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c9-sect",
+         "title": {
+          "ta": "பொருளாதாரத் துறைகள்",
+          "en": "Sectors of the economy"
+         },
+         "game": "sectors",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c9-tax",
+         "title": {
+          "ta": "நேர்முக, மறைமுக வரிகள்",
+          "en": "Direct & indirect taxes"
+         },
+         "game": "taxes",
+         "level": {}
+        }
+       ],
+       "no": 7
+      }
+     ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: நீண்ட program",
+        "en": "Coding: longer programs"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c9-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 6,
+          "rocks": 11,
+          "minLen": 8,
+          "maxLen": 12
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: கணினிச் சிந்தனை • ஒலிம்பியாட் / NTSE தயாரிப்பு",
+        "en": "NCF 2023: computational thinking • Olympiad / NTSE preparation"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளும் விதிகளும்",
+        "en": "Patterns & rules"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c9-seq",
+         "title": {
+          "ta": "அடுத்த எண்",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {}
+        },
+        {
+         "id": "g-thin-c9-odd",
+         "title": {
+          "ta": "பொருந்தாதது",
+          "en": "Odd one out"
+         },
+         "game": "oddOut",
+         "level": {
+          "max": 30
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தர்க்கமும் புதிர்களும்",
+        "en": "Logic & puzzles"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c9-magic",
+         "title": {
+          "ta": "மாயச் சதுரம்",
+          "en": "Magic square"
+         },
+         "game": "magicSquare",
+         "level": {
+          "shift": 50
+         }
+        },
+        {
+         "id": "g-thin-c9-logic",
+         "title": {
+          "ta": "துப்பறியும் புதிர்",
+          "en": "Detective puzzle"
+         },
+         "game": "logic",
+         "level": {
+          "n": 7
+         }
+        },
+        {
+         "id": "g-thin-c9-bin",
+         "title": {
+          "ta": "இரும எண் புதிர்",
+          "en": "Binary puzzles"
+         },
+         "game": "binary",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "குடும்பமும் பெரியவர்களும்",
+        "en": "Family & elders"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c9-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி, நிதி அறிவு, இணையப் பாதுகாப்பு",
+        "en": "NCF 2023: values, financial literacy, online safety"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பணம் — புத்திசாலித்தனமாக",
+        "en": "Money — the smart way"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c9-needs",
+         "title": {
+          "ta": "தேவையா, விருப்பமா?",
+          "en": "Need or want?"
+         },
+         "game": "needsWants",
+         "level": {}
+        },
+        {
+         "id": "g-valu-c9-ci",
+         "title": {
+          "ta": "சேமிப்பின் சக்தி — கூட்டு வட்டி",
+          "en": "The power of saving — compound interest"
+         },
+         "game": "interest",
+         "level": {
+          "compound": true
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இணையப் பாதுகாப்பு",
+        "en": "Online safety"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c9-online",
+         "title": {
+          "ta": "பாதுகாப்பானதா?",
+          "en": "Safe or unsafe?"
+         },
+         "game": "onlineSafety",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "ஜனநாயகம், அரசியலமைப்பு",
+        "en": "Democracy & the Constitution"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c9-demo",
+         "title": {
+          "ta": "ஜனநாயக வினாடி வினா",
+          "en": "Democracy quiz"
+         },
+         "game": "democracy",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c9-const",
+         "title": {
+          "ta": "அரசியலமைப்பு",
+          "en": "The Constitution"
+         },
+         "game": "constitution",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT அரசியல் அறிவியல் • IB MYP: Individuals & Societies",
+        "en": "Samacheer & NCERT Political Science • IB MYP: Individuals & Societies"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் பெருமை, வளர்ச்சி",
+        "en": "India’s pride & progress"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c9-proud",
+         "title": {
+          "ta": "அறிவியலும் மேதைகளும்",
+          "en": "Science & geniuses"
+         },
+         "game": "proudIndia",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c9-rev",
+         "title": {
+          "ta": "வேளாண் புரட்சிகள்",
+          "en": "Farm revolutions"
+         },
+         "game": "revolutions",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c9-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c9-tax",
+         "title": {
+          "ta": "வரி ஏன் செலுத்த வேண்டும்?",
+          "en": "Why we pay taxes"
+         },
+         "game": "taxes",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி",
+        "en": "Hindi"
+       },
+       "lessons": [
+        {
+         "id": "g-lang-c9-hword",
+         "title": {
+          "ta": "இந்திச் சொற்கள்",
+          "en": "Hindi words"
+         },
+         "game": "hindiWord",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c9-3lang",
+         "title": {
+          "ta": "ஒரு சொல், மூன்று மொழி",
+          "en": "One word, three languages"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 மும்மொழி வாய்ப்பு",
+        "en": "NEP 2020 multilingual learning"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்திய மொழிகள்",
+        "en": "Languages of India"
+       },
+       "lessons": [
+        {
+         "id": "g-lang-c9-fam",
+         "title": {
+          "ta": "மொழிக் குடும்பங்கள்",
+          "en": "Language families"
+         },
+         "game": "langFamily",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c9-greet",
+         "title": {
+          "ta": "வணக்கம் — பல மொழிகளில்",
+          "en": "Hello in many languages"
+         },
+         "game": "greetings",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c9-t2e",
+         "title": {
+          "ta": "ஆங்கிலத்தில் தமிழ்ச் சொற்கள்",
+          "en": "Tamil words in English"
+         },
+         "game": "tamilToEnglish",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
+    },
+    {
+     "id": "beyond",
+     "name": {
+      "ta": "பாடநூலுக்கு அப்பால்",
+      "en": "Beyond the Textbook"
+     },
+     "icon": "🚀",
+     "color": "beyond",
+     "chapters": [
+      {
+       "title": {
+        "ta": "கணிதர் போலச் சிந்தி",
+        "en": "Think like a mathematician"
+       },
+       "lessons": [
+        {
+         "id": "rice-chessboard",
+         "title": {
+          "ta": "சதுரங்கப் பலகையும் அரிசியும் — அடுக்குப் பெருக்கம்",
+          "en": "Rice on a chessboard — exponential growth"
+         }
+        }
+       ],
+       "part": {
+        "ta": "பாடநூலுக்கு அப்பால் — IB MYP, Cambridge IGCSE கருத்துகளுடன்",
+        "en": "Beyond the textbook — ideas from IB MYP and Cambridge IGCSE"
+       },
+       "no": 1
+      }
+     ]
     }
    ]
   },
@@ -9679,7 +10949,102 @@
      },
      "icon": "அ",
      "color": "tam",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "இலக்கணம் — வேற்றுமை",
+        "en": "Grammar — case markers"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c10-vet",
+         "title": {
+          "ta": "வேற்றுமை உருபுகள்",
+          "en": "Case markers"
+         },
+         "game": "vetrumai",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer தமிழ் இலக்கணம் & இலக்கியம்",
+        "en": "Samacheer Tamil grammar & literature"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இலக்கணம் — எழுத்தும் சொல்லும்",
+        "en": "Grammar — letters & words"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c10-inam",
+         "title": {
+          "ta": "வல்லினம், மெல்லினம், இடையினம்",
+          "en": "Hard, soft, medium"
+         },
+         "game": "meiInam",
+         "level": {}
+        },
+        {
+         "id": "g-tami-c10-kaalam",
+         "title": {
+          "ta": "முக்காலம்",
+          "en": "Three tenses"
+         },
+         "game": "kaalam",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இலக்கிய வரலாறு",
+        "en": "History of Tamil literature"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c10-lit2",
+         "title": {
+          "ta": "தமிழ் இலக்கியச் செல்வம்",
+          "en": "Treasures of Tamil literature"
+         },
+         "game": "tamilLit2",
+         "level": {}
+        },
+        {
+         "id": "g-tami-c10-lit",
+         "title": {
+          "ta": "யார் எழுதியது?",
+          "en": "Who wrote it?"
+         },
+         "game": "tamilLit",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "தமிழ் எண்கள்",
+        "en": "Tamil numerals"
+       },
+       "lessons": [
+        {
+         "id": "g-tami-c10-tnum",
+         "title": {
+          "ta": "தமிழ் எண்கள்",
+          "en": "Tamil numerals"
+         },
+         "game": "tamilNumerals",
+         "level": {}
+        }
+       ],
+       "no": 4
+      }
+     ]
     },
     {
      "id": "english",
@@ -9689,7 +11054,102 @@
      },
      "icon": "🔤",
      "color": "eng",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "Voice",
+        "en": "Voice"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c10-pass",
+         "title": {
+          "ta": "Active → Passive",
+          "en": "Active → Passive"
+         },
+         "game": "passive",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer English • CBSE English • Cambridge IGCSE English",
+        "en": "Samacheer English • CBSE English • Cambridge IGCSE English"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "Question tags",
+        "en": "Question tags"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c10-tag",
+         "title": {
+          "ta": "Question tags",
+          "en": "Question tags"
+         },
+         "game": "questionTag",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "Verbs & agreement",
+        "en": "Verbs & agreement"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c10-v3",
+         "title": {
+          "ta": "Verb forms V1–V2–V3",
+          "en": "Verb forms V1–V2–V3"
+         },
+         "game": "verbForms",
+         "level": {}
+        },
+        {
+         "id": "g-engl-c10-agree",
+         "title": {
+          "ta": "Subject–verb agreement",
+          "en": "Subject–verb agreement"
+         },
+         "game": "agreement",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "Vocabulary",
+        "en": "Vocabulary"
+       },
+       "lessons": [
+        {
+         "id": "g-engl-c10-pre",
+         "title": {
+          "ta": "Opposites with prefixes",
+          "en": "Opposites with prefixes"
+         },
+         "game": "prefix",
+         "level": {}
+        },
+        {
+         "id": "g-engl-c10-deg",
+         "title": {
+          "ta": "Degrees of comparison",
+          "en": "Degrees of comparison"
+         },
+         "game": "degrees",
+         "level": {}
+        }
+       ],
+       "no": 4
+      }
+     ]
     },
     {
      "id": "maths",
@@ -9706,7 +11166,22 @@
         "ta": "உறவுகளும் சார்புகளும்",
         "en": "Relations and Functions"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-rel",
+         "title": {
+          "ta": "கார்டீசியன் பெருக்கல், உறவுகள்",
+          "en": "Cartesian product & relations"
+         },
+         "game": "setsCount",
+         "level": {
+          "kinds": [
+           "product",
+           "relations"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 2,
@@ -9714,7 +11189,37 @@
         "ta": "எண்களும் தொடர்வரிசைகளும்",
         "en": "Numbers and Sequences"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-ap",
+         "title": {
+          "ta": "AP, GP",
+          "en": "AP & GP"
+         },
+         "game": "ap",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-mod",
+         "title": {
+          "ta": "மட்டு எண்கணிதம்",
+          "en": "Modular arithmetic"
+         },
+         "game": "modular",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-hcf",
+         "title": {
+          "ta": "யூக்ளிட் — மீ.பொ.வ",
+          "en": "Euclid — HCF"
+         },
+         "game": "hcfLcm",
+         "level": {
+          "max": 120
+         }
+        }
+       ]
       },
       {
        "no": 3,
@@ -9722,7 +11227,35 @@
         "ta": "இயற்கணிதம்",
         "en": "Algebra"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-quad",
+         "title": {
+          "ta": "இருபடிச் சமன்பாடுகள்",
+          "en": "Quadratic equations"
+         },
+         "game": "quadRoots",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-fac",
+         "title": {
+          "ta": "காரணிப்படுத்து",
+          "en": "Factorise"
+         },
+         "game": "factorise",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-sim",
+         "title": {
+          "ta": "ஒருங்கமைச் சமன்பாடுகள்",
+          "en": "Simultaneous equations"
+         },
+         "game": "simultaneous",
+         "level": {}
+        }
+       ]
       },
       {
        "no": 4,
@@ -9730,7 +11263,26 @@
         "ta": "வடிவியல்",
         "en": "Geometry"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-simtri",
+         "title": {
+          "ta": "வடிவொத்த முக்கோணங்கள்",
+          "en": "Similar triangles"
+         },
+         "game": "similar",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-tan",
+         "title": {
+          "ta": "தொடுகோட்டின் நீளம்",
+          "en": "Length of a tangent"
+         },
+         "game": "tangent",
+         "level": {}
+        }
+       ]
       },
       {
        "no": 5,
@@ -9738,7 +11290,24 @@
         "ta": "ஆயத்தொலை வடிவியல்",
         "en": "Coordinate Geometry"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-coord",
+         "title": {
+          "ta": "சாய்வு, பரப்பு, தூரம்",
+          "en": "Slope, area, distance"
+         },
+         "game": "coord",
+         "level": {
+          "kinds": [
+           "slope",
+           "area",
+           "dist",
+           "mid"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 6,
@@ -9760,6 +11329,24 @@
           "ta": "உயரங்களும் தூரங்களும் — தொடாமலே அளக்கலாம்",
           "en": "Heights and distances — measure without touching"
          }
+        },
+        {
+         "id": "g-math-c10-hd",
+         "title": {
+          "ta": "உயரங்களும் தூரங்களும்",
+          "en": "Heights & distances"
+         },
+         "game": "heights",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-trig",
+         "title": {
+          "ta": "திட்டக் கோண மதிப்புகள்",
+          "en": "Standard angle values"
+         },
+         "game": "trigValues",
+         "level": {}
         }
        ]
       },
@@ -9769,7 +11356,26 @@
         "ta": "அளவியல்",
         "en": "Mensuration"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-solids",
+         "title": {
+          "ta": "உருளை, கூம்பு, கோளம்",
+          "en": "Cylinder, cone, sphere"
+         },
+         "game": "solids",
+         "level": {
+          "kinds": [
+           "cylV",
+           "cylC",
+           "coneV",
+           "sphV",
+           "sphA",
+           "hemV"
+          ]
+         }
+        }
+       ]
       },
       {
        "no": 8,
@@ -9777,7 +11383,26 @@
         "ta": "புள்ளியியலும் நிகழ்தகவும்",
         "en": "Statistics and Probability"
        },
-       "lessons": []
+       "lessons": [
+        {
+         "id": "g-math-c10-sd",
+         "title": {
+          "ta": "திட்டவிலக்கம், CV",
+          "en": "Standard deviation & CV"
+         },
+         "game": "spread",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-prob",
+         "title": {
+          "ta": "நிகழ்தகவு",
+          "en": "Probability"
+         },
+         "game": "probability",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -9796,7 +11421,26 @@
         "ta": "இயக்க விதிகள்",
         "en": "Laws of Motion"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-fe",
+         "title": {
+          "ta": "விசை, உந்தம், ஆற்றல்",
+          "en": "Force, momentum, energy"
+         },
+         "game": "forceEnergy",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-kin",
+         "title": {
+          "ta": "இயக்கச் சமன்பாடுகள்",
+          "en": "Equations of motion"
+         },
+         "game": "kinematics",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9808,7 +11452,17 @@
         "ta": "ஒளியியல்",
         "en": "Optics"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-opt",
+         "title": {
+          "ta": "லென்ஸ், ஒளிவிலகல்",
+          "en": "Lenses & refraction"
+         },
+         "game": "waves",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9820,7 +11474,17 @@
         "ta": "வெப்ப இயற்பியல்",
         "en": "Thermal Physics"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-temp",
+         "title": {
+          "ta": "வெப்பநிலை மாற்றம்",
+          "en": "Temperature scales"
+         },
+         "game": "temperature",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9832,7 +11496,17 @@
         "ta": "மின்னோட்டவியல்",
         "en": "Electricity"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-elec",
+         "title": {
+          "ta": "மின்னோட்டவியல்",
+          "en": "Current electricity"
+         },
+         "game": "electricity",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9844,7 +11518,17 @@
         "ta": "ஒலியியல்",
         "en": "Acoustics"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-ac",
+         "title": {
+          "ta": "ஒலியியல் உண்மைகள்",
+          "en": "Facts of sound"
+         },
+         "game": "physicsFacts",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9856,7 +11540,17 @@
         "ta": "அணுக்கரு இயற்பியல்",
         "en": "Nuclear Physics"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-hl",
+         "title": {
+          "ta": "அரை ஆயுள்",
+          "en": "Half-life"
+         },
+         "game": "halfLife",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "இயற்பியல்",
         "en": "Physics"
@@ -9875,6 +11569,15 @@
           "ta": "மோல் — எண்ண முடியாததை எடை போட்டு எண்ணுவது",
           "en": "The mole — counting the uncountable by weighing"
          }
+        },
+        {
+         "id": "g-scie-c10-mm",
+         "title": {
+          "ta": "மூலக்கூறு நிறை, மோல்",
+          "en": "Molar mass & moles"
+         },
+         "game": "molarMass",
+         "level": {}
         }
        ],
        "part": {
@@ -9888,7 +11591,26 @@
         "ta": "தனிமங்களின் வகைப்பாட்டு அட்டவணை",
         "en": "Periodic Classification of Elements"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-pt",
+         "title": {
+          "ta": "தனிம வரிசை அட்டவணை",
+          "en": "The periodic table"
+         },
+         "game": "periodic",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-atom",
+         "title": {
+          "ta": "எலக்ட்ரான் அமைப்பு",
+          "en": "Electron configuration"
+         },
+         "game": "atoms",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9900,7 +11622,17 @@
         "ta": "கரைசல்கள்",
         "en": "Solutions"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-sol",
+         "title": {
+          "ta": "கரைசல் செறிவு",
+          "en": "Concentration"
+         },
+         "game": "solutions",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9912,7 +11644,26 @@
         "ta": "வேதிவினைகளின் வகைகள்",
         "en": "Types of Chemical Reactions"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-rx",
+         "title": {
+          "ta": "வேதிவினை வகைகள்",
+          "en": "Types of reactions"
+         },
+         "game": "reactions",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-ph",
+         "title": {
+          "ta": "pH அளவு",
+          "en": "The pH scale"
+         },
+         "game": "pH",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9924,7 +11675,26 @@
         "ta": "கார்பனும் அதன் சேர்மங்களும்",
         "en": "Carbon and its Compounds"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-alk",
+         "title": {
+          "ta": "ஆல்கேன்கள்",
+          "en": "Alkanes"
+         },
+         "game": "alkanes",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-fg",
+         "title": {
+          "ta": "வினைச்செயல் தொகுதிகள்",
+          "en": "Functional groups"
+         },
+         "game": "functionalGroups",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "வேதியியல்",
         "en": "Chemistry"
@@ -9936,7 +11706,17 @@
         "ta": "தாவர உள்ளமைப்பியல் மற்றும் தாவர செயலியல்",
         "en": "Plant Anatomy and Plant Physiology"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-trop",
+         "title": {
+          "ta": "தாவர இயக்கங்கள்",
+          "en": "Tropisms"
+         },
+         "game": "tropism",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9948,7 +11728,17 @@
         "ta": "விலங்குகளின் உள்ளமைப்பு",
         "en": "Structural Organisation of Animals"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-phyla",
+         "title": {
+          "ta": "விலங்குலகத் தொகுதிகள்",
+          "en": "Animal phyla"
+         },
+         "game": "phyla",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9960,7 +11750,17 @@
         "ta": "தாவரங்களில் கடத்துதல் & விலங்குகளில் சுழற்சி",
         "en": "Transportation in Plants and Circulation in Animals"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-body",
+         "title": {
+          "ta": "உடல் மண்டலங்கள்",
+          "en": "Body systems"
+         },
+         "game": "bodySystems",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -9979,6 +11779,15 @@
           "ta": "அனிச்சைச் செயல் — மூளை யோசிக்கும் முன்பே கை இழுக்கிறது",
           "en": "Reflex action — your hand moves before your brain thinks"
          }
+        },
+        {
+         "id": "g-scie-c10-brain",
+         "title": {
+          "ta": "மூளையின் பகுதிகள்",
+          "en": "Parts of the brain"
+         },
+         "game": "brain",
+         "level": {}
         }
        ],
        "part": {
@@ -9992,7 +11801,17 @@
         "ta": "தாவர மற்றும் விலங்கு ஹார்மோன்கள்",
         "en": "Plant and Animal Hormones"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-horm",
+         "title": {
+          "ta": "ஹார்மோன்கள்",
+          "en": "Hormones"
+         },
+         "game": "hormones",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10004,7 +11823,17 @@
         "ta": "தாவரங்கள் மற்றும் விலங்குகளில் இனப்பெருக்கம்",
         "en": "Reproduction in Plants and Animals"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-flower",
+         "title": {
+          "ta": "மலர், இனப்பெருக்கம்",
+          "en": "Flowers & reproduction"
+         },
+         "game": "flower",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10016,7 +11845,17 @@
         "ta": "மரபியல்",
         "en": "Heredity"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-pun",
+         "title": {
+          "ta": "பன்னெட் கட்டம்",
+          "en": "Punnett squares"
+         },
+         "game": "punnett",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10028,7 +11867,17 @@
         "ta": "உயிரின் தோற்றமும் பரிணாமமும்",
         "en": "Origin and Evolution of Life"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-evo",
+         "title": {
+          "ta": "பரிணாமக் கொள்கைகள்",
+          "en": "Theories of evolution"
+         },
+         "game": "evolution",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10040,7 +11889,26 @@
         "ta": "இனக்கலப்பும் உயிரித் தொழில்நுட்பமும்",
         "en": "Breeding and Biotechnology"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-bio",
+         "title": {
+          "ta": "உயிரித் தொழில்நுட்பம்",
+          "en": "Biotechnology"
+         },
+         "game": "biotech",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-rev",
+         "title": {
+          "ta": "இந்தியாவின் வேளாண் புரட்சிகள்",
+          "en": "India’s farm revolutions"
+         },
+         "game": "revolutions",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10052,7 +11920,26 @@
         "ta": "உடல்நலமும் நோய்களும்",
         "en": "Health and Diseases"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-mic",
+         "title": {
+          "ta": "நோய்களும் நுண்ணுயிரிகளும்",
+          "en": "Diseases & microbes"
+         },
+         "game": "microbes",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-sci2",
+         "title": {
+          "ta": "கண்டுபிடிப்பாளர்கள்",
+          "en": "Discoverers"
+         },
+         "game": "scientists",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10064,7 +11951,17 @@
         "ta": "சுற்றுச்சூழல் மேலாண்மை",
         "en": "Environmental Management"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-en",
+         "title": {
+          "ta": "புதுப்பிக்கத்தக்க ஆற்றல்",
+          "en": "Renewable energy"
+         },
+         "game": "energySources",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "உயிரியல்",
         "en": "Biology"
@@ -10076,7 +11973,17 @@
         "ta": "காட்சித் தொடர்பியல்",
         "en": "Visual Communication"
        },
-       "lessons": [],
+       "lessons": [
+        {
+         "id": "g-scie-c10-bin",
+         "title": {
+          "ta": "இரும எண்கள்",
+          "en": "Binary numbers"
+         },
+         "game": "binary",
+         "level": {}
+        }
+       ],
        "part": {
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
@@ -10092,7 +11999,566 @@
      },
      "icon": "🌏",
      "color": "soc",
-     "chapters": []
+     "chapters": [
+      {
+       "title": {
+        "ta": "வரலாறு — உலகப் போர்கள்",
+        "en": "History — the World Wars"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-wh",
+         "title": {
+          "ta": "உலக வரலாறு — ஆண்டுகள்",
+          "en": "World history — dates"
+         },
+         "game": "worldHistory",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer சமூக அறிவியல் • NCERT வரலாறு, புவியியல், அரசியல் அறிவியல், பொருளியல்",
+        "en": "Samacheer Social Science • NCERT History, Geography, Political Science, Economics"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "வரலாறு — இந்திய விடுதலைப் போராட்டம்",
+        "en": "History — India’s freedom struggle"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-free",
+         "title": {
+          "ta": "விடுதலைப் போராட்டம்",
+          "en": "Freedom struggle"
+         },
+         "game": "freedomStruggle",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — இந்தியா: அமைவிடம், ஆறுகள்",
+        "en": "Geography — India: location & rivers"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-time",
+         "title": {
+          "ta": "தீர்க்கரேகையும் நேரமும்",
+          "en": "Longitude & time"
+         },
+         "game": "longitudeTime",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c10-riv",
+         "title": {
+          "ta": "கிழக்கே / மேற்கே பாயும் ஆறுகள்",
+          "en": "East- or west-flowing rivers"
+         },
+         "game": "riversFlow",
+         "level": {}
+        }
+       ],
+       "no": 3
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — காலநிலை, மண், வேளாண்மை",
+        "en": "Geography — climate, soils, agriculture"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-soil",
+         "title": {
+          "ta": "இந்திய மண் வகைகள்",
+          "en": "Soils of India"
+         },
+         "game": "soils",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c10-crop",
+         "title": {
+          "ta": "காரீஃப், ராபி",
+          "en": "Kharif & rabi"
+         },
+         "game": "cropSeasons",
+         "level": {}
+        }
+       ],
+       "no": 4
+      },
+      {
+       "title": {
+        "ta": "புவியியல் — வளங்கள்",
+        "en": "Geography — resources"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-en",
+         "title": {
+          "ta": "ஆற்றல் வளங்கள்",
+          "en": "Energy resources"
+         },
+         "game": "energySources",
+         "level": {}
+        }
+       ],
+       "no": 5
+      },
+      {
+       "title": {
+        "ta": "குடிமையியல் — அரசியலமைப்பு, வெளியுறவுக் கொள்கை",
+        "en": "Civics — Constitution & foreign policy"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-const",
+         "title": {
+          "ta": "நம் அரசியலமைப்பு",
+          "en": "Our Constitution"
+         },
+         "game": "constitution",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c10-intl",
+         "title": {
+          "ta": "உலக அமைப்புகள்",
+          "en": "World bodies"
+         },
+         "game": "intlBodies",
+         "level": {}
+        }
+       ],
+       "no": 6
+      },
+      {
+       "title": {
+        "ta": "பொருளியல் — GDP, வரிகள், உலகமயமாக்கல்",
+        "en": "Economics — GDP, taxes, globalisation"
+       },
+       "lessons": [
+        {
+         "id": "g-soci-c10-tax",
+         "title": {
+          "ta": "நேர்முக, மறைமுக வரிகள்",
+          "en": "Direct & indirect taxes"
+         },
+         "game": "taxes",
+         "level": {}
+        },
+        {
+         "id": "g-soci-c10-sect",
+         "title": {
+          "ta": "பொருளாதாரத் துறைகள்",
+          "en": "Sectors of the economy"
+         },
+         "game": "sectors",
+         "level": {}
+        }
+       ],
+       "no": 7
+      }
+     ]
+    },
+    {
+     "id": "thinking",
+     "name": {
+      "ta": "சிந்தனைக் கூடம்",
+      "en": "Thinking Lab"
+     },
+     "icon": "🧠",
+     "color": "think",
+     "chapters": [
+      {
+       "title": {
+        "ta": "Coding: நீண்ட program",
+        "en": "Coding: longer programs"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c10-robot",
+         "title": {
+          "ta": "Robot program",
+          "en": "Robot program"
+         },
+         "game": "robot",
+         "level": {
+          "size": 6,
+          "rocks": 11,
+          "minLen": 8,
+          "maxLen": 12
+         }
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: கணினிச் சிந்தனை • ஒலிம்பியாட் / NTSE தயாரிப்பு",
+        "en": "NCF 2023: computational thinking • Olympiad / NTSE preparation"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "அமைப்புகளும் விதிகளும்",
+        "en": "Patterns & rules"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c10-seq",
+         "title": {
+          "ta": "அடுத்த எண்",
+          "en": "What comes next?"
+         },
+         "game": "sequence",
+         "level": {}
+        },
+        {
+         "id": "g-thin-c10-odd",
+         "title": {
+          "ta": "பொருந்தாதது",
+          "en": "Odd one out"
+         },
+         "game": "oddOut",
+         "level": {
+          "max": 30
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "தர்க்கமும் புதிர்களும்",
+        "en": "Logic & puzzles"
+       },
+       "lessons": [
+        {
+         "id": "g-thin-c10-magic",
+         "title": {
+          "ta": "மாயச் சதுரம்",
+          "en": "Magic square"
+         },
+         "game": "magicSquare",
+         "level": {
+          "shift": 50
+         }
+        },
+        {
+         "id": "g-thin-c10-logic",
+         "title": {
+          "ta": "துப்பறியும் புதிர்",
+          "en": "Detective puzzle"
+         },
+         "game": "logic",
+         "level": {
+          "n": 7
+         }
+        },
+        {
+         "id": "g-thin-c10-bin",
+         "title": {
+          "ta": "இரும எண் புதிர்",
+          "en": "Binary puzzles"
+         },
+         "game": "binary",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "values",
+     "name": {
+      "ta": "வாழ்க்கைக் கல்வி",
+      "en": "Life & Values"
+     },
+     "icon": "❤️",
+     "color": "val",
+     "chapters": [
+      {
+       "title": {
+        "ta": "குடும்பமும் பெரியவர்களும்",
+        "en": "Family & elders"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c10-values",
+         "title": {
+          "ta": "நீ என்ன செய்வாய்?",
+          "en": "What would you do?"
+         },
+         "game": "values",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NCF 2023: மதிப்புக் கல்வி, நிதி அறிவு, இணையப் பாதுகாப்பு",
+        "en": "NCF 2023: values, financial literacy, online safety"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "பணம் — புத்திசாலித்தனமாக",
+        "en": "Money — the smart way"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c10-needs",
+         "title": {
+          "ta": "தேவையா, விருப்பமா?",
+          "en": "Need or want?"
+         },
+         "game": "needsWants",
+         "level": {}
+        },
+        {
+         "id": "g-valu-c10-ci",
+         "title": {
+          "ta": "சேமிப்பின் சக்தி — கூட்டு வட்டி",
+          "en": "The power of saving — compound interest"
+         },
+         "game": "interest",
+         "level": {
+          "compound": true
+         }
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "இணையப் பாதுகாப்பு",
+        "en": "Online safety"
+       },
+       "lessons": [
+        {
+         "id": "g-valu-c10-online",
+         "title": {
+          "ta": "பாதுகாப்பானதா?",
+          "en": "Safe or unsafe?"
+         },
+         "game": "onlineSafety",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "nation",
+     "name": {
+      "ta": "நாடும் நானும்",
+      "en": "My Nation & Me"
+     },
+     "icon": "🇮🇳",
+     "color": "nat",
+     "chapters": [
+      {
+       "title": {
+        "ta": "ஜனநாயகம், அரசியலமைப்பு",
+        "en": "Democracy & the Constitution"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c10-demo",
+         "title": {
+          "ta": "ஜனநாயக வினாடி வினா",
+          "en": "Democracy quiz"
+         },
+         "game": "democracy",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c10-const",
+         "title": {
+          "ta": "அரசியலமைப்பு",
+          "en": "The Constitution"
+         },
+         "game": "constitution",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "Samacheer & NCERT அரசியல் அறிவியல் • IB MYP: Individuals & Societies",
+        "en": "Samacheer & NCERT Political Science • IB MYP: Individuals & Societies"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்தியாவின் பெருமை, வளர்ச்சி",
+        "en": "India’s pride & progress"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c10-proud",
+         "title": {
+          "ta": "அறிவியலும் மேதைகளும்",
+          "en": "Science & geniuses"
+         },
+         "game": "proudIndia",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c10-rev",
+         "title": {
+          "ta": "வேளாண் புரட்சிகள்",
+          "en": "Farm revolutions"
+         },
+         "game": "revolutions",
+         "level": {}
+        }
+       ],
+       "no": 2
+      },
+      {
+       "title": {
+        "ta": "நல்ல குடிமகன்",
+        "en": "A good citizen"
+       },
+       "lessons": [
+        {
+         "id": "g-nati-c10-civic",
+         "title": {
+          "ta": "சரியா, தவறா?",
+          "en": "Right or wrong?"
+         },
+         "game": "civic",
+         "level": {}
+        },
+        {
+         "id": "g-nati-c10-tax",
+         "title": {
+          "ta": "வரி ஏன் செலுத்த வேண்டும்?",
+          "en": "Why we pay taxes"
+         },
+         "game": "taxes",
+         "level": {}
+        }
+       ],
+       "no": 3
+      }
+     ]
+    },
+    {
+     "id": "languages",
+     "name": {
+      "ta": "பிற மொழிகள்",
+      "en": "More Languages"
+     },
+     "icon": "🗣️",
+     "color": "lang",
+     "chapters": [
+      {
+       "title": {
+        "ta": "இந்தி",
+        "en": "Hindi"
+       },
+       "lessons": [
+        {
+         "id": "g-lang-c10-hword",
+         "title": {
+          "ta": "இந்திச் சொற்கள்",
+          "en": "Hindi words"
+         },
+         "game": "hindiWord",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c10-3lang",
+         "title": {
+          "ta": "ஒரு சொல், மூன்று மொழி",
+          "en": "One word, three languages"
+         },
+         "game": "threeLang",
+         "level": {}
+        }
+       ],
+       "part": {
+        "ta": "NEP 2020 மும்மொழி வாய்ப்பு",
+        "en": "NEP 2020 multilingual learning"
+       },
+       "no": 1
+      },
+      {
+       "title": {
+        "ta": "இந்திய மொழிகள்",
+        "en": "Languages of India"
+       },
+       "lessons": [
+        {
+         "id": "g-lang-c10-fam",
+         "title": {
+          "ta": "மொழிக் குடும்பங்கள்",
+          "en": "Language families"
+         },
+         "game": "langFamily",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c10-greet",
+         "title": {
+          "ta": "வணக்கம் — பல மொழிகளில்",
+          "en": "Hello in many languages"
+         },
+         "game": "greetings",
+         "level": {}
+        },
+        {
+         "id": "g-lang-c10-t2e",
+         "title": {
+          "ta": "ஆங்கிலத்தில் தமிழ்ச் சொற்கள்",
+          "en": "Tamil words in English"
+         },
+         "game": "tamilToEnglish",
+         "level": {}
+        }
+       ],
+       "no": 2
+      }
+     ]
+    },
+    {
+     "id": "beyond",
+     "name": {
+      "ta": "பாடநூலுக்கு அப்பால்",
+      "en": "Beyond the Textbook"
+     },
+     "icon": "🚀",
+     "color": "beyond",
+     "chapters": [
+      {
+       "title": {
+        "ta": "தரவு அறிவியலாளர் போலச் சிந்தி",
+        "en": "Think like a data scientist"
+       },
+       "lessons": [
+        {
+         "id": "birthday-surprise",
+         "title": {
+          "ta": "பிறந்தநாள் ஆச்சரியம் — நிகழ்தகவின் மாயம்",
+          "en": "The birthday surprise — the magic of probability"
+         }
+        }
+       ],
+       "part": {
+        "ta": "பாடநூலுக்கு அப்பால் — IB MYP, Cambridge IGCSE கருத்துகளுடன்",
+        "en": "Beyond the textbook — ideas from IB MYP and Cambridge IGCSE"
+       },
+       "no": 1
+      }
+     ]
     }
    ]
   }
