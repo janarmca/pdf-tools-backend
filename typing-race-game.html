@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type Race — Typing Practice Game | PDF Tools India</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+Tamil:wght@500;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1a0f1f;--bg2:#2a1733;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);
+    --red:#FF5E5B;--gold:#FFC94A;--green:#2ECC71;--ink:#fff;--sub:#c9b8d3;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{font-family:'Poppins',sans-serif;background:radial-gradient(circle at 20% 0%,#3a1a45 0%,var(--bg) 55%);color:var(--ink);}
+  .ta{font-family:'Noto Sans Tamil',sans-serif;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;margin:0;}
+  #app{max-width:900px;margin:0 auto;padding:14px;}
+  button{font-family:inherit;cursor:pointer;}
+
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    background:var(--card);border:2px solid var(--red);border-radius:16px;padding:12px 14px;margin-bottom:12px;}
+  .logo{font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;color:var(--red);}
+  .logo small{display:block;font-family:'Poppins';font-size:11px;font-weight:500;color:var(--sub);}
+  .lvl{min-width:200px;flex:1;max-width:320px;}
+  .lvl-row{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--gold);}
+  .xpbar{height:8px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden;margin-top:5px;}
+  .xpfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--red));transition:width .5s;}
+
+  .tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+  .tabs button{background:var(--card);border:1px solid var(--line);color:#fff;padding:8px 14px;border-radius:10px;font-size:12.5px;font-weight:600;}
+  .tabs button.on{background:var(--red);border-color:var(--red);}
+  .panel{display:none;} .panel.on{display:block;animation:fade .25s;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;}
+  .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin:0 0 8px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{background:transparent;border:1.5px solid var(--line);color:#fff;padding:9px 13px;border-radius:12px;font-size:13px;font-weight:600;}
+  .chip.on{border-color:var(--gold);background:rgba(255,201,74,.15);color:var(--gold);}
+  .setup{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media(min-width:640px){.setup{grid-template-columns:2fr 1fr;}}
+
+  /* track */
+  .track{position:relative;height:84px;background:repeating-linear-gradient(90deg,#2d2d38 0 40px,#34343f 40px 80px);
+    border-radius:12px;overflow:hidden;border:2px solid #444;}
+  .lane{position:absolute;left:0;right:0;height:42px;}
+  .lane.l1{top:0;border-bottom:2px dashed rgba(255,255,255,.35);} .lane.l2{top:42px;}
+  .car{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:28px;transition:left .25s linear;left:6%;}
+  .car.me{transform:translate(-50%,-50%) scaleX(-1);}
+  .car.ghost{opacity:.55;}
+  .laneTag{position:absolute;left:6px;top:3px;font-size:9.5px;font-weight:700;color:rgba(255,255,255,.7);}
+  .finish{position:absolute;right:0;top:0;bottom:0;width:14px;
+    background:repeating-conic-gradient(#fff 0 25%,#111 0 50%) 0 0/14px 14px;}
+
+  .hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;}
+  .hud div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;}
+  .hud b{display:block;font-size:22px;font-family:'Baloo 2';color:var(--gold);line-height:1.1;}
+  .hud span{font-size:10.5px;color:var(--sub);font-weight:600;text-transform:uppercase;}
+  .timebar{height:6px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+  .timefill{height:100%;width:100%;background:var(--red);transition:width .2s linear;}
+
+  .words{background:#120a16;border:2px solid var(--line);border-radius:14px;padding:16px;min-height:120px;
+    font-family:'JetBrains Mono',monospace;font-size:20px;line-height:1.9;cursor:text;user-select:none;word-wrap:break-word;}
+  .words.focus{border-color:var(--gold);}
+  .w{display:inline-block;margin:0 10px 4px 0;padding:0 3px;border-radius:6px;color:#8d7c96;}
+  .w.cur{background:rgba(255,201,74,.12);color:#fff;}
+  .w.ok{color:var(--green);} .w.bad{color:var(--red);text-decoration:line-through;}
+  .c.ok{color:var(--green);} .c.bad{color:#fff;background:var(--red);border-radius:2px;}
+  .tw{display:inline-flex;flex-direction:column;align-items:center;margin:0 14px 6px 0;padding:2px 6px;border-radius:8px;vertical-align:top;}
+  .tw .tt{font-family:'Noto Sans Tamil';font-size:22px;line-height:1.4;color:inherit;}
+  .tw .tg{font-size:15px;line-height:1.3;}
+  .tw .tm{font-family:'Poppins';font-size:10px;color:var(--sub);line-height:1.2;}
+  .hint{font-size:12px;color:var(--sub);margin-top:8px;text-align:center;}
+
+  #typeIn{width:100%;margin-top:10px;padding:14px;font-size:18px;border-radius:12px;border:2px solid var(--line);
+    background:#fff;color:#111;font-family:'JetBrains Mono',monospace;outline:none;}
+  #typeIn:focus{border-color:var(--gold);}
+  #typeIn.err{border-color:var(--red);background:#ffe9e8;}
+
+  .btn{background:var(--red);color:#fff;border:none;padding:12px 20px;border-radius:12px;font-size:15px;font-weight:700;}
+  .btn.alt{background:transparent;border:1.5px solid var(--line);}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;}
+
+  .result{text-align:center;}
+  .big{font-family:'Baloo 2';font-size:56px;font-weight:800;color:var(--gold);line-height:1;}
+  .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+  .rgrid div{background:var(--card);border-radius:12px;padding:10px;}
+  .rgrid b{display:block;font-size:20px;font-family:'Baloo 2';}
+  .rgrid span{font-size:11px;color:var(--sub);}
+  .newb{display:inline-block;background:var(--gold);color:#000;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;margin:4px;}
+  .miss{font-size:13px;color:var(--sub);margin-top:6px;}
+
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+  .badge{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;text-align:center;}
+  .badge .bi{font-size:30px;} .badge .bn{font-weight:700;font-size:13px;margin-top:4px;} .badge .bd{font-size:11px;color:var(--sub);}
+  .badge.lock{opacity:.35;filter:grayscale(1);}
+  .badge.got{border-color:var(--gold);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);}
+  th{color:var(--sub);font-size:11px;text-transform:uppercase;}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--gold);color:#000;
+    padding:10px 18px;border-radius:30px;font-weight:700;font-size:14px;transition:transform .35s;z-index:9;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  @media(max-width:520px){.words{font-size:17px;padding:12px;} .hud b{font-size:18px;} .big{font-size:46px;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">🏁 Type Race<small>Typing speed &amp; accuracy practice</small></div>
+    <div class="lvl">
+      <div class="lvl-row"><span id="lvlName">Level 1</span><span id="xpTxt">0 XP</span></div>
+      <div class="xpbar"><div class="xpfill" id="xpFill" style="width:0%"></div></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button data-tab="play" class="on">🏎️ Race</button>
+    <button data-tab="badges">🏅 Badges</button>
+    <button data-tab="stats">📊 My Stats</button>
+    <button data-tab="help">❓ How to Play</button>
+  </div>
+
+  <!-- PLAY -->
+  <section class="panel on" id="p-play">
+    <div id="setupView">
+      <div class="setup">
+        <div class="box">
+          <p class="lbl">What to type</p>
+          <div class="chips" id="modeChips">
+            <button class="chip on" data-mode="words">🔤 English Words</button>
+            <button class="chip" data-mode="sentences">📝 English Sentences</button>
+            <button class="chip" data-mode="tamil">🅰️ <span class="ta">தமிழ்</span> Words (Tanglish)</button>
+            <button class="chip" data-mode="numbers">🔢 Numbers</button>
+          </div>
+        </div>
+        <div class="box">
+          <p class="lbl">Race time</p>
+          <div class="chips" id="timeChips">
+            <button class="chip" data-t="30">30s</button>
+            <button class="chip on" data-t="60">60s</button>
+            <button class="chip" data-t="120">2 min</button>
+          </div>
+        </div>
+      </div>
+      <div class="box" style="text-align:center">
+        <div id="bestLine" style="font-size:13px;color:var(--sub);margin-bottom:10px"></div>
+        <button class="btn" id="startBtn">🏁 Start Race</button>
+      </div>
+    </div>
+
+    <div id="raceView" style="display:none">
+      <div class="track">
+        <div class="lane l1"><span class="laneTag">YOU</span><div class="car me" id="carMe">🏎️</div></div>
+        <div class="lane l2"><span class="laneTag" id="ghostTag">TARGET</span><div class="car ghost" id="carGhost">🚙</div></div>
+        <div class="finish"></div>
+      </div>
+      <div class="hud">
+        <div><b id="hTime">60</b><span>Seconds</span></div>
+        <div><b id="hWpm">0</b><span>WPM</span></div>
+        <div><b id="hAcc">100%</b><span>Accuracy</span></div>
+        <div><b id="hWords">0</b><span>Words</span></div>
+      </div>
+      <div class="timebar"><div class="timefill" id="timeFill"></div></div>
+      <div class="words" id="words"></div>
+      <input id="typeIn" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+        placeholder="Start typing here — the clock starts on your first key" enterkeyhint="next">
+      <div class="hint">Press <b>Space</b> after each word. Wrong words turn red — keep going!</div>
+      <div class="btnrow"><button class="btn alt" id="quitBtn">✖ Stop</button><button class="btn alt" id="restartBtn">↻ Restart</button></div>
+    </div>
+
+    <div id="resultView" style="display:none" class="box result"></div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="panel" id="p-badges"><div class="box"><div class="badges" id="badgeGrid"></div></div></section>
+
+  <!-- STATS -->
+  <section class="panel" id="p-stats"><div class="box" id="statsBox"></div></section>
+
+  <!-- HELP -->
+  <section class="panel" id="p-help">
+    <div class="box" style="font-size:14px;line-height:1.75">
+      <h3 style="color:var(--gold)">How to play</h3>
+      <ol style="padding-left:20px;margin:8px 0">
+        <li>Pick what to type and how long the race lasts, then press <b>Start Race</b>.</li>
+        <li>Type the highlighted word and press <b>Space</b>. The timer starts on your first key.</li>
+        <li>Your car 🏎️ moves as you type correctly. Beat the 🚙 — it drives at your best speed so far (or 20 WPM on your first race).</li>
+        <li>Earn XP, level up and collect badges. Accuracy counts — XP drops when you make lots of mistakes.</li>
+      </ol>
+      <h3 style="color:var(--gold);margin-top:10px">Tamil words (Tanglish)</h3>
+      <p style="margin:6px 0">You see the Tamil word, its English-letter spelling and its meaning. Type the English-letter spelling (for example <span class="ta">அம்மா</span> → <b>amma</b>). This builds the skill for Tamil phone keyboards that turn English letters into Tamil.</p>
+      <h3 style="color:var(--gold);margin-top:10px">Tips</h3>
+      <ul style="padding-left:20px;margin:6px 0">
+        <li>Look at the screen, not the keyboard. Keep fingers on the home row: <b>A S D F</b> and <b>J K L ;</b></li>
+        <li>Accuracy first, speed will follow. 95%+ accuracy is a great goal.</li>
+        <li>WPM = correct letters ÷ 5, per minute (the standard way typing speed is measured).</li>
+      </ul>
+      <p style="font-size:12px;color:var(--sub)">🔒 Everything runs in your browser. Your progress is saved only on this device.</p>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------------- DATA ---------------- */
+const EN_WORDS = ('the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us is was are has had were said did made find long down call may very tell still school family friend water food house mother father small large big little start play learn read write open close help keep hand head city river tree plant flower seed rain cloud green happy early light night world paper story music sport garden market village teacher student number letter window table chair basket bottle pencil orange yellow purple animal forest mountain island bridge train simple clear quick bright strong gentle honest brave kind').split(' ');
+const EN_SENTENCES = [
+  'The sun rises in the east every morning.',
+  'Practice a little every day and you will improve.',
+  'My grandmother tells the best stories at night.',
+  'We planted a mango tree in our school garden.',
+  'Clean water is important for good health.',
+  'The train to Chennai leaves at seven o\'clock.',
+  'Always read the question twice before you answer.',
+  'A good friend helps you when things are hard.',
+  'The farmer checks the sky before sowing seeds.',
+  'Books can take you to places you have never been.',
+  'Save electricity by switching off the fan when you leave.',
+  'The peacock opened its beautiful feathers in the rain.',
+  'Kindness costs nothing but means a lot.',
+  'Our team won the match after a long, tough game.',
+  'Please wash your hands before every meal.',
+  'The library is quiet, so everyone can read.',
+  'Honest work always brings a good night\'s sleep.',
+  'Typing fast is useful, but typing correctly is better.',
+  'The river flows gently past the old temple.',
+  'Mistakes are proof that you are trying.',
+  'She finished her homework before going out to play.',
+  'Every big journey begins with a single step.',
+  'The market is busy with people buying fresh vegetables.',
+  'Plant a tree today for a cooler tomorrow.',
+  'He wrote a letter to thank his favourite teacher.',
+  'The stars look brighter when the village lights are off.'
+];
+/* [Tamil, Tanglish to type, English meaning] */
+const TA_WORDS = [
+  ['அம்மா','amma','mother'],['அப்பா','appa','father'],['அக்கா','akka','elder sister'],['அண்ணா','anna','elder brother'],
+  ['தம்பி','thambi','younger brother'],['தங்கை','thangai','younger sister'],['பாட்டி','paatti','grandmother'],['தாத்தா','thaatha','grandfather'],
+  ['வீடு','veedu','house'],['பள்ளி','palli','school'],['புத்தகம்','puthagam','book'],['பேனா','pena','pen'],
+  ['மரம்','maram','tree'],['பூ','poo','flower'],['பழம்','pazham','fruit'],['மாம்பழம்','maambazham','mango'],
+  ['தண்ணீர்','thanneer','water'],['பால்','paal','milk'],['நாய்','naai','dog'],['பூனை','poonai','cat'],
+  ['மாடு','maadu','cow'],['யானை','yaanai','elephant'],['குரங்கு','kurangu','monkey'],['பறவை','paravai','bird'],
+  ['மீன்','meen','fish'],['சூரியன்','sooriyan','sun'],['நிலா','nilaa','moon'],['வானம்','vaanam','sky'],
+  ['மழை','mazhai','rain'],['கடல்','kadal','sea'],['மலை','malai','mountain'],['கண்','kan','eye'],
+  ['காது','kaadhu','ear'],['கை','kai','hand'],['கால்','kaal','leg'],['தலை','thalai','head'],
+  ['சிவப்பு','sivappu','red'],['பச்சை','pachai','green'],['மஞ்சள்','manjal','yellow'],['நீலம்','neelam','blue'],
+  ['வெள்ளை','vellai','white'],['கருப்பு','karuppu','black'],['ஒன்று','ondru','one'],['இரண்டு','irandu','two'],
+  ['மூன்று','moondru','three'],['நான்கு','naangu','four'],['ஐந்து','aindhu','five'],['நன்றி','nandri','thank you'],
+  ['வணக்கம்','vanakkam','greetings'],['காலை','kaalai','morning'],['மாலை','maalai','evening'],['இரவு','iravu','night'],
+  ['நண்பன்','nanban','friend'],['ஆசிரியர்','aasiriyar','teacher'],['தமிழ்','thamizh','Tamil'],['இனிப்பு','inippu','sweet'],
+  ['கோயில்','koyil','temple'],['சாலை','saalai','road'],['பேருந்து','perundhu','bus'],['அழகு','azhagu','beauty']
+];
+
+/* ---------------- STORAGE ---------------- */
+const KEY='typeRace_v1';
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&typeof s==='object')return s;}catch(e){}return null;}
+const S=Object.assign({xp:0,races:0,best:{},history:[],badges:[],modeCount:{},days:[]},load()||{});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------------- LEVELS ---------------- */
+const LEVEL_NAMES=['Learner','Starter','Tapper','Cruiser','Racer','Speedster','Pro Racer','Champion','Legend','Typing Master'];
+function levelFor(xp){let l=1;while(xp>=xpNeed(l+1))l++;return l;}
+function xpNeed(l){return 50*(l-1)*l;} /* L2=100, L3=300, L4=600 ... */
+function lvlTitle(l){return LEVEL_NAMES[Math.min(l-1,LEVEL_NAMES.length-1)];}
+function renderLevel(){const l=levelFor(S.xp),a=xpNeed(l),b=xpNeed(l+1);
+  $('lvlName').textContent='Level '+l+' · '+lvlTitle(l);
+  $('xpTxt').textContent=S.xp+' / '+b+' XP';
+  $('xpFill').style.width=Math.min(100,(S.xp-a)/(b-a)*100)+'%';}
+
+/* ---------------- BADGES ---------------- */
+const BADGES=[
+  ['first','🏁','First Race','Finish your first race',(r)=>S.races>=1],
+  ['w20','🚲','20 WPM','Reach 20 words per minute',(r)=>r&&r.wpm>=20],
+  ['w30','🛵','30 WPM','Reach 30 words per minute',(r)=>r&&r.wpm>=30],
+  ['w40','🚗','40 WPM','Reach 40 words per minute',(r)=>r&&r.wpm>=40],
+  ['w60','🏎️','60 WPM','Reach 60 words per minute',(r)=>r&&r.wpm>=60],
+  ['w80','🚀','80 WPM','Reach 80 words per minute',(r)=>r&&r.wpm>=80],
+  ['acc95','🎯','Sharp Shooter','95%+ accuracy with 15+ words',(r)=>r&&r.acc>=95&&r.words>=15],
+  ['acc100','💎','Perfect Run','100% accuracy with 20+ words',(r)=>r&&r.acc===100&&r.words>=20],
+  ['r10','🔟','Regular','Finish 10 races',(r)=>S.races>=10],
+  ['r50','🏆','Marathon','Finish 50 races',(r)=>S.races>=50],
+  ['tamil5','🌺','Tamil Star','Finish 5 Tamil races',(r)=>(S.modeCount.tamil||0)>=5],
+  ['sent5','📚','Sentence Pro','Finish 5 sentence races',(r)=>(S.modeCount.sentences||0)>=5],
+  ['num5','🔢','Number Ninja','Finish 5 number races',(r)=>(S.modeCount.numbers||0)>=5],
+  ['long','⏱️','Endurance','Finish a 2-minute race',(r)=>r&&r.time>=120],
+  ['streak3','🔥','3-Day Streak','Race on 3 days in a row',(r)=>streak()>=3],
+  ['streak7','🌟','7-Day Streak','Race on 7 days in a row',(r)=>streak()>=7],
+  ['beat','👑','Beat Yourself','Beat your own best speed',(r)=>r&&r.beatBest]
+];
+function streak(){const d=[...new Set(S.days)].sort();if(!d.length)return 0;let n=1;
+  for(let i=d.length-1;i>0;i--){const a=new Date(d[i]),b=new Date(d[i-1]);if(Math.round((a-b)/864e5)===1)n++;else break;}
+  const last=new Date(d[d.length-1]),today=new Date(todayStr());return Math.round((today-last)/864e5)<=1?n:0;}
+function todayStr(){const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
+function renderBadges(){$('badgeGrid').innerHTML=BADGES.map(b=>{const got=S.badges.includes(b[0]);
+  return `<div class="badge ${got?'got':'lock'}"><div class="bi">${b[1]}</div><div class="bn">${b[2]}</div><div class="bd">${b[3]}</div></div>`;}).join('');}
+
+/* ---------------- HELPERS ---------------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('show'),2600);}
+const MODE_LABEL={words:'English Words',sentences:'English Sentences',tamil:'Tamil Words',numbers:'Numbers'};
+function bestKey(m,t){return m+'_'+t;}
+
+/* ---------------- TABS / SETUP ---------------- */
+let mode='words',dur=60;
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  if(R.running&&!confirm('Stop the current race?'))return; if(R.running)endRace(true);
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
+  if(b.dataset.tab==='badges')renderBadges(); if(b.dataset.tab==='stats')renderStats();});
+$('modeChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;mode=b.dataset.mode;
+  [...$('modeChips').children].forEach(x=>x.classList.toggle('on',x===b));renderBest();};
+$('timeChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;dur=+b.dataset.t;
+  [...$('timeChips').children].forEach(x=>x.classList.toggle('on',x===b));renderBest();};
+function renderBest(){const b=S.best[bestKey(mode,dur)];
+  $('bestLine').innerHTML=b?`Your best in <b>${MODE_LABEL[mode]}</b> (${dur}s): <b style="color:var(--gold)">${b.wpm} WPM</b> · ${b.acc}% accuracy`
+    :`No record yet for <b>${MODE_LABEL[mode]}</b> (${dur}s) — set one now!`;}
+
+/* ---------------- RACE ENGINE ---------------- */
+const R={running:false};
+function buildQueue(){
+  if(mode==='words')return shuffle(EN_WORDS).concat(shuffle(EN_WORDS)).map(w=>({t:w}));
+  if(mode==='sentences'){const out=[];shuffle(EN_SENTENCES).concat(shuffle(EN_SENTENCES)).forEach(s=>s.split(' ').forEach(w=>out.push({t:w})));return out;}
+  if(mode==='tamil')return shuffle(TA_WORDS).concat(shuffle(TA_WORDS)).concat(shuffle(TA_WORDS)).map(w=>({t:w[1],ta:w[0],m:w[2]}));
+  const out=[];for(let i=0;i<300;i++){const len=2+Math.floor(Math.random()*4);let s=String(1+Math.floor(Math.random()*9));
+    for(let k=1;k<len;k++)s+=Math.floor(Math.random()*10);out.push({t:s});}return out;}
+
+function startRace(){
+  Object.assign(R,{running:true,started:false,q:buildQueue(),i:0,correctChars:0,keys:0,goodKeys:0,
+    wordsOk:0,wordsBad:0,missed:{},t0:0,left:dur,timer:null,prevLen:0});
+  const best=S.best[bestKey(mode,dur)];R.goalWpm=best?best.wpm:20;
+  $('ghostTag').textContent=best?'YOUR BEST · '+best.wpm+' WPM':'TARGET · 20 WPM';
+  $('setupView').style.display='none';$('resultView').style.display='none';$('raceView').style.display='block';
+  $('hTime').textContent=dur;$('hWpm').textContent='0';$('hAcc').textContent='100%';$('hWords').textContent='0';
+  $('timeFill').style.width='100%';$('carMe').style.left='6%';$('carGhost').style.left='6%';
+  const inp=$('typeIn');inp.value='';inp.disabled=false;inp.classList.remove('err');
+  renderWords();setTimeout(()=>inp.focus(),50);}
+
+function renderWords(){
+  const box=$('words'),start=R.i,end=Math.min(R.q.length,R.i+(mode==='tamil'?8:14));let h='';
+  const typed=$('typeIn').value;
+  for(let k=start;k<end;k++){const w=R.q[k];
+    if(mode==='tamil'){let tg=esc(w.t);if(k===R.i)tg=charMarks(w.t,typed);
+      h+=`<span class="tw w ${k===R.i?'cur':''}"><span class="tt">${esc(w.ta)}</span><span class="tg">${tg}</span><span class="tm">${esc(w.m)}</span></span>`;}
+    else h+=`<span class="w ${k===R.i?'cur':''}">${k===R.i?charMarks(w.t,typed):esc(w.t)}</span>`;}
+  box.innerHTML=h;}
+function charMarks(target,typed){let h='';for(let c=0;c<target.length;c++){
+  if(c<typed.length)h+=`<span class="c ${typed[c]===target[c]?'ok':'bad'}">${esc(target[c])}</span>`;else h+=esc(target[c]);}
+  if(typed.length>target.length)h+=`<span class="c bad">${esc(typed.slice(target.length))}</span>`;return h;}
+
+function tick(){
+  const el=(Date.now()-R.t0)/1000;R.left=Math.max(0,dur-el);
+  $('hTime').textContent=Math.ceil(R.left);$('timeFill').style.width=(R.left/dur*100)+'%';
+  const wpm=el>0?Math.round(R.correctChars/5/(el/60)):0;$('hWpm').textContent=el>=2?wpm:0;
+  const goalChars=R.goalWpm*5*dur/60;
+  $('carMe').style.left=Math.min(94,6+88*R.correctChars/goalChars)+'%';
+  $('carGhost').style.left=Math.min(94,6+88*el/dur)+'%';
+  if(R.left<=0)endRace(false);}
+
+function commitWord(typed){
+  const w=R.q[R.i];if(!typed.length)return;
+  if(typed===w.t){R.correctChars+=w.t.length+1;R.wordsOk++;}
+  else{R.wordsBad++;const k=w.ta?w.ta+' ('+w.t+')':w.t;R.missed[k]=(R.missed[k]||0)+1;}
+  R.i++;if(R.i>=R.q.length-20)R.q=R.q.concat(buildQueue());
+  $('hWords').textContent=R.wordsOk;updAcc();}
+function updAcc(){$('hAcc').textContent=(R.keys?Math.round(R.goodKeys/R.keys*100):100)+'%';}
+
+$('typeIn').addEventListener('input',e=>{
+  if(!R.running)return;const inp=e.target;let v=inp.value;
+  if(!R.started&&v.length){R.started=true;R.t0=Date.now();R.timer=setInterval(tick,200);}
+  /* count new keystrokes for accuracy */
+  if(v.length>R.prevLen){const tgt=R.q[R.i].t;for(let c=R.prevLen;c<v.length;c++){
+    if(v[c]===' ')continue;R.keys++;if(v[c]===tgt[c])R.goodKeys++;}updAcc();}
+  if(/\s/.test(v)){const parts=v.split(/\s+/);const last=parts.pop();parts.filter(Boolean).forEach(commitWord);
+    v=last;inp.value=v;}
+  R.prevLen=v.length;
+  const tgt=R.q[R.i].t;inp.classList.toggle('err',v.length>0&&!tgt.startsWith(v));
+  renderWords();});
+$('typeIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&R.running){e.preventDefault();
+  const v=e.target.value;if(v){commitWord(v);e.target.value='';R.prevLen=0;e.target.classList.remove('err');renderWords();}}});
+$('words').onclick=()=>$('typeIn').focus();
+$('typeIn').addEventListener('focus',()=>$('words').classList.add('focus'));
+$('typeIn').addEventListener('blur',()=>$('words').classList.remove('focus'));
+$('startBtn').onclick=startRace;
+$('restartBtn').onclick=()=>{clearInterval(R.timer);R.running=false;startRace();};
+$('quitBtn').onclick=()=>endRace(true);
+
+function endRace(aborted){
+  clearInterval(R.timer);if(!R.running)return;R.running=false;$('typeIn').disabled=true;
+  $('raceView').style.display='none';
+  if(aborted||!R.started){$('setupView').style.display='block';renderBest();return;}
+  const wpm=Math.round(R.correctChars/5/(dur/60));
+  const acc=R.keys?Math.round(R.goodKeys/R.keys*100):0;
+  const bk=bestKey(mode,dur),prev=S.best[bk];const beatBest=!!prev&&wpm>prev.wpm;
+  const newRecord=!prev||wpm>prev.wpm;
+  if(newRecord)S.best[bk]={wpm,acc,date:todayStr()};
+  const accFactor=acc>=95?1.5:acc>=85?1:acc>=70?0.6:0.3;
+  const xp=Math.max(1,Math.round((R.wordsOk*accFactor)+(newRecord&&R.wordsOk>=5?20:0)+(dur/30)*2));
+  const lvlBefore=levelFor(S.xp);
+  S.xp+=xp;S.races++;S.modeCount[mode]=(S.modeCount[mode]||0)+1;
+  if(!S.days.includes(todayStr()))S.days.push(todayStr());S.days=S.days.slice(-60);
+  const run={mode,time:dur,wpm,acc,words:R.wordsOk,bad:R.wordsBad,date:todayStr(),beatBest};
+  S.history.unshift(run);S.history=S.history.slice(0,30);
+  const newly=[];BADGES.forEach(b=>{if(!S.badges.includes(b[0])&&b[4](run)){S.badges.push(b[0]);newly.push(b);}});
+  save();renderLevel();const lvlAfter=levelFor(S.xp);
+  const miss=Object.entries(R.missed).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const msg=wpm>=60?'Blazing fast! 🔥':wpm>=40?'Great speed! 💪':wpm>=25?'Nice driving! 👍':'Good start — keep practising! 🌱';
+  $('resultView').innerHTML=`
+    <div style="font-size:14px;color:var(--sub)">${MODE_LABEL[mode]} · ${dur}s</div>
+    <div class="big">${wpm} <span style="font-size:20px">WPM</span></div>
+    <div style="font-weight:700;margin-top:4px">${msg}</div>
+    ${newRecord&&prev?`<div class="newb">🏆 New personal best! (was ${prev.wpm} WPM)</div>`:''}
+    ${!prev?'<div class="newb">🏁 First record set!</div>':''}
+    ${lvlAfter>lvlBefore?`<div class="newb">⬆️ Level up! Level ${lvlAfter} · ${lvlTitle(lvlAfter)}</div>`:''}
+    <div class="rgrid">
+      <div><b style="color:${acc>=95?'var(--green)':acc>=85?'var(--gold)':'var(--red)'}">${acc}%</b><span>Accuracy</span></div>
+      <div><b>${R.wordsOk}</b><span>Correct words</span></div>
+      <div><b style="color:var(--gold)">+${xp}</b><span>XP earned</span></div>
+    </div>
+    ${newly.length?'<div style="margin-bottom:6px">'+newly.map(b=>`<span class="newb">${b[1]} ${b[2]}</span>`).join('')+'</div>':''}
+    ${miss.length?`<div class="miss">Practise these: <b>${miss.map(m=>esc(m[0])).join(', ')}</b></div>`:''}
+    ${acc<85?'<div class="miss">💡 Slow down a little — accuracy gives more XP than speed.</div>':''}
+    <div class="btnrow"><button class="btn" id="againBtn">↻ Race Again</button><button class="btn alt" id="changeBtn">⚙️ Change Mode</button></div>`;
+  $('resultView').style.display='block';
+  $('againBtn').onclick=startRace;
+  $('changeBtn').onclick=()=>{$('resultView').style.display='none';$('setupView').style.display='block';renderBest();};
+  newly.forEach((b,k)=>setTimeout(()=>toast('Badge unlocked: '+b[1]+' '+b[2]),400+k*2800));}
+
+/* ---------------- STATS ---------------- */
+function renderStats(){
+  const bests=Object.entries(S.best);
+  const rows=S.history.slice(0,12).map(h=>`<tr><td>${h.date}</td><td>${MODE_LABEL[h.mode]}</td><td>${h.time}s</td><td><b>${h.wpm}</b></td><td>${h.acc}%</td></tr>`).join('');
+  $('statsBox').innerHTML=`
+    <div class="rgrid" style="margin-top:0">
+      <div><b>${S.races}</b><span>Races</span></div>
+      <div><b>${levelFor(S.xp)}</b><span>Level</span></div>
+      <div><b>${streak()}🔥</b><span>Day streak</span></div>
+    </div>
+    <p class="lbl">Personal bests</p>
+    ${bests.length?'<table><tr><th>Mode</th><th>Time</th><th>WPM</th><th>Acc</th></tr>'+bests.map(([k,v])=>{const [m,t]=k.split('_');
+      return `<tr><td>${MODE_LABEL[m]||m}</td><td>${t}s</td><td><b style="color:var(--gold)">${v.wpm}</b></td><td>${v.acc}%</td></tr>`;}).join('')+'</table>':'<p style="color:var(--sub);font-size:13px">No races yet.</p>'}
+    <p class="lbl" style="margin-top:16px">Recent races</p>
+    ${rows?'<table><tr><th>Date</th><th>Mode</th><th>Time</th><th>WPM</th><th>Acc</th></tr>'+rows+'</table>':'<p style="color:var(--sub);font-size:13px">No races yet.</p>'}
+    <div class="btnrow"><button class="btn alt" id="resetBtn">🗑 Reset my progress</button></div>`;
+  $('resetBtn').onclick=()=>{if(!confirm('Delete all your Type Race progress on this device?'))return;
+    Object.assign(S,{xp:0,races:0,best:{},history:[],badges:[],modeCount:{},days:[]});save();renderLevel();renderStats();renderBest();};}
+
+renderLevel();renderBest();
+})();
+</script>
+</body>
+</html>
