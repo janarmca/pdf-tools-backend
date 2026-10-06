@@ -9,7 +9,7 @@
 -->
 <!DOCTYPE html>
 <html lang="ta">
-<head><script>/* Nesting guard: a missing embedded game file (e.g. typing-race-game.html) makes Cloudflare serve this homepage inside the game's iframe, which then restores the last tool and opens itself again and again. If we're inside an iframe on our own site, stop and show a clear error instead. */(function(){try{if(window.self!==window.top&&window.top.location.origin===location.origin){window.stop();document.documentElement.innerHTML='<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;font-family:system-ui,sans-serif;background:#FDEDEC;color:#7b241c;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;box-sizing:border-box"><div><div style="font-size:40px">⚠️</div><b>Could not load this game — its file is missing on the server.</b><br><span style="font-size:13px">Please try again later.</span></div></body>';}}catch(e){}})();</script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Free PDF Tools Online - All-in-One PDF Converter India | இலவச PDF கருவிகள்</title>
@@ -290,7 +290,7 @@ const TOOLS = [
   {id:'pdf2ppt', name:'PDF → PowerPoint', desc:'Each page becomes one full-size slide image in a .pptx file', icon:'📽️', color:'#C0392B', cat:'pdf'},
   {id:'ppt2pdf', name:'PowerPoint → PDF', desc:'Turns each slide, text and images, into a matching PDF page', icon:'📄', color:'#8E44AD', cat:'pdf'},
   {id:'excel2word', name:'Excel → Word', desc:'Turn .xlsx into a .docx table', icon:'📑', color:'#22795A', cat:'pdf'},
-  {id:'txt2html', name:'Text → HTML', desc:'Turn a .txt file into a clean, readable HTML page — handles large files', icon:'🌐', color:'#455A64', cat:'pdf'},
+  {id:'txt2html', name:'Text → HTML', desc:'Turn .txt file(s) into one clean, readable HTML page — attach several, handles large files', icon:'🌐', color:'#455A64', cat:'pdf'},
   {id:'pdfeditor', name:'PDF Editor', desc:'Add/edit text, images, signatures, shapes — core editing is free', icon:'✏️', color:'#0B5394', cat:'pdf'},
   {id:'pdfform', name:'Fill PDF Form', desc:'Fill AcroForm fields and save', icon:'🖊️', color:'#2E4053', cat:'pdf'},
   {id:'sign', name:'Sign PDF', desc:'Draw your signature and place it', icon:'✍️', color:'#AF3F73', cat:'pdf'},
@@ -330,8 +330,6 @@ const TOOLS = [
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'stmtcompare', name:'Statement Reconciliation', desc:'Compare Buyer vs Supplier statements (PDF/Excel/Text) — find mismatches automatically', icon:'🔍', color:'#B7410E', cat:'business'},
   {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
-  {id:'tnrentagreement', name:'TN Rent Agreement (வாடகை ஒப்பந்தம்)', desc:'Tamil or English tenancy agreement in the TN Tenancy Act 2017 format — print-ready, free', icon:'🏠', color:'#0F3D2E', cat:'business'},
-  {id:'tnsaledeed', name:'TN Sale Deed Draft (கிரைய சாசனம்)', desc:'Sale deed draft with title history, payments, covenants & property schedule — Tamil or English', icon:'📜', color:'#5B3A12', cat:'business'},
   {id:'tnpropertycalc', name:'TN Property Registration Calculator', desc:'Stamp duty & registration fee for Sale, Gift, Settlement, Partition, Mortgage & POA deeds in Tamil Nadu', icon:'🏛️', color:'#0F2A4A', cat:'business'},
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'imgcompresskb', name:'Compress to Target KB', desc:'Compress to a target file size (auto quality search)', icon:'🗜️', color:'#A93226', cat:'image', cost:0},
@@ -366,6 +364,7 @@ const TOOLS = [
   {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:0},
   {id:'videowave', name:'Audio → Waveform Video', desc:'Turn a song/voice into an animated waveform video', icon:'🌊', color:'#0E6655', cat:'video', cost:0},
   {id:'videowatermark', name:'Video Watermark', desc:'Add your logo/text to a video before sharing', icon:'💧', color:'#2980B9', cat:'video'},
+  {id:'videowmremove', name:'Video Watermark Remover', desc:'Draw a box over a logo/watermark and remove it from every frame — free, in your browser', icon:'🧽', color:'#C0392B', cat:'video', cost:0},
   {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:0},
   {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:0},
   {id:'videothumb', name:'Video Thumbnail', desc:'Grab a frame at a chosen time as an image', icon:'🖼️', color:'#2E6F5E', cat:'video', cost:0},
@@ -378,12 +377,9 @@ const TOOLS = [
   {id:'ocr', name:'Image → Text (OCR)', desc:'20+ languages — correct font rendering', icon:'🔎', color:'#1F6F78', cat:'ai', cost:0},
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:2},
-  {id:'healthcheck', name:'Health Check — Find the Real Cause', desc:'Fever, headache, cough, stomach trouble — every angle checked, emergency signs first, Siddha home remedies, which tests to do', icon:'🩺', color:'#0D5C46', cat:'ai', cost:2},
-  {id:'audiototext', name:'Audio / Video → Text', desc:'Transcribe Tamil, English & 90+ languages from MP3, WAV, M4A or video — AI speech-to-text', icon:'🎧', color:'#0E6655', cat:'ai', cost:2},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
-  {id:'kalvi', name:'Kalvi Kalanjiyam — Learn by Understanding (கல்வி களஞ்சியம்)', desc:'Free learning, Class 1–10: Class 1–5 learning games with Mayilu the peacock, Class 9–10 discover-first lessons, Project Coach, Future Thinkers — Tamil + English', icon:'📚', color:'#3B2FC9', cat:'education'},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
@@ -1707,7 +1703,7 @@ function renderToolPanel(toolId){
 // deducts its own 5 credits server-side (see server.js), so the paid-gate
 // must only CHECK affordability (checkOnly:true) instead of also deducting
 // on unlock — otherwise a single image generation cost 10 credits, not 5.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','audiototext','healthcheck']);
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -2931,7 +2927,7 @@ const TOOL_LIBS = {
   // These 5 share renderAiTextAnswer(), which now also offers Word/PDF export
   // (added so a downloaded result reads correctly even without an Indic font
   // installed — a plain .txt can't embed one, but Word/PDF can).
-  aihandwriting:['docx','html2canvas','pdflib'], audiototext:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
+  aihandwriting:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
   aitranslate:['docx','html2canvas','pdflib'], askai:['docx','html2canvas','pdflib'],
   airesume:['docx','html2canvas','pdflib'],
   aiexcelcompare:['xlsx'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
@@ -7039,18 +7035,21 @@ TOOL_IMPL.txt2pdf = {
 /* ===================== TEXT TO HTML ===================== */
 TOOL_IMPL.txt2html = {
   mount(container){
-    let file = null;
+    let files = [];
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Turns a .txt file into a clear, easy-to-read HTML page. Handles very large files too (reads them chunk by chunk) — but very very large files (100MB+) may be slow depending on the device's memory, or may not work on some devices.</div>`));
+      body.appendChild(el(`<div class="note">Turns .txt files into a clear, easy-to-read HTML page. Attach one file, or several — several files are combined into 1 HTML page (each file gets its own heading, in the order shown). Handles very large files too (reads them chunk by chunk) — but very very large files (100MB+) may be slow depending on the device's memory.</div>`));
       mountUploader(body, {
-        accept:'.txt,text/plain',
-        label:'.txt file drag & drop or tap', sublabel:'',
-        onAdd: (fl)=>{ file = fl[0]; paint(); }
+        accept:'.txt,text/plain', multiple:true,
+        label:'.txt file(s) drag & drop or tap', sublabel:'You can attach more than one — all go into 1 HTML',
+        onAdd: (fl)=>{ files = files.concat(fl.filter(f=>/\.txt$/i.test(f.name) || f.type==='text/plain')); paint(); }
       });
-      if(file){
-        mountFileList(body, [file], ()=>{ file=null; paint(); });
+      if(files.length){
+        mountFileList(body, files, (i)=>{ files.splice(i,1); paint(); }, (i,d)=>{
+          const j=i+d; if(j<0||j>=files.length) return;
+          [files[i],files[j]]=[files[j],files[i]]; paint();
+        });
         const opts = el(`
           <div class="opts one">
             <div class="field">
@@ -7064,7 +7063,7 @@ TOOL_IMPL.txt2html = {
         `);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn">🌐 Convert to HTML</button>`);
+        const btn = el(`<button class="btn">🌐 Convert to HTML${files.length>1?' (all '+files.length+' files → 1 page)':''}</button>`);
         btn.onclick = doConvert;
         row.appendChild(btn);
         body.appendChild(row);
@@ -7077,41 +7076,43 @@ TOOL_IMPL.txt2html = {
       const prog = mountProgress(body);
       try{
         prog.set(5,'Reading…');
-        // Read the file in chunks via a stream rather than file.text() (which
-        // loads the entire file into one giant string at once) — chunked
-        // reading + building the output as an ARRAY of pieces (joined into
-        // the Blob at the end, never concatenated into one huge string in
-        // memory) is genuinely more memory-efficient for very large files,
-        // since the browser can manage the pieces separately instead of
-        // needing one contiguous multi-hundred-MB string.
-        const CHUNK_TARGET = 4 * 1024 * 1024; // ~4MB text per chunk before HTML-escaping
-        const reader = file.stream().getReader();
-        const decoder = new TextDecoder('utf-8');
+        // Each file is read in chunks via a stream (not file.text()) and the
+        // output is kept as an ARRAY of pieces joined into the Blob at the end,
+        // so very large files never need one giant contiguous string.
+        const CHUNK_TARGET = 4 * 1024 * 1024;
+        const multi = files.length > 1;
+        const baseName = f => f.name.replace(/\.txt$/i,'');
+        const title = multi ? 'Combined text files' : baseName(files[0]);
         const htmlParts = [];
-        htmlParts.push(`<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>${escapeHtml(file.name.replace(/\.txt$/i,''))}</title>\n<style>body{font-family:${fontStack}; max-width:900px; margin:24px auto; padding:0 16px; line-height:1.6; color:#1a1a1a; white-space:pre-wrap; word-wrap:break-word;}</style>\n</head><body>`);
-        let pending = '';
-        let totalBytesRead = 0;
-        const fileSize = file.size || 1;
-        while(true){
-          const { done, value } = await reader.read();
-          if(done) break;
-          totalBytesRead += value.length;
-          prog.set(5 + (totalBytesRead/fileSize)*80, `Reading… ${(totalBytesRead/1048576).toFixed(1)}MB`);
-          pending += decoder.decode(value, {stream:true});
-          if(pending.length >= CHUNK_TARGET){
-            htmlParts.push(escapeHtml(pending));
-            pending = '';
+        htmlParts.push(`<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title>\n<style>body{font-family:${fontStack}; max-width:900px; margin:24px auto; padding:0 16px; line-height:1.6; color:#1a1a1a;} .t2h-text{white-space:pre-wrap; word-wrap:break-word;} h2.t2h-h{font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:18px; margin:32px 0 8px; padding-bottom:6px; border-bottom:2px solid #455A64; color:#455A64;}</style>\n</head><body>`);
+        const totalSize = files.reduce((n,f)=>n+(f.size||0),0) || 1;
+        let doneBytes = 0;
+        for(let fi=0; fi<files.length; fi++){
+          const f = files[fi];
+          if(multi) htmlParts.push(`<h2 class="t2h-h">${escapeHtml(f.name)}</h2>`);
+          htmlParts.push(`<div class="t2h-text">`);
+          const reader = f.stream().getReader();
+          const decoder = new TextDecoder('utf-8');
+          let pending = '';
+          while(true){
+            const { done, value } = await reader.read();
+            if(done) break;
+            doneBytes += value.length;
+            prog.set(5 + (doneBytes/totalSize)*80, `Reading… ${(doneBytes/1048576).toFixed(1)}MB${multi?' (file '+(fi+1)+'/'+files.length+')':''}`);
+            pending += decoder.decode(value, {stream:true});
+            if(pending.length >= CHUNK_TARGET){ htmlParts.push(escapeHtml(pending)); pending = ''; }
           }
+          pending += decoder.decode();
+          if(pending) htmlParts.push(escapeHtml(pending));
+          htmlParts.push(`</div>`);
         }
-        pending += decoder.decode(); // flush any remaining bytes from the decoder
-        if(pending) htmlParts.push(escapeHtml(pending));
         htmlParts.push(`</body></html>`);
         prog.set(90,'Preparing HTML…');
         const blob = new Blob(htmlParts, {type:'text/html'});
         prog.set(100,'Done');
-        downloadBlob(blob, file.name.replace(/\.txt$/i,'')+'.html');
+        downloadBlob(blob, (multi ? 'combined-text' : baseName(files[0]))+'.html');
         prog.remove();
-        mountResult(body, `HTML file ready (${(blob.size/1048576).toFixed(2)}MB).`);
+        mountResult(body, `HTML file ready (${(blob.size/1048576).toFixed(2)}MB)${multi?' — '+files.length+' files combined.':'.'}`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — the file may be too large for the device\'s memory.').style.background='#FDEDEC'; }
     }
   }
@@ -8389,6 +8390,358 @@ TOOL_IMPL.videoreverse = {
         mountResult(body, 'Reversed video downloaded.');
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
       finally{ if(ffmpegRef && progHandler){ try{ ffmpegRef.off('progress', progHandler); }catch(e){} } }
+    }
+    paint();
+  }
+};
+
+/* ===================== VIDEO WATERMARK REMOVER ===================== */
+// Free, runs fully in the browser (ffmpeg.wasm). Uses FFmpeg's open-source `delogo`
+// interpolation filter (fills the box from the surrounding pixels, every frame), plus
+// blur / pixelate / crop alternatives. Several boxes, each with its own time range,
+// so a watermark that moves or appears only for part of the clip can be covered too.
+TOOL_IMPL.videowmremove = {
+  mount(container){
+    ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
+    const MAX_REGIONS = 6;
+    let file = null, videoUrl = null, vw = 0, vh = 0, dur = 0;
+    let regions = [];            // {x,y,w,h} normalized 0..1, plus from/to (seconds, '' = whole video)
+    let inputWrittenFor = null;  // File object currently copied into the ffmpeg virtual FS
+    let inputName = 'wm_in.mp4';
+    let busy = false;
+    const body = el(`<div></div>`); container.appendChild(body);
+
+    function fmtTime(s){ s = Math.max(0, s||0); const m = Math.floor(s/60); const r = s - m*60; return m + ':' + (r<10?'0':'') + r.toFixed(1); }
+    function evenFloor(n){ return n - (n % 2); }
+
+    async function freeInput(){
+      if(!inputWrittenFor) return;
+      inputWrittenFor = null;
+      try{ const { ffmpeg } = await ensureFFmpeg(); await ffmpeg.deleteFile(inputName); }catch(e){}
+    }
+
+    function paint(){
+      if(videoUrl){ try{ URL.revokeObjectURL(videoUrl); }catch(e){} videoUrl = null; }
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note">Draw a box over the watermark / logo, then tap <b>Remove watermark</b>. The area is rebuilt from the pixels around it, frame by frame. Works best on small, fixed logos and text. <b>Moving watermark?</b> Add several boxes and set each box's time range. Use only on videos you own or have permission to edit.</div>`));
+      mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
+        onAdd:(fl)=>{ freeInput(); file = fl[0]; regions = []; paint(); } });
+      if(!file) return;
+      mountFileList(body, [file], ()=>{ freeInput(); file = null; regions = []; paint(); });
+      videoUrl = URL.createObjectURL(file);
+
+      const stage = el(`
+        <div class="wmr-stage" style="position:relative; line-height:0; margin:8px auto 6px; border-radius:10px; overflow:hidden; background:#000; touch-action:none; user-select:none; -webkit-user-select:none;">
+          <video playsinline muted preload="metadata" style="width:100%; display:block;"></video>
+          <div class="wmr-ov" style="position:absolute; inset:0; cursor:crosshair; touch-action:none;"></div>
+        </div>`);
+      body.appendChild(stage);
+      const video = stage.querySelector('video');
+      const ov = stage.querySelector('.wmr-ov');
+      video.src = videoUrl;
+
+      const ctrl = el(`
+        <div style="display:flex; align-items:center; gap:8px; margin:0 0 6px;">
+          <button type="button" class="btn secondary wmr-pp" style="padding:6px 12px; min-width:44px;">▶</button>
+          <input type="range" class="wmr-seek" min="0" max="1000" value="0" style="flex:1;">
+          <span class="wmr-tm" style="font-size:12px; font-weight:700; white-space:nowrap;">0:00.0</span>
+        </div>`);
+      body.appendChild(ctrl);
+      const pp = ctrl.querySelector('.wmr-pp'), seek = ctrl.querySelector('.wmr-seek'), tm = ctrl.querySelector('.wmr-tm');
+      let seeking = false;
+      pp.onclick = ()=>{ if(video.paused) video.play().catch(()=>{}); else video.pause(); };
+      video.addEventListener('play', ()=>{ pp.textContent = '⏸'; });
+      video.addEventListener('pause', ()=>{ pp.textContent = '▶'; });
+      video.addEventListener('timeupdate', ()=>{
+        if(!seeking && dur) seek.value = Math.round(video.currentTime/dur*1000);
+        tm.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(dur);
+      });
+      seek.addEventListener('input', ()=>{ seeking = true; if(dur){ video.currentTime = seek.value/1000*dur; } });
+      seek.addEventListener('change', ()=>{ seeking = false; });
+      video.addEventListener('loadedmetadata', ()=>{
+        vw = video.videoWidth; vh = video.videoHeight; dur = video.duration || 0;
+        if(vh > vw){ stage.style.maxWidth = '340px'; } // tall phone videos: keep the box a sensible size
+        tm.textContent = fmtTime(0) + ' / ' + fmtTime(dur);
+      });
+      video.addEventListener('error', ()=>{ mountResult(body, 'This browser cannot preview this video format — you can still process it, but the box can only be placed on a playable preview. Try an MP4 file.').style.background = '#FDEDEC'; });
+
+      body.appendChild(el(`<div class="note" style="margin-top:2px;">👆 Drag on the video to draw a box. Drag a box to move it, drag its white corner to resize. Scrub to a frame where the watermark is clearly visible.</div>`));
+      const listWrap = el(`<div class="wmr-list" style="margin:6px 0;"></div>`);
+      body.appendChild(listWrap);
+
+      // ---------- region drawing / moving / resizing ----------
+      const clamp01 = v => Math.min(1, Math.max(0, v));
+      let drag = null;
+      function pt(e){ const r = ov.getBoundingClientRect(); return { x: clamp01((e.clientX - r.left)/r.width), y: clamp01((e.clientY - r.top)/r.height) }; }
+      ov.addEventListener('pointerdown', (e)=>{
+        if(busy) return;
+        const p = pt(e);
+        const h = e.target.closest('[data-h]'), b = e.target.closest('[data-i]');
+        if(h){ drag = { mode:'resize', i:Number(h.getAttribute('data-h')) }; }
+        else if(b){ const i = Number(b.getAttribute('data-i')); drag = { mode:'move', i, dx:p.x - regions[i].x, dy:p.y - regions[i].y }; }
+        else{
+          if(regions.length >= MAX_REGIONS){ showToastSafe('Maximum '+MAX_REGIONS+' boxes — delete one first.'); return; }
+          regions.push({ x:p.x, y:p.y, w:0, h:0, from:'', to:'' });
+          drag = { mode:'draw', i:regions.length-1, sx:p.x, sy:p.y };
+        }
+        try{ ov.setPointerCapture(e.pointerId); }catch(err){}
+        e.preventDefault();
+      });
+      ov.addEventListener('pointermove', (e)=>{
+        if(!drag) return;
+        const p = pt(e), r = regions[drag.i];
+        if(drag.mode === 'draw'){ r.x = Math.min(drag.sx, p.x); r.y = Math.min(drag.sy, p.y); r.w = Math.abs(p.x - drag.sx); r.h = Math.abs(p.y - drag.sy); }
+        else if(drag.mode === 'move'){ r.x = Math.min(1 - r.w, Math.max(0, p.x - drag.dx)); r.y = Math.min(1 - r.h, Math.max(0, p.y - drag.dy)); }
+        else if(drag.mode === 'resize'){ r.w = Math.max(0.01, p.x - r.x); r.h = Math.max(0.01, p.y - r.y); }
+        renderOverlay();
+      });
+      function endDrag(){
+        if(!drag) return;
+        const r = regions[drag.i];
+        if(drag.mode === 'draw' && (r.w < 0.01 || r.h < 0.01)) regions.splice(drag.i, 1);
+        drag = null; renderRegions();
+      }
+      ov.addEventListener('pointerup', endDrag);
+      ov.addEventListener('pointercancel', endDrag);
+
+      function renderOverlay(){
+        ov.innerHTML = '';
+        regions.forEach((r, i)=>{
+          const b = document.createElement('div');
+          b.setAttribute('data-i', i);
+          b.style.cssText = `position:absolute; left:${r.x*100}%; top:${r.y*100}%; width:${r.w*100}%; height:${r.h*100}%; border:2px solid #FF3B30; background:rgba(255,59,48,.18); box-sizing:border-box; cursor:move;`;
+          b.innerHTML = `<span style="position:absolute; left:0; top:0; background:#FF3B30; color:#fff; font:700 11px/1 sans-serif; padding:3px 6px;">${i+1}</span><i data-h="${i}" style="position:absolute; right:0; bottom:0; width:22px; height:22px; background:#fff; border:2px solid #FF3B30; box-sizing:border-box; cursor:nwse-resize;"></i>`;
+          ov.appendChild(b);
+        });
+      }
+      function renderRegions(){
+        renderOverlay();
+        listWrap.innerHTML = '';
+        if(!regions.length){ listWrap.appendChild(el(`<div style="font-size:12.5px; color:#8a8f98; padding:4px 0;">No box yet — draw one over the watermark.</div>`)); return; }
+        regions.forEach((r, i)=>{
+          const row = el(`
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:6px 8px; margin-bottom:6px; background:#F7F8FA; border:1px solid #E6E8EC; border-radius:10px; font-size:12.5px;">
+              <b style="background:#FF3B30; color:#fff; border-radius:6px; padding:2px 7px;">${i+1}</b>
+              <span>Visible from</span>
+              <input type="number" min="0" step="0.1" placeholder="start" data-f="${i}" value="${r.from}" style="width:64px; padding:5px;">
+              <button type="button" data-fn="${i}" class="btn secondary" style="padding:4px 8px; font-size:11px;">now</button>
+              <span>to</span>
+              <input type="number" min="0" step="0.1" placeholder="end" data-t="${i}" value="${r.to}" style="width:64px; padding:5px;">
+              <button type="button" data-tn="${i}" class="btn secondary" style="padding:4px 8px; font-size:11px;">now</button>
+              <span style="color:#8a8f98;">sec (empty = whole video)</span>
+              <button type="button" data-del="${i}" class="btn secondary" style="margin-left:auto; padding:4px 10px;">✕</button>
+            </div>`);
+          listWrap.appendChild(row);
+        });
+      }
+      listWrap.addEventListener('input', (e)=>{
+        const f = e.target.getAttribute('data-f'), t = e.target.getAttribute('data-t');
+        if(f !== null) regions[Number(f)].from = e.target.value;
+        if(t !== null) regions[Number(t)].to = e.target.value;
+      });
+      listWrap.addEventListener('click', (e)=>{
+        const d = e.target.closest('[data-del]'), fn = e.target.closest('[data-fn]'), tn = e.target.closest('[data-tn]');
+        if(d){ regions.splice(Number(d.getAttribute('data-del')), 1); renderRegions(); }
+        else if(fn){ regions[Number(fn.getAttribute('data-fn'))].from = video.currentTime.toFixed(1); renderRegions(); }
+        else if(tn){ regions[Number(tn.getAttribute('data-tn'))].to = video.currentTime.toFixed(1); renderRegions(); }
+      });
+      renderRegions();
+
+      // ---------- options ----------
+      const opts = el(`
+        <div class="opts">
+          <div class="field">
+            <label>How to remove it</label>
+            <select id="wmrMethod">
+              <option value="delogo">✨ Smart fill — best for logos & text (recommended)</option>
+              <option value="blur">🌫️ Blur the area</option>
+              <option value="pixelate">🔲 Pixelate the area</option>
+              <option value="crop">✂️ Crop out (watermark near an edge)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Extra margin around box (px)</label>
+            <input type="number" id="wmrMargin" min="0" max="40" step="1" value="4">
+          </div>
+          <div class="field">
+            <label>Quality</label>
+            <select id="wmrQuality">
+              <option value="18">High (bigger file, slower)</option>
+              <option value="22" selected>Balanced</option>
+              <option value="26">Small file (faster)</option>
+            </select>
+          </div>
+          <div class="field" id="wmrZoomWrap" style="display:none;">
+            <label><input type="checkbox" id="wmrZoom" checked> Zoom back to the original frame size</label>
+          </div>
+        </div>`);
+      body.appendChild(opts);
+      const methodSel = opts.querySelector('#wmrMethod');
+      methodSel.addEventListener('change', ()=>{ opts.querySelector('#wmrZoomWrap').style.display = methodSel.value === 'crop' ? '' : 'none'; });
+
+      const row = el(`<div class="btn-row"></div>`);
+      const prevBtn = el(`<button class="btn secondary">👁️ Preview this frame</button>`);
+      const goBtn = el(`<button class="btn">💧 Remove watermark</button>`);
+      prevBtn.onclick = doPreview; goBtn.onclick = doRemove;
+      row.appendChild(prevBtn); row.appendChild(goBtn);
+      body.appendChild(row);
+      body.appendChild(el(`<div class="wmr-out"></div>`));
+
+      function currentVideoTime(){ return video.currentTime || 0; }
+      body.__wmrTime = currentVideoTime;
+    }
+
+    function showToastSafe(msg){ try{ if(typeof showToast === 'function') showToast(msg); }catch(e){} }
+
+    // ---------- ffmpeg graph building ----------
+    function pxRects(margin){
+      const out = [];
+      regions.forEach(r=>{
+        let x1 = Math.floor(r.x*vw) - margin, y1 = Math.floor(r.y*vh) - margin;
+        let x2 = Math.ceil((r.x+r.w)*vw) + margin, y2 = Math.ceil((r.y+r.h)*vh) + margin;
+        x1 = Math.max(2, x1); y1 = Math.max(2, y1); x2 = Math.min(vw-2, x2); y2 = Math.min(vh-2, y2);
+        x1 = Math.max(2, evenFloor(x1)); y1 = Math.max(2, evenFloor(y1));
+        const w = evenFloor(x2 - x1), h = evenFloor(y2 - y1);
+        if(w >= 4 && h >= 4) out.push({ x:x1, y:y1, w, h, from:parseFloat(r.from), to:parseFloat(r.to) });
+      });
+      return out;
+    }
+    function enableOpt(r, ignoreTime){
+      if(ignoreTime) return '';
+      const hasF = isFinite(r.from), hasT = isFinite(r.to);
+      if(!hasF && !hasT) return '';
+      return `:enable='between(t,${hasF ? r.from : 0},${hasT ? r.to : 999999})'`;
+    }
+    // Returns {kind:'vf'|'fc', graph}
+    function buildGraph(method, margin, zoomBack, ignoreTime){
+      const rects = pxRects(margin);
+      if(!rects.length) throw new Error('Draw a box over the watermark first.');
+      if(method === 'delogo'){
+        return { kind:'vf', graph: rects.map(r=>`delogo=x=${r.x}:y=${r.y}:w=${r.w}:h=${r.h}${enableOpt(r, ignoreTime)}`).join(',') };
+      }
+      if(method === 'crop'){
+        let l = 0, t = 0, rr = vw, b = vh;
+        rects.forEach(r=>{
+          const dl = r.x, dr = vw - (r.x + r.w), dt = r.y, db = vh - (r.y + r.h);
+          const m = Math.min(dl, dr, dt, db);
+          if(m === dl) l = Math.max(l, r.x + r.w);
+          else if(m === dr) rr = Math.min(rr, r.x);
+          else if(m === dt) t = Math.max(t, r.y + r.h);
+          else b = Math.min(b, r.y);
+        });
+        l += l % 2; t += t % 2; rr = evenFloor(rr); b = evenFloor(b);
+        const cw = rr - l, ch = b - t;
+        if(cw < 16 || ch < 16) throw new Error('Cropping that much would leave almost nothing — use Smart fill or Blur instead.');
+        let g = `crop=${cw}:${ch}:${l}:${t}`;
+        if(zoomBack) g += `,scale=${vw}:${vh}:force_original_aspect_ratio=increase,crop=${vw}:${vh},setsar=1`;
+        return { kind:'vf', graph: g };
+      }
+      // blur / pixelate: crop the region, obscure it, overlay it back (per-box time range supported)
+      let cur = '0:v', parts = [];
+      rects.forEach((r, i)=>{
+        const inner = method === 'blur'
+          ? `gblur=sigma=${Math.max(8, Math.round(Math.min(r.w, r.h)/4))}:steps=2`
+          : `scale=${Math.max(2, Math.round(r.w/10))}:${Math.max(2, Math.round(r.h/10))}:flags=area,scale=${r.w}:${r.h}:flags=neighbor`;
+        parts.push(`[${cur}]split=2[b${i}][s${i}]`);
+        parts.push(`[s${i}]crop=${r.w}:${r.h}:${r.x}:${r.y},${inner}[p${i}]`);
+        const out = i === rects.length - 1 ? 'vout' : 'v' + (i+1);
+        parts.push(`[b${i}][p${i}]overlay=x=${r.x}:y=${r.y}${enableOpt(r, ignoreTime)}[${out}]`);
+        cur = out;
+      });
+      return { kind:'fc', graph: parts.join(';') };
+    }
+    function graphArgs(g, withAudio){ return g.kind === 'vf' ? ['-vf', g.graph] : ['-filter_complex', g.graph, '-map', '[vout]'].concat(withAudio ? ['-map', '0:a?'] : []); }
+
+    async function ensureInput(ffmpeg, fetchFile, prog){
+      if(inputWrittenFor === file) return;
+      if(inputWrittenFor){ try{ await ffmpeg.deleteFile(inputName); }catch(e){} inputWrittenFor = null; }
+      const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g,'') || 'mp4';
+      inputName = 'wm_in.' + ext;
+      if(prog) prog.set(8, 'Reading video…');
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      inputWrittenFor = file;
+    }
+    function readOpts(){
+      return {
+        method: body.querySelector('#wmrMethod').value,
+        margin: Math.min(40, Math.max(0, parseInt(body.querySelector('#wmrMargin').value, 10) || 0)),
+        crf: body.querySelector('#wmrQuality').value,
+        zoomBack: body.querySelector('#wmrZoom').checked
+      };
+    }
+    function attachLog(ffmpeg, lines){
+      const h = ({message})=>{ lines.push(message); if(lines.length > 40) lines.shift(); };
+      ffmpeg.on('log', h); return ()=>{ try{ ffmpeg.off('log', h); }catch(e){} };
+    }
+    function setBusy(v){ busy = v; body.querySelectorAll('.btn-row .btn').forEach(b=>{ b.disabled = v; b.style.opacity = v ? .6 : 1; }); }
+
+    // ---------- single-frame preview ----------
+    async function doPreview(){
+      if(busy) return;
+      const out = body.querySelector('.wmr-out'); out.innerHTML = '';
+      const prog = mountProgress(out);
+      const logs = []; let unlog = null;
+      try{
+        setBusy(true);
+        const o = readOpts();
+        const graph = buildGraph(o.method, o.margin, o.zoomBack, true); // preview shows every box regardless of time range
+        prog.set(3, 'Loading video engine…');
+        const { ffmpeg, fetchFile } = await ensureFFmpeg();
+        unlog = attachLog(ffmpeg, logs);
+        await ensureInput(ffmpeg, fetchFile, prog);
+        prog.set(70, 'Rendering preview…');
+        const t = Math.min(Math.max(0, (body.__wmrTime ? body.__wmrTime() : 0)), Math.max(0, dur - 0.05));
+        try{ await ffmpeg.deleteFile('wm_prev.png'); }catch(e){}
+        const code = await ffmpeg.exec(['-y','-ss', t.toFixed(2), '-i', inputName, ...graphArgs(graph, false), '-an', '-frames:v','1','wm_prev.png']);
+        if(code !== 0) throw new Error('Preview failed (' + (logs.slice(-2).join(' ').slice(0,160) || 'unknown') + ')');
+        const data = await ffmpeg.readFile('wm_prev.png');
+        try{ await ffmpeg.deleteFile('wm_prev.png'); }catch(e){}
+        const url = URL.createObjectURL(new Blob([data], {type:'image/png'}));
+        prog.remove();
+        out.appendChild(el(`<div style="margin:8px 0;"><div style="font-size:12.5px; font-weight:700; margin-bottom:4px;">Preview at ${fmtTime(t)} — still visible? Enlarge the box or raise the margin.</div><img src="${url}" style="width:100%; border-radius:10px; border:1px solid #E6E8EC;"></div>`));
+      }catch(err){ prog.remove(); mountResult(out, 'Error: ' + err.message).style.background = '#FDEDEC'; }
+      finally{ if(unlog) unlog(); setBusy(false); }
+    }
+
+    // ---------- full removal ----------
+    async function doRemove(){
+      if(busy) return;
+      const out = body.querySelector('.wmr-out'); out.innerHTML = '';
+      const prog = mountProgress(out);
+      const logs = []; let unlog = null, progHandler = null, ffmpegRef = null;
+      try{
+        setBusy(true);
+        const o = readOpts();
+        const graph = buildGraph(o.method, o.margin, o.zoomBack, false);
+        prog.set(3, 'Loading video engine…');
+        const { ffmpeg, fetchFile } = await ensureFFmpeg();
+        ffmpegRef = ffmpeg; unlog = attachLog(ffmpeg, logs);
+        await ensureInput(ffmpeg, fetchFile, prog);
+        progHandler = ({progress})=>{ const p = Math.min(1, Math.max(0, progress || 0)); prog.set(12 + p*78, 'Removing watermark… ' + Math.round(p*100) + '%'); };
+        ffmpeg.on('progress', progHandler);
+        prog.set(12, 'Removing watermark…');
+        const baseArgs = ['-y','-i', inputName, ...graphArgs(graph, true), '-c:v','libx264','-preset','veryfast','-crf', o.crf, '-pix_fmt','yuv420p'];
+        try{ await ffmpeg.deleteFile('wm_out.mp4'); }catch(e){}
+        let code = await ffmpeg.exec([...baseArgs, '-c:a','copy','-movflags','+faststart','wm_out.mp4']);
+        if(code !== 0){ // audio codec not allowed inside .mp4 — re-encode just the audio
+          try{ await ffmpeg.deleteFile('wm_out.mp4'); }catch(e){}
+          code = await ffmpeg.exec([...baseArgs, '-c:a','aac','-b:a','160k','-movflags','+faststart','wm_out.mp4']);
+        }
+        if(code !== 0) throw new Error('Could not process this video (' + (logs.slice(-2).join(' ').slice(0,160) || 'unknown') + ')');
+        prog.set(94, 'Preparing file…');
+        const data = await ffmpeg.readFile('wm_out.mp4');
+        try{ await ffmpeg.deleteFile('wm_out.mp4'); }catch(e){}
+        const name = file.name.replace(/\.[^.]+$/, '') + '-no-watermark.mp4';
+        const blob = new Blob([data], {type:'video/mp4'});
+        downloadBlob(blob, name);
+        prog.set(100, 'Done'); prog.remove();
+        mountResult(out, `Done — ${name} (${(blob.size/1048576).toFixed(1)}MB) downloaded. Check the result; if a trace remains, enlarge the box or raise the margin and run again.`);
+        await freeInput();
+      }catch(err){ prog.remove(); mountResult(out, 'Error: ' + err.message).style.background = '#FDEDEC'; }
+      finally{
+        if(ffmpegRef && progHandler){ try{ ffmpegRef.off('progress', progHandler); }catch(e){} }
+        if(unlog) unlog(); setBusy(false);
+      }
     }
     paint();
   }
@@ -11084,98 +11437,6 @@ function mountAiUploadTool(container, config){
   }
   paint();
 }
-
-/* ===================== AUDIO / VIDEO → TEXT (NVIDIA Whisper) =====================
-   Uploads the audio/video to /api/ai/transcribe (server converts it with
-   ffmpeg and sends it to NVIDIA's hosted Whisper Large-v3 over gRPC).
-   Cost: 2 credits per started 5 minutes (charged server-side, refunded on
-   failure), max 30 minutes / 60 MB per file. */
-TOOL_IMPL.audiototext = {
-  mount(container){
-    let file = null, durationSec = 0;
-    const MAX_MB = 60, MAX_SEC = 30*60;
-    const body = el(`<div></div>`); container.appendChild(body);
-    const costFor = (sec)=> Math.max(2, Math.ceil((sec||1)/300)*2);
-    function readDuration(f){
-      return new Promise(resolve=>{
-        const url = URL.createObjectURL(f);
-        const m = document.createElement(f.type.startsWith('video/') ? 'video' : 'audio');
-        m.preload = 'metadata';
-        const done = (d)=>{ URL.revokeObjectURL(url); resolve(Number.isFinite(d) ? d : 0); };
-        m.onloadedmetadata = ()=> done(m.duration);
-        m.onerror = ()=> done(0);
-        setTimeout(()=> done(m.duration), 8000);
-        m.src = url;
-      });
-    }
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Upload a voice recording, song, meeting, WhatsApp voice note or video — AI writes out everything that is said. Works for Tamil, English, Hindi and 90+ languages. Cost: 2 credits per 5 minutes of audio (max 30 minutes, ${MAX_MB} MB).</div>`));
-      mountUploader(body, { accept:'audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.opus,.flac,.amr,.webm,.mp4,.mov,.mkv', label:'Drop an audio or video file', sublabel:'MP3 / WAV / M4A / OGG / OPUS / MP4 / MOV',
-        onAdd: async (fl)=>{
-          file = fl[0];
-          durationSec = await readDuration(file);
-          paint();
-        }});
-      if(!file) return;
-      mountFileList(body, [file], ()=>{ file=null; durationSec=0; paint(); });
-      const tooBig = file.size > MAX_MB*1024*1024, tooLong = durationSec > MAX_SEC;
-      const mins = durationSec ? `${Math.floor(durationSec/60)}m ${Math.round(durationSec%60)}s` : 'unknown length';
-      body.appendChild(el(`<div class="note" style="margin-top:10px;">Length: <b>${mins}</b> · Cost: <b>${costFor(durationSec)} credits</b>${tooBig?`<br>⚠️ File is larger than ${MAX_MB} MB — please trim or compress it first.`:''}${tooLong?'<br>⚠️ Longer than 30 minutes — please split it into parts.':''}</div>`));
-      body.appendChild(el(`<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-        <label style="flex:1; min-width:160px; font-size:12.5px; font-weight:700;">Spoken language
-          <select id="attLang" style="width:100%; margin-top:4px;">
-            <option value="multi">Auto-detect</option>
-            <option value="ta">Tamil</option>
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-            <option value="te">Telugu</option>
-            <option value="ml">Malayalam</option>
-            <option value="kn">Kannada</option>
-          </select></label>
-        <label style="flex:1; min-width:160px; font-size:12.5px; font-weight:700;">Output
-          <select id="attTask" style="width:100%; margin-top:4px;">
-            <option value="transcribe">Same language (transcribe)</option>
-            <option value="translate">Translate to English</option>
-          </select></label>
-      </div>`));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🎧 Convert to Text</button>`);
-      if(tooBig || tooLong) btn.disabled = true;
-      btn.onclick = run;
-      row.appendChild(btn); body.appendChild(row);
-      body.appendChild(el(`<div id="aiAnswerHolder"></div>`));
-    }
-    async function run(){
-      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body,'Please sign in to use this AI feature.').style.background='#FDEDEC'; return; }
-      const answerHolder = body.querySelector('#aiAnswerHolder');
-      answerHolder.innerHTML = '';
-      const cost = costFor(durationSec);
-      const ok = await confirmCreditSpend(answerHolder, cost + ' credits');
-      if(!ok) return;
-      const prog = mountProgress(body);
-      try{
-        prog.set(15, 'Uploading…');
-        const form = new FormData();
-        form.append('file', file);
-        form.append('language', body.querySelector('#attLang').value);
-        form.append('task', body.querySelector('#attTask').value);
-        form.append('toolId', 'audiototext');
-        const t = setTimeout(()=> prog.set(55, 'Listening & writing… (about 10–30 seconds per minute of audio)'), 2500);
-        const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/transcribe', {
-          method:'POST', headers:{ Authorization:'Bearer '+authState.session.access_token }, body: form
-        }, { retry:false });
-        clearTimeout(t);
-        if(result.error) throw new Error(result.error);
-        prog.set(100,'Done'); prog.remove();
-        renderAiTextAnswer(answerHolder, result.text, (file.name||'audio').replace(/\.[^.]+$/,'') + '-transcript');
-        updateCreditsBadgeInline();
-        refreshProfile();
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+friendlyErrorMessage(err)).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
 
 /* ===================== ASK AI ABOUT DOCUMENT ===================== */
 TOOL_IMPL.askai = {
@@ -14119,10 +14380,6 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
-TOOL_IMPL.kalvi = { mount(container){ mountEmbeddedTool(container, 'learn/', 'Kalvi Kalanjiyam'); } };
-TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, 'tn-rent-agreement.html', 'TN Rent Agreement'); } };
-TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, 'tn-sale-deed.html', 'TN Sale Deed Draft'); } };
-TOOL_IMPL.healthcheck = { mount(container){ mountEmbeddedTool(container, 'health-check.html', 'Health Check', true); } };
 TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
 
 render();
