@@ -8398,21 +8398,50 @@ TOOL_IMPL.videoreverse = {
 /* ===================== VIDEO WATERMARK REMOVER ===================== */
 // Free, runs fully in the browser (ffmpeg.wasm). Uses FFmpeg's open-source `delogo`
 // interpolation filter (fills the box from the surrounding pixels, every frame), plus
-// blur / pixelate / crop alternatives. Several boxes, each with its own time range,
-// so a watermark that moves or appears only for part of the clip can be covered too.
+// blur / pixelate / crop alternatives.
+//   • Plain boxes, each with its own optional time range (still logos, logos that appear for part of the clip).
+//   • "Track" boxes: scrub the video, drag the box onto the moving watermark — every drag sets a
+//     keyframe; between keyframes the box moves/resizes smoothly (running text, bouncing logos, zooming text).
 TOOL_IMPL.videowmremove = {
   mount(container){
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
-    const MAX_REGIONS = 6;
+    const MAX_REGIONS = 16;
     let file = null, videoUrl = null, vw = 0, vh = 0, dur = 0;
-    let regions = [];            // {x,y,w,h} normalized 0..1, plus from/to (seconds, '' = whole video)
+    // region: {x,y,w,h} normalized 0..1, from/to seconds ('' = whole video),
+    //         track:boolean, kf:[{t,x,y,w,h}] sorted by t (only used when track)
+    let regions = [];
     let inputWrittenFor = null;  // File object currently copied into the ffmpeg virtual FS
     let inputName = 'wm_in.mp4';
     let busy = false;
+    let curT = ()=>0;            // set in paint(): current preview time
     const body = el(`<div></div>`); container.appendChild(body);
 
     function fmtTime(s){ s = Math.max(0, s||0); const m = Math.floor(s/60); const r = s - m*60; return m + ':' + (r<10?'0':'') + r.toFixed(1); }
     function evenFloor(n){ return n - (n % 2); }
+    const clamp01 = v => Math.min(1, Math.max(0, v));
+    function showToastSafe(msg){ try{ if(typeof showToast === 'function') showToast(msg); }catch(e){} }
+
+    // ---------- keyframe helpers ----------
+    function boxAt(r, t){
+      if(!r.track || !r.kf.length) return { x:r.x, y:r.y, w:r.w, h:r.h };
+      const k = r.kf;
+      if(t <= k[0].t || k.length === 1) return { x:k[0].x, y:k[0].y, w:k[0].w, h:k[0].h };
+      if(t >= k[k.length-1].t){ const L = k[k.length-1]; return { x:L.x, y:L.y, w:L.w, h:L.h }; }
+      for(let j = 0; j < k.length - 1; j++){
+        if(t >= k[j].t && t <= k[j+1].t){
+          const f = (t - k[j].t) / ((k[j+1].t - k[j].t) || 1);
+          const L = (a, b) => a + (b - a)*f;
+          return { x:L(k[j].x, k[j+1].x), y:L(k[j].y, k[j+1].y), w:L(k[j].w, k[j+1].w), h:L(k[j].h, k[j+1].h) };
+        }
+      }
+      return { x:k[0].x, y:k[0].y, w:k[0].w, h:k[0].h };
+    }
+    function trackInRange(r, t){ return r.track && r.kf.length && t >= r.kf[0].t - 0.001 && t <= r.kf[r.kf.length-1].t + 0.001; }
+    function setKeyframe(r, t, b){
+      const near = r.kf.findIndex(q => Math.abs(q.t - t) < 0.06);
+      const kfObj = { t: near >= 0 ? r.kf[near].t : t, x:b.x, y:b.y, w:b.w, h:b.h };
+      if(near >= 0) r.kf[near] = kfObj; else { r.kf.push(kfObj); r.kf.sort((a, c)=>a.t - c.t); }
+    }
 
     async function freeInput(){
       if(!inputWrittenFor) return;
@@ -8423,7 +8452,7 @@ TOOL_IMPL.videowmremove = {
     function paint(){
       if(videoUrl){ try{ URL.revokeObjectURL(videoUrl); }catch(e){} videoUrl = null; }
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Draw a box over the watermark / logo, then tap <b>Remove watermark</b>. The area is rebuilt from the pixels around it, frame by frame. Works best on small, fixed logos and text. <b>Moving watermark?</b> Add several boxes and set each box's time range. Use only on videos you own or have permission to edit.</div>`));
+      body.appendChild(el(`<div class="note">Draw a box over the watermark / logo, then tap <b>Remove watermark</b>. The area is rebuilt from the pixels around it, frame by frame. Works best on small logos and text. <b>Watermark that moves, spins or changes size?</b> Tick <b>🎯 Track</b> on the box: scrub the video and drag the box onto the watermark at different moments — the box follows smoothly in between. Use only on videos you own or have permission to edit.</div>`));
       mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
         onAdd:(fl)=>{ freeInput(); file = fl[0]; regions = []; paint(); } });
       if(!file) return;
@@ -8439,22 +8468,32 @@ TOOL_IMPL.videowmremove = {
       const video = stage.querySelector('video');
       const ov = stage.querySelector('.wmr-ov');
       video.src = videoUrl;
+      curT = ()=> video.currentTime || 0;
 
       const ctrl = el(`
-        <div style="display:flex; align-items:center; gap:8px; margin:0 0 6px;">
+        <div style="display:flex; align-items:center; gap:6px; margin:0 0 6px;">
           <button type="button" class="btn secondary wmr-pp" style="padding:6px 12px; min-width:44px;">▶</button>
-          <input type="range" class="wmr-seek" min="0" max="1000" value="0" style="flex:1;">
+          <button type="button" class="btn secondary wmr-bk" style="padding:6px 8px; font-size:12px;" title="back 0.5 s">◀ .5s</button>
+          <input type="range" class="wmr-seek" min="0" max="1000" value="0" style="flex:1; min-width:60px;">
+          <button type="button" class="btn secondary wmr-fw" style="padding:6px 8px; font-size:12px;" title="forward 0.5 s">.5s ▶</button>
           <span class="wmr-tm" style="font-size:12px; font-weight:700; white-space:nowrap;">0:00.0</span>
         </div>`);
       body.appendChild(ctrl);
       const pp = ctrl.querySelector('.wmr-pp'), seek = ctrl.querySelector('.wmr-seek'), tm = ctrl.querySelector('.wmr-tm');
-      let seeking = false;
+      let seeking = false, raf = 0;
+      const anyTrack = ()=> regions.some(r=>r.track);
+      function refreshTrackOverlay(){ if(anyTrack()) renderOverlay(); }
+      function loop(){ refreshTrackOverlay(); raf = video.paused ? 0 : requestAnimationFrame(loop); }
       pp.onclick = ()=>{ if(video.paused) video.play().catch(()=>{}); else video.pause(); };
-      video.addEventListener('play', ()=>{ pp.textContent = '⏸'; });
-      video.addEventListener('pause', ()=>{ pp.textContent = '▶'; });
+      ctrl.querySelector('.wmr-bk').onclick = ()=>{ video.pause(); video.currentTime = Math.max(0, video.currentTime - 0.5); };
+      ctrl.querySelector('.wmr-fw').onclick = ()=>{ video.pause(); video.currentTime = Math.min(dur, video.currentTime + 0.5); };
+      video.addEventListener('play', ()=>{ pp.textContent = '⏸'; if(!raf) raf = requestAnimationFrame(loop); });
+      video.addEventListener('pause', ()=>{ pp.textContent = '▶'; refreshTrackOverlay(); });
+      video.addEventListener('seeked', refreshTrackOverlay);
       video.addEventListener('timeupdate', ()=>{
         if(!seeking && dur) seek.value = Math.round(video.currentTime/dur*1000);
         tm.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(dur);
+        if(video.paused) refreshTrackOverlay();
       });
       seek.addEventListener('input', ()=>{ seeking = true; if(dur){ video.currentTime = seek.value/1000*dur; } });
       seek.addEventListener('change', ()=>{ seeking = false; });
@@ -8463,42 +8502,45 @@ TOOL_IMPL.videowmremove = {
         if(vh > vw){ stage.style.maxWidth = '340px'; } // tall phone videos: keep the box a sensible size
         tm.textContent = fmtTime(0) + ' / ' + fmtTime(dur);
       });
-      video.addEventListener('error', ()=>{ mountResult(body, 'This browser cannot preview this video format — you can still process it, but the box can only be placed on a playable preview. Try an MP4 file.').style.background = '#FDEDEC'; });
+      video.addEventListener('error', ()=>{ mountResult(body, 'This browser cannot preview this video format — try an MP4 file.').style.background = '#FDEDEC'; });
 
       body.appendChild(el(`<div class="note" style="margin-top:2px;">👆 Drag on the video to draw a box. Drag a box to move it, drag its white corner to resize. Scrub to a frame where the watermark is clearly visible.</div>`));
       const listWrap = el(`<div class="wmr-list" style="margin:6px 0;"></div>`);
       body.appendChild(listWrap);
 
       // ---------- region drawing / moving / resizing ----------
-      const clamp01 = v => Math.min(1, Math.max(0, v));
       let drag = null;
       function pt(e){ const r = ov.getBoundingClientRect(); return { x: clamp01((e.clientX - r.left)/r.width), y: clamp01((e.clientY - r.top)/r.height) }; }
       ov.addEventListener('pointerdown', (e)=>{
         if(busy) return;
         const p = pt(e);
         const h = e.target.closest('[data-h]'), b = e.target.closest('[data-i]');
-        if(h){ drag = { mode:'resize', i:Number(h.getAttribute('data-h')) }; }
-        else if(b){ const i = Number(b.getAttribute('data-i')); drag = { mode:'move', i, dx:p.x - regions[i].x, dy:p.y - regions[i].y }; }
-        else{
+        if(h || b){
+          const i = Number((h || b).getAttribute(h ? 'data-h' : 'data-i'));
+          const r = regions[i];
+          const cur = boxAt(r, curT());
+          drag = { mode: h ? 'resize' : 'move', i, dx:p.x - cur.x, dy:p.y - cur.y, tmp: r.track ? { ...cur } : null };
+        }else{
           if(regions.length >= MAX_REGIONS){ showToastSafe('Maximum '+MAX_REGIONS+' boxes — delete one first.'); return; }
-          regions.push({ x:p.x, y:p.y, w:0, h:0, from:'', to:'' });
-          drag = { mode:'draw', i:regions.length-1, sx:p.x, sy:p.y };
+          regions.push({ x:p.x, y:p.y, w:0, h:0, from:'', to:'', track:false, kf:[] });
+          drag = { mode:'draw', i:regions.length-1, sx:p.x, sy:p.y, tmp:null };
         }
         try{ ov.setPointerCapture(e.pointerId); }catch(err){}
         e.preventDefault();
       });
       ov.addEventListener('pointermove', (e)=>{
         if(!drag) return;
-        const p = pt(e), r = regions[drag.i];
+        const p = pt(e), r = regions[drag.i], tg = drag.tmp || r;
         if(drag.mode === 'draw'){ r.x = Math.min(drag.sx, p.x); r.y = Math.min(drag.sy, p.y); r.w = Math.abs(p.x - drag.sx); r.h = Math.abs(p.y - drag.sy); }
-        else if(drag.mode === 'move'){ r.x = Math.min(1 - r.w, Math.max(0, p.x - drag.dx)); r.y = Math.min(1 - r.h, Math.max(0, p.y - drag.dy)); }
-        else if(drag.mode === 'resize'){ r.w = Math.max(0.01, p.x - r.x); r.h = Math.max(0.01, p.y - r.y); }
+        else if(drag.mode === 'move'){ tg.x = Math.min(1 - tg.w, Math.max(0, p.x - drag.dx)); tg.y = Math.min(1 - tg.h, Math.max(0, p.y - drag.dy)); }
+        else if(drag.mode === 'resize'){ tg.w = Math.max(0.01, Math.min(1 - tg.x, p.x - tg.x)); tg.h = Math.max(0.01, Math.min(1 - tg.y, p.y - tg.y)); }
         renderOverlay();
       });
       function endDrag(){
         if(!drag) return;
         const r = regions[drag.i];
         if(drag.mode === 'draw' && (r.w < 0.01 || r.h < 0.01)) regions.splice(drag.i, 1);
+        else if(drag.tmp){ setKeyframe(r, curT(), drag.tmp); }
         drag = null; renderRegions();
       }
       ov.addEventListener('pointerup', endDrag);
@@ -8506,11 +8548,16 @@ TOOL_IMPL.videowmremove = {
 
       function renderOverlay(){
         ov.innerHTML = '';
+        const t = curT();
         regions.forEach((r, i)=>{
+          const bx = (drag && drag.i === i && drag.tmp) ? drag.tmp : boxAt(r, t);
+          const inRange = !r.track || trackInRange(r, t) || (drag && drag.i === i && drag.tmp);
+          const onKey = r.track && r.kf.some(q=>Math.abs(q.t - t) < 0.05);
+          const col = inRange ? '#FF3B30' : '#8a8f98';
           const b = document.createElement('div');
           b.setAttribute('data-i', i);
-          b.style.cssText = `position:absolute; left:${r.x*100}%; top:${r.y*100}%; width:${r.w*100}%; height:${r.h*100}%; border:2px solid #FF3B30; background:rgba(255,59,48,.18); box-sizing:border-box; cursor:move;`;
-          b.innerHTML = `<span style="position:absolute; left:0; top:0; background:#FF3B30; color:#fff; font:700 11px/1 sans-serif; padding:3px 6px;">${i+1}</span><i data-h="${i}" style="position:absolute; right:0; bottom:0; width:22px; height:22px; background:#fff; border:2px solid #FF3B30; box-sizing:border-box; cursor:nwse-resize;"></i>`;
+          b.style.cssText = `position:absolute; left:${bx.x*100}%; top:${bx.y*100}%; width:${bx.w*100}%; height:${bx.h*100}%; border:2px ${inRange ? 'solid' : 'dashed'} ${col}; background:${inRange ? 'rgba(255,59,48,.18)' : 'rgba(138,143,152,.12)'}; box-sizing:border-box; cursor:move;`;
+          b.innerHTML = `<span style="position:absolute; left:0; top:0; background:${col}; color:#fff; font:700 11px/1 sans-serif; padding:3px 6px; white-space:nowrap;">${i+1}${r.track ? (onKey ? ' ◆' : (inRange ? ' ◇' : ' (off)')) : ''}</span><i data-h="${i}" style="position:absolute; right:0; bottom:0; width:22px; height:22px; background:#fff; border:2px solid ${col}; box-sizing:border-box; cursor:nwse-resize;"></i>`;
           ov.appendChild(b);
         });
       }
@@ -8519,21 +8566,39 @@ TOOL_IMPL.videowmremove = {
         listWrap.innerHTML = '';
         if(!regions.length){ listWrap.appendChild(el(`<div style="font-size:12.5px; color:#8a8f98; padding:4px 0;">No box yet — draw one over the watermark.</div>`)); return; }
         regions.forEach((r, i)=>{
-          const row = el(`
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:6px 8px; margin-bottom:6px; background:#F7F8FA; border:1px solid #E6E8EC; border-radius:10px; font-size:12.5px;">
-              <b style="background:#FF3B30; color:#fff; border-radius:6px; padding:2px 7px;">${i+1}</b>
+          const timeRow = r.track ? '' : `
               <span>Visible from</span>
               <input type="number" min="0" step="0.1" placeholder="start" data-f="${i}" value="${r.from}" style="width:64px; padding:5px;">
               <button type="button" data-fn="${i}" class="btn secondary" style="padding:4px 8px; font-size:11px;">now</button>
               <span>to</span>
               <input type="number" min="0" step="0.1" placeholder="end" data-t="${i}" value="${r.to}" style="width:64px; padding:5px;">
               <button type="button" data-tn="${i}" class="btn secondary" style="padding:4px 8px; font-size:11px;">now</button>
-              <span style="color:#8a8f98;">sec (empty = whole video)</span>
+              <span style="color:#8a8f98;">sec (empty = whole video)</span>`;
+          const chips = r.track ? `
+              <div style="flex-basis:100%; display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+                ${r.kf.map((q, j)=>`<span style="display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid #FF3B30; border-radius:999px; padding:2px 4px 2px 8px; font-weight:700; cursor:pointer;" data-kj="${i}:${j}">◆ ${fmtTime(q.t)}<b data-kd="${i}:${j}" style="color:#FF3B30; padding:0 4px;">✕</b></span>`).join('')}
+                ${r.kf.length < 2 ? '<span style="color:#B7791F;">Add a 2nd keyframe: scrub to another moment and drag the box onto the watermark.</span>' : `<span style="color:#8a8f98;">The box is active from ${fmtTime(r.kf[0].t)} to ${fmtTime(r.kf[r.kf.length-1].t)}. Each drag adds a ◆ keyframe (about every 1–2 s; more when it moves fast).</span>`}
+              </div>` : '';
+          const row = el(`
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:6px 8px; margin-bottom:6px; background:#F7F8FA; border:1px solid #E6E8EC; border-radius:10px; font-size:12.5px;">
+              <b style="background:#FF3B30; color:#fff; border-radius:6px; padding:2px 7px;">${i+1}</b>
+              ${timeRow}
               <button type="button" data-del="${i}" class="btn secondary" style="margin-left:auto; padding:4px 10px;">✕</button>
+              <div style="flex-basis:100%;"><label style="font-weight:700; cursor:pointer;"><input type="checkbox" data-tr="${i}" ${r.track?'checked':''}> 🎯 Track a moving / changing watermark (keyframes)</label></div>
+              ${chips}
             </div>`);
           listWrap.appendChild(row);
         });
       }
+      listWrap.addEventListener('change', (e)=>{
+        const tr = e.target.getAttribute('data-tr');
+        if(tr === null) return;
+        const r = regions[Number(tr)];
+        r.track = e.target.checked;
+        if(r.track){ const b = { x:r.x, y:r.y, w:r.w, h:r.h }; r.kf = [{ t: curT(), ...b }]; }
+        else { const b = boxAt(r, curT()); r.x = b.x; r.y = b.y; r.w = b.w; r.h = b.h; r.kf = []; }
+        renderRegions();
+      });
       listWrap.addEventListener('input', (e)=>{
         const f = e.target.getAttribute('data-f'), t = e.target.getAttribute('data-t');
         if(f !== null) regions[Number(f)].from = e.target.value;
@@ -8541,11 +8606,48 @@ TOOL_IMPL.videowmremove = {
       });
       listWrap.addEventListener('click', (e)=>{
         const d = e.target.closest('[data-del]'), fn = e.target.closest('[data-fn]'), tn = e.target.closest('[data-tn]');
-        if(d){ regions.splice(Number(d.getAttribute('data-del')), 1); renderRegions(); }
+        const kd = e.target.closest('[data-kd]'), kj = e.target.closest('[data-kj]');
+        if(kd){ const [i, j] = kd.getAttribute('data-kd').split(':').map(Number); regions[i].kf.splice(j, 1); if(!regions[i].kf.length){ regions[i].track = false; } renderRegions(); }
+        else if(kj){ const [i, j] = kj.getAttribute('data-kj').split(':').map(Number); video.pause(); video.currentTime = regions[i].kf[j].t; }
+        else if(d){ regions.splice(Number(d.getAttribute('data-del')), 1); renderRegions(); }
         else if(fn){ regions[Number(fn.getAttribute('data-fn'))].from = video.currentTime.toFixed(1); renderRegions(); }
         else if(tn){ regions[Number(tn.getAttribute('data-tn'))].to = video.currentTime.toFixed(1); renderRegions(); }
       });
       renderRegions();
+
+      // ---------- save / load boxes (so a tracked setup can be reused or shared) ----------
+      const adv = el(`
+        <details style="margin:4px 0 8px; font-size:12.5px;">
+          <summary style="cursor:pointer; font-weight:700;">Advanced: save / load boxes</summary>
+          <div style="margin-top:6px;">
+            <textarea class="wmr-json" rows="4" style="width:100%; font-family:monospace; font-size:11px;" placeholder="Boxes as text — press Save to fill this, or paste boxes and press Load"></textarea>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <button type="button" class="btn secondary wmr-save" style="padding:5px 12px;">Save boxes as text</button>
+              <button type="button" class="btn secondary wmr-load" style="padding:5px 12px;">Load boxes</button>
+            </div>
+          </div>
+        </details>`);
+      body.appendChild(adv);
+      const ta = adv.querySelector('.wmr-json');
+      const rd = n => Math.round(n*10000)/10000;
+      adv.querySelector('.wmr-save').onclick = ()=>{
+        ta.value = JSON.stringify(regions.map(r=>({ x:rd(r.x), y:rd(r.y), w:rd(r.w), h:rd(r.h), from:r.from, to:r.to, track:!!r.track, kf:(r.kf||[]).map(q=>({ t:rd(q.t), x:rd(q.x), y:rd(q.y), w:rd(q.w), h:rd(q.h) })) })));
+      };
+      adv.querySelector('.wmr-load').onclick = ()=>{
+        try{
+          const arr = JSON.parse(ta.value);
+          if(!Array.isArray(arr)) throw new Error('not a list');
+          const num = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
+          const out = arr.slice(0, MAX_REGIONS).map(o=>({
+            x:clamp01(num(o.x)), y:clamp01(num(o.y)), w:clamp01(num(o.w)), h:clamp01(num(o.h)),
+            from: (o.from === '' || o.from == null) ? '' : String(o.from), to: (o.to === '' || o.to == null) ? '' : String(o.to),
+            track: !!o.track,
+            kf: Array.isArray(o.kf) ? o.kf.map(q=>({ t:Math.max(0, num(q.t)), x:clamp01(num(q.x)), y:clamp01(num(q.y)), w:clamp01(num(q.w)), h:clamp01(num(q.h)) })).sort((a, c)=>a.t - c.t) : []
+          })).filter(r=> r.track ? r.kf.length : (r.w > 0 && r.h > 0));
+          if(!out.length) throw new Error('no boxes found');
+          regions = out; renderRegions(); showToastSafe('Loaded ' + out.length + ' box(es).');
+        }catch(err){ showToastSafe('Could not read those boxes: ' + err.message); }
+      };
 
       // ---------- options ----------
       const opts = el(`
@@ -8554,10 +8656,19 @@ TOOL_IMPL.videowmremove = {
             <label>How to remove it</label>
             <select id="wmrMethod">
               <option value="delogo">✨ Smart fill — best for logos & text (recommended)</option>
+              <option value="eraser">🔤 See-through text eraser — light/dark text on drawings & photos</option>
               <option value="blur">🌫️ Blur the area</option>
               <option value="pixelate">🔲 Pixelate the area</option>
               <option value="crop">✂️ Crop out (watermark near an edge)</option>
             </select>
+          </div>
+          <div class="field wmr-eraser-opt" style="display:none;">
+            <label>Watermark colour</label>
+            <select id="wmrTone"><option value="light">Light / white text</option><option value="dark">Dark / black text</option></select>
+          </div>
+          <div class="field wmr-eraser-opt" style="display:none;">
+            <label>Letter thickness</label>
+            <select id="wmrThick"><option value="2">Thin (small text)</option><option value="4" selected>Medium</option><option value="7">Thick</option><option value="10">Extra thick (big text)</option></select>
           </div>
           <div class="field">
             <label>Extra margin around box (px)</label>
@@ -8577,7 +8688,10 @@ TOOL_IMPL.videowmremove = {
         </div>`);
       body.appendChild(opts);
       const methodSel = opts.querySelector('#wmrMethod');
-      methodSel.addEventListener('change', ()=>{ opts.querySelector('#wmrZoomWrap').style.display = methodSel.value === 'crop' ? '' : 'none'; });
+      methodSel.addEventListener('change', ()=>{
+        opts.querySelector('#wmrZoomWrap').style.display = methodSel.value === 'crop' ? '' : 'none';
+        opts.querySelectorAll('.wmr-eraser-opt').forEach(f=>{ f.style.display = methodSel.value === 'eraser' ? '' : 'none'; });
+      });
 
       const row = el(`<div class="btn-row"></div>`);
       const prevBtn = el(`<button class="btn secondary">👁️ Preview this frame</button>`);
@@ -8586,40 +8700,100 @@ TOOL_IMPL.videowmremove = {
       row.appendChild(prevBtn); row.appendChild(goBtn);
       body.appendChild(row);
       body.appendChild(el(`<div class="wmr-out"></div>`));
-
-      function currentVideoTime(){ return video.currentTime || 0; }
-      body.__wmrTime = currentVideoTime;
     }
 
-    function showToastSafe(msg){ try{ if(typeof showToast === 'function') showToast(msg); }catch(e){} }
-
-    // ---------- ffmpeg graph building ----------
-    function pxRects(margin){
+    // ---------- geometry (normalized → pixels) ----------
+    function boxPx(nx, ny, nw, nh, margin){
+      let x1 = Math.floor(nx*vw) - margin, y1 = Math.floor(ny*vh) - margin;
+      let x2 = Math.ceil((nx+nw)*vw) + margin, y2 = Math.ceil((ny+nh)*vh) + margin;
+      x1 = Math.max(2, x1); y1 = Math.max(2, y1); x2 = Math.min(vw-2, x2); y2 = Math.min(vh-2, y2);
+      x1 = Math.max(2, evenFloor(x1)); y1 = Math.max(2, evenFloor(y1));
+      const w = evenFloor(x2 - x1), h = evenFloor(y2 - y1);
+      return (w >= 4 && h >= 4) ? { x:x1, y:y1, w, h } : null;
+    }
+    // Plain boxes → {x,y,w,h,from,to}.  Tracked boxes with ≥2 keyframes → {track:true, r, a, e}.
+    // previewT given (single-frame preview): a tracked box becomes one plain box at its position at that time.
+    function pxRects(margin, previewT){
       const out = [];
       regions.forEach(r=>{
-        let x1 = Math.floor(r.x*vw) - margin, y1 = Math.floor(r.y*vh) - margin;
-        let x2 = Math.ceil((r.x+r.w)*vw) + margin, y2 = Math.ceil((r.y+r.h)*vh) + margin;
-        x1 = Math.max(2, x1); y1 = Math.max(2, y1); x2 = Math.min(vw-2, x2); y2 = Math.min(vh-2, y2);
-        x1 = Math.max(2, evenFloor(x1)); y1 = Math.max(2, evenFloor(y1));
-        const w = evenFloor(x2 - x1), h = evenFloor(y2 - y1);
-        if(w >= 4 && h >= 4) out.push({ x:x1, y:y1, w, h, from:parseFloat(r.from), to:parseFloat(r.to) });
+        if(r.track && r.kf.length){
+          if(previewT != null){ const bb = boxAt(r, previewT); const b = boxPx(bb.x, bb.y, bb.w, bb.h, margin); if(b) out.push({ ...b, from:NaN, to:NaN }); return; }
+          if(r.kf.length === 1){ const k = r.kf[0]; const b = boxPx(k.x, k.y, k.w, k.h, margin); if(b) out.push({ ...b, from:NaN, to:NaN }); return; }
+          out.push({ track:true, r, a:r.kf[0].t, e:r.kf[r.kf.length-1].t });
+          return;
+        }
+        const from = parseFloat(r.from), to = parseFloat(r.to);
+        const b = boxPx(r.x, r.y, r.w, r.h, margin); if(b) out.push({ ...b, from, to });
       });
       return out;
     }
+    // A tracked box → chain of short time slices, each box covering where the watermark is during that slice.
+    function trackSlices(m, margin, step){
+      const k = m.r.kf, res = [];
+      for(let j = 0; j < k.length - 1; j++){
+        const t0 = k[j].t, t1 = k[j+1].t, dt = t1 - t0;
+        if(!(dt > 0)) continue;
+        const n = Math.max(1, Math.ceil(dt/step));
+        for(let s = 0; s < n; s++){
+          const ta = t0 + dt*s/n, tb = t0 + dt*(s+1)/n;
+          const A = boxAt(m.r, ta), B = boxAt(m.r, tb);
+          const x1 = Math.min(A.x, B.x), y1 = Math.min(A.y, B.y), x2 = Math.max(A.x + A.w, B.x + B.w), y2 = Math.max(A.y + A.h, B.y + B.h);
+          const b = boxPx(x1, y1, x2 - x1, y2 - y1, margin);
+          if(b) res.push({ ...b, from:ta, to:tb, slice:true });
+        }
+      }
+      return res;
+    }
+    // Tracked box for blur/pixelate: one fixed size (largest keyframe), centre follows the keyframes via per-frame expressions.
+    function trackEnds(m, margin){
+      const k = m.r.kf;
+      const maxW = Math.max(...k.map(q=>q.w)), maxH = Math.max(...k.map(q=>q.h));
+      const w = evenFloor(Math.min(vw - 4, Math.ceil(maxW*vw) + 2*margin)), h = evenFloor(Math.min(vh - 4, Math.ceil(maxH*vh) + 2*margin));
+      if(w < 4 || h < 4) return null;
+      const pos = k.map(q=>({
+        t:q.t,
+        x:Math.min(vw - 2 - w, Math.max(2, evenFloor(Math.round((q.x + q.w/2)*vw - w/2)))),
+        y:Math.min(vh - 2 - h, Math.max(2, evenFloor(Math.round((q.y + q.h/2)*vh - h/2))))
+      }));
+      return { w, h, pos };
+    }
+    function piecewise(pos, key){
+      const L = pos[pos.length-1];
+      let expr = `${L[key]}`;
+      for(let j = pos.length - 2; j >= 0; j--){
+        const a = pos[j], b = pos[j+1];
+        const seg = b.t > a.t ? `${a[key]}+(${b[key] - a[key]})*(t-${a.t.toFixed(3)})/${(b.t - a.t).toFixed(3)}` : `${b[key]}`;
+        expr = `if(lt(t,${b.t.toFixed(3)}),${seg},${expr})`;
+      }
+      return expr;
+    }
     function enableOpt(r, ignoreTime){
       if(ignoreTime) return '';
+      if(r.slice) return `:enable='gte(t,${r.from.toFixed(3)})*lt(t,${(r.to + 0.001).toFixed(3)})'`;
       const hasF = isFinite(r.from), hasT = isFinite(r.to);
       if(!hasF && !hasT) return '';
       return `:enable='between(t,${hasF ? r.from : 0},${hasT ? r.to : 999999})'`;
     }
     // Returns {kind:'vf'|'fc', graph}
-    function buildGraph(method, margin, zoomBack, ignoreTime){
-      const rects = pxRects(margin);
+    function buildGraph(method, margin, zoomBack, ignoreTime, previewT, o){
+      let rects = pxRects(margin, ignoreTime ? previewT : null);
       if(!rects.length) throw new Error('Draw a box over the watermark first.');
       if(method === 'delogo'){
-        return { kind:'vf', graph: rects.map(r=>`delogo=x=${r.x}:y=${r.y}:w=${r.w}:h=${r.h}${enableOpt(r, ignoreTime)}`).join(',') };
+        const trackN = rects.filter(r=>r.track).reduce((n, m)=>n + Math.max(0, m.r.kf.length - 1), 0) || 1;
+        const totalDur = rects.filter(r=>r.track).reduce((n, m)=>n + (m.e - m.a), 0);
+        const step = Math.max(0.3, totalDur/220); // cap the chain at ~220 slices
+        const flat = [];
+        rects.forEach(r=>{ if(r.track) trackSlices(r, margin, step).forEach(sl=>flat.push(sl)); else flat.push(r); });
+        if(!flat.length) throw new Error('Draw a box over the watermark first.');
+        return { kind:'vf', graph: flat.map(r=>`delogo=x=${r.x}:y=${r.y}:w=${r.w}:h=${r.h}${enableOpt(r, ignoreTime)}`).join(',') };
       }
       if(method === 'crop'){
+        rects = rects.map(r=>{
+          if(!r.track) return r;
+          const k = r.r.kf;
+          const x1 = Math.min(...k.map(q=>q.x)), y1 = Math.min(...k.map(q=>q.y)), x2 = Math.max(...k.map(q=>q.x + q.w)), y2 = Math.max(...k.map(q=>q.y + q.h));
+          const b = boxPx(x1, y1, x2 - x1, y2 - y1, margin); return b ? { ...b, from:NaN, to:NaN } : null;
+        }).filter(Boolean);
         let l = 0, t = 0, rr = vw, b = vh;
         rects.forEach(r=>{
           const dl = r.x, dr = vw - (r.x + r.w), dt = r.y, db = vh - (r.y + r.h);
@@ -8636,16 +8810,38 @@ TOOL_IMPL.videowmremove = {
         if(zoomBack) g += `,scale=${vw}:${vh}:force_original_aspect_ratio=increase,crop=${vw}:${vh},setsar=1`;
         return { kind:'vf', graph: g };
       }
-      // blur / pixelate: crop the region, obscure it, overlay it back (per-box time range supported)
+      // blur / pixelate / eraser: crop the region, treat it, overlay it back.
+      // Each region's branch is trimmed to its own time range so only the needed frames are processed.
       let cur = '0:v', parts = [];
+      rects = rects.map(r=>{
+        if(!r.track) return r;
+        const en = trackEnds(r, margin); if(!en) return null;
+        return { w:en.w, h:en.h, pos:en.pos, a:r.a, e:r.e, tracked:true };
+      }).filter(Boolean);
+      const light = !o || o.tone !== 'dark';
+      const R = Math.max(1, Math.min(14, (o && o.thick) || 4));
       rects.forEach((r, i)=>{
-        const inner = method === 'blur'
-          ? `gblur=sigma=${Math.max(8, Math.round(Math.min(r.w, r.h)/4))}:steps=2`
-          : `scale=${Math.max(2, Math.round(r.w/10))}:${Math.max(2, Math.round(r.h/10))}:flags=area,scale=${r.w}:${r.h}:flags=neighbor`;
-        parts.push(`[${cur}]split=2[b${i}][s${i}]`);
-        parts.push(`[s${i}]crop=${r.w}:${r.h}:${r.x}:${r.y},${inner}[p${i}]`);
         const out = i === rects.length - 1 ? 'vout' : 'v' + (i+1);
-        parts.push(`[b${i}][p${i}]overlay=x=${r.x}:y=${r.y}${enableOpt(r, ignoreTime)}[${out}]`);
+        let cropArgs, tStart = NaN, tEnd = NaN, X = null, Y = null;
+        if(r.tracked){ X = piecewise(r.pos, 'x'); Y = piecewise(r.pos, 'y'); cropArgs = `${r.w}:${r.h}:x='${X}':y='${Y}'`; tStart = r.a; tEnd = r.e; }
+        else { cropArgs = `${r.w}:${r.h}:${r.x}:${r.y}`; if(!ignoreTime){ tStart = r.from; tEnd = r.to; } }
+        const trim = (isFinite(tStart) || isFinite(tEnd)) ? `trim=start=${isFinite(tStart) ? tStart.toFixed(3) : 0}${isFinite(tEnd) ? ':end=' + tEnd.toFixed(3) : ''},` : '';
+        parts.push(`[${cur}]split=2[b${i}][s${i}]`);
+        if(method === 'eraser'){
+          // Morphological opening (erode then dilate, radius > letter thickness) removes thin light strokes;
+          // only pixels that were lifted by more than a small threshold are replaced, so everything else stays sharp.
+          const p1 = light ? 0 : 1, p2 = light ? 1 : 0;
+          parts.push(`[s${i}]${trim}crop=${cropArgs},format=gbrp,split=2[o${i}][r${i}]`);
+          parts.push(`[r${i}]median=radius=${R}:percentile=${p1},median=radius=${R}:percentile=${p2}[op${i}]`);
+          parts.push(`[o${i}][op${i}]blend=all_expr='if(gt(${light ? 'A-B' : 'B-A'},5),B,A)',gblur=sigma=0.7[p${i}]`);
+        }else{
+          const inner = method === 'blur'
+            ? `gblur=sigma=${Math.max(8, Math.round(Math.min(r.w, r.h)/4))}:steps=2`
+            : `scale=${Math.max(2, Math.round(r.w/10))}:${Math.max(2, Math.round(r.h/10))}:flags=area,scale=${r.w}:${r.h}:flags=neighbor`;
+          parts.push(`[s${i}]${trim}crop=${cropArgs},${inner}[p${i}]`);
+        }
+        if(r.tracked) parts.push(`[b${i}][p${i}]overlay=x='${X}':y='${Y}':eval=frame:eof_action=pass${ignoreTime ? '' : `:enable='between(t,${r.a.toFixed(3)},${r.e.toFixed(3)})'`}[${out}]`);
+        else parts.push(`[b${i}][p${i}]overlay=x=${r.x}:y=${r.y}:eof_action=pass${enableOpt(r, ignoreTime)}[${out}]`);
         cur = out;
       });
       return { kind:'fc', graph: parts.join(';') };
@@ -8666,7 +8862,9 @@ TOOL_IMPL.videowmremove = {
         method: body.querySelector('#wmrMethod').value,
         margin: Math.min(40, Math.max(0, parseInt(body.querySelector('#wmrMargin').value, 10) || 0)),
         crf: body.querySelector('#wmrQuality').value,
-        zoomBack: body.querySelector('#wmrZoom').checked
+        zoomBack: body.querySelector('#wmrZoom').checked,
+        tone: body.querySelector('#wmrTone').value,
+        thick: parseInt(body.querySelector('#wmrThick').value, 10) || 4
       };
     }
     function attachLog(ffmpeg, lines){
@@ -8684,21 +8882,21 @@ TOOL_IMPL.videowmremove = {
       try{
         setBusy(true);
         const o = readOpts();
-        const graph = buildGraph(o.method, o.margin, o.zoomBack, true); // preview shows every box regardless of time range
+        const tPrev = Math.min(Math.max(0, curT()), Math.max(0, dur - 0.05));
+        const graph = buildGraph(o.method, o.margin, o.zoomBack, true, tPrev, o); // preview shows every box regardless of time range
         prog.set(3, 'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         unlog = attachLog(ffmpeg, logs);
         await ensureInput(ffmpeg, fetchFile, prog);
         prog.set(70, 'Rendering preview…');
-        const t = Math.min(Math.max(0, (body.__wmrTime ? body.__wmrTime() : 0)), Math.max(0, dur - 0.05));
         try{ await ffmpeg.deleteFile('wm_prev.png'); }catch(e){}
-        const code = await ffmpeg.exec(['-y','-ss', t.toFixed(2), '-i', inputName, ...graphArgs(graph, false), '-an', '-frames:v','1','wm_prev.png']);
+        const code = await ffmpeg.exec(['-y','-ss', tPrev.toFixed(2), '-i', inputName, ...graphArgs(graph, false), '-an', '-frames:v','1','wm_prev.png']);
         if(code !== 0) throw new Error('Preview failed (' + (logs.slice(-2).join(' ').slice(0,160) || 'unknown') + ')');
         const data = await ffmpeg.readFile('wm_prev.png');
         try{ await ffmpeg.deleteFile('wm_prev.png'); }catch(e){}
         const url = URL.createObjectURL(new Blob([data], {type:'image/png'}));
         prog.remove();
-        out.appendChild(el(`<div style="margin:8px 0;"><div style="font-size:12.5px; font-weight:700; margin-bottom:4px;">Preview at ${fmtTime(t)} — still visible? Enlarge the box or raise the margin.</div><img src="${url}" style="width:100%; border-radius:10px; border:1px solid #E6E8EC;"></div>`));
+        out.appendChild(el(`<div style="margin:8px 0;"><div style="font-size:12.5px; font-weight:700; margin-bottom:4px;">Preview at ${fmtTime(tPrev)} — still visible? Enlarge the box or raise the margin.</div><img src="${url}" style="width:100%; border-radius:10px; border:1px solid #E6E8EC;"></div>`));
       }catch(err){ prog.remove(); mountResult(out, 'Error: ' + err.message).style.background = '#FDEDEC'; }
       finally{ if(unlog) unlog(); setBusy(false); }
     }
@@ -8712,7 +8910,7 @@ TOOL_IMPL.videowmremove = {
       try{
         setBusy(true);
         const o = readOpts();
-        const graph = buildGraph(o.method, o.margin, o.zoomBack, false);
+        const graph = buildGraph(o.method, o.margin, o.zoomBack, false, null, o);
         prog.set(3, 'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         ffmpegRef = ffmpeg; unlog = attachLog(ffmpeg, logs);
