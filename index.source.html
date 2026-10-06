@@ -364,7 +364,7 @@ const TOOLS = [
   {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:0},
   {id:'videowave', name:'Audio → Waveform Video', desc:'Turn a song/voice into an animated waveform video', icon:'🌊', color:'#0E6655', cat:'video', cost:0},
   {id:'videowatermark', name:'Video Watermark', desc:'Add your logo/text to a video before sharing', icon:'💧', color:'#2980B9', cat:'video'},
-  {id:'videowmremove', name:'Video Watermark Remover', desc:'Draw a box over a logo/watermark and remove it from every frame — free, in your browser', icon:'🧽', color:'#C0392B', cat:'video', cost:0},
+  {id:'videowmremove', name:'Video Watermark Remover', desc:'Remove logos & running/moving text from videos — draw a box or use clean-background match, free in your browser', icon:'🧽', color:'#C0392B', cat:'video', cost:0},
   {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:0},
   {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:0},
   {id:'videothumb', name:'Video Thumbnail', desc:'Grab a frame at a chosen time as an image', icon:'🖼️', color:'#2E6F5E', cat:'video', cost:0},
@@ -8656,11 +8656,15 @@ TOOL_IMPL.videowmremove = {
             <label>How to remove it</label>
             <select id="wmrMethod">
               <option value="delogo">✨ Smart fill — best for logos & text (recommended)</option>
+              <option value="plate">🧩 Clean-background match — best for running / moving text when the background stays still (slow, maximum result)</option>
               <option value="eraser">🔤 See-through text eraser — light/dark text on drawings & photos</option>
               <option value="blur">🌫️ Blur the area</option>
               <option value="pixelate">🔲 Pixelate the area</option>
               <option value="crop">✂️ Crop out (watermark near an edge)</option>
             </select>
+          </div>
+          <div class="note wmr-plate-opt" style="display:none; margin:6px 0 10px;">
+            <b>How this works:</b> the tool finds a clean copy of the background from the moments when the watermark is somewhere else, then puts it back wherever a see-through white watermark sits — no blur, original sharpness kept. It looks at the whole frame, so you do <b>not</b> need to draw boxes. Needs a <b>still camera / still background</b> (cartoons, slideshows, lectures, static shots). It is slow and runs fully in your browser: expect roughly 5–10 minutes for a 30-second phone video, and keep this tab open. Use <b>Preview this frame</b> first (about a minute).
           </div>
           <div class="field wmr-eraser-opt" style="display:none;">
             <label>Watermark colour</label>
@@ -8691,6 +8695,7 @@ TOOL_IMPL.videowmremove = {
       methodSel.addEventListener('change', ()=>{
         opts.querySelector('#wmrZoomWrap').style.display = methodSel.value === 'crop' ? '' : 'none';
         opts.querySelectorAll('.wmr-eraser-opt').forEach(f=>{ f.style.display = methodSel.value === 'eraser' ? '' : 'none'; });
+        opts.querySelectorAll('.wmr-plate-opt').forEach(f=>{ f.style.display = methodSel.value === 'plate' ? '' : 'none'; });
       });
 
       const row = el(`<div class="btn-row"></div>`);
@@ -8873,6 +8878,100 @@ TOOL_IMPL.videowmremove = {
     }
     function setBusy(v){ busy = v; body.querySelectorAll('.btn-row .btn').forEach(b=>{ b.disabled = v; b.style.opacity = v ? .6 : 1; }); }
 
+    // ---------- clean-background ("clean plate") method ----------
+    // 1) sample the video at ~2.5 fps and take a per-pixel temporal MEDIAN over ±4 s (tmedian) = a "clean plate";
+    // 2) clean the sampled frames against that plate and take the median again (2 rounds) so the watermark
+    //    can't leak into the plate; 3) for every real frame, find pixels that are a see-through WHITE overlay on
+    //    the plate (same alpha in R, G and B) and put the plate pixels back. Pure ffmpeg filters, free, in-browser.
+    function plateMask(vL, pL, outL){
+      const E = "if(gt(x-y,6),clip((x-y)*255/max(255-y,1),0,255),0)";
+      return `[${vL}]split=2[pva][pvb];[${pL}]split=2[ppa][ppb];` +
+        `[pva]extractplanes=g+b+r[vg][vbl][vr];[ppa]extractplanes=g+b+r[pg][pbl][pr];` +
+        `[vg][pg]lut2=c0='${E}',split=2[ag1][ag2];[vbl][pbl]lut2=c0='${E}',split=2[ab1][ab2];[vr][pr]lut2=c0='${E}',split=2[ar1][ar2];` +
+        `[ag1][ab1]blend=all_mode=darken[d1];[d1][ar1]blend=all_mode=darken[amin];` +
+        `[ag2][ab2]blend=all_mode=lighten[l1];[l1][ar2]blend=all_mode=lighten[amax];` +
+        `[amax][amin]lut2=c0='if(gt(y,12)*lt(x,251)*lt(x-y,31),255,0)',boxblur=3,lut=y='if(gt(val,38),255,0)',dilation,dilation,gblur=sigma=1,split=3[m1][m2][m3];` +
+        `[m1][m2][m3]mergeplanes=0x201000:gbrp[mm];[pvb][ppb][mm]maskedmerge[${outL}]`;
+    }
+    async function probeFps(ffmpeg){
+      const lines = []; const h = ({message})=>{ lines.push(message); };
+      ffmpeg.on('log', h);
+      try{ await ffmpeg.exec(['-i', inputName]); }catch(e){}
+      try{ ffmpeg.off('log', h); }catch(e){}
+      const m = lines.join('\n').match(/(\d+(?:\.\d+)?) fps/);
+      const f = m ? parseFloat(m[1]) : 30;
+      return (f >= 5 && f <= 120) ? f : 30;
+    }
+    async function doPlate(preview, out, prog, o){
+      if(!dur || !vw || !vh) throw new Error('Wait until the video has loaded, then try again.');
+      if(dur > 120) throw new Error('Clean-background match works on clips up to 2 minutes. Trim the video first, then run it again.');
+      if(!preview && vw*vh*dur > 1280*720*45) throw new Error('This video is too big for the in-browser engine (size × length). Trim it or reduce its size first, or use another method.');
+      prog.set(3, 'Loading video engine…');
+      const { ffmpeg, fetchFile } = await ensureFFmpeg();
+      const logs = []; const unlog = attachLog(ffmpeg, logs);
+      let w0 = 0, w1 = 0, label = '';
+      const ph = ({progress})=>{ const p = Math.min(1, Math.max(0, progress || 0)); prog.set(w0 + p*(w1 - w0), label + ' ' + Math.round(p*100) + '%'); };
+      ffmpeg.on('progress', ph);
+      const rm = async n=>{ try{ await ffmpeg.deleteFile(n); }catch(e){} };
+      const run = async (args, a, b, text)=>{
+        w0 = a; w1 = b; label = text; prog.set(a, text); logs.length = 0;
+        const c = await ffmpeg.exec(args);
+        if(c !== 0) throw new Error('Could not process this video (' + (logs.slice(-2).join(' ').slice(0,160) || 'unknown') + ')');
+      };
+      const files = ['pl_s0.mkv','pl_pa.mkv','pl_pb.mkv','pl_c.mkv','wm_prev.png','wm_out.mp4'];
+      try{
+        await ensureInput(ffmpeg, fetchFile, prog);
+        const F = Number((await probeFps(ffmpeg)).toFixed(3));
+        const pfps = dur <= 36 ? 2.5 : (dur <= 72 ? 1.25 : 0.8);
+        const R = Math.max(3, Math.round(4*pfps));
+        const PLATE = `tpad=start=${R}:stop=${R}:start_mode=clone:stop_mode=clone,tmedian=radius=${R}:percentile=0.5`;
+        const tPrev = Math.min(Math.max(0, curT()), Math.max(0, dur - 0.05));
+        const S = preview ? Math.max(0, tPrev - 4.5) : 0;
+        const seek = preview ? ['-ss', S.toFixed(2), '-t', '9'] : [];
+        for(const n of files) await rm(n);
+        await run(['-y', ...seek, '-i', inputName, '-an', '-vf', `fps=${pfps},format=gbrp`, '-c:v','ffv1','pl_s0.mkv'], 8, 12, 'Step 1/4 · sampling frames…');
+        let cur = 'pl_pa.mkv', alt = 'pl_pb.mkv';
+        await run(['-y','-i','pl_s0.mkv','-vf', PLATE, '-c:v','ffv1', cur], 12, 15, 'Step 2/4 · building clean background…');
+        for(let r = 0; r < 2; r++){
+          const base = 15 + r*7;
+          await run(['-y','-i','pl_s0.mkv','-i',cur,'-filter_complex', `[0:v]format=gbrp[a];[1:v]format=gbrp[b];${plateMask('a','b','o')}`, '-map','[o]','-c:v','ffv1','pl_c.mkv'], base, base + 4, 'Step 3/4 · refining background (' + (r+1) + '/2)…');
+          await rm(alt);
+          await run(['-y','-i','pl_c.mkv','-vf', PLATE, '-c:v','ffv1', alt], base + 4, base + 7, 'Step 3/4 · refining background (' + (r+1) + '/2)…');
+          await rm('pl_c.mkv'); await rm(cur); const t = cur; cur = alt; alt = t;
+        }
+        if(preview){
+          await run(['-y','-ss', tPrev.toFixed(2), '-i', inputName, '-ss', (tPrev - S).toFixed(2), '-i', cur, '-filter_complex',
+            `[0:v]format=gbrp[v0];[1:v]fps=${F},format=gbrp[p0];${plateMask('v0','p0','mo')};[mo]format=rgb24[vout]`,
+            '-map','[vout]','-an','-frames:v','1','wm_prev.png'], 30, 96, 'Step 4/4 · rendering preview…');
+          const data = await ffmpeg.readFile('wm_prev.png');
+          const url = URL.createObjectURL(new Blob([data], {type:'image/png'}));
+          prog.remove();
+          out.appendChild(el(`<div style="margin:8px 0;"><div style="font-size:12.5px; font-weight:700; margin-bottom:4px;">Preview at ${fmtTime(tPrev)} — looks good? Run <b>Remove watermark</b> for the whole video.</div><img src="${url}" style="width:100%; border-radius:10px; border:1px solid #E6E8EC;"></div>`));
+          return;
+        }
+        const fc = `[0:v]format=gbrp[v0];[1:v]fps=${F},format=gbrp[p0];${plateMask('v0','p0','mo')};[mo]scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p[vout]`;
+        const base = ['-y','-i', inputName, '-i', cur, '-filter_complex', fc, '-map','[vout]','-map','0:a?','-c:v','libx264','-preset','veryfast','-crf', o.crf, '-pix_fmt','yuv420p'];
+        try{
+          await run([...base, '-c:a','copy','-movflags','+faststart','wm_out.mp4'], 30, 96, 'Step 4/4 · removing watermark…');
+        }catch(e){
+          await rm('wm_out.mp4');
+          await run([...base, '-c:a','aac','-b:a','160k','-movflags','+faststart','wm_out.mp4'], 30, 96, 'Step 4/4 · removing watermark…');
+        }
+        prog.set(97, 'Preparing file…');
+        const data = await ffmpeg.readFile('wm_out.mp4');
+        const name = file.name.replace(/\.[^.]+$/, '') + '-no-watermark.mp4';
+        const blob = new Blob([data], {type:'video/mp4'});
+        downloadBlob(blob, name);
+        prog.set(100, 'Done'); prog.remove();
+        mountResult(out, `Done — ${name} (${(blob.size/1048576).toFixed(1)}MB) downloaded. This method only works where the background stays still; if a faint trace remains at a scene change, run the result through it once more.`);
+        await freeInput();
+      } finally {
+        try{ ffmpeg.off('progress', ph); }catch(e){}
+        unlog();
+        for(const n of files) await rm(n);
+      }
+    }
+
     // ---------- single-frame preview ----------
     async function doPreview(){
       if(busy) return;
@@ -8882,6 +8981,7 @@ TOOL_IMPL.videowmremove = {
       try{
         setBusy(true);
         const o = readOpts();
+        if(o.method === 'plate'){ await doPlate(true, out, prog, o); return; }
         const tPrev = Math.min(Math.max(0, curT()), Math.max(0, dur - 0.05));
         const graph = buildGraph(o.method, o.margin, o.zoomBack, true, tPrev, o); // preview shows every box regardless of time range
         prog.set(3, 'Loading video engine…');
@@ -8910,6 +9010,7 @@ TOOL_IMPL.videowmremove = {
       try{
         setBusy(true);
         const o = readOpts();
+        if(o.method === 'plate'){ await doPlate(false, out, prog, o); return; }
         const graph = buildGraph(o.method, o.margin, o.zoomBack, false, null, o);
         prog.set(3, 'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
