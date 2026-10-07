@@ -385,7 +385,7 @@ const TOOLS = [
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'carrompuzzle', name:'Carrom Puzzle', desc:'Real physics carrom board — pocket a coin, solve a puzzle for bonus stars', icon:'🎯', color:'#8E44AD', cat:'education'},
   {id:'typerace', name:'Type Race — Typing Practice Game', desc:'Self-paced typing speed & accuracy game — English words, sentences & Tamil words, with XP, levels & badges', icon:'🏁', color:'#FF5E5B', cat:'education'},
-  {id:'tamiltyping', name:'Tamil Typing — தமிழ் தட்டச்சு', desc:'Type Tamil with English letters (thamizh → தமிழ்) — live Unicode Tamil, tap a word to pick ந/ன/ண spellings. Free, offline, no AI', icon:'⌨️', color:'#D81B60', cat:'education', cost:0},
+  {id:'tamiltyping', name:'Tamil Typing — தமிழ் தட்டச்சு', desc:'Type Tamil with English letters (unakkaga → உனக்காக) — word suggestions, voice typing, Word/print export, auto-saved files. Free, no AI', icon:'⌨️', color:'#D81B60', cat:'education', cost:0},
   {id:'tamilfont', name:'Tamil Font Converter — Bamini to Unicode', desc:'Convert Bamini, TSCII, TAB, Anjal, Dinakaran & 20 old Tamil fonts to Unicode and back — free, in your browser', icon:'🔤', color:'#6A1B9A', cat:'education', cost:0},
   {id:'tamilnumwords', name:'Number to Tamil Words — எண்ணை தமிழில்', desc:'Write any number or rupee amount in Tamil words (1,25,000 → ஒரு லட்சத்து இருபத்தைந்தாயிரம்) for cheques & forms', icon:'🔢', color:'#00897B', cat:'education', cost:0},
   {id:'tamiltext', name:'Tamil Text Tools — தமிழ் உரைக் கருவிகள்', desc:'Count Tamil letters (uyir/mei/uyirmei), Tamil→Tanglish, Tamil alphabetical sort, remove duplicate lines, ௧௨௩ digits', icon:'📝', color:'#EF6C00', cat:'education', cost:0},
@@ -13906,66 +13906,202 @@ function ttChips(parent, items, current, onPick){
   parent.appendChild(row); return row;
 }
 
-// ---------------------------------------------------------------- தமிழ் தட்டச்சு
+/* Built-in common-word dictionary (roman → Tamil). Written for this project; used to rank typing suggestions. */
+const TAMIL_DICT = {
+vanakkam:'வணக்கம்', nandri:'நன்றி', nanri:'நன்றி', naan:'நான்', nee:'நீ', neenga:'நீங்கள்', neengal:'நீங்கள்', avan:'அவன்', aval:'அவள்', avar:'அவர்', avargal:'அவர்கள்', naangal:'நாங்கள்', naam:'நாம்', ennai:'என்னை', unnai:'உன்னை', enakku:'எனக்கு', unakku:'உனக்கு', unakkaga:'உனக்காக', enakkaga:'எனக்காக', ungalukku:'உங்களுக்கு',
+amma:'அம்மா', appa:'அப்பா', anna:'அண்ணா', akka:'அக்கா', thambi:'தம்பி', thangai:'தங்கை', thaatha:'தாத்தா', paatti:'பாட்டி', nanban:'நண்பன்', nanbar:'நண்பர்', aasiriyar:'ஆசிரியர்', maanavar:'மாணவர்', maanavan:'மாணவன்', kudumbam:'குடும்பம்', veedu:'வீடு', pallii:'பள்ளி', palli:'பள்ளி', kalloori:'கல்லூரி', ooru:'ஊர்', naadu:'நாடு', ulagam:'உலகம்',
+thamizh:'தமிழ்', tamil:'தமிழ்', thamil:'தமிழ்', thamizhnaadu:'தமிழ்நாடு', mozhi:'மொழி', thaaimozhi:'தாய்மொழி', pesu:'பேசு', pesuvom:'பேசுவோம்', padi:'படி', padikka:'படிக்க', padikkiren:'படிக்கிறேன்', ezhuthu:'எழுது', ezhuththu:'எழுத்து', pudhu:'புது', puthiya:'புதிய', nalla:'நல்ல', nalam:'நலம்', nallaa:'நல்லா', nalladhu:'நல்லது', romba:'ரொம்ப', migavum:'மிகவும்', konjam:'கொஞ்சம்', niraiya:'நிறைய', ellam:'எல்லாம்', ellaarum:'எல்லாரும்', yaar:'யார்', enna:'என்ன', eppadi:'எப்படி', eppothu:'எப்போது', enge:'எங்கே', ange:'அங்கே', inge:'இங்கே', ethu:'எது', edhu:'எது', yen:'ஏன்', evvalavu:'எவ்வளவு', ethanai:'எத்தனை',
+irukku:'இருக்கு', irukkiren:'இருக்கிறேன்', irukkirathu:'இருக்கிறது', illai:'இல்லை', illa:'இல்ல', undu:'உண்டு', vendum:'வேண்டும்', venum:'வேணும்', vaa:'வா', vaanga:'வாங்க', po:'போ', pogalam:'போகலாம்', ponen:'போனேன்', vandhen:'வந்தேன்', vanthen:'வந்தேன்', varugiren:'வருகிறேன்', varuven:'வருவேன்', sollu:'சொல்லு', solgiren:'சொல்கிறேன்', sonnen:'சொன்னேன்', paarkka:'பார்க்க', paarththen:'பார்த்தேன்', kelu:'கேள்', kettaen:'கேட்டேன்', seithi:'செய்தி', seiyum:'செய்யும்', seithen:'செய்தேன்', seiyalaam:'செய்யலாம்', thevai:'தேவை', mudiyum:'முடியும்', mudiyaathu:'முடியாது', theriyum:'தெரியும்', theriyaathu:'தெரியாது', purigirathu:'புரிகிறது', puriyum:'புரியும்', kodu:'கொடு', kudu:'குடு', edu:'எடு', vaangu:'வாங்கு', tharuven:'தருவேன்', nillu:'நில்லு', ukkaaru:'உக்கார்', saappidu:'சாப்பிடு', saappaadu:'சாப்பாடு', thanneer:'தண்ணீர்', kaalai:'காலை', maalai:'மாலை', iravu:'இரவு', pagal:'பகல்', inru:'இன்று', indru:'இன்று', naalai:'நாளை', nethu:'நேற்று', netru:'நேற்று', ippo:'இப்போ', ippothu:'இப்போது', appo:'அப்போ', appuram:'அப்புறம்', munbu:'முன்பு', pin:'பின்', neram:'நேரம்', naal:'நாள்', vaaram:'வாரம்', maatham:'மாதம்', varudam:'வருடம்', aandu:'ஆண்டு',
+ondru:'ஒன்று', irandu:'இரண்டு', moondru:'மூன்று', naangu:'நான்கு', ainthu:'ஐந்து', aaru:'ஆறு', ezhu:'ஏழு', ettu:'எட்டு', onbathu:'ஒன்பது', paththu:'பத்து', nooru:'நூறு', aayiram:'ஆயிரம்', latcham:'லட்சம்', kodi:'கோடி',
+kadai:'கடை', panam:'பணம்', kaasu:'காசு', vilai:'விலை', velai:'வேலை', thozhil:'தொழில்', kanakku:'கணக்கு', kanini:'கணினி', kaippesi:'கைப்பேசி', inaiyam:'இணையம்', mudhal:'முதல்', mudivu:'முடிவு', thodakkam:'தொடக்கம்', kalvi:'கல்வி', arivu:'அறிவு', ariviyal:'அறிவியல்', kanitham:'கணிதம்', varalaaru:'வரலாறு', puthagam:'புத்தகம்', thervu:'தேர்வு', pillai:'பிள்ளை', kuzhanthai:'குழந்தை', kuzhandhai:'குழந்தை',
+anbu:'அன்பு', kaadhal:'காதல்', magizhchi:'மகிழ்ச்சி', santhosham:'சந்தோஷம்', sandhosham:'சந்தோஷம்', kobam:'கோபம்', varutham:'வருத்தம்', vetri:'வெற்றி', thorvi:'தோல்வி', muyarchi:'முயற்சி', ennam:'எண்ணம்', kanavu:'கனவு', nambikkai:'நம்பிக்கை', sagothari:'சகோதரி', sagothar:'சகோதரர்', vaazhthukkal:'வாழ்த்துக்கள்', vaazhga:'வாழ்க', vaazhthu:'வாழ்த்து', paaraattu:'பாராட்டு', mannikkavum:'மன்னிக்கவும்', thayavu:'தயவு', seithu:'செய்து',
+aamaa:'ஆமா', aam:'ஆம்', illaiya:'இல்லையா', sari:'சரி', seri:'சரி', aana:'ஆனா', aanaal:'ஆனால்', athanaal:'அதனால்', athu:'அது', idhu:'இது', ithu:'இது', antha:'அந்த', intha:'இந்த', andha:'அந்த', indha:'இந்த', anga:'அங்க', inga:'இங்க', mattrum:'மற்றும்', matrum:'மற்றும்', alladhu:'அல்லது', allathu:'அல்லது', ennum:'இன்னும்', innum:'இன்னும்', mattum:'மட்டும்', kooda:'கூட', poala:'போல', pola:'போல', pol:'போல்', maathiri:'மாதிரி', vaaruungal:'வாருங்கள்', sollungal:'சொல்லுங்கள்', paarungal:'பாருங்கள்', ezhuthungal:'எழுதுங்கள்',
+chennai:'சென்னை', madurai:'மதுரை', kovai:'கோவை', coimbatore:'கோயம்புத்தூர்', thirunelveli:'திருநெல்வேலி', salem:'சேலம்', trichy:'திருச்சி', kanyakumari:'கன்னியாகுமரி', india:'இந்தியா', bharath:'பாரதம்', bharatham:'பாரதம்', tamilnadu:'தமிழ்நாடு', thiruvalluvar:'திருவள்ளுவர்', thirukkural:'திருக்குறள்', kural:'குறள்'
+};
+
+// ---------------------------------------------------------------- தமிழ் தட்டச்சு (editor)
 TOOL_IMPL.tamiltyping = {
   mount(container){
-    const chosen = {};
-    const body = el(`<div></div>`); container.appendChild(body);
-    body.appendChild(el(`<div class="note tamil">English எழுத்துகளில் தமிழை ஒலிப்பு முறையில் தட்டச்சு செய்யுங்கள் — எ.கா. <b>thamizh</b> → தமிழ், <b>ammaa</b> → அம்மா. கீழே தமிழில் உடனே தெரியும். <b>ஒரு சொல்லைத் தொட்டால்</b> ந/ன/ண, ல/ள/ழ, ர/ற போன்ற மாற்று எழுத்துக்கூட்டல்கள் வரும். இணையம், கணக்கு, AI — எதுவும் தேவையில்லை; முற்றிலும் இலவசம்.</div>`));
-    const ta = el(`<textarea id="ttIn" rows="5" style="${TT_TA}" placeholder="vanakkam, naan thamizh pesuvaen…" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>`);
-    body.appendChild(ta);
-    body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 6px;">தமிழ்</div>`));
-    const out = el(`<div class="tamil" style="min-height:96px; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; font-size:21px; line-height:2; background:#fff; white-space:pre-wrap; word-break:break-word;"></div>`);
-    body.appendChild(out);
-    const pop = el(`<div style="margin-top:8px;"></div>`); body.appendChild(pop);
-    const row = el(`<div class="btn-row" style="margin-top:12px;"></div>`);
-    const copyBtn = el(`<button class="btn">📋 Copy Tamil</button>`);
-    const dlBtn = el(`<button class="btn secondary">⬇️ Save .txt</button>`);
-    const clrBtn = el(`<button class="btn secondary">🧹 Clear</button>`);
-    row.appendChild(copyBtn); row.appendChild(dlBtn); row.appendChild(clrBtn); body.appendChild(row);
-    const key = el(`<details style="margin-top:14px; font-size:13px;"><summary style="cursor:pointer; font-weight:800;">⌨️ எழுத்து விசை அட்டவணை (Key chart)</summary>
-      <div class="tamil" style="line-height:1.9; margin-top:8px;">
-        <b>உயிர்:</b> a அ · aa ஆ · i இ · ee / ii ஈ · u உ · oo / uu ஊ · e எ · ae ஏ · ai ஐ · o ஒ · O ஓ · au ஔ<br>
-        <b>மெய்:</b> k க · ng ங · ch / s ச · nj ஞ · t / d ட · <b>N</b> ண · th த · n ந/ன (தானாக) · p / b ப · m ம · y ய · r ர · l ல · v / w வ · zh ழ · <b>L</b> ள · <b>R</b> ற · j ஜ · sh ஷ · h ஹ · ksh க்ஷ<br>
-        <b>சிறப்பு:</b> tr = ற்ற (kaatru → காற்று) · ndr = ன்ற (nandri → நன்றி) · ng+உயிர் = ங்க (angu → அங்கு) · nj+உயிர் = ஞ்ச (anjal → அஞ்சல்)<br>
-        <b>குறிப்பு:</b> பெரிய எழுத்து N, L, R தெளிவாக ண, ள, ற என எழுதும் (vaNakkam → வணக்கம், paLLi → பள்ளி). சொல்லைத் தொட்டும் மாற்றலாம்.
-      </div></details>`);
-    body.appendChild(key);
+    const LS = {
+      get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+      set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+    };
+    let files = LS.get('ttFiles', []); const learn = LS.get('ttLearn', {});
+    let curId = LS.get('ttCur', null); let lang = 'ta'; let fontPx = LS.get('ttFont', 20);
+    let cands = [], sel = 0, tokStart = -1, tokEnd = -1;
 
-    function plain(){ return ta.value.split(/([A-Za-z]+)/).map((tok, i)=> i % 2 ? (chosen[tok] || TamilCore.phoneticWord(tok)) : tok).join(''); }
-    function render(){
-      out.innerHTML = '';
-      const toks = ta.value.split(/([A-Za-z]+)/);
-      if(!ta.value){ out.appendChild(el(`<span style="color:var(--sub); font-size:14px;">தமிழ் இங்கே தெரியும்…</span>`)); return; }
-      toks.forEach((tok, i)=>{
-        if(i % 2){
-          const base = TamilCore.phoneticWord(tok);
-          const sp = el(`<span style="cursor:pointer; border-bottom:2px dotted #B8C4E8;" title="மாற்று வடிவங்கள்"></span>`);
-          sp.textContent = chosen[tok] || base;
-          sp.onclick = ()=> showVariants(tok, base);
-          out.appendChild(sp);
-        } else if(tok){ out.appendChild(document.createTextNode(tok)); }
+    function candidates(raw){
+      const lw = raw.toLowerCase(); const out = [];
+      const add = t => { if(t && !out.includes(t)) out.push(t); };
+      if(learn[lw]) add(learn[lw]);
+      if(TAMIL_DICT[lw]) add(TAMIL_DICT[lw]);
+      const romans = [raw]; if(/nr/.test(raw)) romans.push(raw.replace(/nr/g, 'ndr'));
+      romans.forEach(r=>{
+        const base = TamilCore.phoneticWord(r); add(base);
+        const re = /aa|ee|ii|oo|uu|ae|ai|au|a|e|i|o|u/g; let m; const spots = [];
+        while((m = re.exec(r))) spots.push([m.index, m[0]]);
+        const longer = {a:'aa', i:'ee', u:'oo', e:'ae', o:'oo'}, shorter = {aa:'a', ee:'i', ii:'i', oo:'o', uu:'u', ae:'e'};
+        spots.forEach(([i, v])=>{ const nv = longer[v] || shorter[v]; if(nv) add(TamilCore.phoneticWord(r.slice(0, i) + nv + r.slice(i + v.length))); });
+      });
+      TamilCore.variants(out[0] || '', 5).forEach(add);
+      add(raw);
+      return out.slice(0, 9);
+    }
+
+    // ---------- UI
+    const body = el(`<div></div>`); container.appendChild(body);
+    body.appendChild(el(`<div class="note tamil">English எழுத்துகளில் தட்டச்சு செய்யுங்கள் (<b>unakkaga</b>); பரிந்துரைகள் தோன்றும் — <b>Space</b> = முதல் சொல், <b>1–9</b> அல்லது ↑ ↓ + Enter = தேர்வு, <b>Esc</b> = ஆங்கிலமாகவே விடு. <b>Ctrl+Space</b> = தமிழ்/English மாற்று. உங்கள் தேர்வுகளை இந்த tool நினைவில் வைத்துக்கொள்ளும். முற்றிலும் இலவசம் — AI, server எதுவும் இல்லை.</div>`));
+    const bar = el(`<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0;"></div>`);
+    const bFiles = el(`<button class="btn secondary" style="padding:6px 10px;">📁 கோப்புகள்</button>`);
+    const bNew = el(`<button class="btn secondary" style="padding:6px 10px;">＋ புதிது</button>`);
+    const bMinus = el(`<button class="btn secondary" style="padding:6px 10px;" title="Smaller">A−</button>`);
+    const bPlus = el(`<button class="btn secondary" style="padding:6px 10px;" title="Larger">A＋</button>`);
+    const bBold = el(`<button class="btn secondary" style="padding:6px 10px;" title="Bold (Word export)"><b>B</b></button>`);
+    bar.append(bFiles, bNew, bMinus, bPlus);
+    body.appendChild(bar);
+    const filesBox = el(`<div style="display:none; border:1px solid var(--line); border-radius:12px; padding:8px; margin-bottom:8px; background:#F7F9FF;"></div>`);
+    body.appendChild(filesBox);
+    const wrap = el(`<div style="position:relative;"></div>`);
+    const ta = el(`<textarea rows="10" class="tamil" style="${TT_TA} font-size:${fontPx}px; line-height:1.8; min-height:260px;" placeholder="இங்கே தட்டச்சு செய்யுங்கள்… vanakkam" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>`);
+    const pop = el(`<div role="listbox" style="display:none; position:absolute; z-index:20; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 6px 22px rgba(0,0,0,.18); min-width:150px; max-width:92%; overflow:hidden;"></div>`);
+    wrap.append(ta, pop); body.appendChild(wrap);
+    const foot = el(`<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px;"></div>`);
+    const langBtn = el(`<button class="btn" style="padding:8px 14px;">தமிழ்</button>`);
+    const voiceBtn = el(`<button class="btn secondary" style="padding:8px 14px;">🎤 குரல் தட்டச்சு</button>`);
+    const copyBtn = el(`<button class="btn secondary" style="padding:8px 14px;">📋 Copy</button>`);
+    const txtBtn = el(`<button class="btn secondary" style="padding:8px 14px;">⬇️ .txt</button>`);
+    const docBtn = el(`<button class="btn secondary" style="padding:8px 14px;">⬇️ Word (.doc)</button>`);
+    const prBtn = el(`<button class="btn secondary" style="padding:8px 14px;">🖨️ Print</button>`);
+    const clrBtn = el(`<button class="btn secondary" style="padding:8px 14px;">🧹 Clear</button>`);
+    foot.append(langBtn, voiceBtn, copyBtn, txtBtn, docBtn, prBtn, clrBtn); body.appendChild(foot);
+    const stat = el(`<div class="tamil" style="font-size:12px; color:var(--sub); margin-top:8px;"></div>`); body.appendChild(stat);
+    body.appendChild(el(`<details style="margin-top:14px; font-size:13px;"><summary style="cursor:pointer; font-weight:800;">⌨️ எழுத்து விசை அட்டவணை</summary>
+      <div class="tamil" style="line-height:1.9; margin-top:8px;">
+        <b>உயிர்:</b> a அ · aa ஆ · i இ · ee ஈ · u உ · oo ஊ · e எ · ae ஏ · ai ஐ · o ஒ · oo/O ஓ · au ஔ<br>
+        <b>மெய்:</b> k க · ng ங · ch/s ச · nj ஞ · t/d ட · <b>N</b> ண · th த · n ந/ன · p/b ப · m ம · y ய · r ர · l ல · v/w வ · zh ழ · <b>L</b> ள · <b>R</b> ற · j ஜ · sh ஷ · h ஹ · ksh க்ஷ<br>
+        <b>சிறப்பு:</b> ndr = ன்ற (nandri → நன்றி) · tr = ற்ற (kaatru → காற்று) · ng+உயிர் = ங்க (angu → அங்கு) · nj+உயிர் = ஞ்ச (anjal → அஞ்சல்)<br>
+        <b>சொல் தவறா?</b> பரிந்துரைகளில் மாற்று எழுத்துக்கூட்டல்கள் (ந/ன/ண, ல/ள/ழ, ர/ற, நெடில்/குறில்) இருக்கும்; தேர்ந்தெடுத்தால் அடுத்த முறை அதுவே முதலில் வரும்.
+      </div></details>`));
+
+    // ---------- storage of files
+    function cur(){ return files.find(f=>f.id === curId); }
+    function persist(){ const f = cur(); if(f){ f.text = ta.value; f.ts = Date.now(); f.title = (ta.value.trim().split(/\n/)[0] || 'பெயரில்லா').slice(0, 30); } LS.set('ttFiles', files.slice(0, 50)); LS.set('ttCur', curId); }
+    function newFile(){ persist(); const f = {id: 'f' + Date.now(), title: 'பெயரில்லா', text: '', ts: Date.now()}; files.unshift(f); curId = f.id; ta.value = ''; hidePop(); renderFiles(); stats(); ta.focus(); }
+    function renderFiles(){
+      filesBox.innerHTML = '';
+      if(!files.length){ filesBox.appendChild(el(`<div class="tamil" style="font-size:13px; color:var(--sub);">கோப்புகள் எதுவும் இல்லை. உங்கள் எழுத்து இந்த உலாவியில் மட்டுமே சேமிக்கப்படும்.</div>`)); return; }
+      files.forEach(f=>{
+        const r = el(`<div style="display:flex; gap:8px; align-items:center; padding:6px 4px; border-bottom:1px solid var(--line);"></div>`);
+        const t = el(`<button class="tamil" style="flex:1; text-align:left; background:none; border:0; cursor:pointer; font-size:14px; font-weight:${f.id === curId ? 800 : 500};"></button>`);
+        t.textContent = f.title || 'பெயரில்லா';
+        t.onclick = ()=>{ persist(); curId = f.id; ta.value = f.text; hidePop(); renderFiles(); stats(); LS.set('ttCur', curId); };
+        const d = el(`<button style="background:none; border:0; cursor:pointer;" title="Delete">🗑️</button>`);
+        d.onclick = ()=>{ if(!confirm('இந்தக் கோப்பை நீக்கவா?')) return; files = files.filter(x=>x.id !== f.id); if(curId === f.id){ curId = files[0] ? files[0].id : null; ta.value = files[0] ? files[0].text : ''; } LS.set('ttFiles', files); LS.set('ttCur', curId); renderFiles(); stats(); };
+        r.append(t, d); filesBox.appendChild(r);
       });
     }
-    function showVariants(roman, base){
+    function stats(){
+      const a = TamilCore.analyze(ta.value);
+      stat.textContent = `${a.words} சொற்கள் · ${a.tamilLetters} தமிழ் எழுத்துகள் · இந்த உலாவியில் தானாகச் சேமிக்கப்படுகிறது`;
+    }
+
+    // ---------- caret position (mirror)
+    function caretXY(pos){
+      const cs = getComputedStyle(ta); const m = document.createElement('div');
+      ['fontFamily','fontSize','fontWeight','lineHeight','letterSpacing','padding','border','boxSizing','width','whiteSpace','wordBreak'].forEach(p=>{ m.style[p] = cs[p]; });
+      m.style.position = 'absolute'; m.style.visibility = 'hidden'; m.style.whiteSpace = 'pre-wrap'; m.style.wordWrap = 'break-word'; m.style.top = '0'; m.style.left = '0';
+      m.textContent = ta.value.slice(0, pos); const s = document.createElement('span'); s.textContent = '​'; m.appendChild(s);
+      wrap.appendChild(m); const r = {x: s.offsetLeft - ta.scrollLeft, y: s.offsetTop - ta.scrollTop, h: parseFloat(cs.lineHeight) || 30}; wrap.removeChild(m); return r;
+    }
+
+    // ---------- suggestions
+    function hidePop(){ pop.style.display = 'none'; cands = []; tokStart = -1; }
+    function drawPop(){
       pop.innerHTML = '';
-      const list = TamilCore.variants(base, 24);
-      const box = el(`<div style="border:1px solid var(--line); border-radius:12px; padding:10px; background:#F7F9FF;"><div class="tamil" style="font-size:12px; font-weight:800; color:var(--sub); margin-bottom:6px;">“${escapeHtml(roman)}” — சரியான எழுத்துக்கூட்டலைத் தேர்ந்தெடுங்கள்:</div></div>`);
-      const wrap = el(`<div style="display:flex; flex-wrap:wrap; gap:8px;"></div>`);
-      list.forEach(v=>{
-        const b = el(`<button class="filter-chip tamil" style="font-size:17px;"></button>`);
-        b.textContent = v; b.onclick = ()=>{ chosen[roman] = v; pop.innerHTML = ''; render(); };
-        wrap.appendChild(b);
+      cands.forEach((c, i)=>{
+        const row = el(`<div role="option" class="tamil" style="padding:7px 12px; cursor:pointer; font-size:16px; white-space:nowrap; ${i === sel ? 'background:#DDEEDD; font-weight:700;' : ''}"><span style="font-size:11px; color:var(--sub); margin-right:8px;">${i + 1}.</span></span></div>`);
+        row.appendChild(document.createTextNode(c));
+        row.addEventListener('mousedown', e=>{ e.preventDefault(); sel = i; commit(''); });
+        row.addEventListener('touchstart', e=>{ e.preventDefault(); sel = i; commit(''); }, {passive:false});
+        pop.appendChild(row);
       });
-      box.appendChild(wrap);
-      if(list.length <= 1) box.appendChild(el(`<div class="tamil" style="font-size:12px; color:var(--sub); margin-top:6px;">இந்த சொல்லுக்கு மாற்று வடிவங்கள் இல்லை.</div>`));
-      pop.appendChild(box);
+      const p = caretXY(tokStart);
+      pop.style.display = 'block';
+      const maxL = Math.max(0, wrap.clientWidth - pop.offsetWidth - 4);
+      pop.style.left = Math.min(Math.max(0, p.x), maxL) + 'px';
+      const below = p.y + p.h + 4; const h = pop.offsetHeight;
+      pop.style.top = (below + h > ta.clientHeight + 8 && p.y - h - 4 > 0 ? p.y - h - 4 : below) + 'px';
     }
-    ta.addEventListener('input', ()=>{ pop.innerHTML = ''; render(); });
-    copyBtn.onclick = ()=> ttCopy(plain(), copyBtn, '📋 Copy Tamil');
-    dlBtn.onclick = ()=> downloadBlob(new Blob([plain()], {type:'text/plain;charset=utf-8'}), 'tamil-text.txt');
-    clrBtn.onclick = ()=>{ ta.value = ''; pop.innerHTML = ''; render(); ta.focus(); };
-    render();
+    function currentToken(){
+      const pos = ta.selectionStart; if(pos !== ta.selectionEnd) return null;
+      const m = /[A-Za-z]+$/.exec(ta.value.slice(0, pos)); if(!m) return null;
+      return {start: pos - m[0].length, end: pos, text: m[0]};
+    }
+    function refresh(){
+      if(lang !== 'ta'){ hidePop(); return; }
+      const t = currentToken(); if(!t){ hidePop(); return; }
+      tokStart = t.start; tokEnd = t.end; cands = candidates(t.text); sel = 0; drawPop();
+    }
+    function replaceRange(s, e, text){
+      ta.focus(); ta.setSelectionRange(s, e);
+      let ok = false; try{ ok = document.execCommand('insertText', false, text); }catch(x){}
+      if(!ok){ ta.setRangeText(text, s, e, 'end'); }
+    }
+    function commit(after){
+      if(tokStart < 0 || !cands.length) return;
+      const t = ta.value.slice(tokStart, tokEnd), chosen = cands[sel];
+      if(chosen !== t){ learn[t.toLowerCase()] = chosen; LS.set('ttLearn', learn); }
+      const ts = tokStart, te = tokEnd; hidePop(); replaceRange(ts, te, chosen + after); onChange();
+    }
+    function onChange(){ persist(); stats(); }
+    ta.addEventListener('input', ()=>{ refresh(); onChange(); });
+    ta.addEventListener('click', refresh);
+    ta.addEventListener('blur', ()=>{ setTimeout(hidePop, 150); });
+    ta.addEventListener('keydown', e=>{
+      if(e.ctrlKey && e.code === 'Space'){ e.preventDefault(); toggleLang(); return; }
+      if(pop.style.display === 'none' || !cands.length) return;
+      if(e.key === 'ArrowDown'){ e.preventDefault(); sel = (sel + 1) % cands.length; drawPop(); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); sel = (sel - 1 + cands.length) % cands.length; drawPop(); }
+      else if(e.key === ' '){ e.preventDefault(); commit(' '); }
+      else if(e.key === 'Enter'){ e.preventDefault(); commit('\n'); }
+      else if(e.key === 'Tab'){ e.preventDefault(); commit(''); }
+      else if(e.key === 'Escape'){ e.preventDefault(); hidePop(); }
+      else if(/^[1-9]$/.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey){ const i = +e.key - 1; if(i < cands.length){ e.preventDefault(); sel = i; commit(''); } }
+      else if(/^[.,;:!?)\]}'"\-]$/.test(e.key)){ e.preventDefault(); commit(e.key); }
+    });
+    ta.addEventListener('keyup', e=>{ if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) refresh(); });
+
+    // ---------- toolbar
+    function toggleLang(){ lang = lang === 'ta' ? 'en' : 'ta'; langBtn.textContent = lang === 'ta' ? 'தமிழ்' : 'English'; langBtn.className = lang === 'ta' ? 'btn' : 'btn secondary'; hidePop(); ta.focus(); }
+    langBtn.onclick = toggleLang;
+    bFiles.onclick = ()=>{ filesBox.style.display = filesBox.style.display === 'none' ? 'block' : 'none'; renderFiles(); };
+    bNew.onclick = newFile;
+    const setFont = d=>{ fontPx = Math.min(48, Math.max(12, fontPx + d)); ta.style.fontSize = fontPx + 'px'; LS.set('ttFont', fontPx); };
+    bMinus.onclick = ()=>setFont(-2); bPlus.onclick = ()=>setFont(2);
+    copyBtn.onclick = ()=> ttCopy(ta.value, copyBtn, '📋 Copy');
+    txtBtn.onclick = ()=> downloadBlob(new Blob([ta.value], {type:'text/plain;charset=utf-8'}), 'tamil-text.txt');
+    docBtn.onclick = ()=>{
+      const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body style="font-family:\'Noto Sans Tamil\',\'Latha\',sans-serif; font-size:' + Math.round(fontPx * 0.6) + 'pt; line-height:1.6;">' + escapeHtml(ta.value).replace(/\n/g, '<br>') + '</body></html>';
+      downloadBlob(new Blob(['﻿', html], {type:'application/msword'}), 'tamil-text.doc');
+    };
+    prBtn.onclick = ()=>{ const w = window.open('', '_blank'); if(!w){ showToast('Pop-up blocked — allow pop-ups to print.'); return; } w.document.write('<meta charset="utf-8"><title>Tamil text</title><body style="font-family:\'Noto Sans Tamil\',sans-serif;font-size:16pt;line-height:1.7;white-space:pre-wrap;">' + escapeHtml(ta.value) + '</body>'); w.document.close(); w.focus(); setTimeout(()=>w.print(), 300); };
+    clrBtn.onclick = ()=>{ if(ta.value && !confirm('எல்லாவற்றையும் அழிக்கவா?')) return; ta.value = ''; hidePop(); onChange(); ta.focus(); };
+
+    // ---------- voice typing (Chrome: free browser speech recognition)
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null, listening = false;
+    if(!SR){ voiceBtn.style.display = 'none'; }
+    voiceBtn.onclick = ()=>{
+      if(listening && rec){ rec.stop(); return; }
+      rec = new SR(); rec.lang = lang === 'ta' ? 'ta-IN' : 'en-IN'; rec.continuous = true; rec.interimResults = false;
+      rec.onresult = ev=>{ for(let i = ev.resultIndex; i < ev.results.length; i++){ if(ev.results[i].isFinal){ const t = ev.results[i][0].transcript.trim(); const pos = ta.selectionEnd; const pre = ta.value.slice(0, pos); replaceRange(pos, pos, (pre && !/\s$/.test(pre) ? ' ' : '') + t + ' '); onChange(); } } };
+      rec.onend = ()=>{ listening = false; voiceBtn.textContent = '🎤 குரல் தட்டச்சு'; voiceBtn.className = 'btn secondary'; };
+      rec.onerror = e=>{ showToast(e.error === 'not-allowed' ? 'மைக் அனுமதி தேவை (Microphone permission)' : 'குரல் பிழை: ' + e.error); };
+      try{ rec.start(); listening = true; voiceBtn.textContent = '⏹ நிறுத்து (கேட்கிறது…)'; voiceBtn.className = 'btn'; ta.focus(); }catch(e){ showToast('Voice typing could not start.'); }
+    };
+
+    // ---------- boot
+    if(!cur()){ const f = {id: 'f' + Date.now(), title: 'பெயரில்லா', text: '', ts: Date.now()}; files.unshift(f); curId = f.id; }
+    ta.value = cur().text || ''; stats();
   }
 };
 
