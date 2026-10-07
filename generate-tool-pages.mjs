@@ -22,6 +22,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { SEO_EXTRA } from './seo-content.mjs';
 
 const SITE = 'https://pdftoolsindia.com';
 const OUT_DIR = './tools';
@@ -78,12 +79,16 @@ function pageHtml(t, slug, related) {
   const metaDesc = isPaid
     ? `${t.desc}. Use ${t.name} online at PDF Tools India — AI-powered, ${t.cost} credit${t.cost>1?'s':''} per use, works on mobile & desktop.`
     : `${t.desc}. Use ${t.name} free online at PDF Tools India — no signup, no install required, works on mobile & desktop.`;
+  const X = SEO_EXTRA[t.id];
+  const title2 = X ? X.title : title;
+  const metaDesc2 = X ? X.desc : metaDesc;
   const costNote = isPaid
     ? `<p class="note">🤖 This is an AI-powered tool — costs ${t.cost} credit${t.cost>1?'s':''} per use. You'll always see this cost and confirm before it's charged.</p>`
     : `<p class="note">🔒 ${CATEGORY_BLURB[t.cat] || 'Free to use.'}</p>`;
 
   const free = !isPaid;
   const faqs = [
+    ...((SEO_EXTRA[t.id] && SEO_EXTRA[t.id].faqs) || []),
     [`Is ${t.name} free to use?`, free ? `Yes. ${t.name} is free on PDF Tools India — no signup, no watermark and no daily limit.` : `${t.name} is AI-powered, so it uses ${t.cost} credit${t.cost>1?'s':''} per run. You always see the cost and confirm before anything is charged; the rest of the site's tools stay free.`],
     [`Is my data safe when I use ${t.name}?`, (t.cat === 'pdf' || t.cat === 'image' || t.cat === 'education') ? `Yes. ${t.name} runs inside your own browser, so your files and text never leave your device.` : (t.cat === 'ai' ? `Your file is sent only to the AI service needed to produce the result, over an encrypted connection, and is not kept after processing.` : `Most processing happens in your browser. Heavy video jobs can optionally use a faster server, and files there are deleted after processing.`)],
     [`Does ${t.name} work on mobile?`, `Yes. ${t.name} works on Android phones, iPhones, tablets and desktop browsers. The interface is available in Tamil and English.`],
@@ -104,12 +109,12 @@ function pageHtml(t, slug, related) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${escapeHtml(title)}</title>
-<meta name="description" content="${escapeHtml(metaDesc)}">
+<title>${escapeHtml(title2)}</title>
+<meta name="description" content="${escapeHtml(metaDesc2)}">
 <link rel="canonical" href="${SITE}/tools/${slug}">
 <meta property="og:type" content="website">
-<meta property="og:title" content="${escapeHtml(title)}">
-<meta property="og:description" content="${escapeHtml(metaDesc)}">
+<meta property="og:title" content="${escapeHtml(title2)}">
+<meta property="og:description" content="${escapeHtml(metaDesc2)}">
 <meta property="og:url" content="${SITE}/tools/${slug}">
 <meta property="og:site_name" content="PDF Tools India">
 <link rel="icon" href="/favicon.ico">
@@ -152,17 +157,21 @@ function pageHtml(t, slug, related) {
     </div>
     <div class="section">
       <h2>About this tool</h2>
-      <p>${escapeHtml(t.name)} is part of PDF Tools India's ${escapeHtml(catLabel)} toolkit. ${escapeHtml(t.desc)}. ${CATEGORY_BLURB[t.cat] || ''} Available in Tamil and English, on both mobile and desktop, with no account required to try it.</p>
+      <p>${X ? escapeHtml(X.intro) + ' ' : ''}${escapeHtml(t.name)} is part of PDF Tools India's ${escapeHtml(catLabel)} toolkit. ${escapeHtml(t.desc)}. ${CATEGORY_BLURB[t.cat] || ''} Available in Tamil and English, on both mobile and desktop, with no account required to try it.</p>
     </div>
     <div class="section">
       <h2>How it works</h2>
       <ol>
-        <li>Click "Open ${escapeHtml(t.name)}" above.</li>
+        ${X ? X.steps.map(x => `<li>${escapeHtml(x)}</li>`).join('\n        ') : `<li>Click "Open ${escapeHtml(t.name)}" above.</li>
         <li>Follow the simple on-screen steps — add a file, type your input, or record, depending on the tool.</li>
-        <li>Download or copy your result — that's it.</li>
+        <li>Download or copy your result — that's it.</li>`}
       </ol>
     </div>
-    <div class="section faq">
+${X && X.uses ? `    <div class="section">
+      <h2>Common uses</h2>
+      <ul style="font-size:14px;line-height:1.8;color:#333;margin:0;padding-left:20px;">${X.uses.map(u => `<li>${escapeHtml(u)}</li>`).join('')}</ul>
+    </div>
+` : ''}    <div class="section faq">
       <h2>Frequently asked questions</h2>
       ${faqHtml}
     </div>
