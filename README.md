@@ -109,3 +109,10 @@ NVIDIA's build.nvidia.com catalog retires models on short notice — `meta/llama
 - Education and Image categories split into lazy-loaded `category-*.js` files (see File Structure above) to reduce initial page weight.
 - Confirmed `server.js` (with the `/api/ai/image` Text-to-Image endpoint) is deployed to Cloud Run and live — verified via `curl -X POST .../api/ai/image` returning the expected "login required" auth error (not "route not found").
 - Removed 2 dead files from the repo: `bill-quotation-maker.html` (its tool was consolidated away) and `kamakshi_gst_checking.html` (an exact byte-for-byte duplicate of `gst-checking.html`). Also removed `bar-collection-register.html` (never wired up as a tool, confirmed no longer needed).
+
+
+## தமிழ் கருவிகள் (Tamil toolkit — free, no AI, runs in the browser)
+- `tamiltyping` Tamil Typing (Tanglish → Unicode Tamil), `tamilfont` Tamil Font Converter, `tamilnumwords` Number → Tamil words, `tamiltext` Tamil Text Tools. All `cat:'education'`, `cost:0`.
+- Logic lives in the inline `TamilCore` module in `index.source.html` (numbers, phonetic typing, sorting, letter analysis).
+- `tamil-legacy-converter.js` is the MIT-licensed npm package `tamil-to-unicode-convertor` (Bamini/TSCII/TAB/… tables), lazy-loaded only by the font converter.
+- Do NOT run `generate-tool-pages.mjs` blindly: it drops hand-added sitemap URLs and renames some slugs.

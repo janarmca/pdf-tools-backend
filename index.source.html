@@ -385,6 +385,10 @@ const TOOLS = [
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
   {id:'carrompuzzle', name:'Carrom Puzzle', desc:'Real physics carrom board — pocket a coin, solve a puzzle for bonus stars', icon:'🎯', color:'#8E44AD', cat:'education'},
   {id:'typerace', name:'Type Race — Typing Practice Game', desc:'Self-paced typing speed & accuracy game — English words, sentences & Tamil words, with XP, levels & badges', icon:'🏁', color:'#FF5E5B', cat:'education'},
+  {id:'tamiltyping', name:'Tamil Typing — தமிழ் தட்டச்சு', desc:'Type Tamil with English letters (thamizh → தமிழ்) — live Unicode Tamil, tap a word to pick ந/ன/ண spellings. Free, offline, no AI', icon:'⌨️', color:'#D81B60', cat:'education', cost:0},
+  {id:'tamilfont', name:'Tamil Font Converter — Bamini to Unicode', desc:'Convert Bamini, TSCII, TAB, Anjal, Dinakaran & 20 old Tamil fonts to Unicode and back — free, in your browser', icon:'🔤', color:'#6A1B9A', cat:'education', cost:0},
+  {id:'tamilnumwords', name:'Number to Tamil Words — எண்ணை தமிழில்', desc:'Write any number or rupee amount in Tamil words (1,25,000 → ஒரு லட்சத்து இருபத்தைந்தாயிரம்) for cheques & forms', icon:'🔢', color:'#00897B', cat:'education', cost:0},
+  {id:'tamiltext', name:'Tamil Text Tools — தமிழ் உரைக் கருவிகள்', desc:'Count Tamil letters (uyir/mei/uyirmei), Tamil→Tanglish, Tamil alphabetical sort, remove duplicate lines, ௧௨௩ digits', icon:'📝', color:'#EF6C00', cat:'education', cost:0},
 
 ];
 
@@ -13636,6 +13640,480 @@ TOOL_IMPL.videowatermark = {
 };
 
 /* ===================== MATH PRACTICE SHEETS ===================== */
+/* TamilCore — pure, dependency-free Tamil helpers (no network, no AI). */
+const TamilCore = (function(){
+  const PULLI = '்';
+  const SIGNS = { 'ா':'ா','ி':'ி','ீ':'ீ','ு':'ு','ூ':'ூ','ெ':'ெ','ே':'ே','ை':'ை','ொ':'ொ','ோ':'ோ','ௌ':'ௌ' };
+
+  // ---------------------------------------------------------------- number -> Tamil words
+  const ONES = ['பூஜ்யம்','ஒன்று','இரண்டு','மூன்று','நான்கு','ஐந்து','ஆறு','ஏழு','எட்டு','ஒன்பது','பத்து','பதினொன்று','பன்னிரண்டு','பதிமூன்று','பதினான்கு','பதினைந்து','பதினாறு','பதினேழு','பதினெட்டு','பத்தொன்பது'];
+  const TENS = [null,null,'இருபது','முப்பது','நாற்பது','ஐம்பது','அறுபது','எழுபது','எண்பது','தொண்ணூறு'];
+  const HUNDREDS = [null,'நூறு','இருநூறு','முந்நூறு','நானூறு','ஐந்நூறு','அறுநூறு','எழுநூறு','எண்ணூறு','தொள்ளாயிரம்'];
+  const VOWEL_SIGN = { 'அ':'', 'ஆ':'ா', 'இ':'ி', 'ஈ':'ீ', 'உ':'ு', 'ஊ':'ூ', 'எ':'ெ', 'ஏ':'ே', 'ஐ':'ை', 'ஒ':'ொ', 'ஓ':'ோ', 'ஔ':'ௌ' };
+  const isVowelStart = s => /^[அ-ஔ]/.test(s);
+  // combining form of a word that is followed by more number words
+  function stemOf(w){
+    if(w.endsWith('ம்')) return w.slice(0, -2) + 'த்து';       // ஆயிரம் -> ஆயிரத்து
+    if(w.endsWith('று')) return w.slice(0, -2) + 'ற்று';       // நூறு -> நூற்று
+    if(w.endsWith('து')) return w.slice(0, -2) + 'த்து';       // இருபது -> இருபத்து
+    return w;
+  }
+  // join stem + next word. mode 'sandhi': merge a vowel-initial next word; 'space': keep separate.
+  function joinNum(stem, rest, mode){
+    if(!rest) return stem;
+    const first = rest.charAt(0);
+    if(mode === 'sandhi' && isVowelStart(rest) && stem.endsWith('\u0BC1')){
+      // ...த்து + அ/இ/உ...  =>  ...த்  + vowel-sign   (இருபத்து + இரண்டு = இருபத்திரண்டு)
+      return stem.slice(0, -1) + (VOWEL_SIGN[first] || '') + rest.slice(1);
+    }
+    if(/^[கசதப]/.test(first)){                                  // வல்லினம் மிகும்: நூற்றுப் பத்து
+      return stem + first + PULLI + ' ' + rest;
+    }
+    return stem + ' ' + rest;
+  }
+  function below100(n){
+    if(n < 20) return ONES[n];
+    const t = Math.floor(n/10), u = n % 10;
+    if(!u) return TENS[t];
+    return joinNum(stemOf(TENS[t]), ONES[u], 'sandhi');
+  }
+  function below1000(n){
+    if(n < 100) return below100(n);
+    const h = Math.floor(n/100), r = n % 100;
+    if(h === 9){ const nine = 'தொள்ளாயிரம்'; return r ? joinNum(stemOf(nine), below100(r), 'sandhi') : nine; }
+    const hw = HUNDREDS[h];
+    return r ? joinNum(stemOf(hw), below100(r), 'sandhi') : hw;
+  }
+  // multiplier + ஆயிரம் (இரண்டு -> இரண்டாயிரம்)
+  function times1000(m){
+    const w = below100(m);
+    if(m === 1) return 'ஆயிரம்';
+    if(w.endsWith('ு')) return w.slice(0, -1) + 'ா' + 'யிரம்';      // ...ு + ஆயிரம்  => ...ாயிரம் (ஒலி இணைப்பு)
+    return w + ' ஆயிரம்';
+  }
+  /**
+   * n: non-negative integer < 1e12.  style: 'lakh-pure' uses இலட்சம், default 'லட்சம்'
+   */
+  function numberToWords(n, opts){
+    opts = opts || {};
+    const lak = opts.pure ? 'இலட்சம்' : 'லட்சம்';
+    if(!Number.isInteger(n) || n < 0 || n >= 1e12) throw new RangeError('0 முதல் 99,99,99,99,999 வரை மட்டும்');
+    if(n === 0) return ONES[0];
+    const crore = Math.floor(n / 1e7); let rem = n % 1e7;
+    const lakh = Math.floor(rem / 1e5); rem = rem % 1e5;
+    const thou = Math.floor(rem / 1e3); rem = rem % 1e3;
+    // pieces: [stem-capable word, mode]
+    const parts = [];
+    if(crore){ parts.push({ w: (crore === 1 ? 'ஒரு' : numberToWords(crore, opts)) + ' கோடி', kind:'crore' }); }
+    if(lakh){ parts.push({ w: (lakh === 1 ? 'ஒரு' : below100(lakh)) + ' ' + lak, kind:'lakh' }); }
+    if(thou){ parts.push({ w: times1000(thou), kind:'thou' }); }
+    if(rem){ parts.push({ w: below1000(rem), kind:'rest' }); }
+    let out = '';
+    for(let i = parts.length - 1; i >= 0; i--){
+      const p = parts[i];
+      if(i === parts.length - 1){ out = p.w; continue; }
+      if(p.kind === 'crore'){ out = p.w.replace(/கோடி$/, 'கோடியே') + ' ' + out; continue; }
+      // lakh / thousand: ...ம் -> ...த்து
+      const stem = p.w.replace(/ம்$/, 'த்து');
+      out = joinNum(stem, out, 'space');
+    }
+    return out;
+  }
+  function rupeesToWords(amount, opts){
+    const s = String(amount).replace(/[,\s₹]/g, '');
+    if(!/^\d+(\.\d{1,2})?$/.test(s)) throw new Error('சரியான தொகையை உள்ளிடவும் (எ.கா. 12500.50)');
+    const [r, p = ''] = s.split('.');
+    const rupees = Number(r), paise = Number((p + '00').slice(0, 2));
+    let out = 'ரூபாய் ' + numberToWords(rupees, opts);
+    if(paise) out += ' மற்றும் ' + numberToWords(paise, opts) + ' பைசா';
+    return out + ' மட்டும்';
+  }
+  const TAMIL_DIGITS = '௦௧௨௩௪௫௬௭௮௯';
+  function toTamilDigits(s){ return String(s).replace(/[0-9]/g, d => TAMIL_DIGITS[+d]); }
+  function fromTamilDigits(s){ return String(s).replace(/[௦-௯]/g, d => String(TAMIL_DIGITS.indexOf(d))); }
+
+  // ---------------------------------------------------------------- phonetic (Tanglish) typing
+  const VOW = [
+    ['aa','ஆ','ா'],['ai','ஐ','ை'],['au','ஔ','ௌ'],['ae','ஏ','ே'],['ee','ஈ','ீ'],['ii','ஈ','ீ'],['oo','ஊ','ூ'],['uu','ஊ','ூ'],
+    ['a','அ',''],['i','இ','ி'],['u','உ','ு'],['e','எ','ெ'],['o','ஒ','ொ'],
+    ['A','ஆ','ா'],['E','ஏ','ே'],['I','ஈ','ீ'],['O','ஓ','ோ'],['U','ஊ','ூ']
+  ];
+  const CONS = [
+    ['zh','ழ'],['sh','ஷ'],['ch','ச'],['th','த'],['dh','த'],['kh','க'],['gh','க'],['bh','ப'],['ph','ப'],
+    ['k','க'],['g','க'],['c','ச'],['s','ச'],['j','ஜ'],['t','ட'],['d','ட'],['T','ட'],['D','ட'],['p','ப'],['b','ப'],
+    ['m','ம'],['y','ய'],['r','ர'],['l','ல'],['v','வ'],['w','வ'],['z','ழ'],['N','ண'],['L','ள'],['R','ற'],['S','ஸ'],['h','ஹ'],['q','க'],['f','ப']
+  ];
+  const isVowelCh = ch => /[aeiouAEIOU]/.test(ch);
+  function phoneticWord(w){
+    let out = '', i = 0, pending = false;
+    const emitCons = c => { if(pending) out += PULLI; out += c; pending = true; };
+    const emitVowel = (ind, sign) => { if(pending){ out += sign; pending = false; } else out += ind; };
+    while(i < w.length){
+      const rest = w.slice(i);
+      // vowels (longest first)
+      let hit = null;
+      for(const v of VOW){ if(rest.startsWith(v[0])){ hit = v; break; } }
+      if(hit){ emitVowel(hit[1], hit[2]); i += hit[0].length; continue; }
+      // special clusters
+      if(rest.startsWith('ksh')){ emitCons('க'); emitCons('ஷ'); i += 3; continue; }
+      if(rest.startsWith('ndr')){ emitCons('ன'); emitCons('ற'); i += 3; continue; }
+      if(rest.startsWith('tr')){ emitCons('ற'); emitCons('ற'); i += 2; continue; }
+      if(rest.startsWith('ng')){
+        const nxt = rest.charAt(2);
+        emitCons('ங');
+        if(nxt && isVowelCh(nxt)) emitCons('க');       // angu -> அங்கு
+        i += 2; continue;
+      }
+      if(rest.startsWith('nj')){
+        const nxt = rest.charAt(2);
+        emitCons('ஞ');
+        if(nxt && isVowelCh(nxt) && i > 0) emitCons('ச');  // anjal -> அஞ்சல்   (njanam -> ஞானம்)
+        i += 2; continue;
+      }
+      if(rest.charAt(0) === 'n'){
+        const r1 = rest.slice(1);
+        let c;
+        if(i === 0) c = 'ந';
+        else if(/^(th|dh)/.test(r1)) c = 'ந';
+        else if(/^[dDtT]/.test(r1) && !/^dr/.test(r1)) c = 'ண';
+        else c = 'ன';
+        emitCons(c); i += 1; continue;
+      }
+      let cm = null;
+      for(const c of CONS){ if(rest.startsWith(c[0])){ cm = c; break; } }
+      if(cm){ emitCons(cm[1]); i += cm[0].length; continue; }
+      // unknown / uppercase leftovers: try lowercase once, else pass through
+      const lc = rest.charAt(0).toLowerCase();
+      if(lc !== rest.charAt(0) && /[a-z]/.test(lc)){ w = w.slice(0, i) + lc + w.slice(i + 1); continue; }
+      if(pending){ out += PULLI; pending = false; }
+      out += rest.charAt(0); i += 1;
+    }
+    if(pending) out += PULLI;
+    return out;
+  }
+  function phoneticToTamil(text){
+    return String(text).replace(/[A-Za-z]+/g, phoneticWord);
+  }
+  // alternative spellings for the ambiguous letters (ந ன ண, ல ள ழ, ர ற, ட த)
+  const CLASSES = ['நனண','லளழ','ரற','டத'];
+  function variants(word, limit){
+    limit = limit || 24;
+    const seen = new Set([word]); const list = [word];
+    for(let pos = 0; pos < word.length && list.length < 400; pos++){
+      const ch = word[pos];
+      const cls = CLASSES.find(c => c.includes(ch));
+      if(!cls) continue;
+      const cur = list.slice();
+      for(const base of cur){
+        for(const alt of cls){
+          if(alt === ch) continue;
+          const v = base.slice(0, pos) + alt + base.slice(pos + 1);
+          if(!seen.has(v)){ seen.add(v); list.push(v); }
+        }
+      }
+    }
+    return list.slice(0, limit);
+  }
+
+  // ---------------------------------------------------------------- Tamil -> Roman (Tanglish, simple)
+  const R_VOW = { 'அ':'a','ஆ':'aa','இ':'i','ஈ':'ee','உ':'u','ஊ':'oo','எ':'e','ஏ':'ae','ஐ':'ai','ஒ':'o','ஓ':'o','ஔ':'au','ஃ':'h' };
+  const R_SIGN = { 'ா':'aa','ி':'i','ீ':'ee','ு':'u','ூ':'oo','ெ':'e','ே':'ae','ை':'ai','ொ':'o','ோ':'o','ௌ':'au' };
+  const R_CONS = { 'க':'k','ங':'ng','ச':'ch','ஞ':'nj','ட':'t','ண':'n','த':'th','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'zh','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'sh','ஸ':'s','ஹ':'h' };
+  function toRoman(text){
+    const chars = Array.from(String(text));
+    let out = '';
+    for(let i = 0; i < chars.length; i++){
+      const ch = chars[i];
+      if(R_VOW[ch]){ out += R_VOW[ch]; continue; }
+      if(R_CONS[ch]){
+        const nx = chars[i + 1];
+        if(nx === PULLI){ out += R_CONS[ch]; i += 1; continue; }
+        if(R_SIGN[nx]){ out += R_CONS[ch] + R_SIGN[nx]; i += 1; continue; }
+        out += R_CONS[ch] + 'a'; continue;
+      }
+      out += ch;
+    }
+    // write clusters the way people type them
+    return out.replace(/ngk/g, 'ng').replace(/njch/g, 'nj').replace(/nr/g, 'ndr').replace(/nt(?!h)/g, 'nd').replace(/mp/g, 'mb')
+      .replace(/([aeiou])t(?=[aeiou])/g, '$1d').replace(/([aeiou])k(?=[aeiou])/g, '$1g');
+  }
+
+  // ---------------------------------------------------------------- counting & sorting
+  function analyze(text){
+    const s = String(text);
+    const r = { chars: Array.from(s).length, words: (s.trim() ? s.trim().split(/\s+/).length : 0), lines: s ? s.split(/\r?\n/).length : 0, uyir:0, mei:0, uyirmei:0, aytham:0, tamilLetters:0 };
+    const a = Array.from(s);
+    for(let i = 0; i < a.length; i++){
+      const c = a[i].codePointAt(0);
+      if(c >= 0x0B85 && c <= 0x0B94){ r.uyir++; }
+      else if(c === 0x0B83){ r.aytham++; }
+      else if((c >= 0x0B95 && c <= 0x0BB9)){
+        const nx = a[i + 1];
+        if(nx === PULLI) r.mei++; else r.uyirmei++;
+      }
+    }
+    r.tamilLetters = r.uyir + r.mei + r.uyirmei + r.aytham;
+    return r;
+  }
+  const C_ORDER = 'கஙசஞடணதநபமயரலவழளறனஜஷஸஹ';
+  const V_ORDER = 'அஆஇஈஉஊஎஏஐஒஓஔஃ';
+  const SIGN_ORDER = ['ா','ி','ீ','ு','ூ','ெ','ே','ை','ொ','ோ','ௌ'];
+  function sortKey(word){
+    const a = Array.from(word); const key = [];
+    for(let i = 0; i < a.length; i++){
+      const ch = a[i]; const vi = V_ORDER.indexOf(ch); const ci = C_ORDER.indexOf(ch);
+      if(vi >= 0){ key.push([vi, 0]); }
+      else if(ci >= 0){
+        const nx = a[i + 1]; let k = 1;
+        if(nx === PULLI){ k = 0; i++; }
+        else if(SIGN_ORDER.includes(nx)){ k = 2 + SIGN_ORDER.indexOf(nx); i++; }
+        key.push([100 + ci, k]);
+      } else { key.push([1000 + ch.codePointAt(0), 0]); }
+    }
+    return key;
+  }
+  function compareTamil(x, y){
+    const a = sortKey(x), b = sortKey(y);
+    for(let i = 0; i < Math.min(a.length, b.length); i++){
+      if(a[i][0] !== b[i][0]) return a[i][0] - b[i][0];
+      if(a[i][1] !== b[i][1]) return a[i][1] - b[i][1];
+    }
+    return a.length - b.length;
+  }
+
+  return { numberToWords, rupeesToWords, toTamilDigits, fromTamilDigits, phoneticToTamil, phoneticWord, variants, toRoman, analyze, compareTamil };
+})();
+
+
+
+/* =====================================================================
+   தமிழ் கருவிகள் — Tamil toolkit (100% free, deterministic, runs in the
+   browser, no AI, no server): phonetic typing, legacy-font converter,
+   number → Tamil words, Tamil text tools.
+   ===================================================================== */
+const TT_TA = 'width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:15px; font-family:inherit; line-height:1.6; box-sizing:border-box;';
+function ttCopy(text, btn, label){
+  try{ navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{}); }catch(e){}
+  btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = label; }, 1200);
+}
+function ttChips(parent, items, current, onPick){
+  const row = el(`<div class="filter-row" style="margin:8px 0;"></div>`);
+  items.forEach(([val, label])=>{
+    const b = el(`<button class="filter-chip ${val === current ? 'active' : ''}">${label}</button>`);
+    b.onclick = ()=>{ onPick(val); };
+    row.appendChild(b);
+  });
+  parent.appendChild(row); return row;
+}
+
+// ---------------------------------------------------------------- தமிழ் தட்டச்சு
+TOOL_IMPL.tamiltyping = {
+  mount(container){
+    const chosen = {};
+    const body = el(`<div></div>`); container.appendChild(body);
+    body.appendChild(el(`<div class="note tamil">English எழுத்துகளில் தமிழை ஒலிப்பு முறையில் தட்டச்சு செய்யுங்கள் — எ.கா. <b>thamizh</b> → தமிழ், <b>ammaa</b> → அம்மா. கீழே தமிழில் உடனே தெரியும். <b>ஒரு சொல்லைத் தொட்டால்</b> ந/ன/ண, ல/ள/ழ, ர/ற போன்ற மாற்று எழுத்துக்கூட்டல்கள் வரும். இணையம், கணக்கு, AI — எதுவும் தேவையில்லை; முற்றிலும் இலவசம்.</div>`));
+    const ta = el(`<textarea id="ttIn" rows="5" style="${TT_TA}" placeholder="vanakkam, naan thamizh pesuvaen…" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>`);
+    body.appendChild(ta);
+    body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 6px;">தமிழ்</div>`));
+    const out = el(`<div class="tamil" style="min-height:96px; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; font-size:21px; line-height:2; background:#fff; white-space:pre-wrap; word-break:break-word;"></div>`);
+    body.appendChild(out);
+    const pop = el(`<div style="margin-top:8px;"></div>`); body.appendChild(pop);
+    const row = el(`<div class="btn-row" style="margin-top:12px;"></div>`);
+    const copyBtn = el(`<button class="btn">📋 Copy Tamil</button>`);
+    const dlBtn = el(`<button class="btn secondary">⬇️ Save .txt</button>`);
+    const clrBtn = el(`<button class="btn secondary">🧹 Clear</button>`);
+    row.appendChild(copyBtn); row.appendChild(dlBtn); row.appendChild(clrBtn); body.appendChild(row);
+    const key = el(`<details style="margin-top:14px; font-size:13px;"><summary style="cursor:pointer; font-weight:800;">⌨️ எழுத்து விசை அட்டவணை (Key chart)</summary>
+      <div class="tamil" style="line-height:1.9; margin-top:8px;">
+        <b>உயிர்:</b> a அ · aa ஆ · i இ · ee / ii ஈ · u உ · oo / uu ஊ · e எ · ae ஏ · ai ஐ · o ஒ · O ஓ · au ஔ<br>
+        <b>மெய்:</b> k க · ng ங · ch / s ச · nj ஞ · t / d ட · <b>N</b> ண · th த · n ந/ன (தானாக) · p / b ப · m ம · y ய · r ர · l ல · v / w வ · zh ழ · <b>L</b> ள · <b>R</b> ற · j ஜ · sh ஷ · h ஹ · ksh க்ஷ<br>
+        <b>சிறப்பு:</b> tr = ற்ற (kaatru → காற்று) · ndr = ன்ற (nandri → நன்றி) · ng+உயிர் = ங்க (angu → அங்கு) · nj+உயிர் = ஞ்ச (anjal → அஞ்சல்)<br>
+        <b>குறிப்பு:</b> பெரிய எழுத்து N, L, R தெளிவாக ண, ள, ற என எழுதும் (vaNakkam → வணக்கம், paLLi → பள்ளி). சொல்லைத் தொட்டும் மாற்றலாம்.
+      </div></details>`);
+    body.appendChild(key);
+
+    function plain(){ return ta.value.split(/([A-Za-z]+)/).map((tok, i)=> i % 2 ? (chosen[tok] || TamilCore.phoneticWord(tok)) : tok).join(''); }
+    function render(){
+      out.innerHTML = '';
+      const toks = ta.value.split(/([A-Za-z]+)/);
+      if(!ta.value){ out.appendChild(el(`<span style="color:var(--sub); font-size:14px;">தமிழ் இங்கே தெரியும்…</span>`)); return; }
+      toks.forEach((tok, i)=>{
+        if(i % 2){
+          const base = TamilCore.phoneticWord(tok);
+          const sp = el(`<span style="cursor:pointer; border-bottom:2px dotted #B8C4E8;" title="மாற்று வடிவங்கள்"></span>`);
+          sp.textContent = chosen[tok] || base;
+          sp.onclick = ()=> showVariants(tok, base);
+          out.appendChild(sp);
+        } else if(tok){ out.appendChild(document.createTextNode(tok)); }
+      });
+    }
+    function showVariants(roman, base){
+      pop.innerHTML = '';
+      const list = TamilCore.variants(base, 24);
+      const box = el(`<div style="border:1px solid var(--line); border-radius:12px; padding:10px; background:#F7F9FF;"><div class="tamil" style="font-size:12px; font-weight:800; color:var(--sub); margin-bottom:6px;">“${escapeHtml(roman)}” — சரியான எழுத்துக்கூட்டலைத் தேர்ந்தெடுங்கள்:</div></div>`);
+      const wrap = el(`<div style="display:flex; flex-wrap:wrap; gap:8px;"></div>`);
+      list.forEach(v=>{
+        const b = el(`<button class="filter-chip tamil" style="font-size:17px;"></button>`);
+        b.textContent = v; b.onclick = ()=>{ chosen[roman] = v; pop.innerHTML = ''; render(); };
+        wrap.appendChild(b);
+      });
+      box.appendChild(wrap);
+      if(list.length <= 1) box.appendChild(el(`<div class="tamil" style="font-size:12px; color:var(--sub); margin-top:6px;">இந்த சொல்லுக்கு மாற்று வடிவங்கள் இல்லை.</div>`));
+      pop.appendChild(box);
+    }
+    ta.addEventListener('input', ()=>{ pop.innerHTML = ''; render(); });
+    copyBtn.onclick = ()=> ttCopy(plain(), copyBtn, '📋 Copy Tamil');
+    dlBtn.onclick = ()=> downloadBlob(new Blob([plain()], {type:'text/plain;charset=utf-8'}), 'tamil-text.txt');
+    clrBtn.onclick = ()=>{ ta.value = ''; pop.innerHTML = ''; render(); ta.focus(); };
+    render();
+  }
+};
+
+// ---------------------------------------------------------------- எழுத்துரு மாற்றி (Bamini/TSCII/TAB… ↔ Unicode)
+TOOL_IMPL.tamilfont = {
+  mount(container){
+    const LEGACY = [['Bamini','Bamini (பாமினி)'],['Tab','TAB'],['Tam','TAM'],['Tscii','TSCII'],['Anjal','Anjal'],['Anjal1','Anjal 1'],['Boomi','Boomi'],['Dinakaran','Dinakaran'],['Dinamani','Dinamani'],['Indoweb','Indoweb'],['Koeln','Koeln'],['Libi','Libi'],['Murasoli','Murasoli'],['Mylai','Mylai'],['Nakkeeeran','Nakkeeran'],['Oldvikatan','Old Vikatan'],['Thanthy','Thanthi'],['Webulagam','Webulagam'],['Keyman','Keyman'],['SenthamizhUni','Senthamizh']];
+    const REVERSE = { Bamini:'UniBamini', Tab:'UniTab', Tscii:'UniTscii', Keyman:'UniKeyman' };
+    let mode = 'toUni', font = 'Bamini', ready = false;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function loadScript(){
+      return new Promise((res, rej)=>{
+        if(window.ConvertToo){ res(); return; }
+        const s = document.createElement('script'); s.src = 'tamil-legacy-converter.js';
+        s.onload = ()=>{ window.ConvertToo ? res() : rej(new Error('Converter did not start.')); };
+        s.onerror = ()=> rej(new Error('Could not load the converter — check your internet connection and try again.'));
+        document.head.appendChild(s);
+      });
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">பழைய தமிழ் எழுத்துருக்களில் (Bamini, TSCII, TAB, Anjal, Dinakaran… ) தட்டச்சு செய்த உரையை <b>யூனிகோடுக்கு</b> மாற்றுங்கள் — அல்லது யூனிகோடை பாமினி போன்றவற்றுக்கு மாற்றுங்கள். பழைய ஆவணத்தில் <code>jkpo; tzf;fk;</code> போன்ற விசித்திர எழுத்துகள் தெரிந்தால் அதை இங்கே ஒட்டுங்கள். முழுவதும் உங்கள் உலாவியிலேயே நடக்கும்; எதுவும் பதிவேற்றப்படாது.</div>`));
+      ttChips(body, [['toUni','பழைய எழுத்துரு → Unicode'],['fromUni','Unicode → பழைய எழுத்துரு']], mode, v=>{ mode = v; if(mode === 'fromUni' && !REVERSE[font]) font = 'Bamini'; paint(); });
+      const fonts = mode === 'toUni' ? LEGACY : LEGACY.filter(f=>REVERSE[f[0]]);
+      const sel = el(`<div class="field"><label>எழுத்துரு (Font)</label><select id="tfFont">${fonts.map(f=>`<option value="${f[0]}" ${f[0]===font?'selected':''}>${f[1]}</option>`).join('')}</select></div>`);
+      body.appendChild(sel);
+      const ta = el(`<textarea id="tfIn" rows="6" style="${TT_TA}" placeholder="${mode==='toUni' ? 'jkpo; tzf;fk;' : 'தமிழ் வணக்கம்'}" spellcheck="false"></textarea>`);
+      body.appendChild(ta);
+      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 6px;">${mode==='toUni' ? 'Unicode தமிழ்' : 'பழைய எழுத்துரு உரை'}</div>`));
+      const out = el(`<textarea id="tfOut" rows="6" readonly class="tamil" style="${TT_TA} background:#F7F9FF;"></textarea>`);
+      body.appendChild(out);
+      const status = el(`<div class="tamil" style="font-size:12px; color:var(--sub); margin-top:6px;"></div>`); body.appendChild(status);
+      const row = el(`<div class="btn-row" style="margin-top:12px;"></div>`);
+      const copyBtn = el(`<button class="btn">📋 Copy</button>`);
+      const dlBtn = el(`<button class="btn secondary">⬇️ Save .txt</button>`);
+      const sampleBtn = el(`<button class="btn secondary">✨ Sample</button>`);
+      row.appendChild(copyBtn); row.appendChild(dlBtn); row.appendChild(sampleBtn); body.appendChild(row);
+      if(mode === 'fromUni') body.appendChild(el(`<div class="note" style="margin-top:10px;">மாற்றிய உரையை Word/Photoshop-ல் பயன்படுத்தும்போது அதே பழைய எழுத்துருவை (எ.கா. Bamini) தேர்ந்தெடுங்கள்; அப்போதுதான் தமிழாகத் தெரியும்.</div>`));
+      function run(){
+        if(!ready){ return; }
+        const fontSel = body.querySelector('#tfFont').value; font = fontSel;
+        const scheme = mode === 'toUni' ? font : REVERSE[font];
+        let r = null; try{ r = window.ConvertToo(scheme, ta.value); }catch(e){ r = null; }
+        out.value = r == null ? '' : r;
+        status.textContent = ta.value ? (r == null ? 'இந்த எழுத்துருவை மாற்ற இயலவில்லை.' : (r.length + ' எழுத்துகள் மாற்றப்பட்டன.')) : '';
+      }
+      body.querySelector('#tfFont').onchange = run;
+      ta.addEventListener('input', run);
+      copyBtn.onclick = ()=> ttCopy(out.value, copyBtn, '📋 Copy');
+      dlBtn.onclick = ()=> downloadBlob(new Blob([out.value], {type:'text/plain;charset=utf-8'}), 'converted-text.txt');
+      sampleBtn.onclick = ()=>{ ta.value = mode === 'toUni' ? 'jkpo; tzf;fk;' : 'தமிழ் வணக்கம்'; run(); };
+      status.textContent = ready ? '' : 'ஏற்றுகிறது…';
+      loadScript().then(()=>{ ready = true; status.textContent = ''; run(); }).catch(err=>{ status.textContent = err.message; });
+    }
+    paint();
+  }
+};
+
+// ---------------------------------------------------------------- எண் → தமிழ் சொல்
+TOOL_IMPL.tamilnumwords = {
+  mount(container){
+    let mode = 'num', pure = false;
+    const body = el(`<div></div>`); container.appendChild(body);
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">எந்த எண்ணையும் (கோடி வரை) தமிழ்ச் சொற்களில் எழுதுகிறது — காசோலை, ரசீது, பள்ளிப் படிவங்களுக்கு. எ.கா. 1,25,000 → ஒரு லட்சத்து இருபத்தைந்தாயிரம். தமிழ் இலக்கணப்படி (புணர்ச்சி) சேர்த்து எழுதும்; முற்றிலும் இலவசம், AI இல்லை.</div>`));
+      ttChips(body, [['num','எண் → சொல்'],['rs','ரூபாய் (காசோலை வடிவம்)']], mode, v=>{ mode = v; paint(); });
+      const f = el(`<div class="field"><label>${mode==='rs' ? 'தொகை (₹)' : 'எண்'}</label><input type="text" id="tnIn" inputmode="decimal" placeholder="${mode==='rs' ? '12500.50' : '2025'}" autocomplete="off"></div>`);
+      body.appendChild(f);
+      const lab = el(`<label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; margin:4px 0 8px;"><input type="checkbox" id="tnPure" ${pure ? 'checked' : ''}> “லட்சம்” என்பதற்குப் பதில் தூய தமிழ் “இலட்சம்”</label>`);
+      body.appendChild(lab);
+      const exRow = el(`<div class="filter-row" style="margin:6px 0;"></div>`);
+      ['21','105','1999','25000','125000','12500000'].forEach(x=>{ const b = el(`<button class="filter-chip">${x}</button>`); b.onclick = ()=>{ inp.value = x; run(); }; exRow.appendChild(b); });
+      body.appendChild(exRow);
+      const out = el(`<div class="tamil" style="margin-top:10px; border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; background:#fff; font-size:21px; line-height:1.9; min-height:70px; word-break:break-word;"></div>`);
+      body.appendChild(out);
+      const extra = el(`<div class="tamil" style="margin-top:8px; font-size:14px; color:var(--sub);"></div>`); body.appendChild(extra);
+      const row = el(`<div class="btn-row" style="margin-top:12px;"></div>`);
+      const copyBtn = el(`<button class="btn">📋 Copy</button>`); row.appendChild(copyBtn); body.appendChild(row);
+      const inp = body.querySelector('#tnIn');
+      function fmtIN(n){ return Number(n).toLocaleString('en-IN'); }
+      function run(){
+        pure = body.querySelector('#tnPure').checked;
+        const raw = TamilCore.fromTamilDigits(inp.value).replace(/[,\s₹]/g, '');
+        extra.textContent = '';
+        if(!raw){ out.textContent = ''; return; }
+        try{
+          if(mode === 'rs'){
+            out.textContent = TamilCore.rupeesToWords(raw, {pure});
+            const n = Number(raw); if(isFinite(n)) extra.textContent = '₹ ' + n.toLocaleString('en-IN', {minimumFractionDigits: raw.includes('.') ? 2 : 0});
+          } else {
+            if(!/^\d+(\.\d+)?$/.test(raw)) throw new Error('எண்ணை மட்டும் உள்ளிடவும்');
+            const [ip, fp = ''] = raw.split('.');
+            if(ip.length > 12) throw new RangeError('99,99,99,99,999 வரை மட்டும் (12 இலக்கங்கள்)');
+            let t = TamilCore.numberToWords(Number(ip), {pure});
+            if(fp) t += ' புள்ளி ' + fp.split('').map(d=>TamilCore.numberToWords(+d, {pure})).join(' ');
+            out.textContent = t;
+            extra.textContent = fmtIN(Number(ip)) + (fp ? '.' + fp : '') + '  ·  ' + TamilCore.toTamilDigits(ip) + (fp ? '.' + TamilCore.toTamilDigits(fp) : '');
+          }
+        }catch(e){ out.textContent = e.message; }
+      }
+      inp.addEventListener('input', run); body.querySelector('#tnPure').onchange = run;
+      copyBtn.onclick = ()=> ttCopy(out.textContent, copyBtn, '📋 Copy');
+    }
+    paint();
+  }
+};
+
+// ---------------------------------------------------------------- தமிழ் உரைக் கருவிகள்
+TOOL_IMPL.tamiltext = {
+  mount(container){
+    let mode = 'count';
+    const body = el(`<div></div>`); container.appendChild(body);
+    const MODES = [['count','எண்ணிக்கை'],['roman','Tanglish ஆக'],['sort','அகர வரிசை'],['dedupe','நகல் வரி நீக்கு'],['digits','எண் வடிவம் (1 ↔ ௧)']];
+    function paint(){
+      const keep = body.querySelector('#ttxIn') ? body.querySelector('#ttxIn').value : '';
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">தமிழ் உரைக்கான சிறு கருவிகள்: எழுத்துகளை (உயிர், மெய், உயிர்மெய்) எண்ணுதல், தமிழை ஆங்கில எழுத்தில் (Tanglish) மாற்றுதல், தமிழ் அகர வரிசையில் வரிகளை அடுக்குதல், நகல் வரிகளை நீக்குதல், 1 ↔ ௧ எண் வடிவம். எல்லாம் இலவசம், உலாவியிலேயே.</div>`));
+      ttChips(body, MODES, mode, v=>{ mode = v; paint(); });
+      const ta = el(`<textarea id="ttxIn" rows="7" class="tamil" style="${TT_TA}" placeholder="தமிழ் உரையை இங்கே ஒட்டுங்கள் / தட்டச்சு செய்யுங்கள்…"></textarea>`);
+      ta.value = keep; body.appendChild(ta);
+      const out = el(`<div style="margin-top:12px;"></div>`); body.appendChild(out);
+      function run(){
+        const s = ta.value; out.innerHTML = '';
+        if(!s.trim()){ return; }
+        if(mode === 'count'){
+          const a = TamilCore.analyze(s);
+          const cell = (k, v)=>`<div style="border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fff;"><div class="tamil" style="font-size:12px; color:var(--sub); font-weight:800;">${k}</div><div style="font-size:22px; font-weight:900;">${v}</div></div>`;
+          out.appendChild(el(`<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px;">
+            ${cell('சொற்கள்', a.words)}${cell('வரிகள்', a.lines)}${cell('மொத்த எழுத்துக்குறிகள்', a.chars)}${cell('தமிழ் எழுத்துகள்', a.tamilLetters)}
+            ${cell('உயிர்', a.uyir)}${cell('மெய்', a.mei)}${cell('உயிர்மெய்', a.uyirmei)}${cell('ஆய்தம்', a.aytham)}</div>`));
+        } else {
+          let text = '';
+          if(mode === 'roman') text = TamilCore.toRoman(s);
+          else if(mode === 'sort') text = s.split(/\r?\n/).filter(x=>x.trim()).sort(TamilCore.compareTamil).join('\n');
+          else if(mode === 'dedupe'){ const seen = new Set(); text = s.split(/\r?\n/).filter(l=>{ const k = l.trim(); if(!k || seen.has(k)) return false; seen.add(k); return true; }).join('\n'); }
+          else if(mode === 'digits') text = /[௦-௯]/.test(s) ? TamilCore.fromTamilDigits(s) : TamilCore.toTamilDigits(s);
+          const o = el(`<textarea readonly rows="7" class="tamil" style="${TT_TA} background:#F7F9FF;"></textarea>`); o.value = text; out.appendChild(o);
+          const row = el(`<div class="btn-row" style="margin-top:10px;"></div>`);
+          const cb = el(`<button class="btn">📋 Copy</button>`); cb.onclick = ()=> ttCopy(text, cb, '📋 Copy'); row.appendChild(cb); out.appendChild(row);
+        }
+      }
+      ta.addEventListener('input', run); run();
+    }
+    paint();
+  }
+};
+
 /* mathpractice — moved to category-education.js (lazy-loaded) */
 /* batchbgremove — moved to category-image.js (lazy-loaded) */
 TOOL_IMPL.businesscard = {
