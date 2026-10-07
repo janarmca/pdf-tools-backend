@@ -84,11 +84,11 @@ input.ans{width:130px;padding:9px 10px;border:1px solid #cfd4e2;border-radius:10
 .summary{background:#f3f1ff}
 .summary li{margin-bottom:4px}
 .tbl{border-collapse:collapse;width:100%;margin:6px 0;text-align:center;font-size:.95rem}.tbl th,.tbl td{border:1px solid #dcdff0;padding:7px 6px}.tbl tr:first-child th{background:#eeecff;color:#3b2fc9}.tbl td{color:#0b5d7a;font-weight:700}
-.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
 .door{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:transform .15s}
 .door:hover{transform:translateY(-2px)}
 .door b{display:block;font-size:1.05rem;margin-bottom:4px}.door span{font-size:.82rem;color:var(--sub)}
-.door.d1{border-top:5px solid #3b2fc9}.door.d2{border-top:5px solid #0b7a75}.door.d3{border-top:5px solid #b3541e}
+.door.d1{border-top:5px solid #3b2fc9}.door.d2{border-top:5px solid #0b7a75}.door.d3{border-top:5px solid #b3541e}.door.d4{border-top:5px solid #2e7d32}
 .predict{background:#fff4f8;border-color:#f6c6d8}
 .discover{background:#f1fbff;border-color:#bfe6f6}
 .world{background:#fff}
@@ -180,6 +180,7 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 <script src="games-high.js?v=1"></script>
 <script src="games-high2.js?v=1"></script>
 <script src="play.js?v=4"></script>
+<script src="lab.js?v=1"></script>
 <script>
 (function(){
 'use strict';
@@ -198,6 +199,7 @@ function md(s){
 const UI = {
   ta:{hero:'மனப்பாடம் செய்யாதே — கண்டுபிடி', heroP:'இங்கே விடைகள் முதலில் வராது. முதலில் நீ ஊகிப்பாய், விளையாடி விதியை நீயே கண்டுபிடிப்பாய், பிறகு புரிந்துகொள்வாய் — அதை வைத்து புதியது உருவாக்குவாய். முழுக்க இலவசம் — login இல்லை, கட்டணம் இல்லை.',
     p1:'🤔 ஊகி',p2:'🔍 கண்டுபிடி',p3:'💡 உருவாக்கு',p4:'🚀 எதிர்காலம்',
+    d4:'🧪 ஆய்வகம்', d4s:'PhET simulations தமிழில் — ஊகி, செய், விளக்கு · இலவச புத்தகங்கள்',
     d1:'📘 பாடம் புரிந்துகொள்', d1s:'வகுப்பு வாரியாக — ஊகி, கண்டுபிடி, புரிந்துகொள், உருவாக்கு', d2:'🧠 திட்ட வழிகாட்டி', d2s:'பள்ளி project? விடை அல்ல — உன்னைச் சிந்திக்க வைக்கும் கேள்விகள். நீயே செய்வாய்!', d3:'🚀 எதிர்கால சிந்தனையாளர்', d3s:'AI எப்படிக் கற்கிறது, கண்டுபிடிப்பது எப்படி, தொழில்நுட்பத்தின் பக்கவிளைவுகளைச் சரிசெய்வது எப்படி',
     predict:'🤔 முதலில் ஊகி', predictSub:'சரியா தவறா என்பது முக்கியமல்ல — ஊகித்த பிறகு கற்றது மனதில் நிற்கும்.', yourGuess:'உன் ஊகம்', guessRight:'🎯 நீ ஊகித்தது சரி! ஏன் என்று பார்:', guessWrong:'💭 எதிர்பாராததா? அருமை — விஞ்ஞானிகள் இப்படித்தான் கற்கிறார்கள். ஏன் என்று பார்:', revealT:'என்ன நடக்கிறது?',
     discover:'🔍 நீயே கண்டுபிடி', discoverWrong:'இன்னும் இல்லை — animation-ஐ மீண்டும் நகர்த்திப் பார், எது மாறுகிறது, எது மாறவில்லை?', insight:'💡 நீ கண்டுபிடித்தது:',
@@ -215,6 +217,7 @@ const UI = {
     prev:'← முந்தைய பாடம்', next:'அடுத்த பாடம் →', back:'← அத்தியாயங்கள்', goal:'இந்தப் பாடம் முடிந்ததும் உன்னால்:', mins:'நிமிடம்', loading:'ஏற்றுகிறது…', loadErr:'பாடத்தை ஏற்ற முடியவில்லை — இணைய இணைப்பைச் சரிபார்க்கவும்.'},
   en:{hero:'Don’t memorise — discover', heroP:'Here the answers don’t come first. First you guess, then you play and discover the rule yourself, then you understand it — and then you build something new with it. Completely free — no login, no fees.',
     p1:'🤔 Guess',p2:'🔍 Discover',p3:'💡 Create',p4:'🚀 Future',
+    d4:'🧪 Experiments Lab', d4s:'PhET simulations in Tamil — predict, do, explain · free books',
     d1:'📘 Understand lessons', d1s:'By class — guess, discover, understand, create', d2:'🧠 Project Coach', d2s:'School project? Not answers — questions that make you think. You do it yourself!', d3:'🚀 Future Thinkers', d3s:'How AI learns, how to invent, how to fix the side-effects of technology',
     predict:'🤔 First, make a guess', predictSub:'Right or wrong doesn’t matter — what you learn after guessing sticks.', yourGuess:'Your guess', guessRight:'🎯 You guessed right! Here’s why:', guessWrong:'💭 Surprised? Great — that’s exactly how scientists learn. Here’s why:', revealT:'What’s going on?',
     discover:'🔍 Discover it yourself', discoverWrong:'Not yet — move the animation again. What changes, and what stays the same?', insight:'💡 What you discovered:',
@@ -250,6 +253,8 @@ async function route(){
   const app = $('#app'); app.innerHTML = `<p class="note">${U('loading')}</p>`;
   try{ await loadCatalog(); }catch(e){ app.innerHTML = `<p class="note">${U('loadErr')}</p>`; return; }
   const [, c, s, ch, les] = (location.hash || '#').replace(/^#\/?/, '#/').split('/');
+  if(c === 'lab') return s ? KALVI_LAB.renderSim(s) : KALVI_LAB.renderLab();
+  if(c === 'books') return KALVI_LAB.renderBooks();
   if(c === 'project') return renderProject(s);
   if(c === 'future') return s ? renderFutureLesson(s) : renderFutureHome();
   if(les) return renderLesson(c, s, ch, les);
@@ -266,7 +271,7 @@ function renderHome(c){
   $('#app').innerHTML = `
     <div class="hero"><h1>${U('hero')}</h1><p>${U('heroP')}</p>
       <div class="pillars"><div>${U('p1')}</div><div>${U('p2')}</div><div>${U('p3')}</div><div>${U('p4')}</div></div></div>
-    <div class="doors"><div class="door d1" data-door="#learn"><b>${U('d1')}</b><span>${U('d1s')}</span></div><div class="door d2" data-door="#/project"><b>${U('d2')}</b><span>${U('d2s')}</span></div><div class="door d3" data-door="#/future"><b>${U('d3')}</b><span>${U('d3s')}</span></div></div>
+    <div class="doors"><div class="door d1" data-door="#learn"><b>${U('d1')}</b><span>${U('d1s')}</span></div><div class="door d2" data-door="#/project"><b>${U('d2')}</b><span>${U('d2s')}</span></div><div class="door d4" data-door="#/lab"><b>${U('d4')}</b><span>${U('d4s')}</span></div><div class="door d3" data-door="#/future"><b>${U('d3')}</b><span>${U('d3s')}</span></div></div>
     <h3 style="margin:18px 0 0" id="learnpick">${U('pick')}</h3>
     <div class="classes">${Object.keys(CATALOG.classes).map(k=>`<div class="cls ${k===c?'on':''}" data-c="${k}"><b>${k}</b>${U('cls')}</div>`).join('')}</div>
     <div class="subjects">${cls.subjects.map(sb=>{
