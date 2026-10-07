@@ -116,3 +116,8 @@ NVIDIA's build.nvidia.com catalog retires models on short notice — `meta/llama
 - Logic lives in the inline `TamilCore` module in `index.source.html` (numbers, phonetic typing, sorting, letter analysis).
 - `tamil-legacy-converter.js` is the MIT-licensed npm package `tamil-to-unicode-convertor` (Bamini/TSCII/TAB/… tables), lazy-loaded only by the font converter.
 - Do NOT run `generate-tool-pages.mjs` blindly: it drops hand-added sitemap URLs and renames some slugs.
+
+### Tamil typing lexicon (`tamil-lexicon.txt`)
+- 100,000 words ordered by frequency, lazy-fetched by Tamil Typing only. Words ending in `*` are lower-confidence extras (the `*` is stripped on load).
+- Sources: KaniyamFoundation/all_tamil_words frequency lists (Public Domain) + vigneshwaran-chandrasekaran/tamil-language-words-list (MIT) for words containing ீ / ங, which are missing from the first source (frequency estimated from stem-family size).
+- Matching = `TamilLex` in `index.source.html`: Tamil words and typed Tanglish are reduced to the same sound key (ந/ன/ண, ல/ள/ழ, ர/ற, ட/த, long/short vowels, double letters) and ranked by frequency; run-on words are split into two or three lexicon words; rule-based `TamilCore` is the fallback.

@@ -13906,6 +13906,124 @@ function ttChips(parent, items, current, onPick){
   parent.appendChild(row); return row;
 }
 
+/* TamilLex — Tanglish → Tamil word lookup using a public-domain frequency lexicon.
+   Both the Tamil word and the typed roman text are reduced to the same "sound key"
+   (collapsing ந/ன/ண, ல/ள/ழ, ர/ற, ட/த, long/short vowels, doubled letters),
+   then matches are ranked by corpus frequency. No AI, no network after the lexicon loads. */
+const TamilLex = (function(){
+  const CONS = {'க':'k','ங':'n','ச':'s','ஞ':'n','ட':'t','ண':'n','த':'t','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'l','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'s','ஸ':'s','ஹ':'h'};
+  const IV = {'அ':['a',0],'ஆ':['a',1],'இ':['i',0],'ஈ':['i',1],'உ':['u',0],'ஊ':['u',1],'எ':['e',0],'ஏ':['e',1],'ஐ':['ai',1],'ஒ':['o',0],'ஓ':['o',1],'ஔ':['au',1]};
+  const SIGN = {'ா':['a',1],'ி':['i',0],'ீ':['i',1],'ு':['u',0],'ூ':['u',1],'ெ':['e',0],'ே':['e',1],'ை':['ai',1],'ொ':['o',0],'ோ':['o',1],'ௌ':['au',1]};
+  const PULLI = '்';
+  function post(k){
+    k = k.replace(/(.)\1+/g, '$1').replace(/nt/g, 'n').replace(/tr/g, 'r').replace(/(.)\1+/g, '$1');
+    return k;
+  }
+  // Tamil word → { key, longs } (longs = string of S/L flags per vowel)
+  function keyOfTamil(w){
+    let k = '', fl = '', i = 0; const cs = Array.from(w);
+    while(i < cs.length){
+      const c = cs[i];
+      if(CONS[c]){
+        let kc = CONS[c]; i++;
+        if(c === 'க' && cs[i] === PULLI && cs[i+1] === 'ஷ'){ k += 'ks'; i += 2; if(cs[i] && SIGN[cs[i]]){ k += SIGN[cs[i]][0]; fl += SIGN[cs[i]][1] ? 'L' : 'S'; i++; } else if(cs[i] === PULLI){ i++; } else { k += 'a'; fl += 'S'; } continue; }
+        k += kc;
+        const n = cs[i];
+        if(n === PULLI){ i++; }
+        else if(n && SIGN[n]){ k += SIGN[n][0]; fl += SIGN[n][1] ? 'L' : 'S'; i++; }
+        else { k += 'a'; fl += 'S'; }
+      } else if(IV[c]){ k += IV[c][0]; fl += IV[c][1] ? 'L' : 'S'; i++; }
+      else if(c === 'ஃ'){ k += 'k'; i++; }
+      else i++;
+    }
+    return {key: post(k), longs: fl};
+  }
+  // typed roman → { key, longs, caps }
+  function keyOfRoman(r){
+    let s = r.replace(/[^A-Za-z]/g, ''); let k = '', fl = ''; let caps = '';
+    let i = 0;
+    const low = s.toLowerCase();
+    while(i < s.length){
+      const c = s[i], l = low[i], two = low.slice(i, i + 2);
+      if(/[NLRTD]/.test(c)) caps += c;
+      if(two === 'zh'){ k += 'l'; i += 2; continue; }
+      if(two === 'th' || two === 'dh'){ k += 't'; i += 2; continue; }
+      if(two === 'sh' || two === 'ch'){ k += 's'; i += 2; continue; }
+      if(two === 'kh' || two === 'gh'){ k += 'k'; i += 2; continue; }
+      if(two === 'ph' || two === 'bh'){ k += 'p'; i += 2; continue; }
+      if(two === 'nj'){ k += 'ns'; i += 2; continue; }
+      if(two === 'aa'){ k += 'a'; fl += 'L'; i += 2; continue; }
+      if(two === 'ee' || two === 'ii'){ k += 'i'; fl += 'L'; i += 2; continue; }
+      if(two === 'oo' || two === 'uu'){ k += 'u'; fl += 'L'; i += 2; continue; }
+      if(two === 'ae'){ k += 'e'; fl += 'L'; i += 2; continue; }
+      if(two === 'ai' || two === 'ei'){ k += 'ai'; fl += 'L'; i += 2; continue; }
+      if(two === 'au' || two === 'ou'){ k += 'au'; fl += 'L'; i += 2; continue; }
+      if(c === 'O'){ k += 'o'; fl += 'L'; i++; continue; }
+      if('aeiou'.includes(l)){ k += l; fl += 'S'; i++; continue; }
+      const m = {g:'k', d:'t', b:'p', c:'s', w:'v', q:'k', f:'p', x:'ks', z:'l'}[l];
+      k += m || l; i++;
+    }
+    return {key: post(k), longs: fl, caps};
+  }
+  let words = [], index = new Map(), ready = false, pos = new Map(), xtra = new Set();
+  function load(text){
+    words = text.split('\n'); index = new Map(); pos = new Map(); xtra = new Set();
+    for(let i = 0; i < words.length; i++){ if(words[i].endsWith('*')){ words[i] = words[i].slice(0, -1); xtra.add(words[i]); } }
+    for(let i = 0; i < words.length; i++){
+      const w = words[i]; if(!w) continue; pos.set(w, i);
+      const k = keyOfTamil(w).key; let a = index.get(k);
+      if(!a){ a = []; index.set(k, a); }
+      if(a.length < 60) a.push(i);
+    }
+    ready = true;
+  }
+  function score(rank, w, tk, rk){
+    let s = -Math.log(rank + 20);
+    const a = tk.longs, b = rk.longs;
+    if(a.length === b.length && b.indexOf('L') >= 0){ for(let j = 0; j < a.length; j++){ if(b[j] === 'L') s += a[j] === 'L' ? 1.6 : -1.6; else if(a[j] === 'L') s -= 0.15; } }
+    else if(b.length && a.length === b.length){ for(let j = 0; j < a.length; j++) if(a[j] === 'L') s -= 0.15; }
+    if(rk.caps){ const hasN = /N/.test(rk.caps), hasL = /L/.test(rk.caps), hasR = /R/.test(rk.caps), hasT = /[TD]/.test(rk.caps);
+      if(hasN) s += w.indexOf('ண') >= 0 ? 1.2 : -0.8; if(hasL) s += w.indexOf('ள') >= 0 ? 1.2 : -0.8;
+      if(hasR) s += w.indexOf('ற') >= 0 ? 1.2 : -0.8; if(hasT) s += w.indexOf('ட') >= 0 ? 1.2 : -0.8; }
+    if(/zh/i.test(rk.raw||'')) s += w.indexOf('ழ') >= 0 ? 1.2 : -0.8;
+    return s;
+  }
+  function matches(roman, limit){
+    if(!ready) return [];
+    const rk = keyOfRoman(roman); rk.raw = roman;
+    const a = index.get(rk.key); if(!a) return [];
+    const sc = a.map(i=>{ const w = words[i]; return [w, score(i, w, keyOfTamil(w), rk)]; });
+    sc.sort((x, y)=>y[1] - x[1]);
+    return sc.slice(0, limit || 6).map(x=>x[0]);
+  }
+  // split a roman run-on into 2–3 known words (tamilmakkal → தமிழ் + மக்கள்)
+  function segment(roman){
+    if(!ready) return null;
+    const s = roman.replace(/[^A-Za-z]/g, ''); if(s.length < 5) return null;
+    const best = [];
+    const memo = new Map();
+    function go(pos, depth){
+      if(pos === s.length) return {sc: 0, parts: []};
+      const mk = pos + ':' + depth; if(memo.has(mk)) return memo.get(mk);
+      let res = null;
+      if(depth < 3){
+        for(let e = s.length; e >= pos + 2; e--){
+          const part = s.slice(pos, e); const m = matches(part, 1); if(!m.length) continue;
+          const sub = go(e, depth + 1); if(!sub) continue;
+          const rk = index.get(keyOfRoman(part).key); const r0 = rk[0];
+          const sc = sub.sc + (-Math.log(r0 + 20)) - 4 - (part.length < 3 ? 3 : 0);
+          if(!res || sc > res.sc) res = {sc, parts: [m[0]].concat(sub.parts)};
+        }
+      }
+      memo.set(mk, res); return res;
+    }
+    const r = go(0, 0);
+    return r && r.parts.length > 1 ? r.parts.join('') : null;
+  }
+  return { load, matches, segment, rank: w=>pos.has(w) ? pos.get(w) : 1e9, isExtra: w=>xtra.has(w), keyOfRoman, keyOfTamil, isReady: ()=>ready };
+})();
+
+
 /* Built-in common-word dictionary (roman → Tamil). Written for this project; used to rank typing suggestions. */
 const TAMIL_DICT = {
 vanakkam:'வணக்கம்', nandri:'நன்றி', nanri:'நன்றி', naan:'நான்', nee:'நீ', neenga:'நீங்கள்', neengal:'நீங்கள்', avan:'அவன்', aval:'அவள்', avar:'அவர்', avargal:'அவர்கள்', naangal:'நாங்கள்', naam:'நாம்', ennai:'என்னை', unnai:'உன்னை', enakku:'எனக்கு', unakku:'உனக்கு', unakkaga:'உனக்காக', enakkaga:'எனக்காக', ungalukku:'உங்களுக்கு',
@@ -13930,20 +14048,38 @@ TOOL_IMPL.tamiltyping = {
     let curId = LS.get('ttCur', null); let lang = 'ta'; let fontPx = LS.get('ttFont', 20);
     let cands = [], sel = 0, tokStart = -1, tokEnd = -1;
 
+    let lexState = 'idle';
+    function loadLexicon(){
+      if(lexState !== 'idle') return; lexState = 'loading';
+      fetch('tamil-lexicon.txt').then(r=>{ if(!r.ok) throw new Error('lexicon'); return r.text(); })
+        .then(t=>{ TamilLex.load(t); lexState = 'ready'; stats(); if(tokStart >= 0) refresh(); })
+        .catch(()=>{ lexState = 'idle'; lexFailed = true; });
+    }
+    let lexFailed = false;
     function candidates(raw){
       const lw = raw.toLowerCase(); const out = [];
       const add = t => { if(t && !out.includes(t)) out.push(t); };
       if(learn[lw]) add(learn[lw]);
       if(TAMIL_DICT[lw]) add(TAMIL_DICT[lw]);
-      const romans = [raw]; if(/nr/.test(raw)) romans.push(raw.replace(/nr/g, 'ndr'));
+      if(TamilLex.isReady()){
+        const m = TamilLex.matches(raw, 6);
+        const rare = m.length && TamilLex.isExtra(m[0]) && TamilLex.rank(m[0]) > 20000;
+        if(rare || !m.length){ const rb = TamilCore.phoneticWord(raw.replace(/^t(?!h)/, 'th').replace(/kal$/, 'kaL').replace(/ki(r+)(?=[aeiou])/g, 'kiR')); add(rb); }
+        m.slice(0, 4).forEach(add);
+        const seg = TamilLex.segment(raw); if(seg) add(seg);
+        m.slice(4).forEach(add);
+      }
+      // rule-based fallback (works offline / for words not in the lexicon)
+      let r0 = raw.replace(/^t(?!h)/, 'th').replace(/kal$/, 'kaL').replace(/ki(r+)(?=[aeiou])/g, 'kiR');
+      const romans = [r0]; if(/nr/.test(r0)) romans.push(r0.replace(/nr/g, 'ndr'));
       romans.forEach(r=>{
-        const base = TamilCore.phoneticWord(r); add(base);
+        add(TamilCore.phoneticWord(r));
         const re = /aa|ee|ii|oo|uu|ae|ai|au|a|e|i|o|u/g; let m; const spots = [];
         while((m = re.exec(r))) spots.push([m.index, m[0]]);
         const longer = {a:'aa', i:'ee', u:'oo', e:'ae', o:'oo'}, shorter = {aa:'a', ee:'i', ii:'i', oo:'o', uu:'u', ae:'e'};
         spots.forEach(([i, v])=>{ const nv = longer[v] || shorter[v]; if(nv) add(TamilCore.phoneticWord(r.slice(0, i) + nv + r.slice(i + v.length))); });
       });
-      TamilCore.variants(out[0] || '', 5).forEach(add);
+      if(out.length < 6) TamilCore.variants(out[0] || '', 4).forEach(add);
       add(raw);
       return out.slice(0, 9);
     }
@@ -14002,7 +14138,7 @@ TOOL_IMPL.tamiltyping = {
     }
     function stats(){
       const a = TamilCore.analyze(ta.value);
-      stat.textContent = `${a.words} சொற்கள் · ${a.tamilLetters} தமிழ் எழுத்துகள் · இந்த உலாவியில் தானாகச் சேமிக்கப்படுகிறது`;
+      stat.textContent = `${a.words} சொற்கள் · ${a.tamilLetters} தமிழ் எழுத்துகள் · ` + (lexState === 'ready' ? '90,000+ சொல் அகராதி தயார்' : (lexFailed ? 'அகராதி ஏற்ற இயலவில்லை (அடிப்படை முறை)' : 'அகராதி ஏற்றுகிறது…')) + ' · தானாகச் சேமிக்கப்படுகிறது';
     }
 
     // ---------- caret position (mirror)
@@ -14101,7 +14237,7 @@ TOOL_IMPL.tamiltyping = {
 
     // ---------- boot
     if(!cur()){ const f = {id: 'f' + Date.now(), title: 'பெயரில்லா', text: '', ts: Date.now()}; files.unshift(f); curId = f.id; }
-    ta.value = cur().text || ''; stats();
+    ta.value = cur().text || ''; stats(); loadLexicon();
   }
 };
 
