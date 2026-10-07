@@ -50,6 +50,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
+const STANDALONE_IDS = new Set(['tnrentagreement', 'tnsaledeed']); // real root pages — no generated /tools/ duplicate
 function readTools() {
   const src = fs.readFileSync('index.source.html', 'utf8');
   const m = src.match(/const TOOLS = \[([\s\S]*?)\n\];/);
@@ -67,7 +68,7 @@ function readTools() {
       icon: mm[4], color: mm[5], cat: mm[6], cost: mm[7] ? parseInt(mm[7], 10) : 0,
     });
   }
-  return tools;
+  return tools.filter(t => !STANDALONE_IDS.has(t.id));
 }
 
 function pageHtml(t, slug, related) {

@@ -331,6 +331,8 @@ const TOOLS = [
   {id:'stmtcompare', name:'Statement Reconciliation', desc:'Compare Buyer vs Supplier statements (PDF/Excel/Text) — find mismatches automatically', icon:'🔍', color:'#B7410E', cat:'business'},
   {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
   {id:'tnpropertycalc', name:'TN Property Registration Calculator', desc:'Stamp duty & registration fee for Sale, Gift, Settlement, Partition, Mortgage & POA deeds in Tamil Nadu', icon:'🏛️', color:'#0F2A4A', cat:'business'},
+  {id:'tnrentagreement', name:'TN Rent Agreement Maker — வாடகை ஒப்பந்தம்', desc:'Tamil Nadu rent / tenancy agreement in Tamil or English, print-ready — free', icon:'🏠', color:'#1B6B5A', cat:'business', cost:0},
+  {id:'tnsaledeed', name:'TN Sale Deed Draft — கிரைய சாசனம்', desc:'Tamil Nadu sale deed draft in Tamil or English with property schedule — free', icon:'📜', color:'#7A4A1B', cat:'business', cost:0},
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'imgcompresskb', name:'Compress to Target KB', desc:'Compress to a target file size (auto quality search)', icon:'🗜️', color:'#A93226', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
@@ -1426,6 +1428,8 @@ function renderCategoryCards(){
 // against the full 114-tool TOOLS list to produce zero collisions before
 // this was wired in; re-check with that script's own dry-run if tools are
 // ever renamed.
+const TOOL_STANDALONE_PAGES = { tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed' }; // real standalone pages, no /tools/ landing page
+function toolHref(t){ return TOOL_STANDALONE_PAGES[t.id] || '/tools/' + toolSlug(t); }
 function toolSlug(t){
   if(t.id === 'typerace') return 'typing-race-game'; // keep in sync with SLUG_OVERRIDES in generate-tool-pages.mjs
   return t.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || t.id;
@@ -1439,7 +1443,7 @@ function renderToolCard(t){
   // no photo yet (images/tools/<id>.jpg 404s → onerror hides the <img>,
   // leaving just the color + gradient + text, still fully readable).
   return el(`
-    <a class="tool-card" href="/tools/${toolSlug(t)}" data-open="${t.id}" style="position:relative; overflow:hidden; padding:0; gap:0; text-decoration:none; color:inherit; min-height:152px; background:${t.color};">
+    <a class="tool-card" href="${toolHref(t)}" data-open="${t.id}" style="position:relative; overflow:hidden; padding:0; gap:0; text-decoration:none; color:inherit; min-height:152px; background:${t.color};">
       <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
       <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,50,.05) 0%, rgba(10,20,50,.35) 55%, rgba(10,20,50,.85) 100%);"></div>
       ${isPaid ? `<div style="position:absolute; top:8px; right:8px; z-index:2; background:#FFF3E0; color:#B8860B; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:6px;">⚡ ${t.cost} credit${t.cost>1?'s':''}</div>` : ''}
@@ -1457,7 +1461,7 @@ function renderToolCard(t){
 function renderToolCardCompact(t){
   const isPaid = !!t.cost;
   return el(`
-    <a class="tool-card" href="/tools/${toolSlug(t)}" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit; min-height:112px; background:${t.color};">
+    <a class="tool-card" href="${toolHref(t)}" data-open="${t.id}" style="position:relative; padding:0; gap:0; overflow:hidden; box-shadow:0 1px 3px rgba(20,30,60,.06); text-decoration:none; color:inherit; min-height:112px; background:${t.color};">
       <img src="images/tools/${t.id}.jpg" loading="lazy" decoding="async" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
       <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,20,50,.05) 0%, rgba(10,20,50,.4) 60%, rgba(10,20,50,.88) 100%);"></div>
       ${isPaid ? `<div style="position:absolute; top:5px; right:5px; z-index:2; background:#fff; color:#B8860B; font-size:8px; font-weight:800; padding:2px 5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.15);">⚡${t.cost}</div>` : ''}
@@ -15431,6 +15435,8 @@ TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-ch
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
+TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, 'tn-rent-agreement.html', 'TN Rent Agreement Maker'); } };
+TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, 'tn-sale-deed.html', 'TN Sale Deed Draft'); } };
 
 render();
 // Deep-link support: a URL like pdftoolsindia.com/?tool=merge opens that
