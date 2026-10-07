@@ -382,6 +382,7 @@ const TOOLS = [
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
+  {id:'kalvikalanjiyam', name:'Kalvi Kalanjiyam — கல்வி களஞ்சியம் (Class 1–10)', desc:'Free Tamil-medium lessons, games & tests for Samacheer Classes 1–10 — understand first, then practise. No login', icon:'📚', color:'#3B2FC9', cat:'education', cost:0},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
   {id:'tamiltracing', name:'Tamil Handwriting Tracing', desc:'Printable letter-tracing practice sheets for kids', icon:'✍️', color:'#2E86AB', cat:'education'},
@@ -1020,6 +1021,7 @@ function render(){
       <a href="/education-tools" style="color:var(--sub);">Education Tools</a>
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
+      <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
       <a href="/terms" style="color:var(--sub);">Terms</a>
       <a href="/privacy" style="color:var(--sub);">Privacy</a>
       <a href="/refund" style="color:var(--sub);">Refund Policy</a>
@@ -1428,7 +1430,7 @@ function renderCategoryCards(){
 // against the full 114-tool TOOLS list to produce zero collisions before
 // this was wired in; re-check with that script's own dry-run if tools are
 // ever renamed.
-const TOOL_STANDALONE_PAGES = { tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed' }; // real standalone pages, no /tools/ landing page
+const TOOL_STANDALONE_PAGES = { tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' }; // real standalone pages, no /tools/ landing page
 function toolHref(t){ return TOOL_STANDALONE_PAGES[t.id] || '/tools/' + toolSlug(t); }
 function toolSlug(t){
   if(t.id === 'typerace') return 'typing-race-game'; // keep in sync with SLUG_OVERRIDES in generate-tool-pages.mjs
@@ -1557,6 +1559,14 @@ function renderHomeBody(){
   }
 
   holder.appendChild(renderSmartUploadZone());
+  holder.appendChild(el(`<a href="/learn/" style="display:flex; align-items:center; gap:14px; margin-top:16px; padding:16px 18px; border-radius:18px; text-decoration:none; color:#fff; background:linear-gradient(135deg,#3b2fc9,#7b2cbf); box-shadow:0 6px 18px rgba(59,47,201,.25);">
+    <div style="font-size:34px; line-height:1;">📚</div>
+    <div style="flex:1; min-width:0;">
+      <div class="tamil" style="font-weight:900; font-size:16px;">கல்வி களஞ்சியம் — Kalvi Kalanjiyam</div>
+      <div class="tamil" style="font-size:12.5px; opacity:.92; margin-top:2px;">1–10 வகுப்பு பாடங்கள், விளையாட்டுகள், தேர்வுகள் — தமிழில், முற்றிலும் இலவசம்</div>
+    </div>
+    <div style="font-weight:900; font-size:20px;">→</div>
+  </a>`));
 
   if(__activeCategory==='all'){
     const recentIds = getRecentTools();
@@ -15435,6 +15445,7 @@ TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-ch
 TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
+TOOL_IMPL.kalvikalanjiyam = { mount(container){ mountEmbeddedTool(container, 'learn/', 'Kalvi Kalanjiyam (கல்வி களஞ்சியம்)'); } };
 TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, 'tn-rent-agreement.html', 'TN Rent Agreement Maker'); } };
 TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, 'tn-sale-deed.html', 'TN Sale Deed Draft'); } };
 

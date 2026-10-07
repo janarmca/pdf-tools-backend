@@ -50,7 +50,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
-const STANDALONE_IDS = new Set(['tnrentagreement', 'tnsaledeed']); // real root pages — no generated /tools/ duplicate
+const STANDALONE_IDS = new Set(['tnrentagreement', 'tnsaledeed', 'kalvikalanjiyam']); // real root pages — no generated /tools/ duplicate
 function readTools() {
   const src = fs.readFileSync('index.source.html', 'utf8');
   const m = src.match(/const TOOLS = \[([\s\S]*?)\n\];/);
