@@ -1427,6 +1427,7 @@ function renderCategoryCards(){
 // this was wired in; re-check with that script's own dry-run if tools are
 // ever renamed.
 function toolSlug(t){
+  if(t.id === 'typerace') return 'typing-race-game'; // keep in sync with SLUG_OVERRIDES in generate-tool-pages.mjs
   return t.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || t.id;
 }
 function renderToolCard(t){
@@ -15442,6 +15443,8 @@ render();
     const params = new URLSearchParams(window.location.search);
     const deepLinkTool = params.get('tool');
     if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
+      // /?tool=<id> is the same page as the static /tools/<slug> landing page — point Google at that one.
+      try{ const c = document.querySelector('link[rel="canonical"]'); const tt = TOOLS.find(t=>t.id===deepLinkTool); if(c && tt) c.setAttribute('href', 'https://pdftoolsindia.com/tools/' + toolSlug(tt)); }catch(e){}
       openTool(deepLinkTool);
       return;
     }

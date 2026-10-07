@@ -55,6 +55,8 @@ const redeemLimiter = rateLimit({ windowMs: 60*60*1000, limit: 10, standardHeade
   message: { error: 'Too many redeem attempts — please try again later.' } });
 
 app.use(generalLimiter);
+// API responses must never appear in Google search results.
+app.use('/api', (req, res, next) => { res.setHeader('X-Robots-Tag', 'noindex, nofollow'); next(); });
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
 // Razorpay webhook needs the RAW body for signature verification, so we
 // register that route's body-parser separately, before the JSON parser.
