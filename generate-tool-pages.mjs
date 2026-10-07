@@ -39,7 +39,9 @@ const CATEGORY_BLURB = {
   education: 'Free learning games and quizzes for Grades 1–12.',
 };
 
+const SLUG_OVERRIDES = { 'Type Race — Typing Practice Game': 'typing-race-game' };
 function slugify(name) {
+  if (SLUG_OVERRIDES[name]) return SLUG_OVERRIDES[name];
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
@@ -79,8 +81,22 @@ function pageHtml(t, slug, related) {
   const costNote = isPaid
     ? `<p class="note">🤖 This is an AI-powered tool — costs ${t.cost} credit${t.cost>1?'s':''} per use. You'll always see this cost and confirm before it's charged.</p>`
     : `<p class="note">🔒 ${CATEGORY_BLURB[t.cat] || 'Free to use.'}</p>`;
+
+  const free = !isPaid;
+  const faqs = [
+    [`Is ${t.name} free to use?`, free ? `Yes. ${t.name} is free on PDF Tools India — no signup, no watermark and no daily limit.` : `${t.name} is AI-powered, so it uses ${t.cost} credit${t.cost>1?'s':''} per run. You always see the cost and confirm before anything is charged; the rest of the site's tools stay free.`],
+    [`Is my data safe when I use ${t.name}?`, (t.cat === 'pdf' || t.cat === 'image' || t.cat === 'education') ? `Yes. ${t.name} runs inside your own browser, so your files and text never leave your device.` : (t.cat === 'ai' ? `Your file is sent only to the AI service needed to produce the result, over an encrypted connection, and is not kept after processing.` : `Most processing happens in your browser. Heavy video jobs can optionally use a faster server, and files there are deleted after processing.`)],
+    [`Does ${t.name} work on mobile?`, `Yes. ${t.name} works on Android phones, iPhones, tablets and desktop browsers. The interface is available in Tamil and English.`],
+    [`What does ${t.name} do?`, `${t.desc}.`],
+  ];
+  const faqHtml = faqs.map(([q, a]) => `<h3>${escapeHtml(q)}</h3><p>${escapeHtml(a)}</p>`).join('\n      ');
+  const ld = JSON.stringify([
+    { '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: t.name, description: t.desc, applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any (web browser)', url: `${SITE}/tools/${slug}`, offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' }, inLanguage: ['en', 'ta'] },
+    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
+    { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: 'PDF Tools India', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: catLabel, item: `${SITE}/${t.cat}-tools` }, { '@type': 'ListItem', position: 3, name: t.name, item: `${SITE}/tools/${slug}` } ] },
+  ]).replace(/</g, '\\u003c');
   const relatedLinks = related.map(r =>
-    `<li><a href="/tools/${slugify(r.name)}.html">${r.icon} ${escapeHtml(r.name)}</a></li>`
+    `<li><a href="/tools/${slugify(r.name)}">${r.icon} ${escapeHtml(r.name)}</a></li>`
   ).join('\n        ');
 
   return `<!DOCTYPE html>
@@ -90,13 +106,14 @@ function pageHtml(t, slug, related) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(metaDesc)}">
-<link rel="canonical" href="${SITE}/tools/${slug}.html">
+<link rel="canonical" href="${SITE}/tools/${slug}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${escapeHtml(title)}">
 <meta property="og:description" content="${escapeHtml(metaDesc)}">
-<meta property="og:url" content="${SITE}/tools/${slug}.html">
+<meta property="og:url" content="${SITE}/tools/${slug}">
 <meta property="og:site_name" content="PDF Tools India">
 <link rel="icon" href="/favicon.ico">
+<script type="application/ld+json">${ld}</script>
 <style>
   :root{--brand:${t.color};--ink:#1a1a2e;--sub:#5a6072;--line:#e6e8ec;--bg:#f7f8fa;}
   *{box-sizing:border-box;}
@@ -113,6 +130,7 @@ function pageHtml(t, slug, related) {
   .note{font-size:13px;color:var(--sub);margin-top:16px;}
   .section{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;}
   .section h2{font-size:16px;margin:0 0 10px;}
+  .faq h3{font-size:14.5px;margin:14px 0 4px;}
   .section p{font-size:14px;line-height:1.7;color:#333;margin:0;}
   .section ol{font-size:14px;line-height:1.8;color:#333;margin:0;padding-left:20px;}
   .related ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -144,6 +162,10 @@ function pageHtml(t, slug, related) {
         <li>Download or copy your result — that's it.</li>
       </ol>
     </div>
+    <div class="section faq">
+      <h2>Frequently asked questions</h2>
+      ${faqHtml}
+    </div>
     ${related.length ? `<div class="section related">
       <h2>Related tools</h2>
       <ul>
@@ -151,7 +173,7 @@ function pageHtml(t, slug, related) {
       </ul>
     </div>` : ''}
     <footer>
-      <a href="/">← All 100+ tools at PDF Tools India</a>
+      <a href="/">← All 100+ tools at PDF Tools India</a> · <a href="/${t.cat}-tools">${escapeHtml(catLabel)} tools</a>
     </footer>
   </div>
 </body>
@@ -163,18 +185,27 @@ function buildSitemap(toolEntries) {
   const staticUrls = [
     { loc: `${SITE}/`, freq: 'weekly', pri: '1.0' },
     { loc: `${SITE}/blog/`, freq: 'weekly', pri: '0.9' },
-    { loc: `${SITE}/blog/how-to-merge-pdf-files-free.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/compress-pdf-for-email-whatsapp.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/forgot-pdf-password-recovery-guide.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/gst-invoice-format-guide.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/how-emi-is-calculated.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/old-vs-new-income-tax-regime.html`, freq: 'monthly', pri: '0.7' },
-    { loc: `${SITE}/blog/how-to-write-a-resume-that-passes-ats.html`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/pdf-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/image-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/business-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/video-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/ai-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/tn-rent-agreement`, freq: 'monthly', pri: '0.6' },
+    { loc: `${SITE}/tn-sale-deed`, freq: 'monthly', pri: '0.6' },
+    { loc: `${SITE}/blog/how-to-merge-pdf-files-free`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/compress-pdf-for-email-whatsapp`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/forgot-pdf-password-recovery-guide`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/gst-invoice-format-guide`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/how-emi-is-calculated`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/old-vs-new-income-tax-regime`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/how-to-write-a-resume-that-passes-ats`, freq: 'monthly', pri: '0.7' },
   ];
-  const toolUrls = toolEntries.map(slug => ({ loc: `${SITE}/tools/${slug}.html`, freq: 'monthly', pri: '0.6' }));
+  const toolUrls = toolEntries.map(slug => ({ loc: `${SITE}/tools/${slug}`, freq: 'monthly', pri: '0.6' }));
   const all = [...staticUrls, ...toolUrls];
   const body = all.map(u =>
-    `  <url>\n    <loc>${u.loc}</loc>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>\n  </url>`
+    `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${new Date().toISOString().slice(0,10)}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>\n  </url>`
   ).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
@@ -209,7 +240,7 @@ function main() {
 
   const sitemap = buildSitemap(slugs);
   fs.writeFileSync('sitemap.xml', sitemap);
-  console.log(`Rewrote sitemap.xml — ${slugs.length + 9} URLs total.`);
+  console.log(`Rewrote sitemap.xml — ${slugs.length + 16} URLs total.`);
 }
 
 main();
