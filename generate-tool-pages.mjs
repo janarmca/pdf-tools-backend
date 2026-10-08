@@ -211,6 +211,16 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/blog/how-emi-is-calculated`, freq: 'monthly', pri: '0.7' },
     { loc: `${SITE}/blog/old-vs-new-income-tax-regime`, freq: 'monthly', pri: '0.7' },
     { loc: `${SITE}/blog/how-to-write-a-resume-that-passes-ats`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/whats-new-pdf-tools-india-october-2026`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/split-pdf-extract-pages-free`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/delete-reorder-rotate-pdf-pages`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/jpg-to-pdf-free-multiple-images`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/pdf-to-word-free-editable-docx`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/sign-pdf-online-free-draw-type-upload`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/reduce-image-size-to-kb-for-online-forms`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/are-online-pdf-tools-safe`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/remove-photo-location-exif-before-sharing`, freq: 'monthly', pri: '0.7' },
+    { loc: `${SITE}/blog/free-kalvi-kalanjiyam-learn-class-1-to-10`, freq: 'monthly', pri: '0.7' },
   ];
   const toolUrls = toolEntries.map(slug => ({ loc: `${SITE}/tools/${slug}`, freq: 'monthly', pri: '0.6' }));
   const all = [...staticUrls, ...toolUrls];
