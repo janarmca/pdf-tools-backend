@@ -3165,16 +3165,50 @@ TOOL_IMPL.split = {
       opts.querySelector('#splitMode').addEventListener('change', ()=>{ renderModeField(); syncThumbs(); });
 
       // ---- Page preview: thumbnails of every page. Tap a page to add/remove it from the range. ----
-      const thumbBox = el(`<div style="margin:12px 0"><div style="font-size:12.5px;color:var(--sub);margin-bottom:6px">👀 Pages preview — tap a page to select it (Extract mode)</div><div id="thumbGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;max-height:340px;overflow:auto"></div></div>`);
+      const thumbBox = el(`<div style="margin:12px 0"><div style="font-size:12.5px;color:var(--sub);margin-bottom:6px">👀 Pages preview — tap a page to select it · 🔍 for a large view</div><div id="thumbGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:560px;overflow:auto"></div></div>`);
       body.insertBefore(thumbBox, opts);
       const grid = thumbBox.querySelector('#thumbGrid');
       const cells = [];
+      let pdfDocRef = null;
+      // ---- Large page view (modal): big render, ◀ ▶ to move between pages, select/unselect from here ----
+      async function openLarge(start){
+        if(!pdfDocRef){ return; }
+        let cur = start;
+        const ov = el(`<div style="position:fixed;inset:0;z-index:9999;background:rgba(10,12,20,.88);display:flex;flex-direction:column;align-items:center;padding:12px;overflow:auto"></div>`);
+        const bar = el(`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:10px;color:#fff;flex-shrink:0;position:sticky;top:0;z-index:2;background:rgba(10,12,20,.92);padding:6px 10px;border-radius:12px"></div>`);
+        const prev = el(`<button type="button" class="btn" style="padding:8px 14px">◀</button>`), next = el(`<button type="button" class="btn" style="padding:8px 14px">▶</button>`);
+        const lab = el(`<b style="min-width:110px;text-align:center"></b>`), pick = el(`<button type="button" class="btn" style="padding:8px 14px"></button>`), close = el(`<button type="button" class="btn" style="padding:8px 14px;background:#555">✕ Close</button>`);
+        [prev, lab, next, pick, close].forEach(x=>bar.appendChild(x));
+        const holder = el(`<div style="background:#fff;border-radius:10px;max-width:100%;display:flex;align-items:center;justify-content:center;min-height:200px;min-width:200px;color:#666;flex-shrink:0">Loading…</div>`);
+        ov.appendChild(bar); ov.appendChild(holder); document.body.appendChild(ov);
+        const done = ()=>{ ov.remove(); document.removeEventListener('keydown', onKey); };
+        const onKey = (e)=>{ if(e.key==='Escape') done(); else if(e.key==='ArrowLeft') go(-1); else if(e.key==='ArrowRight') go(1); };
+        document.addEventListener('keydown', onKey);
+        close.onclick = done; ov.addEventListener('click', (e)=>{ if(e.target===ov) done(); });
+        let token = 0;
+        function label(){ lab.textContent = `Page ${cur+1} / ${pageCount}`; const on = currentSel().has(cur); pick.textContent = on ? '✓ Selected — tap to remove' : '＋ Select this page'; pick.style.background = on ? '#2e7d32' : ''; pick.style.display = body.querySelector('#rangeInput') ? '' : 'none'; }
+        async function show(){
+          const my = ++token; label(); holder.textContent = 'Loading…';
+          try{
+            const pg = await pdfDocRef.getPage(cur+1); const vp0 = pg.getViewport({scale:1});
+            const targetW = Math.min(window.innerWidth - 40, 900); const vp = pg.getViewport({scale: (targetW/vp0.width) * Math.min(2, window.devicePixelRatio||1)});
+            const cv = document.createElement('canvas'); cv.width = Math.ceil(vp.width); cv.height = Math.ceil(vp.height); cv.style.cssText = `width:${Math.round(targetW)}px;max-width:100%;display:block;border-radius:10px`;
+            await pg.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise; pg.cleanup();
+            if(my!==token) return; holder.textContent = ''; holder.appendChild(cv);
+          }catch(err){ if(my===token) holder.textContent = 'Could not draw this page'; }
+        }
+        function go(d){ const n = cur + d; if(n<0 || n>=pageCount) return; cur = n; show(); }
+        prev.onclick = ()=>go(-1); next.onclick = ()=>go(1);
+        pick.onclick = ()=>{ const inp = body.querySelector('#rangeInput'); if(!inp){ return; } const sel = currentSel(); if(sel.has(cur)) sel.delete(cur); else sel.add(cur); inp.value = toRangeStr(sel); syncThumbs(); label(); };
+        show();
+      }
       const paintCell = (i, on)=>{ const c = cells[i]; if(!c) return; c.style.outline = on ? '3px solid #E8894A' : '1px solid var(--line,#ddd)'; c.style.opacity = on ? '1' : '0.75'; };
       function currentSel(){ const inp = body.querySelector('#rangeInput'); return inp ? new Set(parseRanges(inp.value, pageCount)) : new Set(); }
       function syncThumbs(){ const inp = body.querySelector('#rangeInput'); const sel = currentSel(); cells.forEach((c,i)=> paintCell(i, !!inp && sel.has(i))); if(inp && !inp._thumbHook){ inp._thumbHook = true; inp.addEventListener('input', syncThumbs); } }
       function toRangeStr(sel){ const a = Array.from(sel).sort((x,y)=>x-y); const out = []; for(let i=0;i<a.length;){ let j=i; while(j+1<a.length && a[j+1]===a[j]+1) j++; out.push(j>i ? `${a[i]+1}-${a[j]+1}` : `${a[i]+1}`); i=j+1; } return out.join(', '); }
       for(let i=0;i<pageCount;i++){
-        const c = el(`<div style="position:relative;border-radius:8px;overflow:hidden;background:#fff;cursor:pointer;min-height:100px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub)"><span class="tn">${i+1}</span><b style="position:absolute;left:4px;bottom:3px;background:rgba(0,0,0,.65);color:#fff;border-radius:6px;padding:0 6px;font-size:11px">${i+1}</b></div>`);
+        const c = el(`<div style="position:relative;border-radius:8px;overflow:hidden;background:#fff;cursor:pointer;min-height:150px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub)"><span class="tn">${i+1}</span><b style="position:absolute;left:4px;bottom:3px;background:rgba(0,0,0,.65);color:#fff;border-radius:6px;padding:0 6px;font-size:11px">${i+1}</b><button type="button" class="zoomBtn" title="Large view" style="position:absolute;right:4px;top:4px;border:0;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;padding:3px 8px;font-size:14px;cursor:pointer">🔍</button></div>`);
+        c.querySelector('.zoomBtn').onclick = (ev)=>{ ev.stopPropagation(); openLarge(i); };
         c.onclick = ()=>{ const inp = body.querySelector('#rangeInput'); if(!inp) return; const sel = currentSel(); if(sel.has(i)) sel.delete(i); else sel.add(i); inp.value = toRangeStr(sel); syncThumbs(); };
         cells.push(c); grid.appendChild(c);
       }
@@ -3182,17 +3216,16 @@ TOOL_IMPL.split = {
       (async ()=>{
         try{
           await ensurePdfJs();
-          const pdf = await pdfjsLib.getDocument({data: new Uint8Array(file._buf.slice(0))}).promise;
+          const pdf = await pdfjsLib.getDocument({data: new Uint8Array(file._buf.slice(0))}).promise; pdfDocRef = pdf;
           const maxThumbs = Math.min(pageCount, 120);
           for(let i=1;i<=maxThumbs;i++){
             if(!cells[i-1] || !cells[i-1].isConnected) break;
-            const pg = await pdf.getPage(i); const vp0 = pg.getViewport({scale:1}); const vp = pg.getViewport({scale: 110/vp0.width});
+            const pg = await pdf.getPage(i); const vp0 = pg.getViewport({scale:1}); const vp = pg.getViewport({scale: 240/vp0.width});
             const cv = document.createElement('canvas'); cv.width = Math.ceil(vp.width); cv.height = Math.ceil(vp.height); cv.style.cssText = 'width:100%;display:block';
             await pg.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise;
             const holder = cells[i-1]; const tn = holder.querySelector('.tn'); if(tn) tn.remove(); holder.insertBefore(cv, holder.firstChild); pg.cleanup();
           }
           if(pageCount > maxThumbs) grid.appendChild(el(`<div style="grid-column:1/-1;font-size:11.5px;color:var(--sub)">Preview shows the first ${maxThumbs} pages — you can still type any page range.</div>`));
-          pdf.destroy();
         }catch(err){ thumbBox.querySelector('div').textContent = '👀 Page numbers (preview not available for this file — you can still split)'; }
       })();
       const row = el(`<div class="btn-row"></div>`);
