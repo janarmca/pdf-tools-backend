@@ -6200,6 +6200,60 @@
         }
        ],
        "no": 10
+      },
+      {
+       "no": 11,
+       "title": {
+        "ta": "🛒 நிஜ வாழ்க்கைக் கணக்கு",
+        "en": "🛒 Real-life maths"
+       },
+       "lessons": [
+        {
+         "id": "g-math-c6-real-bestBuy",
+         "title": {
+          "ta": "எது மலிவு?",
+          "en": "Best buy"
+         },
+         "game": "bestBuy",
+         "level": {}
+        },
+        {
+         "id": "g-math-c6-real-percentLife",
+         "title": {
+          "ta": "சதவீத மாற்றம்",
+          "en": "Percent change"
+         },
+         "game": "percentLife",
+         "level": {}
+        },
+        {
+         "id": "g-math-c6-real-mapScale",
+         "title": {
+          "ta": "வரைபட அளவு",
+          "en": "Map scale"
+         },
+         "game": "mapScale",
+         "level": {}
+        },
+        {
+         "id": "g-math-c6-real-mileageCost",
+         "title": {
+          "ta": "மைலேஜ் செலவு",
+          "en": "Mileage & cost"
+         },
+         "game": "mileageCost",
+         "level": {}
+        },
+        {
+         "id": "g-math-c6-real-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -6359,6 +6413,105 @@
         }
        ],
        "no": 7
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "🎮 செய்து புரிந்துகொள்",
+        "en": "🎮 Learn by doing"
+       },
+       "lessons": [
+        {
+         "id": "g-scie-c6-do-speedStory",
+         "title": {
+          "ta": "வேகம் கதைகள்",
+          "en": "Speed stories"
+         },
+         "game": "speedStory",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-densityFloat",
+         "title": {
+          "ta": "மிதக்குமா? மூழ்குமா?",
+          "en": "Float or sink?"
+         },
+         "game": "densityFloat",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-atomCount",
+         "title": {
+          "ta": "அணுக்களை எண்ணு",
+          "en": "Count the atoms"
+         },
+         "game": "atomCount",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-separateMix",
+         "title": {
+          "ta": "கலவையைப் பிரி",
+          "en": "Separate the mixture"
+         },
+         "game": "separateMix",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-foodWeb",
+         "title": {
+          "ta": "உணவுச் சங்கிலி",
+          "en": "Food chains"
+         },
+         "game": "foodWeb",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-heartRate",
+         "title": {
+          "ta": "இதயம் எண்களில்",
+          "en": "Heart in numbers"
+         },
+         "game": "heartRate",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-mealEnergy",
+         "title": {
+          "ta": "உணவின் ஆற்றல்",
+          "en": "Energy in food"
+         },
+         "game": "mealEnergy",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-germGrowth",
+         "title": {
+          "ta": "கிருமிகள் இரட்டிப்பு",
+          "en": "Germs double"
+         },
+         "game": "germGrowth",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-photoWhy",
+         "title": {
+          "ta": "ஒளிச்சேர்க்கை",
+          "en": "Photosynthesis"
+         },
+         "game": "photoWhy",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c6-do-microMagnify",
+         "title": {
+          "ta": "நுண்ணோக்கி",
+          "en": "Microscope"
+         },
+         "game": "microMagnify",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -7359,6 +7512,60 @@
         }
        ],
        "no": 10
+      },
+      {
+       "no": 11,
+       "title": {
+        "ta": "🛒 நிஜ வாழ்க்கைக் கணக்கு",
+        "en": "🛒 Real-life maths"
+       },
+       "lessons": [
+        {
+         "id": "g-math-c7-real-bestBuy",
+         "title": {
+          "ta": "எது மலிவு?",
+          "en": "Best buy"
+         },
+         "game": "bestBuy",
+         "level": {}
+        },
+        {
+         "id": "g-math-c7-real-percentLife",
+         "title": {
+          "ta": "சதவீத மாற்றம்",
+          "en": "Percent change"
+         },
+         "game": "percentLife",
+         "level": {}
+        },
+        {
+         "id": "g-math-c7-real-mapScale",
+         "title": {
+          "ta": "வரைபட அளவு",
+          "en": "Map scale"
+         },
+         "game": "mapScale",
+         "level": {}
+        },
+        {
+         "id": "g-math-c7-real-mileageCost",
+         "title": {
+          "ta": "மைலேஜ் செலவு",
+          "en": "Mileage & cost"
+         },
+         "game": "mileageCost",
+         "level": {}
+        },
+        {
+         "id": "g-math-c7-real-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -7509,6 +7716,123 @@
         }
        ],
        "no": 6
+      },
+      {
+       "no": 7,
+       "title": {
+        "ta": "🎮 செய்து புரிந்துகொள்",
+        "en": "🎮 Learn by doing"
+       },
+       "lessons": [
+        {
+         "id": "g-scie-c7-do-speedStory",
+         "title": {
+          "ta": "வேகம் கதைகள்",
+          "en": "Speed stories"
+         },
+         "game": "speedStory",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-springStretch",
+         "title": {
+          "ta": "சுருள்வில் நீட்சி",
+          "en": "Spring stretch"
+         },
+         "game": "springStretch",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-densityFloat",
+         "title": {
+          "ta": "மிதக்குமா? மூழ்குமா?",
+          "en": "Float or sink?"
+         },
+         "game": "densityFloat",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-seesawBalance",
+         "title": {
+          "ta": "சீ-சா சமநிலை",
+          "en": "Seesaw balance"
+         },
+         "game": "seesawBalance",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-echoThunder",
+         "title": {
+          "ta": "எதிரொலி & இடி",
+          "en": "Echo & thunder"
+         },
+         "game": "echoThunder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-atomBuilder",
+         "title": {
+          "ta": "அணுவைக் கட்டு",
+          "en": "Build the atom"
+         },
+         "game": "atomBuilder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-atomCount",
+         "title": {
+          "ta": "அணுக்களை எண்ணு",
+          "en": "Count the atoms"
+         },
+         "game": "atomCount",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-phLife",
+         "title": {
+          "ta": "pH – அமிலமா, காரமா?",
+          "en": "pH – acid or base?"
+         },
+         "game": "phLife",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-separateMix",
+         "title": {
+          "ta": "கலவையைப் பிரி",
+          "en": "Separate the mixture"
+         },
+         "game": "separateMix",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-foodWeb",
+         "title": {
+          "ta": "உணவுச் சங்கிலி",
+          "en": "Food chains"
+         },
+         "game": "foodWeb",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-microMagnify",
+         "title": {
+          "ta": "நுண்ணோக்கி",
+          "en": "Microscope"
+         },
+         "game": "microMagnify",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c7-do-germGrowth",
+         "title": {
+          "ta": "கிருமிகள் இரட்டிப்பு",
+          "en": "Germs double"
+         },
+         "game": "germGrowth",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -8454,6 +8778,60 @@
         }
        ],
        "no": 8
+      },
+      {
+       "no": 9,
+       "title": {
+        "ta": "🛒 நிஜ வாழ்க்கைக் கணக்கு",
+        "en": "🛒 Real-life maths"
+       },
+       "lessons": [
+        {
+         "id": "g-math-c8-real-bestBuy",
+         "title": {
+          "ta": "எது மலிவு?",
+          "en": "Best buy"
+         },
+         "game": "bestBuy",
+         "level": {}
+        },
+        {
+         "id": "g-math-c8-real-percentLife",
+         "title": {
+          "ta": "சதவீத மாற்றம்",
+          "en": "Percent change"
+         },
+         "game": "percentLife",
+         "level": {}
+        },
+        {
+         "id": "g-math-c8-real-mapScale",
+         "title": {
+          "ta": "வரைபட அளவு",
+          "en": "Map scale"
+         },
+         "game": "mapScale",
+         "level": {}
+        },
+        {
+         "id": "g-math-c8-real-mileageCost",
+         "title": {
+          "ta": "மைலேஜ் செலவு",
+          "en": "Mileage & cost"
+         },
+         "game": "mileageCost",
+         "level": {}
+        },
+        {
+         "id": "g-math-c8-real-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -8604,6 +8982,123 @@
         }
        ],
        "no": 7
+      },
+      {
+       "no": 8,
+       "title": {
+        "ta": "🎮 செய்து புரிந்துகொள்",
+        "en": "🎮 Learn by doing"
+       },
+       "lessons": [
+        {
+         "id": "g-scie-c8-do-pressureFelt",
+         "title": {
+          "ta": "அழுத்தம்",
+          "en": "Pressure"
+         },
+         "game": "pressureFelt",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-ohmHome",
+         "title": {
+          "ta": "V–I–R",
+          "en": "V–I–R"
+         },
+         "game": "ohmHome",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-energyHeight",
+         "title": {
+          "ta": "உயரத்தில் ஆற்றல்",
+          "en": "Energy of height"
+         },
+         "game": "energyHeight",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-workPower",
+         "title": {
+          "ta": "வேலை & திறன்",
+          "en": "Work & power"
+         },
+         "game": "workPower",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-echoThunder",
+         "title": {
+          "ta": "எதிரொலி & இடி",
+          "en": "Echo & thunder"
+         },
+         "game": "echoThunder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-atomBuilder",
+         "title": {
+          "ta": "அணுவைக் கட்டு",
+          "en": "Build the atom"
+         },
+         "game": "atomBuilder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-phLife",
+         "title": {
+          "ta": "pH",
+          "en": "pH"
+         },
+         "game": "phLife",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-balanceFill",
+         "title": {
+          "ta": "வேதிச் சமன்பாடு",
+          "en": "Chemical equations"
+         },
+         "game": "balanceFill",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-traitCross",
+         "title": {
+          "ta": "மரபு",
+          "en": "Heredity"
+         },
+         "game": "traitCross",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-foodWeb",
+         "title": {
+          "ta": "உணவுச் சங்கிலி & ஆற்றல்",
+          "en": "Food chains & energy"
+         },
+         "game": "foodWeb",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c8-do-photoWhy",
+         "title": {
+          "ta": "ஒளிச்சேர்க்கை",
+          "en": "Photosynthesis"
+         },
+         "game": "photoWhy",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -9672,6 +10167,60 @@
          "level": {}
         }
        ]
+      },
+      {
+       "no": 10,
+       "title": {
+        "ta": "🛒 நிஜ வாழ்க்கைக் கணக்கு",
+        "en": "🛒 Real-life maths"
+       },
+       "lessons": [
+        {
+         "id": "g-math-c9-real-bestBuy",
+         "title": {
+          "ta": "எது மலிவு?",
+          "en": "Best buy"
+         },
+         "game": "bestBuy",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-real-percentLife",
+         "title": {
+          "ta": "சதவீத மாற்றம்",
+          "en": "Percent change"
+         },
+         "game": "percentLife",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-real-mapScale",
+         "title": {
+          "ta": "வரைபட அளவு",
+          "en": "Map scale"
+         },
+         "game": "mapScale",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-real-mileageCost",
+         "title": {
+          "ta": "மைலேஜ் செலவு",
+          "en": "Mileage & cost"
+         },
+         "game": "mileageCost",
+         "level": {}
+        },
+        {
+         "id": "g-math-c9-real-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -10365,6 +10914,123 @@
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
        }
+      },
+      {
+       "no": 28,
+       "title": {
+        "ta": "🎮 செய்து புரிந்துகொள்",
+        "en": "🎮 Learn by doing"
+       },
+       "lessons": [
+        {
+         "id": "g-scie-c9-do-springStretch",
+         "title": {
+          "ta": "சுருள்வில் நீட்சி",
+          "en": "Spring stretch"
+         },
+         "game": "springStretch",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-seesawBalance",
+         "title": {
+          "ta": "சமநிலை",
+          "en": "Balance"
+         },
+         "game": "seesawBalance",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-energyHeight",
+         "title": {
+          "ta": "ஆற்றல்",
+          "en": "Energy"
+         },
+         "game": "energyHeight",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-workPower",
+         "title": {
+          "ta": "வேலை & திறன்",
+          "en": "Work & power"
+         },
+         "game": "workPower",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-ohmHome",
+         "title": {
+          "ta": "V–I–R",
+          "en": "V–I–R"
+         },
+         "game": "ohmHome",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-moleCalc",
+         "title": {
+          "ta": "மோல் & நிறை",
+          "en": "Moles & mass"
+         },
+         "game": "moleCalc",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-atomBuilder",
+         "title": {
+          "ta": "அணுவைக் கட்டு",
+          "en": "Build the atom"
+         },
+         "game": "atomBuilder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-balanceFill",
+         "title": {
+          "ta": "வேதிச் சமன்பாடு",
+          "en": "Chemical equations"
+         },
+         "game": "balanceFill",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-phLife",
+         "title": {
+          "ta": "pH",
+          "en": "pH"
+         },
+         "game": "phLife",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-traitCross",
+         "title": {
+          "ta": "மரபு",
+          "en": "Heredity"
+         },
+         "game": "traitCross",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c9-do-foodWeb",
+         "title": {
+          "ta": "உணவுச் சங்கிலி & ஆற்றல்",
+          "en": "Food chains & energy"
+         },
+         "game": "foodWeb",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -11403,6 +12069,60 @@
          "level": {}
         }
        ]
+      },
+      {
+       "no": 9,
+       "title": {
+        "ta": "🛒 நிஜ வாழ்க்கைக் கணக்கு",
+        "en": "🛒 Real-life maths"
+       },
+       "lessons": [
+        {
+         "id": "g-math-c10-real-bestBuy",
+         "title": {
+          "ta": "எது மலிவு?",
+          "en": "Best buy"
+         },
+         "game": "bestBuy",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-real-percentLife",
+         "title": {
+          "ta": "சதவீத மாற்றம்",
+          "en": "Percent change"
+         },
+         "game": "percentLife",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-real-mapScale",
+         "title": {
+          "ta": "வரைபட அளவு",
+          "en": "Map scale"
+         },
+         "game": "mapScale",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-real-mileageCost",
+         "title": {
+          "ta": "மைலேஜ் செலவு",
+          "en": "Mileage & cost"
+         },
+         "game": "mileageCost",
+         "level": {}
+        },
+        {
+         "id": "g-math-c10-real-billSaver",
+         "title": {
+          "ta": "மின் கட்டணம்",
+          "en": "Electricity bill"
+         },
+         "game": "billSaver",
+         "level": {}
+        }
+       ]
       }
      ]
     },
@@ -11988,6 +12708,105 @@
         "ta": "கணினி அறிவியல்",
         "en": "Computer Science"
        }
+      },
+      {
+       "no": 24,
+       "title": {
+        "ta": "🎮 செய்து புரிந்துகொள்",
+        "en": "🎮 Learn by doing"
+       },
+       "lessons": [
+        {
+         "id": "g-scie-c10-do-energyHeight",
+         "title": {
+          "ta": "ஆற்றல்",
+          "en": "Energy"
+         },
+         "game": "energyHeight",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-workPower",
+         "title": {
+          "ta": "வேலை & திறன்",
+          "en": "Work & power"
+         },
+         "game": "workPower",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-echoThunder",
+         "title": {
+          "ta": "எதிரொலி & இடி",
+          "en": "Echo & thunder"
+         },
+         "game": "echoThunder",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-moleCalc",
+         "title": {
+          "ta": "மோல் & நிறை",
+          "en": "Moles & mass"
+         },
+         "game": "moleCalc",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-balanceFill",
+         "title": {
+          "ta": "வேதிச் சமன்பாடு",
+          "en": "Chemical equations"
+         },
+         "game": "balanceFill",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-atomCount",
+         "title": {
+          "ta": "அணுக்களை எண்ணு",
+          "en": "Count the atoms"
+         },
+         "game": "atomCount",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-phLife",
+         "title": {
+          "ta": "pH",
+          "en": "pH"
+         },
+         "game": "phLife",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-traitCross",
+         "title": {
+          "ta": "மரபு",
+          "en": "Heredity"
+         },
+         "game": "traitCross",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-foodWeb",
+         "title": {
+          "ta": "உணவுச் சங்கிலி & ஆற்றல்",
+          "en": "Food chains & energy"
+         },
+         "game": "foodWeb",
+         "level": {}
+        },
+        {
+         "id": "g-scie-c10-do-heartRate",
+         "title": {
+          "ta": "இதயம் எண்களில்",
+          "en": "Heart in numbers"
+         },
+         "game": "heartRate",
+         "level": {}
+        }
+       ]
       }
      ]
     },

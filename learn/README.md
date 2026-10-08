@@ -38,6 +38,22 @@ The Samacheer chapter lists (maths 9 / 8 chapters, science 27 / 23 chapters) and
 Generated: sets, surds, scientific notation, recurring decimals, modular arithmetic, AP/GP, remainder theorem, factorising, quadratic roots & discriminant, simultaneous equations, identities, circle theorems, coordinate geometry, BPT/similar triangles, tangents, trig values, heights & distances, solids, Heron, probability, SD/CV, equations of motion, force/energy/power, electricity & bills, waves/lenses/heat, fluid pressure, half-life, molar mass & moles, atomic structure/configuration/valency, pH, concentration, alkanes, binary, Punnett squares — each re-solved independently in `tests/games.test.cjs` (polynomial parser, brute-force solvers, exact enumeration of dice/cards/coins, own atomic-mass table).
 
 ## ஆய்வகம் (Lab) & Books — `lab.js`
-- `#/lab` lists PhET simulations (65, mapped to classes 3–12 and Maths/Physics/Chemistry/Biology); `#/lab/<slug>` embeds `https://phet.colorado.edu/sims/html/<slug>/latest/<slug>_all.html?locale=ta`. PhET is CC-BY-4.0; attribution is shown on every sim page. Slugs were verified as published sims with `_ta` translations in phetsims/babel.
-- Guidance prompts (predict → do → explain) are our own words. To add a sim: append a row in the data (slug, class range, subject, titles, task) — slug must be a PhET repo with `phet.simulation`.
-- `#/books` = link-only list of free official textbooks (Samacheer, NCERT, OpenStax, CK-12, LibreTexts…). Never copy their content; never copy BYJU'S.
+- Our OWN experiments (no PhET/BYJU'S code or content): 28 now (lab.js = first 14, lab2.js = 14 more + the 'why learn this' notes `WHY`). Every experiment must have a `why` {l: daily life, j: careers, h: think-about-it} so students see the purpose. Flow: predict → do & record (min 3 readings) → understand (rule) → check (2 questions; score saved under `lab-<id>` in `kalviProgress`).
+- To add one: push an object to `EXPS` in lab.js: `{id, icon, c:[minClass,maxClass], s:'maths|physics|chem', t, goal, predict:{q,o,a,why}, build(ctx){...return {cols, rec}}, key, quiz}`. Put pure formulas in `PHYS` and test them. Every text is [ta,en].
+- `#/books` = link-only list of free official textbooks. Never copy their content.
+- Tests: Playwright script mounts every experiment, records, answers the quiz (see session notes).
+
+## games-sci.js — "Learn by doing" games (27)
+Computed-answer science and real-life maths games for Classes 6–10 (speed, Hooke, density, pressure, Ohm, electricity bill,
+seesaw, energy, echo, work/power, atom, formula atoms, moles, pH, equations, separation, food chains, heredity, heart,
+microscope, nutrition kcal, germ doubling, photosynthesis, best buy, percent, map scale, mileage).
+Each has a "why" intro and an explanation on every mistake. ~28,000 distinct questions (measured). Independent re-solvers
+live in tests/games.test.cjs. Catalog chapters: "🎮 செய்து புரிந்துகொள்" (science) and "🛒 நிஜ வாழ்க்கைக் கணக்கு" (maths).
+`#/what` page = "What is Maths / Physics / Chemistry / Biology?".
+
+## missions.js — 🎯 "Hit the target" mission games (11)
+Route `#/missions`. One slider, live result, random target, 5 rounds, 3 stars, a "why this matters" note at the end.
+Projectile, spring, seesaw, Ohm, pendulum, gas, refraction, Pythagoras, recipe ratio, interest, wave.
+Every round is solvable on the slider grid (browser-tested: 11 missions x 3 plays x 5 rounds).
+
+## why.js — "Why do we learn this?" banner on every subject page, Classes 1-10 (Tamil + English).
