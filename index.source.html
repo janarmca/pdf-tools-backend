@@ -2963,6 +2963,7 @@ const TOOL_LIBS = {
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
   readaloud:['pdfjs'], rentreceipt:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
+  remove:['pdfjs','pdflib'], organize:['pdfjs','pdflib'], rotate:['pdfjs','pdflib'],
   split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], tuitionreceipt:['pdflib'], txt2pdf:['pdflib'],
   vidsplit:['jszip'], watermark:['pdflib'], word2pdf:['jszip','mammoth','pdflib'],
   // category-image.js
@@ -3348,6 +3349,7 @@ async function mountThumbTool(container, mode){
   let order = [];      // array of original page indices in current order
   let removed = new Set();
   let rotations = {};  // idx -> degrees added (0/90/180/270)
+  let thumbCache = {}; // pageIdx -> rendered preview (so tapping never re-renders the whole PDF)
   const body = el(`<div></div>`); container.appendChild(body);
 
   function paintUpload(){
@@ -3364,6 +3366,7 @@ async function mountThumbTool(container, mode){
         order = Array.from({length:pageCount},(_,i)=>i);
         removed = new Set();
         rotations = {};
+        thumbCache = {};
         await paintThumbs();
       }
     });
@@ -3377,59 +3380,89 @@ async function mountThumbTool(container, mode){
     const label = el(`<div class="progress-label" style="margin-top:10px;">Rendering page previews…</div>`);
     body.appendChild(label);
 
+    // Summary bar (Delete mode): how many pages are marked + one-tap actions. Sticky so it is always reachable while scrolling.
+    let bar = null, barCount = null;
+    if(mode==='remove'){
+      bar = el(`<div style="position:sticky; top:0; z-index:5; display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:var(--card,#fff); border:1px solid var(--line); border-radius:12px; padding:8px 12px; margin-top:12px; box-shadow:0 2px 8px rgba(0,0,0,.08);"></div>`);
+      barCount = el(`<b style="flex:1; min-width:140px;"></b>`);
+      const bAll = el(`<button type="button" class="btn" style="padding:6px 12px; background:#777;">Select all</button>`);
+      const bClr = el(`<button type="button" class="btn" style="padding:6px 12px; background:#777;">Clear</button>`);
+      const bGo = el(`<button type="button" class="btn" style="padding:6px 14px;">🗑️ Delete & Download</button>`);
+      bAll.onclick = ()=>{ order.forEach(i=>removed.add(i)); syncAll(); };
+      bClr.onclick = ()=>{ removed.clear(); syncAll(); };
+      bGo.onclick = doProcess;
+      [barCount, bAll, bClr, bGo].forEach(x=>bar.appendChild(x));
+      body.insertBefore(bar, grid);
+    }
+    // Apply the current state (removed / rotation / numbering) to ONE thumbnail — no re-render, no scroll jump.
+    function syncThumb(th){
+      const idx = Number(th.dataset.idx), gone = removed.has(idx);
+      th.classList.toggle('removed', false);
+      th.style.outline = gone ? '4px solid #C0392B' : '';
+      th.style.outlineOffset = '-2px';
+      const img = th.querySelector('img'); img.style.transform = `rotate(${rotations[idx]||0}deg)`; img.style.opacity = gone ? '.35' : '';
+      const tg = th.querySelector('[data-toggle]'); if(tg){ tg.textContent = gone ? '✓ Will be deleted — tap to keep' : '🗑️ Tap to delete this page'; tg.style.background = gone ? '#C0392B' : ''; tg.style.color = gone ? '#fff' : ''; }
+    }
+    function renumber(){
+      Array.from(grid.children).forEach((th, p)=>{
+        th.dataset.pos = p; const tn = th.querySelector('.tnum'); if(tn) tn.textContent = p+1;
+        const l = th.querySelector('[data-left]'), r = th.querySelector('[data-right]');
+        if(l){ l.setAttribute('data-left', p); l.disabled = p===0; l.style.opacity = p===0 ? '.3' : ''; }
+        if(r){ r.setAttribute('data-right', p); r.disabled = p===order.length-1; r.style.opacity = p===order.length-1 ? '.3' : ''; }
+      });
+    }
+    function syncAll(){
+      Array.from(grid.children).forEach(syncThumb);
+      if(barCount){ const n = removed.size; barCount.textContent = n ? `${n} page${n>1?'s':''} marked to delete · ${order.length-n} will remain` : 'Tap the pages you want to delete'; }
+    }
+
     for(let pos=0; pos<order.length; pos++){
       const pageIdx = order[pos];
-      const dataUrl = await renderThumbDataUrl(pdfjsDoc, pageIdx+1, 1.0); // bigger, clearer preview
-      const rot = rotations[pageIdx] || 0;
+      const dataUrl = thumbCache[pageIdx] || (thumbCache[pageIdx] = await renderThumbDataUrl(pdfjsDoc, pageIdx+1, 1.0)); // rendered once, then reused
       const thumb = el(`
-        <div class="thumb ${removed.has(pageIdx)?'removed':''}" data-pos="${pos}" style="position:relative;">
+        <div class="thumb" data-pos="${pos}" data-idx="${pageIdx}" style="position:relative; ${mode==='remove'?'cursor:pointer;':''}">
           <span class="tnum">${pos+1}</span>
-          <button data-zoom="${pageIdx}" title="Zoom in" style="position:absolute; top:6px; right:6px; z-index:2; width:28px; height:28px; border-radius:50%; border:none; background:rgba(0,0,0,.55); color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🔍</button>
-          <img src="${dataUrl}" style="transform:rotate(${rot}deg); ${removed.has(pageIdx)?'opacity:.35;':''}">
+          <button data-zoom="${pageIdx}" title="Large view" style="position:absolute; top:6px; right:6px; z-index:2; height:30px; padding:0 10px; border-radius:15px; border:none; background:rgba(0,0,0,.6); color:#fff; font-size:15px; cursor:pointer;">🔍</button>
+          <img src="${dataUrl}">
           <div class="tctrl"></div>
         </div>
       `);
       const ctrl = thumb.querySelector('.tctrl');
       if(mode==='remove'){
-        ctrl.innerHTML = `<label style="display:flex; align-items:center; gap:8px; cursor:pointer; width:100%; justify-content:center; padding:4px 0; font-weight:700; font-size:13px;">
-          <input type="checkbox" data-toggle="${pageIdx}" ${removed.has(pageIdx)?'checked':''} style="width:20px; height:20px; accent-color:var(--warn); cursor:pointer;">
-          Delete this page
-        </label>`;
+        ctrl.innerHTML = `<div data-toggle="${pageIdx}" style="width:100%; text-align:center; padding:8px 4px; border-radius:8px; font-weight:700; font-size:13px; background:var(--chip,#eee);"></div>`;
       } else if(mode==='organize'){
-        const bl = el(`<button data-left="${pos}">◀</button>`);
-        const br = el(`<button data-right="${pos}">▶</button>`);
+        const bl = el(`<button type="button" data-left="${pos}" style="font-size:18px; padding:4px 14px;">◀</button>`);
+        const br = el(`<button type="button" data-right="${pos}" style="font-size:18px; padding:4px 14px;">▶</button>`);
         ctrl.appendChild(bl); ctrl.appendChild(br);
       } else if(mode==='rotate'){
-        const b = el(`<button data-rot="${pageIdx}">⟳ 90°</button>`);
+        const b = el(`<button type="button" data-rot="${pageIdx}">⟳ 90°</button>`);
         ctrl.appendChild(b);
       }
       grid.appendChild(thumb);
     }
     label.remove();
+    syncAll(); renumber();
 
-    grid.addEventListener('change', (e)=>{
-      const t = e.target;
-      if(t.matches('[data-toggle]')){
-        const idx = Number(t.getAttribute('data-toggle'));
-        if(t.checked) removed.add(idx); else removed.delete(idx);
-        paintThumbs();
-      }
-    });
     grid.addEventListener('click', (e)=>{
       const t = e.target;
-      if(t.matches('[data-zoom]')){
-        const idx = Number(t.getAttribute('data-zoom'));
-        openZoomLightbox(idx);
-      } else if(t.matches('[data-left]')){
-        const pos = Number(t.getAttribute('data-left'));
-        if(pos>0){ const tmp=order[pos]; order[pos]=order[pos-1]; order[pos-1]=tmp; paintThumbs(); }
-      } else if(t.matches('[data-right]')){
-        const pos = Number(t.getAttribute('data-right'));
-        if(pos<order.length-1){ const tmp=order[pos]; order[pos]=order[pos+1]; order[pos+1]=tmp; paintThumbs(); }
-      } else if(t.matches('[data-rot]')){
-        const idx = Number(t.getAttribute('data-rot'));
+      const th = t.closest ? t.closest('.thumb') : null;
+      if(t.closest && t.closest('[data-zoom]')){
+        openZoomLightbox(Number(t.closest('[data-zoom]').getAttribute('data-zoom')));
+      } else if(t.closest && t.closest('[data-left]')){
+        const b = t.closest('[data-left]'), pos = Number(b.getAttribute('data-left'));
+        if(pos>0){ const tmp=order[pos]; order[pos]=order[pos-1]; order[pos-1]=tmp; grid.insertBefore(grid.children[pos], grid.children[pos-1]); renumber(); }
+      } else if(t.closest && t.closest('[data-right]')){
+        const b = t.closest('[data-right]'), pos = Number(b.getAttribute('data-right'));
+        if(pos<order.length-1){ const tmp=order[pos]; order[pos]=order[pos+1]; order[pos+1]=tmp; grid.insertBefore(grid.children[pos+1], grid.children[pos]); renumber(); }
+      } else if(t.closest && t.closest('[data-rot]')){
+        const idx = Number(t.closest('[data-rot]').getAttribute('data-rot'));
         rotations[idx] = ((rotations[idx]||0) + 90) % 360;
-        paintThumbs();
+        syncThumb(th);
+      } else if(mode==='remove' && th){
+        // tap anywhere on the page card (not only a tiny checkbox) to mark / unmark it
+        const idx = Number(th.dataset.idx);
+        if(removed.has(idx)) removed.delete(idx); else removed.add(idx);
+        syncThumb(th); syncAll();
       }
     });
     async function openZoomLightbox(pageIdx){
