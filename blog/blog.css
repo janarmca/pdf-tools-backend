@@ -70,3 +70,6 @@ footer.site{ text-align:center; padding:30px 20px; color:var(--sub); font-size:1
   article h1{ font-size:24px; }
   .post-row{ padding-left:14px; gap:0; flex-direction:column; }
 }
+
+/* wide tables scroll sideways on phones instead of widening the page */
+article table{ display:block; overflow-x:auto; max-width:100%; }
