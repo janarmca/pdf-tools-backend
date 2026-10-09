@@ -4579,7 +4579,8 @@ TOOL_IMPL.ocr = {
 };
 
 /* ===================== IMAGE → EXCEL : engine (no AI, runs in the browser) =====================
-   1. prepare()   upscale small screenshots, undo dark mode, straighten photos, find the grid lines,
+   1. prepare()   upscale small screenshots, undo dark mode, straighten photos of screens (rotation + perspective),
+                  cut away the Excel ribbon / bezel, even out the light, find the grid lines,
                   rub them out (they confuse OCR) and flip white-on-colour header cells.
    2. buildTable() put every OCR word into a row/column — by the grid when there is one,
                   otherwise by white-space gutters.
@@ -4672,23 +4673,113 @@ const Img2Xls = (function(){
     for(let y = Y0; y < Y1; y++) for(let x = X0; x < X1; x++){ if(inv && (x < x0 || x >= x1 || y < y0 || y >= y1)){ g[y * w + x] = 255; continue; } let v = g[y * w + x]; if(inv) v = 255 - v; g[y * w + x] = clamp((v - off) * k, 0, 255); }
   }
 
+  /* ---------- photos of a monitor: perspective-straighten + find the table area ---------- */
+  // ink = clearly darker than its neighbourhood (works with uneven light / glare, unlike one global threshold)
+  function inkMask(g, w, h){
+    const r = Math.max(6, Math.round(Math.min(w, h) / 55)), W = w + 1, I = new Float64Array(W * (h + 1));
+    for(let y = 0; y < h; y++){ let rs = 0; for(let x = 0; x < w; x++){ rs += g[y * w + x]; I[(y + 1) * W + x + 1] = I[y * W + x + 1] + rs; } }
+    const m = new Uint8Array(w * h);
+    for(let y = 0; y < h; y++){ const y0 = Math.max(0, y - r), y1 = Math.min(h, y + r + 1); for(let x = 0; x < w; x++){ const x0 = Math.max(0, x - r), x1 = Math.min(w, x + r + 1);
+      const mean = (I[y1 * W + x1] - I[y0 * W + x1] - I[y1 * W + x0] + I[y0 * W + x0]) / ((y1 - y0) * (x1 - x0)); if(g[y * w + x] < mean - 16) m[y * w + x] = 1; } }
+    return m;
+  }
+  function inkPoints(m, w, h){
+    let n = 0; for(let i = 0; i < m.length; i++) n += m[i]; const st = Math.max(1, Math.round(n / 70000)), pts = []; let k = 0;
+    for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(m[y * w + x] && (k++ % st) === 0) pts.push(x, y);
+    return pts;
+  }
+  // rows of text are straight lines whose slope may change from top to bottom (perspective). Find a, b so that  y' = y - (a + b·(y-yc))·(x-xc)  makes the rows sharpest.
+  function slopeField(pts, w, h){
+    if(pts.length < 800) return {a: 0, b: 0};
+    const xc = w / 2, yc = h / 2, pad = w, nb = h + 2 * pad;
+    const sc = (a, b) => { const bins = new Float64Array(nb); let n = 0;
+      for(let i = 0; i < pts.length; i += 2){ const x = pts[i] - xc, y = pts[i + 1]; const yy = Math.round(y - (a + b * (y - yc)) * x) + pad; if(yy >= 0 && yy < nb){ bins[yy]++; n++; } }
+      const mean = n / nb; let v = 0; for(let i = 0; i < nb; i++){ const d = bins[i] - mean; v += d * d; } return v; };
+    const v0 = sc(0, 0); let best = {a: 0, b: 0, v: v0};
+    for(let a = -0.07; a <= 0.0701; a += 0.005){ const v = sc(a, 0); if(v > best.v) best = {a, b: 0, v}; }
+    const bestA = best.a, vA = best.v;
+    for(let a = bestA - 0.012; a <= bestA + 0.012; a += 0.002){ const v = sc(a, 0); if(v > best.v) best = {a, b: 0, v}; }
+    const vA2 = best.v; let withB = {a: best.a, b: 0, v: best.v};
+    for(let b = -1e-4; b <= 1.0001e-4; b += 1e-5) for(let a = best.a - 0.03; a <= best.a + 0.03; a += 0.005){ const v = sc(a, b); if(v > withB.v) withB = {a, b, v}; }
+    for(let b = withB.b - 1e-5; b <= withB.b + 1.001e-5; b += 2e-6) for(let a = withB.a - 0.005; a <= withB.a + 0.0051; a += 0.001){ const v = sc(a, b); if(v > withB.v) withB = {a, b, v}; }
+    const useB = withB.v > vA2 * 1.06 && Math.abs(withB.b) * h > 0.006;
+    const fin = useB ? withB : {a: best.a, b: 0, v: vA2};
+    if(fin.v < v0 * 1.04 || (Math.abs(fin.a) < 0.0087 && !useB)) return {a: 0, b: 0};
+    return {a: fin.a, b: fin.b};
+  }
+  function warpRows(g, w, h, a, b, bg){
+    const out = new Uint8ClampedArray(w * h), xc = w / 2, yc = h / 2, k = a - b * yc;
+    for(let x = 0; x < w; x++){ const dx = x - xc, den = 1 - b * dx;
+      for(let y = 0; y < h; y++){ const sy = (y + k * dx) / den; if(sy < 0 || sy > h - 1){ out[y * w + x] = bg; continue; } const y0 = Math.floor(sy), f = sy - y0, y1 = Math.min(h - 1, y0 + 1); out[y * w + x] = g[y0 * w + x] * (1 - f) + g[y1 * w + x] * f; } }
+    return out;
+  }
+  // the spreadsheet rows are evenly spaced; the longest evenly-spaced run of text lines is the table (ribbon, formula bar and status bar are not)
+  function tableRegion(g, w, h){
+    const m = inkMask(g, w, h), p = new Float32Array(h);
+    for(let y = 0; y < h; y++){ let c = 0; const r = y * w; for(let x = 0; x < w; x++) c += m[r + x]; p[y] = c; }
+    const sm = new Float32Array(h); for(let y = 0; y < h; y++){ let s = 0, n = 0; for(let d = -1; d <= 1; d++){ const yy = y + d; if(yy >= 0 && yy < h){ s += p[yy]; n++; } } sm[y] = s / n; }
+    const srt = Array.from(sm).sort((x, y) => x - y), hi = srt[Math.floor(h * 0.9)]; if(!(hi > 0)) return null; const thr = hi * 0.3;
+    const cs = []; let y = 0;
+    while(y < h){ if(sm[y] > thr){ let y2 = y, s = 0, ws = 0; while(y2 < h && sm[y2] > thr){ s += y2 * sm[y2]; ws += sm[y2]; y2++; } if(y2 - y >= 3) cs.push(s / ws); y = y2; } else y++; }
+    if(cs.length < 8) return null;
+    const gaps = []; for(let i = 1; i < cs.length; i++) gaps.push(cs[i] - cs[i - 1]);
+    const hist = new Map(); for(const gp of gaps){ if(gp < 6 || gp > h / 4) continue; const k = Math.round(gp); hist.set(k, (hist.get(k) || 0) + 1); }
+    let modal = 0, mc = 0; for(const [k] of hist){ const c = (hist.get(k - 1) || 0) + hist.get(k) + (hist.get(k + 1) || 0); if(c > mc){ mc = c; modal = k; } }
+    if(!modal || mc < 6) return null;
+    const near = gaps.filter(gp => Math.abs(gp - modal) <= modal * 0.2); const pitch = median(near);
+    const okGap = gp => { const k = Math.round(gp / pitch); return k >= 1 && k <= 3 && Math.abs(gp - k * pitch) <= pitch * 0.22; };
+    let bestRun = null, s0 = 0;
+    for(let i = 1; i <= gaps.length; i++){ if(i === gaps.length || !okGap(gaps[i])){ const lines = i - s0 + 1; if(!bestRun || lines > bestRun.lines) bestRun = {s: s0, e: i, lines}; s0 = i + 1; } }
+    // (indices: run covers cs[s]..cs[e])
+    if(!bestRun || bestRun.lines < 7) return null;
+    const first = cs[bestRun.s], last = cs[bestRun.e];
+    return {y0: Math.max(0, Math.floor(first - pitch * 0.8)), y1: Math.min(h, Math.ceil(last + pitch * 0.8)), pitch, lines: bestRun.lines};
+  }
+
   /* prepare(sourceCanvas) → { canvas, grid, scale, notes } ; works on a fresh canvas, never touches the original */
   function prepare(src, opts){
     opts = opts || {};
-    const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+    const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height, notes = [];
+    // 1. native-resolution gray (photos are analysed before they are enlarged)
+    let cv0 = document.createElement('canvas'); cv0.width = sw; cv0.height = sh;
+    let c0 = cv0.getContext('2d', {willReadFrequently: true}); c0.fillStyle = '#fff'; c0.fillRect(0, 0, sw, sh); c0.drawImage(src, 0, 0, sw, sh);
+    let g0 = grayOf(c0.getImageData(0, 0, sw, sh));
+    if(meanOf(g0) < 110){ for(let i = 0; i < g0.length; i++) g0[i] = 255 - g0[i]; notes.push('dark'); }
+    // 2. straighten (rotation, or a perspective-like fan of slopes)
+    let fieldB = false;
+    if(!opts.noDeskew){
+      const fld = slopeField(inkPoints(inkMask(g0, sw, sh), sw, sh), sw, sh);
+      if(fld.a || fld.b){
+        const bg0 = modeGray(g0);
+        if(Math.abs(fld.b) * sh > 0.006){ g0 = warpRows(g0, sw, sh, fld.a, fld.b, bg0); fieldB = true; notes.push('perspective fixed'); }
+        else { putGray(c0, g0, sw, sh); const c2 = document.createElement('canvas'); c2.width = sw; c2.height = sh; const x2 = c2.getContext('2d', {willReadFrequently: true});
+          x2.fillStyle = 'rgb(' + bg0 + ',' + bg0 + ',' + bg0 + ')'; x2.fillRect(0, 0, sw, sh); x2.translate(sw / 2, sh / 2); x2.rotate(-Math.atan(fld.a)); x2.drawImage(cv0, -sw / 2, -sh / 2);
+          g0 = grayOf(x2.getImageData(0, 0, sw, sh)); notes.push('rotated ' + (Math.atan(fld.a) * 180 / Math.PI).toFixed(1) + '°'); }
+      }
+    }
+    // 3. where is the table? (drops the Excel ribbon / status bar of a photographed screen)
+    let reg = opts.noCrop ? null : tableRegion(g0, sw, sh), cy0 = 0, cy1 = sh;
+    if(reg && (reg.y0 > reg.pitch * 1.5 || sh - reg.y1 > reg.pitch * 1.5)){ cy0 = reg.y0; cy1 = reg.y1; notes.push('table area found'); }
+    // 4. enlarge so the text is comfortable for OCR
     let scale = sw < 700 ? 3 : sw < 1100 ? 2 : sw < 1800 ? 1.5 : 1;
-    while(sw * scale > 4200 || sh * scale > 4200) scale *= 0.8;
-    let w = Math.round(sw * scale), h = Math.round(sh * scale);
+    if(reg) scale = Math.max(scale, Math.min(3.2, 38 / reg.pitch));
+    // dark bezel / shadow strips at the left & right edge of a photographed screen hide the first column from OCR — cut them off
+    let cx0 = 0, cx1 = sw;
+    if(reg){ const cm = new Float32Array(sw); for(let x = 0; x < sw; x++){ let s = 0; for(let y = cy0; y < cy1; y += 2) s += g0[y * sw + x]; cm[x] = s / Math.ceil((cy1 - cy0) / 2); }
+      const md = median(Array.from(cm)); while(cx0 < sw * 0.15 && cm[cx0] < md * 0.5) cx0++; while(cx1 > sw * 0.85 && cm[cx1 - 1] < md * 0.5) cx1--;
+      if(cx0) cx0 = Math.min(sw, cx0 + 2); if(cx1 < sw) cx1 = Math.max(0, cx1 - 2); }
+    const ch = cy1 - cy0, cw = cx1 - cx0, pd = Math.round(8 * scale);
+    while(cw * scale + 2 * pd > 4200 || ch * scale + 2 * pd > 4200) scale *= 0.8;
+    const w = Math.round(cw * scale) + 2 * pd, h = Math.round(ch * scale) + 2 * pd;
+    putGray(c0, g0, sw, sh);
     let cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    let ctx = cv.getContext('2d', {willReadFrequently: true}); ctx.imageSmoothingQuality = 'high'; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); ctx.drawImage(src, 0, 0, w, h);
-    let g = grayOf(ctx.getImageData(0, 0, w, h)); const notes = [];
-    if(meanOf(g) < 110){ for(let i = 0; i < g.length; i++) g[i] = 255 - g[i]; notes.push('dark'); }
-    const ang = opts.noDeskew ? 0 : skewAngle(g, w, h);
-    if(ang){
-      putGray(ctx, g, w, h);
-      const c2 = document.createElement('canvas'); c2.width = w; c2.height = h; const x2 = c2.getContext('2d', {willReadFrequently: true});
-      const bgv = modeGray(g); x2.fillStyle = 'rgb(' + bgv + ',' + bgv + ',' + bgv + ')'; x2.fillRect(0, 0, w, h); x2.translate(w / 2, h / 2); x2.rotate(-ang * Math.PI / 180); x2.drawImage(cv, -w / 2, -h / 2);
-      cv = c2; ctx = x2; g = grayOf(ctx.getImageData(0, 0, w, h)); notes.push('rotated ' + ang + '°');
+    let ctx = cv.getContext('2d', {willReadFrequently: true}); ctx.imageSmoothingQuality = 'high'; const bgv = modeGray(g0); ctx.fillStyle = 'rgb(' + bgv + ',' + bgv + ',' + bgv + ')'; ctx.fillRect(0, 0, w, h); ctx.drawImage(cv0, cx0, cy0, cw, ch, pd, pd, w - 2 * pd, h - 2 * pd);
+    let g = grayOf(ctx.getImageData(0, 0, w, h));
+    if(reg){ // a dark strip (bezel shadow, row numbers, selected-column border) glued to the first letters makes OCR drop them — rub it out
+      const md = median(Array.from(g.filter((v, i) => i % 11 === 0))), bgg = modeGray(g), cm = new Float32Array(w);
+      for(let x = 0; x < w; x++){ let c = 0; for(let y = 0; y < h; y += 3) if(g[y * w + x] < md * 0.75) c++; cm[x] = c / Math.ceil(h / 3); }
+      const lim = Math.round(w * 0.12); let x0 = 0; while(x0 < lim && cm[x0] < 0.9) x0++;
+      if(x0 < lim * 0.5){ let xe = x0; while(xe < lim && cm[xe] >= 0.9) xe++; if(xe > x0 + 3){ xe -= 3; for(let y = 0; y < h; y++) for(let x = 0; x <= xe; x++) g[y * w + x] = bgg; notes.push('edge strip removed'); } }
     }
     const grid = findGrid(g, w, h, scale);
     if(grid && grid.lines){
@@ -4702,6 +4793,14 @@ const Img2Xls = (function(){
         if(m < 120){ let y2 = y; while(y2 <= b.y1){ let s2 = 0; for(let x = b.x0; x <= b.x1; x += 3) s2 += g[y2 * w + x]; if(s2 / Math.ceil((b.x1 - b.x0 + 1) / 3) >= 120) break; y2++; }
           if(y2 - y > 8 * scale / 2) { normaliseRect(g, w, b.x0, y, b.x1 + 1, y2, 0); notes.push('header band flipped'); } y = y2; } else y++; }
     }
+    if(reg && !(grid && grid.lines)){ // uneven light on a photographed screen (darker towards one side) makes OCR's global threshold swallow text — divide by the local background
+      const R = Math.max(20, Math.round(reg.pitch * scale * 2.2)), W1 = w + 1, I = new Float64Array(W1 * (h + 1));
+      for(let y = 0; y < h; y++){ let rs = 0; for(let x = 0; x < w; x++){ rs += g[y * w + x]; I[(y + 1) * W1 + x + 1] = I[y * W1 + x + 1] + rs; } }
+      const o = new Uint8ClampedArray(g.length);
+      for(let y = 0; y < h; y++){ const y0 = Math.max(0, y - R), y1 = Math.min(h, y + R + 1); for(let x = 0; x < w; x++){ const x0 = Math.max(0, x - R), x1 = Math.min(w, x + R + 1);
+        const m = (I[y1 * W1 + x1] - I[y0 * W1 + x1] - I[y1 * W1 + x0] + I[y0 * W1 + x0]) / ((y1 - y0) * (x1 - x0)); o[y * w + x] = Math.min(255, g[y * w + x] / Math.max(m, 1) * 215); } }
+      g = o; notes.push('light evened');
+    }
     putGray(ctx, g, w, h);
     return {canvas: cv, grid: grid && grid.lines ? grid : null, scale, notes, width: w, height: h};
   }
@@ -4709,8 +4808,18 @@ const Img2Xls = (function(){
   /* ---------- words → table ---------- */
   const JUNK = /^[|_\-—–=~.:;,'"`¦!\\/\[\]{}()<>]+$/;
   function cleanWords(words){
-    return words.map(w => ({t: String(w.text || '').trim(), x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1, c: w.confidence == null ? 90 : w.confidence}))
-      .filter(w => w.t && !(JUNK.test(w.t) && w.t.length <= 2 && !/^[()]$/.test(w.t)) && (w.x1 > w.x0));
+    const tidy = t => { t = t.replace(/^[|\\\/\[\]{}!¦~_»«>]+(?=.)/, ''); if(t.length > 2 && /\d/.test(t)) t = t.replace(/[.,;:'|\]}]+$/, ''); return t.trim(); };
+    const out = [];
+    for(const w of words){
+      const t = tidy(String(w.text || '').trim()); if(!t || !(w.bbox.x1 > w.bbox.x0)) continue;
+      const base = {y0: w.bbox.y0, y1: w.bbox.y1, c: w.confidence == null ? 90 : w.confidence};
+      // OCR glues "4330 USD" into "4330/USD": give it back as two words
+      const m = /^(\d[\d,.]*)[\/|!lI,.:]([A-Za-z]{2,6})$/.exec(t);
+      if(m){ const f = m[1].length / (t.length), xm = w.bbox.x0 + (w.bbox.x1 - w.bbox.x0) * f; out.push(Object.assign({t: m[1], x0: w.bbox.x0, x1: xm - 1}, base), Object.assign({t: m[2], x0: xm + 2, x1: w.bbox.x1}, base)); continue; }
+      out.push(Object.assign({t, x0: w.bbox.x0, x1: w.bbox.x1}, base));
+    }
+    // filter-button glyphs of a spreadsheet header (v, ¥, x, » …) are not text
+    return out.filter(w => !(JUNK.test(w.t) && w.t.length <= 2 && !/^[()]$/.test(w.t)) && !(w.t.length <= 2 && /^[vVxX¥»«~=+*<>]{1,2}$/.test(w.t) && w.c < 70 && (w.y1 - w.y0) < 60));
   }
   function joinWords(ws){ ws = ws.slice().sort((a, b) => a.x0 - b.x0); return ws.map(w => w.t).join(' '); }
   function buildTable(rawWords, grid){
@@ -4725,7 +4834,7 @@ const Img2Xls = (function(){
         // several text lines inside one cell: top to bottom
         ws.sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = []; for(const w of ws){ const cy = (w.y0 + w.y1) / 2, L = lines[lines.length - 1]; if(L && Math.abs(cy - L.cy) < mh * 0.6) L.ws.push(w); else lines.push({cy, ws: [w]}); }
         rows[r].push(lines.map(L => joinWords(L.ws)).join(' ')); conf[r].push(Math.min(...ws.map(w => w.c))); } }
-      return stripSheetChrome(trim({rows, conf, mode: 'grid'}));
+      return repairCodes(stripSheetChrome(trim({rows, conf, mode: 'grid'})));
     }
     // rows by y
     const sorted = words.slice().sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = [];
@@ -4741,26 +4850,70 @@ const Img2Xls = (function(){
     const cuts = []; let x = 0;
     while(x < W){ if(cov[x] <= allow){ let y = x; while(y < W && cov[y] <= allow) y++; if(x > 0 && y < W && y - x >= gap) cuts.push(minX + (x + y) / 2); x = y; } else x++; }
     const colOf = w => { const cx = w.x0 + (w.x1 - w.x0) * 0.3; let c = 0; while(c < cuts.length && cx > cuts[c]) c++; return c; };
+    // two columns that touch ("4330 | USD", "791004716 | GOMATESH") leave no gutter: split where almost every row has "number/code + word" at the same x
+    const pairRule = (p, q) => (/^\d{1,2}[-\/.][A-Za-z]{3}[-\/.]\d{2,4}$/.test(p.t) && /^\d/.test(q.t)) || (/^[A-Z]{3,}$/.test(p.t) && /^[A-Z]{2}$/.test(q.t) && false) || (p.t.length >= 3 && /^[A-Za-z]+$/.test(p.t) && /^[|\[(I]?[A-Z]{2}[|\])]?$/.test(q.t) && /^[A-Z]/.test(p.t)) || (/^\d[\d,.]*$/.test(p.t) && /^[|\[(]*[A-Za-z]{2,6}[!|.,]*$/.test(q.t)) || (/^[A-Z]{3}$/.test(p.t) && q.t.length >= 6 && /\d/.test(q.t) && /^[A-Z0-9\-]+$/.test(q.t)) || (p.t.length >= 6 && /\d/.test(p.t) && /^[A-Z0-9\-]+$/.test(p.t) && /^[A-Za-z]{2,}/.test(q.t));
+    for(let pass = 0; pass < 3 && lines.length >= 5; pass++){
+      const Cn = cuts.length + 1, found = []; 
+      for(let c = 0; c < Cn; c++){
+        let tot = 0; const mids = [];
+        for(const L of lines){ const ws = L.ws.filter(w => colOf(w) === c).sort((a, b) => a.x0 - b.x0); if(!ws.length) continue; tot++;
+          for(const w0 of ws){ const one = /^(\d[\d,.]*)[\/|!lI,.:]([A-Za-z]{2,6})[!|.,]*$/.exec(w0.t); if(one) mids.push({x: w0.x0 + (w0.x1 - w0.x0) * (one[1].length + 0.5) / w0.t.length, r: L}); }
+          for(let i = 0; i + 1 < ws.length; i++) if(pairRule(ws[i], ws[i + 1])) mids.push({x: ws[i].x1 + (ws[i + 1].x0 - ws[i].x1) * (/^\d{1,2}[-\/.][A-Za-z]{3}/.test(ws[i].t) ? 0.15 : 0.5), r: L}); }
+        if(tot < 5 || !mids.length) continue;
+        mids.sort((a, b) => a.x - b.x); const tol = Math.max(8, mh * 0.5);
+        let i = 0; while(i < mids.length){ let j = i; while(j + 1 < mids.length && mids[j + 1].x - mids[i].x <= tol) j++; const grp = mids.slice(i, j + 1), rows = new Set(grp.map(m => m.r)); if(rows.size >= tot * 0.45) found.push(median(grp.map(m => m.x))); i = j + 1; }
+      }
+      let added = false; for(const mx of found) if(!cuts.some(k => Math.abs(k - mx) < mh * 0.25)){ cuts.push(mx); added = true; }
+      cuts.sort((a, b) => a - b); if(!added) break;
+    }
     const C = cuts.length + 1; const rows = [], conf = [];
     for(const L of lines){ const cells = Array.from({length: C}, () => []); for(const w of L.ws) cells[colOf(w)].push(w);
       rows.push(cells.map(ws => ws.length ? joinWords(ws) : '')); conf.push(cells.map(ws => ws.length ? Math.min(...ws.map(w => w.c)) : 100)); }
-    return stripSheetChrome(trim({rows, conf, mode: 'gutter'}));
+    return repairCodes(stripSheetChrome(trim({rows, conf, mode: 'gutter'})));
   }
   // Excel/Sheets screenshots carry a column-letter bar (A B C …) and a row-number strip (1 2 3 …) — not data
   function stripSheetChrome(t){
     if(t.rows.length < 3 || !t.rows[0].length) return t;
     for(let k = 0; k < Math.min(3, t.rows.length - 1); k++){ const r0 = t.rows[k].filter(x => x);
-      if(r0.length >= 2 && r0.length >= Math.max(2, t.rows[k].length - 3) && r0.every(x => /^[A-Za-z]{1,2}$/.test(x)) && r0.slice(1).every((x, i) => x.toUpperCase().charCodeAt(0) - r0[i].toUpperCase().charCodeAt(0) === 1 || x.length === 2 || r0[i].length === 2)){
+      if(r0.length >= 2 && r0.length >= Math.max(2, t.rows[k].length - 3) && r0.every(x => /^[A-Za-z]{1,2}$/.test(x)) && r0.slice(1).every((x, i) => x.toUpperCase().charCodeAt(0) > r0[i].toUpperCase().charCodeAt(0) || x.length === 2 || r0[i].length === 2)){
         t.rows.splice(0, k + 1); t.conf.splice(0, k + 1); t.chrome = (t.chrome || []).concat('letters'); break; } }
     const col = t.rows.map(r => r[0]); const nums = col.map(x => /^\d{1,4}$/.test(x) ? +x : null); const ok = nums.filter(x => x != null);
-    if(t.chrome && t.rows[0].length > 1 && ok.length === col.length && ok.length >= 3 && ok.every((x, i) => i === 0 || x === ok[i - 1] + 1)){ t.rows = t.rows.map(r => r.slice(1)); t.conf = t.conf.map(r => r.slice(1)); t.chrome = (t.chrome || []).concat('numbers'); }
+    if(t.chrome && t.rows[0].length > 1 && ok.length === col.length && ok.length >= 3 && ok.every((x, i) => i === 0 || x > ok[i - 1])){ t.rows = t.rows.map(r => r.slice(1)); t.conf = t.conf.map(r => r.slice(1)); t.chrome = (t.chrome || []).concat('numbers'); }
     return t;
   }
   function trim(t){
     const R = t.rows.length; if(!R) return t; const C = Math.max(...t.rows.map(r => r.length));
     const keepC = []; for(let c = 0; c < C; c++) if(t.rows.some(r => (r[c] || '').trim())) keepC.push(c);
-    const keepR = []; for(let r = 0; r < R; r++) if(keepC.some(c => (t.rows[r][c] || '').trim())) keepR.push(r);
+    // stray specks (a lone 1-2 character mark with weak confidence) are not rows
+    const junkRow = r => { const cells = t.rows[r].map((v, c) => ({v: (v || '').trim(), c: t.conf[r] && t.conf[r][c] != null ? t.conf[r][c] : 100})).filter(x => x.v); return cells.length === 0 || (cells.length <= 1 && C > 3 && cells[0].v.length <= 3 && !/\d{2}/.test(cells[0].v)) || (C > 4 && cells.length <= 2 && cells.every(x => x.v.length <= 4 && x.c < 50 && !/^\d+([.,]\d+)?$/.test(x.v))) || (cells.length >= 3 && cells.filter(x => x.c < 40).length >= cells.length * 0.85 && R > 4) || (C > 5 && cells.length < C * 0.4 && cells.every(x => !/[A-Za-z0-9]{3,}/.test(x.v))); };
+    const keepR = []; for(let r = 0; r < R; r++) if(keepC.some(c => (t.rows[r][c] || '').trim()) && !junkRow(r)) keepR.push(r);
     t.rows = keepR.map(r => keepC.map(c => (t.rows[r][c] || '').trim())); t.conf = keepR.map(r => keepC.map(c => t.conf[r][c] == null ? 100 : t.conf[r][c])); return t;
+  }
+
+  // ID / code columns (INV-0001, 0433026TP0B00030 …): OCR slips on the same positions again and again — use the other rows as a witness
+  function repairCodes(t){
+    if(!t.rows || t.rows.length < 6) return t;
+    const C = Math.max.apply(null, t.rows.map(r => r.length)), DIG = {O: '0', o: '0', D: '0', Q: '0', I: '1', l: '1', '|': '1', Z: '2', S: '5', B: '8', G: '6'};
+    for(let c = 0; c < C; c++){
+      const idx = []; for(let r = 1; r < t.rows.length; r++){ const v = (t.rows[r][c] || '').trim(); if(/^[A-Za-z0-9\-_\/]{7,24}$/.test(v) && /\d/.test(v)) idx.push(r); }
+      if(idx.length < Math.max(5, (t.rows.length - 1) * 0.6)) continue;
+      const lens = new Map(); idx.forEach(r => { const L = t.rows[r][c].length; lens.set(L, (lens.get(L) || 0) + 1); });
+      let L = 0, lc = 0; lens.forEach((n, k) => { const m = n + (lens.get(k - 1) || 0) * 0.5 + (lens.get(k + 1) || 0) * 0.5; if(m > lc){ lc = m; L = k; } });
+      // 1) wrong length: junk glued on the front, or the first character lost
+      const same = idx.filter(r => t.rows[r][c].length === L);
+      const cls = Array.from({length: L}, (_, i) => { let d = 0, a = 0, cf = 0; same.forEach(q => { const x = t.rows[q][c][i]; if(/\d/.test(x)) d++; else if(DIG[x]) cf++; else if(/[A-Za-z]/.test(x)) a++; }); const n = d + a + cf; if(n < 4) return ''; return (d + cf >= n * 0.85 && d >= n * 0.1) ? 'd' : (a >= n * 0.85 ? 'a' : ''); });
+      const maj = Array.from({length: L}, (_, i) => { const m = new Map(); same.forEach(q => { const x = t.rows[q][c][i]; m.set(x, (m.get(x) || 0) + 1); }); let b = '', bc = 0; m.forEach((n, ch) => { if(n > bc){ bc = n; b = ch; } }); return bc >= same.length * 0.6 ? b : ''; });
+      for(const r of idx){ let v = t.rows[r][c], ch = false;
+        if(v.length > L && v.length <= L + 3){ v = v.slice(v.length - L); ch = true; }
+        else if(v.length === L - 1 && cls[0] === 'd'){ v = (/\d/.test(maj[0]) ? maj[0] : '0') + v; ch = true; }
+        if(v.length === L){
+          let o = ''; for(let i = 0; i < L; i++){ const x = v[i]; if(cls[i] === 'd' && /[A-Za-z|]/.test(x) && /\d/.test(maj[i])){ o += maj[i]; ch = true; } else if(cls[i] === 'd' && DIG[x]){ o += DIG[x]; ch = true; } else if(cls[i] === 'a' && /\d/.test(x) && maj[i] && /[A-Za-z]/.test(maj[i]) && ({0: 'O', 1: 'I', 5: 'S', 8: 'B'})[x] === maj[i]){ o += maj[i]; ch = true; } else o += x; }
+          v = o;
+        }
+        if(ch){ t.rows[r][c] = v; if(t.conf[r]) t.conf[r][c] = Math.min(t.conf[r][c] == null ? 100 : t.conf[r][c], 55); }
+      }
+    }
+    return t;
   }
 
   /* ---------- typing ---------- */
@@ -4771,7 +4924,7 @@ const Img2Xls = (function(){
     let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/);
     if(m){ let a = +m[1], b = +m[2], y = +m[3]; if(y < 100) y += y < 70 ? 2000 : 1900; let d = dayFirst ? a : b, mo = dayFirst ? b : a; if(!validDate(y, mo, d) && validDate(y, a, b)){ d = b; mo = a; } return validDate(y, mo, d) ? serial(y, mo, d) : null; }
     m = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/); if(m) return validDate(+m[1], +m[2], +m[3]) ? serial(+m[1], +m[2], +m[3]) : null;
-    m = s.match(/^(\d{1,2})[ \-\/]([A-Za-z]{3,9})\.?[ \-\/,]+(\d{2}|\d{4})$/); if(m){ const mo = MONTHS[m[2].slice(0, 4).toLowerCase()] || MONTHS[m[2].slice(0, 3).toLowerCase()]; let y = +m[3]; if(y < 100) y += y < 70 ? 2000 : 1900; if(mo && validDate(y, mo, +m[1])) return serial(y, mo, +m[1]); }
+    m = s.match(/^(\d{1,2})[ \-\/]?([A-Za-z]{3,9})\.?[ \-\/,]*(\d{2}|\d{4})$/); if(m){ const mo = MONTHS[m[2].slice(0, 4).toLowerCase()] || MONTHS[m[2].slice(0, 3).toLowerCase()]; let y = +m[3]; if(y < 100) y += y < 70 ? 2000 : 1900; if(mo && validDate(y, mo, +m[1])) return serial(y, mo, +m[1]); }
     return null;
   }
   const CUR = '(?:₹|\\$|€|£|Rs\\.?|INR|USD|EUR)';
@@ -4814,7 +4967,7 @@ const Img2Xls = (function(){
     for(let c = 0; c < C; c++){ const k = {n: 0, d: 0, s: 0}; for(let r = start; r < R; r++){ const x = kind(rows[r][c]); if(x !== 'e') k[x]++; } const tot = k.n + k.d + k.s;
       // repairable cells (O/l/S) count towards the numeric vote
       let rep = 0; for(let r = start; r < R; r++){ const s = rows[r][c]; if(s && kind(s) === 's'){ const f = fixDigits(s); if(f && parseNumber(f)) rep++; } }
-      const auto = tot && k.d / tot >= 0.6 ? 'd' : tot && (k.n + rep) / tot >= 0.6 && k.n >= 1 ? 'n' : 's'; cols.push((o.force && o.force[c]) || auto); }
+      const type = tot && k.d / tot >= 0.6 ? 'd' : tot && (k.n + rep) / tot >= 0.6 && k.n >= 1 ? 'n' : 's'; cols.push(type); }
     const colDec = cols.map((type, c) => { if(type !== 'n') return 0; const cnt = {}; let tot = 0; for(let r = start; r < R; r++){ const p = parseNumber(rows[r][c] || ''); if(p && !p.pct){ cnt[p.dec] = (cnt[p.dec] || 0) + 1; tot++; } } let best = 0, bc = 0; for(const k in cnt) if(cnt[k] > bc){ bc = cnt[k]; best = +k; } return tot >= 3 && bc / tot >= 0.7 ? best : 0; });
     for(let r = 0; r < R; r++){ const row = []; for(let c = 0; c < C; c++){ const s = rows[r][c], conf = t.conf[r][c], base = {raw: s, low: conf < 55};
       if(!s){ row.push(Object.assign(base, {t: 'e'})); continue; }
@@ -4870,12 +5023,12 @@ TOOL_IMPL.img2excel = {
       S.onProg = p => prog.set(base + span * (0.2 + p * 0.75), `Image ${idx + 1}/${total} — reading… ${Math.round(p * 100)}%`);
       await worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
       let { data } = await worker.recognize(prep.canvas);
-      if(data.confidence < 72){ // hard image: also try "sparse text" mode and keep the better read
-        await worker.setParameters({ tessedit_pageseg_mode: '11' });
-        const alt = await worker.recognize(prep.canvas);
-        if(alt.data.confidence > data.confidence + 3){ data = alt.data; it.notes.push('sparse mode'); }
-      }
       it.table = Img2Xls.buildTable(data.words || [], prep.grid);
+      if(data.confidence < 72 && (it.table.rows.length < 3 || (it.table.rows[0] || []).length < 2)){ // the table reading failed: try "sparse text" mode (it still returns every word with its position)
+        await worker.setParameters({ tessedit_pageseg_mode: '11' });
+        const alt = await worker.recognize(prep.canvas), t2 = Img2Xls.buildTable(alt.data.words || [], prep.grid);
+        if(t2.rows.length > it.table.rows.length || (t2.rows[0] || []).length > (it.table.rows[0] || []).length){ data = alt.data; it.table = t2; it.notes.push('sparse mode'); }
+      }
       it.conf = Math.round(data.confidence || 0); it.mode = it.table.mode; it.force = [];
       if(it.table.chrome) it.notes.push('📑 spreadsheet row/column labels removed');
       it.status = it.table.rows.length ? 'done' : 'empty';
