@@ -23,8 +23,11 @@
 <meta name="robots" content="index, follow">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#3752A6">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:image" content="https://pdftoolsindia.com/og-image.png">
+<meta name="twitter:image" content="https://pdftoolsindia.com/og-image.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
   :root{
@@ -39,7 +42,7 @@
 
   .topbar{display:flex; align-items:center; justify-content:space-between; padding:20px 4px 16px;}
   .brand{display:flex; align-items:center; gap:10px;}
-  .brand-mark{width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--brand),var(--brand-dark)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(55,82,166,.28);}
+  .brand-mark{width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(55,82,166,.28);}
   .brand-name{font-weight:900; font-size:17.5px; letter-spacing:-0.3px;}
   .brand-tag{font-size:11px; color:var(--sub); font-weight:600;}
   .free-badge{background:var(--ok); color:white; font-size:11px; font-weight:800; padding:5px 11px; border-radius:20px; letter-spacing:.3px;}
@@ -1230,11 +1233,7 @@ function renderTopbar(){
   const bar = el(`
     <div class="topbar">
       <div class="brand" style="cursor:pointer;" id="__logoHome">
-        <div class="brand-mark">PDF</div>
-        <div>
-          <div class="brand-name">PDF Tools</div>
-          <div class="brand-tag">Completely free</div>
-        </div>
+        <img src="lockup.svg" alt="PDF Tools India — free tools" height="44" style="display:block;height:44px;width:auto;max-width:58vw;">
       </div>
       <div id="__authWidget" style="display:flex; align-items:center; gap:8px;"></div>
     </div>

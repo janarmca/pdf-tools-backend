@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 20 380 380" role="img" aria-label="PDF Tools India">
+<defs>
+<linearGradient id="bs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6A8BEA"/><stop offset="1" stop-color="#2A4590"/></linearGradient>
+<linearGradient id="os" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#F0792A"/><stop offset="1" stop-color="#FFB347"/></linearGradient>
+</defs>
+<path d="M44 352C112 262 246 236 372 140C338 246 196 338 44 352Z" fill="url(#os)"/>
+
+<path fill-rule="evenodd" fill="url(#bs)" d="M118 70Q118 42 146 42H246L322 118V200Q322 268 254 268H196V338Q196 366 168 366H146Q118 366 118 338ZM176 100V210Q176 216 182 216H262Q268 216 268 210V128L240 100H182Q176 100 176 106Z"/>
+<path d="M246 42V102Q246 118 262 118H322Z" fill="#B8C8F6"/>
+<g fill="#1F2A44"><rect x="194" y="136" width="52" height="12" rx="6"/><rect x="194" y="160" width="62" height="12" rx="6"/><rect x="194" y="184" width="40" height="12" rx="6"/></g>
+<path d="M44 352C112 262 246 236 372 140C338 246 196 338 44 352Z" fill="none"/></svg>
