@@ -14151,6 +14151,163 @@ aamaa:'ஆமா', aam:'ஆம்', illaiya:'இல்லையா', sari:'ச�
 chennai:'சென்னை', madurai:'மதுரை', kovai:'கோவை', coimbatore:'கோயம்புத்தூர்', thirunelveli:'திருநெல்வேலி', salem:'சேலம்', trichy:'திருச்சி', kanyakumari:'கன்னியாகுமரி', india:'இந்தியா', bharath:'பாரதம்', bharatham:'பாரதம்', tamilnadu:'தமிழ்நாடு', thiruvalluvar:'திருவள்ளுவர்', thirukkural:'திருக்குறள்', kural:'குறள்'
 };
 
+/* English words written in Tamil letters (loanwords). Dictionary first, rule-based transliteration as fallback. */
+const EN_LOAN = (function(){
+  const raw = `
+collector:கலெக்டர் doctor:டாக்டர் engineer:இன்ஜினியர் office:ஆபீஸ் officer:ஆபீசர் employment:எம்ப்ளாய்மென்ட் registration:ரிஜிஸ்ட்ரேஷன் register:ரிஜிஸ்டர் computer:கம்ப்யூட்டர் mobile:மொபைல் phone:போன் school:ஸ்கூல் college:காலேஜ் university:யுனிவர்சிட்டி bus:பஸ் hospital:ஹாஸ்பிடல் police:போலீஸ் station:ஸ்டேஷன் train:ட்ரெயின் railway:ரயில்வே car:கார் bike:பைக் auto:ஆட்டோ taxi:டாக்ஸி road:ரோடு street:ஸ்ட்ரீட் bank:பேங்க் account:அக்கவுண்ட் card:கார்டு aadhaar:ஆதார் aadhar:ஆதார் ration:ரேஷன் certificate:சர்டிபிகேட் application:அப்ளிகேஷன் apply:அப்ளை form:பார்ம் online:ஆன்லைன் offline:ஆஃப்லைன் internet:இன்டர்நெட் website:வெப்சைட் email:இமெயில் mail:மெயில் message:மெசேஜ் number:நம்பர் password:பாஸ்வேர்டு username:யூசர்நேம் login:லாகின் logout:லாகவுட் download:டவுன்லோடு upload:அப்லோடு file:பைல் folder:போல்டர் photo:போட்டோ video:வீடியோ camera:கேமரா screen:ஸ்கிரீன் keyboard:கீபோர்டு mouse:மௌஸ் printer:பிரிண்டர் print:பிரிண்ட் scan:ஸ்கேன் copy:காப்பி paste:பேஸ்ட் save:சேவ் delete:டெலிட் edit:எடிட் open:ஓபன் close:குளோஸ் search:சர்ச் software:சாப்ட்வேர் hardware:ஹார்டுவேர் app:ஆப் game:கேம் play:பிளே class:கிளாஸ் classes:கிளாஸ் teacher:டீச்சர் student:ஸ்டூடன்ட் students:ஸ்டூடன்ட்ஸ் principal:பிரின்சிபால் lecturer:லெக்சரர் professor:புரொபசர் exam:எக்ஸாம் test:டெஸ்ட் mark:மார்க் marks:மார்க்ஸ் result:ரிசல்ட் pass:பாஸ் fail:பெயில் rank:ரேங்க் book:புக் notebook:நோட்புக் pen:பேனா pencil:பென்சில் paper:பேப்பர் bag:பேக் table:டேபிள் chair:சேர் bench:பெஞ்ச் board:போர்டு lab:லேப் library:லைப்ரரி ground:கிரவுண்ட் cricket:கிரிக்கெட் football:பூட்பால் match:மேட்ச் team:டீம் captain:கேப்டன் coach:கோச் sports:ஸ்போர்ட்ஸ் time:டைம் date:டேட் day:டே week:வீக் month:மன்த் year:இயர் minute:மினிட் second:செகண்ட் hour:அவர் morning:மார்னிங் evening:ஈவினிங் night:நைட் today:டுடே tomorrow:டுமாரோ sunday:சண்டே monday:மண்டே tuesday:டியூஸ்டே wednesday:வெட்னஸ்டே thursday:தர்ஸ்டே friday:பிரைடே saturday:சனிக்கிழமை january:ஜனவரி february:பிப்ரவரி march:மார்ச் april:ஏப்ரல் may:மே june:ஜூன் july:ஜூலை august:ஆகஸ்ட் september:செப்டம்பர் october:அக்டோபர் november:நவம்பர் december:டிசம்பர்
+good:குட் bad:பேட் best:பெஸ்ட் hello:ஹலோ hi:ஹாய் bye:பை thanks:தேங்க்ஸ் sorry:சாரி please:பிளீஸ் welcome:வெல்கம் super:சூப்பர் superb:சூப்பர்ப் nice:நைஸ் ok:ஓகே okay:ஓகே yes:எஸ் no:நோ sir:சார் madam:மேடம் mister:மிஸ்டர் miss:மிஸ் boss:பாஸ் friend:பிரண்ட் friends:பிரண்ட்ஸ் family:பேமிலி brother:பிரதர் sister:சிஸ்டர் father:ஃபாதர் mother:மதர் uncle:அங்கிள் aunty:ஆன்ட்டி baby:பேபி boy:பாய் girl:கேர்ள் man:மேன் woman:வுமன் husband:ஹஸ்பெண்ட் wife:ஒய்ஃப் love:லவ் life:லைஃப் job:ஜாப் work:வொர்க் salary:சம்பளம் company:கம்பெனி manager:மேனேஜர் owner:ஓனர் driver:டிரைவர் conductor:கண்டக்டர் shop:ஷாப் market:மார்க்கெட் hotel:ஹோட்டல் restaurant:ரெஸ்டாரன்ட் tea:டீ coffee:காபி juice:ஜூஸ் biscuit:பிஸ்கட் chocolate:சாக்லேட் ice:ஐஸ் cream:கிரீம் milk:பால் water:வாட்டர் bottle:பாட்டில் glass:கிளாஸ் plate:பிளேட் spoon:ஸ்பூன் fridge:பிரிட்ஜ் gas:காஸ் cooker:குக்கர் mixie:மிக்சி fan:ஃபேன் light:லைட் current:கரண்ட் switch:சுவிட்ச் bulb:பல்பு tube:டியூப் tv:டிவி television:டெலிவிஷன் radio:ரேடியோ cinema:சினிமா movie:மூவி film:பிலிம் song:சாங் music:மியூசிக் dance:டான்ஸ் hero:ஹீரோ heroine:ஹீரோயின் villain:வில்லன் director:டைரக்டர் producer:புரொடியூசர் theatre:தியேட்டர் ticket:டிக்கெட் tickets:டிக்கெட்ஸ் show:ஷோ news:நியூஸ் paper:பேப்பர் channel:சேனல் serial:சீரியல் facebook:பேஸ்புக் whatsapp:வாட்ஸ்அப் youtube:யூடியூப் instagram:இன்ஸ்டாகிராம் google:கூகுள் twitter:டுவிட்டர் telegram:டெலிகிராம் like:லைக் share:ஷேர் comment:கமெண்ட் subscribe:சப்ஸ்கிரைப் channel:சேனல் status:ஸ்டேட்டஸ் profile:புரொபைல் post:போஸ்ட் story:ஸ்டோரி reels:ரீல்ஸ் 
+government:கவர்ன்மென்ட் minister:மினிஸ்டர் chief:சீப் president:பிரசிடென்ட் prime:பிரைம் election:எலக்ஷன் vote:ஓட்டு party:பார்ட்டி member:மெம்பர் commissioner:கமிஷனர் inspector:இன்ஸ்பெக்டர் court:கோர்ட் judge:ஜட்ஜ் lawyer:லாயர் case:கேஸ் fine:பைன் tax:டாக்ஸ் bill:பில் receipt:ரசீது cash:கேஷ் rupees:ரூபாய் rupee:ரூபாய் dollar:டாலர் loan:லோன் interest:இன்ட்ரஸ்ட் insurance:இன்சூரன்ஸ் policy:பாலிசி scheme:ஸ்கீம் pension:பென்ஷன் ration:ரேஷன் ticket:டிக்கெட் platform:பிளாட்பாரம் flight:பிளைட் airport:ஏர்போர்ட் ship:ஷிப் port:போர்ட் petrol:பெட்ரோல் diesel:டீசல் bunk:பங்க் signal:சிக்னல் traffic:டிராபிக் lorry:லாரி van:வேன் cycle:சைக்கிள் scooter:ஸ்கூட்டர் helmet:ஹெல்மெட் licence:லைசென்ஸ் license:லைசென்ஸ் number:நம்பர் plate:பிளேட் parking:பார்க்கிங் tour:டூர் trip:டிரிப் hotel:ஹோட்டல் room:ரூம் lodge:லாட்ஜ் beach:பீச் park:பார்க் temple:டெம்பிள் church:சர்ச் mosque:மசூதி
+medicine:மெடிசின் tablet:டேப்லெட் injection:இன்ஜெக்ஷன் doctor:டாக்டர் nurse:நர்ஸ் patient:பேஷண்ட் ward:வார்டு scan:ஸ்கேன் xray:எக்ஸ்ரே blood:பிளட் pressure:பிரஷர் sugar:சுகர் fever:பீவர் cold:கோல்ட் cough:காப் operation:ஆபரேஷன் ambulance:ஆம்புலன்ஸ் emergency:எமர்ஜென்சி pharmacy:பார்மசி clinic:கிளினிக் health:ஹெல்த் covid:கோவிட் mask:மாஸ்க் vaccine:வாக்சின் 
+maths:மேத்ஸ் math:மேத்ஸ் science:சயின்ஸ் physics:பிசிக்ஸ் chemistry:கெமிஸ்ட்ரி biology:பயாலஜி english:இங்கிலீஷ் history:ஹிஸ்டரி geography:ஜியாகிராபி computer:கம்ப்யூட்டர் subject:சப்ஜெக்ட் chapter:சாப்டர் lesson:லெசன் question:கொஸ்டீன் answer:ஆன்சர் homework:ஹோம்வொர்க் project:புராஜெக்ட் assignment:அசைன்மென்ட் syllabus:சிலபஸ் course:கோர்ஸ் degree:டிகிரி diploma:டிப்ளமோ training:டிரெய்னிங் interview:இன்டர்வியூ resume:ரெஸ்யூம் job:ஜாப் vacancy:வேகன்சி exam:எக்ஸாம் hall:ஹால் centre:சென்டர் center:சென்டர் district:டிஸ்ட்ரிக்ட் taluk:தாலுகா village:வில்லேஜ் city:சிட்டி town:டவுன் state:ஸ்டேட் country:கன்ட்ரி area:ஏரியா zone:ஜோன் ward:வார்டு colony:காலனி nagar:நகர் flat:பிளாட் house:ஹவுஸ் home:ஹோம் address:அட்ரஸ் pincode:பின்கோடு lane:லேன் 
+tamil:தமிழ் typing:டைப்பிங் type:டைப் text:டெக்ஸ்ட் word:வேர்டு excel:எக்செல் powerpoint:பவர்பாயிண்ட் pdf:பிடிஎப் image:இமேஜ் link:லிங்க் page:பேஜ் pages:பேஜஸ் tools:டூல்ஸ் tool:டூல் free:பிரீ premium:பிரீமியம் plan:பிளான் pay:பே payment:பேமென்ட் upi:யுபிஐ gpay:ஜிபே paytm:பேடிஎம் order:ஆர்டர் delivery:டெலிவரி parcel:பார்சல் courier:கூரியர் post:போஸ்ட் offer:ஆஃபர் discount:டிஸ்கவுண்ட் sale:சேல் price:பிரைஸ் cost:காஸ்ட் total:டோட்டல் amount:அமௌண்ட் balance:பேலன்ஸ் 
+engine:இன்ஜின் motor:மோட்டார் machine:மெஷின் power:பவர் battery:பேட்டரி charger:சார்ஜர் charge:சார்ஜ் wire:வயர் cable:கேபிள் plug:பிளக் socket:சாக்கெட் meter:மீட்டர் unit:யூனிட் voltage:வோல்டேஜ் transformer:டிரான்ஸ்பார்மர் pump:பம்ப் tank:டேங்க் pipe:பைப் tap:டேப் valve:வால்வு cement:சிமெண்ட் steel:ஸ்டீல் iron:அயர்ன் plastic:பிளாஸ்டிக் rubber:ரப்பர் glass:கிளாஸ் paint:பெயிண்ட் colour:கலர் color:கலர் black:பிளாக் white:ஒயிட் red:ரெட் blue:புளூ green:கிரீன் yellow:எல்லோ pink:பிங்க் orange:ஆரஞ்சு
+one:ஒன் two:டூ three:த்ரீ four:போர் five:பைவ் six:சிக்ஸ் seven:செவன் eight:எய்ட் nine:நைன் ten:டென் hundred:ஹண்ட்ரட் thousand:தவுசண்ட் lakh:லட்சம் crore:கோடி first:பர்ஸ்ட் second:செகண்ட் third:தேர்டு last:லாஸ்ட் next:நெக்ஸ்ட் new:நியூ old:ஓல்டு big:பிக் small:ஸ்மால் long:லாங் short:ஷார்ட் high:ஹை low:லோ hot:ஹாட் cool:கூல் fast:ஃபாஸ்ட் slow:ஸ்லோ easy:ஈசி hard:ஹார்டு simple:சிம்பிள் full:புல் half:ஹாஃப் double:டபுள் single:சிங்கிள் very:வெரி more:மோர் less:லெஸ் all:ஆல் only:ஒன்லி just:ஜஸ்ட் again:அகைன் sure:ஷ்யூர் right:ரைட் left:லெப்ட் stop:ஸ்டாப் start:ஸ்டார்ட் go:கோ come:கம் wait:வெயிட் call:கால் missed:மிஸ்டு busy:பிசி free:பிரீ ready:ரெடி problem:பிராப்ளம் solution:சொல்யூஷன் idea:ஐடியா plan:பிளான் tension:டென்ஷன் confusion:கன்பியூஷன் feeling:பீலிங் mood:மூட் style:ஸ்டைல் fashion:பேஷன் dress:டிரஸ் shirt:சட்டை pant:பேன்ட் saree:சேலை shoes:ஷூஸ் watch:வாட்ச் ring:ரிங் chain:செயின் gold:கோல்டு silver:சில்வர் diamond:டயமண்ட்
+`;
+  const m = Object.create(null);
+  raw.split(/\s+/).forEach(p => { const i = p.indexOf(':'); if(i > 0) m[p.slice(0, i).toLowerCase()] = p.slice(i + 1); });
+  return m;
+})();
+
+/* Rule-based English → Tamil spelling (used for English-looking words that are not in EN_LOAN). */
+const EnglishTamil = (function(){
+  const PULLI = '்';
+  const V = { a:['அ',''], aa:['ஆ','ா'], i:['இ','ி'], ee:['ஈ','ீ'], u:['உ','ு'], oo:['ஊ','ூ'], e:['எ','ெ'], ae:['ஏ','ே'], ai:['ஐ','ை'], o:['ஒ','ொ'], oh:['ஓ','ோ'], au:['ஔ','ௌ'] };
+  const isV = ch => /[aeiou]/.test(ch || '');
+  function conv(word){
+    let w = String(word).toLowerCase().replace(/[^a-z]/g, '');
+    if(!w) return '';
+    const units = [];                    // {c:'க'} | {v:key}
+    const C = c => units.push({ c });
+    const Vw = v => units.push({ v });
+    // final-syllable patterns
+    let tail = null;
+    const tails = [
+      [/tion$/, () => { C('ஷ'); Vw('a'); C('ன'); }, 4],
+      [/sion$/, () => { C('ஷ'); Vw('a'); C('ன'); }, 4],
+      [/ture$/, () => { C('ச'); C('ச'); Vw('a'); C('ர'); }, 4],
+      [/ing$/, () => { Vw('i'); C('ங'); }, 3],
+      [/([bpgkcdt])le$/, null, 0],
+      [/[a-z]ce$/, () => { C('ஸ'); }, 2],
+      [/[a-z]ge$/, () => { C('ஜ'); }, 2],
+      [/[aeiou]r$/, () => { Vw('a'); C('ர'); }, 2],
+    ];
+    for(const t of tails){
+      const mm = w.match(t[0]);
+      if(mm && t[1]){ tail = t[1]; w = w.slice(0, w.length - t[2]); break; }
+      if(mm && !t[1]){ const cons = mm[1]; w = w.slice(0, w.length - 3); tail = () => { C(cons === 'c' ? 'க' : ({b:'ப',p:'ப',g:'க',k:'க',d:'ட',t:'ட'})[cons]); Vw('i'); C(cons === 't' ? 'ல' : 'ள'); }; tail.keepCons = true; break; }
+    }
+    if(tail && tail.keepCons){ /* consonant already appended by tail */ }
+    // trailing silent e (name, make) : long vowel before consonant+e
+    let magic = false;
+    if(!tail && /[aeiou]?[^aeiou]e$/.test(w) && w.length > 3 && /[aiou][^aeiouwy]e$/.test(w)){ magic = true; w = w.slice(0, -1); }
+    else if(!tail && /[aiou](?:[^aeiou])e$/.test(w) && w.length === 3){ magic = true; w = w.slice(0, -1); }
+    // plural / ending s
+    let i = 0; const n = w.length;
+    const at = s => w.startsWith(s, i);
+    while(i < n){
+      const ch = w[i], nx = w[i + 1] || '', nn = w[i + 2] || '';
+      const prevV = units.length && units[units.length - 1].v !== undefined;
+      const atEnd = i === n - 1;
+      // ---- vowels
+      if(isV(ch)){
+        if(at('oo')){ Vw('oo'); i += 2; continue; }
+        if(at('eo')){ Vw('ee'); i += 2; continue; }
+        if(at('ee') || at('ea')){ Vw('ee'); i += 2; continue; }
+        if(at('ai') || at('ay')){ Vw('ae'); if(at('ay') || nx === 'i'){ C('ய'); } i += 2; if(!isV(w[i] || '')) {} continue; }
+        if(at('oa')){ Vw('oh'); i += 2; continue; }
+        if(at('ou') || (at('ow') && i + 2 >= n)){ if(at('ow')){ Vw('oh'); } else { Vw('au'); } i += 2; continue; }
+        if(at('oi') || at('oy')){ Vw('o'); C('ய'); i += 2; continue; }
+        if(at('au') || at('aw')){ Vw('oh'); i += 2; continue; }
+        if(at('ie')){ Vw('ee'); i += 2; continue; }
+        if(at('ue') || at('ew')){ C('ய'); Vw('oo'); i += 2; continue; }
+        if(ch === 'a'){
+          if(nx === 'r'){ Vw('aa'); i += 1; continue; }
+          if(magic && i === n - 2){ Vw('ae'); i++; continue; }
+          if(atEnd && units.length){ Vw('aa'); i++; continue; }
+          Vw('a'); i++; continue;
+        }
+        if(ch === 'e'){
+          if(atEnd && units.length && w.length > 2){ i++; continue; }   // silent e
+          Vw('e'); i++; continue;
+        }
+        if(ch === 'i'){
+          if(magic && i === n - 2){ Vw('ai'); i++; continue; }
+          Vw('i'); i++; continue;
+        }
+        if(ch === 'o'){
+          if(magic && i === n - 2){ Vw('oh'); i++; continue; }
+          if(atEnd){ Vw('oh'); i++; continue; }
+          if(nx === 'r' && (i + 2 >= n || !isV(nn))){ if(i + 2 >= n){ Vw('a'); } else { Vw('oh'); } i++; continue; }
+          Vw('o'); i++; continue;
+        }
+        if(ch === 'u'){
+          if(magic && i === n - 2){ C('ய'); Vw('oo'); i++; continue; }
+          if(nx === 'r'){ Vw('a'); i++; continue; }
+          Vw('a'); i++; continue;
+        }
+      }
+      // ---- consonant clusters
+      if(at('tch')){ C('ச'); i += 3; continue; }
+      if(at('dge')){ C('ஜ'); i += 3; continue; }
+      if(at('ck')){ C('க'); i += 2; continue; }
+      if(at('sch')){ C('ஸ'); C('க'); i += 3; continue; }
+      if(at('ch')){ C('ச'); i += 2; continue; }
+      if(at('sh')){ C('ஷ'); i += 2; continue; }
+      if(at('th')){ C('த'); i += 2; continue; }
+      if(at('ph')){ C('ஃப'); i += 2; continue; }
+      if(at('wh')){ C('வ'); i += 2; continue; }
+      if(at('gh')){ i += 2; continue; }
+      if(at('kn') && i === 0){ C('ந'); i += 2; continue; }
+      if(at('qu')){ C('க'); C('வ'); i += 2; continue; }
+      if(at('ng') && (i + 2 >= n || !isV(w[i + 2]))){ C('ங'); i += 2; continue; }
+      if(at('nk')){ C('ங'); C('க'); i += 2; continue; }
+      if(at('x')){ C('க'); C('ஸ'); i += 1; continue; }
+      if(at('ct')){ C('க'); C('ட'); i += 2; continue; }
+      // double consonant
+      if(ch === nx && !isV(ch)){
+        const dbl = 'tdpbkg'.includes(ch);
+        const map1 = { t:'ட', d:'ட', p:'ப', b:'ப', k:'க', g:'க' };
+        if(dbl){ C(map1[ch]); C(map1[ch]); } else { /* single */ i += 0; units.push({ rep: ch }); }
+        i += 2;
+        if(!dbl){ units.pop(); i -= 2; w = w.slice(0, i) + w.slice(i + 1); }   // collapse
+        continue;
+      }
+      const sing = {
+        b:'ப', d:'ட', f:'ஃப', h:'ஹ', j:'ஜ', k:'க', l:'ல', m:'ம', n:'ன', p:'ப', q:'க', r:'ர', t:'ட', v:'வ', w:'வ', y:'ய', z:'ஸ'
+      };
+      if(ch === 'c'){ C(/[eiy]/.test(nx) ? 'ஸ' : 'க'); i++; continue; }
+      if(ch === 'g'){ C(/[ei]/.test(nx) && i > 0 ? 'ஜ' : 'க'); i++; continue; }
+      if(ch === 's'){ C(prevV && isV(nx) ? 'ஸ' : 'ஸ'); i++; continue; }
+      if(ch === 'y'){ if(i === 0 || isV(nx)) { C('ய'); } else { Vw('i'); } i++; continue; }
+      if(ch === 'n'){ C(i === 0 ? 'ந' : 'ன'); i++; continue; }
+      if(sing[ch]){ C(sing[ch]); i++; continue; }
+      i++;
+    }
+    if(tail) tail();
+    // render
+    let out = '', pending = false;
+    for(const u of units){
+      if(u.c !== undefined){
+        if(pending) out += PULLI;
+        // 'ஃப' is two chars: consonant letter that should be treated as one
+        out += u.c; pending = true;
+      } else if(u.v !== undefined){
+        const [ind, sign] = V[u.v];
+        if(pending){ out += sign; pending = false; } else out += ind;
+      }
+    }
+    if(pending) out += PULLI;
+    return out;
+  }
+  // Does this Roman word look like an English word rather than Tanglish?
+  function looksEnglish(w){
+    w = String(w).toLowerCase();
+    if(w.length < 5) return false;
+    return /^s[ptkc]|sch|ck|tion|sion|ct|ph|x|q|c(?![h])|ture|ough|wh|[bcdfgkpst]l(?=[aeiouy])|[bcdfgkpst]r(?=[aeiou])|ing$|ment$|[^aeiou]le$|er$|or$|ly$|ity$|ous$|ize$|ise$/.test(w) && !/^(thirun|kar|per|pir|mar|var|tir|kir)/.test(w);
+  }
+  return { conv, looksEnglish };
+})();
+
 // ---------------------------------------------------------------- தமிழ் தட்டச்சு (editor)
 TOOL_IMPL.tamiltyping = {
   mount(container){
@@ -14175,6 +14332,12 @@ TOOL_IMPL.tamiltyping = {
       const add = t => { if(t && !out.includes(t)) out.push(t); };
       if(learn[lw]) add(learn[lw]);
       if(TAMIL_DICT[lw]) add(TAMIL_DICT[lw]);
+      // English words (collector → கலெக்டர்): dictionary first, then rule-based spelling; the English word itself stays near the top
+      const loan = EN_LOAN[lw];
+      let eng = '';
+      if(loan) add(loan);
+      else if(/^[a-z]+$/.test(lw) && EnglishTamil.looksEnglish(lw) && !(TamilLex.isReady() && TamilLex.matches(raw, 1).length && TamilLex.rank(TamilLex.matches(raw, 1)[0]) < 3000)){ eng = EnglishTamil.conv(lw); add(eng); }
+      const englishy = !!(loan || eng);
       if(TamilLex.isReady()){
         const m = TamilLex.matches(raw, 6);
         const rare = m.length && TamilLex.isExtra(m[0]) && TamilLex.rank(m[0]) > 20000;
@@ -14194,7 +14357,8 @@ TOOL_IMPL.tamiltyping = {
         spots.forEach(([i, v])=>{ const nv = longer[v] || shorter[v]; if(nv) add(TamilCore.phoneticWord(r.slice(0, i) + nv + r.slice(i + v.length))); });
       });
       if(out.length < 6) TamilCore.variants(out[0] || '', 4).forEach(add);
-      add(raw);
+      if(englishy){ const k = out.indexOf(raw); if(k >= 0) out.splice(k, 1); out.splice(Math.min(loan ? 1 : 2, out.length), 0, raw); }
+      else add(raw);
       return out.slice(0, 9);
     }
 
