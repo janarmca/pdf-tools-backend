@@ -5009,8 +5009,13 @@ TOOL_IMPL.img2excel = {
     async function getWorker(prog){
       if(S.worker && S.workerLang === S.lang) return S.worker;
       if(S.worker){ try{ await S.worker.terminate(); }catch(e){} S.worker = null; }
-      const w = await Tesseract.createWorker({ workerBlobURL: true, logger: m => { if(m.status === 'recognizing text' && S.onProg) S.onProg(m.progress); else if(prog && /loading|initializ/.test(m.status || '')) prog.set(Math.min(30, 5 + (m.progress || 0) * 20), 'Loading the reading engine… (first time only)'); } });
-      await w.loadLanguage(S.lang); await w.initialize(S.lang);
+      const logger = m => { if(m.status === 'recognizing text' && S.onProg) S.onProg(m.progress); else if(prog && /loading|initializ/.test(m.status || '')) prog.set(Math.min(30, 5 + (m.progress || 0) * 20), 'Loading the reading engine… (first time only)'); };
+      let w = null;
+      if(S.lang === 'eng'){ // the "best" English model reads blurry photos far more accurately than the default fast one
+        try{ w = await Tesseract.createWorker({ workerBlobURL: true, logger, langPath: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0_best_int' }); await w.loadLanguage('eng'); await w.initialize('eng'); }
+        catch(e){ try{ if(w) await w.terminate(); }catch(_){} w = null; }
+      }
+      if(!w){ w = await Tesseract.createWorker({ workerBlobURL: true, logger }); await w.loadLanguage(S.lang); await w.initialize(S.lang); }
       S.worker = w; S.workerLang = S.lang; return w;
     }
     const loadImage = f => new Promise((res, rej) => { const url = URL.createObjectURL(f); const img = new Image(); img.onload = () => res({ img, url }); img.onerror = () => rej(new Error('Could not open this image')); img.src = url; });
