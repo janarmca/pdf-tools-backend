@@ -1,6 +1,14 @@
 // Hand-written search content for the tools people actually search for.
 // generate-tool-pages.mjs merges this into the generated /tools/<slug> pages.
 export const SEO_EXTRA = {
+  img2excel: {
+    title: 'Image to Excel Converter Free — Screenshot to .xlsx Online | PDF Tools India',
+    desc: 'Convert a screenshot or photo of a table into an editable Excel (.xlsx) file free online. Fixes grid lines, dark mode and tilted photos, cleans numbers and dates. No signup, no AI, works in your browser.',
+    intro: 'Turn a picture of a table into a real Excel sheet. Upload or paste (Ctrl+V) a screenshot of an Excel sheet, a bank statement, a bill or a photo of a printed table. The tool straightens tilted photos, removes grid lines that confuse text reading, fixes dark-mode and white-on-green headers, then places every value in the right row and column. Numbers (₹, %, 1,23,456.00), dates and text are recognised and written as proper Excel cells with a styled header, filters and optional TOTAL formulas.',
+    steps: ['Open Image → Excel and drop a screenshot or photo of the table (or press Ctrl+V to paste).', 'Choose the language if it is not English, then tap Convert to Excel.', 'Check the preview: yellow cells are the ones to double-check; click any cell to correct it.', 'Download the .xlsx (or CSV), or copy the table straight into Excel or Google Sheets.'],
+    uses: ['Moving a table from a screenshot or WhatsApp image into Excel', 'Bank statements, bills and price lists received as pictures', 'Printed marks lists, registers and invoices', 'Combining several screenshots into one sheet'],
+    faqs: [['Is it free and private?', 'Yes. It runs in your browser with open-source text reading — no AI credits, no signup, and your image is never uploaded to a server.'], ['Will it be 100% exact?', 'Clear screenshots come out almost perfectly. Blurry photos can misread a few characters, so uncertain cells are highlighted yellow for a quick check before you download.'], ['Does it handle dates and Indian number format?', 'Yes. Dates like 01/10/2026 become real Excel dates (day-first or month-first, your choice) and amounts like 1,23,456.00 become numbers with Indian grouping.']]
+  },
   bgremove: {
     title: 'Remove Background from Image Free — Online Background Remover | PDF Tools India',
     desc: 'Remove the background from any photo free online, then keep it transparent or swap in a colour or another photo. Works on mobile, no signup, no watermark.',

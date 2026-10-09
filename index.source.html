@@ -339,6 +339,7 @@ const TOOLS = [
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
   {id:'imgcompresskb', name:'Compress to Target KB', desc:'Compress to a target file size (auto quality search)', icon:'🗜️', color:'#A93226', cat:'image', cost:0},
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
+  {id:'img2excel', name:'Image → Excel', desc:'Screenshot or photo of a table → editable .xlsx. Fixes grid lines, dark mode, tilted photos; cleans numbers & dates — free, in your browser', icon:'📸', color:'#1E7145', cat:'image', cost:0},
   {id:'heic2jpg', name:'HEIC → JPG/PNG', desc:'Convert iPhone HEIC photos to JPG or PNG — 100% in your browser, free', icon:'📱', color:'#546E7A', cat:'image', cost:0},
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
@@ -1492,10 +1493,10 @@ const EXT_TO_CONVERT_TARGETS = {
   xls:  [['excel2pdf','PDF'], ['excel2word','Word']],
   xlsx: [['excel2pdf','PDF'], ['excel2word','Word']],
   csv:  [['excel2pdf','PDF']],
-  jpg:  [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
-  jpeg: [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
-  png:  [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
-  webp: [['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  jpg:  [['img2excel','Excel'], ['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  jpeg: [['img2excel','Excel'], ['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  png:  [['img2excel','Excel'], ['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
+  webp: [['img2excel','Excel'], ['bgremove','Remove BG'], ['imgcompress','Compress'], ['imgconvert','Convert Format'], ['img2pdf','PDF']],
   heic: [['heic2jpg','JPG/PNG']],
   heif: [['heic2jpg','JPG/PNG']],
 };
@@ -2916,6 +2917,10 @@ function ensureXlsx(){
   return ensureLib('xlsx', ()=>!!window.XLSX,
     'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'Excel library');
 }
+function ensureExcelJs(){
+  return ensureLib('exceljs', ()=>!!window.ExcelJS,
+    'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js', 'Excel writer library');
+}
 function ensureMammoth(){
   return ensureLib('mammoth', ()=>!!window.mammoth,
     'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', 'Word reader library');
@@ -2935,7 +2940,7 @@ function ensurePptxGenJs(){
 const LIB_LOADERS = {
   pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
   xlsx: ensureXlsx, mammoth: ensureMammoth, html2canvas: ensureHtml2Canvas, docx: ensureDocxLib,
-  pptxgenjs: ensurePptxGenJs
+  pptxgenjs: ensurePptxGenJs, exceljs: ensureExcelJs
 };
 // Which of the 9 on-demand libraries above each tool needs before its
 // mount() can safely run — checked by renderToolPanel(). Covers tools
@@ -2949,7 +2954,7 @@ const TOOL_LIBS = {
   aihandwriting:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
   aitranslate:['docx','html2canvas','pdflib'], askai:['docx','html2canvas','pdflib'],
   airesume:['docx','html2canvas','pdflib'],
-  aiexcelcompare:['xlsx'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
+  aiexcelcompare:['xlsx'], img2excel:['tesseract','exceljs'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
   compress:['pdfjs','pdflib'], emicalc:['xlsx'], excel2pdf:['pdflib','xlsx'], excel2word:['docx','xlsx'],
   expensetracker:['xlsx'], extractpages:['pdflib'], gstinvoice:['pdflib'], img2pdf:['pdflib'],
   leaveletter:['pdflib'], merge:['pdflib'], ocr:['docx','html2canvas','pdfjs','tesseract'], pagenum:['pdflib'],
@@ -4572,6 +4577,470 @@ TOOL_IMPL.ocr = {
     paint();
   }
 };
+
+/* ===================== IMAGE → EXCEL : engine (no AI, runs in the browser) =====================
+   1. prepare()   upscale small screenshots, undo dark mode, straighten photos, find the grid lines,
+                  rub them out (they confuse OCR) and flip white-on-colour header cells.
+   2. buildTable() put every OCR word into a row/column — by the grid when there is one,
+                  otherwise by white-space gutters.
+   3. typeTable() numbers (₹, %, 1,23,456.00, (negative)), dates, text; repairs O/l/S → 0/1/5 in number columns. */
+const Img2Xls = (function(){
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  const median = a => { if(!a.length) return 0; const s = a.slice().sort((x, y)=>x - y); return s[s.length >> 1]; };
+
+  /* ---------- pixels ---------- */
+  function grayOf(id){
+    const d = id.data, n = id.width * id.height, g = new Uint8ClampedArray(n);
+    for(let i = 0, j = 0; i < n; i++, j += 4) g[i] = (d[j] * 299 + d[j + 1] * 587 + d[j + 2] * 114) / 1000;
+    return g;
+  }
+  function putGray(ctx, g, w, h){
+    const id = ctx.createImageData(w, h), d = id.data;
+    for(let i = 0, j = 0; i < g.length; i++, j += 4){ d[j] = d[j + 1] = d[j + 2] = g[i]; d[j + 3] = 255; }
+    ctx.putImageData(id, 0, 0);
+  }
+  function meanOf(g){ let s = 0; for(let i = 0; i < g.length; i += 7) s += g[i]; return s / Math.ceil(g.length / 7); }
+
+  /* ---------- straighten (photos of printed tables) ---------- */
+  function skewAngle(g, w, h){
+    const step = Math.max(1, Math.round(Math.max(w, h) / 700));
+    const pts = []; const thr = Math.min(meanOf(g) - 30, 110);
+    for(let y = 0; y < h; y += step) for(let x = 0; x < w; x += step) if(g[y * w + x] < thr) pts.push(x, y);
+    if(pts.length < 400) return 0;
+    let best = 0, bestV = -1, v0 = 0;
+    for(let a = -5; a <= 5.01; a += 0.5){
+      const t = Math.tan(a * Math.PI / 180), bins = new Float64Array(h * 2 + w + 8), off = w + 4; let n = 0;
+      for(let i = 0; i < pts.length; i += 2){ const yy = Math.round(pts[i + 1] - pts[i] * t) + off; bins[yy]++; n++; }
+      let m = n / bins.length, v = 0; for(let i = 0; i < bins.length; i++){ const dv = bins[i] - m; v += dv * dv; }
+      if(Math.abs(a) < 0.01) v0 = v;
+      if(v > bestV){ bestV = v; best = a; }
+    }
+    return (bestV > v0 * 1.04 && Math.abs(best) >= 0.5) ? best : 0;
+  }
+
+  /* ---------- grid lines ---------- */
+  function contentBox(g, w, h, bg){
+    let x0 = w, x1 = -1, y0 = h, y1 = -1;
+    for(let y = 0; y < h; y += 2){ const r = y * w; for(let x = 0; x < w; x += 2){ if(Math.abs(g[r + x] - bg) > 30){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; } } }
+    return x1 < 0 ? null : {x0, x1, y0, y1};
+  }
+  function modeGray(g){ const hst = new Uint32Array(256); for(let i = 0; i < g.length; i += 5) hst[g[i]]++; let b = 255, bc = -1; for(let i = 0; i < 256; i++) if(hst[i] > bc){ bc = hst[i]; b = i; } return b; }
+  // returns { xs, ys, lineMaskH:Uint8Array(rows), lineMaskV:Uint8Array(cols) , t }
+  function findGrid(g, w, h, scale){
+    const bg = modeGray(g); const box = contentBox(g, w, h, bg); if(!box) return null;
+    const d = Math.max(3, Math.round(scale * 1.5) + 1), T = 9, MIN = 45;
+    const isThin = (a, b, c) => Math.abs(a - b) > T && Math.abs(a - c) > T && Math.abs(b - c) < MIN && ((a < b && a < c) || (a > b && a > c));
+    const bw = box.x1 - box.x0 + 1, bh = box.y1 - box.y0 + 1;
+    const hrow = new Float32Array(h), vcol = new Float32Array(w), edge = new Float32Array(h), tol = 3 * d + 4;
+    // a ruled line is a LONG unbroken run of thin-line pixels; the strokes of letters are many short bits, so measure the longest run
+    for(let y = d; y < h - d; y++){ let run = 0, best = 0, gap = 0; const r = y * w, ru = (y - d) * w, rd = (y + d) * w; for(let x = box.x0; x <= box.x1; x++){ if(isThin(g[r + x], g[ru + x], g[rd + x])){ run += 1 + gap; gap = 0; if(run > best) best = run; } else if(run && ++gap > tol){ run = 0; gap = 0; } } hrow[y] = best / bw; }
+    // fill boundaries (e.g. a green header over white rows) are edges, not thin lines — count those as row separators too
+    const E = 38, de = d + 1;
+    for(let y = de; y < h - de; y++){ let c = 0; const ru = (y - de) * w, rd = (y + de) * w; for(let x = box.x0; x <= box.x1; x++) if(Math.abs(g[rd + x] - g[ru + x]) > E) c++; edge[y] = c / bw; }
+    for(let x = d; x < w - d; x++){ let run = 0, best = 0, gap = 0; for(let y = box.y0; y <= box.y1; y++){ const r = y * w; if(isThin(g[r + x], g[r + x - d], g[r + x + d])){ run += 1 + gap; gap = 0; if(run > best) best = run; } else if(run && ++gap > tol){ run = 0; gap = 0; } } vcol[x] = best / bh; }
+    const maxT = Math.max(4, Math.round(scale * 3));
+    const pick = (arr, lo, hi, thr) => { const out = []; let i = lo; while(i <= hi){ if(arr[i] >= thr){ let j = i, s = 0, ws = 0; while(j <= hi && j - i < maxT && arr[j] >= thr * 0.6){ s += j * arr[j]; ws += arr[j]; j++; } out.push({pos: s / ws, thick: j - i}); i = j + 1; } else i++; } return out; };
+    let hl = pick(hrow, d, h - d - 1, 0.5), vl = pick(vcol, d, w - d - 1, 0.5);
+    const edges = pick(edge, d, h - d - 1, 0.75).filter(e => !hl.some(t => Math.abs(t.pos - e.pos) <= 3 * d + 3));
+    hl = hl.concat(edges).sort((a, b) => a.pos - b.pos);
+    const minGapPx = 6 * scale, dedupe = a => a.filter((l, i) => i === 0 || l.pos - a[i - 1].pos >= minGapPx || (a[i - 1] = Object.assign({}, a[i - 1], {pos: (a[i - 1].pos + l.pos) / 2}), false));
+    hl = dedupe(hl); vl = dedupe(vl);
+    if(hl.length < 2 || vl.length < 2) return {xs: null, ys: null, box, lines: false, bg};
+    const thick = Math.max(1, Math.round(median(hl.concat(vl).map(l => l.thick))));
+    let ys = hl.map(l => l.pos), xs = vl.map(l => l.pos);
+    // add the outer edges of the table when the outer border is missing
+    if(ys[0] - box.y0 > 10 * scale) ys.unshift(box.y0 - 1); if(box.y1 - ys[ys.length - 1] > 10 * scale) ys.push(box.y1 + 1);
+    if(xs[0] - box.x0 > 10 * scale) xs.unshift(box.x0 - 1); if(box.x1 - xs[xs.length - 1] > 10 * scale) xs.push(box.x1 + 1);
+    return {xs, ys, box, lines: true, thick, bg};
+  }
+  function eraseLines(g, w, h, grid, bg){
+    const t = Math.ceil(grid.thick / 2) + 1, d = t + 2;
+    for(const yc of grid.ys){ const y0 = Math.round(yc); for(let y = y0 - t; y <= y0 + t; y++){ if(y < d || y >= h - d) continue; for(let x = Math.max(0, Math.round(grid.xs[0]) - t); x <= Math.min(w - 1, Math.round(grid.xs[grid.xs.length - 1]) + t); x++){ const a = g[(y0 - d) * w + x], b = g[(y0 + d) * w + x]; g[y * w + x] = a > b ? a : b; } } }
+    for(const xc of grid.xs){ const x0 = Math.round(xc); for(let x = x0 - t; x <= x0 + t; x++){ if(x < d || x >= w - d) continue; for(let y = Math.max(0, Math.round(grid.ys[0]) - t); y <= Math.min(h - 1, Math.round(grid.ys[grid.ys.length - 1]) + t); y++){ const a = g[y * w + x0 - d], b = g[y * w + x0 + d]; g[y * w + x] = a > b ? a : b; } } }
+  }
+  // stats come from the inside of the cell; the flip / stretch is applied to the whole cell (grid lines are already rubbed out)
+  function normaliseRect(g, w, X0, Y0, X1, Y1, pad){
+    pad = pad || 0; const h = (g.length / w) | 0;
+    X0 = clamp(Math.round(X0), 0, w); Y0 = clamp(Math.round(Y0), 0, h); X1 = clamp(Math.round(X1), 0, w); Y1 = clamp(Math.round(Y1), 0, h);
+    const x0 = X0 + pad, y0 = Y0 + pad, x1 = X1 - pad, y1 = Y1 - pad; if(x1 <= x0 || y1 <= y0) return;
+    let s = 0, n = 0, mn = 255, mx = 0;
+    for(let y = y0; y < y1; y++) for(let x = x0; x < x1; x++){ const v = g[y * w + x]; s += v; n++; if(v < mn) mn = v; if(v > mx) mx = v; }
+    if(!n) return; const mean = s / n, inv = mean < 118;
+    if(inv){ const t = mn; mn = 255 - mx; mx = 255 - t; }
+    const k = (mx - mn > 25 && mx - mn < 215) ? 255 / (mx - mn) : 1, off = k === 1 ? 0 : mn;
+    if(!inv && k === 1) return;
+    for(let y = Y0; y < Y1; y++) for(let x = X0; x < X1; x++){ if(inv && (x < x0 || x >= x1 || y < y0 || y >= y1)){ g[y * w + x] = 255; continue; } let v = g[y * w + x]; if(inv) v = 255 - v; g[y * w + x] = clamp((v - off) * k, 0, 255); }
+  }
+
+  /* prepare(sourceCanvas) → { canvas, grid, scale, notes } ; works on a fresh canvas, never touches the original */
+  function prepare(src, opts){
+    opts = opts || {};
+    const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+    let scale = sw < 700 ? 3 : sw < 1100 ? 2 : sw < 1800 ? 1.5 : 1;
+    while(sw * scale > 4200 || sh * scale > 4200) scale *= 0.8;
+    let w = Math.round(sw * scale), h = Math.round(sh * scale);
+    let cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    let ctx = cv.getContext('2d', {willReadFrequently: true}); ctx.imageSmoothingQuality = 'high'; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); ctx.drawImage(src, 0, 0, w, h);
+    let g = grayOf(ctx.getImageData(0, 0, w, h)); const notes = [];
+    if(meanOf(g) < 110){ for(let i = 0; i < g.length; i++) g[i] = 255 - g[i]; notes.push('dark'); }
+    const ang = opts.noDeskew ? 0 : skewAngle(g, w, h);
+    if(ang){
+      putGray(ctx, g, w, h);
+      const c2 = document.createElement('canvas'); c2.width = w; c2.height = h; const x2 = c2.getContext('2d', {willReadFrequently: true});
+      const bgv = modeGray(g); x2.fillStyle = 'rgb(' + bgv + ',' + bgv + ',' + bgv + ')'; x2.fillRect(0, 0, w, h); x2.translate(w / 2, h / 2); x2.rotate(-ang * Math.PI / 180); x2.drawImage(cv, -w / 2, -h / 2);
+      cv = c2; ctx = x2; g = grayOf(ctx.getImageData(0, 0, w, h)); notes.push('rotated ' + ang + '°');
+    }
+    const grid = findGrid(g, w, h, scale);
+    if(grid && grid.lines){
+      eraseLines(g, w, h, grid, grid.bg);
+      for(let r = 0; r < grid.ys.length - 1; r++) for(let c = 0; c < grid.xs.length - 1; c++) normaliseRect(g, w, grid.xs[c], grid.ys[r], grid.xs[c + 1], grid.ys[r + 1], Math.max(3, grid.thick + 2));
+      notes.push('grid ' + (grid.ys.length - 1) + '×' + (grid.xs.length - 1));
+    } else if(grid && grid.box){
+      // no ruled grid: flip dark-filled bands (e.g. a white-on-green header row)
+      const b = grid.box; let y = b.y0;
+      while(y <= b.y1){ let s = 0; for(let x = b.x0; x <= b.x1; x += 3) s += g[y * w + x]; const m = s / Math.ceil((b.x1 - b.x0 + 1) / 3);
+        if(m < 120){ let y2 = y; while(y2 <= b.y1){ let s2 = 0; for(let x = b.x0; x <= b.x1; x += 3) s2 += g[y2 * w + x]; if(s2 / Math.ceil((b.x1 - b.x0 + 1) / 3) >= 120) break; y2++; }
+          if(y2 - y > 8 * scale / 2) { normaliseRect(g, w, b.x0, y, b.x1 + 1, y2, 0); notes.push('header band flipped'); } y = y2; } else y++; }
+    }
+    putGray(ctx, g, w, h);
+    return {canvas: cv, grid: grid && grid.lines ? grid : null, scale, notes, width: w, height: h};
+  }
+
+  /* ---------- words → table ---------- */
+  const JUNK = /^[|_\-—–=~.:;,'"`¦!\\/\[\]{}()<>]+$/;
+  function cleanWords(words){
+    return words.map(w => ({t: String(w.text || '').trim(), x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1, c: w.confidence == null ? 90 : w.confidence}))
+      .filter(w => w.t && !(JUNK.test(w.t) && w.t.length <= 2 && !/^[()]$/.test(w.t)) && (w.x1 > w.x0));
+  }
+  function joinWords(ws){ ws = ws.slice().sort((a, b) => a.x0 - b.x0); return ws.map(w => w.t).join(' '); }
+  function buildTable(rawWords, grid){
+    const words = cleanWords(rawWords); if(!words.length) return {rows: [], conf: [], mode: 'none'};
+    const mh = median(words.map(w => w.y1 - w.y0)) || 20;
+    if(grid){
+      const R = grid.ys.length - 1, C = grid.xs.length - 1; const cells = Array.from({length: R}, () => Array.from({length: C}, () => []));
+      const idx = (arr, v) => { for(let i = 0; i < arr.length - 1; i++) if(v >= arr[i] && v < arr[i + 1]) return i; return -1; };
+      for(const w of words){ const r = idx(grid.ys, (w.y0 + w.y1) / 2), c = idx(grid.xs, (w.x0 + w.x1) / 2); if(r >= 0 && c >= 0) cells[r][c].push(w); }
+      const rows = [], conf = [];
+      for(let r = 0; r < R; r++){ rows.push([]); conf.push([]); for(let c = 0; c < C; c++){ const ws = cells[r][c]; if(!ws.length){ rows[r].push(''); conf[r].push(100); continue; }
+        // several text lines inside one cell: top to bottom
+        ws.sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = []; for(const w of ws){ const cy = (w.y0 + w.y1) / 2, L = lines[lines.length - 1]; if(L && Math.abs(cy - L.cy) < mh * 0.6) L.ws.push(w); else lines.push({cy, ws: [w]}); }
+        rows[r].push(lines.map(L => joinWords(L.ws)).join(' ')); conf[r].push(Math.min(...ws.map(w => w.c))); } }
+      return stripSheetChrome(trim({rows, conf, mode: 'grid'}));
+    }
+    // rows by y
+    const sorted = words.slice().sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = [];
+    for(const w of sorted){ const cy = (w.y0 + w.y1) / 2, L = lines[lines.length - 1]; if(L && Math.abs(cy - L.cy) < mh * 0.55){ L.ws.push(w); L.cy = (L.cy * (L.ws.length - 1) + cy) / L.ws.length; } else lines.push({cy, ws: [w]}); }
+    // columns by vertical white-space gutters (only rows with 2+ words vote, so a one-cell title row can't hide them)
+    const minX = Math.min(...words.map(w => w.x0)), maxX = Math.max(...words.map(w => w.x1)), W = Math.ceil(maxX - minX) + 2;
+    const cov = new Int32Array(W); let voters = 0;
+    for(const L of lines){ if(L.ws.length < 2) continue; voters++; for(const w of L.ws) for(let x = Math.floor(w.x0 - minX); x <= Math.ceil(w.x1 - minX) && x < W; x++) cov[x]++; }
+    if(!voters){ // single column list
+      return trim({rows: lines.map(L => [joinWords(L.ws)]), conf: lines.map(L => [Math.min(...L.ws.map(w => w.c))]), mode: 'list'});
+    }
+    const gap = Math.max(mh * 0.75, 6), allow = Math.floor(voters * 0.08);
+    const cuts = []; let x = 0;
+    while(x < W){ if(cov[x] <= allow){ let y = x; while(y < W && cov[y] <= allow) y++; if(x > 0 && y < W && y - x >= gap) cuts.push(minX + (x + y) / 2); x = y; } else x++; }
+    const colOf = w => { const cx = w.x0 + (w.x1 - w.x0) * 0.3; let c = 0; while(c < cuts.length && cx > cuts[c]) c++; return c; };
+    const C = cuts.length + 1; const rows = [], conf = [];
+    for(const L of lines){ const cells = Array.from({length: C}, () => []); for(const w of L.ws) cells[colOf(w)].push(w);
+      rows.push(cells.map(ws => ws.length ? joinWords(ws) : '')); conf.push(cells.map(ws => ws.length ? Math.min(...ws.map(w => w.c)) : 100)); }
+    return stripSheetChrome(trim({rows, conf, mode: 'gutter'}));
+  }
+  // Excel/Sheets screenshots carry a column-letter bar (A B C …) and a row-number strip (1 2 3 …) — not data
+  function stripSheetChrome(t){
+    if(t.rows.length < 3 || !t.rows[0].length) return t;
+    for(let k = 0; k < Math.min(3, t.rows.length - 1); k++){ const r0 = t.rows[k].filter(x => x);
+      if(r0.length >= 2 && r0.length >= Math.max(2, t.rows[k].length - 3) && r0.every(x => /^[A-Za-z]{1,2}$/.test(x)) && r0.slice(1).every((x, i) => x.toUpperCase().charCodeAt(0) - r0[i].toUpperCase().charCodeAt(0) === 1 || x.length === 2 || r0[i].length === 2)){
+        t.rows.splice(0, k + 1); t.conf.splice(0, k + 1); t.chrome = (t.chrome || []).concat('letters'); break; } }
+    const col = t.rows.map(r => r[0]); const nums = col.map(x => /^\d{1,4}$/.test(x) ? +x : null); const ok = nums.filter(x => x != null);
+    if(t.chrome && t.rows[0].length > 1 && ok.length === col.length && ok.length >= 3 && ok.every((x, i) => i === 0 || x === ok[i - 1] + 1)){ t.rows = t.rows.map(r => r.slice(1)); t.conf = t.conf.map(r => r.slice(1)); t.chrome = (t.chrome || []).concat('numbers'); }
+    return t;
+  }
+  function trim(t){
+    const R = t.rows.length; if(!R) return t; const C = Math.max(...t.rows.map(r => r.length));
+    const keepC = []; for(let c = 0; c < C; c++) if(t.rows.some(r => (r[c] || '').trim())) keepC.push(c);
+    const keepR = []; for(let r = 0; r < R; r++) if(keepC.some(c => (t.rows[r][c] || '').trim())) keepR.push(r);
+    t.rows = keepR.map(r => keepC.map(c => (t.rows[r][c] || '').trim())); t.conf = keepR.map(r => keepC.map(c => t.conf[r][c] == null ? 100 : t.conf[r][c])); return t;
+  }
+
+  /* ---------- typing ---------- */
+  const MONTHS = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12};
+  const serial = (y, m, d) => Math.round((Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000);
+  function validDate(y, m, d){ if(m < 1 || m > 12 || d < 1 || d > 31) return false; const dt = new Date(Date.UTC(y, m - 1, d)); return dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d; }
+  function parseDate(s, dayFirst){
+    let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/);
+    if(m){ let a = +m[1], b = +m[2], y = +m[3]; if(y < 100) y += y < 70 ? 2000 : 1900; let d = dayFirst ? a : b, mo = dayFirst ? b : a; if(!validDate(y, mo, d) && validDate(y, a, b)){ d = b; mo = a; } return validDate(y, mo, d) ? serial(y, mo, d) : null; }
+    m = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/); if(m) return validDate(+m[1], +m[2], +m[3]) ? serial(+m[1], +m[2], +m[3]) : null;
+    m = s.match(/^(\d{1,2})[ \-\/]([A-Za-z]{3,9})\.?[ \-\/,]+(\d{2}|\d{4})$/); if(m){ const mo = MONTHS[m[2].slice(0, 4).toLowerCase()] || MONTHS[m[2].slice(0, 3).toLowerCase()]; let y = +m[3]; if(y < 100) y += y < 70 ? 2000 : 1900; if(mo && validDate(y, mo, +m[1])) return serial(y, mo, +m[1]); }
+    return null;
+  }
+  const CUR = '(?:₹|\\$|€|£|Rs\\.?|INR|USD|EUR)';
+  const NUM_RE = new RegExp('^(\\()?\\s*([-−–+])?\\s*(' + CUR + ')?\\s*([-−–])?\\s*(\\d{1,3}(?:,\\d{2,3})+|\\d+)(\\.\\d+)?\\s*(%)?\\s*(\\))?$', 'i');
+  function parseNumber(s){
+    const m = String(s).trim().match(NUM_RE); if(!m) return null;
+    const digits = m[5].replace(/,/g, ''); if(!m[3] && !m[6] && !m[7] && !m[5].includes(',') && digits.length > 1 && digits[0] === '0') return null; // 007, phone numbers
+    if(digits.length > 15 || (digits.length >= 10 && !m[3] && !m[6] && !m[7] && !m[5].includes(','))) return null;
+    let n = parseFloat(digits + (m[6] || '')); if(isNaN(n)) return null;
+    if(m[1] && m[8] || m[2] && /[-−–]/.test(m[2]) || m[4]) n = -n;
+    const dec = m[6] ? m[6].length - 1 : 0; const cur = m[3] ? (/₹|rs|inr/i.test(m[3]) ? '₹' : m[3].toUpperCase() === 'USD' ? '$' : m[3].toUpperCase() === 'EUR' ? '€' : m[3]) : '';
+    if(m[7]) n = n / 100;
+    return {n, dec, pct: !!m[7], cur, comma: m[5].includes(',')};
+  }
+  function fixDigits(s){
+    if(!/\d/.test(s)) return null; const t = s.replace(/[Oo]/g, '0').replace(/[lI|!]/g, '1').replace(/S/g, '5').replace(/B/g, '8').replace(/Z/g, '2').replace(/[,]\s+/g, ',').replace(/\.\s+(?=\d)/g, '.');
+    return t === s ? null : t;
+  }
+  // OCR often mangles separators in money columns ("1.,23,456.00"): keep the last '.' as the decimal point when it fits the column
+  function repairNumber(s, dec){
+    const t = String(s).replace(/[Oo]/g, '0').replace(/[lI|!]/g, '1').replace(/\s+/g, '');
+    if(!/\d/.test(t) || /[A-Za-z]/.test(t.replace(/^(Rs\.?|INR)/i, ''))) return null;
+    const pre = (t.match(/^[-−–(]?(?:₹|\$|€|£|Rs\.?|INR)?/i) || [''])[0], post = (t.match(/%?\)?$/) || [''])[0];
+    let core = t.slice(pre.length, t.length - post.length); const i = core.lastIndexOf('.');
+    let ip = i >= 0 && core.length - i - 1 === dec ? core.slice(0, i) : core, fp = i >= 0 && core.length - i - 1 === dec ? core.slice(i + 1) : '';
+    ip = ip.replace(/[.,]/g, ''); if(!/^\d+$/.test(ip) || (fp && !/^\d+$/.test(fp))) return null;
+    return pre + ip + (fp ? '.' + fp : '') + post;
+  }
+  function typeTable(t, o){
+    o = Object.assign({header: 'auto', dayFirst: true}, o || {}); const rows = t.rows, R = rows.length; if(!R) return {cells: [], header: false, cols: []};
+    const C = rows[0].length, body0 = 1;
+    // pass 1: strict kind per cell
+    const kind = (s) => { if(!s) return 'e'; if(parseDate(s, o.dayFirst) != null) return 'd'; if(parseNumber(s)) return 'n'; return 's'; };
+    const colKinds = []; for(let c = 0; c < C; c++){ const k = {n: 0, d: 0, s: 0}; for(let r = body0; r < R; r++){ const x = kind(rows[r][c]); if(x !== 'e') k[x]++; } colKinds.push(k); }
+    // header?
+    let header = o.header === 'auto' ? false : !!o.header;
+    if(o.header === 'auto'){ let hit = 0, miss = 0; for(let c = 0; c < C; c++){ const k = colKinds[c], tot = k.n + k.d + k.s; if(!tot) continue; const h = kind(rows[0][c]); if((k.n + k.d) / tot >= 0.6) { if(h === 's') hit++; else if(h !== 'e') miss++; } }
+      header = R > 1 && (hit > 0 && miss === 0 || (hit === 0 && miss === 0 && rows[0].every(x => x && kind(x) === 's'))); }
+    const start = header ? 1 : 0; const out = []; const cols = [];
+    for(let c = 0; c < C; c++){ const k = {n: 0, d: 0, s: 0}; for(let r = start; r < R; r++){ const x = kind(rows[r][c]); if(x !== 'e') k[x]++; } const tot = k.n + k.d + k.s;
+      // repairable cells (O/l/S) count towards the numeric vote
+      let rep = 0; for(let r = start; r < R; r++){ const s = rows[r][c]; if(s && kind(s) === 's'){ const f = fixDigits(s); if(f && parseNumber(f)) rep++; } }
+      const auto = tot && k.d / tot >= 0.6 ? 'd' : tot && (k.n + rep) / tot >= 0.6 && k.n >= 1 ? 'n' : 's'; cols.push((o.force && o.force[c]) || auto); }
+    const colDec = cols.map((type, c) => { if(type !== 'n') return 0; const cnt = {}; let tot = 0; for(let r = start; r < R; r++){ const p = parseNumber(rows[r][c] || ''); if(p && !p.pct){ cnt[p.dec] = (cnt[p.dec] || 0) + 1; tot++; } } let best = 0, bc = 0; for(const k in cnt) if(cnt[k] > bc){ bc = cnt[k]; best = +k; } return tot >= 3 && bc / tot >= 0.7 ? best : 0; });
+    for(let r = 0; r < R; r++){ const row = []; for(let c = 0; c < C; c++){ const s = rows[r][c], conf = t.conf[r][c], base = {raw: s, low: conf < 55};
+      if(!s){ row.push(Object.assign(base, {t: 'e'})); continue; }
+      if(header && r === 0){ row.push(Object.assign(base, {t: 's', v: s, head: true})); continue; }
+      if(cols[c] === 'd'){ const ds = parseDate(s, o.dayFirst); if(ds != null){ row.push(Object.assign(base, {t: 'd', v: ds})); continue; } }
+      if(cols[c] === 'n'){ let p = parseNumber(s), fixed = false; if(!p){ const f = fixDigits(s); p = f && parseNumber(f); fixed = !!p; } if(!p){ const f = repairNumber(s, colDec[c]); p = f && parseNumber(f); fixed = !!p; } if(p){ row.push(Object.assign(base, {t: 'n', v: p.n, dec: p.dec, pct: p.pct, cur: p.cur, comma: p.comma, low: base.low || fixed || (colDec[c] > 0 && !p.pct && p.dec === 0)})); continue; } }
+      row.push(Object.assign(base, {t: 's', v: s})); }
+      out.push(row); }
+    // per-column number format
+    const fmt = cols.map((type, c) => { if(type !== 'n') return null; let dec = 0, cur = '', pct = false, comma = false; for(let r = start; r < R; r++){ const x = out[r][c]; if(x.t === 'n'){ dec = Math.max(dec, x.dec || 0); if(x.cur) cur = x.cur; if(x.pct) pct = true; if(x.comma || Math.abs(x.v) >= 10000) comma = true; } } return {dec, cur, pct, comma}; });
+    return {cells: out, header, cols, fmt};
+  }
+  function numFmt(f, indian){
+    if(!f) return 'General'; if(f.pct) return f.dec ? '0.' + '0'.repeat(f.dec) + '%' : '0%';
+    const d = f.dec ? '.' + '0'.repeat(f.dec) : ''; let base;
+    if(!f.comma && !f.cur) return f.dec ? '0' + d : '0';
+    base = indian ? `[>=10000000]##\\,##\\,##\\,##0${d};[>=100000]##\\,##\\,##0${d};##,##0${d}` : '#,##0' + d;
+    return f.cur ? (indian ? base.replace(/(\[>=\d+\])/g, '$1' + '"' + f.cur + '"').replace(/;##,##0/, ';"' + f.cur + '"##,##0') : '"' + f.cur + '"' + base) : base;
+  }
+  return {prepare, buildTable, typeTable, numFmt, parseNumber, parseDate, fixDigits, findGrid, skewAngle};
+})();
+
+
+/* ===================== IMAGE → EXCEL (screenshot / photo of a table → editable .xlsx) ===================== */
+TOOL_IMPL.img2excel = {
+  mount(container){
+    const body = el(`<div></div>`); container.appendChild(body);
+    const S = { items: [], lang: 'eng', header: 'auto', dayFirst: true, indian: true, highlight: true, totals: false, combine: false, busy: false, worker: null, workerLang: '' };
+    const LANGS = [['eng', 'English (numbers, names, invoices)'], ['tam+eng', 'தமிழ் + English'], ['hin+eng', 'हिन्दी + English']];
+    const NOTE_TXT = { dark: '🌙 dark mode fixed', 'header band flipped': '🎨 coloured header fixed' };
+    const noteText = n => NOTE_TXT[n] || (/^grid/.test(n) ? '▦ ' + n.replace('grid ', 'grid ') + ' cells found' : /^rotated/.test(n) ? '↻ straightened ' + n.replace('rotated ', '') : n);
+    const esc = s => escapeHtml(String(s == null ? '' : s));
+    const fmtSerial = n => { const d = new Date(Date.UTC(1899, 11, 30) + n * 86400000); return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + d.getUTCFullYear(); };
+    const typeOpts = () => ({ header: S.header === 'auto' ? 'auto' : S.header === 'yes', dayFirst: S.dayFirst });
+
+    function typed(it){ return Img2Xls.typeTable(it.table, Object.assign(typeOpts(), { force: it.force })); }
+
+    /* ---------------- OCR ---------------- */
+    async function getWorker(prog){
+      if(S.worker && S.workerLang === S.lang) return S.worker;
+      if(S.worker){ try{ await S.worker.terminate(); }catch(e){} S.worker = null; }
+      const w = await Tesseract.createWorker({ workerBlobURL: true, logger: m => { if(m.status === 'recognizing text' && S.onProg) S.onProg(m.progress); else if(prog && /loading|initializ/.test(m.status || '')) prog.set(Math.min(30, 5 + (m.progress || 0) * 20), 'Loading the reading engine… (first time only)'); } });
+      await w.loadLanguage(S.lang); await w.initialize(S.lang);
+      S.worker = w; S.workerLang = S.lang; return w;
+    }
+    const loadImage = f => new Promise((res, rej) => { const url = URL.createObjectURL(f); const img = new Image(); img.onload = () => res({ img, url }); img.onerror = () => rej(new Error('Could not open this image')); img.src = url; });
+    async function runItem(it, idx, total, prog){
+      const base = idx / total * 100, span = 100 / total;
+      prog.set(base + span * 0.05, `Image ${idx + 1}/${total} — preparing…`);
+      const { img, url } = await loadImage(it.file); it.url = url;
+      const prep = Img2Xls.prepare(img); it.notes = prep.notes;
+      const worker = await getWorker(prog);
+      S.onProg = p => prog.set(base + span * (0.2 + p * 0.75), `Image ${idx + 1}/${total} — reading… ${Math.round(p * 100)}%`);
+      await worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
+      let { data } = await worker.recognize(prep.canvas);
+      if(data.confidence < 72){ // hard image: also try "sparse text" mode and keep the better read
+        await worker.setParameters({ tessedit_pageseg_mode: '11' });
+        const alt = await worker.recognize(prep.canvas);
+        if(alt.data.confidence > data.confidence + 3){ data = alt.data; it.notes.push('sparse mode'); }
+      }
+      it.table = Img2Xls.buildTable(data.words || [], prep.grid);
+      it.conf = Math.round(data.confidence || 0); it.mode = it.table.mode; it.force = [];
+      if(it.table.chrome) it.notes.push('📑 spreadsheet row/column labels removed');
+      it.status = it.table.rows.length ? 'done' : 'empty';
+    }
+    async function convertAll(){
+      if(S.busy) return; S.busy = true; paint();
+      const todo = S.items.filter(i => i.status === 'queued'); const prog = mountProgress(body);
+      try{
+        for(let k = 0; k < todo.length; k++){ try{ await runItem(todo[k], k, todo.length, prog); }catch(e){ todo[k].status = 'error'; todo[k].error = e.message || String(e); } }
+        prog.set(100, 'Done');
+      }catch(e){ mountResult(body, 'Error: ' + esc(e.message)).style.background = '#FDEDEC'; }
+      prog.remove(); S.busy = false; paint();
+    }
+
+    /* ---------------- export ---------------- */
+    function safeSheetName(n, used){ let s = String(n).replace(/\.[^.]+$/, '').replace(/[\[\]:*?\/\\]/g, ' ').trim().slice(0, 28) || 'Sheet'; let k = s, i = 2; while(used.has(k.toLowerCase())) k = s.slice(0, 26) + ' ' + i++; used.add(k.toLowerCase()); return k; }
+    const colLetter = n => { let s = ''; n++; while(n > 0){ const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+    function groups(){
+      const done = S.items.filter(i => i.status === 'done' && i.table.rows.length);
+      if(!S.combine || done.length < 2) return done.map(it => ({ name: it.name, parts: [it] }));
+      const same = done.every(it => it.table.rows[0].length === done[0].table.rows[0].length);
+      return same ? [{ name: 'Combined', parts: done }] : done.map(it => ({ name: it.name, parts: [it] }));
+    }
+    async function buildXlsx(){
+      await ensureExcelJs(); const wb = new ExcelJS.Workbook(); wb.creator = 'PDF Tools India'; wb.created = new Date(); const used = new Set();
+      for(const g of groups()){
+        const ws = wb.addWorksheet(safeSheetName(g.name, used)); let rowNo = 0, headerRow = 0, firstData = 0, lastData = 0, colFmt = null, cols = 0, ty0 = null;
+        g.parts.forEach((it, pi) => {
+          const ty = typed(it); cols = ty.cols.length; ty0 = ty0 || ty; colFmt = colFmt || ty;
+          ty.cells.forEach((cells, r) => {
+            if(pi > 0 && r === 0 && ty.header) return; // repeated header of a combined sheet
+            rowNo++; const row = ws.getRow(rowNo);
+            cells.forEach((c, ci) => {
+              const cell = row.getCell(ci + 1);
+              if(c.t === 'e') { cell.value = null; }
+              else if(c.t === 'n'){ cell.value = c.v; cell.numFmt = Img2Xls.numFmt(ty.fmt[ci], S.indian); cell.alignment = { horizontal: 'right' }; }
+              else if(c.t === 'd'){ cell.value = new Date(Date.UTC(1899, 11, 30) + c.v * 86400000); cell.numFmt = 'dd/mm/yyyy'; cell.alignment = { horizontal: 'center' }; }
+              else cell.value = c.v;
+              cell.border = { top: { style: 'thin', color: { argb: 'FFD0D5DD' } }, left: { style: 'thin', color: { argb: 'FFD0D5DD' } }, bottom: { style: 'thin', color: { argb: 'FFD0D5DD' } }, right: { style: 'thin', color: { argb: 'FFD0D5DD' } } };
+              if(c.head){ cell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF217346' } }; cell.alignment = { horizontal: 'center', vertical: 'middle' }; }
+              else if(S.highlight && c.low && c.t !== 'e') cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF2CC' } };
+            });
+            if(ty.header && r === 0 && pi === 0){ headerRow = rowNo; firstData = rowNo + 1; } else if(!firstData) firstData = rowNo; lastData = rowNo;
+          });
+        });
+        // totals row (real formulas)
+        if(S.totals && ty0){
+          rowNo++; const tr = ws.getRow(rowNo); let labelled = false;
+          ty0.cols.forEach((t, ci) => { const cell = tr.getCell(ci + 1);
+            if(t === 'n' && !(ty0.fmt[ci] && ty0.fmt[ci].pct)){ let sum = 0; for(let r = firstData; r <= lastData; r++){ const v = ws.getRow(r).getCell(ci + 1).value; if(typeof v === 'number') sum += v; }
+              cell.value = { formula: `SUM(${colLetter(ci)}${firstData}:${colLetter(ci)}${lastData})`, result: sum }; cell.numFmt = Img2Xls.numFmt(ty0.fmt[ci], S.indian); cell.alignment = { horizontal: 'right' }; }
+            else if(!labelled && t === 's'){ cell.value = 'Total'; labelled = true; }
+            cell.font = { bold: true }; cell.border = { top: { style: 'medium', color: { argb: 'FF217346' } } }; });
+        }
+        // widths, freeze header, filter
+        for(let ci = 0; ci < cols; ci++){ let m = 6; ws.eachRow(row => { const v = row.getCell(ci + 1).value; const t = v == null ? '' : v instanceof Date ? '00/00/0000' : typeof v === 'object' && v.formula ? '000,000,000.00' : typeof v === 'number' ? v.toLocaleString('en-IN', { maximumFractionDigits: 2 }) + '00' : String(v); const wlen = Array.from(t).reduce((a, ch) => a + (ch.charCodeAt(0) > 0x0B00 ? 1.6 : 1), 0); if(wlen > m) m = wlen; }); ws.getColumn(ci + 1).width = Math.min(60, Math.max(8, Math.ceil(m * 1.12) + 2)); }
+        if(headerRow){ ws.views = [{ state: 'frozen', ySplit: headerRow }]; ws.autoFilter = { from: { row: headerRow, column: 1 }, to: { row: lastData, column: cols } }; }
+      }
+      return await wb.xlsx.writeBuffer();
+    }
+    function csvText(){
+      const out = []; const q = s => /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      for(const g of groups()) g.parts.forEach((it, pi) => { const ty = typed(it); ty.cells.forEach((cells, r) => { if(pi > 0 && r === 0 && ty.header) return; out.push(cells.map((c, ci) => c.t === 'n' ? String(c.pct ? +(c.v * 100).toFixed(8) + '%' : c.v) : c.t === 'd' ? fmtSerial(c.v) : q(c.v == null ? '' : String(c.v))).join(',')); }); });
+      return out.join('\r\n');
+    }
+    function tsvText(){ const out = []; for(const g of groups()) g.parts.forEach(it => it.table.rows.forEach(r => out.push(r.join('\t')))); return out.join('\n'); }
+
+    /* ---------------- UI ---------------- */
+    function addFiles(files){
+      const ok = files.filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|webp|bmp|gif)$/i.test(f.name));
+      if(!ok.length){ if(typeof toast === 'function') toast('Please choose an image (PNG / JPG / WEBP)'); return; }
+      ok.forEach(f => S.items.push({ file: f, name: f.name || ('screenshot-' + (S.items.length + 1) + '.png'), status: 'queued' }));
+      paint();
+    }
+    const onPaste = e => {
+      if(!container.isConnected){ document.removeEventListener('paste', onPaste); return; }
+      const fl = Array.from((e.clipboardData && e.clipboardData.files) || []).filter(f => /^image\//.test(f.type));
+      if(fl.length){ e.preventDefault(); addFiles(fl.map((f, i) => f.name && f.name !== 'image.png' ? f : new File([f], 'pasted-' + Date.now() + '-' + i + '.png', { type: f.type }))); }
+    };
+    document.addEventListener('paste', onPaste);
+
+    function select(label, key, opts){
+      const w = el(`<label style="display:flex; flex-direction:column; gap:4px; font-size:12.5px; font-weight:700; color:var(--sub); min-width:150px; flex:1;">${label}<select style="padding:9px 10px; border:1px solid var(--line); border-radius:10px; font:inherit; font-weight:600; color:var(--text, #1c2433); background:#fff;"></select></label>`);
+      const sel = w.querySelector('select'); opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if(String(S[key]) === String(v)) o.selected = true; sel.appendChild(o); });
+      sel.onchange = () => { S[key] = sel.value === 'true' ? true : sel.value === 'false' ? false : sel.value; if(key !== 'lang') paint(); }; return w;
+    }
+    function check(label, key){
+      const w = el(`<label style="display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; cursor:pointer;"><input type="checkbox" ${S[key] ? 'checked' : ''} style="width:18px; height:18px; accent-color:#217346;"> ${label}</label>`);
+      w.querySelector('input').onchange = e => { S[key] = e.target.checked; paint(); }; return w;
+    }
+    const TYPE_LABEL = { s: 'Aa text', n: '123 number', d: '📅 date' };
+    function renderTable(it, host){
+      host.innerHTML = ''; const ty = typed(it); const rows = it.table.rows; const C = rows[0].length;
+      const wrap = el(`<div style="overflow:auto; max-height:420px; border:1px solid var(--line); border-radius:12px; background:#fff;"></div>`);
+      const tb = document.createElement('table'); tb.style.cssText = 'border-collapse:collapse; font-size:13.5px; min-width:100%;';
+      // column controls: type chip + delete
+      const ctl = document.createElement('tr'); ctl.appendChild(document.createElement('td'));
+      for(let c = 0; c < C; c++){ const td = document.createElement('td'); td.style.cssText = 'padding:4px 4px; background:#F4F7F5; border-bottom:1px solid var(--line); white-space:nowrap; text-align:center; position:sticky; top:0; z-index:2;';
+        const t = ty.cols[c]; const chip = el(`<button title="Click to change the column type" style="border:1px solid #cfe3d6; background:#fff; color:#1E7145; border-radius:8px; font-size:11px; font-weight:800; padding:3px 7px; cursor:pointer;">${TYPE_LABEL[t]}${it.force[c] ? ' 🔒' : ''}</button>`);
+        chip.onclick = () => { const seq = [undefined, 's', 'n', 'd']; it.force[c] = seq[(seq.indexOf(it.force[c]) + 1) % 4]; renderTable(it, host); };
+        const del = el(`<button title="Delete this column" style="border:none; background:none; color:#C0392B; font-weight:900; cursor:pointer; font-size:13px;">✕</button>`);
+        del.onclick = () => { it.table.rows = rows.map(r => r.filter((_, i) => i !== c)); it.table.conf = it.table.conf.map(r => r.filter((_, i) => i !== c)); it.force.splice(c, 1); if(!it.table.rows[0].length){ it.status = 'empty'; paint(); } else renderTable(it, host); };
+        td.append(chip, del); ctl.appendChild(td); }
+      tb.appendChild(ctl);
+      ty.cells.forEach((cells, r) => {
+        const tr = document.createElement('tr'); const d0 = document.createElement('td'); d0.style.cssText = 'padding:2px 6px; background:#F4F7F5; text-align:center; position:sticky; left:0; color:#8a94a6; font-size:11px; white-space:nowrap;';
+        d0.innerHTML = `${r + 1}<button title="Delete this row" style="border:none; background:none; color:#C0392B; font-weight:900; cursor:pointer; font-size:12px; margin-left:3px;">✕</button>`;
+        d0.querySelector('button').onclick = () => { it.table.rows.splice(r, 1); it.table.conf.splice(r, 1); if(!it.table.rows.length){ it.status = 'empty'; paint(); } else renderTable(it, host); };
+        tr.appendChild(d0);
+        cells.forEach((cell, c) => {
+          const td = document.createElement('td'); td.contentEditable = 'true'; td.spellcheck = false; td.textContent = cell.raw;
+          const isHead = ty.header && r === 0; const num = cell.t === 'n' || cell.t === 'd';
+          td.style.cssText = `padding:6px 10px; border:1px solid #E4E8EE; min-width:70px; white-space:nowrap; outline:none; ${isHead ? 'background:#217346; color:#fff; font-weight:800;' : (S.highlight && cell.low ? 'background:#FFF2CC;' : '')} ${num && !isHead ? 'text-align:right; font-variant-numeric:tabular-nums;' : ''}`;
+          td.title = cell.low && !isHead ? 'The reader was not sure about this one — please check' : '';
+          td.onfocus = () => { td.style.boxShadow = 'inset 0 0 0 2px #217346'; };
+          td.onblur = () => { td.style.boxShadow = ''; const v = td.textContent.replace(/\s+/g, ' ').trim(); if(v !== it.table.rows[r][c]){ it.table.rows[r][c] = v; it.table.conf[r][c] = 100; renderTable(it, host); } };
+          td.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); td.blur(); } };
+          tr.appendChild(td); });
+        tb.appendChild(tr); });
+      wrap.appendChild(tb); host.appendChild(wrap);
+      const nLow = ty.cells.reduce((a, row) => a + row.filter(c => c.low && !c.head && c.t !== 'e').length, 0);
+      host.appendChild(el(`<div style="font-size:12.5px; color:var(--sub); margin-top:6px;">${rows.length} rows × ${C} columns${ty.header ? ' · first row is the header' : ''}${nLow ? ` · <span style="background:#FFF2CC; padding:1px 6px; border-radius:6px;">${nLow} yellow cell${nLow > 1 ? 's' : ''}</span> to double-check` : ' · everything read with good confidence'}</div>`));
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">📸 Screenshot அல்லது போட்டோவில் உள்ள <b>table-ஐ Excel ஆக</b> மாற்றுங்கள். Excel screenshot, bank statement, bill, printed table — grid கோடுகள், dark mode, சாய்ந்த போட்டோ எல்லாவற்றையும் தானாகச் சரி செய்யும். <b>Ctrl+V</b> மூலம் screenshot-ஐ நேரடியாக paste செய்யலாம். முற்றிலும் இலவசம் — AI இல்லை, உங்கள் படம் device-ஐ விட்டு வெளியே போகாது.</div>`));
+      mountUploader(body, { accept: 'image/*', multiple: true, label: 'Drop a screenshot or photo of a table — or press Ctrl+V', sublabel: 'PNG / JPG / WEBP · several images at once', onAdd: addFiles });
+      if(!S.items.length) return;
+      // file chips
+      const chips = el(`<div style="display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;"></div>`);
+      S.items.forEach((it, i) => { const u = it.url || (it.url = URL.createObjectURL(it.file)); const c = el(`<div style="display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:12px; padding:5px 8px 5px 5px; background:#fff; max-width:100%;"><img src="${u}" alt="" style="width:44px; height:44px; object-fit:cover; border-radius:8px;"><div style="min-width:0;"><div style="font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px;">${esc(it.name)}</div><div style="font-size:11px; color:var(--sub);">${it.status === 'queued' ? 'ready' : it.status === 'done' ? '✅ ' + it.table.rows.length + ' rows' : it.status === 'error' ? '⚠️ ' + esc(it.error) : '⚠️ no table found'}</div></div><button style="border:none; background:none; font-size:16px; cursor:pointer; color:#C0392B;" title="Remove">✕</button></div>`); c.querySelector('button').onclick = () => { S.items.splice(i, 1); paint(); }; chips.appendChild(c); });
+      body.appendChild(chips);
+      // options
+      const opts = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:12px; background:#FAFCFB; margin:8px 0;"></div>`);
+      const r1 = el(`<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;"></div>`);
+      r1.append(select('Language in the image', 'lang', LANGS), select('First row is a header?', 'header', [['auto', 'Auto-detect'], ['yes', 'Yes, first row = header'], ['no', 'No header']]));
+      const r2 = el(`<div style="display:flex; flex-wrap:wrap; gap:8px 18px;"></div>`);
+      r2.append(check('Dates are day/month/year', 'dayFirst'), check('Indian number grouping (12,34,567)', 'indian'), check('Highlight uncertain cells', 'highlight'), check('Add a TOTAL row (formulas)', 'totals'));
+      if(S.items.length > 1) r2.append(check('Combine all images into one sheet', 'combine'));
+      opts.append(r1, r2); body.appendChild(opts);
+      if(!S.busy && S.items.some(i => i.status === 'queued')){
+        const row = el(`<div class="btn-row"></div>`); const b = el(`<button class="btn">📊 Convert to Excel</button>`); b.onclick = convertAll; row.appendChild(b); body.appendChild(row);
+      }
+      // results
+      S.items.forEach(it => {
+        if(it.status !== 'done') return;
+        const card = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:12px; margin:12px 0; background:#fff;"></div>`);
+        const nts = (it.notes || []).map(n => `<span style="background:#E8F3EC; color:#1E7145; border-radius:8px; padding:2px 8px; font-size:11.5px; font-weight:700;">${esc(noteText(n))}</span>`).join(' ');
+        card.appendChild(el(`<div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px;"><b style="font-size:14px;">${esc(it.name)}</b>${nts}<span style="font-size:11.5px; color:var(--sub);">reading confidence ${it.conf}%</span></div>`));
+        const host = el(`<div></div>`); card.appendChild(host); renderTable(it, host); body.appendChild(card);
+      });
+      if(S.items.some(i => i.status === 'done')){
+        const dl = el(`<div class="btn-row"></div>`);
+        const bx = el(`<button class="btn">⬇️ Excel (.xlsx)</button>`), bc = el(`<button class="btn secondary">⬇️ CSV</button>`), bp = el(`<button class="btn secondary">📋 Copy for Excel / Sheets</button>`);
+        bx.onclick = async () => { bx.disabled = true; try{ const buf = await buildXlsx(); await downloadBlob(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), (S.items.find(i => i.status === 'done').name.replace(/\.[^.]+$/, '') || 'table') + '.xlsx'); }catch(e){ mountResult(body, 'Error: ' + esc(e.message)).style.background = '#FDEDEC'; } bx.disabled = false; };
+        bc.onclick = () => downloadBlob(new Blob(['﻿' + csvText()], { type: 'text/csv;charset=utf-8' }), 'table.csv');
+        bp.onclick = async () => { try{ await navigator.clipboard.writeText(tsvText()); bp.textContent = '✅ Copied — paste into Excel'; setTimeout(() => { bp.textContent = '📋 Copy for Excel / Sheets'; }, 2200); }catch(e){ bp.textContent = 'Copy not allowed here'; } };
+        dl.append(bx, bc, bp); body.appendChild(dl);
+        body.appendChild(el(`<div class="note" style="margin-top:10px;">💡 Tip: Yellow cells = the reader was unsure. Click any cell to correct it, ✕ to delete a row/column, and tap the column chip (Aa / 123 / 📅) to force a different type. The Excel file has a styled header, filters, number formats${S.totals ? ' and a TOTAL row' : ''}.</div>`));
+      }
+    }
+    paint();
+  }
+};
+
 
 /* ===================== PDF -> TEXT ===================== */
 TOOL_IMPL.pdf2text = {
