@@ -14033,6 +14033,16 @@ const TamilLex = (function(){
     k = k.replace(/(.)\1+/g, '$1').replace(/nt/g, 'n').replace(/tr/g, 'r').replace(/(.)\1+/g, '$1');
     return k;
   }
+  // consonant skeleton: vowels dropped, doubled letters collapsed (sarthal ≈ சேர்த்தால்)
+  const skel = k => k.replace(/[aeiou]/g, '').replace(/(.)\1+/g, '$1');
+  const vowelsOf = k => k.match(/ai|au|[aeiou]/g) || [];
+  const NEAR = { ae:1, ao:1, ei:1, ie:1, eo:1, ou:1, uo:1 };
+  function vowelPenalty(vt, vw){
+    let p = Math.abs(vt.length - vw.length) * 1.4;
+    const n = Math.min(vt.length, vw.length);
+    for(let j = 0; j < n; j++){ const x = vt[j], y = vw[j]; if(x !== y) p += (NEAR[x + y] || NEAR[y + x]) ? 0.8 : 2.5; }
+    return p;
+  }
   // Tamil word → { key, longs } (longs = string of S/L flags per vowel)
   function keyOfTamil(w){
     let k = '', fl = '', i = 0; const cs = Array.from(w);
@@ -14079,15 +14089,16 @@ const TamilLex = (function(){
     }
     return {key: post(k), longs: fl, caps};
   }
-  let words = [], index = new Map(), ready = false, pos = new Map(), xtra = new Set();
+  let words = [], index = new Map(), skelIndex = new Map(), ready = false, pos = new Map(), xtra = new Set();
   function load(text){
-    words = text.split('\n'); index = new Map(); pos = new Map(); xtra = new Set();
+    words = text.split('\n'); index = new Map(); skelIndex = new Map(); pos = new Map(); xtra = new Set();
     for(let i = 0; i < words.length; i++){ if(words[i].endsWith('*')){ words[i] = words[i].slice(0, -1); xtra.add(words[i]); } }
     for(let i = 0; i < words.length; i++){
       const w = words[i]; if(!w) continue; pos.set(w, i);
       const k = keyOfTamil(w).key; let a = index.get(k);
       if(!a){ a = []; index.set(k, a); }
       if(a.length < 60) a.push(i);
+      const sk = skel(k); if(sk.length >= 3){ let b = skelIndex.get(sk); if(!b){ b = []; skelIndex.set(sk, b); } if(b.length < 120) b.push(i); }
     }
     ready = true;
   }
@@ -14102,11 +14113,30 @@ const TamilLex = (function(){
     if(/zh/i.test(rk.raw||'')) s += w.indexOf('ழ') >= 0 ? 1.2 : -0.8;
     return s;
   }
-  function matches(roman, limit){
+  function matches(roman, limit, exactOnly){
     if(!ready) return [];
     const rk = keyOfRoman(roman); rk.raw = roman;
-    const a = index.get(rk.key); if(!a) return [];
+    const a = index.get(rk.key) || [];
     const sc = a.map(i=>{ const w = words[i]; return [w, score(i, w, keyOfTamil(w), rk)]; });
+    // fuzzy tier: same consonants, different vowels / doubling (sarthal → சேர்த்தால்), like a statistical transliterator
+    const sk = skel(rk.key);
+    if(!exactOnly && sk.length >= 3){
+      const seen = new Set(a); const have = new Set(sc.map(x => x[0]));
+      const tiers = [[sk, rk.key, 0]];
+      const yk = rk.key.replace(/([ae])i/g, '$1y');             // seivathu ≈ செய்வது (ei/ai → ய்)
+      if(yk !== rk.key) tiers.push([skel(yk), yk, 0.4]);
+      for(const [skx, kx, extra] of tiers){
+        const b = skelIndex.get(skx); if(!b) continue;
+        const vt = vowelsOf(kx);
+        for(const i of b){
+          if(seen.has(i)) continue; seen.add(i);
+          const w = words[i]; if(have.has(w)) continue;
+          const tk = keyOfTamil(w);
+          sc.push([w, score(i, w, tk, rk) - 1.5 - extra - vowelPenalty(vt, vowelsOf(tk.key))]);
+        }
+      }
+    }
+    if(!sc.length) return [];
     sc.sort((x, y)=>y[1] - x[1]);
     return sc.slice(0, limit || 6).map(x=>x[0]);
   }
@@ -14122,7 +14152,7 @@ const TamilLex = (function(){
       let res = null;
       if(depth < 3){
         for(let e = s.length; e >= pos + 2; e--){
-          const part = s.slice(pos, e); const m = matches(part, 1); if(!m.length) continue;
+          const part = s.slice(pos, e); const m = matches(part, 1, true); if(!m.length) continue;
           const sub = go(e, depth + 1); if(!sub) continue;
           const rk = index.get(keyOfRoman(part).key); const r0 = rk[0];
           const sc = sub.sc + (-Math.log(r0 + 20)) - 4 - (part.length < 3 ? 3 : 0);
@@ -14164,7 +14194,35 @@ engine:இன்ஜின் motor:மோட்டார் machine:மெஷி
 one:ஒன் two:டூ three:த்ரீ four:போர் five:பைவ் six:சிக்ஸ் seven:செவன் eight:எய்ட் nine:நைன் ten:டென் hundred:ஹண்ட்ரட் thousand:தவுசண்ட் lakh:லட்சம் crore:கோடி first:பர்ஸ்ட் second:செகண்ட் third:தேர்டு last:லாஸ்ட் next:நெக்ஸ்ட் new:நியூ old:ஓல்டு big:பிக் small:ஸ்மால் long:லாங் short:ஷார்ட் high:ஹை low:லோ hot:ஹாட் cool:கூல் fast:ஃபாஸ்ட் slow:ஸ்லோ easy:ஈசி hard:ஹார்டு simple:சிம்பிள் full:புல் half:ஹாஃப் double:டபுள் single:சிங்கிள் very:வெரி more:மோர் less:லெஸ் all:ஆல் only:ஒன்லி just:ஜஸ்ட் again:அகைன் sure:ஷ்யூர் right:ரைட் left:லெப்ட் stop:ஸ்டாப் start:ஸ்டார்ட் go:கோ come:கம் wait:வெயிட் call:கால் missed:மிஸ்டு busy:பிசி free:பிரீ ready:ரெடி problem:பிராப்ளம் solution:சொல்யூஷன் idea:ஐடியா plan:பிளான் tension:டென்ஷன் confusion:கன்பியூஷன் feeling:பீலிங் mood:மூட் style:ஸ்டைல் fashion:பேஷன் dress:டிரஸ் shirt:சட்டை pant:பேன்ட் saree:சேலை shoes:ஷூஸ் watch:வாட்ச் ring:ரிங் chain:செயின் gold:கோல்டு silver:சில்வர் diamond:டயமண்ட்
 `;
   const m = Object.create(null);
-  raw.split(/\s+/).forEach(p => { const i = p.indexOf(':'); if(i > 0) m[p.slice(0, i).toLowerCase()] = p.slice(i + 1); });
+  const raw2 = `
+accident:ஆக்சிடென்ட் action:ஆக்ஷன் active:ஆக்டிவ் activity:ஆக்டிவிட்டி actor:ஆக்டர் actress:ஆக்ட்ரஸ் add:ஆட் adjust:அட்ஜஸ்ட் admin:அட்மின் admission:அட்மிஷன் advance:அட்வான்ஸ் advertisement:விளம்பரம் advice:அட்வைஸ் agent:ஏஜென்ட் agency:ஏஜென்சி alarm:அலாரம் album:ஆல்பம் alert:அலர்ட் allowance:அலவன்ஸ் alter:ஆல்டர் amazon:அமேசான் analysis:அனாலிசிஸ் android:ஆண்ட்ராய்டு angle:ஆங்கிள் animal:அனிமல் announcement:அறிவிப்பு antenna:ஆன்டெனா antivirus:ஆன்டிவைரஸ் appointment:அப்பாயின்ட்மென்ட் approval:அப்ரூவல் approve:அப்ரூவ் architect:ஆர்க்கிடெக்ட் arrange:அரேஞ்ச் arrear:அரியர்ஸ் arrears:அரியர்ஸ் art:ஆர்ட் article:ஆர்ட்டிக்கிள் assistant:அசிஸ்டென்ட் association:அசோசியேஷன் atm:ஏடிஎம் attendance:அட்டெண்டன்ஸ் attention:அட்டென்ஷன் auction:ஏலம் audio:ஆடியோ audit:ஆடிட் auditor:ஆடிட்டர் average:ஆவரேஜ் award:அவார்டு
+backup:பேக்கப் badge:பேட்ஜ் bail:பெயில் bakery:பேக்கரி ball:பால் banana:வாழைப்பழம் band:பேண்ட் banner:பேனர் bar:பார் barber:பார்பர் base:பேஸ் basket:பாஸ்கெட் bat:பேட் bath:பாத் bathroom:பாத்ரூம் beauty:பியூட்டி bed:பெட் bedroom:பெட்ரூம் bell:பெல் belt:பெல்ட் benefit:பெனிபிட் bill:பில் billing:பில்லிங் biodata:பயோடேட்டா bit:பிட் blank:பிளாங்க் blanket:போர்வை block:பிளாக் blog:பிளாக் blouse:பிளவுஸ் blue:புளூ bluetooth:புளூடூத் boarding:போர்டிங் body:பாடி bomb:பாம் bonus:போனஸ் booking:புக்கிங் boot:பூட் border:பார்டர் bore:போர் borewell:போர்வெல் bottle:பாட்டில் bowl:பவுல் bowling:பவுலிங் box:பாக்ஸ் brake:பிரேக் branch:பிராஞ்ச் brand:பிராண்ட் bread:பிரெட் break:பிரேக் breakfast:பிரேக்பாஸ்ட் bridge:பிரிட்ஜ் brief:பிரீப் broker:புரோக்கர் brush:பிரஷ் budget:பட்ஜெட் buffer:பபர் building:பில்டிங் bulb:பல்பு bullet:புல்லட் bundle:பண்டில் burger:பர்கர் business:பிசினஸ் butter:பட்டர் button:பட்டன் buy:பை
+cabin:கேபின் cable:கேபிள் cafe:கபே cake:கேக் calculator:கால்குலேட்டர் calendar:காலண்டர் call:கால் calm:கூல் camp:கேம்ப் campus:கேம்பஸ் cancel:கேன்சல் candle:கேண்டில் canteen:கேன்டீன் cap:கேப் capital:கேபிடல் caption:கேப்ஷன் carbon:கார்பன் care:கேர் career:கேரியர் carrot:கேரட் cart:கார்ட் cartoon:கார்ட்டூன் carry:கேரி cartridge:கார்ட்ரிட்ஜ் cast:காஸ்ட் casual:கேஷுவல் catalog:கேட்டலாக் category:கேட்டகரி cause:காஸ் cd:சிடி ceiling:சீலிங் celebrate:செலிபிரேட் celebration:செலிபிரேஷன் cell:செல் cement:சிமெண்ட் census:சென்சஸ் central:சென்ட்ரல் century:செஞ்சுரி chairman:சேர்மன் challenge:சேலஞ்ச் champion:சாம்பியன் chance:சான்ஸ் change:சேஞ்ச் channel:சேனல் character:கேரக்டர் charge:சார்ஜ் chart:சார்ட் chat:சாட் cheating:சீட்டிங் check:செக் checking:செக்கிங் cheque:செக் chess:செஸ் chicken:சிக்கன் child:சைல்டு chip:சிப் choice:சாய்ஸ் circle:சர்க்கிள் circular:சர்குலர் claim:கிளெய்ம் clean:கிளீன் clear:கிளியர் clerk:கிளார்க் click:கிளிக் client:கிளையன்ட் climate:கிளைமேட் clinic:கிளினிக் clip:கிளிப் clock:கிளாக் cloud:கிளவுட் club:கிளப் code:கோடு coin:காயின் collection:கலெக்ஷன் collectorate:கலெக்டரேட் column:காலம் combo:காம்போ comedy:காமெடி comedian:காமெடியன் command:கமாண்ட் commerce:காமர்ஸ் committee:கமிட்டி common:காமன் community:கம்யூனிட்டி compare:கம்பேர் compartment:கம்பார்ட்மென்ட் competition:காம்படிஷன் complaint:கம்ப்ளைன்ட் complete:கம்ப்ளீட் compound:காம்பவுண்ட் compress:கம்ப்ரஸ் concrete:கான்கிரீட் condition:கண்டிஷன் conference:கான்பரன்ஸ் confirm:கன்பர்ம் confirmation:கன்பர்மேஷன் connection:கனெக்ஷன் connect:கனெக்ட் contact:காண்டாக்ட் content:கன்டென்ட் contest:கான்டெஸ்ட் continue:கன்டினியூ contract:காண்ட்ராக்ட் contractor:காண்ட்ராக்டர் control:கன்ட்ரோல் convert:கன்வெர்ட் cooking:குக்கிங் cool:கூல் copy:காப்பி corner:கார்னர் corporation:கார்ப்பரேஷன் correct:கரெக்ட் cotton:காட்டன் counter:கவுண்டர் counselling:கவுன்சிலிங் count:கவுண்ட் coupon:கூப்பன் cover:கவர் crash:கிராஷ் crime:கிரைம் crop:கிராப் cross:கிராஸ் crowd:கிரவுட் cup:கப் curry:கறி cut:கட் cute:கியூட் cyber:சைபர்
+daily:டெய்லி damage:டேமேஜ் dash:டேஷ் data:டேட்டா database:டேட்டாபேஸ் dealer:டீலர் debit:டெபிட் decision:டெசிஷன் default:டீபால்ட் degree:டிகிரி demand:டிமாண்ட் department:டிபார்ட்மென்ட் deposit:டெபாசிட் design:டிசைன் designer:டிசைனர் desk:டெஸ்க் desktop:டெஸ்க்டாப் detail:டீடெயில் details:டீடெயில்ஸ் develop:டெவலப் developer:டெவலப்பர் device:டிவைஸ் diary:டைரி dictionary:டிக்ஷனரி diet:டயட் digital:டிஜிட்டல் dinner:டின்னர் direct:டைரக்ட் direction:டைரக்ஷன் dirty:டர்ட்டி disc:டிஸ்க் discuss:டிஸ்கஸ் disk:டிஸ்க் display:டிஸ்ப்ளே distance:டிஸ்டன்ஸ் division:டிவிஷன் doctor:டாக்டர் document:டாக்குமென்ட் documents:டாக்குமென்ட்ஸ் domain:டொமைன் door:டோர் dot:டாட் doubt:டவுட் drama:டிராமா draft:டிராப்ட் drawing:டிராயிங் dream:டிரீம் drink:டிரிங்க் drive:டிரைவ் drop:டிராப் drum:டிரம் dry:டிரை duplicate:டூப்ளிகேட் duty:டியூட்டி dvd:டிவிடி
+earphone:இயர்போன் earth:எர்த் economics:எகனாமிக்ஸ் edition:எடிஷன் editor:எடிட்டர் education:எஜுகேஷன் effect:எபெக்ட் egg:முட்டை election:எலக்ஷன் electric:எலக்ட்ரிக் electrical:எலக்ட்ரிக்கல் electrician:எலக்ட்ரீஷியன் electricity:எலக்ட்ரிசிட்டி electronic:எலக்ட்ரானிக் electronics:எலக்ட்ரானிக்ஸ் element:எலிமென்ட் elevator:எலிவேட்டர் email:இமெயில் emergency:எமர்ஜென்சி emoji:எமோஜி employee:எம்ப்ளாயி employer:எம்ப்ளாயர் end:எண்ட் energy:எனர்ஜி enjoy:என்ஜாய் enter:என்டர் entertainment:என்டர்டெயின்மென்ட் entry:என்ட்ரி envelope:என்வலப் error:எரர் escape:எஸ்கேப் essay:எஸ்ஸே event:ஈவென்ட் exact:எக்ஸாக்ட் example:எக்ஸாம்பிள் exchange:எக்ஸ்சேஞ்ச் excuse:எக்ஸ்கியூஸ் exercise:எக்சர்சைஸ் exhibition:எக்ஸிபிஷன் exit:எக்ஸிட் expense:எக்ஸ்பென்ஸ் experience:எக்ஸ்பீரியன்ஸ் expert:எக்ஸ்பர்ட் expiry:எக்ஸ்பைரி export:எக்ஸ்போர்ட் express:எக்ஸ்பிரஸ் extra:எக்ஸ்ட்ரா
+face:பேஸ் facebook:பேஸ்புக் factory:பேக்டரி faculty:பேகல்டி fake:பேக் fall:பால் fan:ஃபேன் fancy:பேன்சி farm:பார்ம் farmer:பார்மர் fashion:பேஷன் fat:பேட் fault:பால்ட் favourite:பேவரைட் favorite:பேவரைட் feature:பீச்சர் fee:பீஸ் feedback:பீட்பேக் fees:பீஸ் festival:பெஸ்டிவல் fiber:பைபர் field:பீல்டு file:பைல் filter:பில்டர் final:பைனல் finance:பைனான்ஸ் finger:பிங்கர் fingerprint:பிங்கர்பிரின்ட் finish:பினிஷ் fire:பயர் fit:பிட் fitness:பிட்னஸ் fix:பிக்ஸ் fixed:பிக்ஸ்டு flag:பிளாக் flash:பிளாஷ் flight:பிளைட் floor:புளோர் flower:பிளவர் fly:பிளை focus:போகஸ் follow:பாலோ follower:பாலோவர் food:புட் foot:புட் force:போர்ஸ் forest:பாரஸ்ட் forget:பர்கெட் forward:பார்வர்டு format:பார்மட் formula:பார்முலா foundation:பவுண்டேஷன் frame:பிரேம் franchise:பிரான்சைஸ் fraud:பிராடு free:பிரீ freezer:பிரீசர் frequency:பிரீக்வென்சி fresh:பிரெஷ் friend:பிரண்ட் front:பிரண்ட் fruit:பழம் fuel:பியூல் function:பங்க்ஷன் fund:பண்ட் funny:பன்னி future:பியூச்சர்
+gallery:கேலரி gang:கேங் garden:கார்டன் garage:கேரேஜ் gate:கேட் general:ஜெனரல் generator:ஜெனரேட்டர் gift:கிப்ட் glass:கிளாஸ் global:குளோபல் glue:க்ளூ goal:கோல் godown:குடோன் gold:கோல்டு golf:கோல்ப் grade:கிரேடு graduate:கிராஜுவேட் grammar:கிராமர் grand:கிராண்ட் graph:கிராப் graphics:கிராபிக்ஸ் grease:கிரீஸ் grill:கிரில் grocery:மளிகை group:குரூப் growth:குரோத் guarantee:கேரண்டி guard:கார்டு guest:கெஸ்ட் guide:கைடு guitar:கிட்டார் gun:துப்பாக்கி gym:ஜிம்
+hair:ஹேர் half:ஹாஃப் hall:ஹால் hand:ஹேண்ட் handle:ஹேண்டில் hang:ஹேங் hanger:ஹேங்கர் happy:ஹேப்பி harbour:ஹார்பர் hard:ஹார்டு hardware:ஹார்டுவேர் hat:ஹேட் head:ஹெட் headmaster:ஹெட்மாஸ்டர் headphone:ஹெட்போன் heart:ஹார்ட் heater:ஹீட்டர் heavy:ஹெவி height:ஹைட் helicopter:ஹெலிகாப்டர் hell:ஹெல் help:ஹெல்ப் helper:ஹெல்பர் hide:ஹைடு highway:ஹைவே hill:ஹில் history:ஹிஸ்டரி hobby:ஹாபி hockey:ஹாக்கி hold:ஹோல்டு holiday:ஹாலிடே hologram:ஹோலோகிராம் homework:ஹோம்வொர்க் honest:ஹானஸ்ட் honey:ஹனி horn:ஹார்ன் horoscope:ஜாதகம் hostel:ஹாஸ்டல் hot:ஹாட் housing:ஹவுசிங் huge:ஹியூஜ் human:ஹியூமன் humour:ஹ்யூமர் hybrid:ஹைபிரிட்
+icon:ஐகான் identity:ஐடென்டிட்டி idli:இட்லி illegal:இல்லீகல் image:இமேஜ் impact:இம்பாக்ட் import:இம்போர்ட் important:இம்பார்ட்டன்ட் improve:இம்ப்ரூவ் inbox:இன்பாக்ஸ் income:இன்கம் increase:இன்கிரீஸ் index:இன்டெக்ஸ் industry:இண்டஸ்ட்ரி information:இன்பர்மேஷன் ink:இங்க் input:இன்புட் inside:இன்சைடு install:இன்ஸ்டால் installment:இன்ஸ்டால்மென்ட் instant:இன்ஸ்டன்ட் institute:இன்ஸ்டிடியூட் instruction:இன்ஸ்ட்ரக்ஷன் insult:இன்சல்ட் interest:இன்ட்ரஸ்ட் interior:இன்டீரியர் international:இன்டர்நேஷனல் invitation:இன்விடேஷன் invite:இன்வைட் invoice:இன்வாய்ஸ் iron:அயர்ன் issue:இஷ்யூ item:ஐட்டம்
+jacket:ஜாக்கெட் jail:ஜெயில் jam:ஜாம் jeans:ஜீன்ஸ் jewel:ஜுவல் jewellery:ஜுவல்லரி joint:ஜாயின்ட் joke:ஜோக் journalist:ஜர்னலிஸ்ட் journey:ஜர்னி joy:ஜாய் judge:ஜட்ஜ் jump:ஜம்ப் junction:ஜங்ஷன் junior:ஜூனியர்
+karate:கராத்தே keep:கீப் kerala:கேரளா key:கீ kick:கிக் kid:கிட் kids:கிட்ஸ் kilo:கிலோ kilometer:கிலோமீட்டர் king:கிங் kit:கிட் kitchen:கிச்சன் knife:நைஃப் knock:நாக் knowledge:நாலெட்ஜ்
+label:லேபிள் labour:லேபர் ladder:லேடர் lady:லேடி lake:லேக் lamp:லாம்ப் land:லேண்ட் landline:லேண்ட்லைன் language:லாங்குவேஜ் laptop:லேப்டாப் large:லார்ஜ் laser:லேசர் late:லேட் latest:லேட்டஸ்ட் laugh:லாஃப் launch:லாஞ்ச் laundry:லாண்டரி law:லா layout:லேஅவுட் leader:லீடர் leaf:லீப் learn:லேர்ன் leave:லீவு lecture:லெக்சர் legal:லீகல் lemon:எலுமிச்சை lens:லென்ஸ் letter:லெட்டர் level:லெவல் lift:லிப்ட் limit:லிமிட் line:லைன் list:லிஸ்ட் listen:லிசன் litre:லிட்டர் live:லைவ் load:லோடு local:லோக்கல் lock:லாக் locker:லாக்கர் logo:லோகோ lorry:லாரி loss:லாஸ் lot:லாட் lottery:லாட்டரி lucky:லக்கி luggage:லக்கேஜ் lunch:லஞ்ச்
+magazine:மேகசின் magic:மேஜிக் magnet:மேக்னெட் mail:மெயில் main:மெயின் maintenance:மெயிண்டனன்ஸ் major:மேஜர் make:மேக் makeup:மேக்கப் mall:மால் manage:மேனேஜ் management:மேனேஜ்மென்ட் manual:மேனுவல் manufacture:மேனுபேக்சர் map:மேப் marathon:மாரத்தான் margin:மார்ஜின் mark:மார்க் marketing:மார்க்கெட்டிங் marriage:மேரேஜ் master:மாஸ்டர் material:மெட்டீரியல் mattress:மெத்தை maximum:மேக்சிமம் meal:மீல்ஸ் meals:மீல்ஸ் measure:மெஷர் mechanic:மெக்கானிக் media:மீடியா medical:மெடிக்கல் medium:மீடியம் meet:மீட் meeting:மீட்டிங் member:மெம்பர் membership:மெம்பர்ஷிப் memory:மெமரி menu:மெனு merge:மெர்ஜ் message:மெசேஜ் metal:மெட்டல் method:மெத்தட் metro:மெட்ரோ microphone:மைக்ரோபோன் middle:மிடில் midnight:மிட்நைட் mike:மைக் military:மிலிட்டரி million:மில்லியன் mind:மைண்ட் mineral:மினரல் minimum:மினிமம் mirror:மிரர் mistake:மிஸ்டேக் mix:மிக்ஸ் mixer:மிக்சர் model:மாடல் modem:மோடம் modern:மாடர்ன் module:மாட்யூல் moment:மொமென்ட் money:மணி monitor:மானிட்டர் monkey:மங்கி motor:மோட்டார் motorcycle:மோட்டார்சைக்கிள் mouse:மவுஸ் mp3:எம்பி3 multiple:மல்டிபிள் murder:மர்டர் museum:மியூசியம் mutual:மியூச்சுவல் mystery:மிஸ்டரி
+name:நேம் nation:நேஷன் national:நேஷனல் native:நேட்டிவ் nature:நேச்சர் navy:நேவி network:நெட்வொர்க் never:நெவர் newspaper:நியூஸ்பேப்பர் nickname:நிக்நேம் noodles:நூடுல்ஸ் normal:நார்மல் north:நார்த் note:நோட் notes:நோட்ஸ் notice:நோட்டீஸ் notification:நோட்டிபிகேஷன் novel:நாவல் nurse:நர்ஸ் nut:நட்
+object:ஆப்ஜெக்ட் office:ஆபீஸ் official:அபிஷியல் oil:ஆயில் online:ஆன்லைன் operator:ஆபரேட்டர் opinion:ஒப்பீனியன் option:ஆப்ஷன் orange:ஆரஞ்சு order:ஆர்டர் organic:ஆர்கானிக் original:ஒரிஜினல் otp:ஓடிபி outing:அவுட்டிங் output:அவுட்புட் oven:ஓவன் over:ஓவர் overtime:ஓவர்டைம் owner:ஓனர்
+pack:பேக் packet:பாக்கெட் packing:பேக்கிங் pad:பேட் painter:பெயிண்டர் pair:பேர் palace:பேலஸ் panel:பேனல் pant:பேன்ட் paper:பேப்பர் parcel:பார்சல் parent:பேரண்ட் parents:பேரண்ட்ஸ் park:பார்க் part:பார்ட் partner:பார்ட்னர் pass:பாஸ் passenger:பாசஞ்சர் passport:பாஸ்போர்ட் past:பாஸ்ட் patch:பேட்ச் path:பாத் pattern:பேட்டர்ன் pause:பாஸ் pay:பே peon:பியூன் percent:பர்சன்ட் percentage:பர்சன்டேஜ் perfect:பெர்பெக்ட் performance:பெர்பார்மன்ஸ் period:பீரியட் permanent:பெர்மனன்ட் permission:பர்மிஷன் permit:பெர்மிட் person:பர்சன் personal:பர்சனல் pet:பெட் photocopy:ஜெராக்ஸ் photography:போட்டோகிராபி physical:பிசிக்கல் piano:பியானோ pick:பிக் picnic:பிக்னிக் picture:பிக்சர் piece:பீஸ் pillow:தலையணை pin:பின் pizza:பிட்சா place:பிளேஸ் planet:பிளானட் plant:பிளான்ட் plastic:பிளாஸ்டிக் platform:பிளாட்பாரம் player:பிளேயர் plot:பிளாட் plumber:பிளம்பர் plus:பிளஸ் pocket:பாக்கெட் point:பாயிண்ட் poison:பாய்சன் pole:போல் polish:பாலிஷ் pollution:பொல்யூஷன் pool:பூல் popular:பாப்புலர் population:பாப்புலேஷன் portal:போர்ட்டல் position:பொசிஷன் positive:பாசிட்டிவ் postal:போஸ்டல் poster:போஸ்டர் pot:பாட் potato:உருளைக்கிழங்கு powder:பவுடர் practice:பிராக்டீஸ் prediction:பிரெடிக்ஷன் preparation:பிரிப்பரேஷன் prepare:பிரிப்பேர் presentation:பிரசென்டேஷன் press:பிரஸ் pressure:பிரஷர் preview:பிரிவியூ primary:பிரைமரி prime:பிரைம் print:பிரிண்ட் priority:பிரையாரிட்டி prison:பிரிசன் private:பிரைவேட் prize:பிரைஸ் probability:புரோபபிலிட்டி process:பிராசஸ் product:புராடக்ட் production:புரொடக்ஷன் professional:புரொபஷனல் profit:புராபிட் program:புரோகிராம் programme:புரோகிராம் progress:புரோகிரஸ் promotion:புரொமோஷன் proof:ப்ரூப் property:புராப்பர்ட்டி protection:புரொடக்ஷன் provide:புரொவைட் public:பப்ளிக் publish:பப்ளிஷ் pull:புல் pump:பம்ப் punch:பஞ்ச் puncture:பஞ்சர் purchase:பர்சேஸ் push:புஷ் puzzle:புதிர்
+quality:குவாலிட்டி quantity:குவாண்டிட்டி quarter:குவார்ட்டர் queue:கியூ quick:குயிக் quiet:குயட் quiz:குவிஸ் quota:கோட்டா quote:கோட்
+race:ரேஸ் rack:ரேக் radio:ரேடியோ rail:ரயில் rain:ரெயின் raise:ரைஸ் rally:ரேலி ram:ராம் random:ராண்டம் range:ரேஞ்ச் rate:ரேட் rating:ரேட்டிங் raw:ராவ் reach:ரீச் react:ரியாக்ட் read:ரீட் reading:ரீடிங் ready:ரெடி real:ரியல் reality:ரியாலிட்டி reason:ரீசன் rebate:ரிபேட் receipt:ரசீது receive:ரிசீவ் receiver:ரிசீவர் recharge:ரீசார்ஜ் recipe:ரெசிபி record:ரெக்கார்டு recording:ரெக்கார்டிங் recovery:ரிகவரி recycle:ரீசைக்கிள் reference:ரெபரன்ஸ் refresh:ரிப்ரெஷ் refund:ரீபண்ட் region:ரீஜியன் registered:ரிஜிஸ்டர்டு regular:ரெகுலர் reject:ரிஜெக்ட் relation:ரிலேஷன் release:ரிலீஸ் reliable:ரிலையபிள் remark:ரிமார்க் remember:ரிமெம்பர் remind:ரிமைண்ட் reminder:ரிமைண்டர் remote:ரிமோட் remove:ரிமூவ் rent:வாடகை rental:ரெண்டல் repair:ரிப்பேர் repeat:ரிப்பீட் replace:ரீப்ளேஸ் reply:ரிப்ளை report:ரிப்போர்ட் reporter:ரிப்போர்ட்டர் request:ரிக்வெஸ்ட் require:ரிக்வயர் rescue:ரெஸ்க்யூ research:ரிசர்ச் reservation:ரிசர்வேஷன் reserve:ரிசர்வ் reset:ரீசெட் resort:ரிசார்ட் resource:ரிசோர்ஸ் respect:ரெஸ்பெக்ட் response:ரெஸ்பான்ஸ் rest:ரெஸ்ட் restart:ரீஸ்டார்ட் retire:ரிட்டயர் retirement:ரிட்டயர்மென்ட் return:ரிட்டர்ன் review:ரிவியூ revision:ரிவிஷன் reward:ரிவார்டு rice:ரைஸ் rider:ரைடர் riding:ரைடிங் right:ரைட் ring:ரிங் risk:ரிஸ்க் river:ரிவர் rocket:ராக்கெட் roll:ரோல் rolling:ரோலிங் roof:ரூப் root:ரூட் rope:ரோப் round:ரவுண்டு route:ரூட் router:ரூட்டர் routine:ரொட்டீன் row:ரோ royal:ராயல் rule:ரூல் rules:ரூல்ஸ் run:ரன் running:ரன்னிங் rush:ரஷ்
+safe:சேப் safety:சேப்டி sale:சேல் salon:சலூன் sample:சேம்பிள் sand:சாண்ட் sandwich:சாண்ட்விச் satellite:சாட்டிலைட் satisfaction:சாட்டிஸ்பேக்ஷன் saving:சேவிங் savings:சேவிங்ஸ் scale:ஸ்கேல் scan:ஸ்கேன் scene:சீன் schedule:ஷெட்யூல் scholarship:ஸ்காலர்ஷிப் scooter:ஸ்கூட்டர் score:ஸ்கோர் scratch:ஸ்கிராட்ச் screen:ஸ்கிரீன் screenshot:ஸ்கிரீன்ஷாட் screw:ஸ்க்ரூ script:ஸ்கிரிப்ட் scroll:ஸ்க்ரோல் seal:சீல் search:சர்ச் season:சீசன் seat:சீட் second:செகண்ட் secret:சீக்ரெட் secretary:செக்ரெட்டரி section:செக்ஷன் security:செக்யூரிட்டி seed:சீட் select:செலக்ட் selfie:செல்பி sell:செல் seller:செல்லர் seminar:செமினார் send:சென்ட் senior:சீனியர் sense:சென்ஸ் sensor:சென்சார் sentence:சென்டன்ஸ் separate:செப்பரேட் series:சீரிஸ் serious:சீரியஸ் servant:சர்வன்ட் server:சர்வர் service:சர்வீஸ் session:செஷன் set:செட் setting:செட்டிங் settings:செட்டிங்ஸ் setup:செட்அப் shade:ஷேட் shadow:ஷேடோ shake:ஷேக் shampoo:ஷாம்பு shape:ஷேப் share:ஷேர் sharp:ஷார்ப் shed:ஷெட் sheet:ஷீட் shelf:செல்ப் shift:ஷிப்ட் shine:ஷைன் shirt:ஷர்ட் shock:ஷாக் shoe:ஷூ shooting:ஷூட்டிங் shopping:ஷாப்பிங் shortcut:ஷார்ட்கட் shot:ஷாட் shoulder:ஷோல்டர் shower:ஷவர் shutdown:ஷட்டவுன் shutter:ஷட்டர் sick:சிக் side:சைடு sight:சைட் sign:சைன் signature:கையெழுத்து silk:பட்டு similar:சிமிலர் sim:சிம் simple:சிம்பிள் singer:சிங்கர் site:சைட் size:சைஸ் skill:ஸ்கில் skin:ஸ்கின் skip:ஸ்கிப் skirt:ஸ்கர்ட் sky:ஸ்கை slab:ஸ்லாப் sleep:ஸ்லீப் slide:ஸ்லைடு slim:ஸ்லிம் slip:ஸ்லிப் smart:ஸ்மார்ட் smartphone:ஸ்மார்ட்போன் smile:ஸ்மைல் smoke:ஸ்மோக் snack:ஸ்நாக் snacks:ஸ்நாக்ஸ் soap:சோப் social:சோஷியல் society:சொசைட்டி sofa:சோபா soft:சாஃப்ட் soil:சாயில் solar:சோலார் soldier:சோல்ஜர் solve:சால்வ் sorry:சாரி sort:சார்ட் sound:சவுண்ட் source:சோர்ஸ் south:சவுத் space:ஸ்பேஸ் spare:ஸ்பேர் speaker:ஸ்பீக்கர் special:ஸ்பெஷல் speech:ஸ்பீச் speed:ஸ்பீடு spell:ஸ்பெல் spend:ஸ்பெண்ட் spicy:ஸ்பைசி spirit:ஸ்பிரிட் split:ஸ்பிளிட் sponsor:ஸ்பான்சர் spot:ஸ்பாட் spray:ஸ்பிரே spread:ஸ்பிரெட் spring:ஸ்பிரிங் square:ஸ்கொயர் staff:ஸ்டாப் stage:ஸ்டேஜ் stair:ஸ்டேர் stamp:ஸ்டாம்ப் stand:ஸ்டாண்ட் standard:ஸ்டாண்டர்டு star:ஸ்டார் state:ஸ்டேட் statement:ஸ்டேட்மென்ட் stationery:ஸ்டேஷனரி statue:ஸ்டேச்சு stay:ஸ்டே steam:ஸ்டீம் steering:ஸ்டீயரிங் step:ஸ்டெப் stick:ஸ்டிக் sticker:ஸ்டிக்கர் stock:ஸ்டாக் stomach:ஸ்டமக் storage:ஸ்டோரேஜ் store:ஸ்டோர் storm:ஸ்டார்ம் stove:ஸ்டவ் straight:ஸ்ட்ரெயிட் strike:ஸ்ட்ரைக் string:ஸ்ட்ரிங் strong:ஸ்ட்ராங் structure:ஸ்ட்ரக்சர் study:ஸ்டடி stuff:ஸ்டஃப் stupid:ஸ்டுப்பிட் style:ஸ்டைல் subject:சப்ஜெக்ட் submit:சப்மிட் subsidy:சப்சிடி success:சக்சஸ் suggestion:சஜஷன் suit:சூட் suitcase:சூட்கேஸ் summary:சம்மரி summer:சம்மர் sunglass:சன்கிளாஸ் supply:சப்ளை support:சப்போர்ட் surgery:சர்ஜரி surprise:சர்ப்ரைஸ் survey:சர்வே swimming:ஸ்விம்மிங் switch:சுவிட்ச் symbol:சிம்பல் symptom:சிம்ப்டம் system:சிஸ்டம்
+tab:டேப் tablet:டேப்லெட் tag:டேக் tailor:டெய்லர் talent:டேலண்ட் talk:டாக் tank:டேங்க் target:டார்கெட் task:டாஸ்க் taste:டேஸ்ட் tax:டாக்ஸ் tea:டீ technical:டெக்னிக்கல் technology:டெக்னாலஜி teen:டீன் telephone:டெலிபோன் template:டெம்ப்ளேட் tender:டெண்டர் tennis:டென்னிஸ் tent:டென்ட் term:டெர்ம் terminal:டெர்மினல் terms:டெர்ம்ஸ் terrace:டெரஸ் testing:டெஸ்டிங் theme:தீம் theory:தியரி therapy:தெரபி thermometer:தெர்மாமீட்டர் thread:த்ரெட் thriller:திரில்லர் throw:த்ரோ thumb:தம்ப் ticket:டிக்கெட் tie:டை tiles:டைல்ஸ் timer:டைமர் timing:டைமிங் tip:டிப் tips:டிப்ஸ் tire:டயர் tiffin:டிபன் title:டைட்டில் toilet:டாய்லெட் token:டோக்கன் toll:டோல் tomato:தக்காளி tone:டோன் tool:டூல் tooth:டூத் top:டாப் topic:டாபிக் torch:டார்ச் total:டோட்டல் touch:டச் tour:டூர் tourist:டூரிஸ்ட் towel:டவல் tower:டவர் toy:டாய் track:டிராக் tractor:டிராக்டர் trade:டிரேட் trader:டிரேடர் tradition:டிரெடிஷன் trailer:டிரெய்லர் transfer:டிரான்ஸ்பர் translate:டிரான்ஸ்லேட் transport:டிரான்ஸ்போர்ட் travel:டிராவல் travels:டிராவல்ஸ் tray:டிரே treatment:டிரீட்மென்ட் tree:மரம் trend:டிரெண்ட் trending:டிரெண்டிங் trial:டிரையல் trick:டிரிக் trophy:டிராபி truck:டிரக் trust:டிரஸ்ட் truth:ட்ரூத் try:ட்ரை tuition:டியூஷன் tune:டியூன் tunnel:டனல் turn:டர்ன் tutorial:டுடோரியல் twin:டுவின் typist:டைபிஸ்ட்
+umbrella:குடை uniform:யூனிபார்ம் union:யூனியன் unit:யூனிட் universe:யூனிவர்ஸ் unlock:அன்லாக் update:அப்டேட் upgrade:அப்கிரேட் urban:அர்பன் urgent:அர்ஜென்ட் usb:யுஎஸ்பி use:யூஸ் used:யூஸ்டு user:யூசர் utility:யுடிலிட்டி
+vaccine:வாக்சின் valid:வேலிட் valley:வேலி value:வேல்யூ van:வேன் variety:வெரைட்டி vegetable:வெஜிடபிள் vehicle:வெகிக்கிள் veg:வெஜ் version:வெர்ஷன் verification:வெரிபிகேஷன் verify:வெரிபை vest:வெஸ்ட் video:வீடியோ view:வியூ viewer:வியூவர் villa:வில்லா violence:வயலன்ஸ் viral:வைரல் virus:வைரஸ் visa:விசா visit:விசிட் visitor:விசிட்டர் vitamin:வைட்டமின் voice:வாய்ஸ் volume:வால்யூம் volunteer:வாலன்டியர் vote:ஓட்டு voter:வோட்டர்
+wage:வேஜ் waiter:வெயிட்டர் walk:வாக் walking:வாக்கிங் wall:வால் wallet:வாலட் wallpaper:வால்பேப்பர் war:வார் warning:வார்னிங் wash:வாஷ் washing:வாஷிங் waste:வேஸ்ட் watch:வாட்ச் wave:வேவ் way:வே weak:வீக் wear:வேர் weather:வெதர் web:வெப் webcam:வெப்கேம் wedding:வெட்டிங் weekend:வீக்எண்ட் weight:வெயிட் welcome:வெல்கம் welfare:வெல்பேர் west:வெஸ்ட் wheel:வீல் wifi:வைபை wild:ஒயில்டு win:வின் wind:விண்ட் window:விண்டோ windows:விண்டோஸ் wine:ஒயின் winner:வின்னர் winter:விண்டர் wire:வயர் wish:விஷ் wishes:விஷஸ் witness:விட்னஸ் wood:வுட் wool:வூல் worker:வொர்க்கர் workshop:வொர்க்ஷாப் world:வேர்ல்டு worry:வொரி wrong:ராங்
+xerox:ஜெராக்ஸ் yard:யார்டு yoga:யோகா young:யங் youth:யூத் zero:ஜீரோ zip:ஜிப் zoo:ஜூ zoom:ஜூம்
+bank:பேங்க் branch:பிராஞ்ச் ifsc:ஐஎப்எஸ்சி passbook:பாஸ்புக் withdraw:வித்ட்ரா withdrawal:வித்ட்ராயல் transaction:டிரான்ஸாக்ஷன் transfer:டிரான்ஸ்பர் netbanking:நெட்பேங்கிங் creditcard:கிரெடிட்கார்டு credit:கிரெடிட் debit:டெபிட் emi:இஎம்ஐ gst:ஜிஎஸ்டி pan:பான் aadhaar:ஆதார் voterid:வோட்டர்ஐடி id:ஐடி proof:ப்ரூப் affidavit:அபிடவிட் stamp:ஸ்டாம்ப் registrar:ரிஜிஸ்ட்ரார் patta:பட்டா chitta:சிட்டா survey:சர்வே tahsildar:தாசில்தார் vao:விஏஓ ration:ரேஷன் smartcard:ஸ்மார்ட்கார்டு income:இன்கம் community:கம்யூனிட்டி nativity:நேட்டிவிட்டி
+mbbs:எம்பிபிஎஸ் bsc:பிஎஸ்சி msc:எம்எஸ்சி bca:பிசிஏ mca:எம்சிஏ be:பிஇ btech:பிடெக் mtech:எம்டெக் ba:பிஏ ma:எம்ஏ bcom:பிகாம் mcom:எம்காம் mba:எம்பிஏ phd:பிஎச்டி ssc:எஸ்எஸ்சி hsc:எச்எஸ்சி sslc:எஸ்எஸ்எல்சி neet:நீட் jee:ஜேஇஇ tnpsc:டிஎன்பிஎஸ்சி upsc:யுபிஎஸ்சி ias:ஐஏஎஸ் ips:ஐபிஎஸ் cbse:சிபிஎஸ்இ icse:ஐசிஎஸ்இ iit:ஐஐடி nit:என்ஐடி ssc:எஸ்எஸ்சி
+`;
+  (raw + ' ' + raw2).split(/\s+/).forEach(p => { const i = p.indexOf(':'); if(i > 0){ const k = p.slice(0, i).toLowerCase(); if(!(k in m)) m[k] = p.slice(i + 1); } });
   return m;
 })();
 
@@ -14327,15 +14385,20 @@ TOOL_IMPL.tamiltyping = {
         .catch(()=>{ lexState = 'idle'; lexFailed = true; });
     }
     let lexFailed = false;
+    const isCapsOnly = r => r.length > 1 && r === r.toUpperCase();
     function candidates(raw){
       const lw = raw.toLowerCase(); const out = [];
       const add = t => { if(t && !out.includes(t)) out.push(t); };
       if(learn[lw]) add(learn[lw]);
       if(TAMIL_DICT[lw]) add(TAMIL_DICT[lw]);
       // English words (collector → கலெக்டர்): dictionary first, then rule-based spelling; the English word itself stays near the top
-      const loan = EN_LOAN[lw];
+      const loan = EN_LOAN[lw] || (lw.length > 3 && lw.endsWith('s') && EN_LOAN[lw.slice(0, -1)] ? EN_LOAN[lw.slice(0, -1)] + 'ஸ்' : '');
       let eng = '';
-      if(loan) add(loan);
+      if(loan){
+        add(loan);
+        // short words that are also common Tamil (ten→தேன், pen→பெண்): keep the Tamil word as 2nd choice
+        if(lw.length <= 4 && TamilLex.isReady()){ const t1 = TamilLex.matches(raw, 1)[0]; if(t1 && TamilLex.rank(t1) < 3000 && !isCapsOnly(raw)) add(t1); }
+      }
       else if(/^[a-z]+$/.test(lw) && EnglishTamil.looksEnglish(lw) && !(TamilLex.isReady() && TamilLex.matches(raw, 1).length && TamilLex.rank(TamilLex.matches(raw, 1)[0]) < 3000)){ eng = EnglishTamil.conv(lw); add(eng); }
       const englishy = !!(loan || eng);
       if(TamilLex.isReady()){
