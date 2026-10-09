@@ -4733,7 +4733,7 @@ const Img2Xls = (function(){
     // (indices: run covers cs[s]..cs[e])
     if(!bestRun || bestRun.lines < 7) return null;
     const first = cs[bestRun.s], last = cs[bestRun.e];
-    return {y0: Math.max(0, Math.floor(first - pitch * 0.8)), y1: Math.min(h, Math.ceil(last + pitch * 0.8)), pitch, lines: bestRun.lines};
+    return {y0: Math.max(0, Math.floor(first - pitch * 0.8)), y1: Math.min(h, Math.ceil(last + pitch * 0.8)), pitch, lines: bestRun.lines, total: cs.length};
   }
 
   /* prepare(sourceCanvas) → { canvas, grid, scale, notes } ; works on a fresh canvas, never touches the original */
@@ -4759,7 +4759,10 @@ const Img2Xls = (function(){
     }
     // 3. where is the table? (drops the Excel ribbon / status bar of a photographed screen)
     let reg = opts.noCrop ? null : tableRegion(g0, sw, sh), cy0 = 0, cy1 = sh;
+    // only cut when the evenly-spaced rows ARE most of the text (a ribbon / status bar around a table); a table with tall multi-line rows or a title must stay whole
+    if(reg && reg.lines < reg.total * 0.55) reg = null;
     if(reg && (reg.y0 > reg.pitch * 1.5 || sh - reg.y1 > reg.pitch * 1.5)){ cy0 = reg.y0; cy1 = reg.y1; notes.push('table area found'); }
+    else if(reg && !fieldB) reg = null;
     // 4. enlarge so the text is comfortable for OCR
     let scale = sw < 700 ? 3 : sw < 1100 ? 2 : sw < 1800 ? 1.5 : 1;
     if(reg) scale = Math.max(scale, Math.min(3.2, 38 / reg.pitch));
@@ -4834,7 +4837,7 @@ const Img2Xls = (function(){
         // several text lines inside one cell: top to bottom
         ws.sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = []; for(const w of ws){ const cy = (w.y0 + w.y1) / 2, L = lines[lines.length - 1]; if(L && Math.abs(cy - L.cy) < mh * 0.6) L.ws.push(w); else lines.push({cy, ws: [w]}); }
         rows[r].push(lines.map(L => joinWords(L.ws)).join(' ')); conf[r].push(Math.min(...ws.map(w => w.c))); } }
-      return repairCodes(stripSheetChrome(trim({rows, conf, mode: 'grid'})));
+      return repairCodes(stripTitles(stripSheetChrome(trim({rows, conf, mode: 'grid'}))));
     }
     // rows by y
     const sorted = words.slice().sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = [];
@@ -4869,7 +4872,7 @@ const Img2Xls = (function(){
     const C = cuts.length + 1; const rows = [], conf = [];
     for(const L of lines){ const cells = Array.from({length: C}, () => []); for(const w of L.ws) cells[colOf(w)].push(w);
       rows.push(cells.map(ws => ws.length ? joinWords(ws) : '')); conf.push(cells.map(ws => ws.length ? Math.min(...ws.map(w => w.c)) : 100)); }
-    return repairCodes(stripSheetChrome(trim({rows, conf, mode: 'gutter'})));
+    return repairCodes(stripTitles(stripSheetChrome(trim({rows, conf, mode: 'gutter'}))));
   }
   // Excel/Sheets screenshots carry a column-letter bar (A B C …) and a row-number strip (1 2 3 …) — not data
   function stripSheetChrome(t){
@@ -4890,6 +4893,22 @@ const Img2Xls = (function(){
     t.rows = keepR.map(r => keepC.map(c => (t.rows[r][c] || '').trim())); t.conf = keepR.map(r => keepC.map(c => t.conf[r][c] == null ? 100 : t.conf[r][c])); return t;
   }
 
+  // a report title above the table ("Gem Granites, Balakundi" / "Supplier Outstanding Details As on …") is not a data row: take it off
+  function stripTitles(t){
+    if(!t.rows || t.rows.length < 4) return t;
+    const C = Math.max.apply(null, t.rows.map(r => r.length)); if(C < 3) return t;
+    const fill = r => t.rows[r].filter(x => (x || '').trim()).length;
+    let k = 0; const titles = [];
+    while(k < 3 && k < t.rows.length - 2){
+      const f = fill(k), nxt = fill(k + 1);
+      const idx = t.rows[k].map((x, i) => (x || '').trim() ? i : -1).filter(i => i >= 0);
+      const contiguous = idx.length && idx[idx.length - 1] - idx[0] === idx.length - 1;
+      const next2 = Math.max(fill(k + 1), fill(Math.min(k + 2, t.rows.length - 1)));
+      if(f >= 1 && f <= 2 && contiguous && next2 >= Math.max(3, C - 1) && f < C - 1){ titles.push(idx.map(i => t.rows[k][i]).join(' ')); k++; } else break;
+    }
+    if(k){ t.rows.splice(0, k); t.conf.splice(0, k); t.titles = titles; }
+    return t;
+  }
   // ID / code columns (INV-0001, 0433026TP0B00030 …): OCR slips on the same positions again and again — use the other rows as a witness
   function repairCodes(t){
     if(!t.rows || t.rows.length < 6) return t;
@@ -5019,6 +5038,31 @@ TOOL_IMPL.img2excel = {
       S.worker = w; S.workerLang = S.lang; return w;
     }
     const loadImage = f => new Promise((res, rej) => { const url = URL.createObjectURL(f); const img = new Image(); img.onload = () => res({ img, url }); img.onerror = () => rej(new Error('Could not open this image')); img.src = url; });
+    // cells the first pass read badly (big header text, tiny 3-line cells) get a second, close-up look on their own
+    async function refineCells(worker, prep, data){
+      const g = prep.grid, words = data.words || []; if(!g || !words.length) return;
+      const cand = [];
+      for(let r = 0; r < g.ys.length - 1; r++) for(let c = 0; c < g.xs.length - 1; c++){
+        const ws = words.filter(w => { const cx = (w.bbox.x0 + w.bbox.x1) / 2, cy = (w.bbox.y0 + w.bbox.y1) / 2; return cx >= g.xs[c] && cx < g.xs[c + 1] && cy >= g.ys[r] && cy < g.ys[r + 1]; });
+        if(!ws.length) continue; const mean = ws.reduce((a, w) => a + (w.confidence || 0), 0) / ws.length;
+        if(mean < 55) cand.push({r, c, ws, mean});
+      }
+      cand.sort((a, b) => a.mean - b.mean);
+      await worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
+      for(const k of cand.slice(0, 14)){
+        const x0 = Math.max(0, Math.floor(g.xs[k.c]) + 2), y0 = Math.max(0, Math.floor(g.ys[k.r]) + 2), w0 = Math.floor(g.xs[k.c + 1]) - x0 - 2, h0 = Math.floor(g.ys[k.r + 1]) - y0 - 2;
+        if(w0 < 20 || h0 < 12) continue;
+        const sc = Math.min(3, Math.max(1, 110 / h0)), pad = 12, cv = document.createElement('canvas'); cv.width = Math.round(w0 * sc) + 2 * pad; cv.height = Math.round(h0 * sc) + 2 * pad;
+        const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.imageSmoothingQuality = 'high'; cx.drawImage(prep.canvas, x0, y0, w0, h0, pad, pad, w0 * sc, h0 * sc);
+        let res; try{ res = await worker.recognize(cv); }catch(e){ continue; }
+        const nw = (res.data.words || []).filter(w => (w.text || '').trim()); if(!nw.length) continue;
+        const nm = nw.reduce((a, w) => a + (w.confidence || 0), 0) / nw.length;
+        if(nm > k.mean + 8){
+          const drop = new Set(k.ws); data.words = data.words.filter(w => !drop.has(w));
+          for(const w of nw) data.words.push({ text: w.text, confidence: w.confidence, bbox: { x0: x0 + (w.bbox.x0 - pad) / sc, x1: x0 + (w.bbox.x1 - pad) / sc, y0: y0 + (w.bbox.y0 - pad) / sc, y1: y0 + (w.bbox.y1 - pad) / sc } });
+        }
+      }
+    }
     async function runItem(it, idx, total, prog){
       const base = idx / total * 100, span = 100 / total;
       prog.set(base + span * 0.05, `Image ${idx + 1}/${total} — preparing…`);
@@ -5028,6 +5072,7 @@ TOOL_IMPL.img2excel = {
       S.onProg = p => prog.set(base + span * (0.2 + p * 0.75), `Image ${idx + 1}/${total} — reading… ${Math.round(p * 100)}%`);
       await worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
       let { data } = await worker.recognize(prep.canvas);
+      if(prep.grid) await refineCells(worker, prep, data);
       it.table = Img2Xls.buildTable(data.words || [], prep.grid);
       if(data.confidence < 72 && (it.table.rows.length < 3 || (it.table.rows[0] || []).length < 2)){ // the table reading failed: try "sparse text" mode (it still returns every word with its position)
         await worker.setParameters({ tessedit_pageseg_mode: '11' });
@@ -5036,6 +5081,7 @@ TOOL_IMPL.img2excel = {
       }
       it.conf = Math.round(data.confidence || 0); it.mode = it.table.mode; it.force = [];
       if(it.table.chrome) it.notes.push('📑 spreadsheet row/column labels removed');
+      if(it.table.titles && it.table.titles.length) it.notes.push('📝 title line removed: ' + it.table.titles.join(' / ').slice(0, 80));
       it.status = it.table.rows.length ? 'done' : 'empty';
     }
     async function convertAll(){
@@ -5080,10 +5126,12 @@ TOOL_IMPL.img2excel = {
           });
         });
         // totals row (real formulas)
-        if(S.totals && ty0){
+        const lastHasTotal = ty0 && lastData && ws.getRow(lastData).values.some(v => typeof v === 'string' && /total/i.test(v)); // the picture already has its own Grand Total row
+        const isSerial = ci => { const vs = []; for(let r = firstData; r <= lastData; r++){ const v = ws.getRow(r).getCell(ci + 1).value; if(typeof v === 'number') vs.push(v); } return vs.length >= 4 && vs.every((v, i) => Number.isInteger(v) && (i === 0 || v > vs[i - 1])) && vs[vs.length - 1] < vs.length * 3; };
+        if(S.totals && ty0 && !lastHasTotal){
           rowNo++; const tr = ws.getRow(rowNo); let labelled = false;
           ty0.cols.forEach((t, ci) => { const cell = tr.getCell(ci + 1);
-            if(t === 'n' && !(ty0.fmt[ci] && ty0.fmt[ci].pct)){ let sum = 0; for(let r = firstData; r <= lastData; r++){ const v = ws.getRow(r).getCell(ci + 1).value; if(typeof v === 'number') sum += v; }
+            if(t === 'n' && !(ty0.fmt[ci] && ty0.fmt[ci].pct) && !isSerial(ci)){ let sum = 0; for(let r = firstData; r <= lastData; r++){ const v = ws.getRow(r).getCell(ci + 1).value; if(typeof v === 'number') sum += v; }
               cell.value = { formula: `SUM(${colLetter(ci)}${firstData}:${colLetter(ci)}${lastData})`, result: sum }; cell.numFmt = Img2Xls.numFmt(ty0.fmt[ci], S.indian); cell.alignment = { horizontal: 'right' }; }
             else if(!labelled && t === 's'){ cell.value = 'Total'; labelled = true; }
             cell.font = { bold: true }; cell.border = { top: { style: 'medium', color: { argb: 'FF217346' } } }; });
