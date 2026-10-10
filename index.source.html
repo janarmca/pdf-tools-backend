@@ -311,9 +311,9 @@
      and most tools don't need most of these. They're now fetched on demand,
      only when a tool that actually needs them is opened (ensurePdfLib(),
      ensurePdfJs(), etc., defined near the other on-demand loaders below; see
-     TOOL_LIBS for which tool needs which). supabase-js stays eager below —
+     TOOL_LIBS for which tool needs which). The login client (cf-auth.js) stays eager below —
      auth/credits are needed site-wide immediately, not tied to any one tool. -->
-<script src="https://unpkg.com/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="/cf-auth.js?v=1"></script>
 <script>
 // Diagnostic safety-net: if ANY uncaught JS error happens anywhere below,
 // show it directly on the page instead of leaving a silent blank screen —
@@ -537,16 +537,15 @@ const TOOLS = [
 let state = { view:'home', tool:null };
 
 // ============================================================
-// ⚙️ CONFIG — Your real Supabase project & backend URL-here.
+// ⚙️ CONFIG — login/database API (Cloudflare Worker) & backend URL.
 // backend/README.md-ல் இவற்றை எப்படி பெறுவது என்ற வழிமுறை உள்ளது.
 // ============================================================
 const APP_CONFIG = {
-  // NOTE: Cloudflare Worker proxy setup was not completed successfully, so
-  // reverted to the direct Supabase URL to restore working functionality.
-  // If the WiFi-ISP-blocking issue returns, the proxy approach can be
-  // retried once the Worker is set up correctly (see conversation history).
-  SUPABASE_URL: 'https://zasarkaysjkclzwvdduu.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_N6LTr070Y6IXwHMjH9aeUQ_-xDo8ARE',
+  // Login + credits database = the pdf-tools-api Cloudflare Worker (cloudflare/), served on our own
+  // domain, so ISP blocks on third-party auth domains no longer affect sign-in. (Key names kept from
+  // the earlier Supabase setup: cf-auth.js provides the same client API.)
+  SUPABASE_URL: 'https://pdftoolsindia.com/cfapi',
+  SUPABASE_ANON_KEY: '',
   BACKEND_URL: 'https://all-in-one-tools-22743935825.asia-south1.run.app'
 };
 const AUTH_CONFIGURED = !APP_CONFIG.SUPABASE_URL.includes('YOUR-PROJECT');
@@ -681,8 +680,9 @@ async function refreshProfile(){
 }
 async function authSignUp(email, password){
   if(!sb) throw new Error(friendlyErrorMessage(null));
-  const { error } = await sb.auth.signUp({ email, password });
+  const { data, error } = await sb.auth.signUp({ email, password });
   if(error) throw new Error(friendlyErrorMessage(error));
+  return !!(data && data.session); // true = signed in already (no e-mail confirmation step)
 }
 async function authSignIn(email, password){
   if(!sb) throw new Error(friendlyErrorMessage(null));
@@ -832,12 +832,12 @@ function mountAuthModal(){
           await authSignIn(email, pass);
           overlay.remove(); render();
         } else {
-          await authSignUp(email, pass);
-          // Supabase requires email confirmation before the account is
-          // actually usable — signUp() succeeding does NOT mean the user is
-          // logged in yet. Show a clear message instead of silently closing
-          // the modal with no feedback, which previously left users confused
-          // about what to do next.
+          // Signed in straight away when no e-mail confirmation is required (no mail service set up on the API)
+          if(await authSignUp(email, pass)){ overlay.remove(); render(); return; }
+          // When e-mail confirmation IS required, signUp() succeeding does NOT
+          // mean the user is logged in yet. Show a clear message instead of
+          // silently closing the modal with no feedback, which previously left
+          // users confused about what to do next.
           card.innerHTML = `
             <div style="text-align:center; padding:8px 0;">
               <div style="font-size:40px; margin-bottom:10px;">📧</div>

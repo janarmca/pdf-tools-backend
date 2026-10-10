@@ -16,7 +16,7 @@ import fs from 'fs';
 import os from 'os';
 import crypto from 'crypto';
 import ffmpeg from 'fluent-ffmpeg';
-import { createClient } from '@supabase/supabase-js';
+import { createDb, verifyAccessToken } from './cf-db.js';
 import Razorpay from 'razorpay';
 import rateLimit from 'express-rate-limit';
 import { registerMatrimonyRoutes, matrimonyOnCaptured } from './matrimony-api.js';
@@ -25,11 +25,8 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 app.set('trust proxy', 1); // Render sits behind a proxy — needed for rate-limit to see the real client IP
 
-// ---------- Supabase admin client (service_role — server-side மட்டும்) ----------
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// ---------- Database: Cloudflare D1 through the pdf-tools-api Worker (server-side மட்டும்) ----------
+const db = createDb(process.env.CF_API_URL, process.env.CF_INTERNAL_KEY);
 
 // ---------- Razorpay client ----------
 const razorpay = process.env.RAZORPAY_KEY_ID ? new Razorpay({
@@ -73,31 +70,43 @@ const uploadVideo = multer({ dest: os.tmpdir(), limits: { fileSize: 60 * 1024 * 
 const uploadImage = multer({ dest: os.tmpdir(), limits: { fileSize: 15 * 1024 * 1024 } });   // 15MB — plenty for photos/scanned pages sent to Gemini
 
 // ============================================================
-// Auth middleware — Supabase-ல் login செய்த user-ஐ சரிபார்க்கிறது
-// Frontend, Authorization: Bearer <supabase_access_token> header அனுப்ப வேண்டும்.
+// Auth middleware — Cloudflare (pdf-tools-api Worker)-ல் login செய்த user-ஐ சரிபார்க்கிறது
+// Frontend, Authorization: Bearer <access_token> header அனுப்ப வேண்டும்.
+// The token is a JWT signed with AUTH_JWT_SECRET, so it is verified here without any network call.
 // ============================================================
 async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'உள்நுழையவும் (Login required)' });
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data.user) return res.status(401).json({ error: 'Session காலாவதியானது — மீண்டும் login செய்யவும்' });
-    req.user = data.user;
+    const user = verifyAccessToken(token, process.env.AUTH_JWT_SECRET);
+    if (!user) return res.status(401).json({ error: 'Session காலாவதியானது — மீண்டும் login செய்யவும்' });
+    req.user = user;
     next();
   } catch (e) {
     res.status(401).json({ error: 'Auth பிழை: ' + e.message });
   }
 }
 
-// Deducts credits atomically via the Postgres function (race-condition safe).
+// "Pro/Business plan still active" — the same rule everywhere (?N = current time, ISO text)
+const IS_PRO_SQL = n => `(plan in ('pro','business') and (plan_expires_at is null or plan_expires_at > ?${n}))`;
+
+// Deducts credits atomically (the UPDATE only succeeds when enough credits are left — race-condition safe).
+// Pro/Business users are never charged (unlimited) — logged as a 0-credit use.
 // Returns true if allowed to proceed, false if not enough credits.
 async function deductCredits(userId, amount, toolId) {
-  const { data, error } = await supabase.rpc('deduct_credits', {
-    p_user_id: userId, p_amount: amount, p_tool_id: toolId
-  });
-  if (error) throw new Error(error.message);
-  return data === true;
+  const ts = new Date().toISOString();
+  const taken = await db.first(
+    `update profiles set credits = credits - ?2 where id = ?1 and credits >= ?2 and not ${IS_PRO_SQL(3)} returning credits`,
+    userId, amount, ts);
+  if (taken) {
+    await db.run('insert into usage_logs (user_id, tool_id, credits_used) values (?, ?, ?)', userId, toolId, amount);
+    return true;
+  }
+  const pro = await db.first(`select 1 as ok from profiles where id = ?1 and ${IS_PRO_SQL(2)}`, userId, ts);
+  if (!pro) return false; // போதுமான credits இல்லை
+  await db.run('insert into usage_logs (user_id, tool_id, credits_used) values (?, ?, 0)', userId, toolId);
+  return true;
 }
 
 // Refunds credits after a deductCredits() call whose paid operation then
@@ -108,10 +117,12 @@ async function deductCredits(userId, amount, toolId) {
 // original error that's already being returned to the user.
 async function refundCredits(userId, amount, toolId) {
   try {
-    const { error } = await supabase.rpc('refund_credits', {
-      p_user_id: userId, p_amount: amount, p_tool_id: toolId
-    });
-    if (error) console.error(`refundCredits failed for user ${userId}, tool ${toolId}:`, error.message);
+    // nothing was deducted for a Pro/Business user, so nothing is refunded to them
+    const ts = new Date().toISOString();
+    await db.batch([
+      { sql: `insert into usage_logs (user_id, tool_id, credits_used) select id, ?2, -?3 from profiles where id = ?1 and not ${IS_PRO_SQL(4)}`, params: [userId, toolId + '_refund', amount, ts] },
+      { sql: `update profiles set credits = credits + ?2 where id = ?1 and not ${IS_PRO_SQL(3)}`, params: [userId, amount, ts] },
+    ]);
   } catch (e) {
     console.error(`refundCredits threw for user ${userId}, tool ${toolId}:`, e.message);
   }
@@ -121,18 +132,26 @@ async function refundCredits(userId, amount, toolId) {
 // GET /api/me — login ஆன user-ன் profile (credits, plan) திருப்பும்
 // ============================================================
 app.get('/api/me', requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', req.user.id).single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const r = await db.batch([
+      { sql: 'insert or ignore into profiles (id, email, credits) values (?, ?, 5)', params: [req.user.id, req.user.email || null] },
+      { sql: 'select * from profiles where id = ?', params: [req.user.id] },
+    ]);
+    res.json(r.results[1][0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ============================================================
 // GET /api/pricing — pricing plans list (login தேவையில்லை)
 // ============================================================
 app.get('/api/pricing', async (req, res) => {
-  const { data, error } = await supabase.from('pricing_plans').select('*').order('amount_inr');
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    res.json(await db.all('select * from pricing_plans order by amount_inr'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ============================================================
@@ -377,9 +396,8 @@ app.post('/api/credits/use', creditLimiter, requireAuth, async (req, res) => {
       // Some tools (video compress, the 6 AI tools) charge credits themselves
       // when the actual action runs — for those, "unlocking" the tool should
       // only VERIFY the person can afford it, not deduct twice.
-      const { data: profile, error } = await supabase.from('profiles')
-        .select('credits, plan, plan_expires_at').eq('id', req.user.id).single();
-      if (error) throw new Error(error.message);
+      const profile = await db.first('select credits, plan, plan_expires_at from profiles where id = ?', req.user.id);
+      if (!profile) throw new Error('Profile not found — please sign in again');
       const isPro = (profile.plan === 'pro' || profile.plan === 'business') &&
         (!profile.plan_expires_at || new Date(profile.plan_expires_at) > new Date());
       if (isPro || profile.credits >= cost) return res.json({ ok: true });
@@ -402,10 +420,21 @@ app.post('/api/redeem', redeemLimiter, requireAuth, async (req, res) => {
   try {
     const code = (req.body.code || '').trim().toUpperCase();
     if (!code) return res.status(400).json({ error: 'Please enter a code' });
-    const { data, error } = await supabase.rpc('redeem_code', { p_user_id: req.user.id, p_code: code });
-    if (error) throw new Error(error.message);
-    if (!data.ok) return res.status(400).json({ error: data.error });
-    res.json({ ok: true, creditsAdded: data.credits_added });
+    const ts = new Date().toISOString();
+    const valid = `from redeem_codes where code = ?2 and active = 1 and (expires_at is null or expires_at > ?3) and (max_uses is null or uses < max_uses)`;
+    // one transaction: record the redemption (primary key = one use per person), then count it and add the credits
+    const mine = 'exists (select 1 from redemptions where user_id = ?1 and code = ?2 and created_at = ?3)'; // the row THIS request inserted
+    const r = await db.batch([
+      { sql: `insert or ignore into redemptions (user_id, code, created_at) select ?1, code, ?3 ${valid}`, params: [req.user.id, code, ts] },
+      { sql: `update redeem_codes set uses = uses + 1 where code = ?2 and ${mine}`, params: [req.user.id, code, ts] },
+      { sql: `update profiles set credits = credits + (select credits from redeem_codes where code = ?2) where id = ?1 and ${mine}`, params: [req.user.id, code, ts] },
+      { sql: 'select credits from redeem_codes where code = ?', params: [code] },
+    ]);
+    if (!r.meta[0].changes) {
+      const used = await db.first('select 1 as x from redemptions where user_id = ? and code = ?', req.user.id, code);
+      return res.status(400).json({ error: used ? 'You have already used this code' : 'Invalid or expired code' });
+    }
+    res.json({ ok: true, creditsAdded: r.results[3][0]?.credits || 0 });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -656,8 +685,8 @@ app.post('/api/payment/create-order', creditLimiter, requireAuth, async (req, re
   try {
     if (!razorpay) return res.status(500).json({ error: 'Razorpay இன்னும் இணைக்கப்படவில்லை (server .env-ல் keys இல்லை)' });
     const { planId } = req.body;
-    const { data: plan, error } = await supabase.from('pricing_plans').select('*').eq('id', planId).single();
-    if (error || !plan) return res.status(400).json({ error: 'தவறான plan' });
+    const plan = await db.first('select * from pricing_plans where id = ?', planId);
+    if (!plan) return res.status(400).json({ error: 'தவறான plan' });
 
     const order = await razorpay.orders.create({
       amount: Math.round(plan.amount_inr * 100), // paise
@@ -666,14 +695,9 @@ app.post('/api/payment/create-order', creditLimiter, requireAuth, async (req, re
       notes: { user_id: req.user.id, plan_id: planId }
     });
 
-    await supabase.from('transactions').insert({
-      user_id: req.user.id,
-      razorpay_order_id: order.id,
-      amount_inr: plan.amount_inr,
-      credits_purchased: plan.credits,
-      plan_purchased: plan.plan,
-      status: 'created'
-    });
+    await db.run(
+      "insert into transactions (user_id, razorpay_order_id, amount_inr, credits_purchased, plan_purchased, status) values (?, ?, ?, ?, ?, 'created')",
+      req.user.id, order.id, plan.amount_inr, plan.credits, plan.plan);
 
     res.json({ orderId: order.id, amount: order.amount, currency: order.currency, keyId: process.env.RAZORPAY_KEY_ID });
   } catch (e) {
@@ -682,30 +706,21 @@ app.post('/api/payment/create-order', creditLimiter, requireAuth, async (req, re
 });
 
 // Shared logic: mark a transaction paid + credit the user. Guarded with
-// .eq('status','created') so it only ever runs ONCE even if both the
+// "status = 'created'" so it only ever runs ONCE even if both the
 // /verify call (below) and the webhook fire for the same payment.
 async function markPaidAndCredit(txn, paymentId) {
-  const { data: updated, error } = await supabase.from('transactions')
-    .update({ status: 'paid', razorpay_payment_id: paymentId })
-    .eq('id', txn.id)
-    .eq('status', 'created') // atomic guard against double-crediting
-    .select();
-  if (error) throw new Error(error.message);
-  if (!updated || !updated.length) return { already: true }; // someone else already credited this
+  const updated = await db.first(
+    "update transactions set status = 'paid', razorpay_payment_id = ? where id = ? and status = 'created' returning id", // atomic guard against double-crediting
+    paymentId, txn.id);
+  if (!updated) return { already: true }; // someone else already credited this
 
   if (txn.credits_purchased) {
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', txn.user_id).single();
-    await supabase.from('profiles').update({
-      credits: (profile?.credits || 0) + txn.credits_purchased
-    }).eq('id', txn.user_id);
+    await db.run('update profiles set credits = credits + ? where id = ?', txn.credits_purchased, txn.user_id);
   } else if (txn.plan_purchased) {
-    const { data: plan } = await supabase.from('pricing_plans')
-      .select('duration_days').eq('plan', txn.plan_purchased).limit(1).single();
+    const plan = await db.first('select duration_days from pricing_plans where plan = ? limit 1', txn.plan_purchased);
     const days = plan?.duration_days || 30;
     const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-    await supabase.from('profiles').update({
-      plan: txn.plan_purchased, plan_expires_at: expires
-    }).eq('id', txn.user_id);
+    await db.run('update profiles set plan = ?, plan_expires_at = ? where id = ?', txn.plan_purchased, expires, txn.user_id);
   }
   return { already: false };
 }
@@ -730,9 +745,8 @@ app.post('/api/payment/verify', creditLimiter, requireAuth, async (req, res) => 
       return res.status(400).json({ error: 'கையொப்பம் பொருந்தவில்லை (invalid signature) — இது போலியான payment ஆக இருக்கலாம்.' });
     }
 
-    const { data: txn, error } = await supabase.from('transactions')
-      .select('*').eq('razorpay_order_id', razorpay_order_id).eq('user_id', req.user.id).single();
-    if (error || !txn) return res.status(404).json({ error: 'Transaction record கிடைக்கவில்லை' });
+    const txn = await db.first('select * from transactions where razorpay_order_id = ? and user_id = ?', razorpay_order_id, req.user.id);
+    if (!txn) return res.status(404).json({ error: 'Transaction record கிடைக்கவில்லை' });
 
     const result = await markPaidAndCredit(txn, razorpay_payment_id);
     res.json({ ok: true, already: result.already });
@@ -764,10 +778,9 @@ async function handleWebhook(req, res) {
       const payment = event.payload.payment.entity;
       const orderId = payment.order_id;
       // சௌடேஸ்வரி திருமண அமைப்பகம் — ₹50 chat unlock payments are handled by matrimony-api.js
-      if (await matrimonyOnCaptured(supabase, payment)) return res.json({ ok: true });
+      if (await matrimonyOnCaptured(db, payment)) return res.json({ ok: true });
 
-      const { data: txn } = await supabase.from('transactions')
-        .select('*').eq('razorpay_order_id', orderId).single();
+      const txn = await db.first('select * from transactions where razorpay_order_id = ?', orderId);
       if (!txn) { console.log('Webhook: no matching transaction for order', orderId); return res.json({ ok: true }); }
 
       await markPaidAndCredit(txn, payment.id);
@@ -1279,7 +1292,7 @@ Answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. End with a 
 app.get('/health', (req, res) => res.json({ ok: true, ffmpeg: 'native', astrology: !!process.env.ASTROLOGER_API_KEY, time: new Date().toISOString() }));
 
 // சௌடேஸ்வரி திருமண அமைப்பகம் — /api/matrimony/create-order, /api/matrimony/verify
-registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, limiter: creditLimiter, upload: uploadImage, deductCredits, refundCredits });
+registerMatrimonyRoutes(app, { db, razorpay, requireAuth, limiter: creditLimiter, upload: uploadImage, deductCredits, refundCredits });
 
 // Catch-all for any route that doesn't exist (e.g. frontend calling a newer
 // endpoint than what's currently deployed here) — returns clear JSON instead

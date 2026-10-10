@@ -150,14 +150,14 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let LANG = 'ta';
 
-/* ---------- auth: token from the main site (postMessage) or its saved Supabase session (same origin) ---------- */
+/* ---------- auth: token from the main site (postMessage) or its saved login session (same origin, cf-auth.js) ---------- */
 let TOKEN = null;
 window.addEventListener('message', e=>{ if(e.data && e.data.type==='jamtaris-auth' && e.data.token){ TOKEN = e.data.token; paintBtn(); } });
 function storedToken(){
   try{
     for(let i=0;i<localStorage.length;i++){
       const k = localStorage.key(i);
-      if(/^sb-.*-auth-token$/.test(k)){
+      if(k === 'cf-auth-session' || /^sb-.*-auth-token$/.test(k)){
         const o = JSON.parse(localStorage.getItem(k)); const s = o && (o.access_token ? o : (o.currentSession||o.session));
         if(s && s.access_token && (!s.expires_at || s.expires_at*1000 > Date.now())) return s.access_token;
       }

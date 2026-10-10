@@ -1,5 +1,5 @@
 /* Backend adapter. Two modes with the SAME function names/arguments:
- *   live  -> Supabase (auth, rpc, storage) + your Cloud Run server for the Rs 50 payment
+ *   live  -> Cloudflare Worker pdf-tools-api (login, matrimony functions, photos) + your Cloud Run server for the Rs 50 payment
  *   demo  -> real schema.sql running inside the browser (PGlite) — for trying the site without any setup (?demo=1)
  */
 (function () {
@@ -13,12 +13,13 @@
   B.onAuth = function (f) { listeners.push(f); };
   function loadScript(src) { return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = function () { rej(new Error('load ' + src)); }; document.head.appendChild(s); }); }
 
-  /* ======================= LIVE (Supabase) ======================= */
+  /* ======================= LIVE (Cloudflare Worker) ======================= */
   var sb;
+  async function authHeader() { var s = (await sb.auth.getSession()).data.session; return s ? { Authorization: 'Bearer ' + s.access_token } : {}; }
   var live = {
     init: async function () {
-      if (!window.supabase) await loadScript('https://unpkg.com/@supabase/supabase-js@2.117.2/dist/umd/supabase.js');
-      sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+      if (!window.CfAuth) await loadScript('/cf-auth.js?v=1');
+      sb = window.CfAuth.createClient(C.API_URL);
       sb.auth.onAuthStateChange(function (ev, session) {
         if (ev === 'PASSWORD_RECOVERY') recovery.forEach(function (f) { try { f(); } catch (e) {} });
         emit(session ? { id: session.user.id, email: session.user.email } : null);
@@ -38,22 +39,29 @@
       var r = await sb.rpc(name, args || {});
       if (r.error) {
         var m = r.error.message || '';
-        if (r.error.code === 'PGRST202' || /Could not find the function|does not exist/i.test(m)) return { ok: false, code: 'not_installed' };
-        if (/JWT|not_logged_in/i.test(m)) return { ok: false, code: 'not_logged_in' };
+        if (r.error.status === 404) return { ok: false, code: 'not_installed' };
+        if (r.error.status === 401 || /JWT|not_logged_in/i.test(m)) return { ok: false, code: 'not_logged_in' };
         return { ok: false, code: 'error', message: m };
       }
       return r.data;
     },
+    // the server picks the file name: <your user id>/... or submissions/... (public sign-up form)
     uploadPhoto: async function (blob, uid) {
-      var path = uid + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
-      var r = await sb.storage.from('mat-photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
-      if (r.error) throw new Error(r.error.message);
-      return path;
+      var folder = uid === 'submissions' ? 'submissions' : 'me';
+      var h = folder === 'me' ? await authHeader() : {};
+      h['Content-Type'] = blob.type || 'image/jpeg';
+      var r = await fetch(C.API_URL + '/mat/photo?folder=' + folder, { method: 'POST', headers: h, body: blob });
+      var j = await r.json().catch(function () { return {}; });
+      if (!r.ok) throw new Error(j.error || 'upload failed');
+      return j.path;
     },
-    removePhoto: async function (path) { try { await sb.storage.from('mat-photos').remove([path]); } catch (e) {} },
+    removePhoto: async function (path) {
+      try { await fetch(C.API_URL + '/mat/photo?path=' + encodeURIComponent(path), { method: 'DELETE', headers: await authHeader() }); } catch (e) {}
+    },
     photoUrl: async function (path) {
-      var r = await sb.storage.from('mat-photos').createSignedUrl(path, 3600);
-      return r.data ? r.data.signedUrl : '';
+      var r = await fetch(C.API_URL + '/mat/photo-url?path=' + encodeURIComponent(path), { headers: await authHeader() });
+      var j = await r.json().catch(function () { return {}; });
+      return j.url || '';
     },
     jathagam: async function (file) {
       var s = (await sb.auth.getSession()).data.session; if (!s) return { ok: false, code: 'not_logged_in' };

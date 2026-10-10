@@ -20,9 +20,20 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
 
       - name: Deploy to Cloud Run
+        env:
+          AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
+          CF_INTERNAL_KEY: ${{ secrets.CF_INTERNAL_KEY }}
         run: |
+          # login + credits database now live in the Cloudflare Worker (cloudflare/); these 3 values connect to it.
+          # --update-env-vars only adds/changes these keys — every other variable on the service is kept.
+          EXTRA=""
+          if [ -n "$AUTH_JWT_SECRET" ] && [ -n "$CF_INTERNAL_KEY" ]; then
+            EXTRA="--update-env-vars=CF_API_URL=https://pdftoolsindia.com/cfapi,AUTH_JWT_SECRET=$AUTH_JWT_SECRET,CF_INTERNAL_KEY=$CF_INTERNAL_KEY"
+          else
+            echo "::warning::AUTH_JWT_SECRET / CF_INTERNAL_KEY repository secrets are missing — login and credits will not work on Cloud Run"
+          fi
           gcloud run deploy all-in-one-tools \
             --source . \
             --region asia-south1 \
             --project pdf-tools-506813 \
-            --quiet
+            --quiet $EXTRA

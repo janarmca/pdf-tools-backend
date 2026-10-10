@@ -15,28 +15,15 @@
 * தொலைபேசி எண் / email: சரிபார்ப்புக்காக **admin-க்கு மட்டும்** தெரியும்; உறுப்பினர்களுக்கு எங்கும் வராது.
 * Chat-ல் எண் / email / WhatsApp / Instagram / link எந்த வடிவில் அனுப்பினாலும் **server-ல்** தடுக்கப்படும் (பார்க்க §6).
 
-## 2. Supabase (database) — ஒருமுறை, மொபைலிலேயே செய்யலாம்
-1. supabase.com → உங்கள் project → **SQL Editor** → **New query**.
-2. `matrimony/supabase/schema.sql` கோப்பு முழுவதையும் copy செய்து ஒட்டி **Run** அழுத்துங்கள். "Success" வர வேண்டும். (மீண்டும் இயக்கினாலும் பிரச்சனை இல்லை.)
-   * இது `mat_` என்று தொடங்கும் அட்டவணைகளை மட்டும் உருவாக்கும்; உங்கள் மற்ற tools-ன் தரவைத் தொடாது.
-   * தனிப்பட்ட படங்களுக்கான `mat-photos` (private) bucket-ம் தானாக உருவாகும்.
-3. **Authentication → URL Configuration → Redirect URLs** → `https://pdftoolsindia.com/matrimony/` சேர்க்கவும்.
-4. **Authentication → Providers → Email** → *Confirm email* **ON** (போலிக் கணக்குகளைக் குறைக்கும்).
-5. தளத்தில் (`/matrimony/`) உங்கள் email-ல் ஒருமுறை பதிவு செய்யுங்கள். பிறகு SQL Editor-ல் இதை இயக்குங்கள் (உங்கள் email-ஐ மாற்றி) — நீங்கள் admin ஆகிவிடுவீர்கள்:
-   ```sql
-   insert into mat_admins (user_id) select id from auth.users where email = 'உங்கள்@email.com' on conflict do nothing;
-   ```
-   பிறகு "என் கணக்கு" → "🛡 நிர்வாகப் பக்கம்".
+## 2. Database + login — Cloudflare (Supabase-க்குப் பதிலாக)
+Login, சுயவிவரங்கள், chat, படங்கள் எல்லாம் இப்போது Cloudflare Worker `pdf-tools-api` (D1 database + KV photos)-ல். அமைப்பு: [`cloudflare/README.md`](../cloudflare/README.md) — GitHub secrets சேர்த்து "Deploy Cloudflare API" workflow-ஐ ஓட்டினால் போதும்; SQL எதையும் கையால் இயக்கத் தேவையில்லை.
+* முன்பு Postgres functions-ஆக இருந்த அனைத்தும் (`mat_search`, `mat_send_message`, …) இப்போது `cloudflare/src/mat.js`-ல் — அதே பெயர்கள், அதே பதில்கள்.
+* Admin ஆக: GitHub secret `MAT_ADMIN_EMAILS`-ல் உங்கள் email-ஐச் சேர்த்து, தளத்தில் அந்த email-ல் login செய்யுங்கள். பிறகு "என் கணக்கு" → "🛡 நிர்வாகப் பக்கம்".
+* Chat கட்டணம் ON: Cloudflare dashboard → D1 → `pdftools-db` → Console: `update mat_settings set value = 'on' where key = 'chat_fee';` (+ `m-config.js`-ல் `FEE_ON: true`).
+* `supabase/schema.sql` இப்போது **demo முறைக்கு மட்டும்** (`?demo=1`, உலாவிக்குள் PGlite).
 
-## 3. Cloud Run server (₹50 payment) — ஒருமுறை
-புதிய கோப்பு: **`matrimony-api.js`** (repo root, `server.js`-க்கு அருகில்).
-`server.js`-ல் 3 சிறிய மாற்றங்கள் — `matrimony/server.js.patch` (`git apply matrimony/server.js.patch`) அல்லது கையால்:
-1. மேலே imports-ல்: `import { registerMatrimonyRoutes, matrimonyOnCaptured } from './matrimony-api.js';`
-2. Webhook-ல் `const orderId = payment.order_id;` வரிக்குப் பிறகு: `if (await matrimonyOnCaptured(supabase, payment)) return res.json({ ok: true });`
-3. 404 catch-all-க்கு முன்: `registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, limiter: creditLimiter });`
-
-புதிய environment variable தேவையில்லை (ஏற்கனவே உள்ள `RAZORPAY_KEY_ID/SECRET`, `SUPABASE_*` போதும்). கட்டணத்தை மாற்ற: `MATRIMONY_FEE_PAISE` (இயல்பு `5000` = ₹50) **மற்றும்** `matrimony/m-config.js`-ல் `FEE_RS`.
-பிறகு வழக்கம்போல் Cloud Run deploy.
+## 3. Cloud Run server (₹50 payment)
+`matrimony-api.js` ஏற்கனவே `server.js`-ல் இணைக்கப்பட்டுள்ளது (`registerMatrimonyRoutes(app, { db, … })`, webhook-ல் `matrimonyOnCaptured(db, payment)`). புதிய environment variable தேவையில்லை (Cloud Run-க்கு `CF_API_URL`, `CF_INTERNAL_KEY`, `AUTH_JWT_SECRET` deploy workflow-ஏ அனுப்பும்). கட்டணத்தை மாற்ற: `MATRIMONY_FEE_PAISE` (இயல்பு `5000` = ₹50) **மற்றும்** `matrimony/m-config.js`-ல் `FEE_RS`.
 
 ## 4. தளக் கோப்புகள் (GitHub-ல் ஏற்ற)
 `matrimony/` கோப்புறை முழுவதும் + `matrimony-api.js` + மாற்றப்பட்ட `index.source.html`, `index.html`, `sw.js`, `sitemap.xml`, `generate-tool-pages.mjs`. (முதன்மைப் பக்கத்தில் 💍 banner + footer link சேர்ந்துள்ளது.)
@@ -69,7 +56,7 @@
 Email/WhatsApp அறிவிப்புகள் (புதிய Interest வந்தால்), ஜாதகப் பொருத்தம் (பத்துப் பொருத்தம்), கன்னட மொழி இடைமுகம், அடையாள ஆவணச் சரிபார்ப்பு badge, சந்தா திட்டங்கள்.
 
 ## 10. சோதனைகள் (dev)
-`node matrimony/tests/filter.test.js` · `node matrimony/tests/sql-parity.test.mjs` (JS = SQL, 1667 வழக்குகள்) · `node matrimony/tests/sql-flow.test.mjs` (71 சோதனைகள், RLS உட்பட) — PGlite (`npm i @electric-sql/pglite`) தேவை. Payment module: repo root-ல் `node matrimony/tests/api.test.mjs`.
+`node matrimony/tests/filter.test.js` · `node matrimony/tests/sql-parity.test.mjs` (JS = SQL, 1667 வழக்குகள்) · `node matrimony/tests/sql-flow.test.mjs` (demo முறையின் SQL; PGlite `npm i @electric-sql/pglite` தேவை). Live Worker: `cloudflare/README.md` → Local development / tests. Payment module: repo root-ல் `node matrimony/tests/api.test.mjs`.
 
 
 ## ✨ AI ஜாதகம் → அடிப்படை விவரங்கள் (புதிது)

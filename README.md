@@ -7,8 +7,8 @@
 | Layer | Service | Notes |
 |---|---|---|
 | Frontend | **Cloudflare Pages** | Auto-deploys from this repo's `main` branch — pushing `index.html` here goes live. |
-| Backend | **Google Cloud Run** (`all-in-one-tools`, project `pdf-tools-506813`, region `asia-south1`) | Handles AI calls (Gemini vision + NVIDIA Nemotron text), payment verification, and Fast Server Mode video processing (real ffmpeg). |
-| Auth + DB | **Supabase** | Email + Google sign-in, credit balances. |
+| Backend | **Google Cloud Run** (`all-in-one-tools`, project `pdf-tools-506813`, region `asia-south1`) | Handles AI calls (Gemini vision + NVIDIA Nemotron text), payment verification, and Fast Server Mode video processing (real ffmpeg). Reads/writes the database through the Worker's internal endpoint (`cf-db.js`). |
+| Auth + DB | **Cloudflare Worker `pdf-tools-api`** + **D1** (+ KV for matrimony photos) — `cloudflare/` | Email + Google sign-in, credit balances, payments records, matrimony data. Served at `https://pdftoolsindia.com/cfapi/*`. Deployed by `.github/workflows/deploy-cloudflare.yml`. Setup: [`cloudflare/README.md`](cloudflare/README.md). (Replaced Supabase.) |
 | Payments | **Razorpay** (live mode) | Credit top-ups. |
 
 Backend deploy command (from `~/pdf-tools-backend/pdf-tools-backend`):
@@ -37,7 +37,7 @@ A few tools are full standalone apps (their own HTML/CSS/JS), opened in a new br
 `blog/` (SEO guide posts + index), `contact.html`, `privacy.html`, `terms.html`, `refund.html`, `robots.txt`, `sitemap.xml`, `manifest.json`, `sw.js`, `icon-192.png`, `icon-512.png`.
 
 ### Backend
-`server.js` (Express + Supabase + Razorpay + ffmpeg), `package.json`, `Dockerfile`, `.env.example`, `supabase_schema.sql`.
+`server.js` (Express + Razorpay + ffmpeg; database via `cf-db.js`), `package.json`, `Dockerfile`, `.env.example`. `cf-auth.js` is the browser login client (same API the site used with supabase-js). `cloudflare/` is the login + database Worker. `supabase_schema.sql` is the old Supabase schema, kept for reference only (no longer used).
 
 ### Data
 `thirukkural-daily.json` — all 1330 Thirukkural verses, used by the homepage's daily-verse widget.

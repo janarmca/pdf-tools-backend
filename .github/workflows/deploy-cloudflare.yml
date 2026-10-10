@@ -1,0 +1,87 @@
+name: Deploy Cloudflare API
+
+# pdf-tools-api Worker (login, credits database, matrimony data) -> https://pdftoolsindia.com/cfapi/*
+# First run creates the D1 database and the KV namespace; every run applies new migrations and deploys.
+# Needs repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, AUTH_JWT_SECRET, CF_INTERNAL_KEY
+# Optional: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, RESEND_API_KEY, EMAIL_FROM, MAT_ADMIN_EMAILS
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'cloudflare/**', 'matrimony/m-filter.js', '.github/workflows/deploy-cloudflare.yml' ]
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: cloudflare
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check required secrets
+        env:
+          AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
+          CF_INTERNAL_KEY: ${{ secrets.CF_INTERNAL_KEY }}
+        run: |
+          missing=""
+          for v in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID AUTH_JWT_SECRET CF_INTERNAL_KEY; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Add these GitHub repository secrets first:$missing (Settings → Secrets and variables → Actions)"
+            exit 1
+          fi
+
+      - name: Install wrangler
+        run: npm install -g wrangler@4
+
+      - name: Create D1 database and KV namespace (first run only)
+        run: |
+          find_d1() { wrangler d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);const x=a.find(d=>d.name==="pdftools-db");process.stdout.write(x?x.uuid:"")})'; }
+          find_kv() { wrangler kv namespace list | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);const x=a.find(n=>n.title==="pdftools-mat-photos"||n.title.endsWith("-pdftools-mat-photos"));process.stdout.write(x?x.id:"")})'; }
+          DB_ID=$(find_d1)
+          if [ -z "$DB_ID" ]; then wrangler d1 create pdftools-db --location apac; DB_ID=$(find_d1); fi
+          KV_ID=$(find_kv)
+          if [ -z "$KV_ID" ]; then wrangler kv namespace create pdftools-mat-photos; KV_ID=$(find_kv); fi
+          [ -n "$DB_ID" ] && [ -n "$KV_ID" ] || { echo "::error::Could not create/find the D1 database or KV namespace"; exit 1; }
+          sed -i "s/__D1_DATABASE_ID__/$DB_ID/; s/__KV_NAMESPACE_ID__/$KV_ID/" wrangler.toml
+          echo "D1 $DB_ID, KV $KV_ID"
+
+      - name: Apply database migrations
+        run: wrangler d1 migrations apply pdftools-db --remote
+
+      - name: Deploy Worker
+        run: wrangler deploy
+
+      - name: Set Worker secrets
+        env:
+          AUTH_JWT_SECRET: ${{ secrets.AUTH_JWT_SECRET }}
+          INTERNAL_KEY: ${{ secrets.CF_INTERNAL_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          MAT_ADMIN_EMAILS: ${{ secrets.MAT_ADMIN_EMAILS }}
+        run: |
+          node -e 'const k=["AUTH_JWT_SECRET","INTERNAL_KEY","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET","RESEND_API_KEY","EMAIL_FROM","MAT_ADMIN_EMAILS"];const o={};for(const n of k)if(process.env[n])o[n]=process.env[n];require("fs").writeFileSync("/tmp/secrets.json",JSON.stringify(o))'
+          wrangler secret bulk /tmp/secrets.json
+          rm -f /tmp/secrets.json
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -sS https://pdftoolsindia.com/cfapi/health || echo "::warning::Health check did not answer yet"

@@ -7,8 +7,8 @@
 //   POST /api/matrimony/jathagam-extract  (multipart: file)  AI reads a horoscope (image/PDF) and returns basic details.
 //        AI = paid: costs JATHAGAM_CREDITS credits from the same credit balance as the other AI tools; refunded if it fails.
 //        The uploaded file is deleted immediately and never stored.
-// The unlock itself is written by the database function mat_record_unlock() using the
-// service-role key, so a browser can never fake a payment.
+// The unlock itself is written only here (server side, Cloudflare D1 through the internal key),
+// after the Razorpay signature is checked, so a browser can never fake a payment.
 // ============================================================
 import crypto from 'crypto';
 import fs from 'fs';
@@ -38,18 +38,16 @@ export function sanitizeJathagam(j) {
   return out;
 }
 
-export function registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, limiter, upload, deductCredits, refundCredits }) {
+export function registerMatrimonyRoutes(app, { db, razorpay, requireAuth, limiter, upload, deductCredits, refundCredits }) {
   const lim = limiter || ((req, res, next) => next());
 
   async function pairState(a, b) {
     const lo = a < b ? a : b, hi = a < b ? b : a;
-    const [{ data: ps }, { data: ints }, { data: unl }, { data: blk }] = await Promise.all([
-      supabase.from('mat_profiles').select('user_id,status').in('user_id', [a, b]),
-      supabase.from('mat_interests').select('id').eq('status', 'accepted')
-        .or(`and(from_user.eq.${a},to_user.eq.${b}),and(from_user.eq.${b},to_user.eq.${a})`),
-      supabase.from('mat_unlocks').select('user_a').eq('user_a', lo).eq('user_b', hi),
-      supabase.from('mat_blocks').select('blocker')
-        .or(`and(blocker.eq.${a},blocked.eq.${b}),and(blocker.eq.${b},blocked.eq.${a})`)
+    const { results: [ps, ints, unl, blk] } = await db.batch([
+      { sql: 'select user_id, status from mat_profiles where user_id in (?, ?)', params: [a, b] },
+      { sql: "select id from mat_interests where status = 'accepted' and ((from_user = ?1 and to_user = ?2) or (from_user = ?2 and to_user = ?1))", params: [a, b] },
+      { sql: 'select user_a from mat_unlocks where user_a = ? and user_b = ?', params: [lo, hi] },
+      { sql: 'select blocker from mat_blocks where (blocker = ?1 and blocked = ?2) or (blocker = ?2 and blocked = ?1)', params: [a, b] }
     ]);
     return {
       bothApproved: (ps || []).length === 2 && ps.every(p => p.status === 'approved'),
@@ -73,8 +71,7 @@ export function registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, 
         receipt: `mat_${Date.now().toString(36)}${crypto.randomBytes(4).toString('hex')}`.slice(0, 40),
         notes: { app: 'matrimony', payer: me, other }
       });
-      const { error } = await supabase.from('mat_orders').insert({ order_id: order.id, user_id: me, other_id: other, amount_paise: MATRIMONY_FEE_PAISE });
-      if (error) throw new Error(error.message);
+      await db.run('insert into mat_orders (order_id, user_id, other_id, amount_paise) values (?, ?, ?, ?)', order.id, me, other, MATRIMONY_FEE_PAISE);
       res.json({ orderId: order.id, amount: order.amount, currency: order.currency, keyId: process.env.RAZORPAY_KEY_ID });
     } catch (e) {
       console.error('matrimony create-order:', e.message);
@@ -121,9 +118,9 @@ export function registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, 
       const { razorpay_order_id: oid, razorpay_payment_id: pid, razorpay_signature: sig } = req.body || {};
       if (!oid || !pid || !sig) return res.status(400).json({ error: 'Payment details missing' });
       if (!verifySignature(oid, pid, sig, process.env.RAZORPAY_KEY_SECRET)) return res.status(400).json({ error: 'கையொப்பம் பொருந்தவில்லை (invalid signature)' });
-      const { data: order } = await supabase.from('mat_orders').select('*').eq('order_id', oid).eq('user_id', req.user.id).maybeSingle();
+      const order = await db.first('select * from mat_orders where order_id = ? and user_id = ?', oid, req.user.id);
       if (!order) return res.status(404).json({ error: 'Order கிடைக்கவில்லை' });
-      const r = await fulfil(supabase, order, pid);
+      const r = await fulfil(db, order, pid);
       if (!r.ok) return res.status(409).json({ error: 'Chat திறக்க முடியவில்லை: ' + (r.code || 'error') });
       res.json({ ok: true });
     } catch (e) {
@@ -140,20 +137,23 @@ export function verifySignature(orderId, paymentId, signature, secret) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-async function fulfil(supabase, order, paymentId) {
-  const { data, error } = await supabase.rpc('mat_record_unlock', {
-    a: order.user_id, b: order.other_id, payer: order.user_id,
-    p_order: order.order_id, p_payment: paymentId, p_amount: order.amount_paise
-  });
-  if (error) throw new Error(error.message);
-  return data || { ok: false };
+// records the unlock (only when the interest was accepted) and marks the order paid — one transaction
+async function fulfil(db, order, paymentId) {
+  const a = order.user_id, b = order.other_id, lo = a < b ? a : b, hi = a < b ? b : a;
+  const accepted = "exists (select 1 from mat_interests where status = 'accepted' and ((from_user = ?1 and to_user = ?2) or (from_user = ?2 and to_user = ?1)))";
+  const r = await db.batch([
+    { sql: `select ${accepted} as ok`, params: [a, b] },
+    { sql: `insert or ignore into mat_unlocks (user_a, user_b, paid_by, order_id, payment_id, amount_paise) select ?3, ?4, ?1, ?5, ?6, ?7 where ${accepted}`, params: [a, b, lo, hi, order.order_id, paymentId, order.amount_paise] },
+    { sql: `update mat_orders set status = 'paid' where order_id = ?3 and ${accepted}`, params: [a, b, order.order_id] }
+  ]);
+  return r.results[0][0] && r.results[0][0].ok ? { ok: true } : { ok: false, code: 'not_accepted' };
 }
 
 // Backup path: the existing Razorpay webhook calls this for payments whose notes.app === 'matrimony'
-export async function matrimonyOnCaptured(supabase, payment) {
+export async function matrimonyOnCaptured(db, payment) {
   if (!payment || !payment.notes || payment.notes.app !== 'matrimony') return false;
-  const { data: order } = await supabase.from('mat_orders').select('*').eq('order_id', payment.order_id).maybeSingle();
+  const order = await db.first('select * from mat_orders where order_id = ?', payment.order_id);
   if (!order || Number(payment.amount) !== Number(order.amount_paise)) return true; // ours, but nothing to do / mismatch
-  await fulfil(supabase, order, payment.id);
+  await fulfil(db, order, payment.id);
   return true;
 }
