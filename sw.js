@@ -5,7 +5,7 @@
 // (i.e. loading the app itself). It does not touch any other request type,
 // so it can never interfere with blob: URLs, downloads, CDN library loads,
 // backend API calls, or anything a tool does while running.
-const CACHE_NAME = 'pdf-tools-shell-v31';
+const CACHE_NAME = 'pdf-tools-shell-v33';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -25,6 +25,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.mode !== 'navigate') return; // only the page load itself
+  if (new URL(event.request.url).pathname.indexOf('/matrimony') === 0) return; // matrimony is its own app: never fall back to the tools shell
   event.respondWith(
     fetch(event.request).catch(() => caches.match('./index.html'))
   );

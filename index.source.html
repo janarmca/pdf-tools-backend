@@ -243,6 +243,7 @@
   .upz{display:flex; align-items:center; gap:14px; flex-wrap:wrap; border:2px dashed #B8CCF0; border-radius:20px; padding:16px 18px; background:linear-gradient(180deg,#F3F7FF,#EAF1FE);}
   .upz .ic{width:54px; height:54px; border-radius:16px; background:var(--brand-dark); color:#fff; display:flex; align-items:center; justify-content:center; font-size:26px; flex:0 0 auto;}
   .upz .tx{flex:1; min-width:180px;}
+  .mtb{background:linear-gradient(135deg,#7A1233,#B5532B); box-shadow:0 8px 20px rgba(122,18,51,.28);}
   .kv{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:20px; text-decoration:none; color:#fff; background:linear-gradient(135deg,#c2255c,#c2410c); box-shadow:0 8px 20px rgba(194,37,92,.28);}
   @media (max-width:760px){ .cat2-grid{grid-template-columns:1fr 1fr;} .hero2 h1{font-size:23px;} .hero2{padding:22px 16px 16px; border-radius:20px;} .qt-grid{grid-template-columns:repeat(3,1fr); gap:8px;} .qt{padding:12px 8px; align-items:center; text-align:center; gap:8px;} .qt .ic{width:44px; height:44px; font-size:22px;} .qt .nm{font-size:12.5px;} .grid2{grid-template-columns:1fr;} .cat2{min-height:128px;} }
   @media (max-width:360px){ .cat2-grid{grid-template-columns:1fr;} }
@@ -284,6 +285,20 @@
     .topbar .free-badge{display:none;}
     .hero2-pill:nth-child(n+4){display:none;}
     .hero2-pill{font-size:11.5px; padding:5px 10px;}
+  }
+
+  /* ---- hero tightening + category count badge ---- */
+  .cat2 .n{position:static; align-self:flex-start; margin-bottom:8px; background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.35); padding:3px 11px; font-size:12px;}
+  .cat2 .ico{margin-bottom:2px;}
+  @media (max-width:520px){
+    .hero2{padding:16px 14px 14px; margin-top:2px;}
+    .hero2 h1{font-size:21px; line-height:1.3; margin:0 0 4px;}
+    .hero2 p{font-size:13px; line-height:1.5; margin:0 0 12px;}
+    .hero2-search input{padding:14px 14px 14px 46px;}
+    .hero2-pills{flex-wrap:nowrap; gap:6px; margin-top:10px; overflow:hidden;}
+    .hero2-pill{white-space:nowrap; font-size:11px; padding:5px 9px;}
+    .hero2-pill:nth-child(n+3){display:none;}
+    .sec2{margin-top:18px;}
   }
 </style>
 </head>
@@ -508,13 +523,14 @@ const TOOLS = [
   {id:'rupeewords', name:'Amount in Words — ரூபாய் எழுத்தில்', desc:'Write any rupee amount in words, in Tamil and English — for cheques, invoices and receipts', icon:'🔢', color:'#2F9E44', cat:'business', cost:0, lazy:'extra'},
   {id:'interestcalc', name:'Interest Calculator — வட்டிக் கணிப்பான்', desc:'Simple and compound interest, including ₹ per 100 per month — with a year-wise table', icon:'💰', color:'#E67700', cat:'business', cost:0, lazy:'extra'},
   {id:'casecvt', name:'Text Case & Clean-up — எழுத்து வடிவ மாற்றி', desc:'UPPER, lower, Title case, remove extra spaces, sort and de-duplicate lines', icon:'🔠', color:'#6741D9', cat:'business', cost:0, lazy:'extra'},
-  {id:'igtools', name:'Instagram Helper — Instagram உதவியாளர்', desc:'Caption & hashtag counter, hashtag builder, bio fonts and post sizes — free, on your device', icon:'📸', color:'#C13584', cat:'business', cost:0, lazy:'extra'},
+  {id:'biodata', name:'Marriage Biodata Maker — திருமணப் பயோடேட்டா', desc:'Make a clean printable biodata with photo in Tamil or English — PDF or image, free and private', icon:'💍', color:'#9C1F4E', cat:'business', cost:0, lazy:'extra'},
   {id:'jsonfmt', name:'JSON Formatter — JSON சரிபார்ப்பு', desc:'Format, minify and validate JSON with friendly error positions', icon:'🧩', color:'#0B7285', cat:'business', cost:0, lazy:'extra'},
   {id:'b64', name:'Base64 Converter — Base64 மாற்றி', desc:'Text or small file to Base64 and back — Tamil works correctly', icon:'🔐', color:'#364FC7', cat:'business', cost:0, lazy:'extra'},
   {id:'textdiff', name:'Compare Two Texts — உரை ஒப்பீடு', desc:'See exactly which lines were added, removed or unchanged', icon:'🆚', color:'#C2255C', cat:'business', cost:0, lazy:'extra'},
   {id:'bmicalc', name:'BMI Calculator — BMI கணிப்பான்', desc:'Body Mass Index with healthy weight range — a screening number, not a diagnosis', icon:'⚖️', color:'#0CA678', cat:'education', cost:0, lazy:'extra'},
   {id:'namepicker', name:'Name Picker & Groups — பெயர் சீட்டு', desc:'Pick a student at random or make fair groups — for teachers', icon:'🎲', color:'#D6336C', cat:'education', cost:0, lazy:'extra'},
   {id:'numsys', name:'Number Systems — எண் முறை மாற்றி', desc:'Decimal, binary, octal and hex with step-by-step working', icon:'🧮', color:'#1971C2', cat:'education', cost:0, lazy:'extra'},
+  {id:'tneacutoff', name:'TNEA Cut-off Calculator — பொறியியல் கட்-ஆஃப்', desc:'Engineering cut-off out of 200 from 12th Maths, Physics, Chemistry, plus the Maths mark you need for a target', icon:'🎯', color:'#0B7285', cat:'education', cost:0, lazy:'extra'},
 
 ];
 
@@ -1152,6 +1168,7 @@ function render(){
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
+      <a href="/matrimony/" style="color:var(--sub);">திருமண அமைப்பகம்</a>
       <a href="/terms" style="color:var(--sub);">Terms</a>
       <a href="/privacy" style="color:var(--sub);">Privacy</a>
       <a href="/refund" style="color:var(--sub);">Refund Policy</a>
@@ -1548,7 +1565,8 @@ passgen:['கடவுச்சொல் உருவாக்கி','வலு
 rupeewords:['ரூபாய் எழுத்தில்','தொகையைத் தமிழிலும் ஆங்கிலத்திலும் எழுத்தில் எழுது'],
 interestcalc:['வட்டிக் கணிப்பான்','தனி வட்டி, கூட்டு வட்டி, மீட்டர் வட்டி'],
 casecvt:['எழுத்து வடிவ மாற்றி','பெரிய / சிறிய எழுத்து, வரிகளை ஒழுங்குபடுத்து'],
-igtools:['Instagram உதவியாளர்','Caption, hashtag, bio எழுத்து வடிவம், படத்தின் அளவு'],
+biodata:['திருமணப் பயோடேட்டா','புகைப்படத்துடன் அழகான பயோடேட்டா — PDF / படம், இலவசம்'],
+tneacutoff:['பொறியியல் கட்-ஆஃப்','12-ஆம் வகுப்பு Maths, Physics, Chemistry-யிலிருந்து 200-க்கு கட்-ஆஃப்'],
 jsonfmt:['JSON சரிபார்ப்பு','JSON-ஐ அழகாக்கு, சரிபார்'],
 b64:['Base64 மாற்றி','எழுத்து ↔ Base64 (தமிழும் சரியாக வரும்)'],
 textdiff:['உரை ஒப்பீடு','இரு உரைகளின் வேறுபாடு'],
@@ -1592,7 +1610,7 @@ const CAT_V2 = {
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
 };
 const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','gstinvoice','tamiltyping','rupeewords','resumebuilder','emicalc'];
-const NEW_TOOL_IDS = ['igtools','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
+const NEW_TOOL_IDS = ['tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
 function esc2(s){ return escapeHtml(String(s)); }
 
 function renderHero(){
@@ -1602,8 +1620,8 @@ function renderHero(){
     : (__appLang==='hi' ? 'PDF, इमेज, वीडियो, GST और तमिल टूल्स — एक ही जगह। ज़्यादातर मुफ़्त।' : 'PDF, image, video, GST and Tamil tools in one place. Most are completely free.');
   const narrow = window.innerWidth < 560;
   const ph = ta ? (narrow ? 'கருவியைத் தேடு… (சுருக்கு, GST)' : `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”`) : (narrow ? 'Search tools… (compress, GST)' : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`);
-  const pills = ta ? [`🧰 ${TOOLS.length} கருவிகள்`,'✓ பெரும்பாலானவை இலவசம்','🔒 கோப்பு உங்கள் போனிலேயே இருக்கும்','⚡ AI-க்கு மட்டும் credit']
-    : [`🧰 ${TOOLS.length} tools`,'✓ Most are free','🔒 Files stay on your device','⚡ Credits only for AI'];
+  const pills = ta ? [`🧰 ${TOOLS.length} கருவிகள்`,'✓ இலவசம்','🔒 கோப்பு உங்கள் போனிலேயே','⚡ AI-க்கு மட்டும் credit']
+    : [`🧰 ${TOOLS.length} tools`,'✓ Mostly free','🔒 Files stay on device','⚡ Credits only for AI'];
   const h = el(`
     <section class="hero2 tamil${__searchQuery.trim()?' searching':''}">
       <h1>${title}</h1>
@@ -1876,6 +1894,15 @@ function renderHomeBody(){
       </div>
       <div style="font-weight:900; font-size:22px;">→</div></a></div>`));
 
+    // 3b. Matrimony (separate site section: /matrimony/)
+    holder.appendChild(el(`<div class="sec2"><a class="kv mtb tamil" href="/matrimony/">
+      <div style="font-size:38px; line-height:1;">💍</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:900; font-size:17px;">சௌடேஸ்வரி திருமண அமைப்பகம்</div>
+        <div style="font-size:12.5px; opacity:.95; margin-top:2px; line-height:1.5;">கன்னட தேவாங்கர் சமூகத்திற்காக · அனைத்து சமூகத்தினரும் வரவேற்கப்படுகிறார்கள் · Interest இலவசம்</div>
+      </div>
+      <div style="font-weight:900; font-size:22px;">→</div></a></div>`));
+
     // 4. Recently used
     const recentTools = getRecentTools().map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
     if(recentTools.length){
@@ -1970,7 +1997,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261010b`;
+    s.src = `category-${cat}.js?v=20261010c`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3247,6 +3274,7 @@ const TOOL_LIBS = {
   aihandwriting:['docx','html2canvas','pdflib'], aisummarize:['docx','html2canvas','pdflib'],
   aitranslate:['docx','html2canvas','pdflib'], askai:['docx','html2canvas','pdflib'],
   airesume:['docx','html2canvas','pdflib'],
+  biodata:['html2canvas','pdflib'],
   aiexcelcompare:['xlsx'], img2excel:['tesseract','exceljs'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
   compress:['pdfjs','pdflib'], emicalc:['xlsx'], excel2pdf:['pdflib','xlsx'], excel2word:['docx','xlsx'],
   expensetracker:['xlsx'], extractpages:['pdflib'], gstinvoice:['pdflib'], img2pdf:['pdflib'],

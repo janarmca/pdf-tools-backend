@@ -267,6 +267,7 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/ai-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7' },
     { loc: `${SITE}/tn-rent-agreement`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/tn-sale-deed`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/blog/how-to-merge-pdf-files-free`, freq: 'monthly', pri: '0.7' },
