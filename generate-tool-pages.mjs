@@ -135,7 +135,7 @@ function pageHtml(t, slug, related) {
 <body>
   ${HEADER}
   <div class="wrap">
-    <div class="crumb"><a href="/">PDF Tools India</a> › <a href="/${t.cat}-tools">${escapeHtml(theme.ta)}</a> › ${escapeHtml(t.name)}</div>
+    <div class="crumb"><a href="/?home=1">PDF Tools India</a> › <a href="/${t.cat}-tools">${escapeHtml(theme.ta)}</a> › ${escapeHtml(t.name)}</div>
     <div class="hero" style="background:linear-gradient(135deg,${t.color},#1d2540);">
       <div class="row">
         <div class="big">${t.icon}</div>
@@ -236,7 +236,7 @@ function hubHtml(cat, items) {
 <body>
   ${HEADER}
   <div class="wrap">
-    <div class="crumb"><a href="/">PDF Tools India</a> › ${escapeHtml(th.ta)}</div>
+    <div class="crumb"><a href="/?home=1">PDF Tools India</a> › ${escapeHtml(th.ta)}</div>
     <div class="hero" style="background:${th.g};">
       <div class="row"><div class="big">${th.icon}</div><div><h1>${escapeHtml(th.ta)}</h1><div class="en">${items.length} free tools · ${escapeHtml(th.en)}</div></div></div>
       <p>${escapeHtml(m.ta)}</p>

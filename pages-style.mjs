@@ -3,13 +3,13 @@
 export const CAT_THEME = {
   pdf:       { g:'linear-gradient(135deg,#4263EB,#2B3F9E)', icon:'📄', ta:'PDF கருவிகள்', en:'PDF Tools',       line:'PDF-ஐ இணை, பிரி, சுருக்கு, மாற்று, கையொப்பமிடு' },
   image:     { g:'linear-gradient(135deg,#9C36B5,#5F2A8A)', icon:'🖼️', ta:'படக் கருவிகள்', en:'Image Tools',     line:'படத்தைச் சுருக்கு, மாற்று, Background நீக்கு' },
-  video:     { g:'linear-gradient(135deg,#F08C00,#C2410C)', icon:'🎬', ta:'வீடியோ கருவிகள்', en:'Video Tools',   line:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு' },
-  business:  { g:'linear-gradient(135deg,#2F9E44,#17613A)', icon:'💼', ta:'வணிகக் கருவிகள்', en:'Business Tools', line:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்' },
-  ai:        { g:'linear-gradient(135deg,#0CA5A5,#0B6070)', icon:'🤖', ta:'AI கருவிகள்', en:'AI Tools',          line:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)' },
-  education: { g:'linear-gradient(135deg,#E64980,#B02A5B)', icon:'🎓', ta:'கல்விக் கருவிகள்', en:'Education Tools', line:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் மற்றும் மாணவர் கருவிகள்' },
+  video:     { g:'linear-gradient(135deg,#C2410C,#9A3412)', icon:'🎬', ta:'வீடியோ கருவிகள்', en:'Video Tools',   line:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு' },
+  business:  { g:'linear-gradient(135deg,#1F7A38,#14532D)', icon:'💼', ta:'வணிகக் கருவிகள்', en:'Business Tools', line:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்' },
+  ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', icon:'🤖', ta:'AI கருவிகள்', en:'AI Tools',          line:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)' },
+  education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', icon:'🎓', ta:'கல்விக் கருவிகள்', en:'Education Tools', line:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் மற்றும் மாணவர் கருவிகள்' },
 };
 export const BASE_CSS = `
-  :root{--ink:#20242B;--sub:#6B7280;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;}
+  :root{--ink:#20242B;--sub:#566070;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;}
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
   body{margin:0;font-family:'Noto Sans Tamil',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
@@ -43,10 +43,10 @@ export const BASE_CSS = `
   .tc .nm small{display:block;font-weight:600;font-size:11px;color:var(--sub);}
   .tc .ds{font-size:12.5px;color:var(--sub);line-height:1.45;margin-top:2px;}
   .tc .bd{flex:0 0 auto;align-self:flex-start;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:#E3F6EB;color:#176B45;}
-  .tc .bd.ai{background:#FFF3E0;color:#9A6700;}
+  .tc .bd.ai{background:#FFF3E0;color:#7A5200;}
   .crumb{font-size:12.5px;color:var(--sub);margin:6px 2px 12px;} .crumb a{text-decoration:none;color:var(--sub);} .crumb a:hover{text-decoration:underline;}
   footer{margin-top:30px;text-align:center;font-size:12.5px;color:var(--sub);} footer a{color:var(--sub);margin:0 6px;}
   @media (max-width:600px){.hero h1{font-size:21px}.hero{padding:20px 16px;border-radius:20px}.hero .big{width:56px;height:56px;font-size:28px}.grid{grid-template-columns:1fr}}
 `;
-export const HEADER = `<div class="top"><a href="/"><img src="/lockup.svg" alt="PDF Tools India" height="40"></a><a class="home" href="/">← முதன்மைப் பக்கம்</a></div>`;
-export const FOOTER = `<footer><div><a href="/">முதன்மை</a><a href="/pdf-tools">PDF</a><a href="/image-tools">படம்</a><a href="/video-tools">வீடியோ</a><a href="/business-tools">வணிகம்</a><a href="/ai-tools">AI</a><a href="/education-tools">கல்வி</a><a href="/learn/">கல்வி களஞ்சியம்</a></div><div style="margin-top:8px;"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/contact">Contact</a></div><div style="margin-top:8px;">உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும் · Your files stay on your device</div></footer>`;
+export const HEADER = `<div class="top"><a href="/?home=1"><img src="/lockup.svg" alt="PDF Tools India" height="40"></a><a class="home" href="/?home=1">← முதன்மைப் பக்கம்</a></div>`;
+export const FOOTER = `<footer><div><a href="/?home=1">முதன்மை</a><a href="/pdf-tools">PDF</a><a href="/image-tools">படம்</a><a href="/video-tools">வீடியோ</a><a href="/business-tools">வணிகம்</a><a href="/ai-tools">AI</a><a href="/education-tools">கல்வி</a><a href="/learn/">கல்வி களஞ்சியம்</a></div><div style="margin-top:8px;"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/contact">Contact</a></div><div style="margin-top:8px;">உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும் · Your files stay on your device</div></footer>`;

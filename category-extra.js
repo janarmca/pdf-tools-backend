@@ -2852,4 +2852,138 @@
   };
   TOOL_IMPL.namepicker._f = { randInt: B_randInt, shuffle: B_shuffle, makeGroups: B_makeGroups, parseNames: B_parseNames, remaining: B_remaining, groupsText: B_groupsText };
 
+
+  /* ===================================================================
+     Instagram Helper (igtools) — caption counter + line-break keeper,
+     hashtag builder, bio / name font styler, post-size cheat-sheet.
+     100% on-device, no AI, free.
+     =================================================================== */
+  const IG_STYLES = [
+    ['bold', 'Bold  𝗔𝗯𝗰', 0x1D5D4, 0x1D5EE, 0x1D7EC],
+    ['italic', 'Italic  𝘈𝘣𝘤', 0x1D608, 0x1D622, 0],
+    ['bolditalic', 'Bold italic  𝘼𝙗𝙘', 0x1D63C, 0x1D656, 0],
+    ['mono', 'Mono  𝙰𝚋𝚌', 0x1D670, 0x1D68A, 0x1D7F6],
+    ['circle', 'Circle  Ⓐⓑⓒ', 0x24B6, 0x24D0, 0],
+    ['wide', 'Wide  Ａｂｃ', 0xFF21, 0xFF41, 0xFF10]
+  ];
+  function IG_map(str, up, lo, dg) {
+    let o = '';
+    for (const ch of String(str)) {
+      const c = ch.codePointAt(0);
+      if (c >= 65 && c <= 90 && up) o += String.fromCodePoint(up + c - 65);
+      else if (c >= 97 && c <= 122 && lo) o += String.fromCodePoint(lo + c - 97);
+      else if (c >= 48 && c <= 57 && dg) o += String.fromCodePoint(dg + c - 48);
+      else o += ch;
+    }
+    return o;
+  }
+  function IG_tags(raw) {
+    const seen = new Set(), out = [];
+    String(raw).split(/[\n,;]+/).forEach(function (part) {
+      const words = part.replace(/#/g, ' ').replace(/[^\p{L}\p{M}\p{N}_\s]/gu, ' ').split(/\s+/).filter(Boolean);
+      if (!words.length) return;
+      const tag = '#' + words.map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('');
+      const k = tag.toLowerCase();
+      if (!seen.has(k)) { seen.add(k); out.push(tag); }
+    });
+    return out;
+  }
+  function IG_count(text) {
+    const tags = (String(text).match(/#[\p{L}\p{M}\p{N}_]+/gu) || []).length;
+    return { chars: Array.from(String(text)).length, tags: tags, lines: text ? String(text).split('\n').length : 0 };
+  }
+  TOOL_IMPL.igtools = {
+    mount(body) {
+      const root = B_root(body);
+      const SIZES = [
+        [T('போஸ்ட் (நிமிர்ந்த)', 'Post (portrait)'), '1080 × 1350', '4:5'],
+        [T('போஸ்ட் (சதுரம்)', 'Post (square)'), '1080 × 1080', '1:1'],
+        [T('ஸ்டோரி / ரீல்', 'Story / Reel'), '1080 × 1920', '9:16'],
+        [T('புரொஃபைல் படம்', 'Profile photo'), '320 × 320', '1:1']
+      ];
+      root.innerHTML = purpose('இது எதற்கு? Instagram caption-ல் எழுத்து/hashtag எண்ணிக்கை பார்க்க, hashtag-களை உருவாக்க, bio-வுக்கு அழகான எழுத்து வடிவம் தர, சரியான படத்தின் அளவை அறிய. எல்லாம் உங்கள் போனிலேயே நடக்கும் — இலவசம்.', 'Count caption characters and hashtags, build hashtags, style your bio text and check the right post sizes. Runs on your device — free.') +
+        '<div class="cx-chips" data-k="tabs">' +
+        '<button type="button" class="cx-chip on" data-tab="cap">' + T('Caption', 'Caption') + '</button>' +
+        '<button type="button" class="cx-chip" data-tab="tag">#' + T('Hashtag', 'Hashtags') + '</button>' +
+        '<button type="button" class="cx-chip" data-tab="bio">' + T('Bio எழுத்து', 'Bio fonts') + '</button>' +
+        '<button type="button" class="cx-chip" data-tab="size">' + T('அளவுகள்', 'Sizes') + '</button></div>' +
+        /* caption */
+        '<div data-p="cap">' +
+        '<div class="cx-f"><label>' + T('உங்கள் caption', 'Your caption') + '</label><textarea class="cxb-ta" rows="7" data-k="cin" spellcheck="false" placeholder="' + esc('இங்கே caption எழுதுங்கள் அல்லது ஒட்டுங்கள்…') + '"></textarea></div>' +
+        '<div class="cx-small" data-k="cstat"></div><div data-k="cwarn"></div>' +
+        '<div class="cx-actions"><button type="button" class="cx-btn" data-act="keep">⠀ ' + T('வரி இடைவெளியைக் காக்கும்படி மாற்று', 'Keep my blank lines') + '</button></div>' +
+        '<div class="cx-small">' + T('Instagram சில நேரம் வெற்று வரிகளை நீக்கிவிடும். இந்த பொத்தான் கண்ணுக்குத் தெரியாத குறியை வைத்து இடைவெளியைக் காக்கும்.', 'Instagram sometimes deletes blank lines. This adds an invisible mark so your spacing stays.') + '</div>' +
+        '<div class="cx-f"><label>' + T('முடிவு', 'Result') + '</label><textarea class="cxb-ta" rows="5" data-k="cout" readonly></textarea></div><div data-k="cact"></div></div>' +
+        /* hashtags */
+        '<div data-p="tag" style="display:none">' +
+        '<div class="cx-f"><label>' + T('சொற்கள் (ஒவ்வொரு வரி அல்லது கமா)', 'Keywords (one per line or comma)') + '</label><textarea class="cxb-ta" rows="5" data-k="tin" spellcheck="false" placeholder="' + esc('chennai food\nதமிழ் கல்வி\nstudy tips') + '"></textarea></div>' +
+        '<div class="cx-small" data-k="tstat"></div><div data-k="twarn"></div>' +
+        '<div class="cx-f"><label>' + T('Hashtag-கள்', 'Hashtags') + '</label><textarea class="cxb-ta" rows="4" data-k="tout" readonly></textarea></div><div data-k="tact"></div></div>' +
+        /* bio */
+        '<div data-p="bio" style="display:none">' +
+        '<div class="cx-f"><label>' + T('உங்கள் பெயர் / Bio (ஆங்கில எழுத்துகள் மாறும்)', 'Your name / bio (English letters change)') + '</label><textarea class="cxb-ta" rows="3" data-k="bin" spellcheck="false" placeholder="PDF Tools India"></textarea></div>' +
+        '<div class="cx-small" data-k="bstat"></div><div data-k="blist"></div>' +
+        '<div class="cx-small">' + T('தமிழ் எழுத்துகள் மாறாது. சில போன்களில் இந்த வடிவங்கள் சதுரமாகத் தெரியலாம்; Bio-வில் 150 எழுத்துகள் வரை மட்டுமே.', 'Tamil letters stay as they are. Some phones may show boxes for these styles; bio limit is 150 characters.') + '</div></div>' +
+        /* sizes */
+        '<div data-p="size" style="display:none"><div class="cx-small" style="margin-bottom:8px">' + T('சரியான அளவில் படம் தயாரித்தால் Instagram வெட்டாது.', 'Prepare images at these sizes so Instagram does not crop them.') + '</div>' +
+        '<table class="cx-tbl" style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:6px">' + T('வகை', 'Type') + '</th><th style="text-align:left;padding:6px">px</th><th style="text-align:left;padding:6px">' + T('விகிதம்', 'Ratio') + '</th></tr></thead><tbody>' +
+        SIZES.map(function (r) { return '<tr><td style="padding:6px;border-top:1px solid var(--line)">' + r[0] + '</td><td style="padding:6px;border-top:1px solid var(--line);font-weight:800">' + r[1] + '</td><td style="padding:6px;border-top:1px solid var(--line)">' + r[2] + '</td></tr>'; }).join('') +
+        '</tbody></table><div class="cx-small" style="margin-top:8px">' + T('படத்தின் அளவை மாற்ற: "படம் அளவு மாற்று / Image Resize" கருவியைப் பயன்படுத்துங்கள்.', 'To change a picture’s size use the Image Resize tool.') + '</div></div>';
+
+      const tabs = $$(root, '[data-tab]'), panels = $$(root, '[data-p]');
+      tabs.forEach(function (b) {
+        b.onclick = B_safe(function () {
+          const k = b.getAttribute('data-tab');
+          tabs.forEach(function (x) { x.classList.toggle('on', x === b); });
+          panels.forEach(function (p) { p.style.display = p.getAttribute('data-p') === k ? '' : 'none'; });
+        });
+      });
+      /* caption */
+      const cin = $(root, '[data-k=cin]'), cout = $(root, '[data-k=cout]');
+      let cres = '';
+      const cact = actionsEl(function () { return cres; });
+      $(root, '[data-k=cact]').appendChild(cact);
+      const cstat = B_safe(function () {
+        const c = IG_count(cin.value);
+        $(root, '[data-k=cstat]').textContent = T('எழுத்துகள்', 'Characters') + ': ' + c.chars + ' / 2200 · Hashtags: ' + c.tags + ' / 30 · ' + T('வரிகள்', 'Lines') + ': ' + c.lines;
+        $(root, '[data-k=cwarn]').innerHTML = (c.chars > 2200 ? msgHtml(T('Caption 2200 எழுத்துகளைத் தாண்டிவிட்டது.', 'Caption is over 2200 characters.')) : '') + (c.tags > 30 ? msgHtml(T('30-க்கு மேல் hashtag வைக்க முடியாது.', 'Instagram allows at most 30 hashtags.')) : '');
+      });
+      cin.addEventListener('input', cstat);
+      $(root, '[data-act=keep]').onclick = B_safe(function () {
+        if (!cin.value.trim()) { $(root, '[data-k=cwarn]').innerHTML = msgHtml(T('முதலில் caption-ஐ உள்ளிடவும்.', 'Enter your caption first.')); return; }
+        cres = cin.value.split('\n').map(function (l) { return l.trim() === '' ? '⠀' : l; }).join('\n');
+        cout.value = cres; cstat();
+      });
+      /* hashtags */
+      const tin = $(root, '[data-k=tin]'), tout = $(root, '[data-k=tout]');
+      let tres = '';
+      $(root, '[data-k=tact]').appendChild(actionsEl(function () { return tres; }));
+      tin.addEventListener('input', B_safe(function () {
+        const list = IG_tags(tin.value);
+        tres = list.slice(0, 30).join(' ');
+        tout.value = tres;
+        $(root, '[data-k=tstat]').textContent = list.length ? 'Hashtags: ' + Math.min(list.length, 30) + ' / 30' : '';
+        $(root, '[data-k=twarn]').innerHTML = list.length > 30 ? msgHtml(T('30-க்கு மேல் இருப்பதால் முதல் 30 மட்டும் காட்டப்படுகிறது.', 'Only the first 30 are shown (Instagram limit).')) : '';
+      }));
+      /* bio */
+      const bin = $(root, '[data-k=bin]'), blist = $(root, '[data-k=blist]');
+      bin.addEventListener('input', B_safe(function () {
+        blist.innerHTML = '';
+        $(root, '[data-k=bstat]').textContent = bin.value ? T('எழுத்துகள்', 'Characters') + ': ' + Array.from(bin.value).length + ' / 150' : '';
+        if (!bin.value.trim()) return;
+        IG_STYLES.forEach(function (s) {
+          const txt = IG_map(bin.value, s[2], s[3], s[4]);
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0;background:#fff';
+          const span = document.createElement('div'); span.style.cssText = 'flex:1;min-width:0;word-break:break-word;font-size:15px'; span.textContent = txt;
+          const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'cx-btn sec'; btn.style.cssText = 'padding:8px 12px;flex:0 0 auto'; btn.textContent = '📋';
+          btn.onclick = function () { copyText(txt, btn); };
+          row.appendChild(span); row.appendChild(btn); blist.appendChild(row);
+        });
+      }));
+      cstat();
+    }
+  };
+  TOOL_IMPL.igtools._f = { map: IG_map, tags: IG_tags, count: IG_count };
+
 })();

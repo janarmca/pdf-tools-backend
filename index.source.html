@@ -32,7 +32,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
   :root{
-    --ink:#20242B; --sub:#6B7280; --line:#E6E8EC; --bg:#F6F7FB; --card:#FFFFFF;
+    --ink:#20242B; --sub:#566070; --line:#E6E8EC; --bg:#F6F7FB; --card:#FFFFFF;
     --brand:#3752A6; --brand-dark:#28407F; --accent:#E8894A; --accent-dark:#C96A2C;
     --ok:#1E8E5A; --warn:#C0392B; --chip:#EEF1FA;
   }
@@ -243,9 +243,48 @@
   .upz{display:flex; align-items:center; gap:14px; flex-wrap:wrap; border:2px dashed #B8CCF0; border-radius:20px; padding:16px 18px; background:linear-gradient(180deg,#F3F7FF,#EAF1FE);}
   .upz .ic{width:54px; height:54px; border-radius:16px; background:var(--brand-dark); color:#fff; display:flex; align-items:center; justify-content:center; font-size:26px; flex:0 0 auto;}
   .upz .tx{flex:1; min-width:180px;}
-  .kv{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:20px; text-decoration:none; color:#fff; background:linear-gradient(135deg,#d6336c,#f08c00); box-shadow:0 8px 20px rgba(214,51,108,.28);}
+  .kv{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:20px; text-decoration:none; color:#fff; background:linear-gradient(135deg,#c2255c,#c2410c); box-shadow:0 8px 20px rgba(194,37,92,.28);}
   @media (max-width:760px){ .cat2-grid{grid-template-columns:1fr 1fr;} .hero2 h1{font-size:23px;} .hero2{padding:22px 16px 16px; border-radius:20px;} .qt-grid{grid-template-columns:repeat(3,1fr); gap:8px;} .qt{padding:12px 8px; align-items:center; text-align:center; gap:8px;} .qt .ic{width:44px; height:44px; font-size:22px;} .qt .nm{font-size:12.5px;} .grid2{grid-template-columns:1fr;} .cat2{min-height:128px;} }
   @media (max-width:360px){ .cat2-grid{grid-template-columns:1fr;} }
+
+  /* ---- mobile-first fixes (10 Oct) ---- */
+  .topbar{position:sticky; top:0; z-index:60; background:var(--bg); margin:0 -16px; padding:10px 16px; gap:8px; border-bottom:1px solid transparent; transition:border-color .2s, box-shadow .2s;}
+  .topbar.scrolled{border-bottom-color:var(--line); box-shadow:0 4px 14px rgba(20,30,60,.07);}
+  .tb-actions{display:flex; align-items:center; gap:8px; flex:0 0 auto;}
+  .langseg{display:flex; border:1.5px solid #B9C4E6; border-radius:12px; overflow:hidden; background:#fff; flex:0 0 auto;}
+  .langseg button{border:0; background:transparent; padding:0 11px; min-width:42px; min-height:38px; font:inherit; font-size:13px; font-weight:800; color:var(--brand-dark); cursor:pointer;}
+  .langseg button + button{border-left:1px solid #D9DFF2;}
+  .langseg button.on{background:var(--brand-dark); color:#fff;}
+  .tb-ic{display:none; border:1.5px solid #B9C4E6; background:#fff; border-radius:12px; width:40px; min-height:38px; font-size:17px; cursor:pointer; padding:0;}
+  .hero2.searching{padding:12px 14px;}
+  .hero2.searching h1,.hero2.searching p,.hero2.searching .hero2-pills{display:none;}
+  .hero2.searching .hero2-search input{box-shadow:none;}
+  .upz2{position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; border:2px dashed #9DB4E8; border-radius:22px; padding:22px 16px 18px; background:linear-gradient(180deg,#F3F7FF,#E8F0FE); cursor:pointer; transition:border-color .15s, background .15s, transform .15s;}
+  .upz2.over{border-color:var(--brand); background:#DCE8FF; transform:scale(1.01);}
+  .upz2 .ic{width:64px; height:64px; border-radius:20px; background:var(--brand-dark); color:#fff; display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 8px 18px rgba(40,64,127,.28);}
+  .upz2 .t{font-weight:900; font-size:18px; line-height:1.35; color:var(--ink);}
+  .upz2 .d{font-size:13px; color:var(--sub); line-height:1.55; max-width:460px;}
+  .upz2-btn{width:100%; max-width:340px; min-height:50px; padding:12px 20px !important; font-size:15.5px !important; border-radius:14px !important; margin-top:4px;}
+  .upz2 .fmts{display:flex; flex-wrap:wrap; justify-content:center; gap:6px;}
+  .upz2 .fmts span{background:#fff; border:1px solid #CBD6F2; border-radius:999px; padding:3px 11px; font-size:11.5px; font-weight:800; color:var(--brand-dark);}
+  .upz2 .priv{font-size:11.5px; color:var(--sub); font-weight:600;}
+  .upz2 .dragtxt{font-size:12.5px; color:var(--sub); font-weight:600;}
+  .upz2 .res{width:100%; margin-top:6px;}
+  .upz2 .res .pick{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:6px;}
+  .upz2 .res .pick button{min-height:46px; padding:10px 12px; border-radius:12px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font:inherit; font-weight:800; font-size:13.5px; cursor:pointer;}
+  .upz2 .res .pick button:active{background:var(--brand-dark); color:#fff;}
+  @media (hover:none){ .upz2 .dragtxt{display:none;} }
+  @media (max-width:520px){
+    .topbar{padding:8px 12px; margin:0 -16px;}
+    .topbar .brand{min-width:0; flex:0 1 auto;} .topbar .brand img{height:32px !important; max-width:30vw !important;}
+    .tb-actions{gap:6px;}
+    .langseg button{padding:0 8px; min-width:36px; min-height:36px; font-size:12px;}
+    .topbar .btn.tamil{padding:8px 11px !important;}
+    .topbar.scrolled .tb-ic{display:block;}
+    .topbar .free-badge{display:none;}
+    .hero2-pill:nth-child(n+4){display:none;}
+    .hero2-pill{font-size:11.5px; padding:5px 10px;}
+  }
 </style>
 </head>
 <body>
@@ -469,6 +508,7 @@ const TOOLS = [
   {id:'rupeewords', name:'Amount in Words — ரூபாய் எழுத்தில்', desc:'Write any rupee amount in words, in Tamil and English — for cheques, invoices and receipts', icon:'🔢', color:'#2F9E44', cat:'business', cost:0, lazy:'extra'},
   {id:'interestcalc', name:'Interest Calculator — வட்டிக் கணிப்பான்', desc:'Simple and compound interest, including ₹ per 100 per month — with a year-wise table', icon:'💰', color:'#E67700', cat:'business', cost:0, lazy:'extra'},
   {id:'casecvt', name:'Text Case & Clean-up — எழுத்து வடிவ மாற்றி', desc:'UPPER, lower, Title case, remove extra spaces, sort and de-duplicate lines', icon:'🔠', color:'#6741D9', cat:'business', cost:0, lazy:'extra'},
+  {id:'igtools', name:'Instagram Helper — Instagram உதவியாளர்', desc:'Caption & hashtag counter, hashtag builder, bio fonts and post sizes — free, on your device', icon:'📸', color:'#C13584', cat:'business', cost:0, lazy:'extra'},
   {id:'jsonfmt', name:'JSON Formatter — JSON சரிபார்ப்பு', desc:'Format, minify and validate JSON with friendly error positions', icon:'🧩', color:'#0B7285', cat:'business', cost:0, lazy:'extra'},
   {id:'b64', name:'Base64 Converter — Base64 மாற்றி', desc:'Text or small file to Base64 and back — Tamil works correctly', icon:'🔐', color:'#364FC7', cat:'business', cost:0, lazy:'extra'},
   {id:'textdiff', name:'Compare Two Texts — உரை ஒப்பீடு', desc:'See exactly which lines were added, removed or unchanged', icon:'🆚', color:'#C2255C', cat:'business', cost:0, lazy:'extra'},
@@ -1077,6 +1117,13 @@ function getRecentTools(){
 let __pendingSmartUploadFile = null;
 function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
+// Social profiles — fill in the full https URLs and they appear in the footer automatically (empty = hidden).
+const SOCIAL_LINKS = { instagram:'', youtube:'', facebook:'' };
+function socialLinksHtml(){
+  const defs = [['instagram','📸 Instagram','#C13584'],['youtube','▶️ YouTube','#C4302B'],['facebook','👍 Facebook','#1877F2']];
+  const items = defs.filter(d=>/^https:\/\//.test(SOCIAL_LINKS[d[0]]||'')).map(d=>`<a href="${SOCIAL_LINKS[d[0]]}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:${d[2]};color:#fff;font-weight:800;font-size:12.5px;text-decoration:none;">${d[1]}</a>`);
+  return items.length ? `<div style="margin-top:12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">${items.join('')}</div>` : '';
+}
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
@@ -1111,6 +1158,7 @@ function render(){
       <a href="/contact" style="color:var(--sub);">Contact</a>
     </div>
     <div style="margin-top:10px; font-weight:800; color:var(--ink); font-size:12.5px;">Developed by Janarthanan Thiyagarajan  &nbsp;·&nbsp; 📞 +91&nbsp;76676&nbsp;63922</div>
+    ${socialLinksHtml()}
     <div style="margin-top:12px;"><a href="https://sellwithboost.com" target="_blank" rel="noopener"><img src="https://sellwithboost.com/badge/pdf-tools-india.svg" alt="Listed on SellWithBoost" width="160" height="40"></a></div>
   </footer>`);
   app.appendChild(foot);
@@ -1292,9 +1340,9 @@ const I18N = {
   freeDesc: { en:'Most tools like Merge, Compress, Convert run entirely in your browser — no server cost.', ta:'Merge, Compress, Convert போன்ற பெரும்பாலான tools உங்க browser-லேயே இயங்கும் — server cost இல்லாதவை.', hi:'Merge, Compress, Convert जैसे अधिकांश tools पूरी तरह आपके browser में चलते हैं — कोई server cost नहीं।' },
   creditTitle: { en:'⚡ Why Some Tools Need Credits', ta:'⚡ ஏன் சில tools credit', hi:'⚡ कुछ tools को credit क्यों चाहिए' },
   creditDesc: { en:'AI tools call Google Gemini — we pass on only the real cost, with no hidden markup.', ta:'AI tools Gemini-ஐ அழைக்கின்றன — உண்மையான செலவை மட்டும், hidden markup இல்லாம காட்டுகிறோம்.', hi:'AI tools Gemini को call करते हैं — हम केवल असली लागत दिखाते हैं, कोई hidden markup नहीं।' },
-  uploadTitle: { en:'Drop your file here', ta:'உங்க கோப்பை இங்கே போடுங்கள்', hi:'अपनी फ़ाइल यहाँ डालें' },
-  uploadDesc: { en:'PDF, Word, Excel, Image, Video — whatever the format, we take you straight to the tool you need.', ta:'PDF, Word, Excel, Image, Video — எந்த format-ஆ இருந்தாலும், நேரடியா convert பண்ண தேவையான tool-க்கு கொண்டு போகிறோம்.', hi:'PDF, Word, Excel, Image, Video — कोई भी format हो, हम आपको सीधे ज़रूरी tool तक ले जाते हैं।' },
-  uploadBtn: { en:'📁 Choose File', ta:'📁 கோப்பை தேர்வு செய்யவும்', hi:'📁 फ़ाइल चुनें' },
+  uploadTitle: { en:'Choose your file', ta:'உங்கள் கோப்பைத் தேர்ந்தெடுங்கள்', hi:'अपनी फ़ाइल चुनें' },
+  uploadDesc: { en:'PDF, Word, Excel, image or video — we take you straight to the right tool.', ta:'PDF, Word, Excel, படம், வீடியோ — எதுவானாலும் சரியான கருவிக்கு நேராக அழைத்துச் செல்கிறோம்.', hi:'PDF, Word, Excel, इमेज या वीडियो — हम आपको सही टूल तक पहुँचाते हैं।' },
+  uploadBtn: { en:'📁 Choose File', ta:'📁 கோப்பைத் தேர்ந்தெடு', hi:'📁 फ़ाइल चुनें' },
   catLabels: {
     pdf: { en:'PDF', ta:'PDF', hi:'PDF' },
     business: { en:'Business', ta:'வணிகம்', hi:'बिज़नेस' },
@@ -1313,17 +1361,22 @@ function renderTopbar(){
       <div class="brand" style="cursor:pointer;" id="__logoHome">
         <img src="lockup.svg" alt="PDF Tools India — free tools" height="44" style="display:block;height:44px;width:auto;max-width:58vw;">
       </div>
-      <div id="__authWidget" style="display:flex; align-items:center; gap:8px;"></div>
+      <div id="__authWidget" class="tb-actions"></div>
     </div>
   `);
   const widget = bar.querySelector('#__authWidget');
-  const langBtn = el(`<button class="btn secondary" style="padding:7px 10px; font-size:12.5px; font-weight:800;" title="Language">🌐 ${__appLang.toUpperCase()}</button>`);
-  langBtn.onclick = ()=>{
-    const order = ['en','ta','hi'];
-    const next = order[(order.indexOf(__appLang)+1) % order.length];
-    setAppLang(next);
-  };
-  widget.appendChild(langBtn);
+  if(state.view==='home'){
+    const sb = el(`<button type="button" class="tb-ic" aria-label="Search">🔍</button>`);
+    sb.onclick = ()=>{ window.scrollTo({top:0, behavior:'smooth'}); setTimeout(()=>{ const i = document.getElementById('__toolSearch'); if(i) i.focus(); }, 320); };
+    widget.appendChild(sb);
+  }
+  const seg = el(`<div class="langseg" role="group" aria-label="Language"></div>`);
+  [['ta','தமிழ்'],['en','EN'],['hi','हि']].forEach(([code,label])=>{
+    const b = el(`<button type="button" class="${__appLang===code?'on':''}" aria-pressed="${__appLang===code}">${label}</button>`);
+    b.onclick = ()=>{ if(__appLang!==code) setAppLang(code); };
+    seg.appendChild(b);
+  });
+  widget.appendChild(seg);
   if(!AUTH_CONFIGURED){
     widget.appendChild(el(`<div class="free-badge">✓ No limits</div>`));
   } else if(!authState.session){
@@ -1341,6 +1394,10 @@ function renderTopbar(){
     widget.appendChild(wrap);
   }
   return bar;
+}
+if(!window.__tbScrollBound){
+  window.__tbScrollBound = true;
+  window.addEventListener('scroll', ()=>{ const t = document.querySelector('.topbar'); if(t) t.classList.toggle('scrolled', window.scrollY > 24); }, {passive:true});
 }
 // ===================== v2 HOME DESIGN =====================
 // Tamil-first display names/descriptions (display only — SEO pages keep the English names).
@@ -1491,6 +1548,7 @@ passgen:['கடவுச்சொல் உருவாக்கி','வலு
 rupeewords:['ரூபாய் எழுத்தில்','தொகையைத் தமிழிலும் ஆங்கிலத்திலும் எழுத்தில் எழுது'],
 interestcalc:['வட்டிக் கணிப்பான்','தனி வட்டி, கூட்டு வட்டி, மீட்டர் வட்டி'],
 casecvt:['எழுத்து வடிவ மாற்றி','பெரிய / சிறிய எழுத்து, வரிகளை ஒழுங்குபடுத்து'],
+igtools:['Instagram உதவியாளர்','Caption, hashtag, bio எழுத்து வடிவம், படத்தின் அளவு'],
 jsonfmt:['JSON சரிபார்ப்பு','JSON-ஐ அழகாக்கு, சரிபார்'],
 b64:['Base64 மாற்றி','எழுத்து ↔ Base64 (தமிழும் சரியாக வரும்)'],
 textdiff:['உரை ஒப்பீடு','இரு உரைகளின் வேறுபாடு'],
@@ -1528,13 +1586,13 @@ function toolSearchText(t){
 const CAT_V2 = {
   pdf:       { g:'linear-gradient(135deg,#4263EB,#2B3F9E)', big:'📄', ta:'PDF-ஐ இணை, பிரி, சுருக்கு, மாற்று, கையொப்பமிடு', en:'Merge, split, compress, convert and sign PDFs' },
   image:     { g:'linear-gradient(135deg,#9C36B5,#5F2A8A)', big:'🖼️', ta:'படத்தைச் சுருக்கு, மாற்று, Background நீக்கு', en:'Compress, convert and clean up photos' },
-  video:     { g:'linear-gradient(135deg,#F08C00,#C2410C)', big:'🎬', ta:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு', en:'Trim, merge, compress and convert video' },
-  business:  { g:'linear-gradient(135deg,#2F9E44,#17613A)', big:'💼', ta:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்', en:'GST bills, calculators, forms and documents' },
-  ai:        { g:'linear-gradient(135deg,#0CA5A5,#0B6070)', big:'🤖', ta:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)', en:'AI that reads, summarises and translates (needs credits)' },
-  education: { g:'linear-gradient(135deg,#E64980,#B02A5B)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
+  video:     { g:'linear-gradient(135deg,#C2410C,#9A3412)', big:'🎬', ta:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு', en:'Trim, merge, compress and convert video' },
+  business:  { g:'linear-gradient(135deg,#1F7A38,#14532D)', big:'💼', ta:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்', en:'GST bills, calculators, forms and documents' },
+  ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', big:'🤖', ta:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)', en:'AI that reads, summarises and translates (needs credits)' },
+  education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
 };
 const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','gstinvoice','tamiltyping','rupeewords','resumebuilder','emicalc'];
-const NEW_TOOL_IDS = ['rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
+const NEW_TOOL_IDS = ['igtools','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
 function esc2(s){ return escapeHtml(String(s)); }
 
 function renderHero(){
@@ -1542,17 +1600,23 @@ function renderHero(){
   const title = ta ? 'இன்று என்ன செய்ய வேண்டும்?' : (__appLang==='hi' ? 'आज क्या करना है?' : 'What would you like to do today?');
   const sub = ta ? 'PDF, படம், வீடியோ, GST, தமிழ் கருவிகள் — எல்லாம் ஒரே இடத்தில். பெரும்பாலானவை முற்றிலும் இலவசம்.'
     : (__appLang==='hi' ? 'PDF, इमेज, वीडियो, GST और तमिल टूल्स — एक ही जगह। ज़्यादातर मुफ़्त।' : 'PDF, image, video, GST and Tamil tools in one place. Most are completely free.');
-  const ph = ta ? `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”` : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`;
+  const narrow = window.innerWidth < 560;
+  const ph = ta ? (narrow ? 'கருவியைத் தேடு… (சுருக்கு, GST)' : `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”`) : (narrow ? 'Search tools… (compress, GST)' : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`);
   const pills = ta ? [`🧰 ${TOOLS.length} கருவிகள்`,'✓ பெரும்பாலானவை இலவசம்','🔒 கோப்பு உங்கள் போனிலேயே இருக்கும்','⚡ AI-க்கு மட்டும் credit']
     : [`🧰 ${TOOLS.length} tools`,'✓ Most are free','🔒 Files stay on your device','⚡ Credits only for AI'];
   const h = el(`
-    <section class="hero2 tamil">
+    <section class="hero2 tamil${__searchQuery.trim()?' searching':''}">
       <h1>${title}</h1>
       <p>${sub}</p>
       <div class="hero2-search"><span class="si">🔍</span><input type="search" id="__toolSearch" placeholder="${esc2(ph)}" value="${esc2(__searchQuery)}" autocomplete="off" enterkeyhint="search"></div>
       <div class="hero2-pills">${pills.map(p=>`<span class="hero2-pill">${p}</span>`).join('')}</div>
     </section>`);
-  h.querySelector('#__toolSearch').addEventListener('input', (e)=>{ __searchQuery = e.target.value; renderHomeBody(); });
+  h.querySelector('#__toolSearch').addEventListener('input', (e)=>{
+    const was = __searchQuery.trim(); __searchQuery = e.target.value;
+    h.classList.toggle('searching', !!__searchQuery.trim());
+    renderHomeBody();
+    if(!was && __searchQuery.trim()){ const y = h.getBoundingClientRect().top + window.scrollY - 60; window.scrollTo({top:Math.max(0,y), behavior:'smooth'}); }
+  });
   return h;
 }
 function renderTrustBanner(){ return el(`<div></div>`); }
@@ -1727,46 +1791,50 @@ const EXT_TO_CONVERT_TARGETS = {
 };
 function renderSmartUploadZone(){
   const wrap = el(`
-    <div class="upz tamil">
+    <div class="upz2 tamil" id="__upzDrop" role="group" aria-label="${esc2(tr('uploadTitle'))}">
       <div class="ic">📂</div>
-      <div class="tx">
-        <div style="font-weight:900; font-size:15.5px;">${tr('uploadTitle')}</div>
-        <div style="font-size:12.5px; color:var(--sub); margin-top:2px; line-height:1.5;">${tr('uploadDesc')}</div>
-        <div id="__smartUploadResult" style="margin-top:10px;"></div>
-      </div>
+      <div class="t">${tr('uploadTitle')}</div>
+      <div class="d">${tr('uploadDesc')}</div>
       <input type="file" id="__smartUploadInput" style="display:none;">
-      <button id="__smartUploadBtn" class="btn" style="padding:11px 20px; font-size:14px;">${tr('uploadBtn')}</button>
+      <button id="__smartUploadBtn" type="button" class="btn upz2-btn">${tr('uploadBtn')}</button>
+      <div class="dragtxt">${taOn() ? 'அல்லது கோப்பை இங்கே இழுத்து விடுங்கள்' : 'or drag and drop a file here'}</div>
+      <div class="fmts"><span>PDF</span><span>Word</span><span>Excel</span><span>JPG</span><span>PNG</span><span>MP4</span></div>
+      <div class="priv">${taOn() ? '🔒 கோப்பு உங்கள் சாதனத்தை விட்டு வெளியே போகாது' : '🔒 Your file never leaves your device'}</div>
+      <div id="__smartUploadResult" class="res"></div>
     </div>
   `);
   const input = wrap.querySelector('#__smartUploadInput');
-  wrap.querySelector('#__smartUploadBtn').onclick = ()=> input.click();
-  input.onchange = ()=>{
-    const f = input.files[0]; if(!f) return;
+  const resultEl = wrap.querySelector('#__smartUploadResult');
+  const openPicker = ()=> input.click();
+  wrap.querySelector('#__smartUploadBtn').onclick = (e)=>{ e.stopPropagation(); openPicker(); };
+  wrap.addEventListener('click', (e)=>{ if(e.target.closest('button,.res')) return; openPicker(); });
+  ['dragenter','dragover'].forEach(ev=> wrap.addEventListener(ev, (e)=>{ e.preventDefault(); wrap.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev=> wrap.addEventListener(ev, (e)=>{ e.preventDefault(); wrap.classList.remove('over'); }));
+  wrap.addEventListener('drop', (e)=>{ const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handle(f); });
+  input.onchange = ()=>{ const f = input.files[0]; if(f) handle(f); };
+  function handle(f){
+    const ta = taOn();
     const ext = (f.name.split('.').pop()||'').toLowerCase();
     const category = EXT_TO_CATEGORY[ext];
     const convertTargets = EXT_TO_CONVERT_TARGETS[ext];
-    const resultEl = wrap.querySelector('#__smartUploadResult');
     resultEl.innerHTML = '';
     if(convertTargets && convertTargets.length){
-      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145; margin-bottom:8px;">✓ "${escapeHtml(f.name)}" — எதற்கு convert பண்ணணும்?</div>`));
-      const btnRow = el(`<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>`);
+      resultEl.appendChild(el(`<div style="font-size:13px; font-weight:800; color:#1E7145;">✓ ${escapeHtml(f.name)}<br><span style="color:var(--ink); font-weight:700;">${ta ? 'எதற்கு மாற்ற வேண்டும்?' : 'Convert to…'}</span></div>`));
+      const row = el(`<div class="pick"></div>`);
       convertTargets.forEach(([toolId,label])=>{
-        const btn = el(`<button style="padding:8px 16px; border-radius:10px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font-weight:700; font-size:12.5px; cursor:pointer;">→ ${label}</button>`);
-        btn.onclick = ()=>{
-          __pendingSmartUploadFile = f;
-          openTool(toolId);
-        };
-        btnRow.appendChild(btn);
+        const btn = el(`<button type="button">→ ${label}</button>`);
+        btn.onclick = (e)=>{ e.stopPropagation(); __pendingSmartUploadFile = f; openTool(toolId); };
+        row.appendChild(btn);
       });
-      resultEl.appendChild(btnRow);
+      resultEl.appendChild(row);
     } else if(category){
       __activeCategory = category;
-      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#1E7145;">✓ "${escapeHtml(f.name)}" — ${escapeHtml(category ? catLabel(category) : category)} tools காட்டப்படுது கீழே</div>`));
+      resultEl.appendChild(el(`<div style="font-size:13px; font-weight:800; color:#1E7145;">✓ ${escapeHtml(f.name)} — ${escapeHtml(catLabel(category))} ${ta ? 'கருவிகள் கீழே' : 'tools shown below'}</div>`));
       renderHomeBody();
     } else {
-      resultEl.appendChild(el(`<div style="font-size:12.5px; font-weight:700; color:#8A6D00;">"${escapeHtml(f.name)}" — இதற்கு specific tool கண்டுபிடிக்க முடியல. கீழே search box-ல் தேடுங்கள்.</div>`));
+      resultEl.appendChild(el(`<div style="font-size:13px; font-weight:800; color:#7A5C00;">${escapeHtml(f.name)} — ${ta ? 'இதற்கான கருவி கிடைக்கவில்லை. மேலே தேடிப் பாருங்கள்.' : 'No matching tool found. Try the search above.'}</div>`));
     }
-  };
+  }
   return wrap;
 }
 
@@ -1894,15 +1962,19 @@ function panelShell(toolId, bodyHtml){
 // categories may move to this pattern later once proven.
 const LAZY_LOAD_CATEGORIES = new Set(['education', 'image']);
 const __loadedCategoryScripts = new Set();
+const __categoryScriptLoading = {};
 function loadCategoryScript(cat){
   if(__loadedCategoryScripts.has(cat)) return Promise.resolve();
-  return new Promise((resolve, reject)=>{
+  // render() can run twice while the file is still downloading (e.g. auth init + deep link);
+  // reuse the in-flight request, otherwise the file executes twice and redeclares its top-level `let`s.
+  if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
+  return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261010`;
+    s.src = `category-${cat}.js?v=20261010b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
-    s.onerror = ()=> reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`));
+    s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
-  });
+  }));
 }
 function renderToolPanel(toolId){
   const impl = TOOL_IMPL[toolId];
@@ -3608,7 +3680,7 @@ async function mountThumbTool(container, mode){
     // Summary bar (Delete mode): how many pages are marked + one-tap actions. Sticky so it is always reachable while scrolling.
     let bar = null, barCount = null;
     if(mode==='remove'){
-      bar = el(`<div style="position:sticky; top:0; z-index:5; display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:var(--card,#fff); border:1px solid var(--line); border-radius:12px; padding:8px 12px; margin-top:12px; box-shadow:0 2px 8px rgba(0,0,0,.08);"></div>`);
+      bar = el(`<div style="position:sticky; top:62px; z-index:5; display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:var(--card,#fff); border:1px solid var(--line); border-radius:12px; padding:8px 12px; margin-top:12px; box-shadow:0 2px 8px rgba(0,0,0,.08);"></div>`);
       barCount = el(`<b style="flex:1; min-width:140px;"></b>`);
       const bAll = el(`<button type="button" class="btn" style="padding:6px 12px; background:#777;">Select all</button>`);
       const bClr = el(`<button type="button" class="btn" style="padding:6px 12px; background:#777;">Clear</button>`);
@@ -16690,6 +16762,14 @@ render();
     // up after being force-reloaded (e.g. Android Chrome discarded it while the
     // native file picker was open), sessionStorage still has the tool they were
     // last on. Send them straight back there instead of the homepage.
+    // ?home=1 (links back from the Kalvi site and static pages) or a referrer from /learn/ means
+    // "I deliberately came to the homepage" — never jump back into an old tool then.
+    const wantsHome = params.get('home') || /\/learn\//.test(document.referrer||'');
+    if(wantsHome){
+      try{ sessionStorage.removeItem(LAST_TOOL_KEY); }catch(e){}
+      if(params.get('home')){ try{ history.replaceState(null,'','/'); }catch(e){} }
+      return;
+    }
     const lastTool = sessionStorage.getItem(LAST_TOOL_KEY);
     if(lastTool && TOOLS.some(t=>t.id===lastTool)) openTool(lastTool);
   }catch(e){ /* malformed URL params / sessionStorage unavailable — just show the homepage as normal */ }

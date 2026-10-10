@@ -102,7 +102,7 @@ function css(){
 .ar-big{border:0;border-radius:20px;padding:16px 14px;text-align:left;cursor:pointer;font:inherit;color:#fff;min-height:96px;transition:transform .12s}
 .ar-big:active{transform:scale(.98)}
 .ar-big b{display:block;font-size:1.12rem;margin-bottom:3px}.ar-big span{font-size:.8rem;opacity:.95;line-height:1.4;display:block}
-.ar-big.d{background:linear-gradient(135deg,#f97316,#ef4444)}.ar-big.n{background:linear-gradient(135deg,#0d9488,#16a34a)}
+.ar-big.d{background:linear-gradient(135deg,#c2410c,#b91c1c)}.ar-big.n{background:linear-gradient(135deg,#0f766e,#15803d)}
 .ar-big.done{background:linear-gradient(135deg,#64748b,#475569)}
 .ar-h{margin:20px 0 8px;font-size:1.05rem;font-weight:800}
 .ar-sub{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
