@@ -40,12 +40,18 @@ create table if not exists mat_profiles (
   district text,
   state text,
   country text not null default 'India',
+  father_name text,
+  mother_name text,
+  native_place text,
   father_occ text,
   mother_occ text,
   brothers int check (brothers between 0 and 15),
   sisters int check (sisters between 0 and 15),
   family_type text,
   family_status text,
+  brothers_married int check (brothers_married between 0 and 15),
+  sisters_married int check (sisters_married between 0 and 15),
+  family_about text check (char_length(family_about) <= 400),
   about text check (char_length(about) <= 600),
   pref jsonb not null default '{}'::jsonb,
   photos text[] not null default '{}',
@@ -87,6 +93,18 @@ create table if not exists mat_orders (
   status text not null default 'created',
   created_at timestamptz not null default now()
 );
+
+-- (upgrade) family columns added later; safe to re-run on an existing database
+alter table mat_profiles add column if not exists father_name text;
+alter table mat_profiles add column if not exists mother_name text;
+alter table mat_profiles add column if not exists native_place text;
+alter table mat_profiles add column if not exists brothers_married int check (brothers_married between 0 and 15);
+alter table mat_profiles add column if not exists sisters_married int check (sisters_married between 0 and 15);
+alter table mat_profiles add column if not exists family_about text check (char_length(family_about) <= 400);
+
+-- switch: chat fee is OFF (free) until you run:  update mat_settings set value = 'on' where key = 'chat_fee';
+create table if not exists mat_settings (key text primary key, value text not null);
+insert into mat_settings (key, value) values ('chat_fee', 'off') on conflict (key) do nothing;
 
 create table if not exists mat_unlocks (
   user_a uuid not null references auth.users(id) on delete cascade,
@@ -150,6 +168,7 @@ alter table mat_private   enable row level security;
 alter table mat_interests enable row level security;
 alter table mat_orders    enable row level security;
 alter table mat_unlocks   enable row level security;
+alter table mat_settings  enable row level security;
 alter table mat_messages  enable row level security;
 alter table mat_blocks    enable row level security;
 alter table mat_shortlist enable row level security;
@@ -157,7 +176,7 @@ alter table mat_reports   enable row level security;
 alter table mat_violations enable row level security;
 
 do $$ declare t text; begin
-  foreach t in array array['mat_admins','mat_profiles','mat_private','mat_interests','mat_orders','mat_unlocks','mat_messages','mat_blocks','mat_shortlist','mat_reports','mat_violations'] loop
+  foreach t in array array['mat_admins','mat_profiles','mat_private','mat_interests','mat_orders','mat_unlocks','mat_settings','mat_messages','mat_blocks','mat_shortlist','mat_reports','mat_violations'] loop
     execute format('revoke all on table %I from anon, authenticated', t);
   end loop;
 end $$;
@@ -193,7 +212,8 @@ create or replace function mat_blocked(x uuid, y uuid) returns boolean language 
 $$;
 
 create or replace function mat_unlocked(x uuid, y uuid) returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from mat_unlocks where user_a = least(x, y) and user_b = greatest(x, y));
+  select coalesce((select value from mat_settings where key = 'chat_fee'), 'off') <> 'on'
+      or exists (select 1 from mat_unlocks where user_a = least(x, y) and user_b = greatest(x, y));
 $$;
 
 create or replace function mat_accepted(x uuid, y uuid) returns boolean language sql stable security definer set search_path = public as $$
@@ -245,7 +265,7 @@ begin
     return jsonb_build_object('ok', false, 'code', 'consent');
   end if;
   -- no contact details inside any free-text field
-  foreach k in array array['name','community_other','kulam','gotra','education_detail','occupation','father_occ','mother_occ','about','city','district'] loop
+  foreach k in array array['name','community_other','kulam','gotra','education_detail','occupation','father_occ','mother_occ','father_name','mother_name','native_place','family_about','about','city','district'] loop
     bad := mat_contact_check(p->>k);
     if bad is not null then return jsonb_build_object('ok', false, 'code', 'contact_in_profile', 'field', k, 'reason', bad); end if;
   end loop;
@@ -257,7 +277,7 @@ begin
   select * into existing from mat_profiles where user_id = uid;
   insert into mat_profiles as m (user_id, created_for, name, gender, dob, religion, community, community_other, kulam, gotra, mother_tongue,
       star, raasi, dosham, marital, height_cm, diet, education, education_detail, occupation, employer_type, income_band,
-      city, district, state, country, father_occ, mother_occ, brothers, sisters, family_type, family_status, about, pref, photos, consent_at)
+      city, district, state, country, father_occ, mother_occ, brothers, sisters, family_type, family_status, father_name, mother_name, native_place, brothers_married, sisters_married, family_about, about, pref, photos, consent_at)
   values (uid, coalesce(nullif(p->>'created_for',''), 'self'), btrim(p->>'name'), g, d, coalesce(nullif(p->>'religion',''), 'hindu'), coalesce(nullif(p->>'community',''), 'other'),
       nullif(btrim(p->>'community_other'), ''), nullif(btrim(p->>'kulam'), ''), nullif(btrim(p->>'gotra'), ''), nullif(p->>'mother_tongue',''),
       nullif(p->>'star',''), nullif(p->>'raasi',''), coalesce(nullif(p->>'dosham',''), 'no'), coalesce(nullif(p->>'marital',''), 'never'),
@@ -265,6 +285,8 @@ begin
       nullif(p->>'employer_type',''), nullif(p->>'income_band',''), nullif(btrim(p->>'city'), ''), nullif(btrim(p->>'district'), ''), nullif(p->>'state',''),
       coalesce(nullif(p->>'country',''), 'India'), nullif(btrim(p->>'father_occ'), ''), nullif(btrim(p->>'mother_occ'), ''),
       nullif(p->>'brothers','')::int, nullif(p->>'sisters','')::int, nullif(p->>'family_type',''), nullif(p->>'family_status',''),
+      nullif(btrim(p->>'father_name'), ''), nullif(btrim(p->>'mother_name'), ''), nullif(btrim(p->>'native_place'), ''),
+      nullif(p->>'brothers_married','')::int, nullif(p->>'sisters_married','')::int, nullif(btrim(p->>'family_about'), ''),
       nullif(btrim(p->>'about'), ''), coalesce(p->'pref', '{}'::jsonb), ph, now())
   on conflict (user_id) do update set
       created_for = excluded.created_for, name = excluded.name, gender = excluded.gender, dob = excluded.dob, religion = excluded.religion,
@@ -274,6 +296,8 @@ begin
       occupation = excluded.occupation, employer_type = excluded.employer_type, income_band = excluded.income_band, city = excluded.city,
       district = excluded.district, state = excluded.state, country = excluded.country, father_occ = excluded.father_occ, mother_occ = excluded.mother_occ,
       brothers = excluded.brothers, sisters = excluded.sisters, family_type = excluded.family_type, family_status = excluded.family_status,
+      father_name = excluded.father_name, mother_name = excluded.mother_name, native_place = excluded.native_place,
+      brothers_married = excluded.brothers_married, sisters_married = excluded.sisters_married, family_about = excluded.family_about,
       about = excluded.about, pref = excluded.pref, photos = excluded.photos, updated_at = now(),
       -- editing photos / about / name sends an approved profile back for a quick re-check
       status = case when m.status = 'approved' and (m.photos is distinct from excluded.photos or m.about is distinct from excluded.about or m.name is distinct from excluded.name)
@@ -571,7 +595,8 @@ begin
     'pending', (select count(*) from mat_profiles where status = 'pending'), 'approved', (select count(*) from mat_profiles where status = 'approved'),
     'men', (select count(*) from mat_profiles where status = 'approved' and gender = 'M'), 'women', (select count(*) from mat_profiles where status = 'approved' and gender = 'F'),
     'unlocks', (select count(*) from mat_unlocks), 'revenue_paise', (select coalesce(sum(amount_paise), 0) from mat_unlocks),
-    'open_reports', (select count(*) from mat_reports where status = 'open'));
+    'open_reports', (select count(*) from mat_reports where status = 'open'),
+    'new_submissions', (select count(*) from mat_submissions where status = 'new'));
 end $$;
 
 -- public numbers for the home page (no login needed, no personal data)
@@ -598,6 +623,75 @@ create or replace function mat_counts() returns jsonb language sql stable securi
     'status', (select status from mat_profiles where user_id = auth.uid()));
 $$;
 
+
+-- ---------- public sign-up (NO login needed): the details are simply recorded for the admin ----------
+create table if not exists mat_submissions (
+  id uuid primary key default gen_random_uuid(),
+  data jsonb not null,
+  phone text not null,
+  email text,
+  photos text[] not null default '{}',
+  status text not null default 'new' check (status in ('new','contacted','done','rejected')),
+  note text,
+  created_at timestamptz not null default now()
+);
+create index if not exists mat_submissions_created on mat_submissions (created_at);
+alter table mat_submissions enable row level security;
+do $$ begin execute 'revoke all on table mat_submissions from anon, authenticated'; end $$;
+
+create or replace function mat_submit_public(p jsonb, phone text default null, email text default null) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare g text; d date; a int; k text; bad text; ph text[]; dig text; nm text; sid uuid; clean jsonb := '{}'::jsonb;
+begin
+  nm := btrim(coalesce(p->>'name', ''));
+  if char_length(nm) < 2 or char_length(nm) > 60 then return jsonb_build_object('ok', false, 'code', 'name'); end if;
+  g := p->>'gender';
+  if g not in ('M','F') then return jsonb_build_object('ok', false, 'code', 'gender'); end if;
+  begin d := (p->>'dob')::date; exception when others then return jsonb_build_object('ok', false, 'code', 'dob'); end;
+  a := mat_age(d);
+  if (g = 'M' and a < 21) or (g = 'F' and a < 18) then return jsonb_build_object('ok', false, 'code', 'age'); end if;
+  if a > 80 then return jsonb_build_object('ok', false, 'code', 'dob'); end if;
+  if coalesce(p->>'consent', '') <> 'true' then return jsonb_build_object('ok', false, 'code', 'consent'); end if;
+  dig := right(regexp_replace(coalesce(phone, ''), '\D', '', 'g'), 10);
+  if char_length(dig) < 10 then return jsonb_build_object('ok', false, 'code', 'phone'); end if;
+  foreach k in array array['name','community_other','kulam','gotra','education_detail','occupation','father_occ','mother_occ','father_name','mother_name','native_place','family_about','about','city','district'] loop
+    bad := mat_contact_check(p->>k);
+    if bad is not null then return jsonb_build_object('ok', false, 'code', 'contact_in_profile', 'field', k, 'reason', bad); end if;
+  end loop;
+  ph := mat_arr(p, 'photos');
+  if cardinality(ph) > 6 then return jsonb_build_object('ok', false, 'code', 'photos'); end if;
+  foreach k in array ph loop
+    if left(k, 12) <> 'submissions/' or position('..' in k) > 0 then return jsonb_build_object('ok', false, 'code', 'photos'); end if;
+  end loop;
+  if (select count(*) from mat_submissions where right(regexp_replace(mat_submissions.phone, '\D', '', 'g'), 10) = dig and created_at > now() - interval '1 day') >= 3
+     or (select count(*) from mat_submissions where created_at > now() - interval '1 hour') >= 300 then
+    return jsonb_build_object('ok', false, 'code', 'rate_limited');
+  end if;
+  -- keep only known fields (nothing else is stored), trimmed
+  foreach k in array array['created_for','name','gender','dob','religion','community','community_other','kulam','gotra','mother_tongue','star','raasi','dosham','marital','height_cm','diet','education','education_detail','occupation','employer_type','income_band','city','district','state','country','father_name','mother_name','native_place','father_occ','mother_occ','brothers','sisters','brothers_married','sisters_married','family_type','family_status','family_about','about'] loop
+    if nullif(btrim(coalesce(p->>k, '')), '') is not null then clean := clean || jsonb_build_object(k, left(btrim(p->>k), 600)); end if;
+  end loop;
+  if jsonb_typeof(p->'pref') = 'object' then clean := clean || jsonb_build_object('pref', p->'pref'); end if;
+  insert into mat_submissions (data, phone, email, photos)
+    values (clean, left(btrim(phone), 20), nullif(left(btrim(coalesce(email, '')), 120), ''), ph) returning id into sid;
+  return jsonb_build_object('ok', true, 'id', sid);
+end $$;
+
+create or replace function mat_admin_submissions(st text default 'new') returns jsonb language plpgsql stable security definer set search_path = public as $$
+begin
+  if not mat_is_admin() then return jsonb_build_object('ok', false, 'code', 'forbidden'); end if;
+  return jsonb_build_object('ok', true, 'items', coalesce((select jsonb_agg(to_jsonb(s) || jsonb_build_object('age', mat_age((s.data->>'dob')::date)) order by s.created_at desc)
+      from mat_submissions s where s.status = coalesce(st, 'new')), '[]'::jsonb));
+end $$;
+
+create or replace function mat_admin_submission_set(sid uuid, st text, note text default null) returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if not mat_is_admin() then return jsonb_build_object('ok', false, 'code', 'forbidden'); end if;
+  if st not in ('new','contacted','done','rejected') then return jsonb_build_object('ok', false, 'code', 'bad_status'); end if;
+  update mat_submissions s set status = st, note = left(mat_admin_submission_set.note, 300) where s.id = sid;
+  return jsonb_build_object('ok', true);
+end $$;
+
 -- ---------- who may call what ----------
 do $$ declare r record; begin
   for r in select p.oid::regprocedure as sig, p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -605,7 +699,7 @@ do $$ declare r record; begin
     execute format('revoke all on function %s from public, anon', r.sig);
     if r.proname in ('mat_record_unlock') then
       begin execute format('revoke all on function %s from authenticated', r.sig); execute format('grant execute on function %s to service_role', r.sig); exception when others then null; end;
-    elsif r.proname = 'mat_public_stats' then
+    elsif r.proname in ('mat_public_stats', 'mat_submit_public') then
       execute format('grant execute on function %s to anon, authenticated', r.sig);
     else
       execute format('grant execute on function %s to authenticated', r.sig);
@@ -622,6 +716,8 @@ do $$ begin
     execute 'drop policy if exists mat_photos_update on storage.objects';
     execute 'drop policy if exists mat_photos_delete on storage.objects';
     execute $p$create policy mat_photos_read on storage.objects for select to authenticated using (bucket_id = 'mat-photos')$p$;
+    execute 'drop policy if exists mat_photos_anon_write on storage.objects';
+    execute $p$create policy mat_photos_anon_write on storage.objects for insert to anon with check (bucket_id = 'mat-photos' and (storage.foldername(name))[1] = 'submissions')$p$;
     execute $p$create policy mat_photos_write on storage.objects for insert to authenticated with check (bucket_id = 'mat-photos' and (storage.foldername(name))[1] = auth.uid()::text)$p$;
     execute $p$create policy mat_photos_update on storage.objects for update to authenticated using (bucket_id = 'mat-photos' and (storage.foldername(name))[1] = auth.uid()::text)$p$;
     execute $p$create policy mat_photos_delete on storage.objects for delete to authenticated using (bucket_id = 'mat-photos' and (storage.foldername(name))[1] = auth.uid()::text)$p$;

@@ -19,6 +19,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { createClient } from '@supabase/supabase-js';
 import Razorpay from 'razorpay';
 import rateLimit from 'express-rate-limit';
+import { registerMatrimonyRoutes, matrimonyOnCaptured } from './matrimony-api.js';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -762,6 +763,8 @@ async function handleWebhook(req, res) {
     if (event.event === 'payment.captured') {
       const payment = event.payload.payment.entity;
       const orderId = payment.order_id;
+      // சௌடேஸ்வரி திருமண அமைப்பகம் — ₹50 chat unlock payments are handled by matrimony-api.js
+      if (await matrimonyOnCaptured(supabase, payment)) return res.json({ ok: true });
 
       const { data: txn } = await supabase.from('transactions')
         .select('*').eq('razorpay_order_id', orderId).single();
@@ -1274,6 +1277,9 @@ Answer the user's ONE question in ${lang === 'ta' ? 'Tamil' : lang}. End with a 
 });
 
 app.get('/health', (req, res) => res.json({ ok: true, ffmpeg: 'native', astrology: !!process.env.ASTROLOGER_API_KEY, time: new Date().toISOString() }));
+
+// சௌடேஸ்வரி திருமண அமைப்பகம் — /api/matrimony/create-order, /api/matrimony/verify
+registerMatrimonyRoutes(app, { supabase, razorpay, requireAuth, limiter: creditLimiter, upload: uploadImage, deductCredits, refundCredits });
 
 // Catch-all for any route that doesn't exist (e.g. frontend calling a newer
 // endpoint than what's currently deployed here) — returns clear JSON instead

@@ -13,6 +13,7 @@ const rpc = async (who, fn, ...args) => { const ph = args.map((_, i) => '$' + (i
 const prof = (o) => ({ name: 'Test', gender: 'M', dob: '1996-05-10', community: 'kannada_devanga', kulam: 'Kashyapa', education: 'be', occupation: 'Engineer', city: 'Salem', state: 'Tamil Nadu', height_cm: 172, consent: 'true', photos: [], ...o });
 const err = async (who, sql) => { try { await as(who, sql); return null; } catch (e) { return e.message; } };
 
+await db.query("update mat_settings set value = 'on' where key = 'chat_fee'"); // paywall tests run with the fee switched ON
 // ---- profile validation
 ok((await rpc('m1', 'mat_save_profile', prof({ dob: '2010-01-01' }))).code === 'age', 'underage male blocked');
 ok((await rpc('m1', 'mat_save_profile', prof({ gender: 'M', dob: new Date(Date.now() - 20.5 * 365.25 * 864e5).toISOString().slice(0, 10) }))).code === 'age', 'male 20 blocked (min 21)');
@@ -119,4 +120,41 @@ ok((await rpc('f1', 'mat_counts')).status === 'approved', 'counts work');
 // ---- admin edit flow + delete
 ok((await rpc('f1', 'mat_save_profile', prof({ name: 'Priya', gender: 'F', dob: '1998-03-02', about: 'Nurse, new text' }))).status === 'pending', 'editing about re-queues approved profile');
 ok((await rpc('f1', 'mat_delete_me')).ok && (await db.query(`select count(*)::int c from mat_profiles where user_id=$1`, [U.f1])).rows[0].c === 0, 'delete account');
+
+// ---- family details saved + filtered
+ok((await rpc('m2', 'mat_save_profile', prof({ family_about: 'reach us 98765 43210' }))).code === 'contact_in_profile', 'phone in family_about blocked');
+ok((await rpc('m2', 'mat_save_profile', prof({ father_name: 'call nine eight seven six five four three two one zero' }))).code === 'contact_in_profile', 'phone in father_name blocked');
+ok((await rpc('m2', 'mat_save_profile', prof({ father_name: 'Shankar', mother_name: 'Lakshmi', native_place: 'Salem', brothers: 2, brothers_married: 1, sisters: 1, sisters_married: 1, family_about: 'Traditional Devanga family' }))).ok, 'family details saved');
+{ const me = await rpc('m2', 'mat_my_profile'); const pr = me.profile || me; ok(pr.father_name === 'Shankar' && pr.native_place === 'Salem' && pr.brothers_married === 1 && pr.family_about === 'Traditional Devanga family', 'family details read back'); }
+// ---- public sign-up without login
+const pub = async (p, phone, email) => (await as('anon', 'select mat_submit_public($1::jsonb, $2, $3) as r', [JSON.stringify(p), phone, email]))[0].r;
+const pp = (o) => ({ name: 'Guest', gender: 'F', dob: '1999-01-01', community: 'kannada_devanga', consent: 'true', father_name: 'Ramu', photos: [], ...o });
+ok((await pub(pp({}), '9876501234', null)).ok === true, 'anon submit works without login');
+ok((await pub(pp({ name: 'x' }), '9876501234', null)).code === 'name', 'anon: name required');
+ok((await pub(pp({ gender: 'M', dob: '2012-01-01' }), '9876501234', null)).code === 'age', 'anon: age rule');
+ok((await pub(pp({ consent: 'false' }), '9876501234', null)).code === 'consent', 'anon: consent required');
+ok((await pub(pp({}), '12345', null)).code === 'phone', 'anon: phone required');
+ok((await pub(pp({ about: 'call 98765 43210' }), '9876501234', null)).code === 'contact_in_profile', 'anon: contact in text blocked');
+ok((await pub(pp({ photos: ['someone-else/x.jpg'] }), '9876501234', null)).code === 'photos', 'anon: photo path must be submissions/');
+ok((await pub(pp({ photos: ['submissions/a.jpg', 'submissions/b.jpg'] }), '9876501235', 'a@b.in')).ok === true, 'anon: photos accepted');
+{ const a1 = await pub(pp({}), '9876501234', null), a2 = await pub(pp({}), '9876501234', null), a3 = await pub(pp({}), '9876501234', null); ok(a1.ok && a2.ok && a3.code === 'rate_limited', 'anon: 3 per phone per day'); }
+ok((await err('anon', 'select * from mat_submissions')) !== null, 'anon cannot read submissions');
+ok((await err('m1', 'select * from mat_submissions')) !== null, 'member cannot read submissions');
+ok((await rpc('m1', 'mat_admin_submissions')).code === 'forbidden', 'non-admin cannot list submissions');
+{ const l = await rpc('adm', 'mat_admin_submissions', 'new'); ok(l.ok && l.items.length === 4 && l.items.some(i => i.phone === '9876501235' && i.photos.length === 2 && i.data.father_name === 'Ramu'), 'admin sees submissions with phone, photos, family');
+  ok((await rpc('adm', 'mat_admin_submission_set', l.items[0].id, 'contacted')).ok, 'admin marks contacted'); ok((await rpc('adm', 'mat_admin_stats')).new_submissions === 3, 'stats count new submissions'); }
+// ---- fee OFF (default): accepted pair can chat free; not-accepted pair still cannot
+await db.query("update mat_settings set value = 'off' where key = 'chat_fee'");
+await db.query('update mat_profiles set chat_banned = false'); await db.query('delete from mat_violations'); await db.query('delete from mat_unlocks'); await db.query('delete from mat_blocks'); await db.query("update mat_profiles set status = 'approved'");
+{
+  await db.query('delete from mat_interests'); await db.query("insert into mat_interests (from_user, to_user, status) values ($1, $2, 'accepted')", [U.m1, U.f2]);
+  const st = await rpc('m1', 'mat_chat_state', U.f2);
+  ok(st.unlocked === true && st.accepted === true, 'fee off: accepted pair is open without payment');
+  const send = await rpc('m1', 'mat_send_message', U.f2, 'Namaskara, nice to meet you');
+  ok(send.ok === true, 'fee off: message sends free');
+  const sendX = await rpc('m2', 'mat_send_message', U.f2, 'hello');
+  ok(sendX.ok === false && sendX.code === 'not_accepted', 'fee off: still needs accepted interest');
+  const bad = await rpc('m1', 'mat_send_message', U.f2, 'call 9876543210');
+  ok(bad.code === 'contact_blocked', 'fee off: contact filter still blocks');
+}
 console.log(`sql flow: ${n} checks, ${bad} failed`); process.exit(bad ? 1 : 0);

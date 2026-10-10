@@ -101,7 +101,7 @@
     v.innerHTML = '<div class="wrap"><h1 class="h2">' + t('Interest', 'Interests') + '</h1><div class="tabsx" role="tablist">' + tabs.map(function (x) { return '<a role="tab" aria-selected="' + (tab === x[0]) + '" class="' + (tab === x[0] ? 'on' : '') + '" href="#/interests/' + x[0] + '">' + esc(x[1]) + ' <i>' + sets[x[0]].length + '</i></a>'; }).join('') + '</div>' +
       (sets[tab].length ? sets[tab].map(function (i) {
         var acts = tab === 'in' ? '<button class="btn pri sm" data-act="respond" data-yes="1" data-iid="' + i.id + '">✓ ' + t('ஏற்கிறேன்', 'Accept') + '</button><button class="btn ghost sm" data-act="respond" data-yes="0" data-iid="' + i.id + '">✕ ' + t('மறு', 'Decline') + '</button>' :
-          tab === 'ok' ? '<a class="btn pri sm" href="#/chat/' + esc(i.other.id) + '">💬 ' + (i.unlocked ? t('Chat', 'Chat') : t('Chat திற (₹' + M.C.FEE_RS + ')', 'Unlock chat (₹' + M.C.FEE_RS + ')')) + '</a>' : '';
+          tab === 'ok' ? '<a class="btn pri sm" href="#/chat/' + esc(i.other.id) + '">💬 ' + (i.unlocked ? t('Chat', 'Chat') : (M.C.FEE_ON ? t('Chat திற (₹' + M.C.FEE_RS + ')', 'Unlock chat (₹' + M.C.FEE_RS + ')') : t('Chat', 'Chat'))) + '</a>' : '';
         return '<div class="irow">' + M.card(i.other) + (i.note ? '<p class="inote">“' + esc(i.note) + '”</p>' : '') + '<div class="rowb">' + acts + '<span class="mut sm">' + M.ago(i.created_at) + '</span></div></div>';
       }).join('') : '<p class="mut c pad">' + t('இங்கே எதுவும் இல்லை.', 'Nothing here yet.') + '</p>') + '</div>';
   };

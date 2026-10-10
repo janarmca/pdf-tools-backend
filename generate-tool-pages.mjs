@@ -256,6 +256,9 @@ function hubHtml(cat, items) {
 `;
 }
 
+// Tamil + English versions of the matrimony landing page (hreflang alternates, both directions)
+const MATRIMONY_ALTS = [['ta', `${SITE}/matrimony/`], ['en', `${SITE}/matrimony/en/`], ['x-default', `${SITE}/matrimony/`]];
+
 function buildSitemap(toolEntries) {
   const staticUrls = [
     { loc: `${SITE}/`, freq: 'weekly', pri: '1.0' },
@@ -267,7 +270,8 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/ai-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },
-    { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7' },
+    { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
+    { loc: `${SITE}/matrimony/en/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/tn-rent-agreement`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/tn-sale-deed`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/blog/how-to-merge-pdf-files-free`, freq: 'monthly', pri: '0.7' },
@@ -294,9 +298,9 @@ function buildSitemap(toolEntries) {
   staticUrls.push({ loc: `${SITE}/health-check`, freq: 'monthly', pri: '0.6' });
   const all = [...staticUrls, ...toolUrls].map(withHtml);
   const body = all.map(u =>
-    `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${new Date().toISOString().slice(0,10)}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>\n  </url>`
+    `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${new Date().toISOString().slice(0,10)}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>${(u.alts || []).map(([l, h]) => `\n    <xhtml:link rel="alternate" hreflang="${l}" href="${h}"/>`).join('')}\n  </url>`
   ).join('\n');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${body}\n</urlset>\n`;
 }
 
 function main() {

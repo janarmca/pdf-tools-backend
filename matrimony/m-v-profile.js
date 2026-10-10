@@ -7,19 +7,24 @@
     { ta: 'அடிப்படை விவரம்', en: 'Basic details' }, { ta: 'ஜாதகம்', en: 'Horoscope' }, { ta: 'கல்வி & தொழில்', en: 'Education & work' },
     { ta: 'குடும்பம் & இருப்பிடம்', en: 'Family & location' }, { ta: 'பற்றி & எதிர்பார்ப்பு', en: 'About & preferences' }, { ta: 'படங்கள் & சமர்ப்பிப்பு', en: 'Photos & submit' }
   ];
-  var DRAFT = 'mat_wiz_draft';
+  var DRAFT = 'mat_wiz_draft', PUBDRAFT = 'mat_pub_draft';
+  function dkey() { return W && W.pub ? PUBDRAFT : DRAFT; }
 
-  function initWizard() {
+  function initWizard(pub) {
     var me = M.st.me, d = {};
+    if (pub) {
+      try { var ps = JSON.parse(localStorage.getItem(PUBDRAFT) || 'null'); if (ps && ps.d) { ps.step = ps.step || 0; ps.pub = true; ps.thumbs = {}; return ps; } } catch (e) {}
+      return { pub: true, thumbs: {}, step: 0, d: { created_for: 'self', religion: 'hindu', community: 'kannada_devanga', marital: 'never', dosham: 'no', country: 'India', pref: {}, photos: [] }, phone: '', email: '' };
+    }
     if (me && !me.none) {
-      ['created_for', 'name', 'gender', 'dob', 'religion', 'community', 'community_other', 'kulam', 'gotra', 'mother_tongue', 'star', 'raasi', 'dosham', 'marital', 'height_cm', 'diet', 'education', 'education_detail', 'occupation', 'employer_type', 'income_band', 'city', 'district', 'state', 'country', 'father_occ', 'mother_occ', 'brothers', 'sisters', 'family_type', 'family_status', 'about'].forEach(function (k) { if (me[k] != null) d[k] = me[k]; });
+      ['created_for', 'name', 'gender', 'dob', 'religion', 'community', 'community_other', 'kulam', 'gotra', 'mother_tongue', 'star', 'raasi', 'dosham', 'marital', 'height_cm', 'diet', 'education', 'education_detail', 'occupation', 'employer_type', 'income_band', 'city', 'district', 'state', 'country', 'father_occ', 'mother_occ', 'father_name', 'mother_name', 'native_place', 'brothers', 'sisters', 'brothers_married', 'sisters_married', 'family_type', 'family_status', 'family_about', 'about'].forEach(function (k) { if (me[k] != null) d[k] = me[k]; });
       d.pref = me.pref || {}; d.photos = (me.photos || []).slice(); d.consent = true;
       return { step: 0, d: d, phone: '', edit: true };
     }
     try { var s = JSON.parse(localStorage.getItem(DRAFT) || 'null'); if (s && s.d) { s.step = s.step || 0; return s; } } catch (e) {}
     return { step: 0, d: { created_for: 'self', religion: 'hindu', community: 'kannada_devanga', marital: 'never', dosham: 'no', country: 'India', pref: {}, photos: [] }, phone: '' };
   }
-  function saveDraft() { if (!W.edit) try { localStorage.setItem(DRAFT, JSON.stringify({ step: W.step, d: W.d, phone: W.phone })); } catch (e) {} }
+  function saveDraft() { if (!W.edit) try { localStorage.setItem(dkey(), JSON.stringify({ step: W.step, d: W.d, phone: W.phone, email: W.email, pub: W.pub })); } catch (e) {} }
 
   function fld(label, inner, hint, cls) { return '<label class="fld ' + (cls || '') + '"><span>' + label + '</span>' + inner + (hint ? '<small>' + hint + '</small>' : '') + '</label>'; }
   function inp(k, type, extra) { var v = W.d[k]; return '<input data-f="' + k + '" type="' + (type || 'text') + '" value="' + esc(v == null ? '' : v) + '" ' + (extra || '') + '>'; }
@@ -31,7 +36,9 @@
 
   function stepHtml(i) {
     var d = W.d;
-    if (i === 0) return '<div class="gridf">' +
+    if (i === 0) return ((W.edit || W.pub) ? '' : '<div class="notice aic"><b>✨ ' + t('ஜாதகத்திலிருந்து AI நிரப்பும்', 'Fill from horoscope with AI') + '</b><p>' + t('உங்கள் புதுப்பிக்கப்பட்ட ஜாதகத்தின் படம் / PDF-ஐப் பதிவேற்றுங்கள்; பெயர், பிறந்த தேதி, நட்சத்திரம், ராசி தானாக நிரப்பப்படும். AI பயன்பாட்டுக்கு மட்டும் 2 credits (பதிவு, விவரங்கள், படங்கள் அனைத்தும் இலவசம்). ஜாதகக் கோப்பு சேமிக்கப்படாது.', 'Upload your latest horoscope (image / PDF); name, date of birth, star and raasi are filled in. AI use costs 2 credits (registration, details and photos stay free). The file is not stored.') + '</p>' +
+      '<label class="btn ghost"><input id="jgin" type="file" accept="image/*,application/pdf" hidden>📄 ' + t('ஜாதகம் பதிவேற்று', 'Upload horoscope') + '</label><p class="err" id="jgerr"></p></div>') +
+      '<div class="gridf">' +
       fld(t('யாருக்காகப் பதிவு?', 'Registering for'), sel('created_for', 'created_for', false)) +
       fld(t('பெயர்', 'Name'), inp('name', 'text', 'maxlength="60" autocomplete="off"'), t('முதல் பெயர் போதும். தொலைபேசி எண் எழுதக்கூடாது.', 'First name is enough. Do not write phone numbers.')) +
       '<div class="fld"><span>' + t('பாலினம்', 'Gender') + '</span><div class="rad">' + D.gender.map(function (x) { return '<label class="chip"><input type="radio" name="gender" data-f="gender" value="' + x.v + '"' + (d.gender === x.v ? ' checked' : '') + '><span>' + esc(M.st.lang === 'en' ? x.en : x.ta) + '</span></label>'; }).join('') + '</div></div>' +
@@ -50,12 +57,16 @@
       fld(t('ஆண்டு வருமானம்', 'Annual income'), sel('income_band', 'income_band'), t('விரும்பினால் மட்டும்', 'Optional')) +
       fld(t('உயரம் (செ.மீ)', 'Height (cm)'), inp('height_cm', 'number', 'min="120" max="230"')) + fld(t('உணவுப் பழக்கம்', 'Diet'), sel('diet', 'diet')) + '</div>';
     if (i === 3) return '<div class="gridf">' +
+      fld(t('தந்தை பெயர்', "Father's name"), inp('father_name', 'text', 'maxlength="60"')) + fld(t('தாய் பெயர்', "Mother's name"), inp('mother_name', 'text', 'maxlength="60"')) +
       fld(t('தந்தை தொழில்', "Father's occupation"), inp('father_occ', 'text', 'maxlength="60"')) + fld(t('தாய் தொழில்', "Mother's occupation"), inp('mother_occ', 'text', 'maxlength="60"')) +
       fld(t('சகோதரர்கள்', 'Brothers'), inp('brothers', 'number', 'min="0" max="15"')) + fld(t('சகோதரிகள்', 'Sisters'), inp('sisters', 'number', 'min="0" max="15"')) +
+      fld(t('திருமணமான சகோதரர்கள்', 'Brothers married'), inp('brothers_married', 'number', 'min="0" max="15"')) + fld(t('திருமணமான சகோதரிகள்', 'Sisters married'), inp('sisters_married', 'number', 'min="0" max="15"')) +
+      fld(t('சொந்த ஊர்', 'Native place'), inp('native_place', 'text', 'maxlength="60"')) +
       fld(t('குடும்ப வகை', 'Family type'), sel('family_type', 'family_type')) + fld(t('குடும்ப நிலை', 'Family status'), sel('family_status', 'family_status')) +
       fld(t('ஊர் / நகரம்', 'City'), inp('city', 'text', 'maxlength="50"')) + fld(t('மாவட்டம்', 'District'), inp('district', 'text', 'maxlength="50"')) +
       fld(t('மாநிலம்', 'State'), sel('state', 'state')) + fld(t('நாடு', 'Country'), inp('country', 'text', 'maxlength="40"')) + '</div>' +
-      '<div class="notice"><b>🔒 ' + t('தொலைபேசி எண் (நிர்வாகிக்கு மட்டும்)', 'Phone number (admin only)') + '</b>' + fld(t('மொபைல் எண்', 'Mobile number'), '<input id="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="15" value="' + esc(W.phone) + '">', t('சரிபார்ப்புக்காக மட்டும். எந்த உறுப்பினருக்கும் ஒருபோதும் காட்டப்படாது.', 'Only for verification. Never shown to any member.')) + '</div>';
+      fld(t('குடும்பம் பற்றி', 'About the family'), '<textarea data-f="family_about" rows="3" maxlength="400" placeholder="' + esc(t('குடும்ப பாரம்பரியம், உறவினர்கள்... (எண்/email எழுதக்கூடாது)', 'Family background, relatives... (no numbers / e-mail)')) + '">' + esc(d.family_about || '') + '</textarea>') +
+      '<div class="notice"><b>🔒 ' + t('தொலைபேசி எண் (நிர்வாகிக்கு மட்டும்)', 'Phone number (admin only)') + '</b>' + fld(t('மொபைல் எண்', 'Mobile number'), '<input id="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="15" value="' + esc(W.phone) + '">', t('எங்கள் குழு உங்களைத் தொடர்புகொள்ள மட்டும். எந்த உறுப்பினருக்கும் ஒருபோதும் காட்டப்படாது.', 'Only so our team can contact you. Never shown to any member.')) + (W.pub ? fld(t('Email (விருப்பம்)', 'Email (optional)'), '<input id="pubmail" type="email" autocomplete="email" maxlength="120" value="' + esc(W.email || '') + '">') : '') + '</div>';
     if (i === 4) return fld(t('உங்களைப் பற்றி', 'About'), '<textarea data-f="about" rows="5" maxlength="600" placeholder="' + esc(t('குடும்பம், விருப்பங்கள், எதிர்பார்ப்பு... (எண்/email எழுதக்கூடாது)', 'Family, interests, expectations... (no numbers / e-mail)')) + '">' + esc(d.about || '') + '</textarea><div class="cnt"><span id="aboutcnt">' + (d.about || '').length + '</span>/600</div>') +
       '<h3 class="h3">' + t('துணையிடம் எதிர்பார்ப்பு', 'Partner preferences') + '</h3><div class="gridf">' +
       fld(t('குறைந்த வயது', 'Min age'), '<input data-pref="min_age" type="number" min="18" max="80" value="' + esc(d.pref.min_age || '') + '">') + fld(t('அதிகபட்ச வயது', 'Max age'), '<input data-pref="max_age" type="number" min="18" max="80" value="' + esc(d.pref.max_age || '') + '">') + '</div>' +
@@ -63,7 +74,7 @@
       '<div class="fld"><span>' + t('திருமண நிலை', 'Marital status') + '</span>' + chips('marital', 'marital', true) + '</div>';
     var n = (d.photos || []).length, hasConsent = !!d.consent;
     return '<p class="mut">' + t('தெளிவான முகப் படம் உங்களுக்கு அதிக Interest பெற்றுத் தரும். அங்கீகரிக்கப்பட்ட உறுப்பினர்கள் மட்டுமே பார்க்க முடியும். (அதிகபட்சம் 6)', 'A clear face photo gets more interest. Only approved members can see it. (max 6)') + '</p>' +
-      '<div class="ph-grid" id="phg">' + (d.photos || []).map(function (p, i) { return '<div class="ph"><img alt="" data-ph="' + esc(p) + '"><div class="phb">' + (i ? '<button type="button" data-act="phMain" data-i="' + i + '">★</button>' : '<span class="main">' + t('முதன்மை', 'Main') + '</span>') + '<button type="button" data-act="phDel" data-i="' + i + '" aria-label="delete">🗑</button></div></div>'; }).join('') +
+      '<div class="ph-grid" id="phg">' + (d.photos || []).map(function (p, i) { return '<div class="ph">' + (W.pub ? (W.thumbs && W.thumbs[p] ? '<img alt="" src="' + esc(W.thumbs[p]) + '">' : '<span class="okph">✓</span>') : '<img alt="" data-ph="' + esc(p) + '">') + '<div class="phb">' + (i ? '<button type="button" data-act="phMain" data-i="' + i + '">★</button>' : '<span class="main">' + t('முதன்மை', 'Main') + '</span>') + '<button type="button" data-act="phDel" data-i="' + i + '" aria-label="delete">🗑</button></div></div>'; }).join('') +
       (n < 6 ? '<label class="ph add"><input id="phin" type="file" accept="image/*" multiple hidden><span>＋<br>' + t('படம் சேர்', 'Add photo') + '</span></label>' : '') + '</div><p class="err" id="pherr"></p>' +
       '<div class="notice">' + t('நிர்வாகி சரிபார்த்த பின்பே உங்கள் சுயவிவரம் மற்றவர்களுக்குத் தெரியும் (பொதுவாக 24 மணி நேரத்தில்).', 'Your profile becomes visible after admin verification (usually within 24 hours).') + '</div>' +
       (W.edit ? '' : '<label class="chk"><input id="consent" type="checkbox"' + (hasConsent ? ' checked' : '') + '> <span>' + t('நான் கொடுத்த தகவல்கள் உண்மை; என் சுயவிவரத்தை அங்கீகரிக்கப்பட்ட உறுப்பினர்கள் பார்க்க ஒப்புக்கொள்கிறேன்; ', 'The details are true; I agree that approved members may view my profile; ') + '<a href="#/terms" target="_blank">' + t('விதிமுறைகள்', 'Terms') + '</a></span></label>');
@@ -83,9 +94,11 @@
     var body = M.$('#stepbody');
     body.addEventListener('input', onField); body.addEventListener('change', onField);
     var ph = M.$('#phin'); if (ph) ph.addEventListener('change', onPhotos);
+    var jg = M.$('#jgin'); if (jg) jg.addEventListener('change', onJathagam);
   }
   function onField(e) {
     var el = e.target;
+    if (el.id === 'pubmail') { W.email = el.value.trim(); saveDraft(); return; }
     if (el.id === 'phone') { W.phone = el.value.replace(/[^\d+ ]/g, ''); saveDraft(); return; }
     if (el.id === 'consent') { W.d.consent = el.checked; return; }
     if (el.hasAttribute('data-f')) {
@@ -99,7 +112,7 @@
     }
     saveDraft();
   }
-  function textFields() { return ['name', 'community_other', 'kulam', 'gotra', 'education_detail', 'occupation', 'father_occ', 'mother_occ', 'about', 'city', 'district']; }
+  function textFields() { return ['name', 'community_other', 'kulam', 'gotra', 'education_detail', 'occupation', 'father_occ', 'mother_occ', 'father_name', 'mother_name', 'native_place', 'family_about', 'about', 'city', 'district']; }
   function validate(i) {
     var d = W.d, e = '';
     if (i === 0) {
@@ -126,7 +139,7 @@
   M.acts.wzNext = function () { var e = validate(W.step); if (e) return showErr(e); W.step++; saveDraft(); renderWizard(); window.scrollTo(0, 0); };
   M.acts.wzBack = function () { W.step = Math.max(0, W.step - 1); renderWizard(); window.scrollTo(0, 0); };
   M.acts.wzGo = function (a) { var to = +a.getAttribute('data-i'); if (to <= W.step) { W.step = to; renderWizard(); return; } for (var s = W.step; s < to; s++) { var e = validate(s); if (e) { W.step = s; renderWizard(); showErr(e); return; } } W.step = to; renderWizard(); };
-  M.acts.phDel = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; B.removePhoto(p); saveDraft(); renderWizard(); };
+  M.acts.phDel = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; if (!W.pub) B.removePhoto(p); saveDraft(); renderWizard(); };
   M.acts.phMain = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; W.d.photos.unshift(p); saveDraft(); renderWizard(); };
 
   function resize(file) {
@@ -140,13 +153,31 @@
       img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('img')); }; img.src = url;
     });
   }
+  var AI_MSG = { not_logged_in: ['முதலில் உள்நுழையுங்கள்', 'Please log in first'], no_credits: ['AI credits போதவில்லை — pdftoolsindia.com-ல் credits வாங்கவும்; அல்லது விவரங்களை கையால் இலவசமாக நிரப்பலாம்', 'Not enough AI credits — buy credits at pdftoolsindia.com, or fill the details by hand for free'], network: ['இணைய இணைப்பு பிழை', 'Network error'] };
+  async function onJathagam(e) {
+    var f = e.target.files && e.target.files[0], err = M.$('#jgerr'); if (!f) return; err.textContent = '';
+    if (!/^(image\/|application\/pdf)/.test(f.type)) { err.textContent = t('படம் அல்லது PDF மட்டும்', 'Image or PDF only'); return; }
+    if (f.size > 15 * 1024 * 1024) { err.textContent = t('கோப்பு மிகப் பெரியது (15MB வரை)', 'File too large (max 15MB)'); return; }
+    err.textContent = t('AI படிக்கிறது… சில வினாடிகள்', 'AI is reading… a few seconds'); e.target.disabled = true;
+    var r = await B.jathagam(f); if (!M.$('#jgerr')) return;
+    if (!r.ok) { e.target.disabled = false; e.target.value = ''; if (r.code === 'cancelled') { err.textContent = ''; return; } var m = AI_MSG[r.code]; err.textContent = m ? t(m[0], m[1]) : (r.message || t('AI தோல்வி; credits திரும்பக் கிடைக்கும்', 'AI failed; credits are refunded')); return; }
+    var x = r.fields || {}, n = 0;
+    ['name', 'gender', 'dob', 'star', 'raasi'].forEach(function (k) {
+      if (!x[k]) return;
+      if (k === 'name' && F && F.check(x[k])) return;
+      if ((k === 'star' || k === 'raasi') && !D[k].some(function (o) { return o.v === x[k]; })) return;
+      W.d[k] = x[k]; n++;
+    });
+    saveDraft(); renderWizard();
+    M.toast(n ? t('AI ' + n + ' விவரங்களை நிரப்பியது — சரிபார்த்துத் திருத்துங்கள்', 'AI filled ' + n + ' fields — please review and correct') : t('தெளிவான விவரம் கிடைக்கவில்லை', 'Nothing clear found'), n ? 'ok' : 'err');
+  }
   async function onPhotos(e) {
     var files = Array.prototype.slice.call(e.target.files || []), err = M.$('#pherr'); err.textContent = '';
     for (var f of files) {
       if (W.d.photos.length >= 6) break;
       if (!/^image\//.test(f.type)) { err.textContent = t('படக் கோப்பு மட்டும்', 'Images only'); continue; }
       if (f.size > 15 * 1024 * 1024) { err.textContent = t('படம் மிகப் பெரியது (15MB வரை)', 'Image too large (max 15MB)'); continue; }
-      try { var blob = await resize(f); W.d.photos.push(await B.uploadPhoto(blob, M.st.user.id)); }
+      try { var blob = await resize(f), pth = await B.uploadPhoto(blob, W.pub ? 'submissions' : M.st.user.id); W.d.photos.push(pth); if (W.pub) { W.thumbs = W.thumbs || {}; W.thumbs[pth] = URL.createObjectURL(blob); } }
       catch (x) { err.textContent = t('படத்தைப் பதிவேற்ற முடியவில்லை: ', 'Upload failed: ') + (x.message || ''); }
     }
     saveDraft(); renderWizard();
@@ -156,18 +187,31 @@
     a.disabled = true;
     var p = Object.assign({}, W.d); p.consent = 'true';
     ['height_cm', 'brothers', 'sisters'].forEach(function (k) { if (p[k] === '' || p[k] == null) delete p[k]; });
-    var r = await M.api('mat_save_profile', { p: p, phone: W.phone || null, email: M.st.user.email || null });
+    ['brothers_married', 'sisters_married'].forEach(function (k) { if (p[k] === '' || p[k] == null) delete p[k]; });
+    var r = W.pub ? await M.api('mat_submit_public', { p: p, phone: W.phone || null, email: W.email || null }) : await M.api('mat_save_profile', { p: p, phone: W.phone || null, email: M.st.user.email || null });
     a.disabled = false;
     if (!r.ok) {
       if (r.code === 'contact_in_profile') { showErr(t(M.ERR.contact_in_profile[0], M.ERR.contact_in_profile[1]) + ' (' + (r.field || '') + ')'); return; }
       return showErr(M.err(r));
     }
+    if (W.pub) { try { localStorage.removeItem(PUBDRAFT); } catch (x) {} W = null; return M.nav('#/joined'); }
     try { localStorage.removeItem(DRAFT); } catch (x) {}
     W = null; await M.refreshMe(); M.mountShell();
     M.toast(r.status === 'approved' ? t('சேமிக்கப்பட்டது ✓', 'Saved ✓') : t('சமர்ப்பிக்கப்பட்டது — நிர்வாகி சரிபார்ப்பார்', 'Submitted — admin will verify'), 'ok');
     M.nav('#/');
   };
 
+  M.views.join = async function (v) {
+    if (!W || !W.pub) W = initWizard(true);
+    renderWizard();
+  };
+  M.views.joined = function (v) {
+    M.pageTitle = t('பதிவு பெறப்பட்டது', 'Registration received');
+    v.innerHTML = '<div class="wrap narrow"><div class="box c"><div class="big-ic">🎉</div><h1 class="h2">' + t('உங்கள் பதிவு பெறப்பட்டது', 'Your registration is received') + '</h1>' +
+      '<p>' + t('நன்றி! உங்கள் விவரங்கள் பாதுகாப்பாகப் பதிவாகிவிட்டன. தேவைப்பட்டால் எங்கள் குழு உங்களைத் தொடர்புகொள்ளும்.', 'Thank you! Your details are safely recorded. Our team will contact you if needed.') + '</p>' +
+      '<p class="mut">' + t('சந்தேகம் இருந்தால்: ', 'Any questions: ') + '<a href="#/contact">' + t('தொடர்பு பக்கம்', 'Contact page') + '</a></p>' +
+      '<div class="cta"><a class="btn" href="#/join">' + t('மற்றொருவரைப் பதிவு செய்', 'Register another person') + '</a><a class="btn ghost" href="#/">' + t('முகப்பு', 'Home') + '</a></div></div></div>';
+  };
   M.views.wizard = async function (v) {
     if (!M.st.me) await M.refreshMe();
     if (!W || (W.edit && M.st.me && M.st.me.none) ) W = initWizard();
@@ -198,7 +242,7 @@
       sec(t('சமூகம் & ஜாதகம்', 'Community & horoscope'), [row(t('மதம்', 'Religion'), M.label('religion', p.religion)), row(t('சமூகம்', 'Community'), M.commLabel(p)), row(t('குலம்', 'Kulam'), p.kulam), row(t('கோத்திரம்', 'Gotra'), p.gotra), row(t('தாய்மொழி', 'Mother tongue'), M.label('mother_tongue', p.mother_tongue)), row(t('நட்சத்திரம்', 'Star'), M.label('star', p.star)), row(t('ராசி', 'Raasi'), M.label('raasi', p.raasi)), row(t('தோஷம்', 'Dosham'), M.label('dosham', p.dosham))]) +
       sec(t('கல்வி & தொழில்', 'Education & career'), [row(t('கல்வி', 'Education'), [M.label('education', p.education), p.education_detail].filter(Boolean).join(' – ')), row(t('தொழில்', 'Occupation'), p.occupation), row(t('பணி வகை', 'Employment'), M.label('employer_type', p.employer_type)), row(t('வருமானம்', 'Income'), M.label('income_band', p.income_band))]) +
       sec(t('தனிப்பட்ட விவரம்', 'Personal'), [row(t('உயரம்', 'Height'), p.height_cm ? M.cm(p.height_cm) : ''), row(t('உணவு', 'Diet'), M.label('diet', p.diet)), row(t('பதிவு செய்தவர்', 'Profile by'), M.label('created_for', p.created_for))]) +
-      sec(t('குடும்பம்', 'Family'), [row(t('தந்தை', 'Father'), p.father_occ), row(t('தாய்', 'Mother'), p.mother_occ), row(t('சகோதரர்கள்', 'Brothers'), p.brothers != null ? String(p.brothers) : ''), row(t('சகோதரிகள்', 'Sisters'), p.sisters != null ? String(p.sisters) : ''), row(t('குடும்ப வகை', 'Family type'), M.label('family_type', p.family_type)), row(t('குடும்ப நிலை', 'Family status'), M.label('family_status', p.family_status))]) +
+      sec(t('குடும்பம்', 'Family'), [row(t('தந்தை', 'Father'), [p.father_name, p.father_occ].filter(Boolean).join(' – ')), row(t('தாய்', 'Mother'), [p.mother_name, p.mother_occ].filter(Boolean).join(' – ')), row(t('சகோதரர்கள்', 'Brothers'), p.brothers != null ? p.brothers + (p.brothers_married != null ? ' (' + t('திருமணம் ', 'married ') + p.brothers_married + ')' : '') : ''), row(t('சகோதரிகள்', 'Sisters'), p.sisters != null ? p.sisters + (p.sisters_married != null ? ' (' + t('திருமணம் ', 'married ') + p.sisters_married + ')' : '') : ''), row(t('சொந்த ஊர்', 'Native place'), p.native_place), row(t('குடும்பம் பற்றி', 'About family'), p.family_about), row(t('குடும்ப வகை', 'Family type'), M.label('family_type', p.family_type)), row(t('குடும்ப நிலை', 'Family status'), M.label('family_status', p.family_status))]) +
       sec(t('இருப்பிடம்', 'Location'), [row(t('ஊர்', 'City'), p.city), row(t('மாவட்டம்', 'District'), p.district), row(t('மாநிலம்', 'State'), M.label('state', p.state)), row(t('நாடு', 'Country'), p.country)]) +
       sec(t('துணையிடம் எதிர்பார்ப்பு', 'Partner preferences'), [prefTxt ? '<p>' + esc(prefTxt) + '</p>' : '']) + '</div>' +
       (self ? '' : '<p class="mut c"><a href="#" data-act="moreMenu" data-id="' + esc(p.id) + '">' + t('தடு / புகார் செய்', 'Block / Report') + '</a></p>') + '</div>';
@@ -211,7 +255,7 @@
     if (!it) h += '<button class="btn pri" data-act="interest" data-id="' + id + '">💌 ' + t('Interest அனுப்பு', 'Send interest') + '</button>';
     else if (it.status === 'pending' && it.dir === 'out') h += '<button class="btn" disabled>✓ ' + t('Interest அனுப்பப்பட்டது', 'Interest sent') + '</button>';
     else if (it.status === 'pending' && it.dir === 'in') h += '<button class="btn pri" data-act="respond" data-yes="1" data-iid="' + it.id + '">✓ ' + t('ஏற்கிறேன்', 'Accept') + '</button><button class="btn ghost" data-act="respond" data-yes="0" data-iid="' + it.id + '">✕ ' + t('மறுக்கிறேன்', 'Decline') + '</button>';
-    else if (it.status === 'accepted') h += '<a class="btn pri" href="#/chat/' + id + '">💬 ' + (r.unlocked ? t('Chat', 'Chat') : t('Chat திறக்க (₹' + M.C.FEE_RS + ')', 'Unlock chat (₹' + M.C.FEE_RS + ')')) + '</a>';
+    else if (it.status === 'accepted') h += '<a class="btn pri" href="#/chat/' + id + '">💬 ' + (r.unlocked ? t('Chat', 'Chat') : (M.C.FEE_ON ? t('Chat திறக்க (₹' + M.C.FEE_RS + ')', 'Unlock chat (₹' + M.C.FEE_RS + ')') : t('Chat', 'Chat'))) + '</a>';
     else h += '<button class="btn" disabled>' + t('இந்த Interest மறுக்கப்பட்டது', 'Interest declined') + '</button>';
     h += '<button class="btn ghost" data-act="shortlist" data-id="' + id + '" aria-pressed="' + (p.shortlisted ? 'true' : 'false') + '">' + (p.shortlisted ? '♥ ' + t('விருப்பப்பட்டியலில்', 'Shortlisted') : '♡ ' + t('விருப்பப்பட்டியல்', 'Shortlist')) + '</button>';
     return '<div class="acts">' + h + '</div>';

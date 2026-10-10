@@ -4,6 +4,7 @@
   var C = window.MAT_CONFIG, D = window.MAT_DATA, B = window.MatBackend;
   var M = window.MAT = { views: {}, acts: {}, st: { user: null, me: null, counts: {}, lang: 'ta', ready: false }, timers: [], B: B, C: C, D: D };
   try { M.st.lang = localStorage.getItem('mat_lang') || 'ta'; } catch (e) {}
+  try { var ql = new URLSearchParams(location.search).get('lang'); if (ql === 'en' || ql === 'ta') { M.st.lang = ql; try { localStorage.setItem('mat_lang', ql); } catch (e2) {} } } catch (e) {}
   M.t = function (ta, en) { return M.st.lang === 'en' ? en : ta; };
   M.esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var esc = M.esc, t = M.t;
@@ -113,7 +114,7 @@
       var b = n[0] === 'interests' ? badge(c.interests_in, 'interests_in') : n[0] === 'messages' ? badge(c.unread, 'unread') : '';
       return '<a href="#/' + n[0] + '" data-nav="' + n[0] + '"><span class="ic" aria-hidden="true">' + n[1] + '</span><span class="lb">' + esc(t(n[2], n[3])) + '</span>' + b + '</a>';
     }).join('') : '';
-    var hd = '<header class="hd"><div class="hdin"><a class="logo" href="#/"><span class="em" aria-hidden="true">ௐ</span><span class="lt"><b>' + t('சௌடேஸ்வரி', 'Chowdeshwari') + '</b><small>' + t('திருமண அமைப்பகம்', 'Thirumana Amaippagam') + '</small></span></a>' +
+    var hd = '<header class="hd"><div class="hdin"><a class="logo" href="#/"><span class="em" aria-hidden="true">ௐ</span><span class="lt"><b>' + t('ஸ்ரீ சௌடேஸ்வரி', 'Sri Chowdeshwari') + '</b><small>' + t('திருமண அமைப்பகம்', 'Thirumana Amaippagam') + '</small></span></a>' +
       '<nav class="dn" aria-label="main">' + links + '</nav>' +
       '<div class="hr"><div class="langseg" role="group" aria-label="language"><button data-act="lang" data-v="ta" class="' + (M.st.lang === 'ta' ? 'on' : '') + '">த</button><button data-act="lang" data-v="en" class="' + (M.st.lang === 'en' ? 'on' : '') + '">EN</button></div>' +
       (u ? '' : '<a class="btn sm" href="#/login">' + t('உள்நுழை', 'Login') + '</a>') + '</div></div></header>';
@@ -123,9 +124,9 @@
     return demo + hd + '<main id="view" tabindex="-1"></main>' + tabs + M.footer();
   };
   M.footer = function () {
-    return '<footer class="ft"><div class="ftin"><div><b>' + t('சௌடேஸ்வரி திருமண அமைப்பகம்', 'Chowdeshwari Thirumana Amaippagam') + '</b><p>' + t('கன்னட தேவாங்கர் சமூகத்திற்காக உருவாக்கப்பட்டது — அனைத்து சமூகத்தினருக்கும் திறந்தது.', 'Built for the Kannada Devanga community — open to all communities.') + '</p></div>' +
+    return '<footer class="ft"><div class="ftin"><div><b>' + t('ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்', 'Sri Chowdeshwari Thirumana Amaippagam') + '</b><p>' + t('கன்னட தேவாங்கர் சமூகத்திற்காக உருவாக்கப்பட்டது — அனைத்து சமூகத்தினருக்கும் திறந்தது.', 'Built for the Kannada Devanga community — open to all communities.') + '</p></div>' +
       '<div class="fl"><a href="#/safety">' + t('பாதுகாப்பு', 'Safety') + '</a><a href="#/terms">' + t('விதிமுறைகள்', 'Terms') + '</a><a href="#/privacy">' + t('தனியுரிமை', 'Privacy') + '</a><a href="../">' + t('PDF Tools இந்தியா', 'PDF Tools India') + '</a>' +
-      (C.SUPPORT_WHATSAPP ? '<a href="https://wa.me/' + esc(C.SUPPORT_WHATSAPP) + '" rel="noopener">' + t('உதவி', 'Help') + '</a>' : '<a href="mailto:' + esc(C.SUPPORT_EMAIL) + '">' + t('உதவி', 'Help') + '</a>') + '</div></div></footer>';
+      '<a href="tel:+91' + esc(C.SUPPORT_PHONE) + '">📞 ' + esc(C.SUPPORT_PHONE.replace(/(\d{5})(\d{5})/, '$1 $2')) + '</a>' + '</div></div></footer>';
   };
   M.mountShell = function () {
     document.getElementById('app').innerHTML = M.shell();
@@ -138,7 +139,7 @@
     M.$$('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-nav') === key); });
   };
 
-  var PUBLIC = { '': 1, login: 1, register: 1, terms: 1, privacy: 1, safety: 1, about: 1, forgot: 1 };
+  var PUBLIC = { '': 1, login: 1, register: 1, terms: 1, privacy: 1, contact: 1, join: 1, joined: 1, safety: 1, about: 1, forgot: 1 };
   M.route = async function () {
     M.clearTimers();
     var parts = location.hash.replace(/^#\/?/, '').split('?')[0].split('/'), name = parts[0] || '', arg = parts[1];
@@ -157,7 +158,7 @@
     try { await fn(holder, arg, parts.slice(1)); } catch (e) { console.error(e); if (seq === M.seq) holder.innerHTML = '<div class="wrap"><p class="err">' + esc(t('பிழை ஏற்பட்டது. பக்கத்தை refresh செய்யுங்கள்.', 'Something went wrong. Please refresh.')) + '</p></div>'; }
     if (seq !== M.seq) return;
     M.hydrate(holder); M.markNav();
-    document.title = (M.pageTitle || t('சௌடேஸ்வரி திருமண அமைப்பகம்', 'Chowdeshwari Thirumana Amaippagam')) + ' | ' + t('சௌடேஸ்வரி திருமண அமைப்பகம்', 'Chowdeshwari Matrimony');
+    document.title = (M.pageTitle || t('ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்', 'Sri Chowdeshwari Thirumana Amaippagam')) + ' | ' + t('ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்', 'Sri Chowdeshwari Matrimony');
     M.pageTitle = '';
     window.scrollTo(0, 0);
   };

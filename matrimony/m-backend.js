@@ -55,6 +55,17 @@
       var r = await sb.storage.from('mat-photos').createSignedUrl(path, 3600);
       return r.data ? r.data.signedUrl : '';
     },
+    jathagam: async function (file) {
+      var s = (await sb.auth.getSession()).data.session; if (!s) return { ok: false, code: 'not_logged_in' };
+      var fd = new FormData(); fd.append('file', file);
+      try {
+        var r = await fetch(C.BACKEND_URL + '/api/matrimony/jathagam-extract', { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token }, body: fd });
+        var j = await r.json().catch(function () { return {}; });
+        if (r.status === 402) return { ok: false, code: 'no_credits', message: j.error };
+        if (!r.ok) return { ok: false, code: 'ai_failed', message: j.error || 'AI error' };
+        return { ok: true, fields: j.fields || {}, credits: j.credits };
+      } catch (e) { return { ok: false, code: 'network', message: String(e.message || e) }; }
+    },
     pay: async function (otherId) {
       var s = (await sb.auth.getSession()).data.session; if (!s) return { ok: false, code: 'not_logged_in' };
       var H = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.access_token };
@@ -66,7 +77,7 @@
       return new Promise(function (resolve) {
         var done = false;
         var rz = new window.Razorpay({
-          key: o.keyId, amount: o.amount, currency: o.currency, order_id: o.orderId, name: 'சௌடேஸ்வரி திருமண அமைப்பகம்', description: 'Chat unlock',
+          key: o.keyId, amount: o.amount, currency: o.currency, order_id: o.orderId, name: 'ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்', description: 'Chat unlock',
           prefill: { email: s.user.email }, theme: { color: '#7A1233' },
           modal: { ondismiss: function () { if (!done) resolve({ ok: false, code: 'cancelled' }); } },
           handler: async function (resp) {
@@ -158,6 +169,10 @@
       var r = await serial(function () { return db.query('select data from demo_photos where path = $1', [path]); });
       return r.rows[0] ? r.rows[0].data : '';
     },
+    jathagam: async function (file) {
+      if (!window.confirm('டெமோ முறை: AI ஜாதகம் படித்ததாகக் கருதி மாதிரி விவரங்களை நிரப்பவா? (உண்மையில் 2 credits)\nDemo mode: simulate the AI reading the horoscope?')) return { ok: false, code: 'cancelled' };
+      return { ok: true, credits: 2, fields: { name: 'Kavya', gender: 'F', dob: '1999-04-12', star: 'rohini', raasi: 'rishabam' } };
+    },
     pay: async function (otherId) {
       if (!window.confirm('டெமோ முறை: ₹50 செலுத்தியதாகக் கருதி chat திறக்கவா?\nDemo mode: pretend ₹50 was paid and unlock chat?')) return { ok: false, code: 'cancelled' };
       var r = await asRole('service_role', '', async function () { return (await db.query("select mat_record_unlock($1, $2, $3, $4, $5, 5000) as r", [demoUid, otherId, demoUid, 'demo_order_' + Date.now(), 'demo_pay_' + Date.now()])).rows[0].r; });
@@ -204,7 +219,7 @@
   }
 
   var impl = demo ? demoImpl : live;
-  ['init', 'user', 'signUp', 'signIn', 'signOut', 'reset', 'setPassword', 'rpc', 'uploadPhoto', 'removePhoto', 'photoUrl', 'pay'].forEach(function (k) { B[k] = function () { return impl[k].apply(null, arguments); }; });
+  ['init', 'user', 'signUp', 'signIn', 'signOut', 'reset', 'setPassword', 'rpc', 'uploadPhoto', 'removePhoto', 'photoUrl', 'pay', 'jathagam'].forEach(function (k) { B[k] = function () { return impl[k].apply(null, arguments); }; });
   B.resetDemo = demoImpl.resetDemo;
   window.MatBackend = B;
 })();

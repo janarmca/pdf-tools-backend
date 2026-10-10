@@ -1,4 +1,4 @@
-# சௌடேஸ்வரி திருமண அமைப்பகம் — அமைப்பு வழிகாட்டி (Setup guide)
+# ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம் — அமைப்பு வழிகாட்டி (Setup guide)
 
 தளம்: `https://pdftoolsindia.com/matrimony/` · முதன்மை சமூகம்: கன்னட தேவாங்கர் · அனைத்து சமூகத்தினரும் பதிவு செய்யலாம்.
 
@@ -70,3 +70,30 @@ Email/WhatsApp அறிவிப்புகள் (புதிய Interest �
 
 ## 10. சோதனைகள் (dev)
 `node matrimony/tests/filter.test.js` · `node matrimony/tests/sql-parity.test.mjs` (JS = SQL, 1667 வழக்குகள்) · `node matrimony/tests/sql-flow.test.mjs` (71 சோதனைகள், RLS உட்பட) — PGlite (`npm i @electric-sql/pglite`) தேவை. Payment module: repo root-ல் `node matrimony/tests/api.test.mjs`.
+
+
+## ✨ AI ஜாதகம் → அடிப்படை விவரங்கள் (புதிது)
+- பதிவு படிவத்தின் முதல் பக்கத்தில் "ஜாதகம் பதிவேற்று" பொத்தான்: படம்/PDF → AI பெயர், பாலினம், பிறந்த தேதி, நட்சத்திரம், ராசி நிரப்பும். உறுப்பினர் சரிபார்த்துத் திருத்தலாம்.
+- **AI = கட்டணம்**: ஒரு முறைக்கு 2 credits (`JATHAGAM_CREDITS` in `matrimony-api.js`), பிற tools-ல் உள்ள அதே credit balance. தோல்வியடைந்தால் credits திரும்பக் கிடைக்கும். ஜாதகக் கோப்பு உடனே நீக்கப்படும், சேமிக்கப்படாது.
+- தேவை: Cloud Run-ல் `GEMINI_API_KEY` ஏற்கனவே உள்ளது; `server.js`-ல் patch-ன் கடைசி வரி (`upload: uploadImage, deductCredits, refundCredits`) சேர்க்க வேண்டும். இது இல்லாவிட்டால் AI பொத்தான் "AI error" காட்டும்; மற்ற அனைத்தும் வேலை செய்யும்.
+- Demo முறை (`?demo=1`): மாதிரி விவரங்களை நிரப்பும் (உண்மை AI இல்லை).
+
+
+## 💰 கட்டணக் கொள்கை (UPDATE 6)
+- பதிவு, விவரங்கள், குடும்ப விவரம், படங்கள், Interest, Chat — **இலவசம்**.
+- **AI மட்டும் கட்டணம்**: ஜாதகத்தை AI படித்து நிரப்ப 2 credits (`MATRIMONY_JATHAGAM_CREDITS` env மூலம் மாற்றலாம்; 0 = இலவசம்).
+- Chat கட்டணம் (தொடர்புக்கு) தற்போது நிறுத்தம். பின்னர் தொகை முடிவானதும்: (1) Supabase SQL Editor-ல் `update mat_settings set value = 'on' where key = 'chat_fee';` (2) `m-config.js`-ல் `FEE_ON: true`, `FEE_RS: <தொகை>`; (3) Cloud Run env `MATRIMONY_FEE_PAISE=<தொகை×100>`.
+- தொடர்பு பக்கம் `#/contact`: எண்/email `m-config.js`-ல் (`SUPPORT_PHONE`, `SUPPORT_EMAIL`, `SUPPORT_WHATSAPP`).
+- `schema.sql`-ஐ மீண்டும் Run செய்தால் புதிய குடும்ப விவர columns + சுவிட்ச் சேர்ந்துவிடும் (பாதுகாப்பாக மீண்டும் ஓடும்).
+
+
+## 🚪 உள்நுழைவு இல்லாமல் பதிவு (UPDATE 7)
+- முகப்பில் "இலவசமாகப் பதிவு செய்க" → `#/join`: கணக்கு/கடவுச்சொல் தேவையில்லை. விவரம் (குடும்பம், ஜாதகம்), படங்கள் (6 வரை), மொபைல் எண், விருப்ப email — சமர்ப்பித்ததும் `mat_submissions`-ல் பதிவாகும்.
+- Admin → **புதிய பதிவுகள்** tab: அனைத்து விவரம், படம், 📞 தட்டினால் அழைப்பு; "தொடர்பு கொண்டேன் / முடிந்தது" குறிக்கலாம். (தள உறுப்பினர் சுயவிவரம் வேறு; பின்னர் இணைத்துக்கொள்ளலாம்.)
+- பாதுகாப்பு: ஒரு எண்ணுக்கு நாளைக்கு 3 பதிவு, மணிக்கு 300 மொத்தம்; எழுத்துப் பெட்டிகளில் தொலைபேசி/email தடை; படங்கள் `submissions/` கோப்புறையில் மட்டும்.
+- AI ஜாதகம் நிரப்பல் உள்நுழைந்தவர்களுக்கு மட்டும் (credits தேவை).
+- `schema.sql`-ஐ மீண்டும் Run செய்யுங்கள் (புதிய table + சேமிப்பு விதி சேரும்).
+
+## 🔎 SEO / sitemap
+- `/matrimony/` (தமிழ்) மற்றும் `/matrimony/en/` (English) — இரண்டிலும் hreflang, JSON-LD (தொடர்பு எண்/email). `sitemap.xml`-ல் இரண்டும் hreflang இணைப்புடன். `generate-tool-pages.mjs` இயக்கினால் தானாக உருவாகும்.
+- தள மொழி: `?lang=en` / `?lang=ta` இணைப்பிலும் வேலை செய்யும்.
