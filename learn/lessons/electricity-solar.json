@@ -1,0 +1,813 @@
+{
+ "id": "electricity-solar",
+ "minutes": 32,
+ "title": {
+  "ta": "மின்சாரம் உன் வீட்டுக்கு எப்படி வருகிறது?",
+  "en": "How does electricity reach your home?"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "அறிவியல்: மின்சாரம், மின்னாற்றல், ஆற்றல் வளங்கள்",
+    "en": "Science: electricity, electrical energy and energy resources"
+   }
+  },
+  {
+   "b": "NCERT",
+   "w": {
+    "ta": "அறிவியல்: மின்சாரத்தின் வெப்ப விளைவு, ஆற்றல் மூலங்கள்",
+    "en": "Science: heating effect of current, sources of energy"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "மின்நிலையத்திலிருந்து வீடு வரை மின்சாரத்தின் பயணத்தைச் சொல்ல",
+   "en": "Describe electricity's journey from power station to home"
+  },
+  {
+   "ta": "ஒரு யூனிட் (kWh) என்றால் என்ன என்று புரிந்து, ஒரு கருவியின் மின் செலவைக் கணக்கிட",
+   "en": "Understand what a unit (kWh) is and calculate an appliance's electricity use"
+  },
+  {
+   "ta": "மின்சாரம் சேமிக்கும் வழிகளைப் பயன்படுத்த",
+   "en": "Use ways of saving electricity"
+  },
+  {
+   "ta": "கூரைச் சூரிய மின்சாரம் எப்படி வேலை செய்கிறது, அதன் செலவு எப்போது திரும்பும் என்று மதிப்பிட",
+   "en": "Understand how rooftop solar works and estimate when its cost is recovered"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "தேர்வுக்கு முந்தின மாலை. செல்வி படித்துக்கொண்டிருந்தபோது திடீரென மின்சாரம் போனது. வெளியே தெருவில் கம்பத்தின் மேல் இருந்த பெரிய மின்மாற்றிப் பெட்டியை (transformer) பார்த்தாள். \"இந்தக் கம்பிகள் வழியாக எங்கிருந்து வருகிறது இந்த மின்சாரம்? மாதம் முடிந்ததும் நாம் பணம் கட்டுகிறோமே, எதற்காக?\" என்று யோசித்தாள்.\n\nஇது உனக்கு ஏன் பயன்? மின்சாரம் எப்படி வருகிறது, எவ்வளவு செலவாகிறது என்று புரிந்தால், உன் வீட்டுக் கட்டணத்தைக் குறைக்கலாம். கூரையில் சூரிய மின்சாரம் போடுவது பயனுள்ளதா என்று குடும்பத்துடன் கணக்குப் போட்டு முடிவெடுக்கலாம். நாளைய உலகின் முக்கிய முடிவுகளில் மின்சாரமும் ஒன்று.\n\nகேள்வி: சுவிட்சைப் போட்டதும் விளக்கு எரிகிறது. அந்த ஆற்றல் எங்கிருந்து, எப்படி வந்தது?",
+    "en": "The evening before an exam. Selvi was studying when the power suddenly went off. Outside, she looked at the big box (transformer) on the pole in the street. \"Where does this electricity come from through these wires? And what are we paying for every month?\" she wondered.\n\nWhy does this matter to you? If you understand how electricity arrives and what it costs, you can reduce your home's bill, and you can work out with your family whether rooftop solar is worth it. Electricity is one of the big decisions of tomorrow's world.\n\nThe question: you press the switch and the light comes on. Where did that energy come from, and how did it get there?"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "மின்நிலையத்திலிருந்து நகரங்களுக்கு மின்சாரத்தை மிக உயர்ந்த மின்னழுத்தத்தில் (பல்லாயிரம் முதல் பல லட்சம் volt) அனுப்புகிறார்கள். ஏன்?",
+    "en": "Electricity is sent from power stations to cities at very high voltage (tens of thousands to several lakh volts). Why?"
+   },
+   "options": [
+    {
+     "ta": "அப்போது கம்பியில் வெப்பமாக வீணாகும் மின்சாரம் குறையும்",
+     "en": "So that less electricity is wasted as heat in the wires"
+    },
+    {
+     "ta": "அப்போது மின்சாரம் வேகமாகப் போகும்",
+     "en": "So that electricity travels faster"
+    },
+    {
+     "ta": "அப்போது மின்சாரத்தின் அளவு அதிகரிக்கும்",
+     "en": "So that the amount of electricity increases"
+    }
+   ],
+   "answer": 0,
+   "reveal": {
+    "ta": "அதே மின்திறனை அனுப்ப, மின்னழுத்தம் அதிகமானால் மின்னோட்டம் (current) குறைவாக இருந்தால் போதும். கம்பியில் வெப்ப இழப்பு மின்னோட்டத்தின் **இருமடிக்கு** ஏற்ப ஏறும். எனவே மின்னோட்டம் குறைந்தால் இழப்பு மிகவும் குறையும். மற்ற இரு ஊகங்களையும் பலரும் செய்வதுதான் — மின்னழுத்தம் வேகத்தையோ மொத்த ஆற்றலையோ கூட்டுவதில்லை. கீழே இதைக் கணக்கிடுவோம்.",
+    "en": "To send the same amount of power, a higher voltage needs a smaller current. Heat loss in a wire grows with the **square** of the current, so a smaller current cuts the loss a lot. The other two guesses are common — voltage does not make electricity faster or increase the total energy. We will do the numbers below."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மின்சாரத்தின் பயணம்",
+    "en": "The journey of electricity"
+   },
+   "text": {
+    "ta": "**1. மின்நிலையம்:** இங்கே ஒரு **ஜெனரேட்டர்** சுழல்கிறது; சுழற்சி மின்சாரத்தை உண்டாக்குகிறது. அதைச் சுழற்றுவது நீராவி, ஓடும் நீர் அல்லது காற்று.\n**2. மின்மாற்றி (transformer):** மின்னழுத்தத்தை மிக அதிகமாக உயர்த்துகிறது.\n**3. உயர் மின்னழுத்தக் கம்பிகள்:** பெரிய கோபுரங்களில் நீண்ட தூரம் செல்கின்றன.\n**4. துணை மின்நிலையம்:** நகரம் அல்லது ஊருக்கு அருகே மின்னழுத்தத்தைக் குறைக்கிறது.\n**5. தெருக் கம்பத்தின் மின்மாற்றி:** இன்னும் குறைத்து, வீடுகளுக்கு இந்தியாவில் வழக்கமான சுமார் **230 volt** தருகிறது.\n**6. உன் வீடு:** மீட்டர் வழியாக விளக்கு, மின்விசிறி, போன் சார்ஜர்…\n\nமின்சாரத்தைப் பெரிய அளவில் சேமிப்பது கடினம்; எனவே பெரும்பாலும் உற்பத்தியும் பயன்பாடும் ஒவ்வொரு கணமும் பொருந்த வேண்டும். அதற்காக மின்வாரியத்தினர் இரவும் பகலும் கண்காணிக்கிறார்கள்.",
+    "en": "**1. Power station:** A **generator** spins here; the spinning produces electricity. What spins it is steam, flowing water or wind.\n**2. Transformer:** raises the voltage very high.\n**3. High-voltage lines:** run a long way on big towers.\n**4. Substation:** near a town or village, lowers the voltage.\n**5. Transformer on the street pole:** lowers it more, giving homes the usual Indian **230 volts**.\n**6. Your home:** through the meter to the light, the fan, the phone charger…\n\nStoring electricity on a large scale is difficult, so mostly production and use must match at every moment. That is why the power utility's staff watch it day and night."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "உயர் மின்னழுத்தம் ஏன் குறைவாக வீணாக்குகிறது?",
+    "en": "Why does high voltage waste less?"
+   },
+   "q": {
+    "ta": "1000 W (1 kW) மின்திறனை ஒரு கம்பி வழியாக அனுப்ப வேண்டும். (அ) 100 V-இல் (ஆ) 1000 V-இல் அனுப்பினால் கம்பியில் ஏற்படும் வெப்ப இழப்பு எத்தனை மடங்கு வேறுபடும்? (எளிய மாதிரி)",
+    "en": "1000 W (1 kW) of power must be sent through a wire. How much do the heat losses differ if sent (a) at 100 V (b) at 1000 V? (a simple model)"
+   },
+   "steps": [
+    {
+     "ta": "மின்திறன் = மின்னழுத்தம் × மின்னோட்டம் (P = V × I). எனவே I = P ÷ V.",
+     "en": "Power = voltage × current (P = V × I). So I = P ÷ V."
+    },
+    {
+     "ta": "100 V-இல்: I = 1000 ÷ 100 = 10 A. 1000 V-இல்: I = 1000 ÷ 1000 = 1 A.",
+     "en": "At 100 V: I = 1000 ÷ 100 = 10 A. At 1000 V: I = 1000 ÷ 1000 = 1 A."
+    },
+    {
+     "ta": "கம்பியில் வெப்ப இழப்பு ∝ I² (அதே கம்பிக்கு). 10² = 100, 1² = 1.",
+     "en": "Heat loss in the wire ∝ I² (for the same wire). 10² = 100, 1² = 1."
+    },
+    {
+     "ta": "எனவே 100 V-ஐ விட 1000 V-இல் இழப்பு 100 மடங்கு குறைவு.",
+     "en": "So at 1000 V the loss is 100 times less than at 100 V."
+    }
+   ],
+   "answer": {
+    "ta": "100 மடங்கு குறைவு (எளிய மாதிரியில்).",
+    "en": "100 times less (in this simple model)."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "மின்சாரம் எப்படித் தயாராகிறது? (தமிழ்நாட்டின் எடுத்துக்காட்டுகள்)",
+    "en": "How is electricity made? (Tamil Nadu examples)"
+   },
+   "head": [
+    {
+     "ta": "மூலம்",
+     "en": "Source"
+    },
+    {
+     "ta": "எதைக் கொண்டு ஜெனரேட்டர் சுழல்கிறது",
+     "en": "What spins the generator"
+    },
+    {
+     "ta": "தமிழ்நாட்டில் எடுத்துக்காட்டு",
+     "en": "Example in Tamil Nadu"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "நிலக்கரி / பழுப்புநிலக்கரி (lignite)",
+      "en": "Coal / lignite"
+     },
+     {
+      "ta": "எரிபொருளை எரித்து நீரைக் கொதிக்க வைத்து வரும் நீராவி",
+      "en": "Steam from water boiled by burning the fuel"
+     },
+     {
+      "ta": "நெய்வேலி (கடலூர் மாவட்டம்) — பழுப்புநிலக்கரிச் சுரங்கமும் மின்நிலையமும்",
+      "en": "Neyveli (Cuddalore district) — a lignite mine and power stations"
+     }
+    ],
+    [
+     {
+      "ta": "நீர்",
+      "en": "Hydro (water)"
+     },
+     {
+      "ta": "உயரத்திலிருந்து விழும் நீர்",
+      "en": "Falling water"
+     },
+     {
+      "ta": "மேட்டூர் அணை (காவிரி); நீலகிரி மலைப் பகுதி",
+      "en": "Mettur Dam (Cauvery); the Nilgiris hills"
+     }
+    ],
+    [
+     {
+      "ta": "காற்று",
+      "en": "Wind"
+     },
+     {
+      "ta": "காற்றாடி இறக்கைகள் நேரடியாகச் சுழல்கின்றன",
+      "en": "Turbine blades turned directly by the wind"
+     },
+     {
+      "ta": "கன்னியாகுமரி மாவட்டத்தில் முப்பந்தல் (Muppandal) பகுதி",
+      "en": "The Muppandal area in Kanyakumari district"
+     }
+    ],
+    [
+     {
+      "ta": "சூரியன்",
+      "en": "Solar"
+     },
+     {
+      "ta": "சுழலுவதே இல்லை — தகடு நேரடியாக மின்சாரம் தருகிறது",
+      "en": "Nothing spins — the panel gives electricity directly"
+     },
+     {
+      "ta": "கூரைகள், பண்ணைகள், பெரிய சூரிய மின் பூங்காக்கள்",
+      "en": "Rooftops, farms and large solar parks"
+     }
+    ],
+    [
+     {
+      "ta": "அணுசக்தி",
+      "en": "Nuclear"
+     },
+     {
+      "ta": "யுரேனியம் அணுக்கள் பிளவுபடும்போது வரும் வெப்பத்தால் உருவாகும் நீராவி",
+      "en": "Steam from the heat released when uranium atoms split"
+     },
+     {
+      "ta": "கூடங்குளம் (திருநெல்வேலி மாவட்டம்) — ரஷ்யாவின் ஒத்துழைப்புடன் அமைந்தது",
+      "en": "Kudankulam (Tirunelveli district) — built with Russian cooperation"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஒவ்வொரு மூலத்துக்கும் நன்மையும் சிக்கலும்",
+    "en": "Every source has a gain and a cost"
+   },
+   "text": {
+    "ta": "**நிலக்கரி/பழுப்புநிலக்கரி:** நிலையாகக் கிடைக்கிறது; ஆனால் எரிக்கும்போது கார்பன் டை ஆக்சைடு வெளியாகி, புவி வெப்பமடைதலுக்குக் காரணமாகிறது. இந்தியாவில் இன்றும் மின்சாரத்தின் பெரும்பகுதி நிலக்கரியிலிருந்துதான் வருகிறது.\n\n**நீர்:** எரிபொருள் தேவையில்லை; ஆனால் மழையையும் அணையில் உள்ள நீரையும் பொறுத்தது.\n\n**காற்று, சூரியன்:** புகை இல்லை; ஆனால் காற்று வீசும்போதும் வெயில் இருக்கும்போதும் மட்டுமே கிடைக்கும். எனவே மற்ற மூலங்களுடன் சேர்த்து, சேமிப்புக் கருவிகளுடன் பயன்படுத்த வேண்டும்.\n\n**அணுசக்தி:** இயங்கும்போது கார்பன் டை ஆக்சைடு மிகக் குறைவு; ஆனால் கதிரியக்கக் கழிவை நீண்ட காலம் பாதுகாக்க வேண்டும், பாதுகாப்பு விதிகளும் மிகக் கண்டிப்பானவை.\n\nஎந்த மூலமும் \"இலவசம்\" அல்ல; ஒவ்வொன்றுக்கும் செலவும் தாக்கமும் உண்டு. அதனால்தான் நாடுகள் பல மூலங்களைக் கலந்து பயன்படுத்துகின்றன.",
+    "en": "**Coal / lignite:** steady supply; but burning releases carbon dioxide, which contributes to global warming. Even today a large part of India's electricity comes from coal.\n\n**Water:** no fuel needed; but depends on rain and the water in the dam.\n\n**Wind and sun:** no smoke; but available only when the wind blows and the sun shines. So they must be used together with other sources and with storage.\n\n**Nuclear:** very little carbon dioxide while running; but radioactive waste must be kept safe for a very long time, and safety rules are very strict.\n\nNo source is \"free\"; each has costs and effects. That is why countries use a mix of sources."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "**1 யூனிட் = 1 kWh (கிலோவாட்-மணி) = 1 kW (1000 W) மின்திறனை 1 மணி நேரம் பயன்படுத்துவது.**\n\n[[ யூனிட் = (watt × மணி நேரம்) ÷ 1000 ]]\n\nஉன் மின் கட்டணம், இந்த யூனிட்களை எண்ணி, ஒவ்வொரு யூனிட்டுக்கும் ஒரு விலை வைத்துக் கணக்கிடப்படுகிறது. (விலை மாநிலத்துக்கு ஏற்ப, அடுக்குகளாக, அவ்வப்போது மாறும் — உன் சொந்த மின் கட்டணச் சீட்டைப் பார்.)",
+    "en": "**1 unit = 1 kWh (kilowatt-hour) = using 1 kW (1000 W) of power for 1 hour.**\n\n[[ units = (watts × hours) ÷ 1000 ]]\n\nYour bill counts these units and multiplies by a price per unit. (The price differs by state, comes in slabs and changes from time to time — look at your own electricity bill.)"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "பல்பை மாற்றினால்?",
+    "en": "What if you change the bulbs?"
+   },
+   "q": {
+    "ta": "ஒரு வீட்டில் 4 பழைய 60 W பல்புகள் தினமும் 5 மணி நேரம் எரிகின்றன. அவற்றுக்குப் பதில் அதே வெளிச்சம் தரும் 9 W LED பல்புகளைப் போட்டால் (பொதுவாக 9 W LED ≈ 60 W பழைய பல்பின் வெளிச்சம்), ஒரு மாதத்தில் எத்தனை யூனிட், எத்தனை ரூபாய் சேமிப்பு? (யூனிட் விலை ₹6 என்று எடுத்துக்கொள்வோம் — இது எடுத்துக்காட்டுக்கான எண்.)",
+    "en": "In a home, 4 old 60 W bulbs burn 5 hours a day. If they are replaced by 9 W LED bulbs giving about the same light (a 9 W LED is generally about as bright as an old 60 W bulb), how many units and rupees are saved in a month? (Take ₹6 per unit — an example number)"
+   },
+   "steps": [
+    {
+     "ta": "பழையவை: 4 × 60 W × 5 h = 1200 Wh = 1.2 kWh ஒரு நாளுக்கு → 30 நாளுக்கு 36 யூனிட்.",
+     "en": "Old: 4 × 60 W × 5 h = 1200 Wh = 1.2 kWh a day → 36 units in 30 days."
+    },
+    {
+     "ta": "LED: 4 × 9 W × 5 h = 180 Wh = 0.18 kWh ஒரு நாளுக்கு → 30 நாளுக்கு 5.4 யூனிட்.",
+     "en": "LED: 4 × 9 W × 5 h = 180 Wh = 0.18 kWh a day → 5.4 units in 30 days."
+    },
+    {
+     "ta": "சேமிப்பு: 36 − 5.4 = 30.6 யூனிட். 30.6 × ₹6 = ₹183.60 (சுமார் ₹184).",
+     "en": "Saving: 36 − 5.4 = 30.6 units. 30.6 × ₹6 = ₹183.60 (about ₹184)."
+    },
+    {
+     "ta": "மின்சாரம் சுமார் 85% குறைவு: (60 − 9) ÷ 60 = 0.85.",
+     "en": "Electricity use is about 85% lower: (60 − 9) ÷ 60 = 0.85."
+    }
+   ],
+   "answer": {
+    "ta": "மாதம் 30.6 யூனிட்; சுமார் ₹184 (எடுத்துக்காட்டு விலையில்).",
+    "en": "30.6 units a month; about ₹184 (at the example price)."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "ஒரு குடும்பத்தின் மாத மின் பயன்பாடு (மாதிரி)",
+    "en": "A family's monthly electricity use (a model)"
+   },
+   "text": {
+    "ta": "இது கற்பனைக் குடும்பம். யூனிட் விலை ₹6 (ஒரே விலை) என்று எளிமைக்காக எடுத்துள்ளோம்; உண்மையான கட்டணத்தில் அடுக்குகளும் மானியங்களும் இருக்கலாம்.",
+    "en": "This is an imaginary family. For simplicity we take a flat ₹6 per unit; real bills may have slabs and subsidies."
+   },
+   "head": [
+    {
+     "ta": "கருவி",
+     "en": "Appliance"
+    },
+    {
+     "ta": "watt × மணி/நாள்",
+     "en": "watt × hours/day"
+    },
+    {
+     "ta": "யூனிட்/மாதம்",
+     "en": "units/month"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "4 LED விளக்கு",
+      "en": "4 LED lights"
+     },
+     "4 × 9 W × 5 h",
+     "5.4"
+    ],
+    [
+     {
+      "ta": "3 மின்விசிறி",
+      "en": "3 fans"
+     },
+     "3 × 75 W × 8 h",
+     "54"
+    ],
+    [
+     {
+      "ta": "தொலைக்காட்சி",
+      "en": "TV"
+     },
+     "80 W × 4 h",
+     "9.6"
+    ],
+    [
+     {
+      "ta": "குளிர்சாதனப் பெட்டி (மதிப்பீடு)",
+      "en": "Fridge (estimate)"
+     },
+     {
+      "ta": "சுமார் 1 யூனிட்/நாள்",
+      "en": "about 1 unit/day"
+     },
+     "30"
+    ],
+    [
+     {
+      "ta": "மிக்ஸி",
+      "en": "Mixer"
+     },
+     "500 W × 0.25 h",
+     "3.75"
+    ],
+    [
+     {
+      "ta": "மொத்தம்",
+      "en": "Total"
+     },
+     "",
+     {
+      "ta": "102.75 ≈ 103 யூனிட் → ₹617 (₹6 ஒரே விலையில்)",
+      "en": "102.75 ≈ 103 units → ₹617 (at flat ₹6)"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "1000 W இஸ்திரிப் பெட்டியை 3 மணி நேரம் பயன்படுத்தினால் எத்தனை யூனிட்?",
+    "en": "How many units does a 1000 W iron use in 3 hours?"
+   },
+   "answer": 3,
+   "tol": 0,
+   "unit": {
+    "ta": "யூனிட்",
+    "en": "units"
+   },
+   "hint": {
+    "ta": "1000 W = 1 kW; kW × மணி",
+    "en": "1000 W = 1 kW; kW × hours"
+   },
+   "solution": {
+    "ta": "1 kW × 3 h = 3 kWh = 3 யூனிட்.",
+    "en": "1 kW × 3 h = 3 kWh = 3 units."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மின்சாரம் சேமிக்கும் வழிகள்",
+    "en": "Ways to save electricity"
+   },
+   "text": {
+    "ta": "**LED விளக்கு:** மேலே பார்த்தபடி, அதே வெளிச்சத்துக்கு மிகக் குறைவான மின்சாரம் போதும்.\n\n**நட்சத்திரக் குறியீடு (star rating):** குளிர்சாதனப் பெட்டி, ஏர்-கண்டிஷனர், மின்விசிறி போன்றவற்றில் இந்தியாவின் எரிசக்தித் திறன் அமைப்பு (Bureau of Energy Efficiency) நட்சத்திர லேபிள் தருகிறது. ஒரே வகை, ஒரே அளவு கருவிகளில் நட்சத்திரம் அதிகம் இருந்தால், அதே வேலைக்கு மின்சாரம் குறைவாகச் செலவாகும். வாங்கும்போது விலை மட்டுமல்ல, பல ஆண்டுகளின் மின் செலவையும் பார்.\n\n**காத்திருப்பு நிலை (standby):** தொலைக்காட்சி, செட்-டாப் பெட்டி, சார்ஜர் போன்றவை அணைத்த பின்னும் சில watt இழுக்கலாம். 5 W × 24 h × 30 நாள் = 3,600 Wh = 3.6 யூனிட். இது சின்ன அளவுதான்; ஆனால் பல கருவிகள் இருந்தால் சேரும். பயன்படுத்தாதபோது சுவிட்சை அணைக்கலாம்.\n\nவெளிச்சம், காற்றோட்டம் உள்ள ஜன்னல்களைப் பகலில் பயன்படுத்தினாலும் மின்சாரம் மிச்சமாகும்.",
+    "en": "**LED lights:** as seen above, far less electricity for the same light.\n\n**Star rating:** For fridges, air-conditioners, fans and similar goods, India's Bureau of Energy Efficiency gives star labels. Among appliances of the same type and size, more stars means less electricity for the same job. When buying, look not only at the price but at years of electricity cost.\n\n**Standby:** TVs, set-top boxes and chargers can draw a few watts even when \"off\". 5 W × 24 h × 30 days = 3,600 Wh = 3.6 units. A small amount, but it adds up with many devices. Switch off at the plug when not in use.\n\nUsing daylight and ventilation through windows during the day also saves electricity."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சூரியத் தகடு மின்சாரம் தருவது எப்படி?",
+    "en": "How does a solar panel make electricity?"
+   },
+   "text": {
+    "ta": "சூரியத் தகடு பல சிறிய **சிலிக்கான் செல்களால்** ஆனது. சூரிய ஒளி செல்லில் படும்போது, அதிலுள்ள மிகச் சிறிய மின்துகள்கள் அசைக்கப்பட்டு ஓடத் தொடங்குகின்றன — அதுவே மின்சாரம். இங்கே எதுவும் சுழலுவதில்லை, எரிபொருளும் இல்லை.\n\nதகடு தருவது ஒரே திசையில் ஓடும் மின்சாரம் (DC). வீட்டுக் கருவிகளுக்கு வேண்டிய மாறுதிசை மின்சாரமாக (AC) மாற்றும் கருவி **இன்வெர்ட்டர்**.\n\n**ஒளி இருக்கும்போது மட்டுமே:** இரவில் தகடு கிட்டத்தட்ட எதுவும் தராது; மேகமூட்டமான நாளில் குறைவாகத் தரும்; நண்பகலில் அதிகம் தரும். நிழலும் தூசி படிவதும் மின்சாரத்தைக் குறைக்கும் — அதனால் தகடுகளைச் சுத்தமாக வைக்க வேண்டும்.",
+    "en": "A solar panel is made of many small **silicon cells**. When sunlight falls on a cell, very tiny electric charges inside are pushed and start flowing — that is electricity. Nothing spins here and no fuel is burnt.\n\nThe panel gives electricity flowing in one direction (DC). An **inverter** changes it to the alternating current (AC) that home appliances need.\n\n**Only when there is light:** at night a panel gives almost nothing; on a cloudy day less; around noon the most. Shade and dust reduce it too — so panels must be kept clean."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "solarHome",
+   "params": {},
+   "title": {
+    "ta": "உன் கூரைக்கு எவ்வளவு சேமிப்பு?",
+    "en": "How much would your roof save?"
+   },
+   "text": {
+    "ta": "கீழே தொடக்க மதிப்புகள் உள்ளன: 3 kW, ஒரு kW-க்கு நாளுக்கு 4.5 யூனிட், யூனிட் விலை ₹6, 1 kW-க்கு செலவு ₹55,000 (இவை எடுத்துக்காட்டு எண்கள்; உண்மையில் மாறும்). \"செலவு திரும்ப\" என்ற எண்ணைக் கவனி. பிறகு **யூனிட் விலை சறுக்கியை ₹6 → ₹12** ஆக்கிப் பார். (அடுத்து தகடு kW-ஐயும் மாற்றிப் பார்.)",
+    "en": "The starting values below: 3 kW, 4.5 units per kW per day, ₹6 per unit, ₹55,000 cost per kW (example numbers — real ones vary). Watch \"Payback\". Then move the **tariff slider from ₹6 to ₹12**. (Next, also change the panel size in kW.)"
+   },
+   "q": {
+    "ta": "மற்றவை மாறாமல் யூனிட் விலை ₹6-இலிருந்து ₹12 ஆனால், செலவு திரும்ப வர ஆகும் காலம் என்ன ஆகும்?",
+    "en": "If the price per unit goes from ₹6 to ₹12 with everything else unchanged, what happens to the payback time?"
+   },
+   "options": [
+    {
+     "ta": "ஏறக்குறைய பாதியாகும் (சுமார் 5.7 → 2.8 ஆண்டு)",
+     "en": "It roughly halves (about 5.7 → 2.8 years)"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "It stays the same"
+    },
+    {
+     "ta": "இரு மடங்காகும்",
+     "en": "It doubles"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "ஒவ்வோர் ஆண்டும் சேமிக்கும் ரூபாய் இரு மடங்காவதால், அதே செலவு பாதி காலத்தில் திரும்பும்: செலவு ÷ ஆண்டுச் சேமிப்பு = 1,65,000 ÷ 58,320 ≈ 2.8 ஆண்டு. அதேபோல் தகட்டின் செலவு இரு மடங்கானால் காலம் இரு மடங்காகும். இன்னொரு ஆச்சரியம்: தகடு kW-ஐ 1 முதல் 10 வரை மாற்றினாலும், இந்த மாதிரியில் செலவு திரும்பும் காலம் மாறுவதில்லை. ஏனென்றால் செலவும் சேமிப்பும் ஒரே விகிதத்தில் ஏறுகின்றன. (உண்மையில் உன் தேவைக்கு மேல் மின்சாரம் உற்பத்தி செய்தால், மீதிக்குக் கிடைக்கும் விலை வேறு.)",
+    "en": "Because the rupees saved each year double, the same cost comes back in half the time: cost ÷ yearly saving = 165,000 ÷ 58,320 ≈ 2.8 years. Likewise, if the panel cost doubles, the time doubles. Another surprise: changing the panel size from 1 to 10 kW does not change payback time in this model — because cost and saving grow in the same ratio. (In real life, extra electricity beyond your needs may be paid at a different rate.)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "2 kW சூரிய அமைப்பு: ஒரு kW-க்கு நாளுக்கு 4.5 யூனிட், யூனிட் விலை ₹6, 1 kW-க்கு ₹55,000. செலவு எத்தனை ஆண்டுகளில் திரும்பும்? (30 நாள் மாதம், ஆண்டுக்கு 12 மாதம்; தசமம் 2 இடம்)",
+    "en": "A 2 kW solar system: 4.5 units per kW per day, ₹6 per unit, ₹55,000 per kW. In how many years is the cost recovered? (30-day months, 12 months a year; 2 decimals)"
+   },
+   "answer": 5.66,
+   "tol": 0.05,
+   "unit": {
+    "ta": "ஆண்டு",
+    "en": "years"
+   },
+   "hint": {
+    "ta": "நாளுக்கு 2 × 4.5 = 9 யூனிட் → மாதம் → ₹ → ஆண்டு; செலவு = 2 × 55,000",
+    "en": "2 × 4.5 = 9 units a day → month → ₹ → year; cost = 2 × 55,000"
+   },
+   "solution": {
+    "ta": "நாளுக்கு 9 யூனிட்; மாதம் 270; மாதச் சேமிப்பு 270 × 6 = ₹1,620; ஆண்டுக்கு ₹19,440. செலவு ₹1,10,000 ÷ 19,440 ≈ 5.66 ஆண்டு.",
+    "en": "9 units a day; 270 a month; monthly saving 270 × 6 = ₹1,620; ₹19,440 a year. Cost ₹110,000 ÷ 19,440 ≈ 5.66 years."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு வீடு மாதம் 135 யூனிட் பயன்படுத்துகிறது (30 நாள்). ஒரு kW தகடு நாளுக்கு 4.5 யூனிட் தருமானால், மாத மின்சாரம் முழுவதையும் ஈடுசெய்ய சுமார் எத்தனை kW தகடு வேண்டும்?",
+    "en": "A home uses 135 units a month (30 days). If 1 kW of panels gives 4.5 units a day, about how many kW of panels would cover the whole month's use?"
+   },
+   "answer": 1,
+   "tol": 0.05,
+   "unit": {
+    "ta": "kW",
+    "en": "kW"
+   },
+   "hint": {
+    "ta": "135 ÷ 30 = நாளுக்கு எத்தனை யூனிட்?",
+    "en": "135 ÷ 30 = how many units a day?"
+   },
+   "solution": {
+    "ta": "135 ÷ 30 = நாளுக்கு 4.5 யூனிட்; 4.5 ÷ 4.5 = 1 kW. (உண்மையில் பகலில் மட்டுமே உற்பத்தி; இரவுக்குத் தனி ஏற்பாடு வேண்டும்.)",
+    "en": "135 ÷ 30 = 4.5 units a day; 4.5 ÷ 4.5 = 1 kW. (In reality the panels produce only by day; night needs a separate arrangement.)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பேட்டரி, net-metering, மானியம்",
+    "en": "Batteries, net-metering and subsidies"
+   },
+   "text": {
+    "ta": "**பேட்டரி:** பகலில் மீந்த மின்சாரத்தைச் சேமித்து, மாலையிலோ மின்தடையின்போதோ பயன்படுத்தலாம்; ஆனால் செலவு கூடும், பேட்டரியையும் ஒரு நாள் மாற்ற வேண்டியிருக்கும்.\n\n**Net-metering:** பேட்டரி இல்லாமல், மின்வாரியக் கம்பியுடன் இணைந்த அமைப்பில் மீந்த மின்சாரம் வாரியத்துக்குச் செல்லும்; இரவில் வாரிய மின்சாரத்தை எடுப்பாய். மீட்டர் இரண்டையும் கணக்கிட்டு, வேறுபாட்டுக்கு மட்டுமே கட்டணம். பாதுகாப்புக்காக, மின்தடையின்போது பேட்டரி இல்லாத இத்தகைய அமைப்புகள் பொதுவாக நின்றுவிடும்.\n\n**மானியம்:** இந்திய அரசு கூரைச் சூரிய மின்சாரத்துக்கு PM Surya Ghar திட்டம் போன்ற உதவிகளை அறிவித்துள்ளது. ஆனால் மானியத் தொகை, விதிகள், net-metering நிபந்தனைகள் **அடிக்கடி மாறும்**; மாநிலத்துக்கும் மாறும். எனவே முடிவெடுக்கும் முன் அதிகாரப்பூர்வ இணையதளத்தையும் (pmsuryaghar.gov.in) உன் மின்வாரிய அலுவலகத்தையும் சரிபார்; பதிவு பெற்ற நிறுவனங்களிடம் மட்டும் விலை கேள்.",
+    "en": "**Battery:** can store the extra daytime electricity for the evening or a power cut; but it raises the cost and must be replaced some day.\n\n**Net-metering:** In a system without a battery, connected to the utility's grid, extra electricity flows to the utility, and at night you draw from the grid. The meter counts both, and you pay for the difference. For safety, such systems without a battery generally switch off during a power cut.\n\n**Subsidy:** The Government of India has announced support for rooftop solar through schemes such as PM Surya Ghar. But the subsidy amount, rules and net-metering conditions **change often** and differ by state. So before deciding, check the official website (pmsuryaghar.gov.in) and your electricity office; ask for quotes only from registered installers."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🌬️",
+     "title": {
+      "ta": "முப்பந்தல் காற்றாலைகள்",
+      "en": "Muppandal wind turbines"
+     },
+     "text": {
+      "ta": "கன்னியாகுமரி மாவட்டத்தில் காற்றாலைகள் வரிசையாக நிற்கின்றன; அவை காற்றின் இயக்க ஆற்றலை மின்சாரமாக்குகின்றன.",
+      "en": "Rows of wind turbines stand in Kanyakumari district, turning the wind's motion energy into electricity."
+     }
+    },
+    {
+     "icon": "⚛️",
+     "title": {
+      "ta": "கூடங்குளம் அணுமின் நிலையம்",
+      "en": "Kudankulam nuclear power plant"
+     },
+     "text": {
+      "ta": "திருநெல்வேலி மாவட்டத்தில் உள்ள இங்கே, தலா சுமார் 1000 MW திறனுள்ள இரண்டு அலகுகள் இயங்குகின்றன; மேலும் சில அலகுகள் கட்டப்பட்டு வருகின்றன. தற்போதைய நிலையைச் சரிபார்.",
+      "en": "Two units of about 1000 MW each operate here in Tirunelveli district; more units are being built. Check the latest status."
+     }
+    },
+    {
+     "icon": "💧",
+     "title": {
+      "ta": "மேட்டூர் அணை",
+      "en": "Mettur Dam"
+     },
+     "text": {
+      "ta": "காவிரியின் நீர் பாசனத்துக்கு மட்டுமல்ல, அணையின் நீர் மின்நிலையங்களிலும் மின்சாரம் தருகிறது.",
+      "en": "Cauvery water is used not only for irrigation; hydro power stations at the dam also produce electricity."
+     }
+    },
+    {
+     "icon": "⛏️",
+     "title": {
+      "ta": "நெய்வேலி",
+      "en": "Neyveli"
+     },
+     "text": {
+      "ta": "இங்கே தோண்டப்படும் பழுப்புநிலக்கரி அருகிலுள்ள மின்நிலையங்களில் எரிக்கப்பட்டு மின்சாரம் ஆகிறது.",
+      "en": "Lignite dug here is burnt in nearby power stations to make electricity."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "மின்சாரத்தின் நாளைய உலகம்",
+    "en": "Tomorrow's electricity"
+   },
+   "text": {
+    "ta": "மேலும் சூரிய, காற்று மின்சாரம் சேர்க்கப்படலாம். அவற்றுடன் பெரிய பேட்டரிகளும், தண்ணீரை மேலே ஏற்றிச் சேமிக்கும் அமைப்புகளும் முயற்சிக்கப்படுகின்றன. மின்சார வாகனங்கள் அதிகரித்தால் மின் தேவையும் கூடும். வீட்டு மீட்டர்கள் நிலைமையைப் பார்த்து இயங்கும் \"ஸ்மார்ட்\" மீட்டர்களாகவும் மாறலாம்.",
+    "en": "More solar and wind power may be added; together with them, big batteries and systems that store energy by pumping water uphill are being tried. If electric vehicles increase, the demand for electricity will rise too. Home meters may become \"smart\" meters that respond to conditions."
+   },
+   "risk": {
+    "ta": "தேவை அதிகரித்தால் மின்தடை, விலை உயர்வு; பழைய தகடுகள், பேட்டரிகள் கழிவாகக் குவியலாம்; சிலரால் மட்டுமே கூரைச் சூரிய அமைப்பை வாங்க முடியலாம்.",
+    "en": "If demand grows: power cuts and price rises; old panels and batteries may pile up as waste; only some families may be able to afford rooftop solar."
+   },
+   "fix": {
+    "ta": "கழிவு மறுசுழற்சி; பொது, பகிரப்பட்ட சூரிய அமைப்புகள்; எல்லோருக்கும் நியாயமான விலை; மின்சாரத்தை வீணாக்காத பழக்கம்.",
+    "en": "Recycling of waste; community and shared solar systems; fair prices for all; the habit of not wasting electricity."
+   },
+   "q": {
+    "ta": "உன் பள்ளிக் கூரையில் சூரியத் தகடு போட்டால் என்னென்ன சேமிப்புகள் கிடைக்கலாம்? என்னென்ன சிக்கல்கள் வரலாம்?",
+    "en": "If solar panels were put on your school roof, what savings might you get and what problems might come?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உன் வீட்டு மின் கணக்கு (போன் தேவையில்லை)",
+    "en": "Your home's electricity audit (no phone needed)"
+   },
+   "text": {
+    "ta": "**1.** ஒரு பெரியவருடன் சேர்ந்து, வீட்டிலுள்ள 5 கருவிகளின் பின்புறம் அல்லது லேபிளில் **watt** எவ்வளவு என்று எழுது (W என்று குறித்திருக்கும்).\n**2.** ஒவ்வொன்றும் ஒரு நாளில் எத்தனை மணி நேரம் ஓடுகிறது என்று மதிப்பிடு.\n**3.** யூனிட் = watt × மணி ÷ 1000. நாளுக்கு எத்தனை யூனிட்? 30-ஆல் பெருக்கு: மாதத்துக்கு?\n**4.** உன் மின் கட்டணச் சீட்டில் உள்ள யூனிட்களுடன் ஒப்பிடு. எந்தக் கருவி அதிகம்? எதைக் குறைக்கலாம்?\n\n(மின் இணைப்புகளையோ மீட்டரையோ நீ தொடாதே; பார்த்து மட்டும் எழுது.)",
+    "en": "**1.** With an adult, note the **watts** written on the back or label of 5 appliances at home (marked W).\n**2.** Estimate how many hours each runs in a day.\n**3.** units = watts × hours ÷ 1000. How many units a day? Multiply by 30 for a month.\n**4.** Compare with the units on your bill. Which appliance uses the most? What could you reduce?\n\n(Do not touch electrical connections or the meter; only look and note.)"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "மின்சாரம் மின்நிலையத்திலிருந்து உன் வீடு வரை எப்படி வருகிறது, ஒரு யூனிட் என்றால் என்ன என்று உன் சொற்களில் சொல்.",
+    "en": "In your own words: how does electricity travel from a power station to your home, and what is a unit?"
+   },
+   "keywords": [
+    {
+     "ta": "ஜெனரேட்டர்",
+     "en": "generator",
+     "alt": [
+      "மின்நிலையம்",
+      "power station",
+      "turbine",
+      "விசையாழி"
+     ]
+    },
+    {
+     "ta": "மின்மாற்றி",
+     "en": "transformer",
+     "alt": [
+      "உயர் மின்னழுத்தம்",
+      "high voltage",
+      "voltage"
+     ]
+    },
+    {
+     "ta": "kWh",
+     "en": "kWh",
+     "alt": [
+      "யூனிட்",
+      "unit",
+      "கிலோவாட்",
+      "kilowatt-hour"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "மின்நிலையத்தில் ஜெனரேட்டர் சுழன்று மின்சாரம் உண்டாக்குகிறது. மின்மாற்றிகள் அதை உயர் மின்னழுத்தமாக்கி நீண்ட தூரம் வீணாகாமல் அனுப்புகின்றன; பிறகு படிப்படியாகக் குறைத்து வீட்டுக்கு 230 V தருகின்றன. ஒரு யூனிட் என்பது 1 kWh, அதாவது 1000 W கருவியை ஒரு மணி நேரம் ஓட்டினால் ஆகும் மின்சாரம்.",
+    "en": "A generator spins at the power station and makes electricity. Transformers raise it to high voltage so that little is wasted over long distances, and then lower it step by step to 230 V for homes. A unit is 1 kWh: the electricity used by a 1000 W appliance running for one hour."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "மின்நிலையம் → உயர் மின்னழுத்தக் கம்பிகள் → துணை மின்நிலையம் → தெரு மின்மாற்றி → வீடு. உயர் மின்னழுத்தம் வெப்ப இழப்பைக் குறைக்கிறது.",
+     "en": "Power station → high-voltage lines → substation → street transformer → home. High voltage reduces heat loss."
+    },
+    {
+     "ta": "நிலக்கரி/பழுப்புநிலக்கரி, நீர், காற்று, சூரியன், அணுசக்தி — ஒவ்வொன்றுக்கும் நன்மையும் சிக்கலும் உண்டு.",
+     "en": "Coal/lignite, water, wind, sun and nuclear — each has gains and costs."
+    },
+    {
+     "ta": "1 யூனிட் = 1 kWh = (watt × மணி) ÷ 1000.",
+     "en": "1 unit = 1 kWh = (watts × hours) ÷ 1000."
+    },
+    {
+     "ta": "LED, நட்சத்திரக் குறியீடு, standby-ஐத் தவிர்த்தல் ஆகியவை மின் செலவைக் குறைக்கும்.",
+     "en": "LEDs, star ratings and avoiding standby cut electricity costs."
+    },
+    {
+     "ta": "சூரியத் தகடு ஒளி இருக்கும்போது மட்டுமே மின்சாரம் தரும். மானியம், net-metering விதிகள் மாறும் — அதிகாரப்பூர்வ இணையதளத்தில் சரிபார்.",
+     "en": "A solar panel gives electricity only when there is light. Subsidy and net-metering rules change — check the official website."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "1 யூனிட் (1 kWh) என்றால் என்ன?",
+    "en": "What is 1 unit (1 kWh)?"
+   },
+   "options": [
+    {
+     "ta": "1 volt-ஐ 1 நாள் பயன்படுத்துவது",
+     "en": "Using 1 volt for 1 day"
+    },
+    {
+     "ta": "1 watt-ஐ 1 நொடி பயன்படுத்துவது",
+     "en": "Using 1 watt for 1 second"
+    },
+    {
+     "ta": "1000 W-ஐ 1 மணி நேரம் பயன்படுத்துவது",
+     "en": "Using 1000 W for 1 hour"
+    },
+    {
+     "ta": "1 மணி நேரத்தில் மீட்டர் ஒரு முறை சுற்றுவது",
+     "en": "The meter turning once in an hour"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "kWh = kW × மணி; 1 kW = 1000 W.",
+    "en": "kWh = kW × hours; 1 kW = 1000 W."
+   }
+  },
+  {
+   "q": {
+    "ta": "மின்சாரத்தை நீண்ட தூரம் உயர் மின்னழுத்தத்தில் ஏன் அனுப்புகிறார்கள்?",
+    "en": "Why is electricity sent over long distances at high voltage?"
+   },
+   "options": [
+    {
+     "ta": "அதே மின்திறனுக்கு மின்னோட்டம் குறைவு, எனவே கம்பியில் வெப்ப இழப்பு குறைவு",
+     "en": "The same power needs less current, so less heat loss in the wires"
+    },
+    {
+     "ta": "மின்சாரம் ஒளி வேகத்தில் செல்ல",
+     "en": "To make electricity travel at the speed of light"
+    },
+    {
+     "ta": "கம்பிகளைக் குறைவாகப் பயன்படுத்த மட்டும்",
+     "en": "Only to use fewer wires"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "P = V × I; V அதிகமானால் I குறையும்; இழப்பு I²-க்கு ஏற்ப.",
+    "en": "P = V × I; higher V means lower I; loss follows I²."
+   }
+  },
+  {
+   "q": {
+    "ta": "1500 W ஹீட்டர்/இஸ்திரிப் பெட்டியை 2 மணி நேரம் ஓட்டினால் எத்தனை யூனிட்?",
+    "en": "How many units does a 1500 W appliance use in 2 hours?"
+   },
+   "options": [
+    {
+     "ta": "1.5",
+     "en": "1.5"
+    },
+    {
+     "ta": "3",
+     "en": "3"
+    },
+    {
+     "ta": "30",
+     "en": "30"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1.5 kW × 2 h = 3 kWh = 3 யூனிட்.",
+    "en": "1.5 kW × 2 h = 3 kWh = 3 units."
+   }
+  },
+  {
+   "q": {
+    "ta": "சூரியத் தகடு இரவில் எவ்வளவு மின்சாரம் தரும்?",
+    "en": "How much electricity does a solar panel give at night?"
+   },
+   "options": [
+    {
+     "ta": "பகலை விட அதிகம்",
+     "en": "More than by day"
+    },
+    {
+     "ta": "பகலின் அதே அளவு",
+     "en": "The same as by day"
+    },
+    {
+     "ta": "நிலவின் அளவைப் பொறுத்து பாதி",
+     "en": "Half, depending on the moon"
+    },
+    {
+     "ta": "கிட்டத்தட்ட எதுவும் இல்லை",
+     "en": "Almost none"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "தகடு ஒளியால் இயங்குகிறது; இரவுக்குப் பேட்டரி அல்லது மின்வாரிய மின்சாரம் வேண்டும்.",
+    "en": "The panel works on light; for the night you need a battery or grid power."
+   }
+  },
+  {
+   "q": {
+    "ta": "தகட்டின் விலை இரு மடங்காகி, மற்றவை மாறாவிட்டால் செலவு திரும்பும் காலம்?",
+    "en": "If the panel cost doubles and everything else stays the same, the payback time"
+   },
+   "options": [
+    {
+     "ta": "பாதியாகும்",
+     "en": "halves"
+    },
+    {
+     "ta": "இரு மடங்காகும்",
+     "en": "doubles"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "stays the same"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "காலம் = செலவு ÷ ஆண்டுச் சேமிப்பு; செலவு இரு மடங்கு, சேமிப்பு அதேதான்.",
+    "en": "Time = cost ÷ yearly saving; the cost doubles, the saving is the same."
+   }
+  },
+  {
+   "q": {
+    "ta": "5 W-இல் standby-இல் இருக்கும் ஒரு கருவி 24 மணி நேரம், 30 நாள் இருந்தால் எத்தனை யூனிட்?",
+    "en": "A device on standby at 5 W for 24 hours a day for 30 days uses how many units?"
+   },
+   "options": [
+    {
+     "ta": "3.6",
+     "en": "3.6"
+    },
+    {
+     "ta": "36",
+     "en": "36"
+    },
+    {
+     "ta": "0.36",
+     "en": "0.36"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "5 W × 24 h × 30 நாள் = 3600 Wh = 3.6 kWh.",
+    "en": "5 × 24 × 30 = 3600 Wh = 3.6 kWh."
+   }
+  },
+  {
+   "q": {
+    "ta": "கூரைச் சூரிய மானியம் பற்றித் தெரிந்துகொள்ள சிறந்த வழி?",
+    "en": "What is the best way to learn about rooftop-solar subsidies?"
+   },
+   "options": [
+    {
+     "ta": "நண்பன் சொன்ன எண்ணை நம்புவது",
+     "en": "Trusting a number a friend told you"
+    },
+    {
+     "ta": "ஒரு விளம்பரத்தில் சொன்னபடி முடிவு செய்வது",
+     "en": "Deciding as an advertisement says"
+    },
+    {
+     "ta": "அதிகாரப்பூர்வ இணையதளத்திலும் மின்வாரிய அலுவலகத்திலும் தற்போதைய விதிகளைச் சரிபார்ப்பது",
+     "en": "Checking the current rules on the official website and at the electricity office"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "மானியங்களும் விதிகளும் மாறுவதால், தற்போதைய அதிகாரப்பூர்வத் தகவல்தான் நம்பத்தக்கது.",
+    "en": "Subsidies and rules change, so only current official information is reliable."
+   }
+  }
+ ]
+}

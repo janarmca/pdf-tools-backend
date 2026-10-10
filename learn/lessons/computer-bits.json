@@ -1,0 +1,631 @@
+{
+ "id": "computer-bits",
+ "minutes": 30,
+ "title": {
+  "ta": "கணினிக்கு எல்லாமே 0 மற்றும் 1",
+  "en": "To a computer, everything is 0 and 1"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "கணினி அறிவியல்: இரும எண்கள், தரவு, அல்காரிதம்",
+    "en": "Computer science basics: binary numbers, data and algorithms"
+   }
+  },
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "தகவல் தொழில்நுட்ப அடிப்படைகள் (கணினி எப்படித் தகவலைச் சேமிக்கிறது)",
+    "en": "Basics of information technology (how a computer stores information)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "கணினி ஏன் ON/OFF சுவிட்சுகளால் வேலை செய்கிறது என்பதைப் புரிந்துகொள்ள",
+   "en": "Understand why computers work with ON/OFF switches"
+  },
+  {
+   "ta": "இரும எண்ணை (binary) தசம எண்ணாக மாற்ற",
+   "en": "Convert binary numbers to ordinary numbers"
+  },
+  {
+   "ta": "எழுத்து, தமிழ் எழுத்து, படம், பாடல் ஆகியவை எப்படி எண்களாகச் சேமிக்கப்படுகின்றன என்று சொல்ல",
+   "en": "Explain how letters, Tamil letters, pictures and songs are stored as numbers"
+  },
+  {
+   "ta": "KB, MB, GB அளவுகளைக் கணக்கிட; அல்காரிதம் என்றால் என்ன என்று சொல்ல",
+   "en": "Calculate KB, MB, GB sizes and say what an algorithm is"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "கவினின் அம்மாவின் போனில் \"சேமிப்பிடம் நிரம்பிவிட்டது (Storage full)\" என்று வந்தது. அம்மா கேட்டார்: \"போட்டோவும் பாட்டும் மெசேஜும் உள்ளே எப்படித்தான் இருக்கும்? உள்ளே ஆயிரம் ஆயிரம் படங்கள் அடுக்கி வைத்திருக்கிறதா?\"\n\nஇதன் விடை: **உள்ளே படமும் இல்லை, பாட்டும் இல்லை, எழுத்தும் இல்லை — எல்லாமே 0 மற்றும் 1 மட்டுமே.** இது உனக்கு ஏன் தேவை? \"Storage full\" ஏன் வருகிறது, இணைய data எப்படித் தீர்ந்து போகிறது, தமிழ் மெசேஜ் எல்லா போனிலும் எப்படித் தெரிகிறது என்பதை நீயே கணக்குப் போட்டுப் புரிந்துகொள்வாய்.\n\nகேள்வி: இரண்டே இரண்டு குறியீடுகளால் ஒரு தமிழ்ப் பாடலையும் ஒரு புகைப்படத்தையும் எப்படிச் சேமிக்க முடியும்?",
+    "en": "Kavin's mother's phone showed \"Storage full\". She asked: \"How do photos and songs and messages even fit inside? Are thousands of pictures stacked in there?\"\n\nThe answer: **inside there is no picture, no song, no letter — only 0s and 1s.** Why does this matter to you? You will be able to work out for yourself why \"Storage full\" appears, how mobile data gets used up, and how a Tamil message shows up on every phone.\n\nThe question: how can just two symbols store a Tamil song and a photograph?"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "கணினியின் நினைவகத்தில் \"அ\" என்ற எழுத்து எப்படிச் சேமிக்கப்படுகிறது?",
+    "en": "How is the letter \"அ\" kept inside a computer's memory?"
+   },
+   "options": [
+    {
+     "ta": "எழுத்தின் சிறிய படமாக",
+     "en": "As a tiny picture of the letter"
+    },
+    {
+     "ta": "ஒரு எண்ணாக (குறியீட்டு எண்)",
+     "en": "As a number (a code)"
+    },
+    {
+     "ta": "ஒரு ஒலியாக",
+     "en": "As a sound"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "ஒவ்வொரு எழுத்துக்கும் ஒரு எண் ஒதுக்கப்பட்டுள்ளது. கணினி அந்த எண்ணைச் சேமிக்கிறது. திரையில் காட்டும்போது, எழுத்துருவிலிருந்து (font) அந்த எண்ணுக்குரிய வடிவத்தை வரைகிறது. இதை இன்று நீயே சோதித்துப் பார்க்கப் போகிறாய்.",
+    "en": "Every letter has been given a number. The computer stores that number. When it has to show the letter on the screen, it draws the shape for that number from a font. You will test this yourself today."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "bits",
+   "title": {
+    "ta": "எட்டு சுவிட்சுகள் = ஒரு byte",
+    "en": "Eight switches = one byte"
+   },
+   "text": {
+    "ta": "கீழே 8 சுவிட்சுகள் (bits) உள்ளன. இடமிருந்து வலமாக அவற்றின் மதிப்பு: **128, 64, 32, 16, 8, 4, 2, 1**. ஒரு சுவிட்சைத் தொட்டால் 0 ↔ 1 என மாறும். நீல நிறம் = ON (1). ON ஆக உள்ள சுவிட்சுகளின் மதிப்புகளைக் கூட்டினால் எண் கிடைக்கும். A, a, 0, 255 போன்ற ஆயத்தப் பொத்தான்களை அழுத்தாமல், நீயே சுவிட்சுகளைத் தொட்டுப் பார்.",
+    "en": "There are 8 switches (bits) below. From left to right their values are **128, 64, 32, 16, 8, 4, 2, 1**. Tap a switch to flip 0 ↔ 1. Blue means ON (1). Add up the values of the ON switches to get the number. Don't press the ready-made buttons (A, a, 0, 255) — tap the switches yourself."
+   },
+   "q": {
+    "ta": "எந்த bit அமைப்பு பெரிய ஆங்கில எழுத்து **C**-ஐக் காட்டும்? (இடமிருந்து வலம்)",
+    "en": "Which bit pattern shows the capital letter **C**? (left to right)"
+   },
+   "options": [
+    {
+     "ta": "01000101",
+     "en": "01000101"
+    },
+    {
+     "ta": "01000011",
+     "en": "01000011"
+    },
+    {
+     "ta": "01100011",
+     "en": "01100011"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "01000011 = 64 + 2 + 1 = 67, இது **C**. 01000101 = 69 (E). 01100011 = 99, இது சிறிய **c**. பெரிய C-க்கும் சிறிய c-க்கும் உள்ள வேறுபாடு சரியாக 32. அதாவது \"32\" என்ற சுவிட்சை மட்டும் ON செய்தால் பெரிய எழுத்து சிறிய எழுத்தாகிறது!",
+    "en": "01000011 = 64 + 2 + 1 = 67, which is **C**. 01000101 = 69 (E). 01100011 = 99, the small **c**. The difference between C and c is exactly 32 — switching on just the \"32\" switch turns a capital letter into a small one!"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஏன் ON / OFF மட்டும்?",
+    "en": "Why only ON and OFF?"
+   },
+   "text": {
+    "ta": "கணினியின் உள்ளே **டிரான்சிஸ்டர் (transistor)** என்ற மிக மிகச் சிறிய மின் சுவிட்சுகள் உள்ளன. ஒரு நவீன போன் சிப்பில் அவை பல நூறு கோடி முதல் ஆயிரம் கோடிக்கும் மேல் இருக்கலாம்! சுவிட்ச் ON அல்லது OFF — இந்த இரண்டு நிலைகளை எளிதாகவும் தவறில்லாமலும் அடையாளம் காண முடியும்.\n\nஉன் வீட்டு மின்விசிறி சுவிட்சை நினைத்துப் பார். ON/OFF என்று தெளிவாகத் தெரியும். ஆனால் வேகத்தைக் குறிக்கும் ரெகுலேட்டரில் \"3.7-இல் இருக்கிறதா, 3.8-இல் இருக்கிறதா?\" என்று சரியாகச் சொல்வது கடினம். கணினியிலும் சிறிய மின் இரைச்சல் இருக்கும். அதனால் இரண்டே நிலைகளை வைப்பது நம்பகமானது.\n\nஒரு சுவிட்சின் நிலை = ஒரு **bit** (binary digit — \"இரும இலக்கம்\"; 0 அல்லது 1). **8 bits சேர்ந்தால் ஒரு byte.**",
+    "en": "Inside a computer are very tiny electric switches called **transistors**. A modern phone chip can hold from hundreds of crores to well over a thousand crore of them! A switch is either ON or OFF — two states that are easy to tell apart without mistakes.\n\nThink of the fan switch at home: ON or OFF is clear. But on the speed regulator it is hard to say exactly \"is it at 3.7 or 3.8?\". Computers also have small electrical noise, so keeping just two states is reliable.\n\nThe state of one switch = one **bit** (binary digit: 0 or 1). **8 bits together make one byte.**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "0, 1 மட்டும் வைத்து எண்ணுவது",
+    "en": "Counting with just 0 and 1"
+   },
+   "text": {
+    "ta": "நாம் தினமும் பயன்படுத்தும் எண்களில் இடத்துக்கு மதிப்பு உண்டு: ஒன்றுகள், பத்துகள், நூறுகள் (1, 10, 100…). ஒவ்வொரு இடமும் முந்தையதைப் போல **10 மடங்கு**. இரும எண்களில் ஒவ்வொரு இடமும் முந்தையதைப் போல **2 மடங்கு**: 1, 2, 4, 8, 16, 32, 64, 128.\n\nஒவ்வொரு இடத்திலும் 0 அல்லது 1 மட்டுமே வரும். 1 இருக்கும் இடங்களின் மதிப்புகளைக் கூட்டு.\n\n[[ 1101 = 8 + 4 + 0 + 1 = 13 ]]\n\n8 bits-இல் எத்தனை வெவ்வேறு அமைப்புகள் உண்டு? ஒவ்வொரு bit-க்கும் 2 தேர்வுகள் என்பதால் 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = **256**. எனவே ஒரு byte-இல் 0 முதல் 255 வரை எந்த எண்ணையும் வைக்கலாம்.",
+    "en": "The numbers we use every day have place values: ones, tens, hundreds (1, 10, 100…). Each place is **10 times** the one before. In binary, each place is **2 times** the one before: 1, 2, 4, 8, 16, 32, 64, 128.\n\nEach place holds only 0 or 1. Add up the values of the places that hold a 1.\n\n[[ 1101 = 8 + 4 + 0 + 1 = 13 ]]\n\nHow many different patterns can 8 bits make? Each bit has 2 choices, so 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = **256**. So one byte can hold any number from 0 to 255."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "இரும எண் 00101101-ஐ தசம எண்ணாக மாற்று.",
+    "en": "Convert the binary number 00101101 to an ordinary number."
+   },
+   "answer": 45,
+   "tol": 0,
+   "hint": {
+    "ta": "1 இருக்கும் இடங்கள்: 32, 8, 4, 1",
+    "en": "The places holding 1: 32, 8, 4, 1"
+   },
+   "solution": {
+    "ta": "32 + 8 + 4 + 1 = 45",
+    "en": "32 + 8 + 4 + 1 = 45"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "எழுத்துகள் எண்களாக: ASCII மற்றும் Unicode",
+    "en": "Letters as numbers: ASCII and Unicode"
+   },
+   "text": {
+    "ta": "ஆங்கில எழுத்துகளுக்கு எண்கள் கொடுக்கும் ஒரு பழைய நிலையான முறை **ASCII**: பெரிய A = 65, B = 66 … Z = 90; சிறிய a = 97 … z = 122. '0' என்ற எழுத்தின் குறியீடு 48; இது எண் 0 அல்ல, **'0' என்ற எழுத்தின்** குறியீடு!\n\nஆனால் ASCII-இல் தமிழுக்கு இடமில்லை. அதனால் உலகின் கிட்டத்தட்ட எல்லா மொழிகளுக்கும் எண்களை ஒதுக்கும் **Unicode** முறை வந்தது. அதில் தமிழுக்கு **U+0B80 முதல் U+0BFF வரை** ஒரு தனிப் பகுதி உண்டு (U+0B85 என்பது 16-அடிப்படை எண்ணை எழுதும் முறை). அ = 2949, க = 2965.\n\n**தமிழ்** என்ற சொல்லில் நீ பார்ப்பது 3 எழுத்துகள் (த, மி, ழ்). ஆனால் \"மி\" என்பது \"ம\" + \"ி\" என்ற இரண்டு குறியீடுகளால் ஆனது. \"ழ்\" என்பது \"ழ\" + புள்ளி (்) என்ற இரண்டு குறியீடுகளால் ஆனது. அதனால் கணினியில் இது **5 குறியீடுகள்**. பொதுவாகப் பயன்படும் UTF-8 முறையில் தமிழ்க் குறியீடு ஒவ்வொன்றும் 3 byte எடுக்கும்; ஆங்கில எழுத்து 1 byte. எனவே \"தமிழ்\" = 15 byte.",
+    "en": "An old agreement that gives numbers to English letters is **ASCII**: capital A = 65, B = 66 … Z = 90; small a = 97 … z = 122. The code for the character '0' is 48; that is not the number 0 — it is the code of **the character '0'**!\n\nBut ASCII has no room for Tamil. So there is **Unicode**, an agreement that gives numbers to the letters of almost all the world's languages. Tamil has its own block, **U+0B80 to U+0BFF** (U+0B85 is a way of writing a number in base 16). அ = 2949, க = 2965.\n\nIn the word **தமிழ்** you see 3 letters (த, மி, ழ்). But \"மி\" is made of two codes, \"ம\" + the vowel sign \"ி\", and \"ழ்\" of \"ழ\" + the dot sign (்). So inside the computer it is **5 codes**. In UTF-8, the commonly used scheme, each Tamil code takes 3 bytes while an English letter takes 1. So \"தமிழ்\" = 15 bytes."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "படம் = புள்ளிகளின் எண்கள்",
+    "en": "A picture = numbers for dots"
+   },
+   "text": {
+    "ta": "ஒரு புகைப்படத்தை மிக அருகில் பார்த்தால், அது **பிக்சல் (pixel)** என்ற சிறிய சதுரப் புள்ளிகளால் ஆனது என்பது தெரியும். கருப்பு-வெள்ளைப் படத்தில் ஒவ்வொரு பிக்சலுக்கும் ஒரு எண்: **0 = முழுக் கருப்பு, 255 = முழு வெள்ளை**, இடையில் சாம்பல் நிறங்கள். ஒரு எண் = ஒரு byte (அதனால்தான் 0–255!).\n\nவண்ணப் படத்தில் ஒவ்வொரு பிக்சலுக்கும் சிவப்பு, பச்சை, நீலம் என மூன்று எண்கள் (ஒவ்வொன்றும் 0–255). எனவே ஒரு பிக்சல் பொதுவாக 3 byte.\n\nஒலியும் இப்படியே: ஒலி அலையின் உயரத்தை ஒரு நொடிக்குப் பல்லாயிரம் முறை அளந்து, எண்களாக எழுதுகிறார்கள்.",
+    "en": "Look closely at a photo and it is made of tiny square dots called **pixels**. In a black-and-white picture each pixel has one number: **0 = pure black, 255 = pure white**, with greys in between. One number = one byte (that is the 0–255 range!).\n\nIn a colour picture each pixel has three numbers: red, green and blue (each 0–255). So one pixel usually takes 3 bytes.\n\nSound works the same way: the height of the sound wave is measured many thousands of times a second and written down as numbers."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "KB, MB, GB — அளவுகள்",
+    "en": "KB, MB, GB — sizes"
+   },
+   "text": {
+    "ta": "1 byte ≈ ஒரு ஆங்கில எழுத்து. அளவுகள் (வசதிக்காக 1000 எனக் கொள்வோம்; சில இடங்களில் 1024 எடுப்பார்கள்):\n\n**1 KB** ≈ 1,000 byte\n**1 MB** ≈ 1,000 KB\n**1 GB** ≈ 1,000 MB\n\nபுகைப்படம்: 12 மெகாபிக்சல் கேமரா படம் = 4000 × 3000 = 1,20,00,000 பிக்சல். சுருக்காமல் வைத்தால் 3 byte × 1,20,00,000 = 3,60,00,000 byte = **36 MB**! ஆனால் போன் படத்தைச் **சுருக்கி (compress)** வைக்கிறது; அதனால் பொதுவாகச் சில MB-தான் ஆகும். (சரியான அளவு படத்தைப் பொறுத்தது.)",
+    "en": "1 byte ≈ one English letter. Sizes (let us use 1000 for convenience; in some places 1024 is used):\n\n**1 KB** ≈ 1,000 bytes\n**1 MB** ≈ 1,000 KB\n**1 GB** ≈ 1,000 MB\n\nA photo: a 12-megapixel picture = 4000 × 3000 = 12,000,000 pixels. Stored without squeezing, 3 bytes × 12,000,000 = 36,000,000 bytes = **36 MB**! But the phone **compresses** the picture, so it usually becomes only a few MB. (The exact size depends on the picture.)"
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "ஒரு பாடலின் அளவு",
+    "en": "The size of a song"
+   },
+   "q": {
+    "ta": "3 நிமிடப் பாடல், ஒரு நொடிக்கு 128,000 bit (128 kbps — பொதுவாகப் பயன்படும் ஒரு தரம்) என்ற அளவில் சுருக்கப்பட்டுள்ளது. அதன் அளவு எத்தனை MB? 3 GB இடத்தில் இதுபோல் எத்தனை பாடல்கள் வைக்கலாம்?",
+    "en": "A 3-minute song is compressed at 128,000 bits per second (128 kbps — a commonly used quality). How many MB is it? How many such songs fit in 3 GB?"
+   },
+   "steps": [
+    {
+     "ta": "3 நிமிடம் = 180 நொடி.",
+     "en": "3 minutes = 180 seconds."
+    },
+    {
+     "ta": "மொத்த bits = 128,000 × 180 = 2,30,40,000 bits.",
+     "en": "Total bits = 128,000 × 180 = 23,040,000 bits."
+    },
+    {
+     "ta": "8 bits = 1 byte என்பதால்: 2,30,40,000 ÷ 8 = 28,80,000 byte.",
+     "en": "8 bits = 1 byte, so 23,040,000 ÷ 8 = 2,880,000 bytes."
+    },
+    {
+     "ta": "28,80,000 byte = 2.88 MB, சுமார் 3 MB.",
+     "en": "2,880,000 bytes = 2.88 MB, about 3 MB."
+    },
+    {
+     "ta": "3 GB = 3000 MB. 3000 ÷ 2.88 ≈ 1041 பாடல்கள் (சுமார் ஆயிரம்).",
+     "en": "3 GB = 3000 MB. 3000 ÷ 2.88 ≈ 1041 songs (about a thousand)."
+    }
+   ],
+   "answer": {
+    "ta": "சுமார் 2.88 MB; 3 GB-இல் சுமார் 1000 பாடல்கள். (போனின் சொந்தப் பயன்பாட்டுக்கும் இடம் தேவை.)",
+    "en": "About 2.88 MB; about 1000 songs in 3 GB. (The phone itself also needs some space.)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "4 நிமிடப் பாடல் (240 நொடி), 128,000 bit/நொடி அளவில் இருந்தால் அது சுமார் எத்தனை MB? (தசமத்தில்)",
+    "en": "A 4-minute song (240 seconds) at 128,000 bits per second is about how many MB? (as a decimal)"
+   },
+   "answer": 3.84,
+   "tol": 0.01,
+   "unit": {
+    "ta": "MB",
+    "en": "MB"
+   },
+   "hint": {
+    "ta": "128,000 × 240 bits; பிறகு 8-ஆல் வகு; பிறகு 1,000,000-ஆல் வகு.",
+    "en": "128,000 × 240 bits; divide by 8; then divide by 1,000,000."
+   },
+   "solution": {
+    "ta": "128,000 × 240 = 3,07,20,000 bits ÷ 8 = 38,40,000 byte = 3.84 MB.",
+    "en": "128,000 × 240 = 30,720,000 bits ÷ 8 = 3,840,000 bytes = 3.84 MB."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு byte (8 bits) மூலம் எத்தனை வெவ்வேறு எண்களை வைக்க முடியும்?",
+    "en": "How many different values can one byte (8 bits) hold?"
+   },
+   "answer": 256,
+   "tol": 0,
+   "hint": {
+    "ta": "ஒவ்வொரு bit-க்கும் 2 தேர்வுகள்; 8 முறை பெருக்கு.",
+    "en": "Each bit has 2 choices; multiply 8 times."
+   },
+   "solution": {
+    "ta": "2⁸ = 256 (0 முதல் 255 வரை).",
+    "en": "2⁸ = 256 (from 0 to 255)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நிரல் = துல்லியமான படிகள் (அல்காரிதம்)",
+    "en": "A program = exact steps (an algorithm)"
+   },
+   "text": {
+    "ta": "கணினி வேகமாகச் செய்யும், ஆனால் தானாக யோசிக்காது; சொன்னபடியே செய்யும். எனவே படிகள் **துல்லியமாக** இருக்க வேண்டும். இப்படிப்பட்ட படிகளின் வரிசைக்குப் பெயர் **அல்காரிதம் (algorithm)**. அதைக் கணினிக்குப் புரியும் மொழியில் எழுதினால் அது **நிரல் (program)**.\n\nஎடுத்துக்காட்டு: வகுப்பில் வரிசையாக நிற்கும் மாணவர்களில் உயரமானவரைக் கண்டுபிடிக்க:\n\n**1.** முதல் மாணவரை \"இப்போதைய உயரமானவர்\" என்று குறித்துக்கொள்.\n**2.** அடுத்த மாணவருடன் ஒப்பிடு. அவர் உயரமானால், அவரை \"இப்போதைய உயரமானவர்\" என்று மாற்று.\n**3.** வரிசை முடியும் வரை படி 2-ஐத் திரும்பச் செய்.\n**4.** கடைசியில் குறித்து வைத்திருப்பவரே உயரமானவர்.\n\n\"கொஞ்சம் உப்பு போடு\" என்பது கணினிக்குப் போதாது; \"1 சிட்டிகை\" என்று சொல்ல வேண்டும்.",
+    "en": "A computer is fast but does not think for itself; it does exactly what it is told. So the steps must be **exact**. A sequence of such steps is called an **algorithm**. Written in a language the computer understands, it becomes a **program**.\n\nExample: to find the tallest student in a row of students:\n\n**1.** Note the first student as \"tallest so far\".\n**2.** Compare with the next student. If that student is taller, note that student as \"tallest so far\".\n**3.** Repeat step 2 until the row ends.\n**4.** The student you have noted at the end is the tallest.\n\n\"Add a little salt\" is not enough for a computer; you must say \"1 pinch\"."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேலே உள்ள \"உயரமானவரைக் கண்டுபிடிக்கும்\" அல்காரிதம், 30 மாணவர்கள் கொண்ட வரிசையில், படி 2-இல் மொத்தம் எத்தனை ஒப்பீடுகள் செய்யும்?",
+    "en": "In the \"find the tallest\" algorithm above, how many comparisons does step 2 make in a row of 30 students?"
+   },
+   "answer": 29,
+   "tol": 0,
+   "hint": {
+    "ta": "முதல் மாணவரை ஒப்பிட வேண்டியதில்லை, அவர் ஏற்கெனவே குறிக்கப்பட்டவர்.",
+    "en": "The first student need not be compared; he or she is already noted."
+   },
+   "solution": {
+    "ta": "முதல் மாணவரைத் தவிர மீதி 29 பேருடன் ஒப்பிடுகிறோம்: 30 − 1 = 29.",
+    "en": "We compare with the remaining 29 students: 30 − 1 = 29."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🔳",
+     "title": {
+      "ta": "QR குறியீடு",
+      "en": "QR codes"
+     },
+     "text": {
+      "ta": "தேநீர்க் கடையில் உள்ள UPI QR குறியீடு கருப்பு-வெள்ளைச் சதுரங்களால் ஆனது. அவையும் 0/1 போலவே தகவலைத் தாங்குகின்றன.",
+      "en": "A UPI QR code at a tea shop is made of black and white squares. They carry information much like 0s and 1s."
+     }
+    },
+    {
+     "icon": "💬",
+     "title": {
+      "ta": "தமிழ் மெசேஜ்",
+      "en": "Tamil messages"
+     },
+     "text": {
+      "ta": "உன் தமிழ் மெசேஜ் வேறு போனிலும் சரியாகத் தெரிவது, போன்கள் ஒரே Unicode எண்களைப் பயன்படுத்துவதாலும் (தமிழ் எழுத்துருவும் இருப்பதாலும்) தான்.",
+      "en": "Your Tamil message shows up correctly on another phone because phones use the same Unicode numbers (and have a Tamil font)."
+     }
+    },
+    {
+     "icon": "📷",
+     "title": {
+      "ta": "போன் படங்கள்",
+      "en": "Phone photos"
+     },
+     "text": {
+      "ta": "படங்கள் சுருக்கப்படுவதால்தான் (compress) ஒரு போனில் ஆயிரக்கணக்கான படங்களை வைக்க முடிகிறது.",
+      "en": "Photos are compressed, which is why one phone can hold thousands of them."
+     }
+    },
+    {
+     "icon": "📶",
+     "title": {
+      "ta": "இணைய data",
+      "en": "Mobile data"
+     },
+     "text": {
+      "ta": "நீ பார்க்கும் ஒவ்வொரு வீடியோவும் bit-களாக வருகிறது. அதிக bit என்றால் அதிக data செலவாகும்.",
+      "en": "Every video you watch arrives as bits. More bits means more data used."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "எல்லாமே எண்கள் என்றால்…",
+    "en": "If everything is numbers…"
+   },
+   "text": {
+    "ta": "எழுத்து, படம், ஒலி எல்லாமே எண்கள் என்பதால், கணினி அவற்றை எண்களாகவே மாற்றவும் முடியும். அதனால்தான் AI படம் வரையவும், குரலைப் போலச் செய்யவும் முயற்சிக்கப்படுகிறது. எதிர்காலத்தில் சேமிக்கும் முறைகளும் வேகமும் இன்னும் மாறலாம்; ஆனாலும் \"எல்லாவற்றையும் எண்களாக்குதல்\" என்ற அடிப்படை தொடர வாய்ப்புள்ளது.",
+    "en": "Because letters, pictures and sound are all numbers, a computer can also change them as numbers. That is why AI is being tried for drawing pictures and imitating voices. Storage methods and speed may change in future — but the basic idea of turning everything into numbers is likely to continue."
+   },
+   "risk": {
+    "ta": "போலிப் படம், போலிக் குரல் (deepfake) உருவாக்குவது எளிதாகலாம்.",
+    "en": "Fake pictures and fake voices (deepfakes) may become easier to make."
+   },
+   "fix": {
+    "ta": "படமோ குரலோ அதிர்ச்சியாக வந்தால், நம்பகமான மூலத்தில் சரிபார்; சந்தேகமானதைப் பகிராதே.",
+    "en": "If a shocking picture or voice arrives, check with a trusted source; do not share what you doubt."
+   },
+   "q": {
+    "ta": "ஒரு படம் உண்மையானதா என்று நீ எப்படிச் சரிபார்ப்பாய்?",
+    "en": "How would you check whether a picture is real?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "விரல்களில் இரும எண்கள் (போன் தேவையில்லை)",
+    "en": "Binary on your fingers (no phone needed)"
+   },
+   "text": {
+    "ta": "ஒரு கையின் 5 விரல்களுக்கு மதிப்புகள் கொடு: கட்டைவிரல் 1, அடுத்தது 2, பிறகு 4, 8, 16. மடக்கிய விரல் = 0, நீட்டிய விரல் = 1. ஒரு கையிலேயே 0 முதல் 31 வரை காட்டலாம்!\n\n**1.** உன் வயதை விரல்களில் காட்டு (எ.கா. 12 = 8 + 4 → 8, 4 மதிப்புள்ள விரல்களை நீட்டு).\n**2.** நண்பனுக்கு ஒரு எண்ணைச் சொல்; அவன் விரல்களில் காட்டட்டும்.\n**3.** 8 காகிதத் துண்டுகளில் 128, 64, 32, 16, 8, 4, 2, 1 எழுது. உன் பிறந்த தேதியை எப்படிக் காட்டலாம்?",
+    "en": "Give values to the five fingers of one hand: thumb 1, next 2, then 4, 8, 16. A folded finger = 0, a raised finger = 1. One hand can show 0 to 31!\n\n**1.** Show your age on your fingers (e.g. 12 = 8 + 4 → raise the fingers worth 8 and 4).\n**2.** Say a number to a friend and let them show it on their fingers.\n**3.** Write 128, 64, 32, 16, 8, 4, 2, 1 on 8 slips of paper. How would you show the date of your birthday?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "கணினி ஒரு தமிழ் எழுத்தையும் ஒரு படத்தையும் எப்படிச் சேமிக்கிறது என்று உன் சொற்களில் சொல்.",
+    "en": "In your own words: how does a computer store a Tamil letter and a picture?"
+   },
+   "keywords": [
+    {
+     "ta": "எண்",
+     "en": "number",
+     "alt": [
+      "எண்கள்",
+      "குறியீடு",
+      "code",
+      "numbers"
+     ]
+    },
+    {
+     "ta": "bit",
+     "en": "bit",
+     "alt": [
+      "பிட்",
+      "0 மற்றும் 1",
+      "0 and 1",
+      "binary",
+      "இரும"
+     ]
+    },
+    {
+     "ta": "pixel",
+     "en": "pixel",
+     "alt": [
+      "பிக்சல்",
+      "புள்ளி",
+      "dot"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "எல்லாமே bit-களாக, அதாவது 0 மற்றும் 1 ஆகச் சேமிக்கப்படுகிறது. தமிழ் எழுத்துக்கு Unicode-இல் ஒரு எண் உண்டு; அந்த எண் இரும வடிவில் வைக்கப்படுகிறது. படம் என்பது பிக்சல்களின் வரிசை; ஒவ்வொரு பிக்சலுக்கும் பிரகாசத்தைக் குறிக்கும் எண்கள் உண்டு.",
+    "en": "Everything is stored as bits, that is 0s and 1s. A Tamil letter has a number in Unicode, and that number is kept in binary form. A picture is a grid of pixels, and each pixel has numbers for its brightness."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "கணினி உள்ளே ON/OFF சுவிட்சுகள்: 1 bit = 0 அல்லது 1; 8 bits = 1 byte (256 மதிப்புகள்).",
+     "en": "Inside, a computer has ON/OFF switches: 1 bit = 0 or 1; 8 bits = 1 byte (256 values)."
+    },
+    {
+     "ta": "இரும எண்: இடங்களின் மதிப்பு 1, 2, 4, 8, 16, 32, 64, 128; 1 இருக்கும் இடங்களைக் கூட்டு.",
+     "en": "Binary: place values 1, 2, 4, 8, 16, 32, 64, 128; add the places holding a 1."
+    },
+    {
+     "ta": "எழுத்துகள் எண்களாகச் சேமிக்கப்படுகின்றன: ஆங்கிலத்துக்கு ASCII (A = 65), தமிழுக்கு Unicode (U+0B80–U+0BFF).",
+     "en": "Letters are stored as numbers: ASCII for English (A = 65), Unicode for Tamil (U+0B80–U+0BFF)."
+    },
+    {
+     "ta": "படம் = பிக்சல்களின் எண்கள் (0 கருப்பு – 255 வெள்ளை). 3 நிமிடப் பாடல் ≈ 3 MB; 1 KB ≈ 1000 byte.",
+     "en": "A picture = numbers for pixels (0 black – 255 white). A 3-minute song ≈ 3 MB; 1 KB ≈ 1000 bytes."
+    },
+    {
+     "ta": "அல்காரிதம் = துல்லியமான படிகள்; கணினி சொன்னபடியே செய்யும்.",
+     "en": "An algorithm = exact steps; a computer does exactly what it is told."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "கணினி ஏன் 0 மற்றும் 1 (ON / OFF) மட்டுமே பயன்படுத்துகிறது?",
+    "en": "Why does a computer use only 0 and 1 (ON / OFF)?"
+   },
+   "options": [
+    {
+     "ta": "அதற்கு மற்ற எண்கள் தெரியாது",
+     "en": "It does not know other numbers"
+    },
+    {
+     "ta": "0, 1 மட்டுமே எண்கள் என்பதால்",
+     "en": "Because 0 and 1 are the only numbers"
+    },
+    {
+     "ta": "மின் சுவிட்சின் இரண்டு நிலைகளை மிகத் துல்லியமாகவும் நம்பகமாகவும் அடையாளம் காண முடியும்",
+     "en": "Two states of an electric switch can be identified very exactly and reliably"
+    },
+    {
+     "ta": "ON/OFF மட்டும்தான் மலிவு",
+     "en": "Only ON/OFF is cheap"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "இரண்டு நிலைகளை எளிதாகவும் இரைச்சல் இருந்தாலும் தவறில்லாமலும் அடையாளம் காண முடியும். அதிக நிலைகள் வைத்தால் தவறுகள் அதிகமாகும்.",
+    "en": "Two states are easy to tell apart even with noise. More states would mean more mistakes."
+   }
+  },
+  {
+   "q": {
+    "ta": "இரும எண் 1011-இன் தசம மதிப்பு என்ன?",
+    "en": "What is the ordinary value of the binary number 1011?"
+   },
+   "options": [
+    {
+     "ta": "11",
+     "en": "11"
+    },
+    {
+     "ta": "1011",
+     "en": "1011"
+    },
+    {
+     "ta": "13",
+     "en": "13"
+    },
+    {
+     "ta": "9",
+     "en": "9"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "8 + 0 + 2 + 1 = 11 (இடங்களின் மதிப்பைக் கூட்டினோம்).",
+    "en": "8 + 0 + 2 + 1 = 11."
+   }
+  },
+  {
+   "q": {
+    "ta": "8 bits (ஒரு byte) மூலம் எத்தனை வெவ்வேறு அமைப்புகள் உருவாக்கலாம்?",
+    "en": "How many different patterns can 8 bits (one byte) make?"
+   },
+   "options": [
+    {
+     "ta": "8",
+     "en": "8"
+    },
+    {
+     "ta": "256",
+     "en": "256"
+    },
+    {
+     "ta": "64",
+     "en": "64"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 256 (0 முதல் 255 வரை).",
+    "en": "2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 256 (from 0 to 255)."
+   }
+  },
+  {
+   "q": {
+    "ta": "ASCII-இல் '5' என்ற எழுத்தின் குறியீடு 53; எண் 5 அல்ல. இதன் பொருள் என்ன?",
+    "en": "In ASCII the character '5' has code 53, not 5. What does that mean?"
+   },
+   "options": [
+    {
+     "ta": "கணினி '5' என்ற எழுத்தையும் 5 என்ற எண்ணையும் வேறுவேறு விதமாகச் சேமிக்கிறது",
+     "en": "The computer stores the character '5' and the number 5 in different ways"
+    },
+    {
+     "ta": "ASCII-இல் தவறு உள்ளது",
+     "en": "ASCII has a mistake"
+    },
+    {
+     "ta": "எண்கள் எழுத்துகளாக மாற முடியாது",
+     "en": "Numbers can never become letters"
+    },
+    {
+     "ta": "'5' என்ற எழுத்து 53 முறை சேமிக்கப்படுகிறது",
+     "en": "The character '5' is stored 53 times"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "எழுத்து '5' என்பது ஒரு குறியீடு (53); எண் 5 கணக்கிடப் பயன்படும் மதிப்பு. இரண்டும் வேறு.",
+    "en": "The character '5' is a symbol with code 53; the number 5 is a value for calculations. They are different."
+   }
+  },
+  {
+   "q": {
+    "ta": "தமிழுக்கு Unicode ஏன் தேவைப்பட்டது?",
+    "en": "Why was Unicode needed for Tamil?"
+   },
+   "options": [
+    {
+     "ta": "தமிழ் எழுத்துகளை எண்களாக மாற்ற முடியாது",
+     "en": "Tamil letters cannot be turned into numbers"
+    },
+    {
+     "ta": "தமிழ் படங்களாகத்தான் சேமிக்கப்படும்",
+     "en": "Tamil can only be stored as pictures"
+    },
+    {
+     "ta": "தமிழுக்கு மட்டும் bit தேவையில்லை",
+     "en": "Tamil does not need bits"
+    },
+    {
+     "ta": "ASCII-இல் தமிழ் எழுத்துகளுக்கு இடம் இல்லை",
+     "en": "ASCII has no room for Tamil letters"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "ASCII-இல் 128 குறியீடுகள் மட்டுமே; தமிழுக்கு Unicode தனிப் பகுதியை (U+0B80–U+0BFF) ஒதுக்கியுள்ளது.",
+    "en": "ASCII has only 128 codes; Unicode keeps a separate block (U+0B80–U+0BFF) for Tamil."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"தமிழ்\" என்ற சொல் கணினியில் 5 குறியீடுகள்; UTF-8-இல் ஒவ்வொன்றும் 3 byte என்றால் மொத்த அளவு?",
+    "en": "\"தமிழ்\" is 5 codes in a computer; if each takes 3 bytes in UTF-8, the total size is?"
+   },
+   "options": [
+    {
+     "ta": "5 byte",
+     "en": "5 bytes"
+    },
+    {
+     "ta": "8 byte",
+     "en": "8 bytes"
+    },
+    {
+     "ta": "15 byte",
+     "en": "15 bytes"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "5 குறியீடு × 3 = 15 byte.",
+    "en": "5 × 3 = 15 bytes."
+   }
+  },
+  {
+   "q": {
+    "ta": "கணினிக்கு அல்காரிதம் ஏன் \"துல்லியமாக\" இருக்க வேண்டும்?",
+    "en": "Why must an algorithm be \"exact\" for a computer?"
+   },
+   "options": [
+    {
+     "ta": "கணினி வேகமாக இருப்பதால்",
+     "en": "Because computers are fast"
+    },
+    {
+     "ta": "கணினி தானாக ஊகிக்காது; சொன்ன படிகளை அப்படியே செய்யும்",
+     "en": "A computer does not guess; it does exactly the steps it is given"
+    },
+    {
+     "ta": "அல்காரிதம் எப்போதும் பத்து படிகள்தான்",
+     "en": "An algorithm always has ten steps"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "\"கொஞ்சம்\" போன்ற மங்கலான சொற்கள் கணினிக்குப் புரியாது; ஒவ்வொரு படியும் தெளிவாக இருக்க வேண்டும்.",
+    "en": "Vague words like \"a little\" mean nothing to a computer; every step must be clear."
+   }
+  }
+ ]
+}

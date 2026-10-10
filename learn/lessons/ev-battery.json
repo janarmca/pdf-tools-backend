@@ -1,0 +1,634 @@
+{
+ "id": "ev-battery",
+ "minutes": 30,
+ "title": {
+  "ta": "மின்சார வாகனங்களும் பேட்டரியும்",
+  "en": "Electric vehicles & batteries"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "ஆற்றல், வேலை, மின்சாரம் (அறிவியல்)",
+    "en": "Energy, work and electricity (Science)"
+   }
+  },
+  {
+   "b": "NCERT",
+   "w": {
+    "ta": "ஆற்றல் மூலங்களும் சுற்றுச்சூழலும்",
+    "en": "Sources of energy and the environment"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "மின் மோட்டாருக்கும் பெட்ரோல் இயந்திரத்துக்கும் உள்ள வேறுபாட்டை விளக்க",
+   "en": "Explain how an electric motor differs from a petrol engine"
+  },
+  {
+   "ta": "kWh, தூரம், ஓட்டும் செலவு ஆகியவற்றைக் கணக்கிட",
+   "en": "Calculate kWh, range and running cost"
+  },
+  {
+   "ta": "மின்சார மூலமும் பேட்டரிக் கனிமங்களும் ஏன் முக்கியம் என்று சொல்ல",
+   "en": "Say why the electricity source and battery minerals matter"
+  },
+  {
+   "ta": "நன்மை-தீமை பார்த்து முடிவு எடுக்க",
+   "en": "Decide by weighing benefits and costs"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "அமுதாவின் மாமா பழைய பெட்ரோல் ஸ்கூட்டரை விற்றுவிட்டு ஒரு மின் ஸ்கூட்டர் வாங்கினார். அது ஓடும்போது சத்தமே இல்லை! \"மாதம் பெட்ரோலுக்குச் செலவே இல்லை\" என்கிறார். ஆனால் பக்கத்து வீட்டுக்காரரோ \"பேட்டரி கெட்டுப்போனால் செலவு அதிகம்\" என்கிறார். யார் சொல்வது சரி?\n\nஇது உனக்கு ஏன் முக்கியம்? இன்னும் சில ஆண்டுகளில் உன் குடும்பம் ஒரு வாகனம் வாங்கலாம்; நீயே ஒரு நாள் அந்த முடிவை எடுக்கலாம். அன்று விளம்பரத்தை நம்பாமல், கணக்குப் போட்டு, நன்மை-தீமை இரண்டையும் பார்த்து முடிவு எடுக்கத் தெரிய வேண்டும். இன்று அதற்கான கருவிகளைக் கற்றுக்கொள்வோம்.",
+    "en": "Amudha's uncle sold his old petrol scooter and bought an electric one. It runs without any noise! \"No petrol bill every month,\" he says. But his neighbour says, \"If the battery fails, the cost is huge.\" Who is right?\n\nWhy does this matter to you? In a few years your family may buy a vehicle, and one day you may make that decision yourself. Then you should not trust an advertisement; you should do the sums and look at both benefits and costs. Today you learn the tools for that."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "பெட்ரோல் வாகனத்தின் இயந்திரம் எரிபொருளில் உள்ள ஆற்றலில் எவ்வளவை வாகனம் நகரப் பயன்படுத்துகிறது? (மீதி எங்கே போகிறது?)",
+    "en": "A petrol vehicle's engine turns how much of the energy in the fuel into moving the vehicle? (Where does the rest go?)"
+   },
+   "options": [
+    {
+     "ta": "சுமார் 90%",
+     "en": "About 90%"
+    },
+    {
+     "ta": "சுமார் 60%",
+     "en": "About 60%"
+    },
+    {
+     "ta": "சுமார் கால் பங்கு அல்லது அதற்கும் குறைவு",
+     "en": "About a quarter or even less"
+    },
+    {
+     "ta": "சுமார் 2%",
+     "en": "About 2%"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "பெரும்பாலான ஆற்றல் **வெப்பமாக** வீணாகிறது — அதனால்தான் இயந்திரம் சூடாகிறது, புகைபோக்கிக் குழாயும் சூடாக இருக்கிறது. அமெரிக்க அரசின் எரிபொருள் சிக்கனத் தளம் இப்படிச் சொல்கிறது: பெட்ரோல் வாகனங்களில் சுமார் 12%–30% மட்டுமே சக்கரத்தை அடைகிறது; மின் வாகனத்தில் 77%-க்கு மேல் அடைகிறது (77% என்பது வாகனத்துக்குள் மட்டும்; மின் நிலைய இழப்பு இதில் சேரவில்லை). எண்கள் வாகனத்துக்கு வாகனம் மாறும்; ஆனால் வேறுபாடு பெரிது.",
+    "en": "Most of the energy is wasted as **heat** — that is why an engine gets hot and the exhaust is hot. A US government fuel-economy website says only about 12%–30% of petrol's energy reaches the wheels in a petrol vehicle, versus over 77% of grid electricity in an electric vehicle (the 77% counts only the vehicle, not the losses at the power station). Numbers vary between vehicles, but the difference is large."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மோட்டார் vs பெட்ரோல் இயந்திரம்",
+    "en": "Motor vs petrol engine"
+   },
+   "text": {
+    "ta": "**பெட்ரோல் இயந்திரம்:** எரிபொருளை உள்ளே எரித்து, வரும் சூடான வாயுவின் அழுத்தத்தால் பிஸ்டனைத் தள்ளுகிறது. எரிப்பே வெப்பம் உண்டாக்கும் செயல் என்பதால் பெரும்பகுதி வெப்பமாக வீணாகிறது.\n\n**மின்சார மோட்டார்:** மின்னோட்டமும் காந்தமும் சேர்ந்து சுழற்சியை உண்டாக்குகின்றன. எரிப்பு இல்லை, எனவே வெப்ப இழப்பு மிகக் குறைவு. அதனால் ஒரே தூரத்துக்குக் குறைவான ஆற்றலே தேவை. பிரேக் போடும்போது சில மின் வாகனங்கள் இயக்க ஆற்றலில் ஒரு பகுதியை மீண்டும் பேட்டரிக்குள் சேமிக்கும் (regenerative braking).\n\nஆனால் ஒன்றை நினைவில் வை: மின்சாரம் எங்கோ ஒரு மின் நிலையத்தில் உண்டாக்கப்படுகிறது. அங்கும் இழப்புகள் உண்டு. அதனால் \"வாகனம் எவ்வளவு திறமையானது\" என்பதோடு \"மின்சாரம் எப்படி வருகிறது\" என்பதும் முக்கியம் (கீழே பார்ப்போம்).",
+    "en": "**Petrol engine:** it burns fuel inside and uses the pressure of the hot gas to push a piston. Because burning itself makes heat, most of the energy is lost as heat.\n\n**Electric motor:** electric current and magnets together make rotation. There is no burning, so heat loss is much smaller. Therefore the same distance needs less energy. When you brake, some electric vehicles save part of the movement energy back into the battery (regenerative braking).\n\nBut remember: electricity is made somewhere, at a power station, and there are losses there too. So besides \"how efficient is the vehicle\", \"how is the electricity made\" matters (see below)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பேட்டரி செல், kWh, தூரம்",
+    "en": "Battery cell, kWh, range"
+   },
+   "text": {
+    "ta": "**பேட்டரி செல்** என்பது வேதிப்பொருட்களில் மின் ஆற்றலைச் சேமிக்கும் சிறிய அலகு. பல செல்கள் சேர்ந்தது **பேட்டரி பேக்**. இன்றைய மின் வாகனங்களில் பெரும்பாலும் லித்தியம்-அயன் செல்கள் உள்ளன.\n\n**kWh (கிலோவாட்-மணி):** 1 கிலோவாட் (1000 வாட்) மின்திறனை ஒரு மணி நேரம் பயன்படுத்தினால் 1 kWh. உன் வீட்டு மின் கட்டணத்தில் வரும் **ஒரு யூனிட் = 1 kWh**. ஸ்மார்ட்போன் பேட்டரி சுமார் 0.02 kWh; ஒரு மின் ஸ்கூட்டர் பேட்டரி சுமார் 2–4 kWh; சிறிய மின் கார் பல பத்து kWh (மாடலுக்கு மாடல் மாறும்).\n\n**தூரம்:** தூரம் (km) = பேட்டரி kWh ÷ (வாகனம் ஒரு km-க்கு எடுக்கும் kWh). எடுத்துக்காட்டாக 3 kWh ÷ 0.035 kWh/km ≈ 86 km. இது சிறந்த நிலையில் கிடைக்கும் தூரம். வேகம், சுமை, ஏறுமேடு, ஏசி, பேட்டரி வயது இவற்றால் உண்மையில் தூரம் குறையும்.",
+    "en": "A **battery cell** is a small unit that stores electrical energy in chemicals. Many cells together make a **battery pack**. Most electric vehicles today use lithium-ion cells.\n\n**kWh (kilowatt-hour):** using 1 kilowatt (1000 watts) of power for one hour is 1 kWh. The **one unit on your electricity bill = 1 kWh**. A smartphone battery is about 0.02 kWh; an electric scooter battery roughly 2–4 kWh; a small electric car tens of kWh (it varies by model).\n\n**Range:** range (km) = battery kWh ÷ (kWh the vehicle uses per km). For example 3 kWh ÷ 0.035 kWh/km ≈ 86 km. That is the ideal case; speed, load, slopes, AC and battery age reduce it in real life."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு சிறிய மின் காரில் 28 kWh பேட்டரி; அது ஒரு km-க்கு 0.14 kWh எடுக்கிறது (எடுத்துக்காட்டு எண்கள்). சிறந்த நிலையில் தூரம்? (km)",
+    "en": "A small electric car has a 28 kWh battery and uses 0.14 kWh per km (example numbers). Ideal range? (km)"
+   },
+   "answer": 200,
+   "tol": 0.5,
+   "unit": {
+    "ta": "km",
+    "en": "km"
+   },
+   "hint": {
+    "ta": "28 ÷ 0.14",
+    "en": "28 ÷ 0.14"
+   },
+   "solution": {
+    "ta": "28 ÷ 0.14 = 200 km. உண்மையான சாலையில் இது குறையலாம்.",
+    "en": "28 ÷ 0.14 = 200 km. On real roads it may be less."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சார்ஜ் ஆகும் நேரம்",
+    "en": "How long does charging take"
+   },
+   "text": {
+    "ta": "சார்ஜ் நேரம் ≈ பேட்டரி kWh ÷ சார்ஜரின் மின்திறன் (kW). 3 kWh பேட்டரியை 0.5 kW சார்ஜரில் ஏற்றினால் 3 ÷ 0.5 = 6 மணி நேரம் (இழப்புகளைக் கணக்கிடாமல்; உண்மையில் சற்று அதிகம்). வேகமான பொது சார்ஜர்கள் மிகப் பெரிய மின்திறன் தருவதால் நேரம் குறையும். ஆனால் அடிக்கடி வேகச் சார்ஜிங் செய்தால் பேட்டரி விரைவில் தேயலாம் என்று பலர் கருதுகின்றனர்; வாகனக் கையேட்டைப் பார்.\n\nவீட்டில் சார்ஜ் செய்யும்போது மின் இணைப்புக் கம்பிகள் (வயரிங்) சரியாக இருக்க வேண்டும். ஒரு மின் பணியாளர் அல்லது பெரியவர் உதவியுடன் மட்டுமே செய்.",
+    "en": "Charging time ≈ battery kWh ÷ charger power (kW). A 3 kWh battery on a 0.5 kW charger takes 3 ÷ 0.5 = 6 hours (ignoring losses; in reality a bit more). Fast public chargers deliver much more power, so the time falls; but many people think frequent fast charging can wear a battery sooner — check the vehicle manual.\n\nWhen charging at home, the wiring must be in good order; do it only with an electrician or an adult."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "costKm",
+   "text": {
+    "ta": "🛵 **இருசக்கர வாகனம்** பொத்தானை அழுத்து (பெட்ரோல் ₹100, 45 km/L, 0.035 kWh/km, ₹6 யூனிட், 1000 km/மாதம்). மாதச் சேமிப்பைப் பார். பிறகு **மின் கட்டணத்தை ₹12 வரை** (அதிகபட்சம்) உயர்த்திப் பார். இவை எல்லாம் எடுத்துக்காட்டு எண்கள்; பின்னர் உன் மின் கட்டணம், வாகனம் ஆகியவற்றின் உண்மை எண்களைப் பயன்படுத்திப் பார்.",
+    "en": "Press the 🛵 **Two-wheeler** button (petrol ₹100, 45 km/L, 0.035 kWh/km, ₹6 per unit, 1000 km/month). Note the monthly saving. Then raise the **tariff to ₹12** (the maximum). These are example numbers; use the real numbers from your own bill and vehicle."
+   },
+   "q": {
+    "ta": "மின் கட்டணம் ₹6-இலிருந்து ₹12-க்கு உயர்ந்தால் மாதச் சேமிப்பு சுமார் எவ்வளவு?",
+    "en": "If the tariff rises from ₹6 to ₹12, the monthly saving becomes about?"
+   },
+   "options": [
+    {
+     "ta": "சுமார் ₹0",
+     "en": "About ₹0"
+    },
+    {
+     "ta": "சுமார் ₹1,000",
+     "en": "About ₹1,000"
+    },
+    {
+     "ta": "சுமார் ₹1,800",
+     "en": "About ₹1,800"
+    },
+    {
+     "ta": "சுமார் ₹2,200",
+     "en": "About ₹2,200"
+    }
+   ],
+   "correct": 2,
+   "insight": {
+    "ta": "₹6-இல் சேமிப்பு சுமார் ₹2,012; ₹12-இல் சுமார் ₹1,802 — சிறிதளவே குறைகிறது. ஏன்? பெட்ரோல் km-க்கு ₹2.22 செலவாகிறது; மின்சாரமோ ₹12-இலும் km-க்கு ₹0.42 மட்டுமே. சேமிப்பு பூஜ்யமாக வேண்டுமானால் மின் கட்டணம் சுமார் ₹63/யூனிட் ஆக இருக்க வேண்டும் — இந்த வாகன எடுத்துக்காட்டில் அது நடக்காது. பெட்ரோல் ₹80 ஆனால் ₹12 கட்டணத்தில் சேமிப்பு சுமார் ₹1,358 (₹6-இல் ₹1,568); ₹130 ஆனால் சுமார் ₹2,469 (₹6-இல் ₹2,679). இந்த எண்களில் **ஓட்டும் செலவு பெரிய கேள்வி அல்ல**; வாகன விலை, பேட்டரி மாற்றுச் செலவு, எவ்வளவு ஓட்டுகிறாய் என்பதே முடிவை நிர்ணயிக்கும்.",
+    "en": "At ₹6 the saving is about ₹2,012; at ₹12 about ₹1,802 — only a small drop. Why? Petrol costs ₹2.22 per km; electricity costs only ₹0.42 per km even at ₹12. The saving would reach zero only if the tariff were about ₹63 per unit — it does not happen in this example. With petrol at ₹80 the saving is about ₹1,358 at a ₹12 tariff (₹1,568 at ₹6); at ₹130 about ₹2,469 (₹2,679 at ₹6). (With these numbers) **running cost is not the big question**; vehicle price, battery replacement cost and how much you drive decide the outcome."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு மாணவியின் அப்பா மாதம் 600 km ஓட்டுகிறார். பெட்ரோல் ₹100/L, வாகனம் 45 km/L; மின் வாகனம் 0.035 kWh/km, மின் கட்டணம் ₹6/யூனிட் (அனைத்தும் எடுத்துக்காட்டு). மாத ஓட்டும் செலவு?",
+    "en": "A student's father drives 600 km a month. Petrol ₹100/L, vehicle 45 km/L; electric vehicle 0.035 kWh/km, tariff ₹6/unit (all examples). Monthly running cost?"
+   },
+   "steps": [
+    {
+     "ta": "பெட்ரோல்: 100 ÷ 45 = ₹2.22 / km → 600 × 2.22 ≈ ₹1,333",
+     "en": "Petrol: 100 ÷ 45 = ₹2.22/km → 600 × 2.22 ≈ ₹1,333"
+    },
+    {
+     "ta": "மின்சாரம்: 0.035 × 6 = ₹0.21 / km → 600 × 0.21 = ₹126",
+     "en": "Electric: 0.035 × 6 = ₹0.21/km → 600 × 0.21 = ₹126"
+    },
+    {
+     "ta": "வேறுபாடு: 1,333 − 126 ≈ ₹1,207 / மாதம்",
+     "en": "Difference: 1,333 − 126 ≈ ₹1,207 per month"
+    }
+   ],
+   "answer": {
+    "ta": "பெட்ரோல் ≈ ₹1,333; மின் ≈ ₹126; சேமிப்பு ≈ ₹1,207 / மாதம் (ஓட்டும் செலவு மட்டும்)",
+    "en": "Petrol ≈ ₹1,333; electric ≈ ₹126; saving ≈ ₹1,207 a month (running cost only)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேலே உள்ள அதே எடுத்துக்காட்டில் ஆண்டுச் சேமிப்பு (ஓட்டும் செலவு மட்டும்) சுமார் எவ்வளவு? (₹, 12 மாதம்)",
+    "en": "In the same example, the yearly saving (running cost only) is about? (₹, 12 months)"
+   },
+   "answer": 14488,
+   "tol": 15,
+   "unit": {
+    "ta": "₹",
+    "en": "₹"
+   },
+   "hint": {
+    "ta": "மாதச் சேமிப்பு ≈ 1,207.33; × 12",
+    "en": "Monthly saving ≈ 1,207.33; × 12"
+   },
+   "solution": {
+    "ta": "1,207.33 × 12 ≈ ₹14,488. இதை வாகன விலை வேறுபாடு, பேட்டரி மாற்றுச் செலவுடன் ஒப்பிட்டுத்தான் முடிவு எடுக்க வேண்டும்.",
+    "en": "1,207.33 × 12 ≈ ₹14,488. Only after comparing this with the price difference of the vehicles and the battery replacement cost can you decide."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "இந்தச் செலவுக் கணக்கில் **சேர்க்கப்படாத** ஆனால் முடிவுக்கு முக்கியமான செலவுகள் எவை?",
+    "en": "Which costs are **not included** in this running-cost calculation but matter for the decision?"
+   },
+   "options": [
+    {
+     "ta": "பெட்ரோல் விலை, மின் கட்டணம்",
+     "en": "Petrol price and electricity tariff"
+    },
+    {
+     "ta": "வாகன விலை, பேட்டரி மாற்றுச் செலவு, பொது சார்ஜிங் கட்டணம்",
+     "en": "Vehicle price, battery replacement cost, public charging fees"
+    },
+    {
+     "ta": "மாதம் ஓட்டும் கிலோமீட்டர்",
+     "en": "Kilometres driven per month"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "எந்தெந்த எண்களை நாம் கணக்கில் போட்டோம்?",
+    "en": "Which numbers did we put in the sum?"
+   },
+   "solution": {
+    "ta": "நாம் பெட்ரோல் விலை, மின் கட்டணம், கி.மீ. மட்டுமே பயன்படுத்தினோம். வாகன விலை, பேட்டரி மாற்றுச் செலவு, பொது சார்ஜிங் கட்டணம் இதில் இல்லை — இவை முடிவை மாற்றலாம்.",
+    "en": "We used only petrol price, tariff and km. Vehicle price, battery replacement and public charging fees are not in it — and they can change the decision."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மின்சாரம் எங்கிருந்து வருகிறது?",
+    "en": "Where does the electricity come from?"
+   },
+   "text": {
+    "ta": "மின் வாகனத்தின் புகைபோக்கிக் குழாயில் புகை வருவதில்லை; ஆனால் அதன் மின்சாரம் மின் நிலையத்தில் உண்டாகிறது. இந்தியாவின் மின் உற்பத்தியில் நிலக்கரியின் பங்கு இன்னும் பெரியது; காற்று, சூரியன், நீர் ஆகியவற்றின் பங்கு வளர்ந்துவருகிறது. தமிழ்நாட்டில் காற்றாலை மின்சாரம் குறிப்பிடத்தக்க அளவு உள்ளது.\n\nஇந்திய மின் தொகுப்பின் தோராயச் சராசரி ≈ 0.7 kg CO₂ / யூனிட், பெட்ரோல் ≈ 2.31 kg CO₂ / லிட்டர் எனக் கொள்வோம் (இவை தோராய மதிப்புகள்). இருசக்கர வாகனம்: பெட்ரோல் 2.31 ÷ 45 ≈ 51 g/km; மின் 0.035 × 0.7 ≈ 24.5 g/km. கார்: பெட்ரோல் 2.31 ÷ 15 ≈ 154 g/km; மின் 0.14 × 0.7 = 98 g/km.\n\nஅதாவது இந்தக் கணக்கில் மின் வாகனத்தின் உமிழ்வு குறைவு — ஆனால் மின் தொகுப்பு தூய்மையாக ஆக ஆக இன்னும் குறையும்; நிலக்கரி அதிகமானால் வேறுபாடு சுருங்கும். பேட்டரி தயாரிப்பிலும் வாகனத் தயாரிப்பிலும் ஏற்படும் உமிழ்வு இதில் சேரவில்லை.",
+    "en": "An electric vehicle has no exhaust pipe smoke, but its electricity is made at a power station. In India's electricity generation coal still has a large share; the share of wind, sun and water is growing. In Tamil Nadu wind power is a notable part.\n\nTaking the approximate Indian grid average ≈ 0.7 kg CO₂ per unit and petrol ≈ 2.31 kg CO₂ per litre (both approximate): two-wheeler: petrol 2.31 ÷ 45 ≈ 51 g/km; electric 0.035 × 0.7 ≈ 24.5 g/km. Car: petrol 2.31 ÷ 15 ≈ 154 g/km; electric 0.14 × 0.7 = 98 g/km.\n\nSo in this sum the electric vehicle is lower — and it falls further as the grid gets cleaner; with more coal the gap narrows. Emissions from making the battery and the vehicle are not included."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேலே உள்ள கார் எடுத்துக்காட்டில், 100 km-க்கு பெட்ரோல் காரின் CO₂ (15 km/L) மற்றும் மின் காரின் CO₂ (0.14 kWh/km) இவற்றின் வேறுபாடு எத்தனை kg? (0.7 kg/யூனிட், 2.31 kg/L)",
+    "en": "In the car example, what is the difference in CO₂ per 100 km between the petrol car (15 km/L) and the electric car (0.14 kWh/km)? (0.7 kg/unit, 2.31 kg/L)"
+   },
+   "answer": 5.6,
+   "tol": 0.05,
+   "unit": {
+    "ta": "kg",
+    "en": "kg"
+   },
+   "hint": {
+    "ta": "பெட்ரோல்: (100 ÷ 15) × 2.31; மின்: 100 × 0.14 × 0.7",
+    "en": "Petrol: (100 ÷ 15) × 2.31; electric: 100 × 0.14 × 0.7"
+   },
+   "solution": {
+    "ta": "பெட்ரோல்: 6.667 L × 2.31 = 15.4 kg; மின்: 14 kWh × 0.7 = 9.8 kg; வேறுபாடு = 5.6 kg.",
+    "en": "Petrol: 6.667 L × 2.31 = 15.4 kg; electric: 14 kWh × 0.7 = 9.8 kg; difference = 5.6 kg."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பேட்டரிக்குத் தேவையான தாதுக்கள் & மறுசுழற்சி",
+    "en": "Battery minerals and recycling"
+   },
+   "text": {
+    "ta": "லித்தியம்-அயன் பேட்டரிகளுக்கு லித்தியம், நிக்கல், கோபால்ட், மாங்கனீசு, கிராஃபைட் போன்ற பொருட்கள் தேவை (சில வகைகள் கோபால்ட், நிக்கல் இல்லாமல் செய்யப்படுகின்றன). இவற்றைச் சுரங்கத்திலிருந்து எடுக்கும்போது நிலம், நீர் பாதிப்பு ஏற்படலாம்; சில சுரங்கங்களில் பாதுகாப்பற்ற வேலைச் சூழல் பற்றிய அறிக்கைகளும் உள்ளன. இந்தப் பொருட்கள் சில நாடுகளில் மட்டுமே அதிகம் கிடைப்பதால் விலையும் அரசியல் சிக்கல்களும் வரலாம்.\n\nநல்ல செய்தி: பழைய பேட்டரிகளிலிருந்து இந்தப் பொருட்களை மீட்டு மீண்டும் பயன்படுத்த முடியும். மறுசுழற்சி முறைகள் வளர்கின்றன; இந்தியாவிலும் பேட்டரிக் கழிவு மேலாண்மைக்கான விதிகள் (2022) உள்ளன. பேட்டரியை எங்கும் வீசாமல், அங்கீகரிக்கப்பட்ட இடத்தில் ஒப்படைப்பது முக்கியம்.",
+    "en": "Lithium-ion batteries need materials like lithium, nickel, cobalt, manganese and graphite (some types are made without cobalt or nickel). Mining them can harm land and water, and there are reports of unsafe working conditions at some mines. Because these materials are concentrated in a few countries, prices and political problems can arise.\n\nGood news: these materials can be recovered from old batteries and used again. Recycling methods are growing; India also has battery-waste management rules (2022). Never throw a battery away anywhere — hand it over at an authorised place."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மின் வாகனம் மட்டும்தான் தீர்வா?",
+    "en": "Is an electric vehicle the only answer?"
+   },
+   "text": {
+    "ta": "இல்லை. ஒரு மின் கார் புகையைக் குறைக்கலாம்; ஆனால் சாலை நெரிசலையும், பேட்டரி, கார் தயாரிப்புச் செலவையும் குறைக்காது. ஒரு பேருந்தில் 50 பேர் பயணித்தால் ஒருவருக்கான ஆற்றலும் இடமும் மிகக் குறைவு. அருகில் உள்ள இடங்களுக்கு **நடப்பது, சைக்கிள்** ஓட்டுவது மிகக் குறைந்த செலவும், உடல் நலமும் தருகிறது.\n\nஆகவே, சிறந்த வழி பெரும்பாலும் பல வழிகளின் கலவை: தேவையற்ற பயணத்தைக் குறைத்தல், பொதுப் போக்குவரத்து, நடை / சைக்கிள், தேவைப்படும் இடத்தில் மின் வாகனம், தூய்மையான மின்சாரம். ஒவ்வொரு ஊருக்கும் வேறு சூழல்; அந்த முடிவை எடுக்கப்போகும் தலைமுறை நீ.",
+    "en": "No. An electric car may cut smoke, but it does not cut traffic jams or the cost of making batteries and cars. If 50 people travel in one bus, the energy and road space per person are very small. For nearby places, **walking and cycling** cost the least and are good for health.\n\nSo the best path is usually a mix: fewer unnecessary trips, public transport, walking/cycling, an electric vehicle where needed, and cleaner electricity. Every town is different; you are the generation that will decide."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🏭",
+     "title": {
+      "ta": "தமிழ்நாட்டில் தொழிற்சாலைகள்",
+      "en": "Factories in Tamil Nadu"
+     },
+     "text": {
+      "ta": "மின் வாகனங்கள், பேட்டரிகள் தயாரிக்கும் பல நிறுவனங்கள் தமிழ்நாட்டில் தொழிற்சாலைகளை அமைத்துள்ளன; இது வேலை வாய்ப்பையும் தரலாம்.",
+      "en": "Several companies that make electric vehicles and batteries have set up factories in Tamil Nadu; this may create jobs."
+     }
+    },
+    {
+     "icon": "🌬️",
+     "title": {
+      "ta": "காற்றாலை மின்சாரம்",
+      "en": "Wind electricity"
+     },
+     "text": {
+      "ta": "தமிழ்நாட்டில் காற்றாலைகள் குறிப்பிடத்தக்க மின்சாரம் தருகின்றன; அது மின் வாகனங்களின் சுற்றுச்சூழல் பலனை அதிகரிக்க உதவும்.",
+      "en": "Wind turbines in Tamil Nadu supply a notable amount of electricity; that can raise the environmental benefit of electric vehicles."
+     }
+    },
+    {
+     "icon": "🚌",
+     "title": {
+      "ta": "பொதுப் பேருந்துகள்",
+      "en": "Public buses"
+     },
+     "text": {
+      "ta": "சில நகரங்களில் மின்சாரப் பேருந்துகளை இயக்கும் / அறிமுகப்படுத்தும் முயற்சிகள் நடந்துவருகின்றன. உன் ஊரில் என்ன நிலை என்பதை அதிகாரப்பூர்வ போக்குவரத்துக் கழகத் தகவலில் பார்.",
+      "en": "Efforts are under way in some cities to run or introduce electric buses. Check the official transport corporation for your town's situation."
+     }
+    },
+    {
+     "icon": "🔋",
+     "title": {
+      "ta": "வீட்டுப் பேட்டரிகள்",
+      "en": "Batteries at home"
+     },
+     "text": {
+      "ta": "இன்வெர்ட்டர், போன், டார்ச் — பேட்டரிகள் ஏற்கெனவே நம் வீட்டில் இருக்கின்றன. பழையதை அங்கீகரிக்கப்பட்ட இடத்தில் ஒப்படைக்க வேண்டும்.",
+      "en": "Inverter, phone, torch — batteries are already in our homes. Old ones should be handed in at an authorised place."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "மேலும் மலிவான, நீண்ட காலம் உழைக்கும் பேட்டரிகள் (வேறு வேதிப்பொருட்களுடன்), பேட்டரி மாற்றும் நிலையங்கள், சூரிய மின்சாரத்தில் சார்ஜிங், பேட்டரிகளின் இரண்டாம் வாழ்க்கை (வீட்டு மின் சேமிப்பு) ஆகியவை முயற்சிக்கப்படுகின்றன. எது பரவலாகும் என்பது இன்று உறுதியாகத் தெரியாது.",
+    "en": "Cheaper, longer-lasting batteries (with different chemicals), battery-swapping stations, charging from solar power and a second life for batteries (home energy storage) are being tried. Which of these will spread widely is not certain today."
+   },
+   "risk": {
+    "ta": "தூய்மையற்ற மின்சாரம்; சுரங்கப் பாதிப்பு; பேட்டரிக் கழிவு; மின் வாகனம் வாங்க முடியாதவர்கள் பின்தங்குதல்; நெரிசல் குறையாதது.",
+    "en": "Dirty electricity; mining damage; battery waste; people who cannot afford electric vehicles being left behind; traffic not reducing."
+   },
+   "fix": {
+    "ta": "தூய்மையான மின்சாரம்; மறுசுழற்சி; நெறியான சுரங்க விதிகள்; பொதுப் போக்குவரத்து, நடை, சைக்கிள் வசதிகள்.",
+    "en": "Cleaner electricity; recycling; responsible mining rules; public transport, walking and cycling facilities."
+   },
+   "q": {
+    "ta": "உன் ஊருக்கு ஒரு போக்குவரத்துத் திட்டம் வகுத்தால், மின் வாகனம், பேருந்து, சைக்கிள், நடைபாதை இவற்றை எப்படிக் கலப்பாய்? ஏன்?",
+    "en": "If you planned transport for your town, how would you mix electric vehicles, buses, cycles and footpaths? Why?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உன் வீட்டு வாகனக் கணக்கு",
+    "en": "Your home vehicle sum"
+   },
+   "text": {
+    "ta": "உன் வீட்டில் வாகனம் இருந்தால்: இந்த மாதம் எவ்வளவு பெட்ரோல் போட்டார்கள் (லிட்டர், ₹), எத்தனை km ஓட்டினார்கள் என்று கேட்டு எழுது. ₹/km கணக்கிடு. பிறகு வீட்டு மின் கட்டணச் சீட்டில் ₹/யூனிட் பார்த்து, 0.035 kWh/km என்று கொண்டு அதே தூரத்துக்கு மின் செலவைக் கணக்கிடு. வாகனம் இல்லையென்றால், பள்ளிக்கு நடந்து அல்லது சைக்கிளில் போனால் ஆகும் நேரத்தையும், பேருந்தில் போனால் ஆகும் நேரத்தையும் ஒப்பிடு. கடைசியில் எழுது: \"இந்தக் கணக்கில் எவை விடுபட்டுள்ளன?\"",
+    "en": "If your home has a vehicle: ask how much petrol was bought this month (litres, ₹) and how many km were driven, and write it down. Work out ₹/km. Then look up ₹/unit on the electricity bill and, taking 0.035 kWh/km, work out the electric cost for the same distance. If there is no vehicle, compare how long your school trip takes on foot or by bicycle with the bus. Finally write: \"What is missing from this sum?\""
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "மின் வாகனம் ஏன் குறைந்த ஆற்றலில் ஓடுகிறது? அதன் பலனை எது மாற்றலாம்?",
+    "en": "Why does an electric vehicle run on less energy? What can change its benefit?"
+   },
+   "keywords": [
+    {
+     "ta": "வெப்பம்",
+     "en": "heat",
+     "alt": [
+      "சூடு",
+      "வீணாகும்",
+      "waste"
+     ]
+    },
+    {
+     "ta": "மின்சாரம்",
+     "en": "electricity",
+     "alt": [
+      "மின் உற்பத்தி",
+      "grid",
+      "மின் தொகுப்பு"
+     ]
+    },
+    {
+     "ta": "பேட்டரி",
+     "en": "battery",
+     "alt": [
+      "சுரங்கம்",
+      "மறுசுழற்சி",
+      "mining",
+      "recycling"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "மின் மோட்டாரில் எரிப்பு இல்லாததால் வெப்பமாக வீணாகும் ஆற்றல் குறைவு. ஆனால் மின்சாரம் எப்படி உண்டாகிறது, பேட்டரிக்கான சுரங்கம் மற்றும் மறுசுழற்சி, வாகனச் செலவு ஆகியவை மொத்த பலனை மாற்றும்.",
+    "en": "An electric motor has no burning, so less energy is wasted as heat. But how the electricity is made, mining and recycling for the battery, and the vehicle's cost change the overall benefit."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "பெட்ரோல் இயந்திரத்தில் பெரும்பாலான ஆற்றல் வெப்பமாக வீணாகிறது; மின் மோட்டாரில் மிகக் குறைவு.",
+     "en": "Most energy is lost as heat in a petrol engine; far less in an electric motor."
+    },
+    {
+     "ta": "1 kWh = ஒரு மின் யூனிட். தூரம் = kWh ÷ (kWh/km).",
+     "en": "1 kWh = one electricity unit. Range = kWh ÷ (kWh/km)."
+    },
+    {
+     "ta": "எடுத்துக்காட்டு எண்களில் மின் வாகனத்தின் ஓட்டும் செலவு பெட்ரோலைவிட மிகக் குறைவு; ஆனால் வாகன விலை, பேட்டரி மாற்றம் முக்கியம்.",
+     "en": "In the example numbers an EV's running cost is much lower, but vehicle price and battery replacement matter."
+    },
+    {
+     "ta": "CO₂ பலன் மின்சாரம் எப்படி வருகிறது என்பதைப் பொறுத்தது.",
+     "en": "The CO₂ benefit depends on how the electricity is made."
+    },
+    {
+     "ta": "பேட்டரிக்குச் சுரங்கம், மறுசுழற்சி சவால்கள் உண்டு; நடை, சைக்கிள், பேருந்து இன்னும் குறைந்த செலவில் முடியும்.",
+     "en": "Batteries bring mining and recycling challenges; walking, cycling and buses remain the cheapest."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "ஒரு மின் யூனிட் என்பது எது?",
+    "en": "What is one electricity \"unit\"?"
+   },
+   "options": [
+    {
+     "ta": "1 வாட்",
+     "en": "1 watt"
+    },
+    {
+     "ta": "1 கிலோவாட்-மணி (1 kWh)",
+     "en": "1 kilowatt-hour (1 kWh)"
+    },
+    {
+     "ta": "1 ஆம்பியர்",
+     "en": "1 ampere"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1000 வாட் மின்திறனை ஒரு மணி நேரம் பயன்படுத்தினால் 1 kWh = 1 யூனிட்.",
+    "en": "Using 1000 watts for one hour is 1 kWh = 1 unit."
+   }
+  },
+  {
+   "q": {
+    "ta": "மின் மோட்டார் ஏன் குறைந்த ஆற்றலை வீணாக்குகிறது?",
+    "en": "Why does an electric motor waste less energy?"
+   },
+   "options": [
+    {
+     "ta": "அது எடை குறைவானது என்பதால்",
+     "en": "Because it is lighter"
+    },
+    {
+     "ta": "அது எப்போதும் மெதுவாகச் சுழல்வதால்",
+     "en": "Because it always spins slowly"
+    },
+    {
+     "ta": "எரிப்பு இல்லாததால் வெப்பமாக வீணாகும் ஆற்றல் குறைவு",
+     "en": "There is no burning, so less energy becomes waste heat"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "பெட்ரோல் இயந்திரத்தில் எரிப்பே பெரும் வெப்ப இழப்பு; மோட்டாரில் அது இல்லை.",
+    "en": "Burning causes large heat loss in a petrol engine; a motor has no burning."
+   }
+  },
+  {
+   "q": {
+    "ta": "3 kWh பேட்டரி; வாகனம் 0.05 kWh/km எடுக்கிறது. சிறந்த நிலையில் தூரம்?",
+    "en": "A 3 kWh battery; the vehicle uses 0.05 kWh/km. Ideal range?"
+   },
+   "options": [
+    {
+     "ta": "60 km",
+     "en": "60 km"
+    },
+    {
+     "ta": "6 km",
+     "en": "6 km"
+    },
+    {
+     "ta": "150 km",
+     "en": "150 km"
+    },
+    {
+     "ta": "0.15 km",
+     "en": "0.15 km"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "3 ÷ 0.05 = 60 கி.மீ.",
+    "en": "3 ÷ 0.05 = 60 km."
+   }
+  },
+  {
+   "q": {
+    "ta": "மின்சாரத்தில் நிலக்கரி அதிகம் இருந்தால் மின் வாகனத்தின் CO₂ பலன்?",
+    "en": "If the electricity has a lot of coal, the CO₂ benefit of an electric vehicle is?"
+   },
+   "options": [
+    {
+     "ta": "எப்போதும் பூஜ்ய உமிழ்வு",
+     "en": "Always zero emissions"
+    },
+    {
+     "ta": "எப்போதும் பெட்ரோலைவிட மோசம்",
+     "en": "Always worse than petrol"
+    },
+    {
+     "ta": "எந்த வேறுபாடும் இல்லை",
+     "en": "No difference at all"
+    },
+    {
+     "ta": "வேறுபாடு சுருங்கலாம்; தூய்மையான மின்சாரத்தில் அதிகரிக்கும்",
+     "en": "The gap may shrink; it grows with cleaner electricity"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "மின் வாகனம் குழாயில் புகைவிடாவிட்டாலும் மின் நிலையத்தில் உமிழ்வு உண்டு; பலன் மின் தொகுப்பைப் பொறுத்தது.",
+    "en": "The vehicle has no exhaust, but the power station emits; the benefit depends on the grid."
+   }
+  },
+  {
+   "q": {
+    "ta": "பெட்ரோல் ₹100/L; வாகனம் 50 km/L. ஓட்டும் செலவு km-க்கு?",
+    "en": "Petrol ₹100/L; vehicle gives 50 km/L. Running cost per km?"
+   },
+   "options": [
+    {
+     "ta": "₹5",
+     "en": "₹5"
+    },
+    {
+     "ta": "₹2",
+     "en": "₹2"
+    },
+    {
+     "ta": "₹0.50",
+     "en": "₹0.50"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "100 ÷ 50 = ஒரு கி.மீ.-க்கு ₹2.",
+    "en": "100 ÷ 50 = ₹2 per km."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஓட்டும் செலவு ஒப்பீட்டில் சேரவில்லை, ஆனால் முடிவுக்கு முக்கியமானது எது?",
+    "en": "Which matters for the decision but was not in our running-cost comparison?"
+   },
+   "options": [
+    {
+     "ta": "பெட்ரோல் விலை",
+     "en": "Petrol price"
+    },
+    {
+     "ta": "மின் கட்டணம்",
+     "en": "Electricity tariff"
+    },
+    {
+     "ta": "வாகன விலை, பேட்டரி மாற்றுச் செலவு",
+     "en": "Vehicle price and battery replacement"
+    },
+    {
+     "ta": "km-க்கான ஆற்றல்",
+     "en": "Energy per km"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "ஓட்டும் செலவு மட்டுமே கணக்கில் வந்தது; மற்றவை முடிவை மாற்றலாம்.",
+    "en": "Only running cost was counted; the others can change the decision."
+   }
+  },
+  {
+   "q": {
+    "ta": "பேட்டரி மறுசுழற்சி ஏன் முக்கியம்?",
+    "en": "Why does battery recycling matter?"
+   },
+   "options": [
+    {
+     "ta": "பழைய பேட்டரியிலிருந்து தாதுக்களை மீட்டுப் புதிய சுரங்கத் தேவையைக் குறைக்கலாம்",
+     "en": "Materials recovered from old batteries can reduce the need for new mining"
+    },
+    {
+     "ta": "பேட்டரிக்குள் மின்சாரமே இல்லை என்பதால்",
+     "en": "Because there is no electricity inside"
+    },
+    {
+     "ta": "வாகனம் வேகமாக ஓடும் என்பதால்",
+     "en": "Because the vehicle will run faster"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "தாதுக்களை மீண்டும் பயன்படுத்துவது சுரங்க அழுத்தத்தையும் கழிவையும் குறைக்கும்.",
+    "en": "Reusing materials can lessen mining pressure and waste."
+   }
+  }
+ ]
+}

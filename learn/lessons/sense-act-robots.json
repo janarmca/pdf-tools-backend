@@ -1,0 +1,769 @@
+{
+ "id": "sense-act-robots",
+ "minutes": 30,
+ "title": {
+  "ta": "இயந்திரங்கள் எப்படி 'யோசிக்கின்றன'? (உணர் – யோசி – செயல்படு)",
+  "en": "How do machines 'think'? (Sense – Think – Act)"
+ },
+ "curriculum": [
+  {
+   "b": "NEP 2020",
+   "w": {
+    "ta": "நிரலாக்கம், கணினிச் சிந்தனை (நடுநிலைப் பள்ளி முதல்)",
+    "en": "Coding and computational thinking (from the middle stage)"
+   }
+  },
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "அறிவியல்: வெப்பம், மின்சாரம் — தொடர்புடைய தலைப்புகள்",
+    "en": "Science: heat and electricity — related topics"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "'உணர் – யோசி – செயல்படு' சுழற்சியை எந்த இயந்திரத்திலும் அடையாளம் காண",
+   "en": "Spot the sense – think – act loop in any machine"
+  },
+  {
+   "ta": "உணரி (sensor), இயக்கி (actuator) ஆகியவற்றைப் பிரித்துச் சொல்ல",
+   "en": "Tell sensors and actuators apart"
+  },
+  {
+   "ta": "வரம்பு (hysteresis) ஏன் அடிக்கடி ஆன்-ஆஃப் ஆவதைத் தடுக்கிறது என்பதை விளக்க",
+   "en": "Explain how a hysteresis band prevents rapid on-off switching"
+  },
+  {
+   "ta": "தானியங்கி இயந்திரம் தவறினால் யார் பொறுப்பு என்பதை விவாதிக்க",
+   "en": "Discuss who is responsible when an automatic machine fails"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "இரவு நீ தூங்கும்போது, தெருவிளக்கு தானாக எரிகிறது; காலையில் தானாக அணைகிறது. சில வீடுகளில் மேல்தொட்டி நிரம்பியதும் தண்ணீர் மோட்டார் தானாக நின்றுவிடுகிறது. யாரும் சுவிட்சைத் தொடுவதில்லை. இயந்திரம் 'யோசிக்கிறதா'?\n\n**இது எனக்கு என்ன பயன்?** இந்த இயந்திரங்கள் எல்லாம் ஒரே எளிய சுழற்சியில் இயங்குகின்றன. அதைப் புரிந்துகொண்டால் உன் வீட்டு ஏசி, ஃப்ரிட்ஜ், மோட்டார் எப்படி வேலை செய்கின்றன என்று தெரியும்; அவை பழுதானால் எங்கே தேடுவது என்றும் தெரியும். நாளை வரும் தானோட்டிக் கார், ட்ரோன், ரோபோ ஆகியவற்றை எப்போது நம்பலாம், எப்போது சந்தேகிக்க வேண்டும் என்பதையும் நீயே தீர்மானிக்க முடியும். **ஒரு இயந்திரம் 'யோசிக்கிறது' என்றால் உண்மையில் என்ன நடக்கிறது?**",
+    "en": "While you sleep at night, the street light switches on by itself and switches off in the morning. In some homes the water motor stops by itself once the rooftop tank is full. Nobody touches a switch. Is the machine 'thinking'?\n\n**What is in it for me?** All these machines run on one simple loop. Once you understand it you will know how your home AC, fridge and motor work; where to look when they go wrong; and you will be able to decide when to trust — and when to doubt — tomorrow's self-driving cars, drones and robots. **When a machine 'thinks', what is really happening?**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "உணர் – யோசி – செயல்படு",
+    "en": "Sense – Think – Act"
+   },
+   "text": {
+    "ta": "ஒவ்வொரு தானியங்கி இயந்திரமும் மூன்று வேலைகளைத் திரும்பத் திரும்பச் செய்கிறது:\n\n1. **உணர்** — ஒரு **உணரி** (sensor) வெளி உலகைப் பற்றிய அளவை எடுக்கிறது (வெப்பம், ஒளி, தூரம், தொடுதல், படம்).\n2. **யோசி** — ஒரு சிறிய கணினி அல்லது சுற்று, முன்பே எழுதிய **விதியோடு** அந்த அளவை ஒப்பிடுகிறது. \"இதைவிட அதிகம் என்றால் இதைச் செய்\".\n3. **செயல்படு** — ஒரு **இயக்கி** (actuator) வேலை செய்கிறது (மோட்டார், பல்பு, ஸ்பீக்கர்).\n\nசெயலின் விளைவு மீண்டும் உணரப்படும். இதனால் இது ஒரு **சுழற்சி**:\n\n[[ உணர் → யோசி → செயல்படு → மீண்டும் உணர் ]]\n\nஇயந்திரத்தின் 'யோசிப்பு' என்பது பெரும்பாலும் எழுதி வைத்த விதிகளைப் பின்பற்றுவதுதான்; அதற்கு மனிதர்களைப் போல் புரிதலோ உணர்வோ இல்லை.",
+    "en": "Every automatic machine repeats three jobs:\n\n1. **Sense** — a **sensor** takes a measurement of the outside world (temperature, light, distance, touch, a picture).\n2. **Think** — a small computer or circuit compares that reading with a **rule** written in advance: \"if it is more than this, do that\".\n3. **Act** — an **actuator** does the work (motor, bulb, speaker).\n\nThe result of the action is sensed again, so it is a **loop**:\n\n[[ Sense → Think → Act → Sense again ]]\n\nA machine's 'thinking' is mostly following rules that someone wrote down; it does not understand or feel as people do."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "நம்மைச் சுற்றியுள்ள எடுத்துக்காட்டுகள்",
+    "en": "Examples around us"
+   },
+   "text": {
+    "ta": "இவற்றில் எல்லாம் உணரி, விதி, இயக்கி மூன்றும் உண்டு. (சில மாதிரிகளில் வெவ்வேறு உணரிகள் இருக்கலாம்.)",
+    "en": "Each of these has a sensor, a rule and an actuator. (Different models may use different sensors.)"
+   },
+   "head": [
+    {
+     "ta": "எங்கே",
+     "en": "Where"
+    },
+    {
+     "ta": "உணர்வது",
+     "en": "Senses"
+    },
+    {
+     "ta": "விதி (யோசி)",
+     "en": "Rule (think)"
+    },
+    {
+     "ta": "செயல்",
+     "en": "Action"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "தானியங்கித் தெருவிளக்கு",
+      "en": "Automatic street light"
+     },
+     {
+      "ta": "வெளிச்சம் (ஒளி உணரி) அல்லது நேரம்",
+      "en": "Daylight (light sensor) or the time"
+     },
+     {
+      "ta": "இருட்டானால் எரி",
+      "en": "If dark, switch on"
+     },
+     {
+      "ta": "பல்பு எரிகிறது",
+      "en": "Bulb lights up"
+     }
+    ],
+    [
+     {
+      "ta": "மேல்தொட்டி மோட்டார் கட்டுப்படுத்தி",
+      "en": "Rooftop-tank motor controller"
+     },
+     {
+      "ta": "தொட்டியில் நீர் மட்டம்",
+      "en": "Water level in the tank"
+     },
+     {
+      "ta": "குறைவானால் மோட்டாரை ஓட்டு; நிரம்பினால் நிறுத்து",
+      "en": "If low, run the motor; if full, stop it"
+     },
+     {
+      "ta": "மோட்டார் ஓடுகிறது / நிற்கிறது",
+      "en": "Motor runs / stops"
+     }
+    ],
+    [
+     {
+      "ta": "ஏசி, ஃப்ரிட்ஜ்",
+      "en": "AC, fridge"
+     },
+     {
+      "ta": "வெப்பநிலை",
+      "en": "Temperature"
+     },
+     {
+      "ta": "அதிகம் என்றால் குளிர்விப்பியை ஓட்டு",
+      "en": "If too warm, run the cooler"
+     },
+     {
+      "ta": "கம்ப்ரசர் ஓடுகிறது / நிற்கிறது",
+      "en": "Compressor runs / stops"
+     }
+    ],
+    [
+     {
+      "ta": "லிஃப்ட்",
+      "en": "Lift"
+     },
+     {
+      "ta": "கதவில் தடை, எந்தத் தளம்",
+      "en": "An obstruction in the door; which floor"
+     },
+     {
+      "ta": "தடை இருந்தால் கதவை மூடாதே; தளம் வந்தால் நில்",
+      "en": "If blocked, do not close; stop at the floor"
+     },
+     {
+      "ta": "கதவு, மோட்டார்",
+      "en": "Door, motor"
+     }
+    ],
+    [
+     {
+      "ta": "ATM",
+      "en": "ATM"
+     },
+     {
+      "ta": "உன் அட்டை, PIN",
+      "en": "Your card and PIN"
+     },
+     {
+      "ta": "வங்கிக் கணினியிடம் சரிபார்; சரி என்றால் தொடர்",
+      "en": "Check with the bank’s computer; continue if correct"
+     },
+     {
+      "ta": "பணத்தை வெளியே தருகிறது",
+      "en": "Dispenses cash"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "உன் வீட்டு ஏசியை 24 °C-க்கு வைத்திருக்கிறாய். வெளியே வெயில் 30 °C-இலிருந்து 40 °C-க்கு ஏறுகிறது. ஏசி என்ன செய்யும்?",
+    "en": "Your home AC is set to 24 °C. The outside heat rises from 30 °C to 40 °C. What will the AC do?"
+   },
+   "options": [
+    {
+     "ta": "முன்பைவிட அதிக நேரம் இயங்கும்; அறை வெப்பம் கிட்டத்தட்ட அதே அளவில் நிற்கும்",
+     "en": "It will run for more of the time; the room stays near the same temperature"
+    },
+    {
+     "ta": "அதே நேரம்தான் இயங்கும்",
+     "en": "It will run for the same amount of time"
+    },
+    {
+     "ta": "வெயில் அதிகமானால் அது இயங்கவே இயங்காது",
+     "en": "It will stop running altogether"
+    }
+   ],
+   "answer": 0,
+   "reveal": {
+    "ta": "வெளியிலிருந்து அதிக வெப்பம் உள்ளே வருவதால், அறையை 24 °C அருகில் வைக்க ஏசி அதிக நேரம் ஓட வேண்டும். அடுத்து இதை நீயே சோதித்துப் பார்.",
+    "en": "More heat leaks in from outside, so the AC must run longer to keep the room near 24 °C. Next, test it yourself."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "thermostat",
+   "text": {
+    "ta": "▶ தொடங்கு பொத்தானை அழுத்து. வரைபடத்தில் நீலக்கோடு அறை வெப்பம்; பச்சைப் பட்டை விரும்பிய வெப்பத்தின் ±1 °C வரம்பு. விரும்பும் வெப்பம் 24 °C என்று வை. **வெளிப்புற வெப்பம் 30 °C** வைத்து, ↺ அழுத்தி மீண்டும் தொடங்கு. வரைபடம் நிரம்பும் வரை ஓடவிடு (1–2 நிமிடம்); AC ON / OFF எவ்வளவு நேரம் என்று கவனி. பிறகு **40 °C** வைத்து அதையே செய். (தொடக்கத்தில் அறை சூடாக இருப்பதால் முதல் சில விநாடிகளைப் புறக்கணி.)",
+    "en": "Press ▶ Start. The blue line is the room temperature; the green band is the ±1 °C range around the set value. Set the temperature to 24 °C. Set **outside to 30 °C**, press ↺ Reset, and let it fill the graph (1–2 minutes); notice how long the AC is ON versus OFF. Then set **40 °C** and do the same. (The room starts warm, so ignore the first 15 seconds.)"
+   },
+   "q": {
+    "ta": "வெளிப்புற வெப்பத்தை 30 °C-இலிருந்து 40 °C-க்கு உயர்த்தியபோது (விரும்பும் வெப்பம் 24 °C), நீ என்ன கண்டாய்?",
+    "en": "When you raised the outside temperature from 30 °C to 40 °C (set value 24 °C), what did you see?"
+   },
+   "options": [
+    {
+     "ta": "AC ON இருக்கும் பங்கு அதிகமானது; அறை வெப்பம் இன்னும் 24 °C அருகிலேயே இருந்தது",
+     "en": "The share of time with the AC ON increased; the room still stayed near 24 °C"
+    },
+    {
+     "ta": "AC ON இருக்கும் பங்கு குறைந்தது",
+     "en": "The share of time with the AC ON decreased"
+    },
+    {
+     "ta": "அறை வெப்பம் வெளிப்புற வெப்பத்துக்கு ஏறிவிட்டது",
+     "en": "The room temperature climbed up to the outside value"
+    },
+    {
+     "ta": "மாற்றம் எதுவுமில்லை",
+     "en": "Nothing changed"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "இந்த மாதிரியில், வெளிப்புறம் 30 °C-இல் AC சுமார் 40% நேரம் ON; 40 °C-இல் சுமார் 60% நேரத்துக்கு மேல் ON. அறை வெப்பம் எப்போதும் சுமார் 22.5–25.5 °C-க்குள்ளேயே இருந்தது. இதுதான் பின்னூட்டச் சுழற்சியின் பலம்: மாறும் சூழலுக்கு ஏற்ப இயந்திரம் தன் செயலைத் தானே சரிசெய்கிறது. (இது ஒரு எளிய மாதிரி; உண்மையான ஏசிகளின் எண்கள் வேறுபடும்.)",
+    "en": "In this model, with 30 °C outside the AC is ON about 40% of the time; at 40 °C it is ON more than about 60% of the time. The room stayed within about 22.5–25.5 °C throughout. That is the power of a feedback loop: the machine adjusts its action to a changing world. (This is a simple model; real ACs differ.)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "±1 °C வரம்பு ஏன்?",
+    "en": "Why the ±1 °C band?"
+   },
+   "text": {
+    "ta": "இந்த வரம்பின் பெயர் **ஹிஸ்டெரிசிஸ்** (hysteresis). இங்கே விதி: அறை **விரும்பியதைவிட 1 °C அதிகமானால்** ஏசி ஆன்; **1 °C குறைவானால்** ஆஃப். (24 °C-க்கு: 25 °C-க்கு மேல் ஆன், 23 °C-க்குக் கீழ் ஆஃப்.)\n\nவரம்பே இல்லாமல், \"24-க்கு மேல் ஆன், 24-க்குக் கீழ் ஆஃப்\" என்று வைத்தால் என்ன ஆகும்? வெப்பம் 24-ஐச் சுற்றி ஊசலாடும்போது ஏசி ஒரு நொடிக்குள் ஆன்-ஆஃப் என்று மாறிக்கொண்டே இருக்கும். கம்ப்ரசர் போன்ற பாகங்கள் அடிக்கடி தொடங்கி நிற்பதால் தேய்மானம் அடையும், மின்சாரமும் வீணாகும்.\n\nஇதே எளிய மாதிரியைக் கணினியில் ஓட்டிப் பார்த்தால்: 400 படிகளில் ±1 வரம்புடன் ஏசி சுமார் **63** முறை மாறியது; வரம்பு 0 என்றால் சுமார் **314** முறை — பல மடங்கு அதிகம்! (இவை வெளிப்புறம் 36 °C என்ற நிலைக்கான மாதிரி எண்கள்; வேறு நிலைகளில் எண்ணிக்கை மாறும்; உண்மையான ஏசிகளில் வேறு.)",
+    "en": "This band is called **hysteresis**. The rule here: switch the AC **on when the room is more than 1 °C above the set value**, and **off when it is more than 1 °C below**. (For 24 °C: on above 25 °C, off below 23 °C.)\n\nWhat if there is no band — \"on above 24, off below 24\"? When the temperature wobbles around 24, the AC would flip on and off again and again. Parts like the compressor wear out from frequent starts and stops, and electricity is wasted.\n\nRunning this same simple model on a computer: in 400 steps the AC switched about **63** times with a ±1 band, but about **314** times with a band of 0 — several times as often! (Model numbers for an outside temperature of 36 °C; other settings give different counts, and real ACs differ.)"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஏசி 24 °C ±1 °C-இல் உள்ளது. அறை வெப்பம் 25.2 °C ஆனதும் ஏசி ஆன் ஆகிறது. ஒவ்வொரு படியிலும் அறை 0.35 °C குளிர்கிறது (மாதிரி). அறை எத்தனை படிகள் குளிர்ந்த பிறகு 23 °C-க்குக் கீழே போகும்?",
+    "en": "The AC is set to 24 °C ±1 °C. It switches on when the room reaches 25.2 °C. Each step the room cools by 0.35 °C (model). After how many cooling steps does the room fall below 23 °C?"
+   },
+   "steps": [
+    {
+     "ta": "25.2 °C-இலிருந்து 23 °C வரை இறங்க வேண்டிய அளவு: 25.2 − 23 = 2.2 °C.",
+     "en": "The drop needed from 25.2 °C to 23 °C: 25.2 − 23 = 2.2 °C."
+    },
+    {
+     "ta": "2.2 ÷ 0.35 = 6.29… எனவே 6 படிகள் போதாது (6 × 0.35 = 2.1 → அறை 23.1 °C, இன்னும் 23-க்கு மேல்).",
+     "en": "2.2 ÷ 0.35 = 6.29…, so 6 steps are not enough (6 × 0.35 = 2.1 → the room is at 23.1 °C, still above 23)."
+    },
+    {
+     "ta": "7 படிகள்: 7 × 0.35 = 2.45 → 25.2 − 2.45 = **22.75 °C**, இது 23-க்குக் கீழே. அப்போது ஏசி ஆஃப் ஆகும்.",
+     "en": "7 steps: 7 × 0.35 = 2.45 → 25.2 − 2.45 = **22.75 °C**, below 23. The AC then switches off."
+    }
+   ],
+   "answer": {
+    "ta": "7 படிகள் (அறை 22.75 °C)",
+    "en": "7 steps (room at 22.75 °C)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஏசி **26 °C ±1 °C** என்று வைக்கப்பட்டுள்ளது. அறை எத்தனை °C-க்கு மேல் ஆனால் ஏசி ஆன் ஆகும்?",
+    "en": "The AC is set to **26 °C ±1 °C**. Above what room temperature will it switch on?"
+   },
+   "answer": 27,
+   "tol": 0.01,
+   "unit": {
+    "ta": "°C",
+    "en": "°C"
+   },
+   "hint": {
+    "ta": "விரும்பிய வெப்பம் + வரம்பு",
+    "en": "Set value + band"
+   },
+   "solution": {
+    "ta": "26 + 1 = **27 °C**-க்கு மேல் ஆன்; 26 − 1 = 25 °C-க்குக் கீழ் ஆஃப்.",
+    "en": "26 + 1 = switches on above **27 °C**; 26 − 1 = switches off below 25 °C."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு கற்பனை மேல்தொட்டி 1000 லிட்டர் கொள்ளளவு. நீர் மட்டம் 200 லிட்டருக்குக் கீழே போனால் மோட்டார் ஆன்; 1000 லிட்டர் ஆனதும் ஆஃப். மோட்டார் நிமிடத்துக்கு 25 லிட்டர் நிரப்பும் (இடையில் யாரும் நீர் எடுக்கவில்லை என்று வைத்துக்கொள்). மோட்டார் எத்தனை நிமிடம் ஓடும்?",
+    "en": "An imaginary rooftop tank holds 1000 litres. The motor switches on when the level falls below 200 litres and off when it reaches 1000 litres. The motor fills 25 litres per minute (assume nobody draws water meanwhile). How many minutes does it run?"
+   },
+   "answer": 32,
+   "tol": 0.01,
+   "unit": {
+    "ta": "நிமிடம்",
+    "en": "minutes"
+   },
+   "hint": {
+    "ta": "நிரப்ப வேண்டிய அளவு = 1000 − 200",
+    "en": "Amount to fill = 1000 − 200"
+   },
+   "solution": {
+    "ta": "(1000 − 200) ÷ 25 = 800 ÷ 25 = **32 நிமிடம்**. இங்கே 'குறைந்த மட்டம்', 'முழு மட்டம்' என்ற இரண்டு எல்லைகளும் ஒரு வரம்பே — மோட்டார் அடிக்கடி ஆன்-ஆஃப் ஆகாமல் தடுக்கின்றன.",
+    "en": "(1000 − 200) ÷ 25 = 800 ÷ 25 = **32 minutes**. The two limits, 'low level' and 'full level', form a band too — they stop the motor from switching on and off constantly."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு ஃப்ரிட்ஜின் தெர்மோஸ்டாட்டில் வரம்பே (band) இல்லை என்று வைத்துக்கொள். என்ன நடக்க வாய்ப்பு அதிகம்?",
+    "en": "Suppose a fridge thermostat had no band at all. What is most likely to happen?"
+   },
+   "options": [
+    {
+     "ta": "கம்ப்ரசர் மிகவும் அடிக்கடி ஆன்-ஆஃப் ஆகும்; பாகங்கள் விரைவில் தேயும், மின்சாரம் வீணாகும்",
+     "en": "The compressor would switch on and off very often; parts wear out sooner and electricity is wasted"
+    },
+    {
+     "ta": "ஃப்ரிட்ஜ் எப்போதும் ஓடிக்கொண்டே இருக்கும்",
+     "en": "The fridge would run all the time"
+    },
+    {
+     "ta": "ஃப்ரிட்ஜ் ஒருபோதும் ஓடாது",
+     "en": "The fridge would never run"
+    }
+   ],
+   "correct": 0,
+   "solution": {
+    "ta": "வெப்பம் விரும்பிய அளவைச் சுற்றி ஊசலாடும்போது ஒவ்வொரு சிறு மாற்றத்துக்கும் இயந்திரம் மாறும். வரம்பு இதைத் தடுக்கிறது.",
+    "en": "When the temperature wobbles around the set value, the machine would change state at every tiny change. A band prevents this."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "robotProgram",
+   "title": {
+    "ta": "உணராத ரோபோ",
+    "en": "A robot that cannot sense"
+   },
+   "text": {
+    "ta": "இந்த 🤖-க்கு உணரி இல்லை. நீ எழுதும் கட்டளைகளை மட்டும் அப்படியே செய்யும் — யோசிக்காது. ⭐-ஐ அடைய ↑ → கட்டளைகளைச் சேர்த்து ▶ இயக்கு. (குறைந்தபட்சம் 8 கட்டளைகள் தேவை: 4 மேலே, 4 வலப்பக்கம்.) இப்போது யோசி: யாராவது ஒரு 🪨-ஐ வழியில் நகர்த்தி வைத்தால் இந்த ரோபோவுக்கு என்ன ஆகும்? உணரி இருந்தால் என்ன வேறுபாடு இருக்கும்?",
+    "en": "This 🤖 has no sensor. It does exactly the commands you write — it does not think. Add ↑ → commands to reach the ⭐ and press ▶ Run. (At least 8 commands are needed: 4 up and 4 right.) Now think: what happens to this robot if someone moves a 🪨 into its path? What difference would a sensor make?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தானோட்டிக் காரும் ட்ரோனும்",
+    "en": "Self-driving cars and drones"
+   },
+   "text": {
+    "ta": "தானோட்டிக் கார், ட்ரோன், தொழிற்சாலை ரோபோ — எல்லாமே **அதே சுழற்சி**தான்; வேறுபாடு உணரிகளிலும் விதிகளிலும் மட்டுமே.\n\n• **ட்ரோன்:** சாய்வை உணரும் உணரிகள், GPS, சில நேரம் கேமரா. ஒரு விநாடிக்கு நூற்றுக்கணக்கான முறை சாய்வை உணர்ந்து மோட்டார்களின் வேகத்தைச் சரிசெய்து சமநிலையில் பறக்கிறது.\n• **தானோட்டிக் கார்:** கேமராக்கள், ரேடார், லேசர் தூர உணரிகள் (lidar), GPS. வெறும் 'ஆன்-ஆஃப்' விதி இல்லை; படத்தில் வாகனம், மனிதர், சிக்னல் ஆகியவற்றை அடையாளம் காணும் AI-யும், பல நிரலாக்க விதிகளும் சேர்ந்து வேலை செய்கின்றன.\n\n**எங்கே தவறலாம்?** கனமழை, கண்கூசும் வெயில், அழிந்த சாலைக்கோடு, முன்பு பார்த்திராத ஒரு காட்சி — உணரி தவறாகப் படிக்கலாம்; விதிகளில் இல்லாத சூழ்நிலை வரலாம். பல்வேறு வாகனங்கள், பாதசாரிகள், விலங்குகள் நிறைந்த சாலைகளில் இது இன்னும் கடினமாக இருக்கலாம்.",
+    "en": "Self-driving cars, drones and factory robots all use **the same loop**; only the sensors and rules differ.\n\n• **Drone:** tilt sensors, GPS, sometimes a camera. Hundreds of times a second it senses its tilt and adjusts its motors’ speed to fly level.\n• **Self-driving car:** cameras, radar, laser distance sensors (lidar), GPS. It is not a simple on-off rule: AI that recognises vehicles, people and signals in pictures works together with many programmed rules.\n\n**Where can it go wrong?** Heavy rain, glaring sun, faded lane lines, a scene never seen before — a sensor may misread, or a situation may arise that the rules never covered. Roads full of mixed vehicles, pedestrians and animals may make this even harder."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "நம் ஊரில்",
+    "en": "Around us"
+   },
+   "items": [
+    {
+     "icon": "💡",
+     "title": {
+      "ta": "தெருவிளக்கு",
+      "en": "Street lights"
+     },
+     "text": {
+      "ta": "சில தெருவிளக்குகள் ஒளி உணரி அல்லது நேரக் கடிகாரம் மூலம் தானாக எரிந்து அணைகின்றன.",
+      "en": "Some street lights switch on and off by themselves using a light sensor or a timer."
+     }
+    },
+    {
+     "icon": "🚰",
+     "title": {
+      "ta": "தொட்டி மோட்டார்",
+      "en": "Tank motors"
+     },
+     "text": {
+      "ta": "நீர் மட்ட உணரிகள் தொட்டி நிரம்பியதும் மோட்டாரை நிறுத்தி, தண்ணீர் வீணாவதைத் தடுக்கும்.",
+      "en": "Water-level sensors stop the motor when the tank is full, preventing overflow."
+     }
+    },
+    {
+     "icon": "🚦",
+     "title": {
+      "ta": "போக்குவரத்து சிக்னல்",
+      "en": "Traffic signals"
+     },
+     "text": {
+      "ta": "பல சிக்னல்கள் நேர அட்டவணைப்படி மாறுகின்றன; சில சந்திப்புகளில் வாகனங்களை உணரும் அமைப்புகளும் உள்ளன.",
+      "en": "Many signals change on a timetable; some junctions also have systems that sense vehicles."
+     }
+    },
+    {
+     "icon": "🏧",
+     "title": {
+      "ta": "ATM, லிஃப்ட்",
+      "en": "ATMs and lifts"
+     },
+     "text": {
+      "ta": "ATM உன் அட்டையையும் PIN-ஐயும் சரிபார்த்தே பணம் தருகிறது. லிஃப்ட் கதவில் தடை இருந்தால் மூடாது.",
+      "en": "An ATM gives cash only after checking your card and PIN. A lift will not close its door if something blocks it."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "தானியங்கி வாகனங்களும் ட்ரோன்களும்",
+    "en": "Self-driving vehicles and drones"
+   },
+   "text": {
+    "ta": "தானோட்டி வாகனங்கள் சில நாடுகளின் சில பகுதிகளில் ஏற்கெனவே பயணிகளை ஏற்றிச் செல்கின்றன; பிற இடங்களில் இன்னும் சோதனையில் உள்ளன. வயல் ட்ரோன்கள் இந்தியாவில் ஏற்கெனவே பயன்படுகின்றன. பொருட்களைக் கொண்டுசெல்லும் ட்ரோன்கள், வயலில் பயன்படும் ட்ரோன்கள், கிடங்குகளில் வேலை செய்யும் ரோபோக்கள் ஆகியவை முயற்சிக்கப்படுகின்றன. எவ்வளவு விரைவில், எவ்வளவு இடங்களில் பரவும் என்பது இன்னும் உறுதியாகத் தெரியாது.",
+    "en": "Self-driving vehicles already carry paying passengers in limited areas of a few countries, and are still being tested elsewhere. Farm drones are already used in India, while delivery drones and warehouse robots are spreading unevenly. How fast and how widely they will spread is still uncertain."
+   },
+   "risk": {
+    "ta": "உணரி தவறாகப் படிப்பது, எதிர்பாராத சூழ்நிலை, மென்பொருள் குறைபாடு, இணையத் தாக்குதல்; சில வேலைகள் மாறலாம்.",
+    "en": "A sensor misreading, an unexpected situation, a software bug, a cyber-attack; some jobs may change."
+   },
+   "fix": {
+    "ta": "பல உணரிகளை ஒன்றாகப் பயன்படுத்துதல், கடுமையான சோதனை, மனிதர் உடனே கட்டுப்பாட்டை எடுக்கும் வசதி (அவசர நிறுத்தம்), தெளிவான சட்டங்கள், சம்பவங்களைப் பதிவுசெய்து கற்றல்.",
+    "en": "Using several sensors together, strict testing, a way for a human to take over at once (emergency stop), clear laws, and recording incidents to learn from them."
+   },
+   "q": {
+    "ta": "ஒரு தானியங்கி இயந்திரத்தை உன் தெருவில் சோதிக்க அனுமதிக்கும் முன் நீ என்னென்ன கேள்விகள் கேட்பாய்?",
+    "en": "What questions would you ask before allowing an automatic machine to be tested on your street?"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "தவறு நடந்தால் யார் பொறுப்பு?",
+    "en": "Who is responsible when something goes wrong?"
+   },
+   "text": {
+    "ta": "ஒரு தானியங்கிக் கதவு யாரையாவது காயப்படுத்தினால், இயந்திரத்தைத் தண்டிக்க முடியாது — அதற்கு நன்மை தீமை புரியாது. அப்படியானால் யார் பொறுப்பு? வடிவமைத்தவர்கள், தயாரித்த நிறுவனம், பராமரிப்பவர், இயக்குபவர், அனுமதி கொடுத்த அதிகாரிகள் — இவர்கள் எல்லோருக்கும் பங்கு இருக்கலாம். எப்படிப் பங்கிடுவது என்பது சட்டமும் சமூகமும் தொடர்ந்து விவாதிக்கும் கேள்வி.",
+    "en": "If an automatic door hurts someone, you cannot punish the machine — it has no idea of right and wrong. So who is responsible? The designers, the maker, the maintainer, the operator, the officials who gave permission — all may share responsibility. How to divide it is a question law and society keep debating."
+   },
+   "risk": {
+    "ta": "'இயந்திரம்தான் செய்தது' என்று ஒவ்வொருவரும் பொறுப்பைத் தட்டிக்கழிக்கலாம்; யாருமே பொறுப்பேற்காத நிலை வரலாம்.",
+    "en": "Everyone may say 'the machine did it' and avoid responsibility, so that no one is accountable."
+   },
+   "fix": {
+    "ta": "முக்கிய முடிவுகளில் மனிதர் கண்காணிப்பு, தெளிவான பொறுப்புப் பட்டியல், பழுதுபார்ப்புப் பதிவுகள், புகார் செய்யும் வழி, கட்டாயப் பாதுகாப்புச் சோதனைகள்.",
+    "en": "Human oversight of important decisions, a clear list of who is responsible, maintenance records, a way to complain, and mandatory safety checks."
+   },
+   "q": {
+    "ta": "ஒரு தானோட்டிக் கார் சாலையைக் கடக்கும் ஒருவரைக் கவனிக்கத் தவறினால் யார் யார் பொறுப்பேற்க வேண்டும்? ஏன்?",
+    "en": "If a self-driving car fails to notice someone crossing the road, who should take responsibility, and why?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இந்த உலகில் உன் வேலை",
+    "en": "Your place in this world"
+   },
+   "text": {
+    "ta": "இந்த இயந்திரங்களை நிறுவுபவர்கள், பழுதுபார்ப்பவர்கள், வடிவமைப்பவர்கள் தேவை: **மின்சாரத் தொழில்நுட்பர் (electrician)**, ஏசி-ஃப்ரிட்ஜ் பழுதுபார்ப்பவர், தானியங்கி (automation) தொழில்நுட்பர், **மெகாட்ரானிக்ஸ்** (இயந்திரவியல் + மின்னணுவியல் + கணினி) பொறியாளர், ட்ரோன் இயக்குபவர் (உரிய பயிற்சியுடன்). ITI, பாலிடெக்னிக், பொறியியல் எனப் பல பாதைகள் உள்ளன. **இந்த வேலைகள் எல்லாப் பாலினத்தவருக்கும், எல்லா ஊர்களைச் சேர்ந்தவருக்கும் உரியவை.** படிப்புகளின் விவரங்கள் மாறும்; உன் பள்ளி ஆசிரியர் அல்லது அரசு வழிகாட்டு மையத்தில் சரிபார்.",
+    "en": "People are needed to install, repair and design these machines: **electricians**, AC-and-fridge technicians, automation technicians, **mechatronics** engineers (mechanics + electronics + computing), drone operators (with proper training). There are many paths — ITI, polytechnic, engineering. **These jobs belong to everyone, of every gender and from every town and village.** Course details change; check with your teacher or a government guidance centre."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "மனித தெர்மோஸ்டாட் விளையாட்டு",
+    "en": "Human thermostat game"
+   },
+   "text": {
+    "ta": "மூன்று பேர் சேருங்கள்:\n\n• **உணரி:** ஒரு தாளில் எழுதிய வெப்பங்களை (எ.கா. 24, 25, 23, 25, 23, 25, 23, 24) ஒவ்வொன்றாகச் சொல்லும்.\n• **கட்டுப்படுத்தி:** விதி: **25-க்கு மேல் என்றால் 'ஆன்', 23-க்குக் கீழ் என்றால் 'ஆஃப்', இடையில் என்றால் முன்பு இருந்தபடியே** (தொடக்கத்தில் ஆஃப்).\n• **இயக்கி:** 'ON' அல்லது 'OFF' என்று எழுதிய அட்டையைத் தூக்கிக் காட்டும்.\n\nபிறகு விதியை '24-க்கு மேல் ஆன், 24-க்குக் கீழ் ஆஃப், சரியாக 24 என்றால் முன்பு இருந்தபடி' என்று மாற்றி அதே எண்களைச் சொல்லுங்கள். அட்டை எத்தனை முறை மாறியது? (விடை: முதல் விதியில் 0 முறை, இரண்டாவதில் 6 முறை.)\n\nவீட்டில்: உன் வீட்டில் தானாக இயங்கும் 5 பொருட்களை எழுது. ஒவ்வொன்றிலும் உணரி எது, இயக்கி எது என்று கண்டுபிடி.",
+    "en": "Form groups of three:\n\n• **Sensor:** reads out temperatures written on a sheet (e.g. 24, 25, 23, 25, 23, 25, 23, 24) one by one.\n• **Controller:** rule: **above 25 say 'ON', below 23 say 'OFF', in between stay as before** (start with OFF).\n• **Actuator:** raises a card marked 'ON' or 'OFF'.\n\nThen change the rule to 'above 24 on, below 24 off, exactly 24 stay as before' and read the same numbers. How many times did the card change? (Answer: 0 times with the first rule, 6 times with the second.)\n\nAt home: list 5 things in your home that work by themselves. For each, find the sensor and the actuator."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "'உணர் – யோசி – செயல்படு' சுழற்சியை உன் வீட்டில் உள்ள ஒரு பொருளின் எடுத்துக்காட்டுடன் விளக்கு.",
+    "en": "Explain the sense – think – act loop with an example of something in your home."
+   },
+   "keywords": [
+    {
+     "ta": "உணரி",
+     "en": "sensor",
+     "alt": [
+      "sensor",
+      "உணர்வி",
+      "உணர்"
+     ]
+    },
+    {
+     "ta": "விதி",
+     "en": "rule",
+     "alt": [
+      "யோசி",
+      "முடிவு",
+      "கட்டுப்படுத்தி",
+      "controller",
+      "think"
+     ]
+    },
+    {
+     "ta": "இயக்கி",
+     "en": "actuator",
+     "alt": [
+      "செயல்",
+      "மோட்டார்",
+      "motor",
+      "act"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "ஃப்ரிட்ஜில் வெப்ப உணரி உள்ளே இருக்கும் வெப்பத்தை அளக்கிறது; வெப்பம் அதிகம் என்றால் ஓட்டு என்ற விதியின்படி கட்டுப்படுத்தி கம்ப்ரசர் என்ற இயக்கியை ஓட்டுகிறது; குளிர்ந்ததும் நிறுத்துகிறது. இது மீண்டும் மீண்டும் நடக்கும் சுழற்சி; வரம்பு இருப்பதால் அடிக்கடி ஆன்-ஆஃப் ஆவதில்லை.",
+    "en": "In a fridge, the temperature sensor measures the inside; when the rule says it is too warm the controller runs the compressor (the actuator), and stops it once it is cool. The loop repeats; because of the band it does not switch on and off constantly."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "இயந்திரத்தின் சுழற்சி: உணர் → யோசி (விதி) → செயல்படு → மீண்டும் உணர்.",
+     "en": "The machine’s loop: sense → think (rule) → act → sense again."
+    },
+    {
+     "ta": "உணரி அளக்கிறது (வெப்பம், ஒளி, தூரம், தொடுதல், படம்); இயக்கி செயல் செய்கிறது (மோட்டார், பல்பு, ஸ்பீக்கர்).",
+     "en": "A sensor measures (heat, light, distance, touch, pictures); an actuator acts (motor, bulb, speaker)."
+    },
+    {
+     "ta": "±1 °C வரம்பு (hysteresis) அடிக்கடி ஆன்-ஆஃப் ஆவதைத் தடுக்கிறது.",
+     "en": "The ±1 °C band (hysteresis) prevents rapid on-off switching."
+    },
+    {
+     "ta": "வெளியே வெப்பம் கூடினால் ஏசி அதிக நேரம் ஓடி, அறையை அதே அளவில் வைக்கிறது — இது பின்னூட்டம்.",
+     "en": "When it gets hotter outside the AC runs longer and keeps the room steady — that is feedback."
+    },
+    {
+     "ta": "தானோட்டிக் கார், ட்ரோன் ஆகியவையும் இதே சுழற்சி; கேமராக்களும் பல விதிகளும் மட்டும் கூடுதல்; அசாதாரணச் சூழலில் தவறலாம்.",
+     "en": "Self-driving cars and drones use the same loop, with cameras and many more rules — and they can fail in unusual situations."
+    },
+    {
+     "ta": "இயந்திரத்தால் பொறுப்பேற்க முடியாது; மனிதர்களும் நிறுவனங்களுமே பொறுப்பு.",
+     "en": "A machine cannot take responsibility; people and organisations are responsible."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "இருட்டானதும் தானாக எரியும் தெருவிளக்கில் 'உணரி' எது?",
+    "en": "In a street light that switches on when it gets dark, which part is the 'sensor'?"
+   },
+   "options": [
+    {
+     "ta": "பல்பு",
+     "en": "The bulb"
+    },
+    {
+     "ta": "ஒளி உணரி (அல்லது நேரக் கடிகாரம்)",
+     "en": "The light sensor (or the timer)"
+    },
+    {
+     "ta": "மின்கம்பம்",
+     "en": "The pole"
+    },
+    {
+     "ta": "சுவிட்ச் போடும் ஊழியர்",
+     "en": "The worker who flips the switch"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "உணரி வெளிச்சத்தை அளக்கிறது; பல்பு இயக்கி.",
+    "en": "The sensor measures light; the bulb is the actuator."
+   }
+  },
+  {
+   "q": {
+    "ta": "இவற்றில் எது 'இயக்கி' (actuator)?",
+    "en": "Which of these is an 'actuator'?"
+   },
+   "options": [
+    {
+     "ta": "நீர் மட்ட உணரி",
+     "en": "Water-level sensor"
+    },
+    {
+     "ta": "வெப்பமானி",
+     "en": "Thermometer"
+    },
+    {
+     "ta": "தொடு உணரி",
+     "en": "Touch sensor"
+    },
+    {
+     "ta": "தண்ணீர் மோட்டார்",
+     "en": "Water motor"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "இயக்கி வேலை செய்யும் பாகம்: மோட்டார், பல்பு, ஸ்பீக்கர்.",
+    "en": "Actuators do the work: motor, bulb, speaker."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஏசியில் ±1 °C வரம்பு எதற்காக?",
+    "en": "Why does an AC use a ±1 °C band?"
+   },
+   "options": [
+    {
+     "ta": "அடிக்கடி ஆன்-ஆஃப் ஆவதைத் தடுக்க",
+     "en": "To prevent constant on-off switching"
+    },
+    {
+     "ta": "அறையைக் கொஞ்சம் சூடாக்க",
+     "en": "To warm the room a little"
+    },
+    {
+     "ta": "உணரியைச் சேமிக்க",
+     "en": "To save the sensor"
+    },
+    {
+     "ta": "ஏசியை எப்போதும் ஓட வைக்க",
+     "en": "To keep the AC running always"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "வரம்பு இல்லாவிட்டால் வெப்பம் ஊசலாடும்போது ஏசி மிக அடிக்கடி மாறுவதால் பாகங்கள் தேயும்.",
+    "en": "Without a band, the AC would flip very often as the temperature wobbles, wearing out parts."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஏசி 24 °C ±1 °C-இல் உள்ளது. அறை எத்தனை °C-ஐத் தாண்டினால் அது ஆன் ஆகும்?",
+    "en": "An AC is set to 24 °C ±1 °C. Above what room temperature does it switch on?"
+   },
+   "options": [
+    {
+     "ta": "23 °C",
+     "en": "23 °C"
+    },
+    {
+     "ta": "24 °C",
+     "en": "24 °C"
+    },
+    {
+     "ta": "25 °C",
+     "en": "25 °C"
+    },
+    {
+     "ta": "26 °C",
+     "en": "26 °C"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "24 + 1 = 25 °C-க்கு மேல் ஆன்; 24 − 1 = 23 °C-க்குக் கீழ் ஆஃப்.",
+    "en": "24 + 1 = on above 25 °C; 24 − 1 = off below 23 °C."
+   }
+  },
+  {
+   "q": {
+    "ta": "வெளியே வெப்பம் கூடும்போது ஏசி அறையை 24 °C அருகில் வைக்க என்ன செய்கிறது?",
+    "en": "When it gets hotter outside, what does the AC do to keep the room near 24 °C?"
+   },
+   "options": [
+    {
+     "ta": "ஒருபோதும் ஓடாது",
+     "en": "Never runs"
+    },
+    {
+     "ta": "அதிக நேரம் ஓடுகிறது",
+     "en": "Runs for more of the time"
+    },
+    {
+     "ta": "வெப்பத்தை உணர்வதை நிறுத்துகிறது",
+     "en": "Stops sensing the temperature"
+    },
+    {
+     "ta": "வரம்பை மாற்றிவிடுகிறது",
+     "en": "Changes the band"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "அதிக வெப்பம் உள்ளே கசிவதால் குளிர்விப்பு அதிக நேரம் தேவை; இதுவே பின்னூட்டம்.",
+    "en": "More heat leaks in, so cooling is needed for longer; this is feedback."
+   }
+  },
+  {
+   "q": {
+    "ta": "தானோட்டிக் கார்கள் சில நேரம் ஏன் தவறக்கூடும்?",
+    "en": "Why might self-driving cars sometimes fail?"
+   },
+   "options": [
+    {
+     "ta": "அவற்றுக்கு எரிபொருள் தேவையில்லை என்பதால்",
+     "en": "Because they need no fuel"
+    },
+    {
+     "ta": "அவை மனிதர்களை விரும்பாததால்",
+     "en": "Because they dislike humans"
+    },
+    {
+     "ta": "அவை எப்போதும் சரியாகவே இயங்குவதால்",
+     "en": "Because they always work perfectly"
+    },
+    {
+     "ta": "உணரிகள் தவறாகப் படிக்கலாம்; விதிகளில் இல்லாத அசாதாரணச் சூழ்நிலை வரலாம்",
+     "en": "Sensors may misread, and unusual situations that the rules never covered may arise"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "கனமழை, அழிந்த சாலைக்கோடு, பார்த்திராத காட்சி — இவை உணரியையும் விதிகளையும் குழப்பலாம்.",
+    "en": "Heavy rain, faded lane lines or a never-seen scene can confuse sensors and rules."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு தானியங்கி இயந்திரம் ஒருவருக்குத் தீங்கு செய்தால், பொறுப்பு யாருடையது?",
+    "en": "If an automatic machine harms someone, who is responsible?"
+   },
+   "options": [
+    {
+     "ta": "இயந்திரம் மட்டுமே",
+     "en": "The machine alone"
+    },
+    {
+     "ta": "பாதிக்கப்பட்டவர் மட்டுமே",
+     "en": "Only the person harmed"
+    },
+    {
+     "ta": "வடிவமைத்தவர், தயாரித்தவர், பராமரிப்பவர், இயக்குபவர், அனுமதி தந்தவர் ஆகியோரில் தொடர்புடையவர்கள்",
+     "en": "The relevant designers, makers, maintainers, operators and approving officials"
+    },
+    {
+     "ta": "யாரும் இல்லை",
+     "en": "No one"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "இயந்திரத்துக்கு நன்மை தீமை புரியாது; பொறுப்பு எப்போதும் மனிதர்களிடமும் நிறுவனங்களிடமும்தான்.",
+    "en": "A machine has no sense of right and wrong; responsibility always rests with people and organisations."
+   }
+  }
+ ]
+}

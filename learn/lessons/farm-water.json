@@ -1,0 +1,829 @@
+{
+ "id": "farm-water",
+ "minutes": 33,
+ "title": {
+  "ta": "உணவு, தண்ணீர், விவசாயத்தின் எதிர்காலம்",
+  "en": "Food, water and the future of farming"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "அறிவியல், சமூக அறிவியல்: நீர் ஆதாரங்கள், மண், பயிர்கள், வேளாண்மை — தொடர்புடைய தலைப்புகள்",
+    "en": "Science and Social Science: water resources, soil, crops, agriculture — related topics"
+   }
+  },
+  {
+   "b": "UN SDG",
+   "w": {
+    "ta": "நிலையான வளர்ச்சி இலக்குகள்: பசியின்மை, தூய நீர், பொறுப்பான நுகர்வு",
+    "en": "Sustainable Development Goals: zero hunger, clean water, responsible consumption"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "நிலத்தடி நீர் ஏன் குறைகிறது என்பதை 'வரவு – செலவு' போல விளக்க",
+   "en": "Explain why groundwater falls using a 'deposit – withdrawal' picture"
+  },
+  {
+   "ta": "மழைநீர் சேகரிப்பில் கிடைக்கும் நீரைக் கணக்கிட",
+   "en": "Calculate the water that rainwater harvesting can collect"
+  },
+  {
+   "ta": "சொட்டு நீர், மூடாக்கு, சிறுதானியம், பயிர் பல்வகைமை ஆகியவற்றின் பயனைச் சொல்ல",
+   "en": "Describe the benefits of drip irrigation, mulching, millets and crop diversity"
+  },
+  {
+   "ta": "உணவு வீணாவதையும் விவசாயிகளின் நியாயமான விலை, ட்ரோன் போன்ற புதிய தொழில்நுட்பம் பற்றிய கேள்விகளையும் சிந்திக்க",
+   "en": "Think about food waste, fair prices for farmers and questions raised by new technology like drones"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "செல்வியின் தாத்தா சொல்வார்: \"நான் சின்னப் பையனா இருந்தப்போ கிணறு நிரம்பி வழியும்!\" இன்று அதே ஊரில் கோடையில் கிணறு காய்ந்துவிடுகிறது; போர்வெல்லை இன்னும் ஆழமாகத் தோண்டுகிறார்கள். ஆனால் வானம் இன்னும் மழை பெய்கிறதே!\n\n**இது எனக்கு என்ன பயன்?** உன் தட்டில் இருக்கும் சோறும், குழாயில் வரும் தண்ணீரும் ஒரே கதையின் இரு பகுதிகள். உணவு விளையத் தண்ணீர் வேண்டும். தண்ணீர் எப்படிக் கிடைக்கிறது, எப்படி வீணாகிறது என்பதைப் புரிந்துகொண்டால், உன் வீட்டிலும் ஊரிலும் நீ நல்ல முடிவுகள் எடுக்கலாம். நாளை நீ விவசாயியாகவோ, பொறியாளராகவோ, அதிகாரியாகவோ, அல்லது வாக்காளராகவோ இருக்கலாம். **மழை பெய்தும் கிணறு ஏன் வற்றுகிறது?**",
+    "en": "Selvi’s grandfather says: \"When I was a boy, our well used to overflow!\" Today in the same village the well dries up in summer, and people drill borewells deeper and deeper. Yet the sky still gives rain!\n\n**What is in it for me?** The rice on your plate and the water from your tap are two halves of one story. Food needs water; if you understand how water arrives and how it is wasted, you can make better decisions at home and in your village. Tomorrow you may be a farmer, an engineer, an officer or a voter. **Why does a well run dry even though it rains?**"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஓர் ஊரில் ஒவ்வோர் ஆண்டும் மழையால் நிலத்தடிக்குள் ஊறும் நீரைவிட, மோட்டார்கள் இறைக்கும் நீர் அதிகம். காலப்போக்கில் என்ன ஆகும்?",
+    "en": "In a village, motors pump out more water each year than the rain lets seep underground. What happens over time?"
+   },
+   "options": [
+    {
+     "ta": "எதுவும் ஆகாது; நிலத்தடி நீர் தானாக நிரம்பும்",
+     "en": "Nothing; groundwater refills by itself"
+    },
+    {
+     "ta": "நிலத்தடி நீர் மட்டம் ஆண்டுதோறும் குறையும்; கிணறுகள் வற்றும்",
+     "en": "The groundwater level falls year after year; wells dry up"
+    },
+    {
+     "ta": "மழை அதிகமாகப் பெய்யத் தொடங்கும்",
+     "en": "It starts raining more"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "நிலத்தடி நீர் ஒரு சேமிப்புக் கணக்கு போன்றது: வரவு (மழை ஊறல்) குறைவு, செலவு (இறைப்பு) அதிகம் என்றால் இருப்பு குறையும். கீழே எண்களோடு பார்ப்போம்.",
+    "en": "Groundwater is like a savings account: if deposits (rain seeping in) are less than withdrawals (pumping), the balance falls. We will see it with numbers below."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நம் தண்ணீர் எங்கிருந்து வருகிறது?",
+    "en": "Where does our water come from?"
+   },
+   "text": {
+    "ta": "எல்லா நீருக்கும் முதல் மூலம் **மழை**. தமிழ்நாட்டில் வடகிழக்குப் பருவமழை (அக்டோபர்–டிசம்பர்) ஒரு முக்கியமான மழைக்காலம். மழை பெய்தவுடன் நீர் மூன்று வழிகளில் போகிறது:\n\n• **ஆறுகள்:** மேலே பெய்த மழை ஓடைகளாகி ஆறாகிறது. சில ஆறுகள் வேறு மாநிலங்களிலிருந்து வருகின்றன; அவற்றின் நீரை மாநிலங்கள் பகிர்ந்துகொள்கின்றன.\n• **ஏரி, குளம், கண்மாய் (நீர்நிலைகள்):** மழைநீரைத் தேக்கி வைக்கின்றன; தேங்கிய நீர் மெதுவாக நிலத்துக்குள்ளும் இறங்கும்.\n• **நிலத்தடி நீர்:** மண், பாறைகளின் இடைவெளிகளில் தங்கிய நீர். இது நிலத்துக்கடியில் ஓடும் ஏரி அல்ல; நனைந்த கடற்பஞ்சு போன்றது.",
+    "en": "The first source of all water is **rain**. In Tamil Nadu the northeast monsoon (October–December) is an important rainy season. Once it rains, the water goes three ways:\n\n• **Rivers:** rain falling upstream becomes streams and then a river. Some rivers come from other states, and the states share their water.\n• **Tanks, ponds (ஏரி, குளம், கண்மாய்):** they store rainwater, and the stored water slowly sinks into the ground.\n• **Groundwater:** water held in the gaps of soil and rock. It is not an underground lake; it is more like a wet sponge."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "மூன்று நீர் மூலங்கள்",
+    "en": "Three water sources"
+   },
+   "head": [
+    {
+     "ta": "மூலம்",
+     "en": "Source"
+    },
+    {
+     "ta": "எப்படி நிரம்புகிறது?",
+     "en": "How does it refill?"
+    },
+    {
+     "ta": "கவனிக்க வேண்டியது",
+     "en": "Things to watch"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "ஆறு, அணை",
+      "en": "River, dam"
+     },
+     {
+      "ta": "மேலே பெய்யும் மழை",
+      "en": "Rain upstream"
+     },
+     {
+      "ta": "மழை குறைந்தால் வரத்தும் குறையும்; பல மாநிலங்கள் பகிர்கின்றன",
+      "en": "Flow falls when rain falls; several states share it"
+     }
+    ],
+    [
+     {
+      "ta": "ஏரி, குளம்",
+      "en": "Tank, pond"
+     },
+     {
+      "ta": "பெய்யும் மழையும் ஓடிவரும் நீரும்",
+      "en": "Rain and run-off water"
+     },
+     {
+      "ta": "வரத்துக் கால்வாய் அடைபட்டாலோ, மண் தூர்ந்தாலோ நீர் தேங்காது",
+      "en": "They cannot fill if inflow channels are blocked or silted up"
+     }
+    ],
+    [
+     {
+      "ta": "நிலத்தடி நீர்",
+      "en": "Groundwater"
+     },
+     {
+      "ta": "மழையும் நீர்நிலைகளும் நிலத்தில் ஊறுவதால், மெதுவாக",
+      "en": "Slowly, as rain and water bodies seep into the ground"
+     },
+     {
+      "ta": "இறைப்பு ஊறலைவிட அதிகமானால் மட்டம் குறையும்",
+      "en": "If pumping exceeds seepage, the level falls"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நிலத்தடி நீர் — ஒரு சேமிப்புக் கணக்கு",
+    "en": "Groundwater — a savings account"
+   },
+   "text": {
+    "ta": "[[ மாற்றம் = வரவு (மழை ஊறல்) − செலவு (இறைப்பு) ]]\n\nஒரு கற்பனை ஊர்: ஆண்டுக்கு ஊறும் நீர் **5 கோடி லிட்டர்**; இறைக்கும் நீர் **6.5 கோடி லிட்டர்**. அப்படியானால்:\n\n[[ 5 − 6.5 = −1.5 கோடி லிட்டர் (ஒவ்வோர் ஆண்டும்) ]]\n\nஇருப்பு 12 கோடி லிட்டர் என்றால் 12 ÷ 1.5 = **8 ஆண்டுகளில்** வற்றிவிடும் (இது ஒரு எளிய கணக்கு; உண்மையில் மழை ஆண்டுக்கு ஆண்டு மாறும்).\n\nஆழமாகத் தோண்டுவது தற்காலிகத் தீர்வு; அது இருப்பைக் குறைக்கும் வேகத்தை இன்னும் கூட்டும். தீர்வு இரண்டு: **வரவைக் கூட்டு** (மழைநீர் சேகரிப்பு, ஏரி பராமரிப்பு) மற்றும் **செலவைக் குறை** (குறைவான நீரில் பயிர் செய்தல், வீணாக்காமை).",
+    "en": "[[ Change = deposits (rain seeping in) − withdrawals (pumping) ]]\n\nAn imaginary village: **5 crore litres** seep in each year; **6.5 crore litres** are pumped out. Then:\n\n[[ 5 − 6.5 = −1.5 crore litres (every year) ]]\n\nIf the stock is 12 crore litres, 12 ÷ 1.5 = it runs out in **8 years** (a simple calculation; in reality rain differs from year to year).\n\nDrilling deeper is a temporary fix; it speeds up the fall. There are two real solutions: **raise the deposits** (rainwater harvesting, looking after tanks) and **cut the withdrawals** (grow crops with less water, avoid waste)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு கற்பனை ஊரில் ஆண்டுக்கு ஊறும் நீர் **8 கோடி லிட்டர்**, இறைக்கும் நீர் **9.2 கோடி லிட்டர்**. 5 ஆண்டுகளில் நிலத்தடி நீர் மொத்தம் எத்தனை கோடி லிட்டர் குறையும்?",
+    "en": "In an imaginary village **8 crore litres** seep in each year and **9.2 crore litres** are pumped out. By how many crore litres does groundwater fall in 5 years?"
+   },
+   "answer": 6,
+   "tol": 0.01,
+   "unit": {
+    "ta": "கோடி லிட்டர்",
+    "en": "crore litres"
+   },
+   "hint": {
+    "ta": "முதலில் ஓர் ஆண்டின் குறைவு: 9.2 − 8",
+    "en": "First the yearly loss: 9.2 − 8"
+   },
+   "solution": {
+    "ta": "9.2 − 8 = 1.2 கோடி லிட்டர் ஓர் ஆண்டில்; 1.2 × 5 = **6 கோடி லிட்டர்**.",
+    "en": "9.2 − 8 = 1.2 crore litres in a year; 1.2 × 5 = **6 crore litres**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மழைநீர் சேகரிப்பு",
+    "en": "Rainwater harvesting"
+   },
+   "text": {
+    "ta": "கூரையில் விழும் மழைநீரைக் குழாய் மூலம் தொட்டியிலோ, நிலத்துக்குள் ஊறும் அமைப்பிலோ சேர்ப்பதே **மழைநீர் சேகரிப்பு**. தமிழ்நாட்டில் 2003-இல் ஓர் அவசரச் சட்டம் (Tamil Nadu Municipal Laws (Second Amendment) Ordinance, 2003) மூலம் கட்டடங்களில் மழைநீர் சேகரிப்பு அமைப்பை அமைப்பது கட்டாயமாக்கப்பட்டது. இன்றைய விதிகளின் விவரங்களை உன் உள்ளாட்சி அலுவலகத்தில் சரிபார்.\n\nஎவ்வளவு நீர் கிடைக்கும்? ஒரு சதுர மீட்டர் பரப்பில் **1 மில்லிமீட்டர்** மழை பெய்தால் **1 லிட்டர்** நீர் விழுகிறது. எல்லாம் சேராது; கசிவு, ஆவியாதல் போக, இங்கே சுமார் **0.8** பங்கு சேரும் என்று எடுத்துக்கொள்வோம் (இது ஒரு மதிப்பீடு).\n\n[[ நீர் (லிட்டர்) = கூரைப் பரப்பு (m²) × மழை (mm) × 0.8 ]]",
+    "en": "Collecting the rain that falls on a roof and leading it by pipe into a tank, or into a structure that lets it sink into the ground, is **rainwater harvesting**. In 2003 Tamil Nadu made it compulsory, through an ordinance (the Tamil Nadu Municipal Laws (Second Amendment) Ordinance, 2003), to provide a rainwater-harvesting structure in buildings. Check today’s rule details with your local body office.\n\nHow much water? When **1 millimetre** of rain falls on **1 square metre**, that is **1 litre** of water. Not all of it is collected; after leaks and evaporation we assume about **0.8** of it here (an estimate).\n\n[[ Water (litres) = roof area (m²) × rain (mm) × 0.8 ]]"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு வீட்டுக் கூரையின் பரப்பு **100 m²**. ஒரு நாள் **40 mm** மழை பெய்தது. 0.8 பங்கு சேர்ந்தால் எத்தனை லிட்டர் நீர் கிடைக்கும்?",
+    "en": "A house roof has an area of **100 m²**. One day **40 mm** of rain fell. If 0.8 of it is collected, how many litres of water do we get?"
+   },
+   "steps": [
+    {
+     "ta": "கூரையில் விழும் மொத்த நீர் = 100 × 40 = 4000 லிட்டர் (1 m²-இல் 1 mm = 1 L என்பதால்).",
+     "en": "Total water falling on the roof = 100 × 40 = 4000 litres (since 1 mm on 1 m² = 1 L)."
+    },
+    {
+     "ta": "சேரும் பகுதி = 4000 × 0.8 = **3200 லிட்டர்**.",
+     "en": "Collected part = 4000 × 0.8 = **3200 litres**."
+    }
+   ],
+   "answer": {
+    "ta": "3200 லிட்டர்",
+    "en": "3200 litres"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "உன் வீட்டுக் கூரை **60 m²**; மழை **50 mm**; 0.8 பங்கு சேர்கிறது. எத்தனை லிட்டர் கிடைக்கும்?",
+    "en": "Your roof is **60 m²**; rainfall is **50 mm**; 0.8 is collected. How many litres do you get?"
+   },
+   "answer": 2400,
+   "tol": 0.5,
+   "unit": {
+    "ta": "லிட்டர்",
+    "en": "litres"
+   },
+   "hint": {
+    "ta": "60 × 50 × 0.8",
+    "en": "60 × 50 × 0.8"
+   },
+   "solution": {
+    "ta": "60 × 50 = 3000 லிட்டர்; × 0.8 = **2400 லிட்டர்**.",
+    "en": "60 × 50 = 3000 litres; × 0.8 = **2400 litres**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சொட்டு நீர்ப் பாசனமும் மூடாக்கும்",
+    "en": "Drip irrigation and mulching"
+   },
+   "text": {
+    "ta": "வயலில் தண்ணீரைப் பாய்ச்சும்போது ஒரு பகுதி ஆவியாகிறது, இன்னொரு பகுதி பயிர் இல்லாத இடங்களில் ஓடிப்போகிறது. **சொட்டு நீர்ப்பாசனத்தில்** (drip irrigation) குழாய்கள் வழியாக நீர் செடியின் வேர் அருகில் மெதுவாகச் சொட்டுகிறது. அதனால் இது பெரும்பாலும் குறைவான நீரில் பயிரை வளர்க்க உதவுகிறது; எவ்வளவு குறையும் என்பது பயிர், மண், முறையைப் பொறுத்தது.\n\n**மூடாக்கு** (mulching) என்பது மண்ணின் மேல் வைக்கோல், உலர்ந்த இலை போன்றவற்றைப் பரப்புவது. இது மண் வேகமாகக் காய்வதைத் தடுக்கிறது, களைகளைக் குறைக்கிறது; அழுகும்போது மண்ணுக்கு உரமாகவும் ஆகிறது.\n\nஇவற்றுக்கும் குறைகள் உண்டு: தொடக்கச் செலவு, குழாய் அடைப்பு, பராமரிப்பு. அரசு மானியத் திட்டங்கள் உள்ளன; அவற்றின் விவரங்கள் மாறும் — உள்ளூர் வேளாண்மைத் துறை அலுவலகத்தில் கேள்.",
+    "en": "When water is let into a field, some evaporates and some runs off where there are no plants. In **drip irrigation**, pipes let water drip slowly near the plant’s roots. So it often helps grow crops with less water; how much less depends on the crop, the soil and the method.\n\n**Mulching** means spreading straw, dry leaves and the like over the soil. It slows the soil drying out, reduces weeds, and as it rots it feeds the soil.\n\nThey have drawbacks too: the starting cost, blocked pipes, upkeep. Government subsidy schemes are known to exist; their details change — ask at your local agriculture department office."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "பாசன முறைகள் — ஒப்பீடு",
+    "en": "Irrigation methods compared"
+   },
+   "head": [
+    {
+     "ta": "முறை",
+     "en": "Method"
+    },
+    {
+     "ta": "எப்படிக் கொடுக்கிறது?",
+     "en": "How is water given?"
+    },
+    {
+     "ta": "நீர் இழப்பு",
+     "en": "Water loss"
+    },
+    {
+     "ta": "குறிப்பு",
+     "en": "Note"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "வயல் முழுவதும் பாய்ச்சுதல்",
+      "en": "Flooding the field"
+     },
+     {
+      "ta": "வயல் முழுவதும் நீர் நிரப்பப்படுகிறது",
+      "en": "Water covers the whole field"
+     },
+     {
+      "ta": "பொதுவாக அதிகம்",
+      "en": "Usually higher"
+     },
+     {
+      "ta": "நெல் போன்ற சில பயிர்களுக்குப் பாரம்பரிய முறை",
+      "en": "Traditional for crops like paddy"
+     }
+    ],
+    [
+     {
+      "ta": "தெளிப்பு",
+      "en": "Sprinkler"
+     },
+     {
+      "ta": "மழை போலத் தெளிக்கிறது",
+      "en": "Sprays like rain"
+     },
+     {
+      "ta": "காற்று, வெயிலில் ஆவியாதல் உண்டு",
+      "en": "Some evaporation in wind and sun"
+     },
+     {
+      "ta": "சில பயிர்களுக்குப் பொருந்தும்",
+      "en": "Suits some crops"
+     }
+    ],
+    [
+     {
+      "ta": "சொட்டு",
+      "en": "Drip"
+     },
+     {
+      "ta": "வேர் அருகே மெதுவாகச் சொட்டுகிறது",
+      "en": "Drips slowly near the roots"
+     },
+     {
+      "ta": "பெரும்பாலும் குறைவு",
+      "en": "Often lower"
+     },
+     {
+      "ta": "தொடக்கச் செலவு, குழாய் பராமரிப்பு தேவை",
+      "en": "Needs startup cost and pipe care"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு கற்பனைச் சோதனை: வயல் முழுவதும் பாய்ச்சும் முறையில் ஒரு சிறு தோட்டத்துக்கு வாரம் **10,000 லிட்டர்** தேவைப்பட்டது; சொட்டு நீரில் அதே தோட்டத்துக்கு **6,000 லிட்டர்**. நீர் சேமிப்பு எத்தனை சதவீதம்? (உண்மையான சேமிப்பு பயிர், மண், முறையைப் பொறுத்து மாறும்.)",
+    "en": "An imaginary trial: with flooding, a small garden needed **10,000 litres** a week; with drip, the same garden needed **6,000 litres**. What percentage of water was saved? (Real savings depend on the crop, soil and method.)"
+   },
+   "answer": 40,
+   "tol": 0.01,
+   "unit": {
+    "ta": "%",
+    "en": "%"
+   },
+   "hint": {
+    "ta": "சேமிப்பு = 10,000 − 6,000; பிறகு 10,000-ஆல் வகு",
+    "en": "Saving = 10,000 − 6,000; then divide by 10,000"
+   },
+   "solution": {
+    "ta": "10,000 − 6,000 = 4,000 லிட்டர்; 4,000 ÷ 10,000 = 0.4 = **40%**.",
+    "en": "10,000 − 6,000 = 4,000 litres; 4,000 ÷ 10,000 = 0.4 = **40%**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மண் ஈர உணரிகளும் தொலைபேசி ஆலோசனைகளும்",
+    "en": "Soil-moisture sensors and phone advisories"
+   },
+   "text": {
+    "ta": "**மண் ஈர உணரி** (soil-moisture sensor) மண்ணில் எவ்வளவு ஈரம் இருக்கிறது என்று அளக்கும். ஒரு கட்டுப்படுத்தி அதை ஒரு எல்லையோடு ஒப்பிடுகிறது: ஈரம் குறைவானால் வால்வைத் திறந்து நீர் விடு; போதுமானால் மூடு. இது முந்தைய பாடத்தில் நாம் பார்த்த **உணர் – யோசி – செயல்படு** சுழற்சியே; இதன் மூலம் தேவையான நேரத்தில் தேவையான அளவு மட்டும் நீர் பாய்ச்சலாம்.\n\nவானிலை முன்னறிவிப்பு, பயிர்ப் பாதுகாப்பு ஆலோசனைகள் போன்றவை குறுஞ்செய்தி அல்லது செயலி மூலம் விவசாயிகளுக்கு அனுப்பப்படுகின்றன. ஆனால் எந்த ஆலோசனையையும் நம்பும் முன், அது **அரசு அல்லது நம்பகமான வேளாண் அமைப்பிலிருந்து** வருகிறதா என்று பார்; சந்தேகம் என்றால் வேளாண் அலுவலரிடம் கேள்.",
+    "en": "A **soil-moisture sensor** measures how much moisture the soil holds. A controller compares it with a limit: if the soil is too dry, open the valve and let water flow; when it is enough, close it. This is the same **sense – think – act** loop from the previous lesson, and it lets a farmer give the right amount of water at the right time.\n\nWeather forecasts and crop-protection advice can be sent to farmers by text message or app. But before trusting any advice, check that it comes from **the government or a trusted agricultural body**; if in doubt, ask an agriculture officer."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "thermostat",
+   "title": {
+    "ta": "அதே விதி, வேறு இடத்தில்",
+    "en": "The same rule, elsewhere"
+   },
+   "text": {
+    "ta": "இங்கே நீ பார்ப்பது ஓர் அறையின் வெப்பக் கட்டுப்படுத்தி; ஆனால் விதி ஒன்றே: உணர், எல்லையோடு ஒப்பிடு, செயல்படு, மீண்டும் உணர். பாசனக் கட்டுப்படுத்தியில் அது தலைகீழ் — **ஈரம் குறைவானால் ஆன், போதுமானால் ஆஃப்**; அங்கும் ஒரு வரம்பு இருந்தால் வால்வு அடிக்கடி திறந்து மூடாது. (இது ஒரு எளிய மாதிரி; உண்மையான கட்டுப்படுத்திகள் வேறுபடும்.) ▶ தொடங்கு பொத்தானை அழுத்திக் கவனி.",
+    "en": "What you see here is a room-temperature controller, but the rule is the same: sense, compare with a limit, act, sense again. In an irrigation controller it is the other way round — **on when the soil is too dry, off when it is moist enough**; a band there too stops the valve opening and closing constantly. (A simple model; real controllers differ.) Press ▶ Start and watch."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சிறுதானியங்களும் பயிர் பல்வகைமையும்",
+    "en": "Millets and crop diversity"
+   },
+   "text": {
+    "ta": "ஐக்கிய நாடுகள் சபை **2023-ஐ சர்வதேச சிறுதானிய ஆண்டாக** (International Year of Millets) அறிவித்தது; இந்தியாவின் முன்மொழிவை ஏற்று இது நடந்தது. கேழ்வரகு, கம்பு, சோளம், தினை, வரகு, சாமை, குதிரைவாலி ஆகியவை சிறுதானியங்கள். பல சிறுதானியங்களில் நார்ச்சத்தும் தாதுச் சத்துகளும் நல்ல அளவில் உள்ளன (எ.கா. கேழ்வரகில் கால்சியம்). பொதுவாக இவை நெல்லைவிடக் குறைந்த நீரிலும் வறண்ட நிலத்திலும் விளையும். ஆனால் உணவுத் தேவைகள் ஒவ்வொருவருக்கும் வேறுபடும்; உணவுமுறை பற்றி மருத்துவர் அல்லது ஊட்டச்சத்து நிபுணரிடம் கேள்.\n\n**பயிர் பல்வகைமை:** ஒரே பயிரை மட்டும் பெரிய பரப்பில் விளைவித்தால் ஒரு பூச்சி அல்லது நோய் எல்லாவற்றையும் அழிக்கலாம். பல பயிர்கள் இருந்தால் ஆபத்து பிரிகிறது. **பயறு வகைகளின்** வேர்களில் உள்ள பாக்டீரியாக்கள் காற்றிலுள்ள நைட்ரஜனை மண்ணுக்குச் சேர்க்கின்றன; அதனால் பயறு பயிரிடுவது அடுத்த பயிருக்கு உதவும்.",
+    "en": "The United Nations declared **2023 the International Year of Millets**, in support of a proposal by India. Finger millet (கேழ்வரகு), pearl millet (கம்பு), sorghum (சோளம்), foxtail millet (தினை), kodo millet (வரகு), little millet (சாமை) and barnyard millet (குதிரைவாலி) are millets. Many millets hold fibre and minerals in good amounts (for example, calcium in finger millet). In general they grow with less water than paddy and on drier land. But food needs differ from person to person; ask a doctor or nutritionist about diets.\n\n**Crop diversity:** if only one crop is grown over a large area, a single pest or disease can wipe out everything. With many crops, the risk is spread. Bacteria in the roots of **pulses** add nitrogen from the air to the soil, so growing pulses helps the next crop."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மண்ணும் ஒரு உயிருள்ள பொருள்",
+    "en": "Soil is alive"
+   },
+   "text": {
+    "ta": "ஆரோக்கியமான மண்ணில் புழுக்கள், பூஞ்சைகள், நுண்ணுயிர்கள் ஆகியவை உயிர் வாழ்கின்றன. மட்கிய இலை, எரு, உரம் (compost) போன்ற **கரிமப் பொருட்கள்** மண்ணுக்குச் சத்துகளைத் தருவதோடு நீரையும் பிடித்துவைக்க உதவுகின்றன. அதனால் கரிமப் பொருள் நிறைந்த மண் வறட்சியைச் சற்று நன்றாகத் தாங்கும்.\n\nஅறுவடைக்குப் பிறகு வைக்கோலை எரிப்பது மண்ணின் மேல்புற உயிர்களையும் சத்துகளையும் அழிக்கும், காற்றையும் மாசுபடுத்தும். அதைப் பயன்படுத்தி மூடாக்கோ உரமோ செய்யலாம். மண்ணின் நிலை தெரிய அருகிலுள்ள வேளாண் அலுவலகத்தில் **மண் பரிசோதனை** (soil test) செய்யலாம்.",
+    "en": "Healthy soil is home to worms, fungi and microbes. **Organic matter** — rotted leaves, farmyard manure, compost — feeds the soil and also helps it hold water, so soil rich in organic matter can cope somewhat better with dry spells.\n\nBurning straw after harvest kills the living top layer and its nutrients, and pollutes the air. It can be used for mulch or compost instead. To know your soil, you can have a **soil test** done at a nearby agriculture office."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "காவிரி டெல்டா — ஓர் உதாரணம்",
+    "en": "The Cauvery delta — an example"
+   },
+   "items": [
+    {
+     "icon": "🌾",
+     "title": {
+      "ta": "நெற்களஞ்சியம்",
+      "en": "Rice bowl"
+     },
+     "text": {
+      "ta": "தஞ்சாவூர், திருவாரூர், நாகப்பட்டினம் போன்ற மாவட்டங்கள் அடங்கிய காவிரி டெல்டா, தமிழ்நாட்டின் 'நெற்களஞ்சியம்' என்று அழைக்கப்படுகிறது.",
+      "en": "The Cauvery delta — with districts such as Thanjavur, Tiruvarur and Nagapattinam — is called the 'rice bowl' of Tamil Nadu."
+     }
+    },
+    {
+     "icon": "🏗️",
+     "title": {
+      "ta": "கல்லணை",
+      "en": "Kallanai"
+     },
+     "text": {
+      "ta": "கரிகால சோழன் காலத்தில் கட்டப்பட்டதாகக் கருதப்படும் கல்லணை (Grand Anicut) கிட்டத்தட்ட 2000 ஆண்டுகள் பழமையானது என்று கூறப்படுகிறது; இன்றும் பாசனத்துக்குப் பயன்படுகிறது.",
+      "en": "Kallanai (the Grand Anicut), believed to date from the time of Karikala Chola, is said to be nearly 2000 years old, and it is still used for irrigation."
+     }
+    },
+    {
+     "icon": "💧",
+     "title": {
+      "ta": "மேட்டூர் அணை",
+      "en": "Mettur Dam"
+     },
+     "text": {
+      "ta": "மேட்டூர் அணை 1934-இல் திறக்கப்பட்டது. குறுவை சாகுபடிக்கான வழக்கமான தண்ணீர் திறப்புத் தேதி ஜூன் 12; ஆனால் அணையில் உள்ள நீரையும் மழையையும் பொறுத்து இது ஆண்டுக்கு ஆண்டு மாறுகிறது.",
+      "en": "Mettur Dam was inaugurated in 1934. June 12 is the customary date to release water for the kuruvai crop, but it changes from year to year depending on the water in the dam and the rain."
+     }
+    },
+    {
+     "icon": "🌧️",
+     "title": {
+      "ta": "வரத்து மழையைப் பொறுத்தது",
+      "en": "Depends on the rain"
+     },
+     "text": {
+      "ta": "காவிரி கர்நாடகத்தில் உற்பத்தியாகித் தமிழ்நாட்டுக்கு வருகிறது. மேலே மழை குறைந்தால் டெல்டாவுக்கு வரும் நீரும் குறையும் — அதனால் ஒவ்வொரு துளிக்கும் மதிப்பு உண்டு.",
+      "en": "The Cauvery rises in Karnataka and flows into Tamil Nadu. If rain upstream is poor, less water reaches the delta — so every drop counts."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "ட்ரோனும் துல்லிய வேளாண்மையும்",
+    "en": "Drones and precision farming"
+   },
+   "text": {
+    "ta": "வயலின் மேல் பறக்கும் ட்ரோன்கள் பயிரின் படங்களை எடுத்து எந்தப் பகுதியில் தண்ணீரோ சத்தோ குறைகிறது என்று காட்டலாம்; இந்தியாவின் பல பகுதிகளில் மருந்து தெளிக்க ட்ரோன்கள் ஏற்கெனவே பயன்படுகின்றன (எ.கா. அரசின் நமோ ட்ரோன் தீதி திட்டம்). 'துல்லிய வேளாண்மை' என்றால் வயலின் ஒவ்வொரு பகுதிக்கும் தேவையான அளவு மட்டும் தண்ணீர், உரம் கொடுப்பது. ஆனால் இந்த முறைகள் எவ்வளவு விரைவில் சிறு விவசாயிகளுக்குக் கிடைக்கும் என்பது இன்னும் உறுதியில்லை.",
+    "en": "Drones flying over a field can photograph the crop and show which part is short of water or nutrients; drones are already used for spraying in many parts of India, for example under the government’s Namo Drone Didi scheme. 'Precision farming' means giving each part of a field only the water and fertiliser it needs. But how soon these methods will reach small farmers is still uncertain."
+   },
+   "risk": {
+    "ta": "தெளிக்கும் மருந்து காற்றில் பரவி மனிதருக்கும் பிற பயிர்களுக்கும் தீங்கு செய்யலாம்; கருவிகள் விலை அதிகம்; வயல் பற்றிய தகவல் யாருக்குச் சொந்தம் என்ற கேள்வி; சிறு விவசாயிகள் பின்தங்கலாம்.",
+    "en": "Sprays can drift in the air and harm people and other crops; the equipment is costly; there is the question of who owns the data about a field; small farmers may be left behind."
+   },
+   "fix": {
+    "ta": "இந்தியாவில் ட்ரோன்கள் பதிவு, பயிற்சி பெற்ற இயக்குபவர் போன்ற அரசு விதிகளுக்கு உட்பட்டவை (எ.கா. Drone Rules, 2021); விதிகள் மாறும் என்பதால் அதிகாரப்பூர்வ தளத்தில் சரிபார். விவசாயிகள் குழுவாகக் கருவிகளைப் பகிரலாம்; மருந்து லேபிள் வழிமுறைகளையும் பாதுகாப்பையும் பின்பற்ற வேண்டும்.",
+    "en": "In India drones come under government rules such as registration and trained operators (e.g. the Drone Rules, 2021); rules change, so check an official site. Farmers can share equipment as a group; label instructions and safety must be followed for any spray."
+   },
+   "q": {
+    "ta": "ஒரு கிராமத்தில் ஒரே ஒரு ட்ரோன் இருந்தால் அதை எல்லா விவசாயிகளும் நியாயமாகப் பயன்படுத்த என்ன ஏற்பாடு செய்யலாம்?",
+    "en": "If a village has just one drone, what arrangement would let all farmers use it fairly?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "உணவு வீணாவதைக் குறைப்போம்",
+    "en": "Cutting food waste"
+   },
+   "text": {
+    "ta": "ஒரு தட்டுச் சோறு விளைய நீர், உழைப்பு, மின்சாரம், எரிபொருள் செலவாகியிருக்கிறது. உணவை வீணாக்கினால் இவை எல்லாமே வீணாகின்றன. வீட்டில் செய்யக்கூடியவை: தேவையான அளவு சமை; மீந்ததைச் சரியாகச் சேமித்துப் பாதுகாப்பாகப் பயன்படுத்து; காய்கறித் தோல், மீந்த காய்களை உரமாக்கு; அதிகமாக இருப்பதைப் பகிர்ந்துகொள்.\n\nஎண்ணிப் பார்: ஒரு வீட்டில் தினமும் **150 கிராம்** சமைத்த உணவு வீணாகிறது என்று வைத்துக்கொள் (கற்பனை எண்). ஓர் ஆண்டில் 150 × 365 = 54,750 கிராம் = **54.75 கிலோ**. அப்படிப்பட்ட 500 வீடுகள் உள்ள ஓர் ஊரில்: 54.75 × 500 = 27,375 கிலோ — சுமார் **27 டன்**!",
+    "en": "Growing a plate of rice took water, labour, electricity and fuel. Wasting food wastes all of these. At home you can: cook the amount you need; store leftovers properly and use them safely; compost vegetable peels and scraps; share what is in excess.\n\nDo the sum: suppose a home wastes **150 grams** of cooked food a day (an imaginary figure). In a year that is 150 × 365 = 54,750 g = **54.75 kg**. In a village of 500 such homes: 54.75 × 500 = 27,375 kg — about **27 tonnes**!"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு வீட்டில் தினமும் **150 கிராம்** உணவு வீணாகிறது. ஓர் ஆண்டில் (365 நாள்) எத்தனை கிலோ வீணாகும்?",
+    "en": "A home wastes **150 grams** of food every day. How many kilograms is wasted in a year (365 days)?"
+   },
+   "answer": 54.75,
+   "tol": 0.05,
+   "unit": {
+    "ta": "கிலோ",
+    "en": "kg"
+   },
+   "hint": {
+    "ta": "150 × 365 கிராம்; பிறகு 1000-ஆல் வகு",
+    "en": "150 × 365 grams; then divide by 1000"
+   },
+   "solution": {
+    "ta": "150 × 365 = 54,750 கிராம் ÷ 1000 = **54.75 கிலோ**. (ஒரு கிலோ உணவுக்கு ₹60 செலவு என்று கற்பனை செய்தால் ≈ ₹3,285.)",
+    "en": "150 × 365 = 54,750 g ÷ 1000 = **54.75 kg**. (If we imagine food costing ₹60 a kilo, that is about ₹3,285.)"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "நியாயமான விலையும் விவசாயிகளின் குரலும்",
+    "en": "Fair prices and farmers’ voices"
+   },
+   "text": {
+    "ta": "விவசாயியிடமிருந்து காய்கறி வாங்கும் விலைக்கும், நாம் கடையில் கொடுக்கும் விலைக்கும் இடையில் வியாபாரிகள், போக்குவரத்து, சேமிப்பு எனப் பல படிகள் உள்ளன. அரசு சில பயிர்களுக்குக் **குறைந்தபட்ச ஆதரவு விலையை** (MSP) அறிவிக்கிறது; தற்போதைய விலைகளை அதிகாரப்பூர்வ தளங்களில் பார். உழவர் சந்தைகளில் விவசாயிகள் நேரடியாக விற்கிறார்கள். **விவசாயிகள் உற்பத்தியாளர் அமைப்புகள்** (FPO), விவசாயிகள் சேர்ந்து விற்கவும் வாங்கவும் உதவுகின்றன. எதிர்காலத்தில் போன் வழி விலை அறிவிப்புகள், நேரடி இணைய விற்பனை போன்றவை முயற்சிக்கப்படுகின்றன.",
+    "en": "Between the price a farmer gets for vegetables and the price we pay in the shop lie many steps: traders, transport, storage. The government announces a **minimum support price** (MSP) for some crops; check current prices on official sites. In farmers’ markets (உழவர் சந்தை) farmers sell directly; **farmer producer organisations** (FPOs) help farmers sell and buy together. In future, phone-based price alerts and direct online selling are being tried."
+   },
+   "risk": {
+    "ta": "விலை திடீரெனச் சரிந்தால் விவசாயி நஷ்டப்படலாம்; சேமிக்க வசதி இல்லாவிட்டால் விளைச்சல் வீணாகலாம்; முடிவுகளில் விவசாயிகளின் குரல் கேட்கப்படாமல் போகலாம்.",
+    "en": "If prices crash a farmer may suffer a loss; without storage the harvest may rot; farmers’ voices may go unheard in decisions."
+   },
+   "fix": {
+    "ta": "சேமிப்புக் கிடங்குகள், நேரடி விற்பனை, விவசாயிகள் குழுக்கள், வெளிப்படையான விலைத் தகவல்; நீர், விதை, சந்தை பற்றிய முடிவுகளில் விவசாயிகளையும் உள்ளூர் மக்களையும் கலந்தாலோசித்தல் (எ.கா. கிராம சபை விவாதங்கள்).",
+    "en": "Storage facilities, direct sales, farmers’ groups, transparent price information; consulting farmers and local people on decisions about water, seed and markets (e.g. gram sabha discussions)."
+   },
+   "q": {
+    "ta": "ஒரு விவசாயி 1 கிலோ தக்காளியை ₹10-க்கு விற்கிறார்; நீ கடையில் ₹30-க்கு வாங்குகிறாய் (கற்பனை). நடுவில் உள்ள ₹20 எங்கெல்லாம் செல்லக்கூடும்? விவசாயிக்கு அதிகம் கிடைக்க என்ன செய்யலாம்?",
+    "en": "A farmer sells 1 kg of tomatoes for ₹10 and you buy it in a shop for ₹30 (imaginary). Where might the ₹20 in between go? What could help the farmer get more?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "வீட்டின் ஒரு நாள் தண்ணீர்",
+    "en": "A day of water at home"
+   },
+   "text": {
+    "ta": "ஒரு வாளியில் எத்தனை லிட்டர் நீர் நிரம்புகிறது என்று அளந்துகொள் (ஒரு லிட்டர் பாட்டிலால் எத்தனை முறை ஊற்றினால் நிறையும் என்று எண்ணு). பிறகு ஒரு நாள் முழுவதும், வீட்டில் எத்தனை வாளி/குடம் நீர் குளிக்க, துவைக்க, சமைக்க, கழிவறைக்கு, குடிக்கப் பயன்படுகிறது என்று குறித்துக்கொள். மொத்த லிட்டரை வீட்டில் உள்ளவர் எண்ணிக்கையால் வகு. எங்கே நீரைச் சேமிக்கலாம் என்று குடும்பமாகப் பேசி ஒரு மாற்றத்தை முயற்சி செய்; ஒரு வாரம் கழித்து மீண்டும் அளந்து பார்.",
+    "en": "Measure how many litres fill one bucket (count how many 1-litre bottles it takes). Then, for a whole day, note how many buckets or pots of water the home uses for bathing, washing, cooking, the toilet and drinking. Divide the total litres by the number of people at home. Talk as a family about where water could be saved, try one change, and measure again a week later."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "பாட்டிலில் மழைமானி",
+    "en": "A bottle rain gauge"
+   },
+   "text": {
+    "ta": "பெரியவரின் உதவியுடன் நேரான பக்கங்கள் கொண்ட ஒரு பிளாஸ்டிக் பாட்டிலின் மேல்பகுதியை வெட்டி எடு. கீழே சில சிறு கற்களைப் போட்டு, சமமான தட்டைப் பகுதி வரை நீர் நிரப்பு; அந்த மட்டத்திலிருந்து அளவுகோலால் (ஸ்கேல்) அளக்கத் தொடங்கு. திறந்த வெளியில் நிலையாக வை. மழை பெய்ததும் நீரின் ஆழத்தை **மில்லிமீட்டரில்** அளந்து நாள்தோறும் குறித்துக்கொள்.\n\nஅந்த எண் அந்த நாளின் மழை (mm). 1 m² பரப்பில் 1 mm = 1 லிட்டர். எடுத்துக்காட்டு: 10 mm மழை, 50 m² கூரை, 0.8 பங்கு சேர்ந்தால் 50 × 10 × 0.8 = **400 லிட்டர்**. உன் வீட்டுக் கூரைக்குக் கணக்கிடு!",
+    "en": "With an adult’s help, cut the top off a plastic bottle with straight sides. Put a few small pebbles in the bottom and fill water up to the flat part; start measuring with a ruler from that level. Place it steadily in the open. After rain, measure the depth of water in **millimetres** and note it each day.\n\nThat number is the day’s rainfall (mm). On 1 m², 1 mm = 1 litre. Example: 10 mm of rain, a 50 m² roof, 0.8 collected: 50 × 10 × 0.8 = **400 litres**. Calculate it for your own roof!"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "நிலத்தடி நீர் ஏன் குறைகிறது? ஓர் ஊர் அதைத் தடுக்க இரண்டு வழிகளைச் சொல்.",
+    "en": "Why does groundwater fall? Name two ways a village can prevent it."
+   },
+   "keywords": [
+    {
+     "ta": "நிலத்தடி நீர்",
+     "en": "groundwater",
+     "alt": [
+      "நிலத்தடி",
+      "groundwater",
+      "ground water"
+     ]
+    },
+    {
+     "ta": "இறைப்பு",
+     "en": "pumping",
+     "alt": [
+      "இறை",
+      "எடுப்பு",
+      "pump",
+      "செலவு",
+      "withdraw"
+     ]
+    },
+    {
+     "ta": "மழைநீர் சேகரிப்பு",
+     "en": "rainwater harvesting",
+     "alt": [
+      "சேகரிப்பு",
+      "மழைநீர்",
+      "harvest",
+      "ஊறல்",
+      "recharge",
+      "சொட்டு நீர்",
+      "drip"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "மழையால் நிலத்தடிக்குள் ஊறும் நீரைவிட, மோட்டார்களால் இறைக்கும் நீர் அதிகமானால் நிலத்தடி நீர் குறைகிறது. வரவைக் கூட்ட மழைநீர் சேகரிப்பு, ஏரி பராமரிப்பு; செலவைக் குறைக்க சொட்டு நீர், மூடாக்கு, குறைந்த நீர் பயிர்கள் (சிறுதானியம்) ஆகியவை உதவும்.",
+    "en": "Groundwater falls when the water pumped out is more than the water that seeps in from rain. To raise the deposits: rainwater harvesting and looking after tanks; to cut withdrawals: drip irrigation, mulching and lower-water crops such as millets."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "நீரின் மூலம் மழை; ஆறு, ஏரி, நிலத்தடி நீர் ஆகியவை அதன் சேமிப்பிடங்கள்.",
+     "en": "Rain is the source; rivers, tanks and groundwater are its stores."
+    },
+    {
+     "ta": "நிலத்தடி நீர் = சேமிப்புக் கணக்கு: இறைப்பு > ஊறல் என்றால் மட்டம் குறையும்.",
+     "en": "Groundwater is a savings account: pumping > seepage means the level falls."
+    },
+    {
+     "ta": "மழைநீர் சேகரிப்பு: நீர் (லிட்டர்) = கூரைப் பரப்பு (m²) × மழை (mm) × சேரும் பங்கு. தமிழ்நாடு 2003-இல் இதைக் கட்டடங்களுக்குக் கட்டாயமாக்கியது.",
+     "en": "Rainwater harvesting: water (litres) = roof area (m²) × rain (mm) × share collected. Tamil Nadu made it compulsory for buildings in 2003."
+    },
+    {
+     "ta": "சொட்டு நீர், மூடாக்கு, மண் ஈர உணரி ஆகியவை பெரும்பாலும் குறைவான நீரில் பயிர் வளர்க்க உதவுகின்றன.",
+     "en": "Drip irrigation, mulching and soil-moisture sensors often help grow crops with less water."
+    },
+    {
+     "ta": "சிறுதானியங்கள், பயிர் பல்வகைமை, ஆரோக்கியமான மண் ஆகியவை உணவுப் பாதுகாப்பை வலுப்படுத்தும்.",
+     "en": "Millets, crop diversity and healthy soil strengthen food security."
+    },
+    {
+     "ta": "உணவை வீணாக்காதது நீரையும் சேமிக்கிறது; நியாயமான விலையும் விவசாயிகளின் குரலும் எதிர்கால வேளாண்மைக்கு அவசியம்.",
+     "en": "Not wasting food saves water too; fair prices and farmers’ voices matter for the future of farming."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "ஓர் ஊரில் நிலத்தடி நீர் குறைவதற்கான முக்கியக் காரணம் எது?",
+    "en": "What is the main reason groundwater falls in a village?"
+   },
+   "options": [
+    {
+     "ta": "நிலத்தடி நீர் தானாக ஆவியாகிவிடுகிறது",
+     "en": "Groundwater evaporates by itself"
+    },
+    {
+     "ta": "இறைக்கும் நீர், ஊறும் நீரைவிட அதிகமாக இருப்பது",
+     "en": "More water is pumped out than seeps in"
+    },
+    {
+     "ta": "மண் நீரை விரும்பாதது",
+     "en": "Soil dislikes water"
+    },
+    {
+     "ta": "ஏரிகள் அதிகம் இருப்பது",
+     "en": "Having too many tanks"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "வரவு குறைவாகவும் செலவு அதிகமாகவும் இருந்தால் எந்தக் கணக்கும் குறையும்; நிலத்தடி நீரும் அப்படியே. ஏரிகள் உண்மையில் ஊறலுக்கு உதவும்.",
+    "en": "Any account falls when deposits are low and withdrawals high; so does groundwater. Tanks in fact help seepage."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு சதுர மீட்டரில் 1 மில்லிமீட்டர் மழை பெய்தால் எவ்வளவு நீர் விழுகிறது?",
+    "en": "How much water falls when 1 millimetre of rain falls on one square metre?"
+   },
+   "options": [
+    {
+     "ta": "1 மில்லிலிட்டர்",
+     "en": "1 millilitre"
+    },
+    {
+     "ta": "10 லிட்டர்",
+     "en": "10 litres"
+    },
+    {
+     "ta": "100 லிட்டர்",
+     "en": "100 litres"
+    },
+    {
+     "ta": "1 லிட்டர்",
+     "en": "1 litre"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "1 m² = 1000 mm × 1000 mm; ஆழம் 1 mm என்றால் 1,000,000 mm³ = 1000 cm³ = 1 லிட்டர்.",
+    "en": "1 m² = 1000 mm × 1000 mm; at 1 mm depth that is 1,000,000 mm³ = 1000 cm³ = 1 litre."
+   }
+  },
+  {
+   "q": {
+    "ta": "தமிழ்நாட்டில் கட்டடங்களுக்கு மழைநீர் சேகரிப்பு அமைப்பு கட்டாயமாக்கப்பட்ட ஆண்டு எது?",
+    "en": "In which year did Tamil Nadu make rainwater harvesting structures compulsory for buildings?"
+   },
+   "options": [
+    {
+     "ta": "2003",
+     "en": "2003"
+    },
+    {
+     "ta": "1983",
+     "en": "1983"
+    },
+    {
+     "ta": "2023",
+     "en": "2023"
+    },
+    {
+     "ta": "1950",
+     "en": "1950"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "2003-இல் ஓர் அவசரச் சட்டம் மூலம் இது கட்டாயமாக்கப்பட்டது.",
+    "en": "It was made compulsory by an ordinance in 2003."
+   }
+  },
+  {
+   "q": {
+    "ta": "சொட்டு நீர்ப்பாசனம் ஏன் நீரை மிச்சப்படுத்துகிறது?",
+    "en": "Why does drip irrigation save water?"
+   },
+   "options": [
+    {
+     "ta": "செடிக்கு நீரே தேவையில்லை என்பதால்",
+     "en": "Because plants need no water"
+    },
+    {
+     "ta": "நீர் அதிகம் ஆவியாகும்படி செய்வதால்",
+     "en": "Because it makes more water evaporate"
+    },
+    {
+     "ta": "வேர் அருகில் மெதுவாகத் தருவதால் ஆவியாதலும் வீணாக ஓடுவதும் குறைகின்றன",
+     "en": "It gives water slowly near the roots, reducing evaporation and run-off"
+    },
+    {
+     "ta": "மழையை நிறுத்துவதால்",
+     "en": "Because it stops the rain"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "தேவையான இடத்துக்கு மட்டும் நீர் செல்கிறது. சேமிப்பின் அளவு பயிர், மண், முறையைப் பொறுத்தது.",
+    "en": "Water goes only where it is needed. The amount saved depends on crop, soil and method."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஐக்கிய நாடுகள் சபை எந்த ஆண்டை சர்வதேச சிறுதானிய ஆண்டாக அறிவித்தது?",
+    "en": "Which year did the United Nations declare the International Year of Millets?"
+   },
+   "options": [
+    {
+     "ta": "2013",
+     "en": "2013"
+    },
+    {
+     "ta": "2023",
+     "en": "2023"
+    },
+    {
+     "ta": "2030",
+     "en": "2030"
+    },
+    {
+     "ta": "2003",
+     "en": "2003"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "2023 சர்வதேச சிறுதானிய ஆண்டு.",
+    "en": "2023 was the International Year of Millets."
+   }
+  },
+  {
+   "q": {
+    "ta": "பயறு வகைகளைப் பயிரிடுவது அடுத்த பயிருக்கு ஏன் உதவுகிறது?",
+    "en": "Why does growing pulses help the next crop?"
+   },
+   "options": [
+    {
+     "ta": "பயறு மண்ணின் நீரை முழுதும் உறிஞ்சுவதால்",
+     "en": "Pulses soak up all the soil water"
+    },
+    {
+     "ta": "பயறு மண்ணை எரிப்பதால்",
+     "en": "Pulses burn the soil"
+    },
+    {
+     "ta": "பயறு பூச்சிகளை வளர்ப்பதால்",
+     "en": "Pulses breed pests"
+    },
+    {
+     "ta": "வேர்களில் உள்ள பாக்டீரியாக்கள் காற்றிலுள்ள நைட்ரஜனை மண்ணுக்குச் சேர்ப்பதால்",
+     "en": "Bacteria in their roots add nitrogen from the air to the soil"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "நைட்ரஜன் பயிர்களுக்கு முக்கியச் சத்து; இதனால் பயிர்ச் சுழற்சியில் பயறு பயன்படுகிறது.",
+    "en": "Nitrogen is a key plant nutrient, which is why pulses are useful in crop rotation."
+   }
+  },
+  {
+   "q": {
+    "ta": "உணவை வீணாக்குவது தண்ணீரையும் வீணாக்குவது ஏன்?",
+    "en": "Why does wasting food also waste water?"
+   },
+   "options": [
+    {
+     "ta": "உணவு குப்பையில் இருந்தால் குழாய் ஒழுகும் என்பதால்",
+     "en": "Because taps leak when food is in the bin"
+    },
+    {
+     "ta": "உணவில் தண்ணீர் மட்டுமே இருப்பதால்",
+     "en": "Because food is only water"
+    },
+    {
+     "ta": "அந்த உணவை விளைவிக்கச் செலவான நீரும் உழைப்பும் சேர்ந்தே வீணாகின்றன",
+     "en": "The water and effort used to grow that food are wasted along with it"
+    },
+    {
+     "ta": "அது ஒரு தொடர்பும் இல்லை",
+     "en": "There is no connection"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "பயிர் விளைய நீர் தேவை; உணவை வீணாக்கினால் அதற்காகச் செலவான நீரும் வீணாகிறது.",
+    "en": "Crops need water to grow; wasting food wastes the water that went into it."
+   }
+  }
+ ]
+}

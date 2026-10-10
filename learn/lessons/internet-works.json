@@ -1,0 +1,610 @@
+{
+ "id": "internet-works",
+ "minutes": 30,
+ "title": {
+  "ta": "இணையம் எப்படி வேலை செய்கிறது?",
+  "en": "How does the internet work?"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "கணினி வலையமைப்பு மற்றும் இணையம்; சைபர் பாதுகாப்பு",
+    "en": "Computer networks, the internet and cyber safety"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "ஊடகம் மற்றும் தகவல் எழுத்தறிவு — பாதுகாப்பான இணையப் பயன்பாடு",
+    "en": "Media and information literacy — safe use of the internet"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "செய்தி packets-ஆக உடைந்து, வெவ்வேறு பாதையில் சென்று, மீண்டும் சேர்வதை விளக்க",
+   "en": "Explain how a message is cut into packets, travels different routes and is put back together"
+  },
+  {
+   "ta": "IP முகவரி, பெயர், DNS, server, router ஆகியவற்றின் வேலையைச் சொல்ல",
+   "en": "Say what an IP address, a name, DNS, a server and a router do"
+  },
+  {
+   "ta": "Wi-Fi, மொபைல் டவர், கேபிள்கள் ஆகியவற்றின் பங்கைப் புரிந்துகொள்ள",
+   "en": "Understand the role of Wi-Fi, mobile towers and cables"
+  },
+  {
+   "ta": "https பூட்டு எதைக் காட்டும், எதைக் காட்டாது என்பதைத் தெரிந்துகொள்ள",
+   "en": "Know what the https lock does and does not tell you"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "அருண் நாகர்கோவிலில் இருக்கிறான். துபாயில் வேலை செய்யும் அவன் மாமாவுக்கு ஒரு மெசேஜும் ஒரு புகைப்படமும் அனுப்பினான். ஒரு நொடிக்குள் \"வந்துவிட்டது\" என்று பதில் வந்தது. கடலும் நாடுகளும் தாண்டி இவ்வளவு வேகமாக எப்படி?\n\nஇது உனக்கு ஏன் முக்கியம்? இதைப் புரிந்துகொண்டால், இணையம் ஏன் சில நேரம் மெதுவாகிறது, உன் தகவலை யாரால் பார்க்க முடியும், எந்த இணையதளத்தை நம்பலாம் என்பதை நீயே முடிவு செய்ய முடியும். மோசடியிலிருந்தும் தப்பலாம்.\n\nகேள்வி: ஒரு புகைப்படம் எப்படி நாகர்கோவிலிலிருந்து துபாய்க்குப் போகிறது?",
+    "en": "Arun lives in Nagercoil. He sent a message and a photo to his uncle, who works in Dubai. Within a second the reply came: \"Got it.\" Across seas and countries — how can it be so fast?\n\nWhy does this matter to you? If you understand it, you can decide for yourself why the internet is sometimes slow, who can see your information, and which websites to trust. It can also help you stay safe from fraud.\n\nThe question: how does a photo travel from Nagercoil to Dubai?"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு நீண்ட மெசேஜை அனுப்பும்போது, அது இணையத்தில் எப்படிப் பயணிக்கிறது?",
+    "en": "When you send a long message, how does it travel across the internet?"
+   },
+   "options": [
+    {
+     "ta": "முழு மெசேஜும் ஒரே துண்டாக, ஒரே கம்பியில்",
+     "en": "The whole message as one piece along one wire"
+    },
+    {
+     "ta": "சிறு சிறு துண்டுகளாக (packets) உடைந்து, வெவ்வேறு பாதைகளில்",
+     "en": "Cut into small pieces (packets) that may take different routes"
+    },
+    {
+     "ta": "ஒவ்வோர் எழுத்தாக, ஒரே வரிசையில், ஒரே பாதையில்",
+     "en": "One letter at a time, in order, along one route"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "செய்தி சிறு துண்டுகளாக (packets) உடைக்கப்படுகிறது. ஒவ்வொரு packet-இலும் எங்கே போக வேண்டும், எத்தனாவது துண்டு என்ற தகவல் இருக்கும். பாதையில் நெரிசல் இருந்தால் வேறு பாதையில் செல்லும். இறுதியில் எண் வரிசைப்படி சேர்க்கப்படும். உன் ஊகம் வேறாக இருந்தாலும் பரவாயில்லை — அடுத்து நீயே இதைச் சோதிக்கப் போகிறாய்.",
+    "en": "The message is cut into small packets. Each packet carries where it must go and which piece number it is. If a route is jammed, packets go by another one. At the end they are put back in number order. If you guessed differently, that is fine — you will test it yourself next."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "packets",
+   "params": {
+    "text": "Hello from Tamil Nadu"
+   },
+   "title": {
+    "ta": "உன் செய்தியை packets-ஆக்கு",
+    "en": "Turn your message into packets"
+   },
+   "text": {
+    "ta": "கீழே உள்ள பெட்டியில் ஒரு செய்தியை எழுது (அல்லது அப்படியே விடு). பிறகு **அனுப்பு** பொத்தானை அழுத்து. இதில் ஒவ்வொரு packet-இலும் 3 எழுத்துகள் மட்டும் இருக்கும். உண்மையில் ஒரு packet-இல் ஆயிரத்துக்கும் மேற்பட்ட எழுத்துகள் இருக்கலாம்; இது ஒரு எளிய மாதிரி. 4–5 முறை அழுத்து; \"ஒரு packet தொலைந்துவிடட்டும்\" என்பதையும் தேர்ந்தெடுத்துப் பார்.",
+    "en": "Type a message in the box below (or leave it) and press **Send**. Here each packet holds only 3 letters (in reality a packet can hold over a thousand letters; this is a simple model). Press it 4–5 times, and also tick \"Let one packet get lost\"."
+   },
+   "q": {
+    "ta": "packets கலைந்த வரிசையில் வந்தாலும் இறுதிச் செய்தி எப்போதும் சரியாக இருக்கிறது. ஏன்?",
+    "en": "The packets arrive mixed up, yet the final message is always right. Why?"
+   },
+   "options": [
+    {
+     "ta": "ஒவ்வொரு packet-இலும் ஒரு எண் உள்ளது; பெறுபவர் அந்த எண் வரிசைப்படி சேர்க்கிறார்",
+     "en": "Each packet carries a number; the receiver puts them back in that number order"
+    },
+    {
+     "ta": "அதிர்ஷ்டத்தால்",
+     "en": "By luck"
+    },
+    {
+     "ta": "பெறுபவர் எழுத்துகளை ஊகித்துவிடுகிறார்",
+     "en": "The receiver guesses the letters"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "ஒவ்வொரு packet-க்கும் ஒரு வரிசை எண் உண்டு (#1, #2…). பெறும் கணினி அந்த எண்களைப் பார்த்துச் சேர்க்கிறது. ஒரு packet தொலைந்தால் \"#5 வரவில்லை\" என்று அறிந்து, அதை மட்டும் மீண்டும் அனுப்பச் சொல்கிறது. முழுச் செய்தியையும் மீண்டும் அனுப்பத் தேவையில்லை.",
+    "en": "Every packet has a sequence number (#1, #2…). The receiving computer uses those numbers to assemble the message. If one packet is lost it notices \"#5 is missing\" and asks for just that one again. The whole message need not be sent again."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "துண்டுகள் ஏன்? router என்ன செய்கிறது?",
+    "en": "Why pieces? What does a router do?"
+   },
+   "text": {
+    "ta": "ஒரு நீண்ட கடிதத்தை நினைத்துக்கொள். அதன் பக்கங்களில் 1, 2, 3 என்று எண் எழுதி, தனித்தனி உறைகளில் போட்டு அனுப்பினால், அவை வெவ்வேறு பேருந்துகளில் போகலாம். எல்லாம் வந்த பிறகு எண் வரிசையில் அடுக்கலாம். இணையமும் இப்படித்தான் — **packet** என்பது எண்ணிடப்பட்ட ஒரு சிறு துண்டு.\n\nஇதனால் ஒரு பாதை நிரம்பியிருந்தால் மற்றொரு பாதையைப் பயன்படுத்தலாம்; ஒரே பெரிய செய்தி எல்லா வழிகளையும் அடைத்துக்கொள்ளாது.\n\nபாதையில் **router** என்ற கருவிகள் சந்திப்புகள் போல நிற்கின்றன. ஒவ்வொரு packet-இன் முகவரியையும் பார்த்து, \"அடுத்து எந்தச் சாலை?\" என்று திருப்பிவிடுகின்றன. பேருந்து நிலையத்தில் \"மதுரை பேருந்து இந்தப் பக்கம்\" என்று காட்டுபவர் போல.",
+    "en": "Take a long letter. Number its pages 1, 2, 3, put each page in a separate envelope and post them: they may go on different buses. When all arrive, arrange them in number order. The internet works the same way — a **packet** is a small numbered piece.\n\nThis way, if one route is crowded, packets can use another; one big message does not block all the roads.\n\nAlong the way, devices called **routers** stand like junctions. A router looks at each packet's address and decides \"which road next?\" — like the person at a bus stand pointing \"the Madurai bus goes this way\"."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முகவரியும் பெயரும்: DNS",
+    "en": "Address and name: DNS"
+   },
+   "text": {
+    "ta": "இணையத்தில் இணைந்த ஒவ்வொரு கருவிக்கும் ஒரு எண் முகவரி உண்டு — **இணைய முகவரி (IP address)**. அது இப்படி இருக்கும்: 203.0.113.25 (இது ஒரு எடுத்துக்காட்டு எண்). இது உன் வீட்டு முகவரி போன்றது; packet சரியாகப் போய்ச் சேர இது வேண்டும்.\n\nஆனால் எண்களை நினைவில் வைப்பது கடினம். உன் போனில் \"அம்மா\" என்று பெயர் சேமித்திருக்கிறாய், எண்ணை நினைவில் வைத்திருக்கவில்லை அல்லவா? அதுபோல இணையதளத்துக்கு ஒரு **பெயர்** உண்டு. நீ அந்தப் பெயரை உள்ளிட்டால், ஒரு **தொலைபேசி புத்தகம்** போன்ற அமைப்பு (இதன் பெயர் **DNS**) அந்தப் பெயருக்குரிய எண்ணைச் சொல்கிறது. பிறகு உன் கருவி அந்த எண்ணுக்கு packets அனுப்புகிறது.\n\nஇணையதளத்தின் தகவலைச் சேமித்து வைத்து, யாராவது கேட்டவுடன் அனுப்பும், எப்போதும் இயங்கும் கணினிக்கு **server** என்று பெயர்.",
+    "en": "Every device connected to the internet has a numeric address — an **IP address**. It looks like this: 203.0.113.25 (an example number). It is like your home address; packets need it to reach the right place.\n\nBut numbers are hard to remember. In your phone you saved \"Amma\" as a name, without remembering the number — right? In the same way a website has a **name**. When you type the name, a system like a **phone book** (called **DNS**) tells your device the number that belongs to that name. Then your device sends packets to that number.\n\nA computer that is always on, stores a website's information and sends it when asked, is called a **server**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "Wi-Fi, மொபைல் டவர், கேபிள்கள்",
+    "en": "Wi-Fi, mobile towers and cables"
+   },
+   "text": {
+    "ta": "**Wi-Fi** என்பது உன் போனுக்கும் வீட்டு router-க்கும் இடையிலான சில பத்து மீட்டர் தூரத்துக்கான வானொலி அலை இணைப்பு. அந்த router-உம் ஒரு கம்பி அல்லது ஒளி இழை (fibre) மூலம்தான் வெளி உலகுக்கு இணைகிறது. **மொபைல் டேட்டாவில்** உன் போன் அருகிலுள்ள டவருடன் வானொலி அலையில் பேசுகிறது; டவரும் பெரும்பாலும் ஒளி இழையால் வலையமைப்பில் இணைகிறது.\n\nஅதாவது **கடைசிச் சில மீட்டர் அல்லது கிலோமீட்டர்தான் வானொலி; உலகம் முழுவதும் இணைப்பது கேபிள்கள்.** ஒளி இழை கேபிள்களில் தகவல் ஒளியின் மினுக்கல்களாகப் போகிறது.\n\nகண்டங்களுக்கு இடையே செல்லும் இணையத் தகவலின் மிகப் பெரும்பகுதி **கடலுக்கடியில் உள்ள கேபிள்கள்** வழியாகச் செல்கிறது; செயற்கைக்கோள்கள் ஒரு சிறிய பங்கையே சுமக்கின்றன. இந்தியாவில் இத்தகைய கேபிள்கள் கரையைத் தொடும் முக்கிய இடங்களில் சென்னையும் ஒன்று. கப்பல் நங்கூரம், மீன்பிடி வலை போன்றவற்றால் சில நேரம் கேபிள் சேதமடையும்; அதைப் பழுதுபார்க்கும் சிறப்புக் கப்பல்கள் உள்ளன.",
+    "en": "**Wi-Fi** is a radio link over a short distance (tens of metres) between your phone and the router at home. That router itself connects to the outside world through a wire or an optical fibre. With **mobile data**, your phone talks by radio to a nearby tower; the tower too is mostly connected to the network by optical fibre.\n\nSo **radio covers only the last few metres or kilometres; cables connect the world.** In fibre-optic cables, information travels as flickers of light.\n\nThe great majority of internet traffic between continents goes through **undersea cables**; satellites carry only a small part. Chennai is one of the main places in India where such cables come ashore. Ship anchors and fishing nets can sometimes damage a cable; special ships exist to repair them."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "ஒரு பாடல் எத்தனை packets?",
+    "en": "How many packets is a song?"
+   },
+   "q": {
+    "ta": "3 MB அளவுள்ள ஒரு பாடலை அனுப்பும்போது, ஒரு packet-இல் சுமார் 1,500 byte (தோராயம்) போகிறது என்று வைத்துக்கொள்வோம். எத்தனை packets?",
+    "en": "When sending a 3 MB song, suppose a packet carries about 1,500 bytes (approximately). How many packets?"
+   },
+   "steps": [
+    {
+     "ta": "3 MB = 30,00,000 byte (1 MB ≈ 10,00,000 byte என்று கொள்வோம்).",
+     "en": "3 MB = 3,000,000 bytes (taking 1 MB ≈ 1,000,000 bytes)."
+    },
+    {
+     "ta": "30,00,000 ÷ 1,500 = 2,000.",
+     "en": "3,000,000 ÷ 1,500 = 2,000."
+    },
+    {
+     "ta": "ஒவ்வொன்றுக்கும் எண் இருப்பதால், 2,000 packets கலைந்து வந்தாலும் சரியான வரிசையில் சேர்க்க முடியும்.",
+     "en": "Since each has a number, the 2,000 packets can be put in the right order even if they arrive mixed up."
+    }
+   ],
+   "answer": {
+    "ta": "சுமார் 2,000 packets (உண்மையான அளவு மாறுபடலாம்).",
+    "en": "About 2,000 packets (the real size can vary)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேலே உள்ள மாதிரியில் \"Hello from Tamil Nadu\" (21 எழுத்துகள், இடைவெளிகளும் சேர்த்து) 3-3 எழுத்தாகப் பிரிக்கப்பட்டால் எத்தனை packets?",
+    "en": "In the widget above, \"Hello from Tamil Nadu\" (21 characters including spaces) is cut into 3-letter pieces. How many packets?"
+   },
+   "answer": 7,
+   "tol": 0,
+   "hint": {
+    "ta": "21 ÷ 3",
+    "en": "21 ÷ 3"
+   },
+   "solution": {
+    "ta": "21 ÷ 3 = 7 packets.",
+    "en": "21 ÷ 3 = 7 packets."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "https பூட்டு: என்ன சொல்கிறது, என்ன சொல்லவில்லை",
+    "en": "The https lock: what it says and what it does not"
+   },
+   "text": {
+    "ta": "முகவரிப் பட்டையில் பூட்டுப் படமும் **https** என்பதும் இருந்தால், உன் கருவிக்கும் அந்த இணையதளத்துக்கும் இடையே போகும் உரையாடல் **குழப்பப்பட்டு (scrambled)** அனுப்பப்படுகிறது. இதனால், நடுவழியில் உள்ளவர்கள் (எ.கா. அதே Wi-Fi-ஐப் பயன்படுத்தும் வேறொருவர்) உள்ளடக்கத்தைப் படிக்க முடியாது.\n\n**ஆனால் பூட்டு என்பது அந்த இணையதளம் நேர்மையானது என்பதற்குச் சான்று அல்ல.** மோசடி இணையதளங்களுக்கும் பூட்டு இருக்கலாம். எனவே பெயர் சரியாக எழுதப்பட்டுள்ளதா என்று பார். செய்தியில் வந்த இணைப்பைத் தொட்டு, கடவுச்சொல், OTP, வங்கி விவரம் ஆகியவற்றைக் கொடுக்காதே.\n\n**கடவுச்சொல்:** நீளமாக, வேறு இடங்களில் பயன்படுத்தாத ஒன்றாக வை. **OTP:** யாரிடமும் சொல்லாதே — வங்கியோ காவல்துறையோ உன் OTP-ஐக் கேட்காது. ஏமாந்துவிட்டால் உடனே ஒரு பெரியவரிடம் சொல்லி, இந்தியாவின் சைபர் குற்ற உதவி எண் 1930-ஐ அழைக்கலாம்.",
+    "en": "If the address bar shows a lock and **https**, the conversation between your device and that website is sent **scrambled**. So someone in the middle — for example another person on the same Wi-Fi — cannot read the contents.\n\n**But the lock is not proof that the website is honest.** Fraud websites can have a lock too. So check that the name is spelt correctly; do not tap a link in a message and then give a password, OTP or bank details.\n\n**Password:** make it long and do not reuse it on other sites. **OTP:** tell it to nobody — a bank or the police will not ask for your OTP. If you have been cheated, tell an adult at once; India's cyber-crime helpline is 1930."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு இணையதளத்தில் பூட்டு (https) இருக்கிறது. இதிலிருந்து நிச்சயமாக என்ன சொல்லலாம்?",
+    "en": "A website shows the lock (https). What can you say for sure?"
+   },
+   "options": [
+    {
+     "ta": "அந்த இணையதளம் நேர்மையானது",
+     "en": "The website is honest"
+    },
+    {
+     "ta": "நமக்கும் அந்த இணையதளத்துக்கும் இடையிலான உரையாடல் வழியில் படிக்க முடியாதபடி குழப்பப்பட்டுள்ளது",
+     "en": "The conversation between us and the site is scrambled so it cannot be read on the way"
+    },
+    {
+     "ta": "அங்கே கொடுக்கும் OTP பாதுகாப்பானது",
+     "en": "An OTP given there is safe"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "பூட்டு பாதுகாக்கிறது — வழியில் உள்ளவர்களிடமிருந்து.",
+    "en": "The lock protects against people along the way."
+   },
+   "solution": {
+    "ta": "பூட்டு நடுவழிப் பாதுகாப்பைத் தருகிறது; இணையதளத்தின் நேர்மையை உறுதி செய்யாது.",
+    "en": "The lock gives protection in transit; it does not guarantee the website is honest."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "DNS-இன் வேலை என்ன?",
+    "en": "What is the job of DNS?"
+   },
+   "options": [
+    {
+     "ta": "வீடியோவைச் சுருக்குவது",
+     "en": "Compressing videos"
+    },
+    {
+     "ta": "இணையதளத்தின் பெயருக்கான எண் முகவரியைச் சொல்வது",
+     "en": "Telling the numeric address for a website's name"
+    },
+    {
+     "ta": "போனுக்குச் சார்ஜ் ஏற்றுவது",
+     "en": "Charging the phone"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "தொலைபேசி புத்தகம்!",
+    "en": "A phone book!"
+   },
+   "solution": {
+    "ta": "DNS பெயரிலிருந்து IP முகவரியைக் கண்டுபிடித்துத் தருகிறது.",
+    "en": "DNS finds the IP address from the name."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🌊",
+     "title": {
+      "ta": "சென்னையில் கடலடிக் கேபிள்கள்",
+      "en": "Undersea cables at Chennai"
+     },
+     "text": {
+      "ta": "இந்தியாவில் கடலடிக் கேபிள்கள் கரையைத் தொடும் முக்கிய இடங்களில் சென்னை ஒன்று.",
+      "en": "Chennai is one of the main places in India where undersea cables come ashore."
+     }
+    },
+    {
+     "icon": "🏘️",
+     "title": {
+      "ta": "கிராமங்களுக்கு ஒளி இழை",
+      "en": "Fibre for villages"
+     },
+     "text": {
+      "ta": "கிராமப் பஞ்சாயத்துகளை ஒளி இழையால் இணைக்கும் BharatNet என்ற அரசுத் திட்டம் உள்ளது. எவ்வளவு முடிந்துள்ளது என்பது மாறிக்கொண்டிருக்கும்; அதிகாரப்பூர்வத் தகவலைப் பார்.",
+      "en": "There is a government project called BharatNet to connect village panchayats with optical fibre. How much is complete keeps changing; check the official source."
+     }
+    },
+    {
+     "icon": "🍵",
+     "title": {
+      "ta": "தேநீர்க் கடையில் UPI",
+      "en": "UPI at a tea shop"
+     },
+     "text": {
+      "ta": "நீ QR-ஐ ஸ்கேன் செய்து பணம் அனுப்பும்போது உன் போனும் வங்கிக் கணினிகளும் packets மூலம் பேசிக்கொள்கின்றன.",
+      "en": "When you scan a QR and pay, your phone and the banks' computers talk to each other using packets."
+     }
+    },
+    {
+     "icon": "🗼",
+     "title": {
+      "ta": "மொபைல் டவர்",
+      "en": "Mobile tower"
+     },
+     "text": {
+      "ta": "உன் ஊர் டவர் உன் போனை வானொலி அலையில் கேட்டு, ஒளி இழைக்கும் இணைக்கிறது.",
+      "en": "Your local tower listens to your phone by radio and passes it on to the fibre network."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "இணையம் எங்கே போகிறது?",
+    "en": "Where is the internet going?"
+   },
+   "text": {
+    "ta": "அதிக ஊர்களுக்கு ஒளி இழை, தொலைதூரப் பகுதிகளுக்குச் செயற்கைக்கோள் இணைப்பு, வேகமான மொபைல் வலையமைப்புகள் ஆகியவை முயற்சிக்கப்படுகின்றன. எதிர்காலத்தில் வீட்டுக் கருவிகள், கடிகாரங்கள் எனப் பல கருவிகள் இணையத்தில் இணைவதை நீ பார்க்கலாம்.",
+    "en": "More fibre to more towns, satellite links for remote places and faster mobile networks are being tried. In future you may see many more devices (home appliances, watches) joining the internet."
+   },
+   "risk": {
+    "ta": "கேபிள் அறுந்தால் ஒரு பகுதி பாதிக்கப்படலாம்; இணையத் தொடர்பு இல்லாத மக்கள் பின்தங்கலாம்; மோசடிகள் அதிகரிக்கலாம்.",
+    "en": "A cable cut can hurt a whole region; people without connections can be left behind; scams may increase."
+   },
+   "fix": {
+    "ta": "பல பாதைகள், பல கேபிள்கள் வைத்தல்; எல்லோருக்கும் இணைப்பு; இணையப் பாதுகாப்புக் கல்வி.",
+    "en": "Keeping many routes and cables; connections for everyone; internet-safety education."
+   },
+   "q": {
+    "ta": "உன் ஊர் முழுவதும் இணையம் கிடைக்க என்ன வேண்டும்? யார் அதைச் செய்ய வேண்டும்?",
+    "en": "What would it take for your whole town to have internet? Who should do it?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "காகித packets விளையாட்டு (போன் தேவையில்லை)",
+    "en": "The paper-packet game (no phone needed)"
+   },
+   "text": {
+    "ta": "**1.** ஒரு வாக்கியத்தை (எ.கா. \"நாளை பள்ளிக்குச் சீக்கிரம் வா\") எழுது.\n**2.** அதை 3-4 எழுத்துத் துண்டுகளாக வெட்டி, ஒவ்வொன்றிலும் எண் (#1, #2…) எழுது.\n**3.** துண்டுகளைக் கலக்கி ஒரு நண்பனிடம் கொடு. அவன் எண் வரிசையில் அடுக்கி வாக்கியத்தைப் படிக்கட்டும்.\n**4.** இப்போது ஒரு துண்டை மறைத்து வை. நண்பன் என்ன சொல்கிறான்? (\"#4 வரவில்லை, மீண்டும் அனுப்பு\" என்று சொல்வானா?) இதுதான் இணையம் செய்வது!",
+    "en": "**1.** Write a sentence (for example \"Come early to school tomorrow\").\n**2.** Cut it into pieces of 3–4 letters and write a number (#1, #2…) on each.\n**3.** Mix the pieces and give them to a friend. Let your friend arrange them in number order and read the sentence.\n**4.** Now hide one piece. What does your friend say? (\"#4 is missing, send it again\"?) That is exactly what the internet does!"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "ஒரு புகைப்படம் நாகர்கோவிலிலிருந்து துபாய்க்கு எப்படிப் போகிறது என்று உன் சொற்களில் சொல்.",
+    "en": "In your own words: how does a photo get from Nagercoil to Dubai?"
+   },
+   "keywords": [
+    {
+     "ta": "packet",
+     "en": "packet",
+     "alt": [
+      "துண்டு",
+      "துண்டுகள்",
+      "pieces",
+      "packets"
+     ]
+    },
+    {
+     "ta": "முகவரி",
+     "en": "address",
+     "alt": [
+      "IP",
+      "இணைய முகவரி",
+      "IP address"
+     ]
+    },
+    {
+     "ta": "கேபிள்",
+     "en": "cable",
+     "alt": [
+      "கடலடி",
+      "கடலுக்கடியில்",
+      "fibre",
+      "ஒளி இழை",
+      "cables",
+      "undersea"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "புகைப்படம் எண்ணிடப்பட்ட சிறு packets-ஆக உடைகிறது. ஒவ்வொன்றிலும் போய்ச் சேர வேண்டிய இணைய முகவரி உள்ளது. router-கள் அவற்றை வெவ்வேறு பாதைகளில் அனுப்புகின்றன. பெரும்பாலான தூரம் ஒளி இழைக் கேபிள்கள், கடலுக்கடியில் உள்ள கேபிள்கள் வழியாகச் செல்கிறது. துபாயில் அவை எண் வரிசைப்படி சேர்க்கப்பட்டுப் புகைப்படமாகின்றன.",
+    "en": "The photo is cut into small numbered packets. Each carries the IP address it must reach. Routers send them along different routes. Most of the distance is covered by optical-fibre cables, including undersea cables. In Dubai they are put back in number order and become the photo again."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "செய்தி எண்ணிடப்பட்ட packets-ஆக உடைந்து, வெவ்வேறு பாதைகளில் சென்று, எண் வரிசையில் சேர்கிறது; தொலைந்தால் அந்தத் துண்டு மட்டும் மீண்டும் அனுப்பப்படும்.",
+     "en": "A message is cut into numbered packets, travels by different routes and is joined in number order; a lost one is re-sent alone."
+    },
+    {
+     "ta": "ஒவ்வொரு கருவிக்கும் IP எண் முகவரி; பெயரை எண்ணாக மாற்றுவது DNS (தொலைபேசி புத்தகம் போல). router திசை காட்டுகிறது; server தகவலை வைத்திருக்கிறது.",
+     "en": "Each device has a numeric IP address; DNS turns a name into a number (like a phone book). Routers point the way; servers hold information."
+    },
+    {
+     "ta": "Wi-Fi, மொபைல் டவர் ஆகியவை கடைசிச் சிறிய தூரம் மட்டுமே; உலகை இணைப்பவை ஒளி இழைக் கேபிள்கள்; கண்டங்களுக்கு இடையே பெரும்பகுதி கடலடிக் கேபிள்கள்.",
+     "en": "Wi-Fi and mobile towers are only the last short stretch; fibre cables connect the world, and undersea cables carry most traffic between continents."
+    },
+    {
+     "ta": "https பூட்டு = உரையாடல் வழியில் குழப்பப்படுகிறது. அது இணையதளம் நேர்மையானது என்று உறுதி செய்யாது.",
+     "en": "The https lock = the conversation is scrambled in transit. It does not prove the site is honest."
+    },
+    {
+     "ta": "நீளமான கடவுச்சொல் வை; OTP-ஐ யாரிடமும் சொல்லாதே; ஏமாந்தால் பெரியவரிடம் சொல்லி 1930-ஐ அழை.",
+     "en": "Use a long password, tell your OTP to nobody; if cheated, tell an adult and call 1930."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "packets கலைந்து வந்தாலும் செய்தி எப்படிச் சரியாகச் சேர்கிறது?",
+    "en": "How does the message assemble correctly even when packets arrive mixed up?"
+   },
+   "options": [
+    {
+     "ta": "அவை எப்போதும் சரியான வரிசையில்தான் வரும்",
+     "en": "They always arrive in the right order"
+    },
+    {
+     "ta": "ஒவ்வொரு packet-க்கும் வரிசை எண் உண்டு; பெறுபவர் அதை வைத்து அடுக்குகிறார்",
+     "en": "Each packet has a sequence number; the receiver arranges them by it"
+    },
+    {
+     "ta": "பெறுபவர் ஊகிக்கிறார்",
+     "en": "The receiver guesses"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "வரிசை எண்தான் திறவுகோல்.",
+    "en": "The sequence number is the key."
+   }
+  },
+  {
+   "q": {
+    "ta": "DNS-ஐ எதனுடன் ஒப்பிடலாம்?",
+    "en": "What is DNS most like?"
+   },
+   "options": [
+    {
+     "ta": "வீட்டு மின்சார மீட்டர்",
+     "en": "A home electricity meter"
+    },
+    {
+     "ta": "பேருந்தின் டிக்கெட்",
+     "en": "A bus ticket"
+    },
+    {
+     "ta": "பள்ளி மணி",
+     "en": "A school bell"
+    },
+    {
+     "ta": "பெயரைச் சொன்னால் எண் தரும் தொலைபேசி புத்தகம்",
+     "en": "A phone book that gives the number when you say the name"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "DNS இணையதளப் பெயரிலிருந்து IP எண்ணைத் தருகிறது.",
+    "en": "DNS gives the IP number for a website's name."
+   }
+  },
+  {
+   "q": {
+    "ta": "Wi-Fi பற்றி எது சரி?",
+    "en": "Which is true about Wi-Fi?"
+   },
+   "options": [
+    {
+     "ta": "போனுக்கும் router-க்கும் இடையிலான குறுகிய வானொலி இணைப்பு; router ஒளி இழை/கம்பி மூலம் உலகுடன் இணைகிறது",
+     "en": "A short radio link between phone and router; the router connects to the world by fibre or wire"
+    },
+    {
+     "ta": "Wi-Fi நேராக வெளிநாட்டுக்கு அலையில் செல்கிறது",
+     "en": "Wi-Fi goes by radio straight to other countries"
+    },
+    {
+     "ta": "Wi-Fi-க்குக் கம்பியே தேவையில்லை",
+     "en": "Wi-Fi needs no wire anywhere"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "Wi-Fi கடைசிச் சில மீட்டர் மட்டுமே; அதன் பின்னால் கம்பிகள் உள்ளன.",
+    "en": "Wi-Fi is only the last few metres; wires lie behind it."
+   }
+  },
+  {
+   "q": {
+    "ta": "கண்டங்களுக்கு இடையே இணையத் தகவலின் பெரும்பகுதி எதன் வழியாகச் செல்கிறது?",
+    "en": "Through what does most internet traffic between continents travel?"
+   },
+   "options": [
+    {
+     "ta": "மொபைல் டவர்களின் வானொலி அலைகள்",
+     "en": "Radio waves from mobile towers"
+    },
+    {
+     "ta": "செயற்கைக்கோள்கள் மட்டும்",
+     "en": "Satellites only"
+    },
+    {
+     "ta": "கடலுக்கடியில் உள்ள கேபிள்கள்",
+     "en": "Cables under the sea"
+    },
+    {
+     "ta": "மேகங்கள் வழியாக",
+     "en": "Through the clouds"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "பெரும்பாலானவை கடலடி ஒளி இழைக் கேபிள்கள் வழியாகச் செல்கின்றன; செயற்கைக்கோள் சிறிய பங்கு.",
+    "en": "Most goes through undersea fibre cables; satellites carry a small share."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு மோசடி இணையதளத்துக்கும் https பூட்டு இருக்க முடியுமா?",
+    "en": "Can a fraud website also have the https lock?"
+   },
+   "options": [
+    {
+     "ta": "முடியாது — பூட்டு இருந்தால் நேர்மையானது",
+     "en": "No — a lock means it is honest"
+    },
+    {
+     "ta": "முடியும் — பூட்டு உரையாடல் குழப்பப்படுவதைத்தான் காட்டும், நேர்மையை அல்ல",
+     "en": "Yes — the lock only shows the conversation is scrambled, not that it is honest"
+    },
+    {
+     "ta": "பூட்டு போலியாகவே இருக்கும்",
+     "en": "The lock is always fake"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "பூட்டு நடுவழிப் பாதுகாப்பு மட்டுமே.",
+    "en": "The lock only protects in transit."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"உங்கள் வங்கியிலிருந்து பேசுகிறோம், வந்த OTP-ஐச் சொல்லுங்கள்\" என்று ஒருவர் போனில் கேட்கிறார். என்ன செய்வது?",
+    "en": "Someone phones: \"We are calling from your bank, tell us the OTP you received.\" What should you do?"
+   },
+   "options": [
+    {
+     "ta": "சொல்லாதே; இணைப்பைத் துண்டித்து, ஒரு பெரியவரிடம் சொல்; வங்கியின் அதிகாரப்பூர்வ எண்ணில் நீயே அழைத்துச் சரிபார்",
+     "en": "Do not tell; hang up, tell an adult, and check by calling the bank's official number yourself"
+    },
+    {
+     "ta": "சொல்லிவிடு, அவசரம்",
+     "en": "Tell it, it is urgent"
+    },
+    {
+     "ta": "பாதி எண்களை மட்டும் சொல்",
+     "en": "Tell only half the digits"
+    },
+    {
+     "ta": "நண்பனுக்கு OTP அனுப்பு",
+     "en": "Forward the OTP to a friend"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "OTP-ஐ யாரிடமும் பகிரக் கூடாது; வங்கிகள் அதைக் கேட்காது.",
+    "en": "An OTP must never be shared; banks do not ask for it."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு packet வழியில் தொலைந்துவிட்டால் என்ன நடக்கும்?",
+    "en": "What happens if one packet is lost on the way?"
+   },
+   "options": [
+    {
+     "ta": "முழுச் செய்தியும் அழிந்துவிடும்",
+     "en": "The whole message is destroyed"
+    },
+    {
+     "ta": "செய்தி இடைவெளியுடன் வந்துசேரும்",
+     "en": "The message arrives with a gap"
+    },
+    {
+     "ta": "எதுவும் நடக்காது",
+     "en": "Nothing happens"
+    },
+    {
+     "ta": "பெறும் கணினி எண் வரிசையில் ஒன்று இல்லை என்று கண்டு, அந்த packet-ஐ மட்டும் மீண்டும் கேட்கும்",
+     "en": "The receiver sees a number missing and asks for just that packet again"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "வரிசை எண்களால் விடுபட்டதை அறிந்து அதை மட்டும் மீண்டும் அனுப்புகிறது.",
+    "en": "Because of the sequence numbers it finds the gap and requests only that piece."
+   }
+  }
+ ]
+}

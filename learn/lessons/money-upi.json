@@ -1,0 +1,715 @@
+{
+ "id": "money-upi",
+ "minutes": 30,
+ "title": {
+  "ta": "பணம் எப்படி வேலை செய்கிறது? (UPI முதல் சேமிப்பு வரை)",
+  "en": "How does money work? (From UPI to saving)"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "நிதி எழுத்தறிவு — சேமிப்பு, வட்டி (கணிதம் மற்றும் சமூக அறிவியல்)",
+    "en": "Financial literacy — saving and interest (Maths & Social Science)"
+   }
+  },
+  {
+   "b": "RBI",
+   "w": {
+    "ta": "பாதுகாப்பான டிஜிட்டல் பணப் பரிவர்த்தனை",
+    "en": "Safe digital payments"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "UPI எப்படி வேலை செய்கிறது என்று விளக்க",
+   "en": "Explain how UPI works"
+  },
+  {
+   "ta": "PIN, OTP, collect-request மோசடிகளிலிருந்து தன்னைக் காத்துக்கொள்ள",
+   "en": "Protect yourself from PIN, OTP and collect-request frauds"
+  },
+  {
+   "ta": "தனி வட்டி, கூட்டு வட்டி, 72-இன் விதியைக் கணக்கிட",
+   "en": "Calculate simple interest, compound interest and the rule of 72"
+  },
+  {
+   "ta": "எளிய மாத பட்ஜெட் போட",
+   "en": "Make a simple monthly budget"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "செல்வி தன் அம்மாவுடன் தேநீர்க் கடைக்குப் போனாள். அம்மா போனில் QR code-ஐ ஸ்கேன் செய்து ₹20 அனுப்பினார். இரண்டு நொடியில் கடைக்காரரின் போன் \"₹20 வந்தது\" என்று பேசியது. பணம் எங்கிருந்து எங்கே போனது? யாரும் நோட்டைத் தொடவே இல்லை!\n\nஇது உனக்கு ஏன் முக்கியம்? நீ சீக்கிரமே உன் சொந்த வங்கிக் கணக்கு, UPI, சேமிப்பு, கடன் என்று பணத்தைக் கையாளப் போகிறாய். இதை நன்றாகப் புரிந்தவர்கள் ஏமாற மாட்டார்கள். இன்னொரு நாள் செல்விக்கு ஒரு செய்தி வந்தது: \"உனக்கு ₹500 திருப்பி அனுப்புகிறேன், உன் போனில் வரும் கோரிக்கையை ஏற்று PIN போடு.\" அவள் PIN போட்டிருந்தால் என்ன நடந்திருக்கும்? இன்று கண்டுபிடிப்போம்.",
+    "en": "Selvi went to a tea shop with her mother. Her mother scanned a QR code on her phone and sent ₹20. Two seconds later the shopkeeper's phone said \"₹20 received\". Where did the money go from and to? Nobody touched a note!\n\nWhy does this matter to you? Very soon you will handle your own bank account, UPI, savings and loans. People who understand money are hard to cheat. Another day a message reached Selvi: \"I am sending you ₹500 back — accept the request on your phone and enter your PIN.\" What would have happened if she had entered the PIN? Let's find out today."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "₹10,000-ஐ ஆண்டுக்கு 8% வட்டியில் 20 ஆண்டுகள் வைக்கிறாய். **தனி வட்டியில்** இது ₹26,000 ஆகும். வட்டிக்கும் வட்டி சேரும் **கூட்டு வட்டியில்** சுமார் எவ்வளவு ஆகும்?",
+    "en": "You keep ₹10,000 for 20 years at 8% a year. With **simple interest** it becomes ₹26,000. With **compound interest** (interest on the interest too) about how much will it be?"
+   },
+   "options": [
+    {
+     "ta": "சுமார் ₹26,000 — அதே",
+     "en": "About ₹26,000 — the same"
+    },
+    {
+     "ta": "சுமார் ₹30,000",
+     "en": "About ₹30,000"
+    },
+    {
+     "ta": "சுமார் ₹46,600",
+     "en": "About ₹46,600"
+    },
+    {
+     "ta": "சுமார் ₹1,00,000",
+     "en": "About ₹1,00,000"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "கூட்டு வட்டியில் சுமார் ₹46,600 (₹10,000 × 1.08²⁰). தனி வட்டியைவிட ₹20,000 அதிகம்! ஆனால் ₹1,00,000 வராது — வட்டி வீதம் 8% என்பதால் வளர்ச்சியின் வேகத்துக்கு ஓர் எல்லை உண்டு. எது எப்படி வளர்கிறது என்பதைக் கீழே நீயே விளையாடிப் பார்ப்பாய்.",
+    "en": "Compound interest gives about ₹46,600 (₹10,000 × 1.08²⁰) — ₹20,000 more than simple interest! But it does not reach ₹1,00,000: at 8% the growth has a limited speed. Below you will play with it yourself."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பணம் என்றால் என்ன? வங்கி என்ன செய்கிறது?",
+    "en": "What is money? What does a bank do?"
+   },
+   "text": {
+    "ta": "**பணம்** என்பது எல்லோரும் ஏற்றுக்கொள்ளும் ஒரு \"பரிமாற்றக் கருவி\". நீ அரிசி விற்றுச் செருப்பு வாங்க வேண்டுமானால், இருவரிடமும் ஒருவருக்கு வேண்டியது மற்றவரிடம் இருக்க வேண்டும். பணம் இருந்தால் அந்தச் சிக்கல் இல்லை: விற்றுப் பணம் பெறு, வேண்டியதை வாங்கு.\n\n**வங்கி** என்பது பணத்தைப் பாதுகாப்பாக வைக்கும் இடம் மட்டும் அல்ல. உன் சேமிப்பைப் பலர் ஒரே இடத்தில் வைக்கிறார்கள். வங்கி அதில் ஒரு பகுதியைத் தொழில், வீடு, படிப்புக்காக **கடனாகக்** கொடுத்து, அதற்கு வட்டி பெறுகிறது. அந்த வட்டியிலிருந்து சேமிப்பவர்களுக்கும் ஒரு பங்கு வட்டி கொடுக்கிறது.\n\nஇன்று உன் \"கணக்கில்\" உள்ள பணம் பெரும்பாலும் வங்கிக் கணினியில் எழுதப்பட்ட ஓர் எண். அந்த எண்ணைக் குறைத்து இன்னொருவர் கணக்கில் கூட்டுவதுதான் \"பணம் அனுப்புதல்\".",
+    "en": "**Money** is a \"tool of exchange\" that everybody agrees to accept. If you sell rice and want to buy slippers, both sides must need what the other has. With money that problem disappears: sell, get money, buy what you need.\n\nA **bank** is not just a safe place for money. Many people keep their savings there; the bank **lends** part of it for businesses, homes or education and earns interest. From that interest it pays savers a share.\n\nToday the money in your \"account\" is mostly a number written in the bank's computer. \"Sending money\" simply means lowering your number and raising someone else's."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "UPI எப்படி வேலை செய்கிறது?",
+    "en": "How does UPI work?"
+   },
+   "text": {
+    "ta": "**UPI (Unified Payments Interface)** என்பது இந்தியாவில் வங்கிக் கணக்கிலிருந்து வங்கிக் கணக்குக்கு உடனே பணம் அனுப்பும் முறை. இதை இயக்குவது **NPCI** (தேசியக் கட்டணக் கழகம் — National Payments Corporation of India). UPI **2016-இல்** தொடங்கியது.\n\nபணம் நீ பயன்படுத்தும் app-க்குள் இருப்பதில்லை. App ஒரு தூதுவர் மட்டுமே: \"இந்தக் கணக்கிலிருந்து ₹20-ஐ அந்தக் கணக்குக்கு மாற்று\" என்று வங்கிகளிடம் கேட்கிறது. உன் வங்கி உன் **PIN**-ஐ சரிபார்த்து ஒப்புக்கொள்கிறது; பணம் மாறுகிறது.\n\n**UPI ID** என்பது உன் கணக்குக்கான ஒரு முகவரி (எ.கா. பெயர்@வங்கி). **QR code** என்பது அந்த முகவரியையும் சில நேரம் தொகையையும் ஒரு சதுரப் படமாக்கியது. ஸ்கேன் செய்தால் முகவரியை நீ தட்டச்சு செய்ய வேண்டியதில்லை. இது ஒரு எளிய விளக்கம்; உள்ளே இன்னும் பல படிகள் உண்டு.",
+    "en": "**UPI (Unified Payments Interface)** is a way in India to send money instantly from one bank account to another. It is run by **NPCI** (the National Payments Corporation of India). UPI began in **2016**.\n\nThe money does not sit inside the app you use. The app is only a messenger: it asks the banks \"move ₹20 from this account to that account\". Your bank checks your **PIN** and agrees; the money moves.\n\nA **UPI ID** is an address for your account (like name@bank). A **QR code** is that address — and sometimes the amount — drawn as a square picture, so you do not have to type it. This is a simple explanation; there are more steps inside."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தங்க விதிகள் — PIN, OTP, மோசடி",
+    "en": "Golden rules — PIN, OTP, fraud"
+   },
+   "text": {
+    "ta": "**விதி 1: பணத்தைப் பெற PIN தேவையே இல்லை.** பணம் பெற உன் UPI ID, QR அல்லது எண் மட்டும் போதும். PIN கேட்கும் திரை பெரும்பாலும் **பணம் அனுப்ப அல்லது செலுத்த ஒப்புதல்** அளிக்கும் திரையே. பணம் பெறுவதற்காக மட்டும் காத்திருந்தால் PIN போடாதே.\n\n**விதி 2: PIN, OTP, கார்டு எண்ணை யாரிடமும் சொல்லாதே** — \"வங்கி அதிகாரி\", \"போலீஸ்\", \"லாட்டரி நிறுவனம்\" என்று சொல்பவரிடமும் கூட. உண்மையான வங்கி PIN / OTP கேட்காது.\n\n**விதி 3: \"கோரிக்கை\" (collect request) தந்திரம்.** மோசடிக்காரர் \"உனக்குப் பணம் திருப்பி அனுப்புகிறேன்\" என்று சொல்லிப் பணக் கோரிக்கை, QR அல்லது இணைப்பு (link) அனுப்புவார். அதை ஏற்றுப் PIN போட்டால் உன் பணம் அவருக்குப் போகும்.\n\n**விதி 4: ஏமாந்துவிட்டால்** உடனே பெரியவர்களிடம் சொல். தேசிய சைபர் குற்ற உதவி எண் **1930** (24 மணிநேரமும்); இணையதளம் **cybercrime.gov.in**. உடனே தெரிவித்தால் பணத்தைத் தடுக்க வாய்ப்பு அதிகம். உன் வங்கிக்கும் உடனே சொல்.",
+    "en": "**Rule 1: you never need your PIN to RECEIVE money.** To receive, your UPI ID, QR or number is enough. A screen asking for your PIN is almost always for **sending or approving a payment**. If you were only expecting to receive money, do not enter the PIN.\n\n**Rule 2: never tell anyone your PIN, OTP or card number** — not even someone who says \"bank officer\", \"police\" or \"lottery company\". A real bank does not ask for your PIN or OTP.\n\n**Rule 3: the \"collect request\" trick.** A cheat says \"I'm sending your money back\" and sends a payment request, a QR code or a link. If you approve it and enter your PIN, your money goes to the cheat.\n\n**Rule 4: if you are cheated,** tell an adult at once. The national cyber-crime helpline is **1930** (24 hours) and the website is **cybercrime.gov.in**. Reporting quickly gives a better chance of stopping the money. Tell your bank immediately too."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "அறிமுகம் இல்லாத ஒருவர் போன் செய்து சொல்கிறார்: \"உன் கணக்கில் ₹2,000 தவறுதலாக அனுப்பிவிட்டேன். என் கோரிக்கையை ஏற்றுப் PIN போட்டால் திரும்பி வந்துவிடும்.\" சரியான செயல் எது?",
+    "en": "A stranger calls: \"I sent ₹2,000 to your account by mistake. Accept my request and enter your PIN and it will come back.\" What is the right action?"
+   },
+   "options": [
+    {
+     "ta": "PIN போட்டு ஏற்பேன் — பணம் திரும்ப வேண்டும்",
+     "en": "Accept and enter the PIN — he wants money back"
+    },
+    {
+     "ta": "ஏற்க மாட்டேன்; பெரியவரிடம் சொல்லி, என் கணக்கை நானே வங்கி app-இல் அல்லது வங்கியில் சரிபார்ப்பேன்",
+     "en": "Do not accept; tell an adult and check my own balance myself in the bank app or at the bank"
+    },
+    {
+     "ta": "OTP மட்டும் சொல்வேன்",
+     "en": "Tell him only the OTP"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "பணம் வந்திருந்தால் அதைப் பெற PIN வேண்டுமா?",
+    "en": "If money had really arrived, would you need a PIN to receive it?"
+   },
+   "solution": {
+    "ta": "பெற PIN தேவையில்லை; PIN கேட்பது அனுப்பும் திரை. உன் கணக்கில் உண்மையில் பணம் வந்ததா என்பதை நீயே உன் app-இல் அல்லது வங்கியில் பார். தவறாக வந்த பணத்தை வங்கி மூலம், பெரியவர்கள் துணையுடன் திருப்பி அனுப்புவதே பாதுகாப்பானது.",
+    "en": "No PIN is needed to receive; a PIN prompt means sending. Check yourself in your own app or bank whether money really arrived. Returning a wrongly credited amount is safest through the bank — with an adult's help."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "growth",
+   "text": {
+    "ta": "வரைபடத்தில் பச்சைக் கோடு கூட்டு வட்டி, சாம்பல் கோடு தனி வட்டி. முதலில் ₹10,000, 10%, **1 ஆண்டு** வை; அப்போது இரண்டு தொகையும் சமமாக இருக்கும். பிறகு ஆண்டுகளை 5, 10, 20, **30** என்று கூட்டு. கடைசியில் 30 ஆண்டுகளுக்கு இரண்டையும் ஒப்பிடு.",
+    "en": "On the graph the green line is compound, the grey line simple. First set ₹10,000, 10%, **1 year** — both amounts are equal. Then raise the years to 5, 10, 20 and **30**. At 30 years compare the two."
+   },
+   "q": {
+    "ta": "₹10,000, 10%, 30 ஆண்டு — கூட்டு வட்டித் தொகை தனி வட்டித் தொகையைவிட சுமார் எத்தனை மடங்கு?",
+    "en": "₹10,000, 10%, 30 years — the compound amount is about how many times the simple-interest amount?"
+   },
+   "options": [
+    {
+     "ta": "சுமார் 1.5 மடங்கு",
+     "en": "About 1.5 times"
+    },
+    {
+     "ta": "சுமார் 2 மடங்கு",
+     "en": "About 2 times"
+    },
+    {
+     "ta": "சுமார் 4 மடங்கு",
+     "en": "About 4 times"
+    },
+    {
+     "ta": "சுமார் 10 மடங்கு",
+     "en": "About 10 times"
+    }
+   ],
+   "correct": 2,
+   "insight": {
+    "ta": "தனி வட்டியில் ₹40,000; கூட்டு வட்டியில் ₹1,74,494 — சுமார் 4.4 மடங்கு. முதல் ஆண்டில் இரண்டும் ₹11,000 (சமம்). 5 ஆண்டில் ₹15,000 vs ₹16,105 — வேறுபாடு சிறியது. 10 ஆண்டில் ₹20,000 vs ₹25,937; 20 ஆண்டில் ₹30,000 vs ₹67,275. இரண்டும் ஏன் தாமதமாகத்தான் வேறுபடுகின்றன? தனி வட்டியில் வட்டி எப்போதும் ₹1,000-தான். கூட்டு வட்டியில் சேர்ந்த வட்டியும் வட்டி ஈட்டுவதால், ஒவ்வொரு ஆண்டும் வட்டி பெரிதாகிறது. **நேரம்தான் கூட்டு வட்டியின் பலம்.**",
+    "en": "Simple: ₹40,000. Compound: ₹1,74,494 — about 4.4 times. In year 1 both are ₹11,000 (equal). At 5 years ₹15,000 vs ₹16,105 — a small gap. At 10 years ₹20,000 vs ₹25,937; at 20 years ₹30,000 vs ₹67,275. Why does the gap open late? With simple interest the interest is always ₹1,000 a year. With compound interest the earlier interest also earns interest, so each year's interest is bigger. **Time is the power of compounding.**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தனி வட்டி, கூட்டு வட்டி, 72-இன் விதி",
+    "en": "Simple interest, compound interest, the rule of 72"
+   },
+   "text": {
+    "ta": "**தனி வட்டி:** வட்டி எப்போதும் முதல் தொகைக்கு மட்டுமே. தொகை = P × (1 + r × n).\n\n**கூட்டு வட்டி:** ஒவ்வொரு ஆண்டும் சேர்ந்த வட்டியும் முதலோடு சேர்ந்து அடுத்த ஆண்டு வட்டி ஈட்டும். தொகை = P × (1 + r)ⁿ. (r = வட்டி வீதம் ÷ 100; வட்டி ஆண்டுக்கு ஒரு முறை சேர்கிறது)\n\n[[ தொகை (கூட்டு) = P × (1 + r)ⁿ ]]\n\n**72-இன் விதி:** பணம் இரட்டிப்பாக ஆகும் ஆண்டுகள் ≈ 72 ÷ ஆண்டு வட்டி %. 8% என்றால் சுமார் 72 ÷ 8 = 9 ஆண்டு. இது ஒரு விரைவான தோராயம்; 6%–10% போன்ற வீதங்களில் நன்றாகப் பொருந்தும்.\n\nஇதே கணக்கு **கடனுக்கும்** பொருந்தும். திருப்பிக் கட்டாமல் விட்ட கடனின் வட்டி மேலும் வட்டியைப் பெற்று உனக்கு எதிராக வளரும். அதனால் கடன் வாங்கும் முன் வட்டி வீதத்தைக் கேட்டு, பெரியவர்களுடன் கணக்குப் போடு.",
+    "en": "**Simple interest:** interest is always on the original amount only. Amount = P × (1 + r × n).\n\n**Compound interest:** each year's interest joins the principal and earns interest the next year. Amount = P × (1 + r)ⁿ. (r = rate % ÷ 100; interest is added once a year)\n\n[[ Amount (compound) = P × (1 + r)ⁿ ]]\n\n**Rule of 72:** years to double ≈ 72 ÷ yearly interest %. At 8% that is about 72 ÷ 8 = 9 years. It is a quick estimate that works well for rates like 6%–10%.\n\nThe same maths works on **loans**. Interest on an unpaid loan earns more interest and grows against you. So before borrowing, ask for the interest rate and do the sum with an adult."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "₹10,000-ஐ ஆண்டுக்கு 8% வட்டியில் 10 ஆண்டுகள் வைத்தால், தனி வட்டியிலும் கூட்டு வட்டியிலும் எவ்வளவு? எத்தனை ஆண்டில் இரட்டிப்பாகும்?",
+    "en": "₹10,000 for 10 years at 8% a year: how much with simple and with compound interest? When does it double?"
+   },
+   "steps": [
+    {
+     "ta": "தனி வட்டி = 10,000 × (1 + 0.08 × 10) = 10,000 × 1.8 = ₹18,000",
+     "en": "Simple = 10,000 × (1 + 0.08 × 10) = 10,000 × 1.8 = ₹18,000"
+    },
+    {
+     "ta": "கூட்டு = 10,000 × 1.08¹⁰ = 10,000 × 2.1589 ≈ ₹21,589",
+     "en": "Compound = 10,000 × 1.08¹⁰ = 10,000 × 2.1589 ≈ ₹21,589"
+    },
+    {
+     "ta": "கூடுதல் = 21,589 − 18,000 ≈ ₹3,589",
+     "en": "Extra = 21,589 − 18,000 ≈ ₹3,589"
+    },
+    {
+     "ta": "72-இன் விதி: 72 ÷ 8 = 9 ஆண்டு. (சரிபார்: 1.08⁹ ≈ 1.999 → ₹19,990 ≈ ₹20,000 ✓)",
+     "en": "Rule of 72: 72 ÷ 8 = 9 years. (Check: 1.08⁹ ≈ 1.999 → ₹19,990 ≈ ₹20,000 ✓)"
+    }
+   ],
+   "answer": {
+    "ta": "தனி ₹18,000; கூட்டு சுமார் ₹21,589; இரட்டிப்பு சுமார் 9 ஆண்டு",
+    "en": "Simple ₹18,000; compound about ₹21,589; doubling in about 9 years"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "₹5,000-ஐ ஆண்டுக்கு 8% **தனி வட்டியில்** 5 ஆண்டுகள் வைத்தால் மொத்தத் தொகை? (₹)",
+    "en": "₹5,000 for 5 years at 8% a year, **simple interest**. Total amount? (₹)"
+   },
+   "answer": 7000,
+   "tol": 0.5,
+   "unit": {
+    "ta": "₹",
+    "en": "₹"
+   },
+   "hint": {
+    "ta": "5,000 × (1 + 0.08 × 5)",
+    "en": "5,000 × (1 + 0.08 × 5)"
+   },
+   "solution": {
+    "ta": "வட்டி = 5,000 × 0.08 × 5 = ₹2,000; தொகை = ₹7,000.",
+    "en": "Interest = 5,000 × 0.08 × 5 = ₹2,000; amount = ₹7,000."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "72-இன் விதிப்படி, ஆண்டுக்கு 9% வட்டியில் பணம் இரட்டிப்பாக சுமார் எத்தனை ஆண்டுகள் ஆகும்?",
+    "en": "By the rule of 72, about how many years does money take to double at 9% a year?"
+   },
+   "answer": 8,
+   "tol": 0.01,
+   "unit": {
+    "ta": "ஆண்டு",
+    "en": "years"
+   },
+   "hint": {
+    "ta": "72 ÷ வட்டி %",
+    "en": "72 ÷ interest %"
+   },
+   "solution": {
+    "ta": "72 ÷ 9 = 8 ஆண்டுகள். (உண்மைக் கணக்கு: 1.09⁸ ≈ 1.99 ✓)",
+    "en": "72 ÷ 9 = 8 years. (Exact check: 1.09⁸ ≈ 1.99 ✓)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பணவீக்கம் — சேமிப்பு vs கடன்",
+    "en": "Inflation — saving vs borrowing"
+   },
+   "text": {
+    "ta": "**பணவீக்கம் (inflation)** என்றால் பொருட்களின் விலை காலப்போக்கில் உயர்வது. எடுத்துக்காட்டு (கற்பனை எண்): விலை ஆண்டுக்கு 6% உயர்ந்தால், இன்று ₹100 மதிப்புள்ள பொருள் 10 ஆண்டுக்குப் பின் சுமார் ₹179 ஆகும். அதாவது இன்றைய ₹100 நோட்டு அப்போது சுமார் ₹56 மதிப்பிலான பொருளையே வாங்கும். பணவீக்க வீதம் ஆண்டுக்கு ஆண்டு மாறும்.\n\nஅதனால் பணத்தைப் பெட்டியில் மட்டும் வைப்பதைவிட, வட்டி தரும் பாதுகாப்பான இடத்தில் வைப்பது நல்லது — வட்டி விலை உயர்வில் ஒரு பகுதியை ஈடுசெய்ய உதவும்; ஆனால் எப்போதும் முழுவதையும் அல்ல. ஆனால் எந்த இடம் உனக்குச் சரி என்பதைப் பெரியவர்களுடனும் அதிகாரப்பூர்வ வங்கி அலுவலர்களுடனும் பேசி முடிவு செய்.\n\n**சேமிப்பு** = இன்றைய பணத்தில் ஒரு பகுதியை நாளைக்காக ஒதுக்குவது; காலம் உனக்குச் சாதகமாக இருக்கும். **கடன்** = நாளைய பணத்தை இன்று செலவு செய்வது; வட்டி உனக்கு எதிராக வேலை செய்யும். படிப்பு, தொழிலுக்கான கடன் பயனுள்ளதாக இருக்கலாம்; ஆனால் திருப்பிக் கட்ட முடியுமா என்று முதலில் கணக்கிடு.",
+    "en": "**Inflation** means prices rise over time. An example (imaginary number): if prices rise 6% a year, something worth ₹100 today would cost about ₹179 after 10 years. In other words, today's ₹100 note would then buy only about ₹56 worth of goods. The real inflation rate changes from year to year.\n\nSo keeping money only in a box is weaker than keeping it somewhere safe that pays interest — interest can help cover part of rising prices, though not always all of it. But which place suits you is a decision to make with adults and the bank's official staff.\n\n**Saving** = setting aside part of today's money for tomorrow; time works for you. **Borrowing** = spending tomorrow's money today; interest works against you. A loan for study or a business can be useful, but first work out whether you can repay it."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "விலை ஆண்டுக்கு 6% உயர்கிறது (எடுத்துக்காட்டு). இன்று ₹100 உள்ள பொருளின் 10 ஆண்டுக்குப் பின் விலை? (₹, முழு எண்ணாக)",
+    "en": "Prices rise 6% a year (an example). Something costing ₹100 today will cost how much after 10 years? (₹, nearest whole number)"
+   },
+   "answer": 179,
+   "tol": 1,
+   "unit": {
+    "ta": "₹",
+    "en": "₹"
+   },
+   "hint": {
+    "ta": "100 × 1.06¹⁰",
+    "en": "100 × 1.06¹⁰"
+   },
+   "solution": {
+    "ta": "1.06¹⁰ ≈ 1.7908, ஆகவே 100 × 1.7908 ≈ ₹179.",
+    "en": "1.06¹⁰ ≈ 1.7908, so 100 × 1.7908 ≈ ₹179."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "\"சீக்கிரம் இரட்டிப்பு\" என்றால் மோசடி",
+    "en": "\"Double your money fast\" means a scam"
+   },
+   "text": {
+    "ta": "\"ஒரு மாதத்தில் பணம் இரட்டிப்பு!\" என்ற விளம்பரம் வந்தால் கணக்குப் போடு. ₹1,000 ஒவ்வொரு மாதமும் இரட்டிப்பானால், 12 மாதத்தில் 2¹² = 4,096 மடங்கு — ₹40,96,000! அப்படி வளரும் நிஜத் தொழில் எதுவும் இல்லை. ஒரு மாதத்தில் இரட்டிப்பாக வேண்டுமானால் மாதம் 100% வட்டி வேண்டும்!\n\nஅப்படியானால் பணம் எங்கிருந்து வருகிறது? பொதுவாகப் புதிதாகச் சேருபவர்களின் பணத்தை எடுத்துப் பழையவர்களுக்குக் கொடுப்பார்கள்; புதியவர் வருவது நின்றதும் எல்லாம் கவிழும்.\n\n**எச்சரிக்கை அடையாளங்கள்:** உறுதியான அதிக லாபம், \"இன்றே சேர்\" என்ற அவசரம், \"நண்பர்களைச் சேர்த்தால் பணம்\", பணத்தைத் திரும்ப எடுக்க முடியாத குழப்பம். அதிக லாபம் என்றால் அதிக ஆபத்தும் உண்டு. இந்தப் பாடம் எந்த முதலீட்டையும் பரிந்துரைக்கவில்லை; பெரிய பண முடிவுகளைப் பெரியவர்களுடன் சேர்ந்து, அதிகாரப்பூர்வ இடங்களில் விசாரித்து எடு.",
+    "en": "If an advertisement says \"money doubles in a month!\" do the sum. If ₹1,000 doubled every month, after 12 months it would be 2¹² = 4,096 times — ₹40,96,000! No real business does that. Doubling in one month would need 100% interest every month!\n\nSo where does the money come from? Usually the money of new joiners is paid to the older ones; when new people stop coming, everything collapses.\n\n**Warning signs:** a guaranteed high profit, \"join today\" pressure, \"bring friends and earn\", confusion when you try to withdraw. Higher profit also means higher risk. This lesson recommends no investment; take big money decisions with adults and check at official places."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "மாணவர் மாதப் பட்ஜெட் — ஒரு எடுத்துக்காட்டு",
+    "en": "A student's monthly budget — an example"
+   },
+   "head": [
+    "",
+    {
+     "ta": "₹",
+     "en": "₹"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "பள்ளிப் பொருட்கள் (நோட்டு, பேனா)",
+      "en": "School things (notebooks, pens)"
+     },
+     "200"
+    ],
+    [
+     {
+      "ta": "தின்பண்டம் / வெளியே செலவு",
+      "en": "Snacks / outings"
+     },
+     "250"
+    ],
+    [
+     {
+      "ta": "போன் recharge",
+      "en": "Phone recharge"
+     },
+     "100"
+    ],
+    [
+     {
+      "ta": "பரிசு, பகிர்தல்",
+      "en": "Gifts, sharing"
+     },
+     "100"
+    ],
+    [
+     {
+      "ta": "சேமிப்பு",
+      "en": "Saving"
+     },
+     "150"
+    ],
+    [
+     {
+      "ta": "மொத்த வரவு",
+      "en": "Total income"
+     },
+     "800"
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேல் அட்டவணைப்படி ஒவ்வொரு மாதமும் ₹150 சேமிக்கிறாய். ₹1,800 விலையுள்ள சைக்கிள் பழுது அல்லது புதிய பொருள் வாங்க எத்தனை மாதம் ஆகும்? (வட்டி இல்லாமல்)",
+    "en": "Following the table above you save ₹150 a month. How many months to reach ₹1,800 for a bicycle repair or new item? (ignore interest)"
+   },
+   "answer": 12,
+   "tol": 0.01,
+   "unit": {
+    "ta": "மாதம்",
+    "en": "months"
+   },
+   "hint": {
+    "ta": "1,800 ÷ 150",
+    "en": "1,800 ÷ 150"
+   },
+   "solution": {
+    "ta": "1,800 ÷ 150 = 12 மாதம். (வரவு 200+250+100+100+150 = 800 ✓)",
+    "en": "1,800 ÷ 150 = 12 months. (Check: 200+250+100+100+150 = 800 ✓)"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "UPI கடைகளில்",
+      "en": "UPI in shops"
+     },
+     "text": {
+      "ta": "தேநீர்க் கடை, காய்கறிச் சந்தை, ஆட்டோ — பல இடங்களில் QR code இருக்கிறது. அது NPCI-யின் UPI முறையைப் பயன்படுத்துகிறது.",
+      "en": "Tea shops, vegetable markets, autos — many have a QR code. It uses NPCI's UPI system."
+     }
+    },
+    {
+     "icon": "🏦",
+     "title": {
+      "ta": "வங்கிகளும் கூட்டுறவும்",
+      "en": "Banks & cooperatives"
+     },
+     "text": {
+      "ta": "ஊரில் வங்கிக் கிளைகளும் கூட்டுறவுச் சங்கங்களும் சேமிப்பையும் கடனையும் தருகின்றன; வட்டி வீதத்தைக் கேட்டுத் தெரிந்துகொள்ளலாம்.",
+      "en": "Bank branches and cooperative societies in towns take savings and give loans; you can ask for the interest rate."
+     }
+    },
+    {
+     "icon": "🚨",
+     "title": {
+      "ta": "1930 உதவி எண்",
+      "en": "The 1930 helpline"
+     },
+     "text": {
+      "ta": "இணைய நிதி மோசடிக்குத் தேசிய உதவி எண் 1930 மற்றும் cybercrime.gov.in உள்ளன.",
+      "en": "1930 and cybercrime.gov.in are the national helpline and portal for online financial fraud."
+     }
+    },
+    {
+     "icon": "🧾",
+     "title": {
+      "ta": "ரேஷன் கடை, பால் கணக்கு",
+      "en": "Ration shop, milk account"
+     },
+     "text": {
+      "ta": "வீட்டுக் கணக்கு எழுதிப் பார்ப்பது (வரவு, செலவு, மிச்சம்) உன் குடும்பத்திலேயே நீ தொடங்கக்கூடிய பட்ஜெட் பயிற்சி.",
+      "en": "Writing down the household accounts (income, spending, balance) is a budget exercise you can start in your own home."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இனி மேலும் பல பணப் பரிவர்த்தனைகள் செல்போன் வழியாக நடக்கலாம்; கிராமங்களிலும் இணையமும் வங்கிச் சேவையும் அதிகம் எட்டக்கூடும். இதனால் நேரமும் அலைச்சலும் குறையலாம்.",
+    "en": "In future more payments may happen through phones, and internet and banking may reach villages more widely. That could save time and travel."
+   },
+   "risk": {
+    "ta": "புதுப்புது மோசடி வழிகள்; தேவைக்கு மேல் செலவு செய்யும் பழக்கம்; இணையம் இல்லாதவர்கள் அல்லது முதியவர்கள் பின்தங்குவது.",
+    "en": "New kinds of fraud; the habit of spending more than needed; people without internet access, or elderly people, being left behind."
+   },
+   "fix": {
+    "ta": "விழிப்புணர்வு; PIN/OTP கொடுக்காத பழக்கம்; குடும்பத்தில் பணக் கல்வி; பணக் கணக்கை எழுதிப் பார்ப்பது; பணம் கையாளத் தெரியாத பெரியவர்களுக்கு நீ உதவுவது.",
+    "en": "Awareness; the habit of never giving PIN/OTP; money education in families; writing down your accounts; helping elders who are unsure with payments."
+   },
+   "q": {
+    "ta": "உன் தாத்தாவோ பாட்டியோ UPI பயன்படுத்தத் தொடங்கினால், அவர்களுக்கு நீ என்ன 3 பாதுகாப்பு விதிகள் சொல்வாய்?",
+    "en": "If your grandparents start using UPI, which 3 safety rules would you tell them?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "குடும்பப் பணக் கணக்கு",
+    "en": "Family money notebook"
+   },
+   "text": {
+    "ta": "ஒரு நோட்டில் ஒரு வாரம் உன் செலவுகளை எழுது (தின்பண்டம், பேருந்து, recharge…). வாரக் கடைசியில் மொத்தம் கூட்டு. பிறகு: (1) எதைக் குறைக்கலாம்? (2) வாரம் எவ்வளவு சேமிக்கலாம்? (3) அந்தத் தொகையை 12 ஆண்டு 6% கூட்டு வட்டியில் வைத்தால் எவ்வளவு ஆகும் என்று 72-இன் விதியால் (72 ÷ 6 = 12 → இரட்டிப்பு) ஊகி. வீட்டில் பெரியவர்களிடம் \"UPI-யில் PIN எப்போது போடுவோம்?\" என்று கேட்டு, அவர்களுக்கு விதி 1-ஐ விளக்கு.",
+    "en": "In a notebook write down your spending for one week (snacks, bus, recharge…). At the end, add it up. Then: (1) what could you cut? (2) how much could you save each week? (3) using the rule of 72 (72 ÷ 6 = 12 years to double), guess what that amount would become after 12 years at 6% compound interest. Ask the adults at home \"when do we enter the PIN in UPI?\" and explain Rule 1 to them."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "பணம் அனுப்பும்போதும் பெறும்போதும் PIN-ஐ எப்படிப் பயன்படுத்த வேண்டும்? கூட்டு வட்டி ஏன் காலத்தால் வளர்கிறது?",
+    "en": "How do you treat the PIN when sending and receiving money? Why does compound interest grow with time?"
+   },
+   "keywords": [
+    {
+     "ta": "PIN",
+     "en": "PIN",
+     "alt": [
+      "பின்",
+      "ரகசிய எண்",
+      "secret"
+     ]
+    },
+    {
+     "ta": "அனுப்ப",
+     "en": "send",
+     "alt": [
+      "பணம் அனுப்பும்",
+      "paying",
+      "pay"
+     ]
+    },
+    {
+     "ta": "கூட்டு வட்டி",
+     "en": "compound",
+     "alt": [
+      "வட்டிக்கு வட்டி",
+      "interest on interest"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "PIN-ஐ யாரிடமும் சொல்லக்கூடாது; பணத்தை அனுப்பும்போது மட்டுமே PIN போடுவோம், பெறும்போது தேவையில்லை. கூட்டு வட்டியில் சேர்ந்த வட்டிக்கும் வட்டி கிடைப்பதால் ஆண்டுகள் செல்லச் செல்ல வளர்ச்சி வேகமாகும்.",
+    "en": "Never tell anyone your PIN; we enter it only to send money, not to receive it. In compound interest the interest also earns interest, so growth speeds up as the years pass."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "UPI = NPCI இயக்கும், வங்கிக் கணக்கிலிருந்து கணக்குக்கு உடனடியாகப் பணம் அனுப்பும் முறை (2016-இல் தொடக்கம்).",
+     "en": "UPI = NPCI-run, instant account-to-account transfer (started 2016)."
+    },
+    {
+     "ta": "பணத்தைப் பெற PIN வேண்டாம்; PIN கேட்டால் அது அனுப்பும் திரை. PIN, OTP-ஐ யாரிடமும் சொல்லாதே.",
+     "en": "No PIN to receive; a PIN prompt means sending. Never share PIN or OTP."
+    },
+    {
+     "ta": "ஏமாந்தால் உடனே பெரியவர்களிடமும் வங்கியிடமும் சொல்; 1930 / cybercrime.gov.in-இல் தெரிவி.",
+     "en": "If cheated: adults + bank + 1930 / cybercrime.gov.in at once."
+    },
+    {
+     "ta": "கூட்டு வட்டி = P(1+r)ⁿ; இரட்டிப்பு ≈ 72 ÷ வட்டி %; நேரம் அதன் பலம்.",
+     "en": "Compound = P(1+r)ⁿ; doubling ≈ 72 ÷ rate %; time is its strength."
+    },
+    {
+     "ta": "\"சீக்கிரம் இரட்டிப்பு\" வாக்குறுதிகள் மோசடி அடையாளம்; பட்ஜெட் எழுது, சேமி.",
+     "en": "\"Double fast\" promises are a scam sign; write a budget and save."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "UPI-ஐ இயக்கும் அமைப்பு எது?",
+    "en": "Which organisation runs UPI?"
+   },
+   "options": [
+    {
+     "ta": "NPCI",
+     "en": "NPCI"
+    },
+    {
+     "ta": "உன் செல்போன் நிறுவனம்",
+     "en": "Your mobile company"
+    },
+    {
+     "ta": "தேநீர்க் கடைக்காரர்",
+     "en": "The tea-shop owner"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "UPI-ஐ NPCI இயக்குகிறது; app-கள் வங்கிகளுடன் பேச உதவுபவை மட்டுமே.",
+    "en": "NPCI runs UPI; apps are ways to talk to the banks."
+   }
+  },
+  {
+   "q": {
+    "ta": "பணத்தைப் பெறும்போது PIN பற்றி எது சரி?",
+    "en": "About the PIN when you receive money, which is right?"
+   },
+   "options": [
+    {
+     "ta": "பணம் வர PIN போட வேண்டும்",
+     "en": "You must enter the PIN for money to arrive"
+    },
+    {
+     "ta": "பெற PIN தேவையில்லை; PIN கேட்டால் அது அனுப்பும் திரை",
+     "en": "No PIN is needed to receive; a PIN prompt means sending"
+    },
+    {
+     "ta": "PIN-ஐ அனுப்புபவரிடம் சொல்லலாம்",
+     "en": "You can tell the sender the PIN"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "PIN பணத்தை வெளியே அனுப்ப அனுமதி தரும் ரகசியம்.",
+    "en": "The PIN is the secret that allows money to go out."
+   }
+  },
+  {
+   "q": {
+    "ta": "₹10,000, 10% தனி வட்டியில் 5 ஆண்டுக்குப் பின் தொகை?",
+    "en": "₹10,000 at 10% simple interest after 5 years?"
+   },
+   "options": [
+    {
+     "ta": "₹16,105",
+     "en": "₹16,105"
+    },
+    {
+     "ta": "₹15,500",
+     "en": "₹15,500"
+    },
+    {
+     "ta": "₹15,000",
+     "en": "₹15,000"
+    },
+    {
+     "ta": "₹10,500",
+     "en": "₹10,500"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "10,000 × (1 + 0.10 × 5) = ₹15,000. ₹16,105 கூட்டு வட்டித் தொகை.",
+    "en": "10,000 × (1 + 0.10 × 5) = ₹15,000. ₹16,105 is the compound amount."
+   }
+  },
+  {
+   "q": {
+    "ta": "72-இன் விதிப்படி 12% வட்டியில் பணம் இரட்டிப்பாக சுமார் எவ்வளவு காலம்?",
+    "en": "By the rule of 72, about how long to double at 12%?"
+   },
+   "options": [
+    {
+     "ta": "12 ஆண்டு",
+     "en": "12 years"
+    },
+    {
+     "ta": "7 ஆண்டு",
+     "en": "7 years"
+    },
+    {
+     "ta": "3 ஆண்டு",
+     "en": "3 years"
+    },
+    {
+     "ta": "6 ஆண்டு",
+     "en": "6 years"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "72 ÷ 12 = 6 ஆண்டு.",
+    "en": "72 ÷ 12 = 6 years."
+   }
+  },
+  {
+   "q": {
+    "ta": "முதல் ஆண்டில் தனி வட்டியும் கூட்டு வட்டியும் ஏன் சமம்?",
+    "en": "Why are simple and compound interest equal in the first year?"
+   },
+   "options": [
+    {
+     "ta": "முதல் ஆண்டில் கூட்டுவதற்கு முந்தைய வட்டி எதுவும் இல்லை",
+     "en": "There is no earlier interest yet to add"
+    },
+    {
+     "ta": "வங்கி முதல் ஆண்டு தவறு செய்கிறது",
+     "en": "The bank makes a mistake in year one"
+    },
+    {
+     "ta": "கூட்டு வட்டி 2-ஆம் ஆண்டு வரை இல்லை என்பதால்",
+     "en": "Because compound interest does not exist until year 2"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "வட்டி முதல் ஆண்டு முடிவில்தான் சேர்கிறது; அதன் மேல் வட்டி 2-ஆம் ஆண்டிலிருந்து தொடங்குகிறது.",
+    "en": "Interest is added only at the end of year one; interest on it starts from year two."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"ஒரு மாதத்தில் பணம் இரட்டிப்பு\" என்ற வாக்குறுதியை ஏன் நம்பக்கூடாது?",
+    "en": "Why should you not trust \"money doubles in a month\"?"
+   },
+   "options": [
+    {
+     "ta": "விளம்பரம் தவறாக அச்சடிக்கப்பட்டிருக்கும்",
+     "en": "The advert is probably misprinted"
+    },
+    {
+     "ta": "12 மாதம் இரட்டிப்பானால் 4,096 மடங்கு ஆகும்; நிஜத் தொழில் அப்படி வளராது",
+     "en": "Doubling for 12 months would be 4,096 times; no real business grows like that"
+    },
+    {
+     "ta": "வங்கி மட்டுமே இரட்டிப்பு தர முடியும்",
+     "en": "Only a bank can give doubling"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "2¹² = 4,096. அதிக வருமான வாக்குறுதி என்றால் அதிக ஆபத்து அல்லது மோசடி.",
+    "en": "2¹² = 4,096. A promise of very high returns means high risk or a scam."
+   }
+  },
+  {
+   "q": {
+    "ta": "தேசிய சைபர் குற்ற உதவி எண் எது?",
+    "en": "Which is the national cyber-crime helpline number?"
+   },
+   "options": [
+    {
+     "ta": "1930",
+     "en": "1930"
+    },
+    {
+     "ta": "100 மட்டும்",
+     "en": "Only 100"
+    },
+    {
+     "ta": "1098",
+     "en": "1098"
+    },
+    {
+     "ta": "108",
+     "en": "108"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "இணைய நிதி மோசடிக்கு 1930 (cybercrime.gov.in-உம் உண்டு). 100 காவல்துறை எண், 112 அனைத்துக்குமான அவசர எண்; 108 ஆம்புலன்ஸ்; 1098 குழந்தைகள் உதவி எண்.",
+    "en": "1930 for online financial fraud (also cybercrime.gov.in). 100 is the police number and 112 the all-in-one emergency number; 108 ambulance; 1098 child helpline."
+   }
+  }
+ ]
+}

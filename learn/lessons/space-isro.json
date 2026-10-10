@@ -1,0 +1,860 @@
+{
+ "id": "space-isro",
+ "minutes": 32,
+ "title": {
+  "ta": "விண்வெளியும் இஸ்ரோவும்",
+  "en": "Space and ISRO"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer / NCERT",
+   "w": {
+    "ta": "அறிவியல் வகுப்பு 8–10: விசை, ஈர்ப்பு, கட்டற்ற வீழ்ச்சி (பாடப்பகுதிகள் வகுப்புக்கு வகுப்பு மாறும்)",
+    "en": "Science Classes 8–10: force, gravity, free fall (topics vary by class)"
+   }
+  },
+  {
+   "b": "ISRO",
+   "w": {
+    "ta": "தேசிய விண்வெளி நாள் — 23 ஆகஸ்ட்",
+    "en": "National Space Day — 23 August"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "நிறைக்கும் எடைக்கும் உள்ள வேறுபாட்டையும் பிற கோள்களில் எடை எப்படி மாறும் என்பதையும் கணக்கிட",
+   "en": "Tell mass from weight and calculate weight on other worlds"
+  },
+  {
+   "ta": "செயற்கைக்கோள் ஏன் கீழே விழுவதில்லை என்பதை விளக்க",
+   "en": "Explain why a satellite does not fall down"
+  },
+  {
+   "ta": "இஸ்ரோவின் முக்கிய மைல்கற்களையும் தமிழ்நாட்டின் பங்கையும் சரியான தேதிகளுடன் அறிய",
+   "en": "Know ISRO’s key milestones and Tamil Nadu’s part, with correct dates"
+  },
+  {
+   "ta": "விண்வெளியின் எதிர்கால வாய்ப்புகளையும் அபாயங்களையும் சிந்திக்க",
+   "en": "Think about space’s future chances and risks"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "பள்ளி அறிவியல் ஆய்வகத்தில் உன் நிறை 40 kg என்று தராசு காட்டுகிறது. அதே தராசை நிலாவுக்குக் கொண்டுபோய் அதில் ஏறினால் என்ன காட்டும்? நீ திடீரென்று மெலிந்துவிடுவாயா?\n\n**இது எனக்கு என்ன பயன்?** இந்தப் பாடத்தில் நிறைக்கும் எடைக்கும் உள்ள வேறுபாட்டைப் புரிந்துகொள்வாய். செயற்கைக்கோள்கள் ஏன் கீழே விழாமல் சுற்றுகின்றன என்று அறிவாய். புயல் எச்சரிக்கை, டிவி, வரைபடம் ஆகியவை வானிலிருந்து எப்படி வருகின்றன என்றும், நம் தமிழ்நாட்டு ஊர்களிலிருந்து வந்த விஞ்ஞானிகள் இஸ்ரோவில் என்ன செய்தார்கள் என்றும் தெரிந்துகொள்வாய். நாளை நீயும் இதில் ஒரு பங்கு வகிக்கலாம்.",
+    "en": "Your school lab scale says your mass is 40 kg. Take that same scale to the Moon and step on it — what will it show? Will you suddenly become thin?\n\n**What is in it for me?** In this lesson you will learn the difference between mass and weight, and why satellites circle the Earth without falling down. You will see how storm warnings, TV and maps reach us from space, and what scientists from Tamil Nadu towns did at ISRO. Tomorrow you could play a part in it too."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "40 kg நிறை உள்ள ஒரு மாணவி நிலாவில் ஒரு ஸ்பிரிங் தராசில் ஏறினால், தராசு சுமார் எவ்வளவு காட்டும்?",
+    "en": "A student of mass 40 kg stands on a spring scale on the Moon. Roughly what will the scale show?"
+   },
+   "options": [
+    {
+     "ta": "40 kg — மாறாது",
+     "en": "40 kg — no change"
+    },
+    {
+     "ta": "20 kg — பாதி",
+     "en": "20 kg — half"
+    },
+    {
+     "ta": "சுமார் 6–7 kg",
+     "en": "About 6–7 kg"
+    },
+    {
+     "ta": "0 kg — எடையே இருக்காது",
+     "en": "0 kg — no weight at all"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "நிலாவின் ஈர்ப்பு பூமியின் ஈர்ப்பில் சுமார் ஆறில் ஒரு பங்கு (1.62 ÷ 9.81 ≈ 0.165). எனவே தராசு சுமார் 40 ÷ 6 ≈ 6.6 kg காட்டும். உன் உடலில் உள்ள பொருளின் அளவு (நிறை) மாறவில்லை — இழுக்கும் விசைதான் குறைந்தது. எந்த ஊகமாக இருந்தாலும் பரவாயில்லை; இப்போது நீயே சோதித்துப் பார்!",
+    "en": "The Moon’s gravity is about one-sixth of Earth’s (1.62 ÷ 9.81 ≈ 0.165). So the scale shows about 40 ÷ 6 ≈ 6.6 kg. The amount of matter in your body (your mass) has not changed — only the pull has. Whatever you guessed, now test it yourself!"
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "planetWeight",
+   "params": {},
+   "text": {
+    "ta": "கோளைத் தேர்ந்தெடு, உன் நிறையை நகர்த்து. **எடை (N)** எப்படி மாறுகிறது, **நிறை** மாறுகிறதா என்று கவனி. 40 kg நிறைக்குப் பூமியில் தராசு 40 kg காட்டும்.",
+    "en": "Pick a world and move the mass slider. Watch how the **weight (N)** changes, and whether the **mass** changes. For a 40 kg mass, the scale on Earth shows 40 kg."
+   },
+   "q": {
+    "ta": "40 kg நிறையுடன் தராசு சுமார் 20 kg (பூமியில் உள்ளதில் பாதி) காட்டும் நிலைக்கு மிக அருகில் வருவது எந்தக் கோள் / இடம்?",
+    "en": "With a 40 kg mass, which world comes closest to a scale reading of about 20 kg (half of the Earth value)?"
+   },
+   "options": [
+    {
+     "ta": "நிலா (Moon)",
+     "en": "Moon"
+    },
+    {
+     "ta": "செவ்வாய் (Mars)",
+     "en": "Mars"
+    },
+    {
+     "ta": "வெள்ளி (Venus)",
+     "en": "Venus"
+    },
+    {
+     "ta": "வியாழன் (Jupiter)",
+     "en": "Jupiter"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "எந்த இடத்திலும் சரியாகப் பாதி வராது! செவ்வாயில் தராசு சுமார் 15.1 kg காட்டும் (பூமியின் சுமார் 38 %); புதனிலும் கிட்டத்தட்ட அதே. நிலாவில் சுமார் 6.6 kg, வெள்ளியில் சுமார் 36.2 kg, வியாழனில் சுமார் 101 kg. எல்லா இடத்திலும் உன் **நிறை 40 kg-ஆகவே** இருக்கிறது.",
+    "en": "No world gives exactly half! On Mars the scale shows about 15.1 kg (about 38 % of the Earth value); Mercury is almost the same. The Moon gives about 6.6 kg, Venus about 36.2 kg and Jupiter about 101 kg. Everywhere, your **mass stays 40 kg**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நிறை வேறு, எடை வேறு",
+    "en": "Mass is one thing, weight is another"
+   },
+   "text": {
+    "ta": "**நிறை (mass)** என்பது உன் உடலில் எவ்வளவு பொருள் இருக்கிறது என்பது. அது kg-இல் அளக்கப்படும்; நீ எங்கே போனாலும் மாறாது.\n\n**எடை (weight)** என்பது அந்த இடத்தின் ஈர்ப்பு உன்னைக் கீழே இழுக்கும் **விசை**. அது நியூட்டன் (N) என்ற அலகில் அளக்கப்படும்; இடத்துக்கு இடம் மாறும்.\n\n[[ எடை (N) = நிறை (kg) × g ]]\n\nபூமியில் g ≈ 9.81 N/kg (தோராயம்). நிலாவில் ≈ 1.62, செவ்வாயில் ≈ 3.71. தினசரி பேச்சில் \"என் எடை 40 kg\" என்கிறோம்; அறிவியலில் அது **நிறை**. நாம் பயன்படுத்தும் தராசு உண்மையில் இழுக்கும் விசையை அளந்து, பூமியின் g-ஆல் வகுத்து kg-இல் காட்டுகிறது — அதனால்தான் நிலாவில் அது குறைவாகக் காட்டும்.",
+    "en": "**Mass** is how much matter your body contains. It is measured in kg and does not change wherever you go.\n\n**Weight** is the **force** with which a place’s gravity pulls you down. It is measured in newtons (N) and changes from place to place.\n\n[[ weight (N) = mass (kg) × g ]]\n\nOn Earth g ≈ 9.81 N/kg (approx.). On the Moon ≈ 1.62, on Mars ≈ 3.71. In daily talk we say \"my weight is 40 kg\"; in science that is your **mass**. A scale really measures the pull, divides by Earth’s g and shows kg — which is why it reads less on the Moon."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "40 kg மாணவி",
+    "en": "A 40 kg student"
+   },
+   "q": {
+    "ta": "40 kg நிறை உள்ள மாணவியின் எடை பூமியிலும் நிலாவிலும் எவ்வளவு? நிலாவில் தராசு எத்தனை kg காட்டும்?",
+    "en": "What is the weight of a 40 kg student on Earth and on the Moon? How many kg would a scale show on the Moon?"
+   },
+   "steps": [
+    {
+     "ta": "பூமி: 40 × 9.81 = 392.4 N",
+     "en": "Earth: 40 × 9.81 = 392.4 N"
+    },
+    {
+     "ta": "நிலா: 40 × 1.62 = 64.8 N",
+     "en": "Moon: 40 × 1.62 = 64.8 N"
+    },
+    {
+     "ta": "தராசு kg-இல் காட்ட, பூமியின் g-ஆல் வகு: 64.8 ÷ 9.81 ≈ 6.6 kg",
+     "en": "A scale shows kg by dividing by Earth’s g: 64.8 ÷ 9.81 ≈ 6.6 kg"
+    }
+   ],
+   "answer": {
+    "ta": "பூமியில் 392.4 N; நிலாவில் 64.8 N; தராசு ≈ 6.6 kg. நிறை எங்கும் 40 kg.",
+    "en": "392.4 N on Earth; 64.8 N on the Moon; a scale shows ≈ 6.6 kg. Mass is 40 kg everywhere."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "45 kg நிறை உள்ள ஒருவர் நிலாவில் (g = 1.62) தராசில் ஏறினால் தராசு சுமார் எத்தனை kg காட்டும்?",
+    "en": "A person of mass 45 kg steps on a scale on the Moon (g = 1.62). About how many kg will it show?"
+   },
+   "answer": 7.4,
+   "tol": 0.2,
+   "unit": {
+    "ta": "kg",
+    "en": "kg"
+   },
+   "hint": {
+    "ta": "45 × 1.62 = எடை (N); பிறகு 9.81-ஆல் வகு.",
+    "en": "45 × 1.62 gives the weight (N); then divide by 9.81."
+   },
+   "solution": {
+    "ta": "45 × 1.62 = 72.9 N; 72.9 ÷ 9.81 ≈ 7.4 kg. (அல்லது 45 × 0.165 ≈ 7.4)",
+    "en": "45 × 1.62 = 72.9 N; 72.9 ÷ 9.81 ≈ 7.4 kg. (Or 45 × 0.165 ≈ 7.4)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "50 kg நிறை உள்ள ஒருவரின் எடை செவ்வாயில் (g = 3.71) எத்தனை நியூட்டன்?",
+    "en": "What is the weight, in newtons, of a 50 kg person on Mars (g = 3.71)?"
+   },
+   "answer": 185.5,
+   "tol": 1,
+   "unit": {
+    "ta": "N",
+    "en": "N"
+   },
+   "hint": {
+    "ta": "எடை = நிறை × g",
+    "en": "weight = mass × g"
+   },
+   "solution": {
+    "ta": "50 × 3.71 = 185.5 N. (பூமியில் 50 × 9.81 = 490.5 N — செவ்வாயில் சுமார் 38 % மட்டுமே.)",
+    "en": "50 × 3.71 = 185.5 N. (On Earth it is 50 × 9.81 = 490.5 N — only about 38 % of that on Mars.)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ராக்கெட் ஏன் பக்கவாட்டில் வேகமாகப் போக வேண்டும்?",
+    "en": "Why must a rocket go fast sideways?"
+   },
+   "text": {
+    "ta": "ஒரு மலை உச்சியில் நின்று கல்லை எறி. மெதுவாக எறிந்தால் அருகில் விழும்; வேகமாக எறிந்தால் தொலைவில் விழும். எப்படியும் கல் **கீழே விழுந்துகொண்டே** இருக்கிறது.\n\nநியூட்டன் இதை யோசித்தார்: மிக உயர்ந்த மலையில் ஒரு பீரங்கி இருந்தால்? ஒரு வினாடியில் கல் சுமார் 4.9 m கீழே விழும் (½ × 9.81 × 1²). பூமி உருண்டை; பக்கவாட்டில் சுமார் 8 km போனால் தரை சுமார் 5 m கீழே வளைந்துவிடுகிறது. கல் வினாடிக்குச் சுமார் 8 km வேகத்தில் போனால், அது விழுந்தாலும் தரையும் அதே அளவு வளைந்து விலகும் — **கல் தரையைத் தொடவே தொடாது**. அதுதான் சுற்றுப்பாதை (orbit). (இது ஒரு எளிய மாதிரி.)\n\nஉண்மையில் சுமார் 400 km உயரத்தில் சுற்றும் விண்வெளி நிலையத்தின் வேகம் சுமார் 7.7 km/s (மணிக்குச் சுமார் 28,000 km). அதனால் ராக்கெட்டின் முக்கிய வேலை வெறும் மேலே போவது அல்ல; **பக்கவாட்டில் மிக வேகம் தருவது**. உயரம், காற்றின் தடையைத் தாண்ட உதவும்.",
+    "en": "Stand on a hilltop and throw a stone. Throw slowly and it lands near; throw fast and it lands far. Either way the stone is **always falling**.\n\nNewton imagined a cannon on a very tall mountain. In one second a stone falls about 4.9 m (½ × 9.81 × 1²). The Earth is round: after about 8 km sideways, the ground has curved away by about 5 m. If the stone moves about 8 km every second, it falls — but the ground curves away by the same amount — so **the stone never touches the ground**. That is an orbit. (This is a simple model.)\n\nIn reality a space station about 400 km up moves at about 7.7 km/s (roughly 28,000 km per hour). So a rocket’s main job is not just going up; it is **giving huge sideways speed**. Height helps it get above the thick air."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு செயற்கைக்கோள் ஒரு முறை சுற்றிவர சுமார் 90 நிமிடம் ஆகிறது. 24 மணி நேரத்தில் (1440 நிமிடம்) அது எத்தனை முறை பூமியைச் சுற்றும்?",
+    "en": "A satellite takes about 90 minutes for one orbit. How many orbits does it make in 24 hours (1440 minutes)?"
+   },
+   "answer": 16,
+   "tol": 0.1,
+   "unit": {
+    "ta": "முறை",
+    "en": "orbits"
+   },
+   "hint": {
+    "ta": "1440 ÷ 90",
+    "en": "1440 ÷ 90"
+   },
+   "solution": {
+    "ta": "1440 ÷ 90 = 16. விண்வெளி நிலையத்தில் உள்ளவர்கள் ஒரு நாளில் சுமார் 16 சூரிய உதயங்களைப் பார்க்கிறார்கள்!",
+    "en": "1440 ÷ 90 = 16. People on the space station see about 16 sunrises in a day!"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "விண்வெளி நிலையத்தில் (சுமார் 400 km உயரம்) வீரர்கள் மிதக்கிறார்கள். அங்கே பூமியின் ஈர்ப்பு எப்படி இருக்கும்?",
+    "en": "Astronauts float in the space station (about 400 km up). What is Earth’s gravity like there?"
+   },
+   "options": [
+    {
+     "ta": "கிட்டத்தட்ட பூஜ்யம்",
+     "en": "Almost zero"
+    },
+    {
+     "ta": "தரையில் உள்ளதில் சுமார் 90 % — இன்னும் வலுவாக உள்ளது",
+     "en": "About 90 % of its value on the ground — still strong"
+    },
+    {
+     "ta": "தரையை விட அதிகம்",
+     "en": "Greater than on the ground"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "ஈர்ப்பு தூரத்தோடு மெதுவாகத்தான் குறைகிறது; பூமியின் ஆரம் சுமார் 6,371 km.",
+    "en": "Gravity weakens only slowly with distance; Earth’s radius is about 6,371 km."
+   },
+   "solution": {
+    "ta": "(6371 ÷ 6771)² ≈ 0.89, அதாவது சுமார் 89 %. வீரர்கள் மிதப்பதற்குக் காரணம் ஈர்ப்பு இல்லாதது அல்ல; அவர்களும் நிலையமும் ஒன்றாகச் சேர்ந்து **விழுந்துகொண்டே** இருப்பதால், தராசின் மேல் எதுவும் அழுத்துவதில்லை.",
+    "en": "(6371 ÷ 6771)² ≈ 0.89, i.e. about 89 %. Astronauts float not because gravity is absent, but because they and the station are **falling together**, so nothing presses on a scale."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "செயற்கைக்கோள்கள் நம் அன்றாட வாழ்வில்",
+    "en": "Satellites in everyday life"
+   },
+   "items": [
+    {
+     "icon": "🌀",
+     "title": {
+      "ta": "புயல் எச்சரிக்கை",
+      "en": "Cyclone warnings"
+     },
+     "text": {
+      "ta": "இந்திய வானிலை ஆய்வுத் துறை, இன்சாட் வகை செயற்கைக்கோள்களின் மேகப் படங்களைப் பார்த்துப் புயலின் நகர்வைக் கண்காணிக்கிறது.",
+      "en": "India’s weather department tracks a cyclone using cloud pictures from INSAT-series satellites."
+     }
+    },
+    {
+     "icon": "🎣",
+     "title": {
+      "ta": "மீனவர்களுக்கு",
+      "en": "For fishermen"
+     },
+     "text": {
+      "ta": "கடல் மேற்பரப்பு வெப்பம் போன்ற செயற்கைக்கோள் தரவுகளிலிருந்து INCOIS மீன் கிடைக்க வாய்ப்புள்ள பகுதிகளைத் தெரிவிக்கிறது. இஸ்ரோவின் NavIC செய்திக் கருவிகள் புயல்-அலை எச்சரிக்கைகளுக்காகச் சோதிக்கப்பட்டன; தமிழ்நாடு மீன்வளத் துறைக்கும் சில கருவிகள் வழங்கப்பட்டன (2020 மக்களவைப் பதில்).",
+      "en": "INCOIS uses satellite data such as sea-surface temperature to advise where fish are likely. ISRO’s NavIC messaging receivers were trialled for storm and high-wave alerts; some were given to Tamil Nadu’s fisheries department (2020 Lok Sabha reply)."
+     }
+    },
+    {
+     "icon": "🧭",
+     "title": {
+      "ta": "வழிகாட்டும் NavIC",
+      "en": "Navigation: NavIC"
+     },
+     "text": {
+      "ta": "NavIC இந்தியாவின் சொந்தப் பகுதி வழிகாட்டு அமைப்பு; இந்தியாவிலும் அதைச் சுற்றி சுமார் 1,500 km வரையிலும் இடத்தைச் சொல்ல வடிவமைக்கப்பட்டது. போன்கள் பல நாடுகளின் செயற்கைக்கோள் சமிக்ஞைகளையும் பயன்படுத்துகின்றன.",
+      "en": "NavIC is India’s own regional navigation system, designed to give position over India and up to about 1,500 km around it. Phones also use signals from several countries’ satellites."
+     }
+    },
+    {
+     "icon": "📺",
+     "title": {
+      "ta": "டிவி, தொடர்பு",
+      "en": "TV and communication"
+     },
+     "text": {
+      "ta": "டிடிஎச் தொலைக்காட்சி போன்ற பல சேவைகளுக்குத் தொடர்புச் செயற்கைக்கோள்கள் உதவுகின்றன; தொலைதூரப் பகுதிகளுக்கும் இணைப்பு போகலாம்.",
+      "en": "Communication satellites serve things like DTH television and can reach remote places."
+     }
+    },
+    {
+     "icon": "🌾",
+     "title": {
+      "ta": "விவசாயமும் நிலமும்",
+      "en": "Farms and land"
+     },
+     "text": {
+      "ta": "பூமியைப் படம் எடுக்கும் செயற்கைக்கோள்கள் பயிர்ப் பரப்பு, வறட்சி, வெள்ளம் போன்றவற்றைக் கண்காணிக்க அதிகாரிகளுக்கு உதவுகின்றன.",
+      "en": "Earth-observing satellites help officials keep watch on crop area, drought and floods."
+     }
+    }
+   ]
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "இஸ்ரோ — சில முக்கிய மைல்கற்கள்",
+    "en": "ISRO — some milestones"
+   },
+   "text": {
+    "ta": "தேதிகள் இஸ்ரோ / நாசா அறிக்கைகளிலிருந்து சரிபார்க்கப்பட்டவை.",
+    "en": "Dates checked against ISRO / NASA material."
+   },
+   "head": [
+    {
+     "ta": "தேதி",
+     "en": "Date"
+    },
+    {
+     "ta": "என்ன நடந்தது",
+     "en": "What happened"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "1962",
+      "en": "1962"
+     },
+     {
+      "ta": "விக்ரம் சாராபாய் ஆலோசனையில் விண்வெளி ஆராய்ச்சிக்கான இந்தியத் தேசியக் குழு (INCOSPAR) அமைக்கப்பட்டது",
+      "en": "The Indian National Committee for Space Research (INCOSPAR) was set up on Vikram Sarabhai’s advice"
+     }
+    ],
+    [
+     {
+      "ta": "15 ஆகஸ்ட் 1969",
+      "en": "15 Aug 1969"
+     },
+     {
+      "ta": "இஸ்ரோ (ISRO) அமைக்கப்பட்டது",
+      "en": "ISRO was formed"
+     }
+    ],
+    [
+     {
+      "ta": "19 ஏப்ரல் 1975",
+      "en": "19 Apr 1975"
+     },
+     {
+      "ta": "ஆர்யபட்டா — இந்தியா உருவாக்கிய முதல் செயற்கைக்கோள் — சோவியத் ஒன்றியத்தின் ராக்கெட்டில் ஏவப்பட்டது",
+      "en": "Aryabhata, India’s first satellite, was launched from the Soviet Union on a Soviet rocket"
+     }
+    ],
+    [
+     {
+      "ta": "18 ஜூலை 1980",
+      "en": "18 Jul 1980"
+     },
+     {
+      "ta": "SLV-3 ராக்கெட் ரோகிணி செயற்கைக்கோளை சுற்றுப்பாதையில் சேர்த்தது — இந்திய ராக்கெட்டில் முதல் வெற்றி",
+      "en": "SLV-3 put the Rohini satellite in orbit — the first success on an Indian rocket"
+     }
+    ],
+    [
+     {
+      "ta": "22 அக்டோபர் 2008",
+      "en": "22 Oct 2008"
+     },
+     {
+      "ta": "சந்திரயான்-1 ஏவப்பட்டது; 8 நவம்பர் 2008-இல் நிலாவைச் சுற்றத் தொடங்கியது",
+      "en": "Chandrayaan-1 launched; entered lunar orbit on 8 Nov 2008"
+     }
+    ],
+    [
+     {
+      "ta": "5 நவம்பர் 2013 → 24 செப்டம்பர் 2014",
+      "en": "5 Nov 2013 → 24 Sep 2014"
+     },
+     {
+      "ta": "மங்கள்யான் (Mars Orbiter Mission) ஏவப்பட்டு, செவ்வாய்ச் சுற்றுப்பாதையை அடைந்தது. ஆறு மாதத் திட்டம் பல ஆண்டுகள் செயல்பட்டது.",
+      "en": "Mangalyaan (Mars Orbiter Mission) launched and reached Mars orbit. A six-month mission, it worked for years."
+     }
+    ],
+    [
+     {
+      "ta": "23 ஆகஸ்ட் 2023",
+      "en": "23 Aug 2023"
+     },
+     {
+      "ta": "சந்திரயான்-3 நிலாவின் தென் துருவப் பகுதிக்கு அருகில் தரையிறங்கியது",
+      "en": "Chandrayaan-3 landed near the Moon’s south polar region"
+     }
+    ],
+    [
+     {
+      "ta": "2 செப்டம்பர் 2023 → 6 ஜனவரி 2024",
+      "en": "2 Sep 2023 → 6 Jan 2024"
+     },
+     {
+      "ta": "ஆதித்யா-L1 ஏவப்பட்டு, சூரியனைக் கண்காணிக்கும் L1 சுற்றுப்பாதையை அடைந்தது",
+      "en": "Aditya-L1 launched and reached its L1 orbit for watching the Sun"
+     }
+    ],
+    [
+     {
+      "ta": "16 ஜனவரி 2025",
+      "en": "16 Jan 2025"
+     },
+     {
+      "ta": "SpaDeX: இரண்டு சிறு செயற்கைக்கோள்கள் விண்ணில் இணைந்ததை (docking) இஸ்ரோ உறுதிப்படுத்தியது",
+      "en": "SpaDeX: ISRO confirmed that two small satellites docked with each other in orbit"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சந்திரயான்-3: \"தென் துருவப் பகுதி\" என்றால் என்ன?",
+    "en": "Chandrayaan-3: what does “south polar region” mean?"
+   },
+   "text": {
+    "ta": "**சந்திரயான்-3** 14 ஜூலை 2023-இல் ஏவப்பட்டது. **23 ஆகஸ்ட் 2023** மாலை சுமார் 6 மணிக்கு, அதன் **விக்ரம்** தரையிறங்கி நிலாவில் மெதுவாக இறங்கியது; **பிரக்யான்** ஊர்தி வெளியே வந்து ஓடியது. இதற்கு நான்கு ஆண்டுகள் முன்பு சந்திரயான்-2-இன் தரையிறங்கி விழுந்து நொறுங்கியது. அந்தத் தவறுகளிலிருந்து கற்றுத்தான் இந்த வெற்றி வந்தது. சோவியத் ஒன்றியம், அமெரிக்கா, சீனா ஆகியவற்றுக்குப் பிறகு நிலாவில் மெதுவாக இறங்கிய நான்காவது நாடு இந்தியா. அந்த நாளே இப்போது **தேசிய விண்வெளி நாளாகக்** கொண்டாடப்படுகிறது.\n\nபூமியில் அட்சரேகை உள்ளது போல நிலாவுக்கும் உண்டு. தரையிறங்கிய இடம் சுமார் 69° தெற்கு — துருவத்திலிருந்து சுமார் 600 km தொலைவில், நிலாவின் தென் துருவப் பகுதியில் (நடுக்கோட்டிலிருந்து வெகு தொலைவில்). இங்கே சூரியன் எப்போதும் தாழ்வாகவே தெரியும்; சில பள்ளங்களின் அடிப்பகுதிக்குச் சூரிய ஒளியே வருவதில்லை. அங்கே பனிக்கட்டி இருக்கலாம் என்று விஞ்ஞானிகள் கருதுகிறார்கள். எதிர்கால நிலா வீரர்களுக்கு நீர் ஒரு பெரிய வளமாக இருக்கலாம் என்பதால் அப்பகுதி ஆர்வம் தருகிறது. 2023-இல், இந்தப் பகுதிக்கு அருகில் இவ்வளவு மெதுவாக இறங்கிய முதல் விண்கலம் என்று அறிக்கைகள் கூறின.",
+    "en": "**Chandrayaan-3** was launched on 14 July 2023. On **23 August 2023**, around 6 pm, its lander **Vikram** touched down softly on the Moon, and the rover **Pragyan** rolled out. Four years earlier, Chandrayaan-2’s lander had crashed; this success grew out of learning from that. After the Soviet Union, the USA and China, India became the fourth country to land softly on the Moon. That day is now celebrated as **National Space Day**.\n\nThe Moon has latitude lines like the Earth. The landing spot was about 69° south — roughly 600 km from the pole, in the Moon’s south polar region and far from the equator. There the Sun always sits low in the sky, and the floors of some craters never see sunlight. Scientists think ice may be hiding there. Because water could be a precious resource for future Moon travellers, the region is interesting. In 2023, reports described it as the first spacecraft to land softly so near this region."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஆதித்யா-L1: சூரியனைக் கவனிக்கும் செயற்கைக்கோள்",
+    "en": "Aditya-L1: a satellite that watches the Sun"
+   },
+   "text": {
+    "ta": "\"ஆதித்யா\" என்றால் சூரியன். **ஆதித்யா-L1** 2 செப்டம்பர் 2023-இல் ஏவப்பட்டு, 6 ஜனவரி 2024-இல் **L1 புள்ளியைச்** சுற்றும் பாதையை அடைந்தது. L1 என்பது பூமியிலிருந்து சூரியன் பக்கம் சுமார் 15 லட்சம் km தொலைவில் உள்ள ஓர் இடம். அங்கே சூரியனும் பூமியும் தரும் ஈர்ப்புகள் ஒன்றோடொன்று சேர்ந்து, விண்கலம் மிகக் குறைந்த எரிபொருளுடன் தங்கி இருக்க உதவும். பூமியின் நிழலோ கிரகணமோ தடுக்காமல் சூரியனைத் தொடர்ந்து பார்க்கலாம்.\n\nஇது சூரியனின் வெளிப்புற அடுக்குகளையும், சூரியப் புயல்களையும், **விண்வெளி வானிலையையும்** ஆராய்கிறது. சூரியப் புயல்கள் செயற்கைக்கோள்கள், வழிகாட்டும் சமிக்ஞைகள், மின்தொகுப்புகளைப் பாதிக்கலாம் என்பதால் இந்த ஆராய்ச்சி நமக்குப் பயன் தருகிறது.",
+    "en": "“Aditya” means the Sun. **Aditya-L1** was launched on 2 September 2023 and on 6 January 2024 reached an orbit around the **L1 point**. L1 is a spot about 1.5 million km from Earth towards the Sun, where the pulls of the Sun and Earth combine so that a spacecraft can stay there using very little fuel. It can watch the Sun continuously, without Earth’s shadow or eclipses getting in the way.\n\nIt studies the Sun’s outer layers, solar storms and **space weather**. Solar storms can disturb satellites, navigation signals and power grids, so this research is useful to us."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "தமிழ்நாட்டின் தொடர்புகள்",
+    "en": "Tamil Nadu connections"
+   },
+   "items": [
+    {
+     "icon": "🚀",
+     "title": {
+      "ta": "ஏ. பி. ஜே. அப்துல் கலாம்",
+      "en": "A. P. J. Abdul Kalam"
+     },
+     "text": {
+      "ta": "ராமேஸ்வரத்தில் பிறந்தவர்; இந்தியாவின் முதல் செயற்கைக்கோள் ஏவு ராக்கெட்டான SLV-3 திட்டத்தின் இயக்குநராக இருந்தார்.",
+      "en": "Born in Rameswaram; he was project director of SLV-3, India’s first satellite-launch rocket."
+     }
+    },
+    {
+     "icon": "🌕",
+     "title": {
+      "ta": "மயில்சாமி அண்ணாதுரை",
+      "en": "Mylswamy Annadurai"
+     },
+     "text": {
+      "ta": "கோயம்புத்தூர் மாவட்டம் கொத்தவாடியில் பிறந்தவர்; சந்திரயான்-1 திட்ட இயக்குநர், மங்கள்யான் திட்டத்தின் திட்ட இயக்குநர் (programme director).",
+      "en": "Born in Kothavadi, Coimbatore district; project director of Chandrayaan-1 and programme director of Mangalyaan."
+     }
+    },
+    {
+     "icon": "🛬",
+     "title": {
+      "ta": "பி. வீரமுத்துவேல்",
+      "en": "P. Veeramuthuvel"
+     },
+     "text": {
+      "ta": "விழுப்புரத்தில் வளர்ந்தவர்; சந்திரயான்-3 திட்ட இயக்குநர். பள்ளிக்குப் பின் டிப்ளோமா படித்து, பிறகு பொறியியல் படித்தார் — பல வழிகள் உண்டு!",
+      "en": "Grew up in Villupuram; project director of Chandrayaan-3. After school he did a diploma, then engineering — there are many paths!"
+     }
+    },
+    {
+     "icon": "☀️",
+     "title": {
+      "ta": "நிகர் ஷாஜி",
+      "en": "Nigar Shaji"
+     },
+     "text": {
+      "ta": "தென்காசி மாவட்டம் செங்கோட்டையில் வளர்ந்தவர்; அரசுப் பெண்கள் பள்ளியில் படித்தவர்; ஆதித்யா-L1 திட்ட இயக்குநர்.",
+      "en": "Grew up in Sengottai, Tenkasi district; studied in a government girls’ school; project director of Aditya-L1."
+     }
+    },
+    {
+     "icon": "🏗️",
+     "title": {
+      "ta": "குலசேகரப்பட்டினம்",
+      "en": "Kulasekarapattinam"
+     },
+     "text": {
+      "ta": "தூத்துக்குடி மாவட்டத்தில் இஸ்ரோவின் இரண்டாவது ஏவுதளம் (சிறிய ராக்கெட்டுகளுக்கு) கட்டப்படுகிறது; அடிக்கல் நாட்டியது 28 பிப்ரவரி 2024. இறுதித் தேதிகள் மாறக்கூடும் — இஸ்ரோவின் அறிவிப்பைப் பார்.",
+      "en": "A second ISRO launch site (for small rockets) is being built in Thoothukudi district; foundation stone 28 Feb 2024. Dates may change — check ISRO’s announcements."
+     }
+    },
+    {
+     "icon": "🔥",
+     "title": {
+      "ta": "மகேந்திரகிரி",
+      "en": "Mahendragiri"
+     },
+     "text": {
+      "ta": "திருநெல்வேலி மாவட்டத்தில் இஸ்ரோவின் ராக்கெட் இயந்திரச் சோதனை மையம் உள்ளது.",
+      "en": "ISRO’s rocket-engine testing complex is in Tirunelveli district."
+     }
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ககன்யான்: இப்போதைய நிலை",
+    "en": "Gaganyaan: where it stands"
+   },
+   "text": {
+    "ta": "**ககன்யான்** என்பது இந்திய வீரர்களை இந்திய விண்கலத்தில் சுமார் 400 km உயரச் சுற்றுப்பாதைக்கு அனுப்பிப் பாதுகாப்பாகக் கடலில் இறக்கும் திட்டம். மனிதர்களை அனுப்பும் முன் ஆளில்லாச் சோதனைப் பயணங்கள் நடக்கும்; முதல் பயணத்தில் மனித வடிவ ரோபோ \"வியோம்மித்ரா\" செல்வதாகத் திட்டம். 2026 அக்டோபர் நிலவரப்படி அந்த முதல் ஆளில்லாப் பயணம் இன்னும் நடக்கவில்லை; 2026-இன் கடைசிக் காலாண்டை இஸ்ரோ இலக்காகக் கொண்டுள்ளது. தேதிகள் பலமுறை மாறியுள்ளன. மனிதர்கள் செல்லும் பயணத்தின் தேதியும் உறுதியாக இல்லை. சமீபத்திய நிலையை isro.gov.in-இல் பார்.",
+    "en": "**Gaganyaan** is the project to send Indian astronauts in an Indian spacecraft to an orbit about 400 km up and bring them safely down in the sea. Before people fly, there will be uncrewed test flights; the first is planned to carry a humanoid robot called \"Vyommitra\". As of October 2026, that first uncrewed flight had not yet happened; ISRO has been aiming for the last quarter of 2026. Dates have shifted several times, and the crewed flight date is not fixed. Check isro.gov.in for the latest."
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "எதிர்கால விண்வெளி",
+    "en": "Space tomorrow"
+   },
+   "text": {
+    "ta": "**மறுபயன்பாட்டு ராக்கெட்டுகள்:** வெளிநாட்டில் சில நிறுவனங்கள் ராக்கெட்டின் பகுதிகளைத் தரையிறக்கி மீண்டும் பயன்படுத்துகின்றன. இஸ்ரோ சிறகுள்ள ஒரு மாதிரி விண்கலத்தைத் தானாகத் தரையிறக்கிச் சோதித்துள்ளது. வெற்றி பெற்றால் ஏவும் செலவு குறையலாம்.\n\n**நிலா, விண்வெளி நிலைய இலக்குகள்:** 2023 அக்டோபரில் இந்தியா தனது விண்வெளி நிலையம் 2035-க்குள், ஒரு இந்தியர் நிலாவில் 2040-க்குள் என்று இலக்குகளை அறிவித்தது. இவை இலக்குகள்; உறுதிமொழிகள் அல்ல. நிலாவில் நிரந்தரத் தளம் அமைக்கும் யோசனைகள் பல நாடுகளிடம் உள்ளன.",
+    "en": "**Reusable rockets:** Some companies abroad land parts of their rockets and fly them again. ISRO has tested landing a winged model vehicle on its own. If this works, launches could become cheaper.\n\n**Moon and space-station goals:** In October 2023 India announced goals: its own space station by 2035 and an Indian on the Moon by 2040. These are goals, not promises. Several countries have ideas for a permanent Moon base."
+   },
+   "risk": {
+    "ta": "**விண்வெளிக் குப்பை:** பழைய செயற்கைக்கோள்கள், உடைந்த துண்டுகள் என்று, கண்காணிக்கப்படுபவை மட்டுமே பல பத்தாயிரம் பொருட்கள் சுற்றுகின்றன. வினாடிக்குச் சுமார் 7–8 km வேகத்தில் ஒரு சிறு துண்டுகூட செயற்கைக்கோளைச் சேதப்படுத்தலாம்.",
+    "en": "**Space debris:** old satellites and broken pieces — tens of thousands of tracked objects alone — are circling. At about 7–8 km every second, even a small fragment can damage a satellite."
+   },
+   "fix": {
+    "ta": "செயற்கைக்கோள் வேலை முடிந்ததும் தாழ்வாக இறக்கி எரிய விடுவது, குப்பையைக் கண்காணிப்பது, நாடுகள் சேர்ந்து விதிகள் வகுப்பது.",
+    "en": "Bringing satellites down to burn up when their job ends, tracking debris, and countries agreeing on shared rules."
+   },
+   "q": {
+    "ta": "விண்வெளி நெரிசலாகிவிட்டால், யார் விதிகளை வகுக்க வேண்டும்? ஏன்?",
+    "en": "If space gets crowded, who should make the rules? Why?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "விண்வெளியில் வேலை செய்ய...",
+    "en": "Working in space…"
+   },
+   "text": {
+    "ta": "இஸ்ரோவில் பொறியாளர்கள், இயற்பியல்-கணித விஞ்ஞானிகள் மட்டுமல்ல; ராக்கெட் பாகங்களைச் செய்யும் தொழில்நுட்பப் பணியாளர்கள் (டெக்னீசியன்கள்), மென்பொருள் எழுதுபவர்கள், தரவை ஆராய்பவர்கள், மருத்துவர்கள், அறிவியலை எளிமையாக விளக்கும் ஆசிரியர்கள் எனப் பலரும் தேவை. இந்தியாவில் சிறிய ராக்கெட், செயற்கைக்கோள் தயாரிக்கும் தனியார் நிறுவனங்களும் வளர்ந்துவருகின்றன. தொடக்கம் வகுப்பறையே: கணிதம், அறிவியல், படித்துப் புரிந்துகொள்ளும் பழக்கம், குழுவாக வேலை செய்தல்.",
+    "en": "ISRO needs not only engineers and physics-and-maths scientists, but also technicians who make rocket parts, people who write software, analyse data, doctors, and teachers who explain science simply. Private companies making small rockets and satellites are also growing in India. The start is the classroom: maths, science, the habit of reading and understanding, and working in a team."
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "மேசையிலிருந்து ஒரு சோதனை",
+    "en": "A tabletop experiment"
+   },
+   "text": {
+    "ta": "ஒரு கோலிக்குண்டை (அல்லது சிறு உருண்டையை) மேசை விளிம்பில் மெதுவாக உருட்டு; தரையில் விழும் இடத்தில் ஒரு குறி வை. இப்போது வேகமாக உருட்டு; குறி வை. எது தொலைவில் விழுகிறது? இரண்டும் தரையைத் தொட எடுத்த நேரம் ஒன்றா? (நண்பரிடம் கவனிக்கச் சொல்.) பூமி தட்டையாக இருந்தால் எவ்வளவு வேகமான உருண்டையும் கடைசியில் விழுந்துவிடும். பூமி வளைந்திருப்பதால், மிக மிக வேகமாக எறிந்தால் அது விழுந்துகொண்டே இருந்தாலும் தரை விலகிக்கொண்டே போகும் என்று கற்பனை செய்.\n\nபிறகு உன் நிறையை நோட்டில் எழுது. பக்கத்தில் நிலா (×0.165), செவ்வாய் (×0.378), வியாழன் (×2.53) ஆகியவற்றில் உன் தராசு அளவை எழுது.",
+    "en": "Roll a marble gently off a table edge and mark where it lands. Now roll it fast and mark again. Which lands farther? Did both take the same time to reach the floor? (Ask a friend to watch.) If the Earth were flat, even a very fast marble would land in the end. Because the Earth curves, imagine a throw so fast that the marble keeps falling while the ground keeps curving away.\n\nThen write your mass in your notebook. Beside it write your scale reading on the Moon (×0.165), Mars (×0.378) and Jupiter (×2.53)."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "செயற்கைக்கோள் ஏன் கீழே விழுவதில்லை? நிறைக்கும் எடைக்கும் உள்ள வேறுபாடு என்ன?",
+    "en": "Why does a satellite not fall to the ground? What is the difference between mass and weight?"
+   },
+   "keywords": [
+    {
+     "ta": "நிறை",
+     "en": "mass",
+     "alt": [
+      "பொருளின் அளவு",
+      "kg"
+     ]
+    },
+    {
+     "ta": "ஈர்ப்பு",
+     "en": "gravity",
+     "alt": [
+      "எடை",
+      "weight"
+     ]
+    },
+    {
+     "ta": "பக்கவாட்டு வேகம்",
+     "en": "sideways speed",
+     "alt": [
+      "வேகம்",
+      "speed",
+      "சுற்றுப்பாதை",
+      "orbit"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "நிறை என்பது உடலில் உள்ள பொருளின் அளவு; அது எங்கும் மாறாது. எடை என்பது ஈர்ப்பு இழுக்கும் விசை; கோளுக்குக் கோள் மாறும். செயற்கைக்கோள் விழுந்துகொண்டுதான் இருக்கிறது; ஆனால் அது பக்கவாட்டில் மிக வேகமாகப் போவதால் பூமியின் வளைவு விலகிச் செல்கிறது, அதனால் தரையைத் தொடுவதில்லை.",
+    "en": "Mass is the amount of matter in a body and never changes. Weight is the pull of gravity and changes from world to world. A satellite is always falling, but it moves sideways so fast that the Earth’s curve falls away beneath it, so it never reaches the ground."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "நிறை (kg) எங்கும் ஒன்றே; எடை (N) = நிறை × g, இடத்துக்கு இடம் மாறும்.",
+     "en": "Mass (kg) is the same everywhere; weight (N) = mass × g and changes with place."
+    },
+    {
+     "ta": "சுற்றுப்பாதை = தொடர்ந்து விழுந்துகொண்டே, பக்கவாட்டில் வேகமாகப் போவது (சுமார் 7.7–8 km/s). விண்வெளியிலும் ஈர்ப்பு இருக்கிறது.",
+     "en": "An orbit = falling all the time while moving sideways very fast (about 7.7–8 km/s). Gravity is still there in space."
+    },
+    {
+     "ta": "செயற்கைக்கோள்கள் புயல் எச்சரிக்கை, மீனவர் ஆலோசனை, வழிகாட்டல், டிவி, பயிர்க் கண்காணிப்பு ஆகியவற்றுக்கு உதவுகின்றன.",
+     "en": "Satellites help with cyclone warnings, fishermen’s advice, navigation, TV and crop monitoring."
+    },
+    {
+     "ta": "இஸ்ரோ: 1969 தொடக்கம்; ஆர்யபட்டா 1975; மங்கள்யான் 2014; சந்திரயான்-3 23-8-2023; ஆதித்யா-L1 2024-இல் L1-ஐ அடைந்தது; ககன்யான் திட்டமிடப்பட்டுள்ளது.",
+     "en": "ISRO: formed 1969; Aryabhata 1975; Mangalyaan 2014; Chandrayaan-3 on 23-8-2023; Aditya-L1 reached L1 in 2024; Gaganyaan is planned."
+    },
+    {
+     "ta": "தமிழ்நாட்டு ஊர்களிலிருந்து வந்தவர்கள் இந்தத் திட்டங்களை வழிநடத்தினர்; பாதைகள் பல.",
+     "en": "People from Tamil Nadu towns led these missions; the paths are many."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "நிலாவுக்குப் போனால் எது மாறாது?",
+    "en": "Which of these does NOT change when you go to the Moon?"
+   },
+   "options": [
+    {
+     "ta": "உன் எடை (N)",
+     "en": "Your weight (N)"
+    },
+    {
+     "ta": "உன் நிறை (kg)",
+     "en": "Your mass (kg)"
+    },
+    {
+     "ta": "தராசு காட்டும் அளவு",
+     "en": "What a scale shows"
+    },
+    {
+     "ta": "உன்னை இழுக்கும் ஈர்ப்பு",
+     "en": "The pull of gravity on you"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "நிறை பொருளின் அளவு; அது மாறாது. மற்றவை ஈர்ப்பைப் பொறுத்து மாறும்.",
+    "en": "Mass is the amount of matter and stays the same; the others depend on gravity."
+   }
+  },
+  {
+   "q": {
+    "ta": "செயற்கைக்கோள் ஏன் தரையில் விழுவதில்லை?",
+    "en": "Why does a satellite not fall to the ground?"
+   },
+   "options": [
+    {
+     "ta": "விண்வெளியில் ஈர்ப்பே இல்லை",
+     "en": "There is no gravity in space"
+    },
+    {
+     "ta": "ராக்கெட் இயந்திரம் எப்போதும் மேலே தள்ளுகிறது",
+     "en": "Rocket engines keep pushing it up"
+    },
+    {
+     "ta": "அது மிகவும் தொலைவில் இருக்கிறது",
+     "en": "It is too far away"
+    },
+    {
+     "ta": "அது விழுந்துகொண்டே இருக்கிறது, ஆனால் பக்கவாட்டு வேகத்தால் பூமியின் வளைவு விலகுகிறது",
+     "en": "It is falling, but its sideways speed makes the Earth’s curve fall away"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "ஈர்ப்பு உள்ளது; வேகம்தான் சுற்றுப்பாதையைத் தருகிறது.",
+    "en": "Gravity is there; speed gives the orbit."
+   }
+  },
+  {
+   "q": {
+    "ta": "இந்தியாவின் முதல் செயற்கைக்கோள் ஆர்யபட்டா எப்போது ஏவப்பட்டது?",
+    "en": "When was India’s first satellite, Aryabhata, launched?"
+   },
+   "options": [
+    {
+     "ta": "19 ஏப்ரல் 1975",
+     "en": "19 April 1975"
+    },
+    {
+     "ta": "5 நவம்பர் 2013",
+     "en": "5 November 2013"
+    },
+    {
+     "ta": "23 ஆகஸ்ட் 2023",
+     "en": "23 August 2023"
+    },
+    {
+     "ta": "15 ஆகஸ்ட் 1969",
+     "en": "15 August 1969"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "1969 இஸ்ரோ தொடங்கிய ஆண்டு; 2013 மங்கள்யான் ஏவல்; 2023 சந்திரயான்-3.",
+    "en": "1969 is when ISRO was formed; 2013 Mangalyaan’s launch; 2023 Chandrayaan-3."
+   }
+  },
+  {
+   "q": {
+    "ta": "சந்திரயான்-3 நிலாவில் எங்கே தரையிறங்கியது?",
+    "en": "Where on the Moon did Chandrayaan-3 land?"
+   },
+   "options": [
+    {
+     "ta": "நிலாவின் நடுக்கோட்டுப் பகுதி",
+     "en": "Near the Moon’s equator"
+    },
+    {
+     "ta": "வட துருவம்",
+     "en": "The north pole"
+    },
+    {
+     "ta": "தென் துருவப் பகுதிக்கு அருகில் (சுமார் 69° தெற்கு)",
+     "en": "Near the south polar region (about 69° south)"
+    },
+    {
+     "ta": "நிலாவின் மறுபக்க நடுப்பகுதி",
+     "en": "The middle of the far side"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "தென் துருவப் பகுதியின் பள்ளங்களில் பனி இருக்கலாம் என்பதால் அது ஆர்வம் தருகிறது.",
+    "en": "Craters in the south polar region may hide ice, which makes it interesting."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஆதித்யா-L1 எதை ஆராய்கிறது?",
+    "en": "What does Aditya-L1 study?"
+   },
+   "options": [
+    {
+     "ta": "நிலாவின் மண்",
+     "en": "The Moon’s soil"
+    },
+    {
+     "ta": "சூரியன்",
+     "en": "The Sun"
+    },
+    {
+     "ta": "செவ்வாயின் காற்று",
+     "en": "The air of Mars"
+    },
+    {
+     "ta": "கடல் வெப்பம்",
+     "en": "Sea temperature"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஆதித்யா = சூரியன்; அது சூரியனையும் விண்வெளி வானிலையையும் ஆராய்கிறது.",
+    "en": "Aditya = Sun; it studies the Sun and space weather."
+   }
+  },
+  {
+   "q": {
+    "ta": "நிகர் ஷாஜி எந்தத் திட்டத்தின் திட்ட இயக்குநர்?",
+    "en": "Nigar Shaji was project director of which mission?"
+   },
+   "options": [
+    {
+     "ta": "சந்திரயான்-1",
+     "en": "Chandrayaan-1"
+    },
+    {
+     "ta": "சந்திரயான்-3",
+     "en": "Chandrayaan-3"
+    },
+    {
+     "ta": "மங்கள்யான்",
+     "en": "Mangalyaan"
+    },
+    {
+     "ta": "ஆதித்யா-L1",
+     "en": "Aditya-L1"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "சந்திரயான்-3-க்கு பி. வீரமுத்துவேல், சந்திரயான்-1-க்கு மயில்சாமி அண்ணாதுரை.",
+    "en": "P. Veeramuthuvel led Chandrayaan-3 and Mylswamy Annadurai led Chandrayaan-1."
+   }
+  },
+  {
+   "q": {
+    "ta": "ராக்கெட் மேலே போவதைவிட பக்கவாட்டு வேகத்துக்கு ஏன் அதிக ஆற்றலைச் செலவிடுகிறது?",
+    "en": "Why does a rocket spend so much effort on sideways speed rather than just going up?"
+   },
+   "options": [
+    {
+     "ta": "பார்க்க அழகாக இருக்க",
+     "en": "To look good"
+    },
+    {
+     "ta": "விண்வெளியில் காற்று இல்லை என்பதால்",
+     "en": "Because there is no air in space"
+    },
+    {
+     "ta": "மேலே போனால் மட்டும் திரும்ப விழுந்துவிடும்; சுற்றுப்பாதையில் தங்க சுமார் 8 km/s பக்கவாட்டு வேகம் வேண்டும்",
+     "en": "Going up alone means falling back; staying in orbit needs about 8 km/s sideways"
+    },
+    {
+     "ta": "ராக்கெட்டின் நிறையைக் குறைக்க",
+     "en": "To reduce the rocket’s mass"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "உயரம் மட்டும் போதாது; வேகம்தான் சுற்றுப்பாதையைத் தருகிறது.",
+    "en": "Height alone is not enough; speed is what makes an orbit."
+   }
+  }
+ ]
+}

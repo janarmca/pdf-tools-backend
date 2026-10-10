@@ -1,0 +1,875 @@
+{
+ "id": "careers-future",
+ "minutes": 30,
+ "title": {
+  "ta": "நாளை என்ன வேலை? நான் என்ன கற்க வேண்டும்?",
+  "en": "Tomorrow’s work: what should I learn?"
+ },
+ "curriculum": [
+  {
+   "b": "NEP 2020",
+   "w": {
+    "ta": "வகுப்பு 6 முதல் தொழில் அறிமுகம், திறன் கல்வி",
+    "en": "Career awareness and vocational exposure from Class 6"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "வாழ்நாள் கற்றலும் திறன் வளர்ச்சியும்",
+    "en": "Lifelong learning and skills"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "வேலைகள் மாறும், சில திறன்கள் நிலைக்கும் என்பதைப் புரிந்துகொள்ள",
+   "en": "Understand that jobs change but some skills last"
+  },
+  {
+   "ta": "செலவில்லாமல் ஆராயும் வழிகளையும் உதவித்தொகைகளையும் அதிகாரப்பூர்வத் தளங்களில் தேட",
+   "en": "Find free ways to explore and scholarships on official sites"
+  },
+  {
+   "ta": "ஆர்வம் × திறன் × தேவை வரைபடத்தை நீயே வரைய",
+   "en": "Draw your own interest × skill × need map"
+  },
+  {
+   "ta": "உன் வகுப்புக்கு ஏற்ற 5 ஆண்டுத் திறன் ஏணியைத் திட்டமிட",
+   "en": "Plan a 5-year skills ladder for your class"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் தாத்தா, பாட்டி காலத்தில் ஊர்த் தபால் நிலையத்தில் தந்தி அடிப்பது ஒரு வேலையாக இருந்தது. இந்தியாவில் தந்திச் சேவை 2013-இல் நிறுத்தப்பட்டது. அதே காலத்தில் செல்போன் பழுது பார்ப்பவர், செயலி மூலம் உணவு கொண்டுசேர்ப்பவர், சூரிய மின் தகடு பொருத்துபவர் போன்ற வேலைகள் பெருகின.\n\n**இது எனக்கு என்ன பயன்?** நீ 25 வயதை அடையும்போது எந்த வேலைகள் இருக்கும் என்று இன்று யாருக்கும் முழுமையாகத் தெரியாது. ஆனால் எப்படித் தயாராவது என்று தெரிந்துகொள்ளலாம்: வேலைகள் மாறினாலும் எந்தத் திறன்கள் பயன்படும், எங்கே இலவசமாகக் கற்கலாம், உன் சொந்த வழியை எப்படித் தேர்ந்தெடுக்கலாம். இதுவே இந்தப் பாடம்.",
+    "en": "In your grandparents’ day, sending telegrams at the village post office was a job. The telegram service in India was stopped in 2013. In the same years, jobs such as mobile-phone repair, app-based food delivery and solar-panel fitting grew.\n\n**What is in it for me?** Nobody fully knows which jobs will exist when you are 25. But you can learn how to prepare: which skills stay useful when jobs change, where to learn for free, and how to choose your own path. That is this lesson."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "வேலைகள் மாறிக்கொண்டே இருக்கும் உலகில், எது நீண்ட காலம் பயன்படும் என்று நினைக்கிறாய்?",
+    "en": "In a world where jobs keep changing, which do you think stays useful the longest?"
+   },
+   "options": [
+    {
+     "ta": "ஒரு குறிப்பிட்ட செயலியின் பட்டியலை மனப்பாடம் செய்வது",
+     "en": "Memorising the menus of one particular app"
+    },
+    {
+     "ta": "புதிய ஒன்றைப் படித்துப் புரிந்துகொண்டு, நாமே கற்றுக்கொள்ளும் திறன்",
+     "en": "The ability to read about something new, understand it and teach yourself"
+    },
+    {
+     "ta": "ஒரே ஒரு வேலைக்கான திறனை மட்டும் வளர்ப்பது",
+     "en": "Building skill for only one single job"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "செயலிகளும் கருவிகளும் மாறும்; கற்கும் திறன் உன்னுடனே வரும். அதனால்தான் \"கற்பது எப்படி\" என்பதே ஒரு முக்கியத் திறன். எதை ஊகித்தாலும் பரவாயில்லை — காரணங்களைத் தொடர்ந்து பார்ப்போம்.",
+    "en": "Apps and tools change; the ability to learn comes with you. That is why “learning how to learn” is itself a key skill. Whatever you guessed is fine — let us look at the reasons."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "ideaSpinner",
+   "params": {},
+   "title": {
+    "ta": "நாளைய வேலையைக் கண்டுபிடி",
+    "en": "Invent a job of tomorrow"
+   },
+   "text": {
+    "ta": "சுழற்சியில் வந்த பொருளையும் யோசனையையும் வைத்து, அதைச் சுற்றி நாளை உருவாகக்கூடிய ஒரு **சேவை அல்லது வேலையைக்** கற்பனை செய் (எ.கா. \"குடை + மறுபயன்பாடு\" → பழைய குடைகளைச் சரிசெய்யும் சிறு தொழில்). இதை யார் விரும்புவார்கள்? இதற்கு நீ என்ன கற்க வேண்டும்?",
+    "en": "Take the object and idea that come up and imagine a **service or job** that could grow around it tomorrow (e.g. “umbrella + reuse” → a small business repairing old umbrellas). Who would want it? What would you need to learn?"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "வேலைகள் மாறும்; சில திறன்கள் நிற்கும்",
+    "en": "Jobs change; some skills last"
+   },
+   "text": {
+    "ta": "தொழில்நுட்பம், சந்தை, காலநிலை மாறும்போது வேலைகளின் பட்டியலும் மாறுகிறது. ஆனால் இந்த ஏழு திறன்கள் பெரும்பாலான வேலைகளில் பயன்படுகின்றன:\n\n**1. நன்றாகப் படித்துப் புரிந்துகொள்ளுதல்** — அறிவுறுத்தல், ஒப்பந்தம், செய்தி எதுவானாலும்.\n**2. கணித சிந்தனை** — எண்களையும் தர்க்கத்தையும் கொண்டு யோசித்தல்.\n**3. தெளிவாக எழுதுதலும் பேசுதலும்.**\n**4. ஆர்வம்** — \"ஏன்? எப்படி?\" என்று கேட்பது.\n**5. குழுவாக வேலை செய்தல்.**\n**6. கற்பது எப்படி என்பதைக் கற்றல்** — தவறிலிருந்து திருத்திக்கொள்வது.\n**7. நேர்மை** — சொன்னதைச் செய்வது; நம்பிக்கை எல்லா வேலைக்கும் அடிப்படை.\n\nஇவை பள்ளியில் இப்போதே பயிற்சி செய்யக்கூடியவை.",
+    "en": "When technology, markets and climate change, the list of jobs changes too. But these seven skills are useful in most jobs:\n\n**1. Reading well and understanding** — instructions, contracts, news, anything.\n**2. Mathematical thinking** — reasoning with numbers and logic.\n**3. Writing and speaking clearly.**\n**4. Curiosity** — asking “why? how?”\n**5. Working in a team.**\n**6. Learning how to learn** — correcting yourself after mistakes.\n**7. Honesty** — doing what you say; trust is the base of every job.\n\nYou can practise all of these at school right now."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "எங்கே நிறையப் பேர் தேவைப்படலாம்?",
+    "en": "Where many people may be needed"
+   },
+   "text": {
+    "ta": "இது ஒரு தோராய வழிகாட்டி; எதிர்காலம் உறுதியானது அல்ல. சம்பள எண்கள் இங்கே இல்லை — அவை இடத்துக்கும் காலத்துக்கும் ஏற்ப மாறும்.",
+    "en": "This is a rough guide; the future is not certain. No salary numbers here — they vary by place and time."
+   },
+   "head": [
+    {
+     "ta": "துறை",
+     "en": "Sector"
+    },
+    {
+     "ta": "எடுத்துக்காட்டு வேலைகள்",
+     "en": "Example work"
+    },
+    {
+     "ta": "உதவும் பாடங்கள்",
+     "en": "Helpful subjects"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "மருத்துவம், நலவாழ்வு",
+      "en": "Health care"
+     },
+     {
+      "ta": "செவிலியர், ஆய்வகத் தொழில்நுட்பர், மருத்துவர், இயன்முறை மருத்துவர், சமூக நலப் பணியாளர்",
+      "en": "Nurse, lab technician, doctor, physiotherapist, community health worker"
+     },
+     {
+      "ta": "உயிரியல், வேதியியல், அக்கறை",
+      "en": "Biology, chemistry, care for people"
+     }
+    ],
+    [
+     {
+      "ta": "தூய ஆற்றல், மின்சாரம்",
+      "en": "Clean energy and electrical"
+     },
+     {
+      "ta": "சூரியத் தகடு பொருத்துபவர், எலக்ட்ரீஷியன், மின்தொகுப்புப் பொறியாளர்",
+      "en": "Solar installer, electrician, grid engineer"
+     },
+     {
+      "ta": "இயற்பியல், கணிதம்",
+      "en": "Physics, maths"
+     }
+    ],
+    [
+     {
+      "ta": "வேளாண் தொழில்நுட்பம்",
+      "en": "Farming technology"
+     },
+     {
+      "ta": "மண் பரிசோதனை, சொட்டு நீர்ப் பாசனம், குளிர்பதனக் கிடங்கு, உணவு பதப்படுத்துதல்",
+      "en": "Soil testing, drip irrigation, cold storage, food processing"
+     },
+     {
+      "ta": "உயிரியல், கணிதம்",
+      "en": "Biology, maths"
+     }
+    ],
+    [
+     {
+      "ta": "டிஜிட்டல், தரவு",
+      "en": "Digital and data"
+     },
+     {
+      "ta": "மென்பொருள், தரவு ஆய்வு, இணையப் பாதுகாப்பு, கணினி, போன் பழுதுபார்ப்பு",
+      "en": "Software, data analysis, cyber security, computer and phone repair"
+     },
+     {
+      "ta": "கணிதம், தர்க்கம், எழுதுதல்",
+      "en": "Maths, logic, writing"
+     }
+    ],
+    [
+     {
+      "ta": "கற்பித்தல், குழந்தை வளர்ப்பு",
+      "en": "Teaching and childcare"
+     },
+     {
+      "ta": "ஆசிரியர், பயிற்றுநர், குழந்தை நல ஆதரவாளர்",
+      "en": "Teacher, trainer, child-care worker"
+     },
+     {
+      "ta": "எல்லாப் பாடங்களும், பொறுமை",
+      "en": "All subjects, patience"
+     }
+    ],
+    [
+     {
+      "ta": "திறன் தொழில்கள்",
+      "en": "Skilled trades"
+     },
+     {
+      "ta": "பற்றவைப்பவர், குழாய் பொருத்துபவர், இயந்திரப் பழுதுபார்ப்பவர், கட்டுமானம்",
+      "en": "Welder, plumber, machine mechanic, construction"
+     },
+     {
+      "ta": "கணிதம், இயற்பியல், கைத்திறன்",
+      "en": "Maths, physics, handiwork"
+     }
+    ],
+    [
+     {
+      "ta": "படைப்புத் துறைகள்",
+      "en": "Creative work"
+     },
+     {
+      "ta": "வடிவமைப்பு, திரைப்படம், இசை, எழுத்து, கைவினை",
+      "en": "Design, film, music, writing, crafts"
+     },
+     {
+      "ta": "மொழி, கலை, கணினி",
+      "en": "Language, art, computers"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "தமிழ்நாட்டில் இன்று",
+    "en": "In Tamil Nadu today"
+   },
+   "items": [
+    {
+     "icon": "🏥",
+     "title": {
+      "ta": "மருத்துவமனைகள், சுகாதார மையங்கள்",
+      "en": "Hospitals and health centres"
+     },
+     "text": {
+      "ta": "ஒவ்வொரு ஊரிலும் செவிலியர், ஆய்வக ஊழியர், மருந்தாளர் தேவைப்படுகிறார்கள்.",
+      "en": "Every town needs nurses, lab staff and pharmacists."
+     }
+    },
+    {
+     "icon": "🏭",
+     "title": {
+      "ta": "தொழிற்சாலைகள்",
+      "en": "Factories"
+     },
+     "text": {
+      "ta": "தமிழ்நாட்டில் ஆடை, வாகனம், மின்னணுவியல் போன்ற பல உற்பத்தித் தொழில்கள் உள்ளன; இயந்திரங்களைப் பராமரிக்கத் திறமையானவர்கள் தேவை.",
+      "en": "Tamil Nadu has many manufacturing industries such as textiles, vehicles and electronics; skilled people are needed to run and maintain machines."
+     }
+    },
+    {
+     "icon": "🌾",
+     "title": {
+      "ta": "வயல்களும் உணவுத் தொழில்களும்",
+      "en": "Fields and food businesses"
+     },
+     "text": {
+      "ta": "நீர்ப்பாசனம், மண் ஆய்வு, சேமிப்பு, பதப்படுத்துதல் போன்றவற்றில் புதிய தொழில் வாய்ப்புகள் உள்ளன.",
+      "en": "There are newer opportunities in irrigation, soil testing, storage and processing."
+     }
+    },
+    {
+     "icon": "☀️",
+     "title": {
+      "ta": "சூரிய மின்சாரம்",
+      "en": "Solar power"
+     },
+     "text": {
+      "ta": "வீடுகளிலும் தொழில்களிலும் சூரியத் தகடுகள் பொருத்தப்படுகின்றன; பொருத்தவும் பராமரிக்கவும் ஆட்கள் வேண்டும்.",
+      "en": "Solar panels are being fitted on homes and businesses; people are needed to install and maintain them."
+     }
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "செலவில்லாமல் எப்படி ஆராய்வது?",
+    "en": "How to explore at zero cost"
+   },
+   "text": {
+    "ta": "**பள்ளி நூலகம், ஆசிரியர்கள், பெரியவர்கள்:** இவையே முதல் தகவல் மூலங்கள். \"உங்கள் வேலை என்ன? எதைப் படித்தீர்கள்?\" என்று கேள்.\n\n**DIKSHA:** பள்ளிக் கல்விக்கான அரசு தளம்; பல பாடப்புத்தகங்களில் உள்ள QR குறியீடுகளைத் தொட்டால் கூடுதல் பாடங்கள் கிடைக்கும்.\n\n**SWAYAM:** இந்திய அரசின் இலவசக் கற்றல் தளம்; வகுப்பு 9 முதல் முதுகலை வரை படிப்புகள் உள்ளன. கற்பது இலவசம். சான்றிதழுக்கான தேர்வு விருப்பம்தான்; அதற்குக் கட்டணம் உண்டு.\n\n**NPTEL:** ஐ.ஐ.டி-களும் ஐ.ஐ.எஸ்.சி-யும் நடத்தும் காணொளிப் பாடங்கள் (முக்கியமாகப் பொறியியல், அறிவியல்; இப்போது வேறு துறைகளும்); இவற்றையும் இலவசமாகப் பார்க்கலாம். சான்றிதழுக்கான தேர்வு விருப்பம்தான்.\n\n**நான் முதல்வன்:** தமிழ்நாடு அரசின் திறன் மேம்பாட்டுத் திட்டம்; 1 மார்ச் 2022-இல் தொடங்கப்பட்டது (2026-இல் இது புதிய பெயரில் தொடர்வதாக அரசு அறிவித்தது — தற்போதைய பெயரை அரசு திறன் மேம்பாட்டு இணையதளத்தில் பார்). தொழில் துறைக்குப் பொருந்தும் படிப்புகள், வழிகாட்டுதல், பயிற்சிகள், வேலை ஆதரவு போன்றவற்றைக் கல்லூரிகள் வழியாக அளிக்கிறது. இது பெரும்பாலும் இளைஞர்கள், கல்லூரி மாணவர்களுக்கானது; உன் வகுப்புக்கு என்ன கிடைக்கும் என்று ஆசிரியரிடம் கேள்.",
+    "en": "**School library, teachers, elders:** the first source. Ask “What is your work? What did you study?”\n\n**DIKSHA:** a government platform for school education; scan the QR codes in many textbooks to get extra lessons.\n\n**SWAYAM:** the Government of India’s free learning platform, with courses from Class 9 to postgraduate level. Learning is free; the certificate exam is optional (and has a fee).\n\n**NPTEL:** video courses run by the IITs and IISc (mainly engineering and science, now other subjects too); also free to watch. The certificate exam is optional.\n\n**Naan Mudhalvan:** the Tamil Nadu government’s skilling programme, launched on 1 March 2022 (in 2026 the government said it continues under a new name — check the official Tamil Nadu skill-development site for the current name). Through colleges it offers industry-linked courses, guidance, mentoring, training and job support. It is mainly meant for youth and college students; ask your teacher what is available at your level."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "உதவித்தொகைகள்: அதிகாரப்பூர்வ தளங்களில் பார்",
+    "en": "Scholarships: check official sites"
+   },
+   "text": {
+    "ta": "பல உதவித்தொகைகள் உள்ளன. மத்திய அரசின் தேசிய உதவித்தொகை இணையதளம் (scholarships.gov.in) ஒன்று. தமிழ்நாடு அரசின் திட்டங்களும் உள்ளன. எ.கா. அரசுப் பள்ளியிலிருந்து கல்லூரி செல்லும் மாணவிகளுக்குப் புதுமைப் பெண், மாணவர்களுக்குத் தமிழ்ப் புதல்வன் — இவை மாதாந்திர உதவித் திட்டங்கள். விதிகள், தொகை, கடைசித் தேதி எல்லாம் மாறக்கூடும். அதனால் **அதிகாரப்பூர்வ .gov.in தளத்திலோ பள்ளி / கல்லூரி அலுவலகத்திலோ** பார். விண்ணப்பிக்க யாரும் பணம் கேட்கக் கூடாது; இடைத்தரகருக்குப் பணம் தராதே. வாட்ஸ்அப் செய்திகளை அப்படியே நம்பாதே.",
+    "en": "Many scholarships exist — the Government of India’s National Scholarship Portal (scholarships.gov.in) and Tamil Nadu government schemes (for example Pudhumai Penn for girls and Tamil Pudhalvan for boys, monthly-support schemes for students from government schools entering college). Rules, amounts and last dates change, so **check the official .gov.in site or your school / college office.** Nobody should ask money to apply; do not pay an agent. Do not trust forwarded messages as they are."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "\"ஆர்வம் × திறன் × தேவை\" வரைபடம்",
+    "en": "The “interest × skill × need” map"
+   },
+   "q": {
+    "ta": "ப்ரியா (கற்பனை மாணவி) தன் வரைபடத்தை எப்படி உருவாக்குகிறாள்?",
+    "en": "How does Priya (an imagined student) build her map?"
+   },
+   "steps": [
+    {
+     "ta": "**ஆர்வம்:** செடிகள் வளர்ப்பதும், விளையாட்டில் புள்ளிக் கணக்கு வைப்பதும் எனக்குப் பிடிக்கும்.",
+     "en": "**Interest:** I like growing plants and keeping scores in games."
+    },
+    {
+     "ta": "**திறன்:** கணக்கில் நன்றாகச் செய்வேன்; அளவிடுவதில் கவனமாக இருப்பேன்.",
+     "en": "**Skill:** I am good at maths and careful with measuring."
+    },
+    {
+     "ta": "**தேவை:** எங்கள் ஊரில் கோடையில் தண்ணீர் குறைவு; விவசாயிகள் நீரைச் சிக்கனமாகப் பயன்படுத்த வழி தேடுகிறார்கள்.",
+     "en": "**Need:** Our village is short of water in summer; farmers look for ways to save water."
+    },
+    {
+     "ta": "**மூன்றும் சந்திக்கும் இடம்:** நீர்ப் பயன்பாட்டை அளந்து பயிர்க்குத் தேவையான அளவு சொல்லும் வேலை — வேளாண் தொழில்நுட்பம் அல்லது நீர் மேலாண்மை.",
+     "en": "**Where all three meet:** work that measures water use and tells crops how much they need — farming technology or water management."
+    },
+    {
+     "ta": "**அடுத்த 3 நடவடிக்கைகள்:** ஆசிரியரிடம் வழிகாட்டக் கேட்பது; வீட்டுத் தோட்டத்தில் தண்ணீர் அளவை நோட்டில் பதிவு செய்வது; DIKSHA / SWAYAM-இல் தொடர்புடைய பாடத்தைப் பார்ப்பது.",
+     "en": "**Next 3 actions:** ask a teacher for guidance; record water used in a home garden in a notebook; look at a related lesson on DIKSHA / SWAYAM."
+    }
+   ],
+   "answer": {
+    "ta": "இந்த வரைபடம் இறுதி முடிவு அல்ல; ஒவ்வொரு ஆண்டும் மாற்றிக்கொள்ளக்கூடிய வரைபடம்.",
+    "en": "The map is not a final decision; it is a map you can redraw every year."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சாதாரண பாதைகள் — கற்பனைக் கதைகள்",
+    "en": "Ordinary paths — imagined stories"
+   },
+   "text": {
+    "ta": "இவர்கள் நிஜ நபர்கள் அல்ல; பல உண்மைப் பாதைகளிலிருந்து கலந்து அமைத்த **கதைகள்**.\n\n**முத்து:** 10-ஆம் வகுப்புக்குப் பின் ITI-இல் எலக்ட்ரீஷியன் படிப்பில் சேர்ந்தான். ஒரு கடையில் வேலை செய்தான்; பிறகு சூரியத் தகடு பொருத்தும் பயிற்சி பெற்றான். இப்போது சிறு குழுவுடன் தன் சொந்தப் பணியைச் செய்கிறான்.\n\n**செல்வி:** 10-ஆம் வகுப்பில் சராசரி மதிப்பெண்தான் பெற்றாள். டிப்ளோமா படித்தாள்; பிறகு பொறியியல் கல்லூரியில் சேர்ந்தாள். ஒவ்வொரு தோல்விக்குப் பின்னும் தன்னைத் திருத்திக்கொள்ளப் பழகினாள்.\n\n**அமுதா:** குடும்பத்தில் முதல் முறையாகச் செவிலியர் படிப்பைப் படித்தாள்; பிறகு இரவுப் பள்ளியில் மேலும் படித்தாள். இப்போது மருத்துவமனையில் பயிற்சி அளிக்கிறாள்.\n\nவிண்வெளிப் பாடத்தில் நீ கண்ட திட்டத் தலைவர்களில் ஒருவரும் டிப்ளோமா வழியாக வந்தவர். பாதை நேராக இருக்க வேண்டியதில்லை.",
+    "en": "These are not real people; they are **stories** blended from many real paths.\n\n**Muthu:** after Class 10, an electrician course at an ITI. Worked in a shop; then learnt solar-panel fitting; now runs his own work with a small team.\n\n**Selvi:** average marks in Class 10. Did a diploma, then joined an engineering college. After every failure she practised correcting and rewriting herself.\n\n**Amutha:** the first in her family to study nursing; then kept studying more at evening classes; now trains others at a hospital.\n\nOne of the space-mission leaders you met in the space lesson also came through a diploma: a path need not be a straight line."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "5 ஆண்டுத் திறன் ஏணி",
+    "en": "A 5-year skills ladder"
+   },
+   "text": {
+    "ta": "ஒரு ஆலோசனை மட்டுமே — உன் ஊர், பள்ளி, குடும்பச் சூழலுக்கு ஏற்ப மாற்று.",
+    "en": "A suggestion only — adapt it to your town, school and family."
+   },
+   "head": [
+    {
+     "ta": "நீ இப்போது",
+     "en": "You are in"
+    },
+    {
+     "ta": "இந்த ஆண்டு",
+     "en": "This year"
+    },
+    {
+     "ta": "அடுத்த 2–3 ஆண்டுகள்",
+     "en": "Next 2–3 years"
+    },
+    {
+     "ta": "5 ஆண்டுகளுக்குள்",
+     "en": "Within 5 years"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "வகுப்பு 8",
+      "en": "Class 8"
+     },
+     {
+      "ta": "பாடப்புத்தகம் தவிர்த்த நூல்களை வாரம் 20 பக்கமாவது படி; பின்னங்கள், சதவீதம், அடிப்படை இயற்கணிதம் ஆகியவற்றில் உறுதியாக இரு",
+      "en": "Read at least 20 pages a week beyond the textbook; firm up fractions, percentages, basic algebra"
+     },
+     {
+      "ta": "ஒரு சிறு திட்டம் (எ.கா. வீட்டு நீர் அளவீடு); கணினி அல்லது போன் தட்டச்சுப் பயிற்சி; ஒரு தொழில் செய்பவரைச் சந்தித்துக் கேள்",
+      "en": "One mini project (e.g. measuring home water use); typing practice on a computer or phone; meet someone in a trade and ask questions"
+     },
+     {
+      "ta": "2–3 வழிகள் பற்றித் தெளிவு இருக்கும்; என்ன படிக்க வேண்டும் என்று தெரியும்; ஒரு திட்டத்தை முடித்திருப்பாய்",
+      "en": "Clarity about 2–3 paths and what each needs; one finished project"
+     }
+    ],
+    [
+     {
+      "ta": "வகுப்பு 10",
+      "en": "Class 10"
+     },
+     {
+      "ta": "10-க்குப் பின் வழிகளை (மேல்நிலைப் பள்ளி, டிப்ளோமா, ITI) ஆசிரியருடன் பேசி அறி; கடினமான பாடத்தில் கூடுதல் பயிற்சி",
+      "en": "Learn the options after Class 10 (higher secondary, diploma, ITI) by talking to teachers; extra practice in your hardest subject"
+     },
+     {
+      "ta": "தேர்ந்த பாதையில் அடிப்படைகள்; இலவச ஆன்லைன் பாடம் ஒன்றை முடி; எழுத்துத் திறன் (விண்ணப்பம், கடிதம்)",
+      "en": "Basics of your chosen path; finish one free online course; writing skills (application, letter)"
+     },
+     {
+      "ta": "படிப்பையோ பயிற்சியையோ முடித்து வேலை அல்லது அடுத்த படிப்புக்குத் தயார்",
+      "en": "Finished a course or training and ready for work or further study"
+     }
+    ],
+    [
+     {
+      "ta": "வகுப்பு 12",
+      "en": "Class 12"
+     },
+     {
+      "ta": "படிப்புகளுக்கும் உதவித்தொகைகளுக்கும் அதிகாரப்பூர்வத் தேதிகளையும் விதிகளையும் சரிபார்; விண்ணப்பங்களை முன்கூட்டியே தயார் செய்",
+      "en": "Check official dates and rules for courses and scholarships; prepare applications early"
+     },
+     {
+      "ta": "தேர்ந்த படிப்பில் அடிப்படைகள்; தொழிற்பயிற்சி (internship) அல்லது பகுதிநேர அனுபவம்",
+      "en": "Fundamentals of your course; an internship or part-time experience"
+     },
+     {
+      "ta": "பட்டம் / டிப்ளோமா / பயிற்சி முடித்து முதல் வேலை அல்லது தொழில் தொடக்கம்",
+      "en": "Degree / diploma / training done; first job or business started"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு மாணவிக்குச் செடிகள் பிடிக்கும், கணக்கில் திறமை உண்டு, அவள் ஊரில் நீர்ப் பற்றாக்குறை. ஆர்வம் × திறன் × தேவை வரைபடத்தின்படி எந்தப் பாதையில் மூன்றும் சந்திக்கின்றன?",
+    "en": "A student likes plants, is good at maths, and her village is short of water. Which path fits interest × skill × need?"
+   },
+   "options": [
+    {
+     "ta": "நீர் மேலாண்மை / வேளாண் தொழில்நுட்பம்",
+     "en": "Water management / farming technology"
+    },
+    {
+     "ta": "ஆர்வமே இல்லாத ஏதேனும் ஒரு வேலை",
+     "en": "Any job she has no interest in"
+    },
+    {
+     "ta": "திறன் தேவையில்லாத வேலை",
+     "en": "A job needing no skill"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "மூன்று வட்டங்களும் ஒன்றாகச் சந்திக்கும் இடம்.",
+    "en": "Where all three circles meet."
+   },
+   "solution": {
+    "ta": "ஆர்வம் (செடிகள்), திறன் (கணிதம்), தேவை (நீர்) — மூன்றும் சந்திப்பது நீர் மேலாண்மை.",
+    "en": "Interest (plants), skill (maths), need (water) all meet in water management."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு வாட்ஸ்அப் செய்தி: \"இந்த வேலைக்கு ₹5,000 செலுத்தினால் உடனே அரசு வேலை உறுதி!\" நீ என்ன செய்வாய்?",
+    "en": "A WhatsApp message: “Pay ₹5,000 and a government job is guaranteed immediately!” What do you do?"
+   },
+   "options": [
+    {
+     "ta": "உடனே பணம் அனுப்புவேன்",
+     "en": "Pay straight away"
+    },
+    {
+     "ta": "நண்பர்களுக்கு அனுப்புவேன்",
+     "en": "Forward it to friends"
+    },
+    {
+     "ta": "அதிகாரப்பூர்வ .gov.in தளத்தில் சரிபார்த்து, பெரியவர்களிடம் கேட்பேன்; பணம் தர மாட்டேன்",
+     "en": "Check the official .gov.in site, ask elders, and not pay"
+    }
+   ],
+   "correct": 2,
+   "hint": {
+    "ta": "உண்மையான அரசு விண்ணப்பத்துக்கு இடைத்தரகர் தேவையா?",
+    "en": "Does a real government application need an agent?"
+   },
+   "solution": {
+    "ta": "வேலை \"உறுதி\" என்று பணம் கேட்பது மோசடி அடையாளம். அதிகாரப்பூர்வ அறிவிப்பைப் பார்.",
+    "en": "Asking money for a “guaranteed” job is a scam sign. Look for the official notification."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "கீழ்வருவனவற்றில் எந்தத் திறன் உன் எதிர்காலத்துக்கு எந்த வேலையிலும் பயன்படும்?",
+    "en": "Which skill will be useful in almost any future job?"
+   },
+   "options": [
+    {
+     "ta": "தெளிவாக எழுதுதலும் பேசுதலும்",
+     "en": "Clear writing and speaking"
+    },
+    {
+     "ta": "ஒரு பழைய கருவியின் பொத்தான் வரிசையை மனப்பாடம் செய்தல்",
+     "en": "Memorising the button order of an old gadget"
+    },
+    {
+     "ta": "நண்பர்களுடன் ஒத்துழைக்காமல் இருத்தல்",
+     "en": "Not cooperating with colleagues"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "எவை கருவி மாறினாலும் நிற்கும்?",
+    "en": "Which stay even when tools change?"
+   },
+   "solution": {
+    "ta": "தொடர்புத் திறன் எல்லா வேலையிலும் பயன்படும்; கருவி மாறினால் மனப்பாடம் பயனற்றுப் போகும்.",
+    "en": "Communication helps in every job; memorised button orders become useless when tools change."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பெண்கள் அறிவியல்-தொழில்நுட்பத்தில்",
+    "en": "Girls in science and technology"
+   },
+   "text": {
+    "ta": "கணிதம், மின்னணுவியல், கணினி, இயந்திரம் — இவை \"ஆண்களுக்கு\" அல்லது \"பெண்களுக்கு\" என்று பிறப்பால் வருபவை அல்ல; **பயிற்சியால் வருபவை**. அரசுப் பள்ளியில் படித்த ஒரு தமிழ்நாட்டுப் பெண் ஆதித்யா-L1 திட்டத்தை வழிநடத்தியதை விண்வெளிப் பாடத்தில் பார்த்தோம்.\n\nஆனாலும் உண்மையான தடைகள் உள்ளன: தொலைவில் உள்ள பள்ளி, பாதுகாப்பு பற்றிய கவலை, \"இது உனக்கு எதற்கு?\" என்ற எதிர்பார்ப்பு. இவற்றைக் குறைக்கும் வழிகள்: படிப்புக் குழுக்கள், ஆசிரியர் ஆதரவு, விடுதி, உதவித்தொகை, முன்மாதிரிகள். அதேபோல், செவிலியர், ஆசிரியர், குழந்தை நலப் பணி போன்ற துறைகளுக்கு ஆண்களும் தேவை. எந்தத் தொழிலும் யாருக்கும் மூடப்பட்டதல்ல.",
+    "en": "Maths, electronics, computers and machines are not “for boys” or “for girls” by birth; they are **learnt through practice**. In the space lesson we saw a Tamil Nadu woman who studied in a government school lead the Aditya-L1 mission.\n\nStill, real obstacles exist: a far-away school, worries about safety, the expectation of “why do you need this?” Things that reduce them: study groups, teacher support, hostels, scholarships, role models. Likewise, nursing, teaching and child-care need men too. No profession is closed to anyone."
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "எதிர்காலத்துக்குத் தயாராவது",
+    "en": "Getting ready for what is coming"
+   },
+   "text": {
+    "ta": "தானியங்கிக் கருவிகள், AI, தூய ஆற்றல் போன்றவற்றால் சில பணிகள் குறையலாம்; புதிய பணிகள் உருவாகலாம். எவ்வளவு என்பது உறுதியாகத் தெரியாது. அதனால் ஒரே வேலையை நம்பாமல், அடிப்படைத் திறன்களுடன் பல வழிகளைத் திறந்து வைத்திரு.",
+    "en": "Automation, AI and clean energy may reduce some tasks and create new ones. How much is uncertain. So instead of relying on one single job, keep several paths open with strong basic skills."
+   },
+   "risk": {
+    "ta": "மாற்றம் வேகமாக வரும்போது சிலர் பின்தங்கலாம்; வேலை பற்றிய வதந்திகளும் மோசடிகளும் பரவலாம்.",
+    "en": "When change is fast some people may be left behind; rumours and scams about jobs may spread."
+   },
+   "fix": {
+    "ta": "வாழ்நாள் முழுவதும் கற்றல், இலவசக் கற்றல் வாய்ப்புகள், மறுபயிற்சித் திட்டங்கள், அதிகாரப்பூர்வத் தகவலைச் சரிபார்த்தல்.",
+    "en": "Lifelong learning, free learning chances, retraining programmes, and checking official information."
+   },
+   "q": {
+    "ta": "இன்னும் 10 ஆண்டுகளில் உன் ஊரில் எந்த ஒரு புதிய வேலை தேவைப்படலாம்? அதற்கு இன்று நீ என்ன கற்கத் தொடங்கலாம்?",
+    "en": "In 10 years, what new kind of work might your town need? What could you start learning today for it?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "ஒரு பெரியவரின் வேலை எப்படி மாறியது?",
+    "en": "How has an adult’s work changed?"
+   },
+   "text": {
+    "ta": "வீட்டிலோ ஊரிலோ ஒரு பெரியவரைத் தேர்ந்தெடுத்து (செலவில்லை, போன் தேவையில்லை) மூன்று கேள்விகள் கேள்: ① நீங்கள் தொடங்கியபோது இந்த வேலை எப்படி இருந்தது? ② இப்போது என்ன மாறியது? ③ இன்று தொடங்கும் ஒருவர் எந்தத் திறனை முதலில் கற்க வேண்டும்? பதில்களை நோட்டில் எழுதி, மேலே பார்த்த 7 திறன்களில் எவை அவற்றில் இருந்தன என்று குறித்துக்கொள்.",
+    "en": "Choose an adult at home or in your town (free, no phone needed) and ask three questions: ① What was this work like when you started? ② What has changed? ③ Which skill should someone starting today learn first? Write the answers in your notebook and mark which of the 7 skills above appeared."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "என் 5 ஆண்டுத் திட்டத் தாள்",
+    "en": "My 5-year plan sheet"
+   },
+   "text": {
+    "ta": "ஒரு தாளில் மூன்று நெடுவரிசைகள் (ஆர்வம் | திறன் | தேவை) வரைந்து, ஒவ்வொன்றிலும் குறைந்தது 5 புள்ளிகள் எழுது. மூன்றும் சந்திக்கும் 2 வழிகளைத் தேர்வு செய்.",
+    "en": "On a sheet draw three columns (Interest | Skill | Need) and write at least 5 points in each. Pick 2 paths where all three meet."
+   },
+   "prompts": [
+    {
+     "ta": "இந்த ஆண்டு நான் தொடங்கும் ஒரு பழக்கம் என்ன?",
+     "en": "What one habit will I start this year?"
+    },
+    {
+     "ta": "எனக்கு உதவக்கூடிய ஒரு பெரியவர் அல்லது ஆசிரியர் யார்?",
+     "en": "Which adult or teacher can help me?"
+    },
+    {
+     "ta": "நான் இலவசமாகப் பார்க்கக்கூடிய ஒரு பாடம் எது (DIKSHA, SWAYAM, NPTEL, நூலகம்)?",
+     "en": "Which free lesson can I look at (DIKSHA, SWAYAM, NPTEL, library)?"
+    },
+    {
+     "ta": "என் திட்டத்தில் தவறு நடந்தால் மாற்றுவழி என்ன?",
+     "en": "If my plan goes wrong, what is plan B?"
+    }
+   ]
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "வேலைகள் மாறினாலும் எந்தத் திறன்கள் நிலைக்கும்? நீ எப்படி ஆராய்ந்து தயாராவாய்?",
+    "en": "Which skills last even when jobs change? How will you explore and prepare?"
+   },
+   "keywords": [
+    {
+     "ta": "கற்றல்",
+     "en": "learning",
+     "alt": [
+      "கற்பது",
+      "learn"
+     ]
+    },
+    {
+     "ta": "ஆர்வம்",
+     "en": "interest",
+     "alt": [
+      "விருப்பம்",
+      "curiosity"
+     ]
+    },
+    {
+     "ta": "தேவை",
+     "en": "need",
+     "alt": [
+      "ஊர்",
+      "demand"
+     ]
+    },
+    {
+     "ta": "இலவச",
+     "en": "free",
+     "alt": [
+      "DIKSHA",
+      "SWAYAM",
+      "NPTEL",
+      "நூலகம்"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "படித்தல், கணித சிந்தனை, தெளிவான எழுத்து-பேச்சு, ஆர்வம், குழுப்பணி, கற்பது எப்படி என்ற திறன், நேர்மை ஆகியவை நிலைக்கும். என் ஆர்வம், திறன், ஊரின் தேவை மூன்றையும் எழுதி சந்திக்கும் இடத்தைத் தேடுவேன்; நூலகம், DIKSHA, SWAYAM, NPTEL போன்ற இலவச வாய்ப்புகளையும் அதிகாரப்பூர்வ உதவித்தொகைத் தளங்களையும் பயன்படுத்துவேன்.",
+    "en": "Reading, mathematical thinking, clear writing and speaking, curiosity, teamwork, learning how to learn and honesty last. I will write down my interests, skills and my town’s needs and find where they meet, and use free chances like the library, DIKSHA, SWAYAM, NPTEL and official scholarship sites."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "வேலைகளின் பட்டியல் மாறும்; படிப்பு, கணித சிந்தனை, தெளிவான எழுத்து-பேச்சு, ஆர்வம், குழுப்பணி, கற்கும் திறன், நேர்மை நிலைக்கும்.",
+     "en": "The list of jobs changes; reading, mathematical thinking, clear communication, curiosity, teamwork, learning and honesty last."
+    },
+    {
+     "ta": "மருத்துவம், தூய ஆற்றல், வேளாண் தொழில்நுட்பம், டிஜிட்டல், கற்பித்தல், திறன் தொழில்கள், படைப்புத் துறைகளில் பலர் தேவைப்படலாம் — உறுதியில்லை.",
+     "en": "Many people may be needed in health, clean energy, farming technology, digital, teaching, skilled trades and creative work — not certain."
+    },
+    {
+     "ta": "நூலகம், DIKSHA, SWAYAM, NPTEL ஆகியவற்றில் இலவசமாகக் கற்கலாம்; நான் முதல்வன் திட்டம் இருக்கிறது; உதவித்தொகைகளை அதிகாரப்பூர்வத் தளங்களில் சரிபார்.",
+     "en": "Learn free through the library, DIKSHA, SWAYAM and NPTEL; Naan Mudhalvan exists; check scholarships on official sites."
+    },
+    {
+     "ta": "ஆர்வம் × திறன் × தேவை வரைபடம் உன் வழியைத் தேட உதவும்; ஆண்டுதோறும் மாற்று.",
+     "en": "The interest × skill × need map helps find your path; redraw it every year."
+    },
+    {
+     "ta": "எந்தத் தொழிலும் யாருக்கும் மூடப்பட்டதல்ல; பாதை நேராக இருக்க வேண்டியதில்லை.",
+     "en": "No profession is closed to anyone; a path need not be straight."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "வேலைகள் மாறும் உலகில் எது நிலையான திறன்?",
+    "en": "In a world of changing jobs, which is a lasting skill?"
+   },
+   "options": [
+    {
+     "ta": "ஒரு செயலியின் பொத்தான்களை மனப்பாடம் செய்தல்",
+     "en": "Memorising an app’s buttons"
+    },
+    {
+     "ta": "புதியதைப் படித்துப் புரிந்து கற்கும் திறன்",
+     "en": "The ability to read, understand and learn something new"
+    },
+    {
+     "ta": "ஒரே ஒரு பழைய இயந்திரத்தை மட்டும் அறிதல்",
+     "en": "Knowing only one old machine"
+    },
+    {
+     "ta": "யாருடனும் பேசாமல் இருத்தல்",
+     "en": "Not talking to anyone"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "கற்கும் திறன் கருவிகள் மாறினாலும் நிற்கும்.",
+    "en": "The ability to learn stays when tools change."
+   }
+  },
+  {
+   "q": {
+    "ta": "SWAYAM பற்றி எது சரி?",
+    "en": "What is true about SWAYAM?"
+   },
+   "options": [
+    {
+     "ta": "எல்லாக் கற்றலுக்கும் கட்டணம் உண்டு",
+     "en": "All learning has a fee"
+    },
+    {
+     "ta": "தமிழ்நாடு அரசின் திட்டம் மட்டும்",
+     "en": "It is only a Tamil Nadu government scheme"
+    },
+    {
+     "ta": "பள்ளி மாணவருக்கு மட்டும்",
+     "en": "Only for school students"
+    },
+    {
+     "ta": "இந்திய அரசின் இலவசக் கற்றல் தளம்; சான்றிதழ் தேர்வு விருப்பத்துக்குரியது, அதற்குக் கட்டணம் உண்டு",
+     "en": "The Government of India’s free learning platform; the certificate exam is optional and has a fee"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "கற்பது இலவசம்; சான்றிதழ் தேர்வுக்கு மட்டும் கட்டணம்.",
+    "en": "Learning is free; only the certificate exam has a fee."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"நான் முதல்வன்\" என்றால் என்ன?",
+    "en": "What is “Naan Mudhalvan”?"
+   },
+   "options": [
+    {
+     "ta": "தமிழ்நாடு அரசின் திறன் மேம்பாட்டுத் திட்டம் (1 மார்ச் 2022-இல் தொடக்கம்)",
+     "en": "A Tamil Nadu government skilling programme (launched 1 March 2022)"
+    },
+    {
+     "ta": "ஒரு திரைப்படம்",
+     "en": "A film"
+    },
+    {
+     "ta": "ஒரு விளையாட்டுப் போட்டி",
+     "en": "A sports event"
+    },
+    {
+     "ta": "வெளிநாட்டு உதவித்தொகை நிறுவனம்",
+     "en": "A foreign scholarship company"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "இது இளைஞர்களுக்கான திறன் திட்டம்; உன் வகுப்புக்கு என்ன கிடைக்கும் என்று ஆசிரியரிடம் கேள்.",
+    "en": "It is a skilling programme for youth; ask your teacher what is available at your level."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஆர்வம் × திறன் × தேவை வரைபடத்தில் \"தேவை\" என்றால்?",
+    "en": "In the interest × skill × need map, what does “need” mean?"
+   },
+   "options": [
+    {
+     "ta": "உனக்கு வேண்டிய பொருட்கள்",
+     "en": "Things you want to buy"
+    },
+    {
+     "ta": "நண்பர்கள் என்ன படிக்கிறார்கள்",
+     "en": "What your friends are studying"
+    },
+    {
+     "ta": "உன் ஊருக்கோ சமூகத்துக்கோ எந்த வேலை தேவைப்படுகிறது",
+     "en": "What work your town or society needs"
+    },
+    {
+     "ta": "உன் பெற்றோரின் விருப்பம் மட்டும்",
+     "en": "Only your parents’ wishes"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "தேவையுள்ள இடத்தில் திறன் பயன்படும்.",
+    "en": "Skill is useful where there is a need."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"₹5,000 கொடுத்தால் அரசு வேலை உறுதி\" என்ற செய்திக்கு சரியான எதிர்வினை?",
+    "en": "What is the right reaction to “Pay ₹5,000 for a guaranteed government job”?"
+   },
+   "options": [
+    {
+     "ta": "உடனே பணம் அனுப்புதல்",
+     "en": "Pay immediately"
+    },
+    {
+     "ta": "இது மோசடி அடையாளம்; அதிகாரப்பூர்வத் தளத்தில் சரிபார்த்துப் பணம் தராமல் இருத்தல்",
+     "en": "It is a scam sign; check the official site and do not pay"
+    },
+    {
+     "ta": "நண்பர்களுக்கு அனுப்புதல்",
+     "en": "Forward to friends"
+    },
+    {
+     "ta": "அனுப்பியவருக்குப் பணம் கொடுத்துக் கேட்டல்",
+     "en": "Pay the sender to ask more"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இடைத்தரகருக்குப் பணம் தராதே.",
+    "en": "Do not pay agents."
+   }
+  },
+  {
+   "q": {
+    "ta": "பெண்கள் கணிதம், மின்னணுவியலில் வளர்வது பற்றி எது சரி?",
+    "en": "What is correct about girls in maths and electronics?"
+   },
+   "options": [
+    {
+     "ta": "இவை ஆண்களுக்கு மட்டும்",
+     "en": "These are only for boys"
+    },
+    {
+     "ta": "பிறப்பிலேயே தீர்மானமாகிறது",
+     "en": "It is decided at birth"
+    },
+    {
+     "ta": "பயிற்சியால் வளரும் திறன்கள்; தடைகளைக் குறைக்க ஆதரவு தேவை",
+     "en": "They are skills built through practice; support is needed to reduce obstacles"
+    },
+    {
+     "ta": "அவை பயனற்றவை",
+     "en": "They are useless"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "எந்தத் தொழிலும் யாருக்கும் மூடப்பட்டதல்ல.",
+    "en": "No profession is closed to anyone."
+   }
+  },
+  {
+   "q": {
+    "ta": "தானியங்கிக் கருவிகள் அதிகமாகும் எதிர்காலத்துக்கு நேர்மையான தயாரிப்பு எது?",
+    "en": "What is an honest way to prepare for a future with more automation?"
+   },
+   "options": [
+    {
+     "ta": "ஒரே வேலையையே முழுதாக நம்புதல்",
+     "en": "Rely completely on one job"
+    },
+    {
+     "ta": "படிப்பதை நிறுத்துதல்",
+     "en": "Stop studying"
+    },
+    {
+     "ta": "வதந்திகளை நம்புதல்",
+     "en": "Believe rumours"
+    },
+    {
+     "ta": "அடிப்படைத் திறன்களுடன் தொடர்ந்து கற்று, பல வழிகளைத் திறந்து வைத்தல்",
+     "en": "Keep learning with strong basics and keep several paths open"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "எந்த வேலை எவ்வளவு மாறும் என்பது உறுதியில்லை; தயார்நிலைதான் பாதுகாப்பு.",
+    "en": "How much any job will change is uncertain; readiness is the safety."
+   }
+  }
+ ]
+}

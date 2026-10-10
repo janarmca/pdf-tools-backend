@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>கல்வி களஞ்சியம் — Kalvi Kalanjiyam | Free lessons for TN students</title>
-<meta name="description" content="Free, world-class lessons for Tamil Nadu students (Samacheer Kalvi): understand first with real-life examples and hands-on animations, then practise and test. Tamil + English. No login, no fees.">
+<title>கல்விக் களஞ்சியம் — விளையாடிக் கற்போம் | தமிழ்நாடு மாணவர்களுக்கு இலவசம்</title>
+<meta name="description" content="1 முதல் 10 ஆம் வகுப்பு வரை — தமிழில் விளையாடிக் கற்கும் இலவசக் களஞ்சியம்: தினசரி சவால், நட்சத்திரங்கள், பதக்கங்கள், ஆய்வகம். பதிவு இல்லை, கட்டணம் இல்லை. Free game-based learning in Tamil for Classes 1–10.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -14,7 +14,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.7}
 a{color:var(--brand)}
 .top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
-.topin{max-width:980px;margin:auto;padding:10px 16px;display:flex;gap:10px;align-items:center}
+.topin{max-width:980px;margin:auto;padding:10px 12px;display:flex;gap:8px;align-items:center}
 .logo{font-weight:800;font-size:1.05rem;cursor:pointer;white-space:nowrap}
 .logo small{display:block;font-size:.68rem;font-weight:600;color:var(--sub);line-height:1.2}
 .sp{flex:1}
@@ -166,9 +166,9 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 </head>
 <body>
 <div class="top"><div class="topin">
-  <div class="logo" id="home">📚 கல்வி களஞ்சியம்<small>Kalvi Kalanjiyam · pdftoolsindia.com</small></div>
+  <div class="logo" id="home">📚 கல்விக் களஞ்சியம்<small>இலவசம் · பதிவு இல்லை · pdftoolsindia.com</small></div>
   <div class="sp"></div>
-  <a href="/" style="font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-right:6px;">← PDF Tools</a>
+  <a href="/" style="font-size:.8rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-right:2px;">← முதன்மை</a>
   <div class="lang"><button data-l="ta" class="on">தமிழ்</button><button data-l="en">EN</button></div>
 </div></div>
 <div class="wrap" id="app"></div>
@@ -182,7 +182,9 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 <script src="games-sci.js?v=1"></script>
 <script src="why.js?v=1"></script>
 <script src="missions.js?v=1"></script>
-<script src="play.js?v=5"></script>
+<script src="play.js?v=6"></script>
+<script src="arena.js?v=1"></script>
+<script src="future-widgets.js?v=1"></script>
 <script src="lab.js?v=4"></script>
 <script src="lab2.js?v=1"></script>
 <script>
@@ -204,13 +206,13 @@ const UI = {
   ta:{hero:'மனப்பாடம் செய்யாதே — கண்டுபிடி', heroP:'இங்கே விடைகள் முதலில் வராது. முதலில் நீ ஊகிப்பாய், விளையாடி விதியை நீயே கண்டுபிடிப்பாய், பிறகு புரிந்துகொள்வாய் — அதை வைத்து புதியது உருவாக்குவாய். முழுக்க இலவசம் — login இல்லை, கட்டணம் இல்லை.',
     p1:'🤔 ஊகி',p2:'🔍 கண்டுபிடி',p3:'💡 உருவாக்கு',p4:'🚀 எதிர்காலம்',
     d4:'🧪 ஆய்வகம்', d4s:'28 சோதனைகள் — ஊகி, செய், புரிந்துகொள் · இது என்ன பாடம்? · இலவச புத்தகங்கள்',
-    d1:'📘 பாடம் புரிந்துகொள்', d1s:'வகுப்பு வாரியாக — ஊகி, கண்டுபிடி, புரிந்துகொள், உருவாக்கு', d2:'🧠 திட்ட வழிகாட்டி', d2s:'பள்ளி project? விடை அல்ல — உன்னைச் சிந்திக்க வைக்கும் கேள்விகள். நீயே செய்வாய்!', d3:'🚀 எதிர்கால சிந்தனையாளர்', d3s:'AI எப்படிக் கற்கிறது, கண்டுபிடிப்பது எப்படி, தொழில்நுட்பத்தின் பக்கவிளைவுகளைச் சரிசெய்வது எப்படி',
+    d1:'📘 பாடம் புரிந்துகொள்', d1s:'வகுப்பு வாரியாக — ஊகி, கண்டுபிடி, புரிந்துகொள், உருவாக்கு', d2:'🧠 திட்ட வழிகாட்டி', d2s:'பள்ளி project? விடை அல்ல — உன்னைச் சிந்திக்க வைக்கும் கேள்விகள். நீயே செய்வாய்!', d3:'🚀 நாளைய உலகம்', d3s:'மின்சாரம், இணையம், விண்வெளி, மருத்துவம், AI… இன்று எப்படி இயங்குகிறது, நாளை என்ன வரும்',
     predict:'🤔 முதலில் ஊகி', predictSub:'சரியா தவறா என்பது முக்கியமல்ல — ஊகித்த பிறகு கற்றது மனதில் நிற்கும்.', yourGuess:'உன் ஊகம்', guessRight:'🎯 நீ ஊகித்தது சரி! ஏன் என்று பார்:', guessWrong:'💭 எதிர்பாராததா? அருமை — விஞ்ஞானிகள் இப்படித்தான் கற்கிறார்கள். ஏன் என்று பார்:', revealT:'என்ன நடக்கிறது?',
     discover:'🔍 நீயே கண்டுபிடி', discoverWrong:'இன்னும் இல்லை — animation-ஐ மீண்டும் நகர்த்திப் பார், எது மாறுகிறது, எது மாறவில்லை?', insight:'💡 நீ கண்டுபிடித்தது:',
     world:'🌍 உலகில் இது எங்கே வேலை செய்கிறது?', invent:'💡 கண்டுபிடிப்பாளராகு', inventPh:'உன் யோசனையை இங்கே எழுது (இந்த போனில் சேமிக்கப்படும்)…', toCoach:'🧠 இதை project ஆக்கு', saved:'✓ சேமிக்கப்பட்டது',
     future:'🚀 எதிர்காலப் பார்வை', risk:'⚠️ ஆபத்து', fix:'🛠️ தீர்வு', think:'🤔 நீ என்ன நினைக்கிறாய்?',
     explain:'🗣️ உன் வார்த்தைகளில் சொல்', explainSub:'உன் தம்பி/தங்கைக்குப் புரியும்படி 3 வரிகளில் எழுது. நீயே விளக்க முடிந்தால், உனக்கு உண்மையில் புரிந்திருக்கிறது.', explainChk:'என் விளக்கத்தைச் சோதி', explainHave:'✓ சேர்த்திருக்கிறாய்:', explainMiss:'இவற்றையும் சேர்க்க முயற்சி செய்:',
-    curric:'📍 பாடத்திட்டங்களில் இது:', futureHome:'எதிர்கால சிந்தனையாளர்', futureSub:'பாடப்புத்தகத்தில் இல்லாதவை — ஆனால் உன் எதிர்காலத்திற்கு மிக முக்கியமானவை.',
+    curric:'📍 பாடத்திட்டங்களில் இது:', futureHome:'நாளைய உலகம்', futureSub:'இன்றைய உலகம் எப்படி இயங்குகிறது, நாளை என்ன வரப்போகிறது — பாடப்புத்தகத்தில் முழுமையாக இல்லாத, ஆனால் உன் வாழ்க்கைக்கு மிக முக்கியமான அறிவு. எளிமையாக, செய்து பார்த்துப் புரிந்துகொள்.',
     pick:'வகுப்பைத் தேர்ந்தெடு', cls:'வகுப்பு', ready:'தயார்', soon:'விரைவில்', done:'முடிந்தது', lessons:'பாடங்கள்', chapters:'அத்தியாயங்கள்',
     soonSub:'இந்தப் பாடத்தின் அத்தியாயங்கள் விரைவில் சேர்க்கப்படும். இப்போது 1–5 வகுப்புகள் அல்லது 9, 10 வகுப்பு கணிதம் & அறிவியல் பாருங்கள்.',
     soonLes:'இந்த அத்தியாயத்தின் பாடங்கள் தயாராகி வருகின்றன.', home:'முகப்பு',
@@ -228,7 +230,7 @@ const UI = {
     world:'🌍 Where does this work in the world?', invent:'💡 Be an inventor', inventPh:'Write your idea here (saved on this phone)…', toCoach:'🧠 Turn this into a project', saved:'✓ Saved',
     future:'🚀 Future lens', risk:'⚠️ Risk', fix:'🛠️ Fix', think:'🤔 What do you think?',
     explain:'🗣️ Say it in your own words', explainSub:'Explain it in 3 lines so your younger brother or sister would understand. If you can explain it, you truly understand it.', explainChk:'Check my explanation', explainHave:'✓ You included:', explainMiss:'Try to also include:',
-    curric:'📍 Where this appears in syllabuses:', futureHome:'Future Thinkers', futureSub:'Not in your textbook — but vital for your future.',
+    curric:'📍 Where this appears in syllabuses:', futureHome:'Tomorrow’s World', futureSub:'How today’s world works and what is coming next — knowledge your textbook only partly covers, but your life needs. Simple, hands-on.',
     pick:'Choose your class', cls:'Class', ready:'Ready', soon:'Coming soon', done:'Done', lessons:'lessons', chapters:'chapters',
     soonSub:'Chapters for this subject are being added. For now, explore Classes 1–5 or Class 9 & 10 Maths and Science.',
     soonLes:'Lessons for this chapter are being prepared.', home:'Home',
@@ -261,6 +263,8 @@ async function route(){
   if(c === 'books') return KALVI_LAB.renderBooks();
   if(c === 'what') return KALVI_LAB.renderWhat();
   if(c === 'missions') return KALVI_MISSIONS.render(s);
+  if(c === 'daily') return KALVI_ARENA.daily(s);
+  if(c === 'mix') return KALVI_ARENA.mix(s, ch);
   if(c === 'project') return renderProject(s);
   if(c === 'future') return s ? renderFutureLesson(s) : renderFutureHome();
   if(les) return renderLesson(c, s, ch, les);
@@ -271,6 +275,7 @@ function subjById(c, s){ const k = CATALOG.classes[c]; return k && k.subjects.fi
 function lessonsOf(subj){ const out=[]; (subj.chapters||[]).forEach((ch,ci)=> (ch.lessons||[]).forEach(l=> out.push({ch:ci+1, id:l.id, title:l.title}))); return out; }
 
 function renderHome(c){
+  if(window.KALVI_ARENA) return KALVI_ARENA.home(c);
   try{ localStorage.setItem('kalviClass', c); }catch(e){}
   const prog = getProg();
   const cls = CATALOG.classes[c];
@@ -301,10 +306,11 @@ function renderSubject(c, s){
     <div class="crumbs"><span data-go="#/${c}">${U('home')}</span> › ${c} ${U('cls')} › ${esc(L(sb.name))}</div>
     <h2 style="margin:0 0 12px">${sb.icon||''} ${esc(L(sb.name))} — ${c} ${U('cls')}</h2>
     ${window.KALVI_WHYSUBJ ? KALVI_WHYSUBJ(s, c, LANG) : ''}
+    ${window.KALVI_ARENA ? KALVI_ARENA.subjectBar(c, s) : ''}
     ${chs.length ? chs.map((ch,i)=>{
       const ls = ch.lessons||[], dn = ls.filter(l=>prog[l.id]&&prog[l.id].done).length;
       const tag = ls.length ? (dn===ls.length ? `<span class="tag done">✓ ${U('done')}</span>` : `<span class="tag ready">${ls.length} ${U('lessons')}</span>`) : `<span class="tag soon">${U('soon')}</span>`;
-      return `<div class="chap"><div class="h" data-i="${i}"><div class="no">${ch.no||i+1}</div><div class="t">${esc(L(ch.title))}${ch.part?`<div class="note">${esc(L(ch.part))}</div>`:''}</div>${tag}</div>
+      return `<div class="chap"><div class="h" data-i="${i}"><div class="no">${ch.no||i+1}</div><div class="t">${esc(L(ch.title))}${ch.part && LANG!=='ta' ?`<div class="note">${esc(L(ch.part))}</div>`:''}</div>${tag}</div>
         <div class="lessons" style="display:${ls.length?'block':'none'}">${ls.map(l=>{
           const p = prog[l.id]; const st = p && p.stars; return `<div class="les" data-l="${l.id}" data-ch="${i+1}"><span class="ic">${l.game ? (window.KALVI_GAMES && KALVI_GAMES[l.game] ? KALVI_GAMES[l.game].icon : '🎮') : (p&&p.done?'✅':'▶️')}</span><span style="flex:1">${esc(L(l.title))}${l.game?`<div class="note">🎮 ${LANG==='ta'?'விளையாட்டு':'Game'}</div>`:''}</span>${l.game ? `<span class="tag done">${'⭐'.repeat(st||0)}${'☆'.repeat(3-(st||0))}</span>` : (p&&p.score!=null?`<span class="tag done">${p.score}%</span>`:'')}</div>`; }).join('')}</div></div>`;
     }).join('') : `<div class="soonbox">${U('soonSub')}</div>`}`;
@@ -335,10 +341,13 @@ async function renderFutureLesson(id){
   return renderLessonCore(id, crumbs, nav);
 }
 function renderFutureHome(){
-  const prog = getProg();
+  const prog = getProg(), list = CATALOG.future || [], groups = CATALOG.futureGroups || [];
+  const doneN = list.filter(m=>prog[m.id]&&prog[m.id].done).length;
+  const row = m=>`<div class="chap"><div class="h" data-f="${m.id}"><div class="no" style="font-size:1.2rem">${m.icon}</div><div class="t">${esc(L(m.title))}<div class="note">${esc(L(m.desc))}</div></div>${prog[m.id]&&prog[m.id].done?`<span class="tag done">✓ ${prog[m.id].score!=null?prog[m.id].score+'%':''}</span>`:''}</div></div>`;
+  const sections = groups.length ? groups.map(g=>{ const ms = list.filter(m=>m.group===g.id); return ms.length ? `<h3 style="margin:18px 0 8px">${g.icon} ${esc(L(g.title))}</h3>${ms.map(row).join('')}` : ''; }).join('') : list.map(row).join('');
   $('#app').innerHTML = `<div class="crumbs"><span data-go="#/">${U('home')}</span> › ${U('futureHome')}</div>
-    <div class="hero" style="background:linear-gradient(135deg,#b3541e,#7b2cbf)"><h1>🚀 ${U('futureHome')}</h1><p>${U('futureSub')}</p></div>
-    <div style="margin-top:14px">${(CATALOG.future||[]).map(m=>`<div class="chap"><div class="h" data-f="${m.id}"><div class="no" style="font-size:1.2rem">${m.icon}</div><div class="t">${esc(L(m.title))}<div class="note">${esc(L(m.desc))}</div></div>${prog[m.id]&&prog[m.id].done?`<span class="tag done">✓</span>`:''}</div></div>`).join('')}</div>`;
+    <div class="hero" style="background:linear-gradient(135deg,#b3541e,#7b2cbf)"><h1>🚀 ${U('futureHome')}</h1><p>${U('futureSub')}</p><div class="pillars" style="grid-template-columns:repeat(2,1fr)"><div>📘 ${list.length} ${U('lessons')}</div><div>✅ ${doneN}/${list.length} ${U('done')}</div></div></div>
+    <div>${sections}</div>`;
   document.querySelectorAll('[data-go]').forEach(n=> n.onclick = ()=> go(n.dataset.go));
   document.querySelectorAll('[data-f]').forEach(n=> n.onclick = ()=> go('#/future/' + n.dataset.f));
   window.scrollTo(0,0);
@@ -1083,8 +1092,10 @@ function renderReport(pid){
 /* ---------------- language ---------------- */
 function paintLang(){ document.querySelectorAll('.lang button').forEach(b=> b.classList.toggle('on', b.dataset.l===LANG)); document.documentElement.lang = LANG; }
 document.querySelectorAll('.lang button').forEach(b=> b.onclick = ()=>{ LANG = b.dataset.l; try{ localStorage.setItem('kalviLang', LANG); }catch(e){} paintLang(); route(); });
+if(window.KALVI_WIDGETS_X) Object.assign(WIDGETS, KALVI_WIDGETS_X({svg, readout, slider, T, esc}));
 $('#home').onclick = ()=> go('#/');
-if(window.KALVI_PLAY) KALVI_PLAY.init({lang:()=>LANG, esc, go, getProg, setProg});
+if(window.KALVI_ARENA) KALVI_ARENA.init({C:()=>CATALOG, L, esc, go, lang:()=>LANG, getProg});
+if(window.KALVI_PLAY) KALVI_PLAY.init({lang:()=>LANG, esc, go, getProg, setProg, award:(window.KALVI_ARENA?KALVI_ARENA.award:null)});
 paintLang(); route();
 })();
 </script>

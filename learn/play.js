@@ -87,6 +87,7 @@ function play(stage, game, level, id){
   const finish = () => {
     const st = stars(score, ROUNDS), prev = (H.getProg()[id] || {}).stars || 0;
     H.setProg(id, {stars: Math.max(st, prev), done: Math.max(st, prev) >= 2, score: Math.round(score / ROUNDS * 100)});
+    if(H.award) H.award(score * 2 + Math.max(0, st - prev) * 10);
     stage.innerHTML = `<div class="finish"><div class="confetti">${Array.from({length: 18}, (_, k) => `<i style="left:${k * 5.5}%;animation-delay:${(k % 6) * .15}s">${['⭐','🎉','✨','🌟'][k % 4]}</i>`).join('')}</div>
       ${MAYILU}<div class="score">${score} / ${ROUNDS}</div><div class="stars">${'⭐'.repeat(st)}${'☆'.repeat(3 - st)}</div>
       <p>${st === 3 ? T('அற்புதம்! நீ இதில் சாம்பியன்!', 'Amazing! You are a champion at this!') : st === 2 ? T('நன்று! இன்னும் ஒரு முறை விளையாடி 3 நட்சத்திரம் பெறு!', 'Good! Play once more for 3 stars!') : T('பரவாயில்லை — மயிலுவின் விளக்கத்தை மீண்டும் பார்த்து, மீண்டும் விளையாடு. ஒவ்வொரு முறையும் நீ முன்னேறுவாய்!', 'That’s okay — look at Mayilu’s explanation again and play again. You get better every time!')}</p>
@@ -94,6 +95,19 @@ function play(stage, game, level, id){
     beep(st >= 2);
     stage.querySelector('#again').onclick = () => play(stage, game, level, id);
     stage.querySelector('#how').onclick = () => showIntro(stage, game, level, id);
+  };
+  next();
+}
+/* mixed run: every round comes from a random game of the given picks [{game, level}] — used by the daily challenge and subject marathons */
+function playMix(stage, picks, done){
+  let i = 0, score = 0; const seen = new Set();
+  const next = () => {
+    if(i >= ROUNDS) return done(score);
+    let q = null, tries = 0;
+    do { const g = picks[Math.floor(Math.random() * picks.length)]; try{ q = g.game.gen(g.level || {}); }catch(e){ q = null; } tries++; } while((!q || seen.has(sig(q))) && tries < 24);
+    if(!q) return done(score);
+    seen.add(sig(q)); i++;
+    (q.kind === 'sort' ? askSort : askChoice)(stage, q, i, ok => { if(ok) score++; next(); });
   };
   next();
 }
@@ -142,5 +156,5 @@ function askSort(stage, q, n, done){
 }
 const pick = a => a[Math.floor(Math.random() * a.length)];
 
-G.KALVI_PLAY = { init(h){ H = h; }, render, GAMES };
+G.KALVI_PLAY = { init(h){ H = h; }, render, GAMES, playMix, MAYILU, beep, ROUNDS, stars };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>AI Lab – Private Test | PDF Tools India</title>
+<style>
+:root{--bg:#f6f8fc;--card:#fff;--ink:#14213d;--mut:#5b6b8c;--line:#dbe3f1;--pri:#1a56db;--ok:#0a7d3b;--bad:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1424;--card:#171f36;--ink:#e8eefc;--mut:#9fb0d4;--line:#2a3558;--pri:#6ea0ff;--ok:#4cd488;--bad:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Noto Sans Tamil",Segoe UI,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 14px}
+h2{font-size:1.05rem;margin:0 0 8px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:8px 0 3px}
+select,input[type=file],textarea,button{width:100%;font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:10px;padding:9px}
+textarea{min-height:90px;resize:vertical}
+button{background:var(--pri);color:#fff;border:0;font-weight:600;margin-top:10px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+button.sec{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+.out{white-space:pre-wrap;border:1px dashed var(--line);border-radius:10px;padding:10px;margin-top:10px;min-height:48px}
+.stat{font-size:.85rem;color:var(--mut);margin-top:6px}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:8px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--pri);transition:width .2s}
+.note{font-size:.85rem;color:var(--mut)}
+.err{color:var(--bad)}
+.rate{display:flex;gap:6px;margin-top:8px}.rate button{margin:0;background:transparent;color:var(--ink);border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<main>
+<h1>🧪 AI Lab (private test)</h1>
+<p class="sub">Open-source AI உங்க phone/laptop-லயே ஓடுதா, Tamil நல்லா வருதான்னு சோதிக்க. Files எங்கும் upload ஆகாது. முதல் முறை model download ஆகும் (Wi-Fi பயன்படுத்துங்க), அடுத்த முறை cache-ல இருந்து வரும்.</p>
+
+<div class="card">
+  <div class="stat" id="env">Device சோதிக்கிறது…</div>
+</div>
+
+<div class="card">
+  <h2>1) Voice → Text (Whisper)</h2>
+  <label>Audio / video file (mp3, wav, m4a, mp4…)</label>
+  <input type="file" id="aud" accept="audio/*,video/*">
+  <label>மொழி</label>
+  <select id="lang">
+    <option value="tamil">தமிழ் (Tamil)</option>
+    <option value="english">English</option>
+    <option value="hindi">Hindi</option>
+    <option value="">தானாக கண்டுபிடி (Auto)</option>
+  </select>
+  <label>Model (பெரியது = துல்லியம் அதிகம், ஆனால் மெதுவு + பெரிய download)</label>
+  <select id="wm">
+    <option value="Xenova/whisper-tiny">tiny (~40 MB, வேகம், துல்லியம் குறைவு)</option>
+    <option value="Xenova/whisper-base" selected>base (~75 MB)</option>
+    <option value="Xenova/whisper-small">small (~250 MB, Tamil-க்கு இதுவே குறைந்தபட்சம்)</option>
+  </select>
+  <button id="wgo">Transcribe செய்</button>
+  <div class="bar" id="wbar"><i></i></div>
+  <div class="stat" id="wstat"></div>
+  <div class="out" id="wout">இங்கே முடிவு வரும்…</div>
+  <div class="rate" id="wrate" style="display:none"><button data-k="wh">👍 நல்லா இருக்கு</button><button data-k="wh">😐 சுமார்</button><button data-k="wh">👎 சரியில்லை</button></div>
+</div>
+
+<div class="card">
+  <h2>2) Translate (NLLB-200)</h2>
+  <label>Direction</label>
+  <select id="dir">
+    <option value="eng_Latn|tam_Taml">English → தமிழ்</option>
+    <option value="tam_Taml|eng_Latn">தமிழ் → English</option>
+    <option value="eng_Latn|hin_Deva">English → Hindi</option>
+  </select>
+  <label>Text</label>
+  <textarea id="tin" placeholder="Translate செய்ய வேண்டிய text…"></textarea>
+  <button id="tgo">Translate செய்</button>
+  <div class="bar" id="tbar"><i></i></div>
+  <div class="stat" id="tstat"></div>
+  <div class="out" id="tout">இங்கே முடிவு வரும்… (முதல் முறை ~600 MB download)</div>
+  <div class="rate" id="trate" style="display:none"><button data-k="tr">👍 நல்லா இருக்கு</button><button data-k="tr">😐 சுமார்</button><button data-k="tr">👎 சரியில்லை</button></div>
+</div>
+
+<div class="card">
+  <h2>சோதனை குறிப்புகள்</h2>
+  <div class="out" id="log" style="min-height:60px">இதுவரை முடிவு இல்லை.</div>
+  <button class="sec" id="copy">குறிப்புகளை Copy செய்</button>
+  <p class="note">உங்க மாணவர்களின் உண்மையான Tamil audio-வுடன் சோதிங்க. Model பெயர், நேரம், 👍/👎 இங்கே சேரும். அதை Copy செய்து எனக்கு அனுப்புங்க; அதை வைத்து எது site-ல போடலாம்னு முடிவு செய்வோம்.</p>
+</div>
+</main>
+
+<script type="module">
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1';
+env.allowLocalModels = false;
+
+const $ = id => document.getElementById(id);
+const hasGPU = !!navigator.gpu;
+$('env').textContent = 'WebGPU: ' + (hasGPU ? 'உண்டு ✅ (வேகம் அதிகம்)' : 'இல்லை ⚠️ (CPU/WASM, மெதுவாக இருக்கும்)') +
+  ' · RAM ≈ ' + (navigator.deviceMemory ? navigator.deviceMemory + ' GB+' : 'தெரியவில்லை') +
+  ' · Cores: ' + (navigator.hardwareConcurrency || '?');
+
+const notes = [];
+function addNote(s){ notes.push(s); $('log').textContent = notes.join('\n'); }
+$('copy').onclick = async () => { try { await navigator.clipboard.writeText(notes.join('\n')); $('copy').textContent = 'Copy ஆச்சு ✔'; } catch(e){ $('copy').textContent = 'Copy ஆகவில்லை – text-ஐ select செய்யுங்க'; } };
+
+function progressTo(barId, statId){
+  const bar = $(barId), fill = bar.firstElementChild, st = $(statId);
+  bar.style.display = 'block';
+  return p => {
+    if (p.status === 'progress' && p.total) { fill.style.width = (p.loaded / p.total * 100).toFixed(0) + '%'; st.textContent = 'Model download: ' + (p.loaded/1048576).toFixed(0) + ' / ' + (p.total/1048576).toFixed(0) + ' MB'; }
+    else if (p.status === 'ready') st.textContent = 'Model தயார்…';
+  };
+}
+
+const cache = {};
+async function getPipe(task, model, opts, barId, statId){
+  const key = task + model + JSON.stringify(opts||{});
+  if (cache[key]) return cache[key];
+  const base = { progress_callback: progressTo(barId, statId), ...(opts||{}) };
+  let p;
+  if (hasGPU) {
+    try { p = await pipeline(task, model, { ...base, device: 'webgpu', dtype: task === 'automatic-speech-recognition' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8' }); }
+    catch (e) { console.warn('WebGPU failed, falling back', e); }
+  }
+  if (!p) p = await pipeline(task, model, { ...base, dtype: 'q8' });
+  return (cache[key] = p);
+}
+
+async function decodeAudio(file){
+  const buf = await file.arrayBuffer();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+  const audio = await ctx.decodeAudioData(buf);
+  ctx.close && ctx.close();
+  let ch = audio.getChannelData(0);
+  if (audio.numberOfChannels > 1) {
+    const b = audio.getChannelData(1), m = new Float32Array(ch.length);
+    for (let i = 0; i < ch.length; i++) m[i] = (ch[i] + b[i]) / 2;
+    ch = m;
+  }
+  return { data: ch, seconds: audio.duration };
+}
+
+$('wgo').onclick = async () => {
+  const f = $('aud').files[0];
+  if (!f) { $('wstat').innerHTML = '<span class="err">முதலில் ஒரு audio file தேர்ந்தெடுங்க.</span>'; return; }
+  const btn = $('wgo'); btn.disabled = true; $('wrate').style.display = 'none';
+  $('wout').textContent = ''; $('wstat').textContent = 'Audio படிக்கிறது…';
+  try {
+    const model = $('wm').value, lang = $('lang').value;
+    const { data, seconds } = await decodeAudio(f);
+    const asr = await getPipe('automatic-speech-recognition', model, {}, 'wbar', 'wstat');
+    $('wstat').textContent = 'Transcribe ஆகிறது… (' + Math.round(seconds) + ' sec audio)';
+    const t0 = performance.now();
+    const o = { chunk_length_s: 30, stride_length_s: 5, task: 'transcribe', return_timestamps: false };
+    if (lang) o.language = lang;
+    const r = await asr(data, o);
+    const sec = ((performance.now() - t0) / 1000).toFixed(1);
+    $('wout').textContent = (r.text || '').trim() || '(எதுவும் கிடைக்கவில்லை)';
+    $('wstat').textContent = 'முடிந்தது: ' + sec + ' sec (audio ' + Math.round(seconds) + ' sec)';
+    $('wrate').style.display = 'flex';
+    $('wrate').dataset.info = 'Whisper ' + model.split('/')[1] + ' · ' + (lang || 'auto') + ' · ' + sec + 's/' + Math.round(seconds) + 's · ' + (hasGPU ? 'GPU' : 'CPU');
+  } catch (e) {
+    $('wstat').innerHTML = '<span class="err">பிழை: ' + (e.message || e) + '</span>';
+  }
+  btn.disabled = false;
+};
+
+$('tgo').onclick = async () => {
+  const txt = $('tin').value.trim();
+  if (!txt) { $('tstat').innerHTML = '<span class="err">Text எழுதுங்க.</span>'; return; }
+  const btn = $('tgo'); btn.disabled = true; $('trate').style.display = 'none';
+  $('tout').textContent = ''; $('tstat').textContent = 'Model தயாராகிறது…';
+  try {
+    const [src, tgt] = $('dir').value.split('|');
+    const tr = await getPipe('translation', 'Xenova/nllb-200-distilled-600M', {}, 'tbar', 'tstat');
+    $('tstat').textContent = 'Translate ஆகிறது…';
+    const t0 = performance.now();
+    const r = await tr(txt, { src_lang: src, tgt_lang: tgt, max_new_tokens: 400 });
+    const sec = ((performance.now() - t0) / 1000).toFixed(1);
+    $('tout').textContent = r[0].translation_text;
+    $('tstat').textContent = 'முடிந்தது: ' + sec + ' sec';
+    $('trate').style.display = 'flex';
+    $('trate').dataset.info = 'NLLB-600M ' + src + '→' + tgt + ' · ' + sec + 's · ' + (hasGPU ? 'GPU' : 'CPU');
+  } catch (e) {
+    $('tstat').innerHTML = '<span class="err">பிழை: ' + (e.message || e) + '</span>';
+  }
+  btn.disabled = false;
+};
+
+document.querySelectorAll('.rate button').forEach(b => b.onclick = () => {
+  const box = b.parentElement;
+  addNote(b.textContent.trim() + ' — ' + (box.dataset.info || ''));
+  box.style.display = 'none';
+});
+</script>
+</body>
+</html>

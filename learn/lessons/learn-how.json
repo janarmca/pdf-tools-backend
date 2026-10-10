@@ -1,0 +1,708 @@
+{
+ "id": "learn-how",
+ "minutes": 30,
+ "title": {
+  "ta": "நன்றாகக் கற்பது எப்படி? (கற்கும் அறிவியல்)",
+  "en": "How to learn well (the science of learning)"
+ },
+ "curriculum": [
+  {
+   "b": "WHO",
+   "w": {
+    "ta": "வாழ்க்கைத் திறன்கள்: விமர்சனச் சிந்தனை, சுய விழிப்புணர்வு",
+    "en": "Life skills: critical thinking and self-awareness"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "வாழ்நாள் முழுவதும் கற்றல் (learning to learn)",
+    "en": "Learning to learn — lifelong learning"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "நாம் ஏன் மறக்கிறோம் என்பதைப் புரிந்துகொள்ள",
+   "en": "Understand why we forget"
+  },
+  {
+   "ta": "ஆய்வுகள் ஆதரிக்கும் படிக்கும் முறைகளை (நினைவிலிருந்து எழுதுதல், இடைவெளி விட்டு மீள்பார்வை, தூக்கம், பிறருக்கு விளக்குதல்) பயன்படுத்த",
+   "en": "Use study methods that research supports: recalling, spaced review, sleep, explaining to others"
+  },
+  {
+   "ta": "மீண்டும் படித்தல், வண்ணக்கோடு போடுதல் ஆகியவை ஏமாற்றும் முறைகள் என்பதை அடையாளம் காண",
+   "en": "Spot the trap of re-reading and highlighting"
+  },
+  {
+   "ta": "ஒரு வார தேர்வுக்கு உண்மையான திட்டம் போட",
+   "en": "Make a realistic one-week exam plan"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "மீனா தேர்வுக்கு முந்தைய இரவு அறிவியல் பாடத்தை மூன்று முறை படித்தாள். முக்கிய வரிகளுக்குக் கீழே வண்ணக்கோடு போட்டாள். \"எல்லாம் தெரிந்துவிட்டது\" என்று தோன்றியது. காலையில் தேர்வுத்தாளைப் பார்த்தபோது, பாதி விடைகள் நினைவுக்கே வரவில்லை.\n\nஇது மீனாவுக்கு மட்டும் நடப்பதில்லை; பலருக்கும் நடக்கிறது. **இந்தப் பாடம் உனக்கு ஏன் முக்கியம்?** படிக்கும் நேரம் உன்னிடம் குறைவாக இருக்கலாம். ஆனால் அதே நேரத்தில் அதிகம் நினைவில் நிற்கும் வழிகள் உள்ளன. அவை தேர்வுக்கு மட்டுமல்ல, வாழ்நாள் முழுவதும் புதிதாக எதையும் கற்பதற்கும் உதவும்.\n\nகேள்வி: மூன்று முறை படித்தும் மீனாவுக்கு ஏன் நினைவில் இல்லை?",
+    "en": "Meena read her Science chapter three times the night before the exam. She underlined the important lines in colour. \"I know it all now,\" she felt. In the morning, looking at the question paper, half the answers simply would not come back.\n\nThis does not happen only to Meena; it happens to many people. **Why does this lesson matter to you?** You may have little time to study. But some ways of studying make much more stay in your head in the same time. They help in exams, and also for the rest of your life whenever you learn something new.\n\nThe question: why did Meena forget after reading three times?"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு பாடத்தை 20 நிமிடம் படித்து முடித்துவிட்டாய். இன்னும் 10 நிமிடம் இருக்கிறது. ஒரு வாரம் கழித்து அதிகம் நினைவில் இருக்க எது உதவும்?",
+    "en": "You have just studied a lesson for 20 minutes and have 10 minutes left. Which is more likely to help you remember it a week later?"
+   },
+   "options": [
+    {
+     "ta": "அதே பகுதியை இன்னொரு முறை படிப்பது",
+     "en": "Reading the same part once more"
+    },
+    {
+     "ta": "புத்தகத்தை மூடி, நினைவிலிருந்து தாளில் எழுத முயல்வது",
+     "en": "Closing the book and trying to write what you remember"
+    },
+    {
+     "ta": "முக்கிய வரிகளுக்கு இன்னும் வண்ணக்கோடு போடுவது",
+     "en": "Adding more colour lines under the key sentences"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "பல ஆய்வுகளில், நினைவிலிருந்து எடுத்து எழுத முயன்றவர்கள், மீண்டும் மீண்டும் படித்தவர்களை விட ஒரு வாரம் கழித்து அதிகம் நினைவில் வைத்திருந்தனர். ஆச்சரியம் என்னவென்றால், மீண்டும் படித்தவர்கள்தான் \"நான் நன்றாகத் தெரிந்துகொண்டேன்\" என்று அதிக நம்பிக்கையுடன் இருந்தனர். உன் ஊகம் வேறாக இருந்தாலும் கவலை வேண்டாம் — பலரும் அப்படித்தான் நினைக்கிறார்கள்.",
+    "en": "In many studies, people who tried to pull the material out of memory remembered more a week later than people who simply re-read it. The surprise: the re-readers felt more sure that they had learnt it. If you guessed differently, don't worry — most people do."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "forgetting",
+   "params": {},
+   "title": {
+    "ta": "நினைவு மாதிரியுடன் விளையாடு",
+    "en": "Play with a memory model"
+   },
+   "text": {
+    "ta": "கீழே ஒரு **எளிய மாதிரி** உள்ளது. சாம்பல் கோடு: ஒரு முறை மட்டும் படித்தால் நினைவு எப்படிக் குறைகிறது. நீலக் கோடு: இடைவெளி விட்டு மீண்டும் பார்த்தால் என்ன ஆகிறது. **\"மீள்பார்வை\" சறுக்கியை 3-இல் வை.** பிறகு \"இடைவெளி (நாள்)\" சறுக்கியை 1, 3, 7 என்று மாற்றி, \"30-ஆம் நாள் — மீள்பார்வையுடன்\" என்ற எண்ணைப் பார்.",
+    "en": "A **simple model** is below. The grey line shows how memory fades if you study only once; the blue line shows it when you review after gaps. **Set the \"Reviews\" slider to 3.** Then move the \"Gap (days)\" slider to 1, 3 and 7 and watch the number \"Day 30 — with reviews\"."
+   },
+   "q": {
+    "ta": "3 முறை மீள்பார்வை செய்யும்போது, இந்த மாதிரியில் 30-ஆம் நாள் நினைவு எந்த இடைவெளியில் அதிகமாக இருக்கிறது?",
+    "en": "With 3 reviews, which gap leaves the highest memory on day 30 in this model?"
+   },
+   "options": [
+    {
+     "ta": "1 நாள் இடைவெளி (தினமும்)",
+     "en": "1-day gap (every day)"
+    },
+    {
+     "ta": "3 நாள் இடைவெளி",
+     "en": "3-day gap"
+    },
+    {
+     "ta": "7 நாள் இடைவெளி",
+     "en": "7-day gap"
+    }
+   ],
+   "correct": 2,
+   "insight": {
+    "ta": "இந்த மாதிரியில்: 1 நாள் இடைவெளி → சுமார் 32%, 3 நாள் → சுமார் 41%, 7 நாள் → சுமார் 68%. ஒவ்வொரு மீள்பார்வையும் நினைவை வலுப்படுத்துவதால், அடுத்த மீள்பார்வைக்கு நீண்ட நேரம் காத்திருக்கலாம். மூன்று மீள்பார்வைகளையும் ஒரே வாரத்தில் நெருக்கமாக வைத்தால் பலன் குறைவு. **ஆனால் இது ஒரு எளிய மாதிரி — எண்கள் உண்மையான அளவீடுகள் அல்ல.** உண்மையான வாழ்க்கையில், முழுவதும் மறப்பதற்கு முன்பே மீண்டும் பார்க்க வேண்டும்.",
+    "en": "In this model: a 1-day gap gives about 32%, 3 days about 41%, 7 days about 68%. Each review makes the memory stronger, so you can wait longer before the next one. Cramming all three reviews close together gives less. **But this is only a simple model — the numbers are not real measurements.** In real life, the idea is to review before you have forgotten everything."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நாம் ஏன் மறக்கிறோம்?",
+    "en": "Why do we forget?"
+   },
+   "text": {
+    "ta": "மூளை ஒரு அலமாரி அல்ல; பார்த்ததையெல்லாம் அப்படியே பூட்டி வைப்பதில்லை. நீ திரும்பத் திரும்பப் பயன்படுத்தும் தகவல்களை \"முக்கியம்\" என்று வைத்துக்கொள்கிறது. பயன்படுத்தாதவை மெல்ல மங்குகின்றன. இது ஒரு **எளிய படம்** — உண்மையான மூளை இதைவிடச் சிக்கலானது.\n\n140 ஆண்டுகளுக்கு முன்பு, ஹெர்மன் எபிங்ஹவுஸ் (Hermann Ebbinghaus) என்ற ஜெர்மன் ஆய்வாளர் அர்த்தமில்லாத சொற்களை மனப்பாடம் செய்தார். பிறகு எவ்வளவு மறக்கிறார் என்று அளந்தார். மறதி **முதலில் வேகமாக** நடக்கிறது, பிறகு மெதுவாகிறது என்று கண்டார். ஊரில் பார்த்த ஒரு திருவிழாவின் நினைவும் அப்படித்தான்: முதல் சில நாட்களில் நிறைய மறந்துவிடுவாய்.\n\nஇன்னொரு விஷயம்: **மறப்பது குறை அல்ல.** பார்த்த ஒவ்வொரு பேருந்து எண்ணையும் ஒவ்வொரு முகத்தையும் மூளை வைத்திருந்தால் நீ குழம்பிவிடுவாய். எனவே நாம் செய்ய வேண்டியது: \"இது முக்கியம், மீண்டும் தேவைப்படும்\" என்று மூளைக்குக் காட்டுவது.",
+    "en": "The brain is not a cupboard that locks away everything you see. It keeps what you use again and again as \"important\", and the rest slowly fades. This is a **simple picture** — the real brain is more complicated.\n\nOver 140 years ago a German researcher, Hermann Ebbinghaus, memorised meaningless words and measured how much he forgot. He found that forgetting is **fast at first** and then slows down. It is like your memory of a festival you saw: in the first few days you lose a lot.\n\nOne more thing: **forgetting is not a flaw.** If your brain kept every bus number and every face you ever saw, you would be hopelessly confused. So our job is to show the brain: \"this matters, I will need it again\"."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முறை 1: புத்தகத்தை மூடி நினைவிலிருந்து எடு",
+    "en": "Method 1: close the book and pull it out of memory"
+   },
+   "text": {
+    "ta": "இதன் பெயர் **நினைவிலிருந்து எடுத்தல் (retrieval practice)**. எப்படிச் செய்வது:\n\n**1.** 10 நிமிடம் பாடத்தைப் படி.\n**2.** புத்தகத்தை மூடு.\n**3.** 5 நிமிடம் ஒரு வெள்ளைத் தாளில், நினைவிருப்பதையெல்லாம் எழுது அல்லது படம் வரை. பார்க்காதே!\n**4.** புத்தகத்தைத் திறந்து சரிபார். விட்டுப்போனவற்றைச் சிவப்பு மையில் எழுது.\n**5.** அடுத்த முறை சிவப்புப் பகுதிகளிலிருந்து தொடங்கு.\n\nஇது ஏன் உதவுகிறது? தகவலை நினைவிலிருந்து இழுத்து எடுக்கும் முயற்சியே அதை வலுவாக்குகிறது. எது தெரியாது என்பதையும் இது உடனே காட்டுகிறது. கடினமாக இருந்தால், அது **பலன் தருகிறது** என்பதற்கான அடையாளமாகவும் இருக்கலாம்.",
+    "en": "This is called **retrieval practice**. How to do it:\n\n**1.** Read the lesson for 10 minutes.\n**2.** Close the book.\n**3.** On a blank sheet, write or draw everything you remember for 5 minutes. No peeking!\n**4.** Open the book and check. Write what you missed in red.\n**5.** Next time, start with the red parts.\n\nWhy does it help? The effort of pulling information out of memory itself makes the memory stronger, and it immediately shows what you do not know. If it feels hard, that can be a sign that it is **working**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முறை 2 & 3: இடைவெளி விட்டுப் படி; தூங்கு",
+    "en": "Methods 2 and 3: space it out; sleep"
+   },
+   "text": {
+    "ta": "**இடைவெளி (spacing):** ஒரே இரவில் 3 மணி நேரம் மனப்பாடம் செய்வதை விட, மூன்று நாட்கள் ஒவ்வொன்றிலும் 1 மணி நேரம் படிப்பது பொதுவாக நீண்ட காலம் நினைவில் நிற்கும். முந்தைய இரவு மனப்பாடம் (cramming) நாளைய தேர்வுக்கு ஓரளவு உதவலாம்; ஆனால் விரைவில் மறந்துவிடுவாய். பாடங்கள் ஒவ்வொன்றையும் நாள் 1, நாள் 3, நாள் 7 என்று மீண்டும் பார்.\n\n**தூக்கம்:** தூங்கும்போது மூளை பகலில் கற்றதை ஒழுங்குபடுத்தி வைக்க உதவுகிறது என்று ஆய்வுகள் காட்டுகின்றன. இரவு முழுவதும் விழித்துப் படிப்பது பெரும்பாலும் பலன் தராது. குழந்தைகளுக்கும் பதின்வயதினருக்கும் பொதுவாக 8 முதல் 12 மணி நேரத் தூக்கம் பரிந்துரைக்கப்படுகிறது (வயது குறைவாக இருந்தால் அதிகம் தேவை). எவ்வளவு தேவை என்பது ஆளுக்கு ஆள் மாறும் — சந்தேகம் இருந்தால் பெரியவர்களிடமோ மருத்துவரிடமோ கேள்.",
+    "en": "**Spacing:** Instead of memorising for 3 hours in one night, studying 1 hour on each of three days usually stays in memory longer. Last-night cramming may help a little with tomorrow's exam, but it fades quickly. Look at each topic again on day 1, day 3 and day 7.\n\n**Sleep:** Studies suggest that during sleep the brain helps to organise what you learnt in the day. Studying all night is often a loss. Children and teenagers generally need about 8 to 12 hours of sleep (younger children need more); how much you need varies from person to person — ask an adult or a doctor if you are unsure."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "முறை 4 & 5: பிறருக்கு விளக்கு; கலந்து பயிற்சி செய்",
+    "en": "Methods 4 and 5: explain to someone; mix it up"
+   },
+   "text": {
+    "ta": "**விளக்குதல்:** படித்ததை உன் தங்கை, தம்பி, நண்பன் — யாராவது ஒருவருக்கு, புத்தகம் பார்க்காமல், உன் சொற்களில் சொல்லிப் பார். எங்கே தடுமாறுகிறாயோ, அங்குதான் உனக்குப் புரியாத இடம். அதை மட்டும் மீண்டும் படி. யாரும் இல்லையென்றால் சுவரிடம் சொல்லலாம்!\n\n**கலந்து பயிற்சி (interleaving):** கணிதத்தில் ஒரே வகைக் கணக்கை 10 முறை செய்வதை விட, வெவ்வேறு வகைக் கணக்குகளைக் கலந்து செய். தேர்வில் எந்த வகை வரும் என்று உனக்குத் தெரியாது; \"இதற்கு எந்த முறை?\" என்று தேர்ந்தெடுக்கும் பயிற்சியும் வேண்டும். இது கடினமாகத் தோன்றும், ஆனால் ஆய்வுகளில் பெரும்பாலும் நல்ல பலன் தந்தது.",
+    "en": "**Explaining:** Tell what you studied to your younger sister or brother, or a friend, without looking at the book, in your own words. Where you stumble is exactly where you do not understand yet. Study only that part again. If nobody is around, tell the wall!\n\n**Mixing (interleaving):** In maths, instead of doing 10 problems of the same type, mix different types. In the exam you will not know which type is coming; you also need practice in choosing \"which method does this need?\". It feels harder, but in studies it often gave better results."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "**ஏமாற்றும் உணர்வு:** பாடத்தை மீண்டும் படிக்கும்போதும் வண்ணக்கோடு போடும்போதும் \"எல்லாம் தெரிகிறது\" என்று தோன்றும். ஏனென்றால் அது **பழக்கமாகத் தெரிகிறது**. ஆனால் \"பழக்கமாகத் தெரிவது\" வேறு, \"புத்தகம் இல்லாமல் சொல்ல முடிவது\" வேறு. தேர்வில் புத்தகம் இருக்காது. படிப்பு முறைகளை ஒப்பிட்ட ஒரு பெரிய ஆய்வு மதிப்பீடு (2013) இப்படி முடிவு செய்தது: மீண்டும் படித்தல், வண்ணக்கோடு ஆகியவற்றைத் தனியாகப் பயன்படுத்தினால் பலன் குறைவு; தன்னைத் தானே சோதித்தல், இடைவெளி விட்டுப் படித்தல் ஆகியவற்றால் பலன் அதிகம்.",
+    "en": "**The trap of feeling:** When you re-read or highlight, it feels like \"I know all this\" — because the text looks **familiar**. But \"looks familiar\" is different from \"can say it without the book\". There will be no book in the exam. A large review of study methods (2013) concluded that re-reading and highlighting on their own give little benefit, while testing yourself and spacing your study give much more."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தவறுகளும் முயற்சியும் கற்றலின் பகுதி",
+    "en": "Mistakes and effort are part of learning"
+   },
+   "text": {
+    "ta": "நினைவிலிருந்து எழுத முயன்று தவறு செய்தால், அது தோல்வி அல்ல. தவறைப் பார்த்துச் சரிசெய்யும்போது மூளை அந்தப் பகுதிக்குக் கூடுதல் கவனம் தருகிறது. கற்றல் மிக எளிதாகத் தோன்றினால், நீ அதிகம் கற்கவில்லை என்றும் இருக்கலாம். \"எனக்கு மூளை இல்லை\" என்று நினைக்க வேண்டாம்; \"இந்த முறையை இன்னும் பழகவில்லை\" என்று நினை.\n\n**நேர்மையான குறிப்பு:** இந்த முறைகள் பெரும்பாலானவர்களுக்கு, சராசரியாக, உதவுகின்றன. ஆனால் எல்லோருக்கும் ஒரே அளவு உதவாது. ஒரு வாரம் முயன்று, உன் மதிப்பெண்ணிலும் தன்னம்பிக்கையிலும் என்ன மாறியது என்று பார். படிப்பதில், கவனிப்பதில் தொடர்ந்து சிரமம் இருந்தால் ஆசிரியரிடம் சொல்; உனக்கு உதவி கிடைக்கும்.",
+    "en": "If you try to write from memory and make mistakes, that is not failure. When you see and fix the mistake, your brain pays extra attention to that part. If learning always feels easy, you may not be learning much. Do not think \"I have no brains\"; think \"I have not practised this method yet\".\n\n**An honest note:** These methods help most people, on average, but not everyone by the same amount. Try them for a week and see what changes in your marks and your confidence. If you keep finding it hard to study or to pay attention, tell your teacher — help is available."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "ஒரு வார தேர்வுத் திட்டம்",
+    "en": "A one-week exam plan"
+   },
+   "q": {
+    "ta": "தேர்வு இன்றிலிருந்து 8-ஆம் நாள்; அதற்குள் தயாராக 7 நாட்கள் உண்டு. 5 பாடங்கள். தினமும் 1½ மணி நேரம் (90 நிமிடம்) மட்டுமே நேரம் உண்டு. எப்படித் திட்டமிடுவது?",
+    "en": "The exam is on the 8th day from today, so you have 7 days to prepare. There are 5 chapters. You have only 1½ hours (90 minutes) a day. How do you plan?"
+   },
+   "steps": [
+    {
+     "ta": "மொத்த நேரம்: 7 × 90 = 630 நிமிடம் (10½ மணி நேரம்).",
+     "en": "Total time: 7 × 90 = 630 minutes (10½ hours)."
+    },
+    {
+     "ta": "நாள் 1 முதல் 5 வரை: ஒவ்வொரு நாளும் ஒரு புதிய பாடம் 50 நிமிடம் + முந்தைய நாட்களின் பாடங்களைப் புத்தகம் மூடி நினைவிலிருந்து எழுத 25 நிமிடம் + தவறுகளைச் சரிசெய்ய 15 நிமிடம் = 90.",
+     "en": "Days 1 to 5: each day one new chapter for 50 minutes + 25 minutes recalling earlier chapters with the book closed + 15 minutes fixing mistakes = 90."
+    },
+    {
+     "ta": "புதிய பாடங்கள்: 5 × 50 = 250 நிமிடம். மீதி: 630 − 250 = 380 நிமிடம் (60%-க்கு மேல்) நினைவிலிருந்து எடுக்கவும் சரிசெய்யவும் செலவாகிறது.",
+     "en": "New learning: 5 × 50 = 250 minutes. The rest, 630 − 250 = 380 minutes (over 60%), goes on recalling and fixing."
+    },
+    {
+     "ta": "நாள் 6: புதிய பாடம் இல்லை — எல்லாப் பாடங்களிலிருந்தும் கலந்த கேள்விகளுக்குப் பதில் எழுது. நாள் 7 (தேர்வுக்கு முந்தைய நாள்): சிவப்பு மையில் குறித்த பகுதிகளை மட்டும் நினைவிலிருந்து சொல், சீக்கிரமே தூங்கு.",
+     "en": "Day 6: no new chapter — answer mixed questions from all chapters. Day 7 (the day before the exam): recall only the red-marked parts, and go to bed early."
+    }
+   ],
+   "answer": {
+    "ta": "புதிய கற்றலை விட மீள்பார்வைக்கே அதிக நேரம்: 250 நிமிடம் புதியது, 380 நிமிடம் நினைவிலிருந்து எடுத்தல்.",
+    "en": "More time goes on review than on first learning: 250 minutes new, 380 minutes recall."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "திட்டம் ஒரே பார்வையில் (90 நிமிடம்/நாள்)",
+    "en": "The plan at a glance (90 min/day)"
+   },
+   "head": [
+    {
+     "ta": "நாள்",
+     "en": "Day"
+    },
+    {
+     "ta": "புதியது",
+     "en": "New"
+    },
+    {
+     "ta": "நினைவிலிருந்து",
+     "en": "Recall"
+    },
+    {
+     "ta": "தவறு திருத்தம்",
+     "en": "Fix mistakes"
+    }
+   ],
+   "rows": [
+    [
+     "1",
+     "50 (பாடம் 1 / ch 1)",
+     "25 (முதல் முறை — அன்றைய பாடம் / today's chapter)",
+     "15"
+    ],
+    [
+     "2",
+     "50 (பாடம் 2 / ch 2)",
+     "25 (பாடம் 1, 2)",
+     "15"
+    ],
+    [
+     "3",
+     "50 (பாடம் 3 / ch 3)",
+     "25 (பாடம் 1–3)",
+     "15"
+    ],
+    [
+     "4",
+     "50 (பாடம் 4 / ch 4)",
+     "25 (பாடம் 1–4)",
+     "15"
+    ],
+    [
+     "5",
+     "50 (பாடம் 5 / ch 5)",
+     "25 (பாடம் 1–5)",
+     "15"
+    ],
+    [
+     "6",
+     "0",
+     {
+      "ta": "90 (எல்லாப் பாடக் கேள்விகளும் கலந்து)",
+      "en": "90 (mixed questions from all chapters)"
+     },
+     "—"
+    ],
+    [
+     "7",
+     "0",
+     {
+      "ta": "60 (சிவப்புப் பகுதிகள் மட்டும்) — பிறகு ஓய்வு, சீக்கிரமே தூக்கம்",
+      "en": "60 (red parts only) — then rest, early sleep"
+     },
+     {
+      "ta": "30",
+      "en": "30"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மேலே உள்ள திட்டத்தில் புதிய பாடங்களுக்கு 250 நிமிடம் செலவாகிறது. மொத்தம் 630 நிமிடம் என்றால், நினைவிலிருந்து எடுக்கவும் திருத்தவும் எத்தனை நிமிடம் மீதம்?",
+    "en": "In the plan above, new chapters take 250 minutes out of 630 minutes. How many minutes are left for recalling and fixing?"
+   },
+   "answer": 380,
+   "tol": 0,
+   "unit": {
+    "ta": "நிமிடம்",
+    "en": "minutes"
+   },
+   "hint": {
+    "ta": "630 − 250",
+    "en": "630 − 250"
+   },
+   "solution": {
+    "ta": "630 − 250 = 380 நிமிடம். இது மொத்தத்தில் சுமார் 60%.",
+    "en": "630 − 250 = 380 minutes. That is about 60% of the total."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "கீழே எது **நினைவிலிருந்து எடுத்தல்**?",
+    "en": "Which of these is **retrieval practice**?"
+   },
+   "options": [
+    {
+     "ta": "பாடத்தை அழகாகப் பிரதி எடுத்து எழுதுவது",
+     "en": "Copying the lesson out neatly"
+    },
+    {
+     "ta": "புத்தகத்தை மூடி, \"ஒளிச்சேர்க்கை என்றால் என்ன?\" என்று தாளில் எழுத முயல்வது",
+     "en": "Closing the book and trying to write \"What is photosynthesis?\" on paper"
+    },
+    {
+     "ta": "பாடத்தின் தலைப்புகளை மஞ்சள் வண்ணத்தில் குறிப்பது",
+     "en": "Marking the headings in yellow"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "புத்தகம் திறந்திருக்கிறதா மூடியிருக்கிறதா?",
+    "en": "Is the book open or closed?"
+   },
+   "solution": {
+    "ta": "புத்தகம் மூடிய நிலையில், நினைவிலிருந்து தகவலை எடுக்க முயல்வதுதான் நினைவிலிருந்து எடுத்தல். பிரதி எடுப்பதும் வண்ணக்கோடும் தகவலை மீண்டும் பார்ப்பதுதான்.",
+    "en": "Trying to pull the answer out with the book closed is retrieval practice. Copying and highlighting only look at the information again."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ரவி இரண்டாவது முறையாகப் படிக்கும்போது \"இது எளிதாக இருக்கிறது, எனக்கு எல்லாம் தெரியும்\" என்கிறான். இந்த உணர்வு எதைக் காட்டலாம்?",
+    "en": "Ravi says while reading a chapter the second time: \"This is easy, I know it all.\" What might this feeling really show?"
+   },
+   "options": [
+    {
+     "ta": "பாடம் பழக்கமாகத் தெரிகிறது; புத்தகம் இல்லாமல் சொல்ல முடியுமா என்பது இன்னும் தெரியாது",
+     "en": "The text looks familiar; he does not yet know if he can say it without the book"
+    },
+    {
+     "ta": "அவன் முழுவதும் கற்றுவிட்டான்",
+     "en": "He has fully learnt it"
+    },
+    {
+     "ta": "அவனுக்கு இனி படிக்கவே தேவையில்லை",
+     "en": "He never needs to study it again"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "\"பழக்கமாகத் தெரிவது\" என்றால் \"நினைவிலிருந்து எடுக்க முடிவது\" என்று பொருளா?",
+    "en": "Does \"looks familiar\" mean \"can recall\"?"
+   },
+   "solution": {
+    "ta": "புத்தகம் கண் முன் இருப்பதால் எல்லாம் பழக்கமாகத் தெரிகிறது. சரிபார்க்க ஒரே வழி: புத்தகத்தை மூடிச் சொல்லிப் பார்ப்பது.",
+    "en": "With the book in front of him everything looks familiar. The only test is to close the book and try to say it."
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📝",
+     "title": {
+      "ta": "சிறு தேர்வுகள் (slip test)",
+      "en": "Short school tests (slip tests)"
+     },
+     "text": {
+      "ta": "பள்ளியில் நடக்கும் சிறு தேர்வு மதிப்பெண்ணுக்கு மட்டுமல்ல; நினைவிலிருந்து எடுக்கும் பயிற்சியாகவும் உதவுகிறது.",
+      "en": "A short test at school is not only for marks; it is retrieval practice too."
+     }
+    },
+    {
+     "icon": "🧒",
+     "title": {
+      "ta": "தம்பி தங்கைக்குச் சொல்லிக்கொடு",
+      "en": "Teach your younger sibling"
+     },
+     "text": {
+      "ta": "வீட்டில் உள்ள சிறியவருக்குப் பாடம் சொல்லிக் கொடுப்பது, புரியாத இடங்களைக் கண்டுபிடிக்க உதவும்.",
+      "en": "Teaching a younger child at home shows you the parts you do not understand."
+     }
+    },
+    {
+     "icon": "🗂️",
+     "title": {
+      "ta": "காகித அட்டைகள் (flashcards)",
+      "en": "Paper flashcards"
+     },
+     "text": {
+      "ta": "ஒரு பக்கம் கேள்வி, மறுபக்கம் விடை எழுதிய அட்டைகள் செலவில்லாத சுய சோதனைக் கருவி. பழைய அட்டைப் பெட்டியில் செய்யலாம்.",
+      "en": "Cards with a question on one side and the answer on the other are a free self-testing tool. You can cut them from old cardboard."
+     }
+    },
+    {
+     "icon": "🌙",
+     "title": {
+      "ta": "தேர்வுக்கு முந்திய இரவு",
+      "en": "The night before the exam"
+     },
+     "text": {
+      "ta": "சீக்கிரம் தூங்குவது, விழித்துப் படிப்பதை விட நல்லது என்று தூக்க ஆய்வுகள் பொதுவாகக் காட்டுகின்றன.",
+      "en": "Sleep studies generally suggest that sleeping early is better than staying up to study."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "கற்றலின் எதிர்காலம்",
+    "en": "The future of learning"
+   },
+   "text": {
+    "ta": "எதிர்காலத்தில் கணினி, செல்போன் பயிற்சிச் செயலிகள், ஒவ்வொரு மாணவரும் எதை மறக்கத் தொடங்குகிறார் என்று பார்த்து, சரியான நேரத்தில் கேள்வி கேட்கலாம். சில செயலிகள் ஏற்கெனவே இடைவெளி விட்டு மீள்பார்வையை நினைவூட்ட முயல்கின்றன. AI உதவியாளர்கள் கேள்விகள் தயாரித்துத் தரலாம்.",
+    "en": "In future, learning apps on computers and phones may notice what each student is starting to forget and ask a question at the right time. Some apps already try to remind learners to review after gaps. AI helpers may prepare practice questions."
+   },
+   "risk": {
+    "ta": "AI உடனே விடை சொல்லிவிட்டால், நீ முயற்சி செய்யாமலே முடித்துவிடலாம்; அப்போது கற்றல் நடக்காது. திரையில் கவனம் சிதறலாம்.",
+    "en": "If an AI gives the answer at once, you may finish without trying, and then no learning happens. Screens can also distract you."
+   },
+   "fix": {
+    "ta": "முதலில் நீயே விடையை எழுது; பிறகு உதவியைப் பார். கருவியை உன்னைச் சோதிக்கப் பயன்படுத்து, உனக்குப் பதிலாக யோசிக்க அல்ல.",
+    "en": "Write your own answer first; check help afterwards. Use the tool to test you, not to think for you."
+   },
+   "q": {
+    "ta": "ஒரு AI உதவியாளரைப் பயன்படுத்தும்போது, உன் கற்றல் குறையாமல் இருக்க என்ன விதி வைத்துக்கொள்வாய்?",
+    "en": "If you use an AI helper, what rule would you make so that your own learning does not shrink?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உன் சொந்த சோதனை: 2 நாள், செலவில்லை",
+    "en": "Your own experiment: 2 days, no cost"
+   },
+   "text": {
+    "ta": "ஒரே அளவுள்ள இரண்டு சிறு பகுதிகளை (எ.கா. அறிவியல் பாடத்தின் 2 பக்கங்கள்) எடு.\n\n**பகுதி A:** 10 நிமிடம் படி, மீண்டும் 5 நிமிடம் படி.\n**பகுதி B:** 10 நிமிடம் படி, புத்தகத்தை மூடி 5 நிமிடம் நினைவிலிருந்து எழுது.\n\nஇரண்டு நாள் கழித்து, புத்தகம் பார்க்காமல் ஒவ்வொரு பகுதியிலிருந்தும் எவ்வளவு எழுத முடிகிறது என்று பார். எது அதிகம்? உன் முடிவு மற்றவர்களுடன் ஒத்துப்போகுமா என்று நண்பர்களுடன் ஒப்பிடு. (ஒரே ஒருவருடைய சோதனை உறுதியான முடிவு அல்ல; பலரிடம் ஒப்பிடுவது நல்லது.)",
+    "en": "Take two short parts of equal size (for example, 2 pages each of a Science chapter).\n\n**Part A:** read for 10 minutes, then read again for 5 minutes.\n**Part B:** read for 10 minutes, then close the book and write from memory for 5 minutes.\n\nTwo days later, without the book, see how much you can write from each part. Which is more? Compare with friends to see whether your result matches theirs. (One person's test is not final proof; comparing across many people is better.)"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "நன்றாகக் கற்க உதவும் இரண்டு முறைகளையும், \"மீண்டும் படிப்பது\" ஏன் ஏமாற்றுகிறது என்பதையும் உன் சொற்களில் சொல்.",
+    "en": "In your own words: name two methods that help you learn well, and say why re-reading can fool you."
+   },
+   "keywords": [
+    {
+     "ta": "நினைவிலிருந்து",
+     "en": "recall",
+     "alt": [
+      "நினைவில் இருந்து",
+      "retrieval",
+      "மூடி",
+      "புத்தகத்தை மூடி",
+      "self-test",
+      "சோதி"
+     ]
+    },
+    {
+     "ta": "இடைவெளி",
+     "en": "spacing",
+     "alt": [
+      "spaced",
+      "இடைவெளி விட்டு",
+      "நாட்களாகப் பிரி",
+      "space"
+     ]
+    },
+    {
+     "ta": "பழக்கம்",
+     "en": "familiar",
+     "alt": [
+      "பழக்கமாக",
+      "familiarity",
+      "தெரிந்தது போல"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "புத்தகத்தை மூடி நினைவிலிருந்து எழுதிப் பார்ப்பது, நாட்களுக்கு இடைவெளி விட்டு மீண்டும் பார்ப்பது ஆகியவை உதவும். மீண்டும் படிக்கும்போது பாடம் பழக்கமாகத் தெரிவதால், \"தெரியும்\" என்று தோன்றும்; ஆனால் புத்தகம் இல்லாமல் சொல்ல முடிகிறதா என்பது வேறு.",
+    "en": "Closing the book and writing from memory, and revisiting after gaps of days, both help. When you re-read, the text looks familiar so you feel \"I know it\"; but whether you can say it without the book is a different matter."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "மறதி இயல்பானது; முதலில் வேகமாக, பிறகு மெதுவாக நடக்கிறது.",
+     "en": "Forgetting is normal: fast at first, then slower."
+    },
+    {
+     "ta": "புத்தகத்தை மூடி நினைவிலிருந்து எழுதுவது மிகவும் பலன் தரும் முறைகளில் ஒன்று.",
+     "en": "Closing the book and writing from memory is one of the most useful methods."
+    },
+    {
+     "ta": "இடைவெளி விட்டுப் படி, போதுமான தூக்கம் எடு, பிறருக்கு விளக்கு, கணக்குகளைக் கலந்து செய்.",
+     "en": "Space your study, get enough sleep, explain to others, and mix problem types."
+    },
+    {
+     "ta": "மீண்டும் படிப்பதும் வண்ணக்கோடும் \"தெரிந்தது போல\" உணர வைக்கலாம்; தனியாக அவை போதாது.",
+     "en": "Re-reading and highlighting can make you feel you know it; on their own they are not enough."
+    },
+    {
+     "ta": "தவறுகளும் முயற்சியும் கற்றலின் பகுதி. முறைகள் ஆளுக்கு ஆள் வேறுபடலாம் — ஒரு வாரம் முயன்று உனக்கு எது பலிக்கிறது என்று பார்.",
+     "en": "Mistakes and effort are part of learning. Methods affect people differently — try them for a week and see what works for you."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "கீழே எது நினைவிலிருந்து எடுக்கும் பயிற்சி?",
+    "en": "Which of these is retrieval practice?"
+   },
+   "options": [
+    {
+     "ta": "பாடத்தை மூன்றாவது முறை படிப்பது",
+     "en": "Reading the lesson a third time"
+    },
+    {
+     "ta": "தலைப்புகளுக்கு வண்ணக்கோடு போடுவது",
+     "en": "Underlining the headings"
+    },
+    {
+     "ta": "புத்தகத்தை மூடி, பாடத்தில் என்ன இருந்தது என்று எழுதுவது",
+     "en": "Closing the book and writing what the lesson said"
+    },
+    {
+     "ta": "பாடத்தைப் பிரதி எடுப்பது",
+     "en": "Copying out the lesson"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "நினைவிலிருந்து தகவலை எடுக்க முயல்வதே இந்தப் பயிற்சி; மற்றவற்றில் தகவலை மீண்டும் பார்க்கிறாய், அவ்வளவுதான்.",
+    "en": "Pulling the information out of memory is the practice; in the others you only look at it again."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு மாதம் கழித்தும் பாடம் நினைவில் இருக்க வேண்டும். எந்தத் திட்டம் பொதுவாக நல்லது?",
+    "en": "You want to remember a lesson a month later. Which plan is generally better?"
+   },
+   "options": [
+    {
+     "ta": "ஒரே இரவில் 3 மணி நேரம்",
+     "en": "3 hours in one night"
+    },
+    {
+     "ta": "நாள் 1, 4, 8 — ஒவ்வொன்றிலும் 1 மணி நேரம்",
+     "en": "1 hour each on day 1, day 4 and day 8"
+    },
+    {
+     "ta": "ஒரு முறை மட்டும் படித்துவிட்டு விடுதல்",
+     "en": "Study once and leave it"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இடைவெளி விட்டுப் படிப்பது நீண்ட கால நினைவுக்குப் பொதுவாக நல்லது. ஒரே இரவு மனப்பாடம் சில நாட்களில் மங்கிவிடும்.",
+    "en": "Spacing is generally better for long-term memory. One-night cramming fades within days."
+   }
+  },
+  {
+   "q": {
+    "ta": "மீண்டும் மீண்டும் படிக்கும்போது \"எல்லாம் தெரியும்\" என்று தோன்றுவது ஏன்?",
+    "en": "Why does re-reading make you feel \"I know it all\"?"
+   },
+   "options": [
+    {
+     "ta": "பாடம் பழக்கமாகத் தெரிகிறது, ஆனால் அது நினைவிலிருந்து சொல்ல முடிவது என்று ஆகாது",
+     "en": "The text looks familiar, but that is not the same as being able to recall it"
+    },
+    {
+     "ta": "ஏனென்றால் மூளை பாடத்தை முழுவதும் சேமித்துவிட்டது",
+     "en": "Because the brain has stored it completely"
+    },
+    {
+     "ta": "ஏனென்றால் புத்தகம் எளிதாக இருக்கிறது",
+     "en": "Because the book is easy"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "பழக்கமாகத் தெரிதல் வேறு, நினைவிலிருந்து எடுத்தல் வேறு. சரிபார்க்க ஒரே வழி: புத்தகம் மூடிப் பார்ப்பது.",
+    "en": "Familiarity is not the same as recall. The way to check is to close the book and try."
+   }
+  },
+  {
+   "q": {
+    "ta": "எபிங்ஹவுஸின் மறதி ஆய்வு எதைக் காட்டியது?",
+    "en": "What did Ebbinghaus's forgetting experiments show?"
+   },
+   "options": [
+    {
+     "ta": "மறதி எப்போதும் ஒரே வேகத்தில் நடக்கிறது",
+     "en": "Forgetting always happens at the same speed"
+    },
+    {
+     "ta": "எதையும் மறக்கவே மாட்டோம்",
+     "en": "We never forget anything"
+    },
+    {
+     "ta": "ஒரு முறை படித்தால் போதும்",
+     "en": "Reading once is enough"
+    },
+    {
+     "ta": "முதலில் வேகமாக மறக்கிறோம், பிறகு மெதுவாக",
+     "en": "We forget fast at first, then more slowly"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "மறதி முதலில் வேகமாகவும் பிறகு மெதுவாகவும் நடக்கிறது; எனவே ஆரம்பத்தில் செய்யும் மீள்பார்வை முக்கியம்.",
+    "en": "Forgetting is fast at first and then slows down, so an early review matters."
+   }
+  },
+  {
+   "q": {
+    "ta": "நினைவிலிருந்து எழுத முயன்றபோது நீ ஒரு பதிலைத் தவறாக எழுதினாய். என்ன செய்வது நல்லது?",
+    "en": "While recalling from memory you wrote an answer wrongly. What is best to do?"
+   },
+   "options": [
+    {
+     "ta": "பாடம் தனக்குப் பொருந்தாது என்று விட்டுவிடுவது",
+     "en": "Give up, deciding the subject is not for you"
+    },
+    {
+     "ta": "புத்தகத்தில் சரியான விடையைப் பார்த்து, அந்தப் பகுதியைக் குறித்துவைத்து, அடுத்த முறை முதலில் சோதிப்பது",
+     "en": "Check the correct answer, mark that part, and test it first next time"
+    },
+    {
+     "ta": "தவறை மறைத்துவிடுவது",
+     "en": "Hide the mistake"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தவறு எங்கு இருக்கிறது என்பதை இந்த முறை காட்டுகிறது. அதைத் திருத்துவதுதான் கற்றல்.",
+    "en": "The method shows where the gap is. Fixing it is the learning."
+   }
+  },
+  {
+   "q": {
+    "ta": "இந்தப் பாடத்தின் நினைவு மாதிரி \"30-ஆம் நாள் 68%\" என்று காட்டியது. இதை எப்படிப் புரிந்துகொள்ள வேண்டும்?",
+    "en": "The lesson's memory model showed \"68% on day 30\". How should you read this?"
+   },
+   "options": [
+    {
+     "ta": "உனக்கு நிச்சயம் 68% நினைவிருக்கும்",
+     "en": "You will certainly remember exactly 68%"
+    },
+    {
+     "ta": "எல்லா மாணவர்களுக்கும் இதே எண் வரும்",
+     "en": "Every student gets this same number"
+    },
+    {
+     "ta": "இது எடுத்துக்காட்டுக்கான எளிய மாதிரி; எண் உண்மையான அளவீடு அல்ல. 'இடைவெளி உதவும்' என்ற கருத்தை மட்டும் காட்டுகிறது",
+     "en": "It is a simple illustrative model; the number is not a real measurement. It only shows the idea that spacing helps"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "மாதிரிகள் ஒரு கருத்தைப் புரியவைக்கும்; உண்மையான நினைவு ஆளுக்கு ஆள் மாறும்.",
+    "en": "Models explain an idea; real memory varies from person to person."
+   }
+  },
+  {
+   "q": {
+    "ta": "தேர்வுக்கு முந்திய நாள் எந்தத் திட்டம் சிறந்தது?",
+    "en": "Which is the best plan for the day before the exam?"
+   },
+   "options": [
+    {
+     "ta": "சிவப்பு மையில் குறித்த பலவீனமான பகுதிகளை நினைவிலிருந்து சொல்லிப் பார்த்து, சீக்கிரம் தூங்குவது",
+     "en": "Recall the weak, red-marked parts, then sleep early"
+    },
+    {
+     "ta": "இரவு முழுவதும் விழித்து எல்லாவற்றையும் மீண்டும் படிப்பது",
+     "en": "Stay up all night re-reading everything"
+    },
+    {
+     "ta": "புதிய பாடத்தை ஆரம்பிப்பது",
+     "en": "Start a brand-new chapter"
+    },
+    {
+     "ta": "படிக்காமல் விடுவது",
+     "en": "Not study at all"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "பலவீனமான பகுதிகளை நினைவிலிருந்து சோதிப்பதும் போதுமான தூக்கமும் சேர்ந்து உதவும்.",
+    "en": "Testing the weak parts from memory plus enough sleep works together."
+   }
+  }
+ ]
+}

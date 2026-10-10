@@ -1,0 +1,717 @@
+{
+ "id": "dna-medicine",
+ "minutes": 32,
+ "title": {
+  "ta": "உடல், மரபணு, மருத்துவத்தின் எதிர்காலம்",
+  "en": "The body, genes and the future of medicine"
+ },
+ "curriculum": [
+  {
+   "b": "Samacheer",
+   "w": {
+    "ta": "அறிவியல் (உயிரியல்): செல், பரம்பரைக் கடத்தல், நோய்களும் நோய்த்தடுப்பும் — தொடர்புடைய தலைப்புகள்",
+    "en": "Science (biology): the cell, heredity, disease and immunisation — related topics"
+   }
+  },
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "10-ஆம் வகுப்பு அறிவியல்: பரம்பரை (Heredity)",
+    "en": "Class 10 Science: Heredity"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "செல் → DNA → மரபணு → புரதம் என்ற தொடரைச் சமையல் புத்தக உவமையுடன் விளக்க",
+   "en": "Explain cell → DNA → gene → protein with the recipe-book analogy"
+  },
+  {
+   "ta": "DNA இணைப்பு விதியைப் (A–T, C–G; RNA-வில் U) பயன்படுத்தி இழைகளை எழுத",
+   "en": "Use the pairing rule (A–T, C–G; U in RNA) to write strands"
+  },
+  {
+   "ta": "தடுப்பூசி, நுண்ணுயிர்க்கொல்லி (antibiotic) ஆகியவற்றின் வேலையையும், மருந்தை ஏன் மருத்துவர் சொன்னபடியே எடுக்க வேண்டும் என்பதையும் புரிந்துகொள்ள",
+   "en": "Understand what vaccines and antibiotics do, and why medicines must be taken as the doctor says"
+  },
+  {
+   "ta": "மரபணு மருத்துவத்தின் நன்மை, அபாயம், நெறிமுறைக் கேள்விகளை விவாதிக்க",
+   "en": "Discuss the benefits, risks and ethical questions of gene-based medicine"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "பொங்கல் விடுமுறைக்கு ஊருக்குப் போயிருக்கிறாய். எல்லோரும் சொல்கிறார்கள்: \"சிரிப்பு பாட்டி மாதிரி! உயரம் மாமா மாதிரி!\" ஆனால் நீ யாருடைய நகலும் இல்லை — உன் உடன்பிறந்தவர்கூட உன்னைப் போலவே அப்படியே இருப்பதில்லை. இது எப்படி?\n\n**இது எனக்கு என்ன பயன்?** இதற்கான விடை உன் உடலின் ஒவ்வொரு செல்லுக்குள்ளும் இருக்கும் ஒரு நீண்ட 'எழுத்து வரிசை'யில் இருக்கிறது. அதைப் புரிந்துகொண்டால், தடுப்பூசி எப்படி வேலை செய்கிறது, மருந்தை ஏன் மருத்துவர் சொன்னபடியே எடுக்க வேண்டும், நாளைய மருத்துவம் எப்படி மாறலாம் என்பவை உனக்கு விளங்கும். இவற்றில் சில முடிவுகளை நீயே எதிர்காலத்தில் எடுக்க வேண்டியிருக்கும். **ஒரு சிறிய செல்லுக்குள் இவ்வளவு தகவலை உடல் எப்படி வைத்திருக்கிறது?**",
+    "en": "At Pongal holidays you visit your village. Everyone says: \"That smile is just like Paati's! That height is like Mama's!\" Yet you are nobody's copy — even your brother or sister is not exactly like you. How?\n\n**What is in it for me?** The answer lies in a long 'string of letters' inside every cell of your body. Once you understand it, you will see how a vaccine works, why a medicine must be taken exactly as the doctor says, and how tomorrow's medicine may change. Some of those decisions you will have to make yourself one day. **How does the body store so much information inside one tiny cell?**"
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "உன் தோல் செல்லிலும் கல்லீரல் செல்லிலும் உள்ள DNA பற்றி எது சரி?",
+    "en": "Which statement about the DNA in your skin cell and your liver cell is right?"
+   },
+   "options": [
+    {
+     "ta": "தோல் செல்லில் தோலுக்கான DNA மட்டும், கல்லீரல் செல்லில் கல்லீரலுக்கான DNA மட்டும் இருக்கும்",
+     "en": "The skin cell holds only skin DNA and the liver cell only liver DNA"
+    },
+    {
+     "ta": "கிட்டத்தட்ட எல்லா செல்களிலும் ஒரே முழு DNA 'புத்தகம்' இருக்கும்; ஒவ்வொரு செல்லும் தனக்கு வேண்டிய பக்கங்களை மட்டும் பயன்படுத்தும்",
+     "en": "Almost every cell holds the same complete DNA 'book'; each cell uses only the pages it needs"
+    },
+    {
+     "ta": "ஒவ்வொரு செல்லிலும் வெவ்வேறு புதிய DNA உருவாகும்",
+     "en": "Every cell makes brand-new, different DNA"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "பெரும்பாலான செல்களில் (சில சிறப்பு செல்களைத் தவிர) ஒரே DNA தொகுப்பு உள்ளது. தோல் செல் தோலுக்கான செய்முறைகளையும், கல்லீரல் செல் கல்லீரலுக்கான செய்முறைகளையும் 'படிக்கிறது'. அடுத்த பகுதியில் இந்தச் சமையல் புத்தக உவமையைப் பார்ப்போம்.",
+    "en": "Most cells (a few special ones aside) carry the same set of DNA. A skin cell 'reads' the recipes for skin; a liver cell reads the recipes for the liver. Next we meet this recipe-book idea."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "செல், DNA, மரபணு, புரதம்",
+    "en": "Cell, DNA, gene, protein"
+   },
+   "text": {
+    "ta": "உன் உடல் பல லட்சம் கோடி சிறிய **செல்களால்** (cells) ஆனது. பெரும்பாலான செல்களுக்குள் ஓர் **உட்கரு** (nucleus) உண்டு; அங்கே **DNA** என்ற மிக நீண்ட நூல் போன்ற பொருள் சுருண்டு இருக்கிறது.\n\nஇதை ஒரு சமையல் புத்தகமாக நினைத்துக்கொள்:\n\n• **DNA** = முழு சமையல் புத்தகம்\n• **மரபணு** (gene) = அதில் உள்ள ஒரு செய்முறை\n• **புரதம்** (protein) = அந்தச் செய்முறைப்படி சமைத்த உணவு. உடலைக் கட்டுவதும், உடலில் வேலை செய்வதும் புரதங்கள்தான்\n• **செல்** = சமையலறை\n\nமனிதர்களின் DNA-வில் புரதத்துக்கான மரபணுக்கள் சுமார் 20,000 என்று மதிப்பிடப்படுகிறது. இது ஒரு எளிய மாதிரி.",
+    "en": "Your body is made of many trillions of tiny **cells**. Most cells have a centre (nucleus), and inside it a very long thread-like substance called **DNA** lies coiled up.\n\nThink of it as a cookbook:\n\n• **DNA** = the whole cookbook\n• **Gene** = one recipe in it\n• **Protein** = the dish cooked from that recipe. Proteins build the body and do its work\n• **Cell** = the kitchen\n\nHuman DNA is estimated to hold about 20,000 genes that code for proteins. This is a simple model."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "DNA-வின் நான்கு எழுத்துகள்",
+    "en": "The four letters of DNA"
+   },
+   "text": {
+    "ta": "தமிழுக்கு 247 எழுத்துகள் உண்டு. DNA-வுக்கு வெறும் **4 எழுத்துகள்தான்**: **A, T, C, G**. இவற்றின் வரிசைதான் செய்தி.\n\nDNA ஒரு ஏணி போல இரண்டு இழைகளாக இருக்கும் (முறுக்கிய ஏணி). ஏணியின் படிகளில் எழுத்துகள் **ஜோடியாக** இணையும்:\n\n[[ A ↔ T      C ↔ G ]]\n\nஒரு இழையில் **A** இருந்தால் எதிர் இழையில் **T** இருக்கும்; **C** இருந்தால் எதிரில் **G**. அதனால் ஓர் இழையைத் தெரிந்தால் மற்ற இழையை எழுதிவிடலாம். செல் பிரியும்போது இந்த இரண்டு இழைகளும் பிரிந்து, ஒவ்வொன்றும் தன் இணையைப் புதிதாகச் செய்துகொள்கிறது; இப்படித்தான் DNA நகலாகிறது.\n\nஇன்னொரு உறவினர் **RNA** — இது பொதுவாக ஓர் இழை; அதில் **T-க்குப் பதிலாக U** இருக்கும்.",
+    "en": "Tamil has 247 letters. DNA has just **4 letters**: **A, T, C, G**. The order of these letters is the message.\n\nDNA has two strands, like a twisted ladder. Letters join in **pairs** on the rungs:\n\n[[ A ↔ T      C ↔ G ]]\n\nIf one strand has **A**, the opposite strand has **T**; if one has **C**, the opposite has **G**. So if you know one strand you can write the other. When a cell divides, the two strands separate and each builds a new partner for itself — that is how DNA is copied.\n\nA cousin molecule, **RNA**, is usually a single strand, and it has **U instead of T**."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "dna",
+   "params": {
+    "seq": "TACGGCTAA"
+   },
+   "text": {
+    "ta": "பெட்டியில் உள்ள இழை **TACGGCTAA**. இங்கே உன் இழையை, செல் வாசிக்கும் இழையாகக் கொள்கிறோம். கீழே அதன் இணை DNA இழையும், அதிலிருந்து உருவாகும் mRNA-வும் தெரிகின்றன. நீ விரும்பும் எழுத்துகளைத் தட்டச்சு செய்தும் பார்.",
+    "en": "The strand in the box is **TACGGCTAA**. Here we treat your strand as the one the cell reads. Below it you can see its partner DNA strand and the mRNA made from it. Type your own letters too."
+   },
+   "q": {
+    "ta": "உன் இழையில் **A** இருக்கும் இடங்களில், இணை DNA இழையிலும் mRNA-விலும் என்ன எழுத்து வருகிறது?",
+    "en": "Where your strand has an **A**, what letter appears in the partner DNA strand and in the mRNA?"
+   },
+   "options": [
+    {
+     "ta": "இரண்டிலும் T",
+     "en": "T in both"
+    },
+    {
+     "ta": "இணை DNA-வில் T, mRNA-வில் U",
+     "en": "T in the partner DNA, U in the mRNA"
+    },
+    {
+     "ta": "இரண்டிலும் U",
+     "en": "U in both"
+    },
+    {
+     "ta": "இணை DNA-வில் U, mRNA-வில் T",
+     "en": "U in the partner DNA, T in the mRNA"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "DNA-வில் A-க்கு எதிரே T. mRNA-வில் T இல்லை; அதற்குப் பதில் U. அதனால்தான் இணை இழையில் T இருக்கும் இடத்தில் mRNA-வில் U வருகிறது.",
+    "en": "In DNA, A pairs with T. RNA has no T, so U takes its place. That is why where the partner strand has T, the mRNA has U."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "மரபணுவிலிருந்து புரதம் வரை",
+    "en": "From gene to protein"
+   },
+   "text": {
+    "ta": "உட்கருவுக்குள் இருக்கும் DNA புத்தகம் வெளியே வராது. எனவே செல் தேவையான செய்முறையை ஒரு **mRNA** நகலாக எடுத்து வெளியே அனுப்புகிறது — சமையல் புத்தகத்தைச் சமையலறைக்கு எடுத்துச் செல்லாமல், ஒரு செய்முறைத் தாளை நகல் எடுத்து அனுப்புவது போல.\n\nவெளியே இருக்கும் புரதம் செய்யும் இயந்திரங்கள் mRNA-வை **மூன்று மூன்று எழுத்துகளாக** (codon) வாசிக்கின்றன. பெரும்பாலான மூன்றெழுத்துகள் ஓர் **அமினோ அமிலத்தைக்** குறிக்கும். அமினோ அமிலங்கள் மணிகள் போல வரிசையாக இணைந்தால் அது ஒரு **புரதம்**.\n\nஏன் 3 எழுத்து? 4 எழுத்துகளால் 2 எழுத்துச் சேர்க்கைகள் 16 மட்டுமே; ஆனால் அமினோ அமிலங்கள் 20. 3 எழுத்துச் சேர்க்கைகள் 64 — போதும்! (இது ஒரு எளிய மாதிரி; உண்மை இன்னும் சிக்கலானது.)",
+    "en": "The DNA book stays inside the nucleus. So the cell makes an **mRNA** copy of the recipe it needs and sends it out — like photocopying one recipe sheet instead of carrying the whole cookbook to the kitchen.\n\nOutside, protein-making machines read the mRNA **three letters at a time** (a codon). Most triplets stand for one **amino acid** (a few mean “stop”). Amino acids joined in a row, like beads on a string, make a **protein**.\n\nWhy 3 letters? With 4 letters there are only 16 two-letter combinations, but there are 20 amino acids. Three-letter combinations number 64 — enough! (This is a simple model; the real process is more complex.)"
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "ஒரு DNA இழையின் பகுதி **TACGGCTAA**. (அ) அதன் இணை DNA இழை என்ன? (ஆ) அதிலிருந்து உருவாகும் mRNA என்ன? (இ) அதில் எத்தனை codon?",
+    "en": "A piece of DNA strand is **TACGGCTAA**. (a) What is its partner DNA strand? (b) What mRNA is made from it? (c) How many codons does it have?"
+   },
+   "steps": [
+    {
+     "ta": "இணை DNA: T→A, A→T, C→G, G→C, G→C, C→G, T→A, A→T, A→T. எழுதினால் **ATGCCGATT**.",
+     "en": "Partner DNA: T→A, A→T, C→G, G→C, G→C, C→G, T→A, A→T, A→T. Written out: **ATGCCGATT**."
+    },
+    {
+     "ta": "mRNA: இதே இணைப்பு, ஆனால் A-க்கு எதிரே U: T→A, A→U, C→G, G→C, G→C, C→G, T→A, A→U, A→U. எழுதினால் **AUGCCGAUU**. (இது இணை DNA-வின் T-களை U ஆக மாற்றியது போலவே இருக்கிறது — கவனி!)",
+     "en": "mRNA: same pairing, but A pairs with U: T→A, A→U, C→G, G→C, G→C, C→G, T→A, A→U, A→U. Written out: **AUGCCGAUU**. (Notice it equals the partner DNA with T changed to U!)"
+    },
+    {
+     "ta": "9 எழுத்துகளை மூன்று மூன்றாகப் பிரி: **AUG | CCG | AUU** → 3 codon.",
+     "en": "Split the 9 letters in threes: **AUG | CCG | AUU** → 3 codons."
+    }
+   ],
+   "answer": {
+    "ta": "இணை DNA = ATGCCGATT; mRNA = AUGCCGAUU; 3 codon",
+    "en": "Partner DNA = ATGCCGATT; mRNA = AUGCCGAUU; 3 codons"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "**AGCTTA** என்ற DNA இழையின் இணை DNA இழை எது?",
+    "en": "What is the partner DNA strand of **AGCTTA**?"
+   },
+   "options": [
+    {
+     "ta": "UCGAAU",
+     "en": "UCGAAU"
+    },
+    {
+     "ta": "TCGAAT",
+     "en": "TCGAAT"
+    },
+    {
+     "ta": "TGCTTA",
+     "en": "TGCTTA"
+    },
+    {
+     "ta": "AGCTTA",
+     "en": "AGCTTA"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "ஒவ்வொரு எழுத்துக்கும் அதன் ஜோடி: A–T, C–G. DNA-வில் U வராது.",
+    "en": "Pair each letter: A–T, C–G. U never appears in DNA."
+   },
+   "solution": {
+    "ta": "A→T, G→C, C→G, T→A, T→A, A→T = **TCGAAT**. UCGAAU என்பது mRNA (U இருப்பதைக் கவனி).",
+    "en": "A→T, G→C, C→G, T→A, T→A, A→T = **TCGAAT**. UCGAAU would be mRNA (note the U)."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு codon-இல் 3 இடங்கள் உண்டு; ஒவ்வோர் இடத்திலும் A, U, C, G-இல் ஒன்று வரலாம். மொத்தம் எத்தனை வெவ்வேறு codon சாத்தியம்?",
+    "en": "A codon has 3 places, and each place can hold A, U, C or G. How many different codons are possible?"
+   },
+   "answer": 64,
+   "tol": 0.5,
+   "unit": {
+    "ta": "codon",
+    "en": "codons"
+   },
+   "hint": {
+    "ta": "4 × 4 × 4",
+    "en": "4 × 4 × 4"
+   },
+   "solution": {
+    "ta": "4 × 4 × 4 = **64**. 2 இடங்கள் மட்டும் என்றால் 4 × 4 = 16 — 20 அமினோ அமிலங்களுக்குப் போதாது. அதனால் 3.",
+    "en": "4 × 4 × 4 = **64**. With only 2 places it would be 4 × 4 = 16 — not enough for 20 amino acids. Hence 3."
+   }
+  },
+  {
+   "type": "key",
+   "title": {
+    "ta": "ஏன் குழந்தை பெற்றோரைப்போல் இருக்கிறது, ஆனால் நகல் இல்லை?",
+    "en": "Why a child resembles parents but is not a copy"
+   },
+   "text": {
+    "ta": "உன் செல்லில் DNA **23 ஜோடி குரோமோசோம்களாக** (chromosomes) பொதியப்பட்டிருக்கிறது — மொத்தம் 46. ஒவ்வொரு ஜோடியிலும் ஒன்று அம்மாவிடமிருந்து, ஒன்று அப்பாவிடமிருந்து வருகிறது:\n\n[[ 23 (அம்மா) + 23 (அப்பா) = 46 ]]\n\nஒவ்வொரு பெற்றோரும் தம் குரோமோசோம்களைக் 'குலுக்கி'க் கொடுப்பதால் ஒவ்வொரு குழந்தையும் ஒரு புதிய சேர்க்கை. அதனால் உடன்பிறந்தவர்கள் ஒத்திருந்தாலும் ஒரே மாதிரி இல்லை. ஒரே கருவிலிருந்து பிறக்கும் ஒத்த இரட்டையர்களுக்கு மட்டுமே DNA கிட்டத்தட்ட ஒன்று.\n\nஉயரம், எடை போன்றவை மரபணுவோடு உணவு, ஆரோக்கியம், வளரும் சூழலாலும் அமைகின்றன. எந்த இருவரின் DNA-வும் 99%-க்கும் மேல் ஒன்றேதான்; சிறிய வேறுபாடுகளே நம்மை வேறுபடுத்துகின்றன.",
+    "en": "In your cells the DNA is packed into **23 pairs of chromosomes** — 46 in all. In each pair, one comes from your mother and one from your father:\n\n[[ 23 (mother) + 23 (father) = 46 ]]\n\nEach parent 'shuffles' their chromosomes before passing them on, so every child is a new combination. That is why brothers and sisters resemble each other yet are not identical. Only identical twins, who come from the same fertilised egg, have almost the same DNA.\n\nHeight, weight and similar traits depend on genes together with food, health and growing-up conditions. The DNA of any two people is more than 99% the same; small differences make each of us different."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு பெற்றோரிடம் 23 குரோமோசோம் ஜோடிகள் உள்ளன. ஒவ்வோர் ஜோடியிலிருந்தும் குழந்தைக்கு ஏதாவது ஒன்று மட்டுமே போகும் (2 வாய்ப்புகள்). 23 ஜோடிகளுக்கும் சேர்த்து, ஒரு பெற்றோர் எத்தனை வெவ்வேறு தொகுப்புகளைக் கொடுக்க முடியும்? (2 × 2 × … 23 முறை)",
+    "en": "A parent has 23 pairs of chromosomes. From each pair only one goes to the child (2 choices). Over all 23 pairs, how many different sets can one parent pass on? (2 × 2 × … 23 times)"
+   },
+   "answer": 8388608,
+   "tol": 0.5,
+   "unit": {
+    "ta": "தொகுப்புகள்",
+    "en": "sets"
+   },
+   "hint": {
+    "ta": "2¹⁰ = 1024. 2²⁰ = 1024 × 1024 = 1,048,576. பிறகு இன்னும் 3 முறை இரட்டிப்பாக்கு (×8).",
+    "en": "2¹⁰ = 1024. 2²⁰ = 1024 × 1024 = 1,048,576. Then double 3 more times (×8)."
+   },
+   "solution": {
+    "ta": "2²³ = 1,048,576 × 8 = **8,388,608** (சுமார் 84 லட்சம்). இது குரோமோசோம் குலுக்கல் மட்டுமே; இரு பெற்றோரும் சேரும்போது எண்ணிக்கை இன்னும் பல மடங்கு. அதனால்தான் இரண்டு குழந்தைகள் ஒரே மாதிரி அமைவது மிக அரிது.",
+    "en": "2²³ = 1,048,576 × 8 = **8,388,608** (about 8.4 million). This counts only the chromosome shuffle; when both parents are combined the number is far larger. That is why two children almost never get the same mix."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தடுப்பூசி — நோய் வராமலே பயிற்சி",
+    "en": "Vaccines — practice without the illness"
+   },
+   "text": {
+    "ta": "உன் உடலில் ஒரு **நோயெதிர்ப்பு மண்டலம்** (immune system) உண்டு; அது கிருமிகளை எதிர்க்கும் பாதுகாப்புப் படை. ஒரு புதிய கிருமி முதல்முறை வரும்போது, படை அதைப் பழகிக்கொள்ளச் சில நாட்கள் ஆகும் — அதற்குள் நோய் வரலாம்.\n\n**தடுப்பூசி** (vaccine) அந்தப் பயிற்சியை முன்கூட்டியே தருகிறது. அதில் பெரும்பாலும் கொல்லப்பட்ட அல்லது பலவீனப்படுத்தப்பட்ட கிருமி, அல்லது கிருமியின் ஒரு சிறு பகுதி, அல்லது அந்தச் சிறு பகுதியை உடலே செய்யும்படி சொல்லும் செய்தி இருக்கும். முழு நோயை உண்டாக்காதபடி தடுப்பூசிகள் வடிவமைக்கப்பட்டு, சோதிக்கப்படுகின்றன. உடல் அதைப் பார்த்து எதிர்ப்புப் பொருட்களைச் செய்து, 'நினைவு' செல்களையும் வைத்துக்கொள்கிறது. உண்மையான கிருமி வந்தால் படை உடனே தயாராக இருக்கும்.\n\nசிலருக்கு ஊசி போட்ட இடத்தில் வலி அல்லது ஒரு நாள் லேசான காய்ச்சல் வரலாம். எந்தத் தடுப்பூசி யாருக்கு, எப்போது என்பதை **மருத்துவர் அல்லது சுகாதாரப் பணியாளரிடம் கேள்**.",
+    "en": "Your body has an **immune system** — a defence force against germs. When a new germ arrives for the first time, the force needs some days to learn it — and in that time you may fall ill.\n\nA **vaccine** gives that training in advance. It usually contains a killed or weakened germ, or a small harmless piece of the germ, or a message telling the body to make that small piece itself. Vaccines are designed and tested so that they do not cause the full illness. The body sees it, makes defending substances, and keeps 'memory' cells. If the real germ arrives, the force is ready at once.\n\nSome people get a sore arm or a mild fever for a day. **Ask a doctor or health worker** which vaccine is right for whom, and when."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நுண்ணுயிர்க்கொல்லி மருந்தும் எதிர்ப்புத் திறனும்",
+    "en": "Antibiotics and resistance"
+   },
+   "text": {
+    "ta": "**பாக்டீரியா** தானாகவே பெருகும் மிகச் சிறிய உயிரினங்கள். **வைரஸ்** அதைவிடவும் சிறியது; அது நம் செல்லுக்குள் நுழைந்தே பெருகும். **நுண்ணுயிர்க்கொல்லி** (antibiotic) பாக்டீரியாவைத்தான் தாக்கும்; **வைரஸ் நோய்களுக்கு** (பெரும்பாலான சளி, காய்ச்சல் போன்றவை) வேலை செய்யாது.\n\nகோடிக்கணக்கான பாக்டீரியாக்களில் சில, DNA-வில் ஏற்பட்ட சிறு எழுத்து மாற்றத்தால் (mutation) மருந்தை எதிர்க்கும். மருந்தைத் தேவையில்லாமல் எடுத்தாலோ, தவறாக எடுத்தாலோ, மருத்துவர் சொன்னபடி எடுக்காவிட்டாலோ, பலவீனமானவை சாகும்; வலிமையானவை உயிர் பிழைத்துப் பெருகும். அடுத்த முறை அதே மருந்து அவற்றுக்கு வேலை செய்யாது. இதற்கு **எதிர்ப்புத் திறன்** (antimicrobial resistance) என்று பெயர்; உலகச் சுகாதார அமைப்பு இதை ஒரு பெரிய சுகாதார அச்சுறுத்தல் என்கிறது.\n\n**ஆகவே:** நுண்ணுயிர்க்கொல்லியை மருத்துவர் எழுதிக் கொடுத்தால் மட்டும், அவர் சொன்னபடியே எடுக்க வேண்டும்; மீதமுள்ள மாத்திரையை வேறொருவருக்குக் கொடுக்கக் கூடாது. அளவு பற்றி எப்போதும் மருத்துவரையே கேள்.",
+    "en": "**Bacteria** are tiny living things that multiply on their own. A **virus** is even smaller and multiplies only by entering living cells. An **antibiotic** acts on bacteria; it does **not** work on **viral illnesses** (most colds and flu, for example).\n\nAmong billions of bacteria, a few may resist the medicine because of a small letter change (a mutation) in their DNA. If a medicine is taken when not needed, wrongly, or not as the doctor said, the weak bacteria die while the tough ones survive and multiply. Next time the same medicine fails against them. This is called **antimicrobial resistance**; the World Health Organization calls it a major global health threat.\n\n**So:** take an antibiotic only when a doctor prescribes it, exactly as told, and never pass leftover tablets to someone else. For amounts, always ask the doctor."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "தும்மல், தொண்டை வலியுடன் ஒருவருக்குச் சளி. 'முன்பு மீந்த நுண்ணுயிர்க்கொல்லி மாத்திரை வீட்டில் இருக்கிறது, சாப்பிடலாமா?' என்று கேட்கிறார். சரியான பதில் எது?",
+    "en": "Someone has a cold with sneezing and a sore throat. They ask, 'There are leftover antibiotic tablets at home — shall I take them?' Which answer is best?"
+   },
+   "options": [
+    {
+     "ta": "ஆம், எந்த நோய்க்கும் அது உதவும்",
+     "en": "Yes, it helps with any illness"
+    },
+    {
+     "ta": "வேண்டாம்; சளிக்குக் காரணம் பெரும்பாலும் வைரஸ். மருத்துவரிடம் கேட்டு, அவர் சொன்னபடி செய்யலாம்",
+     "en": "No; colds are mostly caused by viruses. Ask a doctor and do what the doctor says"
+    },
+    {
+     "ta": "பாதி மாத்திரை மட்டும் சாப்பிடலாம்",
+     "en": "Take just half a tablet"
+    }
+   ],
+   "correct": 1,
+   "solution": {
+    "ta": "நுண்ணுயிர்க்கொல்லி வைரஸுக்கு வேலை செய்யாது; தேவையில்லாத பயன்பாடு எதிர்ப்புத் திறனை வளர்க்கும். மருந்து, அளவு பற்றி மருத்துவரிடமே கேள்.",
+    "en": "Antibiotics do not act on viruses, and unnecessary use breeds resistance. Ask a doctor about any medicine or amount."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "இன்றைய உலகில்",
+    "en": "In the world today"
+   },
+   "items": [
+    {
+     "icon": "💉",
+     "title": {
+      "ta": "பெரியம்மை ஒழிப்பு",
+      "en": "Smallpox gone"
+     },
+     "text": {
+      "ta": "பெரியம்மை (smallpox) நோய் தடுப்பூசிகளால் உலகிலிருந்து ஒழிக்கப்பட்டது; உலகச் சுகாதார அமைப்பு 1980-இல் இதை அறிவித்தது.",
+      "en": "Smallpox was wiped out worldwide by vaccination; the World Health Organization announced this in 1980."
+     }
+    },
+    {
+     "icon": "🦶",
+     "title": {
+      "ta": "போலியோ",
+      "en": "Polio"
+     },
+     "text": {
+      "ta": "இந்தியா 2014-இல் 'போலியோ இல்லாத நாடு' எனச் சான்றளிக்கப்பட்டது. வீடு வீடாகச் சென்று சொட்டு மருந்து போட்ட சுகாதாரப் பணியாளர்கள் இதற்குக் காரணம்.",
+      "en": "India was certified polio-free in 2014. Health workers going door to door with the drops made this possible."
+     }
+    },
+    {
+     "icon": "🧬",
+     "title": {
+      "ta": "மரபணுப் பரிசோதனை",
+      "en": "Gene tests"
+     },
+     "text": {
+      "ta": "மருத்துவமனைகளில் சில பரம்பரை நோய்களைக் கண்டறிய DNA பரிசோதனைகள் பயன்படுகின்றன. எப்போது தேவை என்பதை மருத்துவர் முடிவு செய்வார்.",
+      "en": "Hospitals use DNA tests to detect some inherited conditions. A doctor decides when a test is needed."
+     }
+    },
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "இ-சஞ்சீவனி",
+      "en": "eSanjeevani"
+     },
+     "text": {
+      "ta": "இந்திய அரசின் இ-சஞ்சீவனி தொலைமருத்துவச் சேவை மூலம் போன் அல்லது வீடியோவில் மருத்துவரைக் கலந்தாலோசிக்கலாம்.",
+      "en": "The Government of India’s eSanjeevani telemedicine service lets people consult a doctor by phone or video."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "மரபணு அறிவும் புதிய மருத்துவமும்",
+    "en": "Gene knowledge and new medicine"
+   },
+   "text": {
+    "ta": "**மரபணுப் பரிசோதனை** ஒருவரின் DNA-வில் சில குறிப்பிட்ட மாற்றங்கள் இருக்கின்றனவா என்று பார்க்கிறது. எதிர்காலத்தில், ஒருவர் உடலுக்கு எந்த மருந்து நன்றாகப் பொருந்தும் என்று அவருடைய மரபணுக்களைப் பார்த்து முடிவு செய்யும் **தனிப்பயன் மருத்துவம்** (personalised medicine) பரவலாகப் பயன்படலாம்.\n\n**CRISPR** என்பது DNA-வில் குறிப்பிட்ட இடத்தை வெட்டித் திருத்த உதவும் 'மரபணுக் கத்தரிக்கோல்' போன்ற முறை. இதை உருவாக்கியதற்காக எம்மானுவேல் ஷார்பென்டியே (Emmanuelle Charpentier), ஜெனிஃபர் டவுட்னா (Jennifer Doudna) ஆகியோருக்கு 2020 வேதியியல் நோபல் பரிசு வழங்கப்பட்டது. சிக்கிள் செல் நோய் போன்ற சில ரத்த நோய்களுக்காக, CRISPR அடிப்படையிலான ஒரு சிகிச்சை 2023-இல் சில நாடுகளில் அங்கீகரிக்கப்பட்டது. ஆனால் இவை இன்னும் புதியவை, மிகவும் செலவு பிடிப்பவை; ஆராய்ச்சி தொடர்கிறது.",
+    "en": "A **gene test** checks whether a person’s DNA has certain specific changes. In future, **personalised medicine** — choosing the medicine that suits a person by looking at their genes — may become common.\n\n**CRISPR** is a method, like 'genetic scissors', that helps cut and edit a chosen spot in DNA. For developing it, Emmanuelle Charpentier and Jennifer Doudna received the 2020 Nobel Prize in Chemistry. In 2023, regulators in some countries approved a CRISPR-based treatment for some blood disorders such as sickle cell disease. But these treatments are still new and very expensive, and research continues."
+   },
+   "risk": {
+    "ta": "**தனியுரிமை:** உன் DNA தகவல் உன் உறவினர்களைப் பற்றியும் சொல்லும்; தவறான கைகளுக்குப் போனால் காப்பீடு, வேலை போன்றவற்றில் பாகுபாடு வரலாம். **நியாயம்:** விலையுயர்ந்த சிகிச்சை பணக்காரர்களுக்கு மட்டுமே கிடைக்கலாம். பரிசோதனை முடிவுகள் 'உறுதி' அல்ல, 'வாய்ப்பு' மட்டுமே என்பதையும் நினைவில் கொள்.",
+    "en": "**Privacy:** your DNA data also says things about your relatives; if misused it could lead to discrimination in insurance or jobs. **Fairness:** costly treatments may reach only the rich. Remember too that test results show a 'chance', not a certainty."
+   },
+   "fix": {
+    "ta": "தரவுப் பாதுகாப்புச் சட்டங்கள், தகவல் அறிந்த ஒப்புதல் (informed consent), மரபணு ஆலோசனை, அனைவருக்கும் கிடைக்கும் செலவு குறைந்த சிகிச்சை, பொது விவாதம். மரபணுப் பரிசோதனை பற்றிய கேள்விகளை மருத்துவரிடமே கேள்.",
+    "en": "Data-protection laws, informed consent, genetic counselling, affordable treatment for all, and public debate. Take questions about gene tests to a doctor."
+   },
+   "q": {
+    "ta": "உன் DNA தகவல் யாருக்குச் சொந்தம்? ஒரு காப்பீட்டு நிறுவனம் அதைக் கேட்க அனுமதிக்கலாமா? ஏன்?",
+    "en": "Who owns your DNA information? Should an insurance company be allowed to ask for it? Why?"
+   }
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "தொலைமருத்துவம்",
+    "en": "Telemedicine"
+   },
+   "text": {
+    "ta": "தொலைதூர ஊரில் இருப்பவர் போன் அல்லது வீடியோ மூலம் நகரத்துச் சிறப்பு மருத்துவரிடம் பேச முடிவது ஒரு பெரிய மாற்றம். பரிசோதனை அறிக்கை, புகைப்படம் போன்றவற்றையும் அனுப்பலாம். இதனால் பயணச் செலவும் நேரமும் மிச்சம். எதிர்காலத்தில் அணியக்கூடிய சென்சார் கருவிகள் இதயத் துடிப்பு போன்றவற்றை மருத்துவருக்கு அனுப்பும் முயற்சிகளும் நடக்கின்றன.",
+    "en": "A person in a far-off village talking to a city specialist by phone or video is a big change. Reports and photos can be sent too, saving travel cost and time. In future, wearable sensors may send things like heart-rate to the doctor — this is being tried."
+   },
+   "risk": {
+    "ta": "நேரில் பரிசோதிக்க முடியாது; இணையம் இல்லாத இடங்கள் விடுபடலாம்; உடல்நலத் தகவல் திருடப்படலாம்; போலி 'ஆன்லைன் மருத்துவர்கள்', போலி மருந்து விளம்பரங்கள் உண்டு.",
+    "en": "The doctor cannot examine you in person; places without internet may be left out; health data can be stolen; there are fake 'online doctors' and fake medicine ads."
+   },
+   "fix": {
+    "ta": "அரசு அல்லது பதிவு பெற்ற மருத்துவர்களின் சேவையை மட்டும் பயன்படுத்து; ஆலோசனைக் குறிப்பைப் பத்திரப்படுத்து. அவசரம் என்றால் தொலைமருத்துவத்துக்குக் காத்திராமல் உடனே அருகிலுள்ள மருத்துவமனைக்குச் செல்; 108 ஆம்புலன்ஸை அழை.",
+    "en": "Use only government or registered doctors’ services and keep the advice note. In an emergency do not wait for a tele-consultation — go to the nearest hospital and call the 108 ambulance."
+   },
+   "q": {
+    "ta": "உன் ஊரில் தொலைமருத்துவம் எல்லோருக்கும் பயன்பட என்ன தேவை? (இணையம், போன், பயிற்சி… வேறு என்ன?)",
+    "en": "What would your village need so that telemedicine helps everyone? (Internet, phones, training… what else?)"
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "வகுப்பு விவாதம்",
+    "en": "Class debate"
+   },
+   "text": {
+    "ta": "இரண்டு அணிகளாகப் பிரிந்து, ஒவ்வொரு அணியும் 3 நிமிடம் பேசுங்கள். பிறகு அணிகளை மாற்றி எதிர்ப்பக்கத்தை வாதிடுங்கள். சரி-தவறு பற்றி யாரையும் குறைசொல்லாமல், காரணங்களை மட்டும் சொல்லுங்கள்.",
+    "en": "Split into two teams; each speaks for 3 minutes. Then swap and argue the other side. Give reasons only — do not blame anyone."
+   },
+   "prompts": [
+    {
+     "ta": "நோயைத் தடுக்க மரபணுத் திருத்தம் தேவைப்படலாம்; உயரம் அல்லது தோற்றத்தை மாற்றும் திருத்தம் தேவைப்படாமல் போகலாம் — இந்தக் கோடு எங்கே வரைவது?",
+     "en": "Editing genes to prevent disease may be needed; editing for height or looks may not — where should the line be drawn?"
+    },
+    {
+     "ta": "புதிய, விலையுயர்ந்த சிகிச்சை எல்லோருக்கும் கிடைக்க என்ன செய்யலாம்?",
+     "en": "What could be done so that new, costly treatments reach everyone?"
+    },
+    {
+     "ta": "மரபணுத் தகவலை யார் பார்க்கலாம், யார் பார்க்கக் கூடாது?",
+     "en": "Who may see genetic data and who may not?"
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "காகிதப் பட்டை DNA",
+    "en": "Paper-strip DNA"
+   },
+   "text": {
+    "ta": "நான்கு நிறங்களில் (அல்லது நான்கு குறிகளில்) காகிதத் துண்டுகளைத் தயார் செய்: A, T, C, G.\n\n1. 9 எழுத்து நீளமான ஓர் இழையை வரிசையாக வை (எ.கா. GATTACAGT).\n2. அதன் கீழே, A–T, C–G விதிப்படி இணை இழையை அமை.\n3. இப்போது mRNA செய்: T-க்குப் பதிலாக U-வை எழுது; 3-3 ஆகப் பிரித்து codon-களைக் குறி.\n4. உன் நண்பருக்குப் பாதி இழையைக் கொடு; அவர் மீதியை நிரப்பட்டும். இருவரும் சரிபார்த்துக்கொள்ளுங்கள்.\n\nவீட்டில்: தடுப்பூசி அட்டை இருந்தால் பெரியவரிடம் காட்டச் சொல்லி, ஒவ்வொரு தடுப்பூசியும் எதற்காக என்று கேள். ஏதாவது விடுபட்டிருக்கிறதா என்று உறுதிசெய்ய, சுகாதார நிலையத்தில் கேட்கச் சொல்.",
+    "en": "Prepare paper slips in four colours (or four marks): A, T, C, G.\n\n1. Lay out a strand 9 letters long (e.g. GATTACAGT).\n2. Below it, build the partner strand by the rule A–T, C–G.\n3. Now make the mRNA: write U instead of T; split into threes and mark the codons.\n4. Give a friend half a strand and let them complete the rest. Check each other.\n\nAt home: if there is a vaccination card, ask an elder to show it and tell you what each vaccine is for. Ask them to check with the health centre whether anything is due."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "மரபணுவிலிருந்து புரதம் எப்படி உருவாகிறது என்பதை, அல்லது தடுப்பூசி எப்படிப் பாதுகாக்கிறது என்பதை உன் சொற்களில் விளக்கு.",
+    "en": "In your own words, explain how a gene becomes a protein, or how a vaccine protects the body."
+   },
+   "keywords": [
+    {
+     "ta": "DNA",
+     "en": "DNA",
+     "alt": [
+      "டிஎன்ஏ",
+      "டி.என்.ஏ",
+      "dna"
+     ]
+    },
+    {
+     "ta": "மரபணு",
+     "en": "gene",
+     "alt": [
+      "மரபணுக்கள்",
+      "gene",
+      "செய்முறை"
+     ]
+    },
+    {
+     "ta": "புரதம்",
+     "en": "protein",
+     "alt": [
+      "புரதங்கள்",
+      "protein",
+      "அமினோ"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "செல்லின் DNA-வில் மரபணுக்கள் என்ற செய்முறைகள் உள்ளன. ஒரு மரபணு mRNA ஆக நகலெடுக்கப்பட்டு, 3 எழுத்து codon-களாக வாசிக்கப்பட்டு அமினோ அமிலங்களை இணைத்துப் புரதம் உருவாகிறது. தடுப்பூசி கிருமியின் பாதிப்பில்லாத பகுதியைக் காட்டி உடலுக்குப் பயிற்சி தருகிறது; உண்மையான கிருமி வந்தால் உடல் விரைவாக எதிர்க்கும்.",
+    "en": "A cell’s DNA holds recipes called genes. A gene is copied as mRNA, read in 3-letter codons, and amino acids are joined to make a protein. A vaccine shows the body a harmless part of a germ so it can practise; when the real germ comes the body responds quickly."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "DNA = சமையல் புத்தகம்; மரபணு = செய்முறை; புரதம் = சமைத்த உணவு.",
+     "en": "DNA = cookbook; gene = recipe; protein = the cooked dish."
+    },
+    {
+     "ta": "DNA இணைப்பு: A–T, C–G; RNA-வில் T-க்குப் பதில் U; 3 எழுத்து = 1 codon (பெரும்பாலும் 1 அமினோ அமிலம்).",
+     "en": "DNA pairing: A–T, C–G; RNA uses U for T; 3 letters = 1 codon (mostly 1 amino acid)."
+    },
+    {
+     "ta": "23 + 23 = 46 குரோமோசோம்; குலுக்கலால் ஒவ்வொருவரும் தனித்துவம்; சூழலும் பங்கு வகிக்கிறது.",
+     "en": "23 + 23 = 46 chromosomes; shuffling makes everyone unique; environment plays a part too."
+    },
+    {
+     "ta": "தடுப்பூசி நோய் வராமலே நோயெதிர்ப்பு மண்டலத்துக்குப் பயிற்சி தருகிறது.",
+     "en": "A vaccine trains the immune system without causing the disease."
+    },
+    {
+     "ta": "நுண்ணுயிர்க்கொல்லி பாக்டீரியாவுக்கே; தவறான பயன்பாடு எதிர்ப்புத் திறனை உருவாக்கும்; மருத்துவர் சொன்னபடியே எடு.",
+     "en": "Antibiotics are for bacteria only; misuse creates resistance; take them exactly as the doctor says."
+    },
+    {
+     "ta": "மரபணு மருத்துவம், CRISPR, தொலைமருத்துவம் நன்மை தரும்; தனியுரிமை, நியாயம் பற்றிய கேள்விகளை நாம் விவாதிக்க வேண்டும்.",
+     "en": "Gene medicine, CRISPR and telemedicine can help, but we must debate privacy and fairness."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "சமையல் புத்தக உவமையில் 'மரபணு' எதற்குச் சமம்?",
+    "en": "In the cookbook analogy, what is a 'gene'?"
+   },
+   "options": [
+    {
+     "ta": "முழுப் புத்தகம்",
+     "en": "The whole book"
+    },
+    {
+     "ta": "சமையலறை",
+     "en": "The kitchen"
+    },
+    {
+     "ta": "புத்தகத்தில் ஒரு செய்முறை",
+     "en": "One recipe in the book"
+    },
+    {
+     "ta": "சமைத்த உணவு",
+     "en": "The cooked dish"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "DNA = புத்தகம்; மரபணு = ஒரு செய்முறை; புரதம் = உணவு; செல் = சமையலறை.",
+    "en": "DNA = the book; gene = one recipe; protein = the dish; cell = the kitchen."
+   }
+  },
+  {
+   "q": {
+    "ta": "DNA இழை **CCATG**-ன் இணை DNA இழை எது?",
+    "en": "What is the partner DNA strand of **CCATG**?"
+   },
+   "options": [
+    {
+     "ta": "GGTAC",
+     "en": "GGTAC"
+    },
+    {
+     "ta": "GGUAC",
+     "en": "GGUAC"
+    },
+    {
+     "ta": "CCATG",
+     "en": "CCATG"
+    },
+    {
+     "ta": "TTGCA",
+     "en": "TTGCA"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "C→G, C→G, A→T, T→A, G→C. DNA-வில் U வராது (GGUAC தவறு).",
+    "en": "C→G, C→G, A→T, T→A, G→C. DNA never has U (so GGUAC is wrong)."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரே பெற்றோரின் இரு குழந்தைகள் ஏன் ஒரே மாதிரி இருப்பதில்லை?",
+    "en": "Why are two children of the same parents not identical?"
+   },
+   "options": [
+    {
+     "ta": "ஒருவர் மட்டும் அம்மாவின் DNA பெறுகிறார்",
+     "en": "Only one gets the mother’s DNA"
+    },
+    {
+     "ta": "DNA பிறந்த பிறகு முழுவதும் மாறிவிடுகிறது",
+     "en": "DNA changes completely after birth"
+    },
+    {
+     "ta": "குழந்தைகள் தங்கள் DNA-வை உணவால் உருவாக்குகின்றனர்",
+     "en": "Children build their DNA from food"
+    },
+    {
+     "ta": "பெற்றோர் குரோமோசோம்களைக் குலுக்கிக் கொடுப்பதால் ஒவ்வொரு குழந்தையும் ஒரு புதிய சேர்க்கை",
+     "en": "Parents shuffle their chromosomes, so each child is a new combination"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "ஒரு பெற்றோரின் குலுக்கலிலேயே சுமார் 84 லட்சம் தொகுப்புகள் சாத்தியம்.",
+    "en": "Even one parent’s shuffle can make about 8.4 million different sets."
+   }
+  },
+  {
+   "q": {
+    "ta": "தடுப்பூசி எப்படி வேலை செய்கிறது?",
+    "en": "How does a vaccine work?"
+   },
+   "options": [
+    {
+     "ta": "கிருமியை அப்படியே உடலில் வளர்த்து நோயை வரவழைக்கிறது",
+     "en": "It grows the germ in the body and causes the disease"
+    },
+    {
+     "ta": "கிருமியின் பாதிப்பில்லாத வடிவத்தைக் காட்டி நோயெதிர்ப்பு மண்டலத்துக்குப் பயிற்சி தருகிறது",
+     "en": "It shows a harmless form of the germ and trains the immune system"
+    },
+    {
+     "ta": "உடலில் உள்ள எல்லாக் கிருமிகளையும் உடனே கொன்றுவிடுகிறது",
+     "en": "It instantly kills all germs in the body"
+    },
+    {
+     "ta": "DNA-வை முழுவதும் மாற்றிவிடுகிறது",
+     "en": "It rewrites all your DNA"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "பயிற்சி பெற்ற உடல் உண்மையான கிருமியை விரைவாக எதிர்க்கும். தடுப்பூசி DNA-வை மாற்றாது.",
+    "en": "A trained body fights the real germ quickly. A vaccine does not rewrite your DNA."
+   }
+  },
+  {
+   "q": {
+    "ta": "நுண்ணுயிர்க்கொல்லி மருந்து பற்றி எது சரி?",
+    "en": "Which statement about antibiotics is right?"
+   },
+   "options": [
+    {
+     "ta": "எல்லாக் காய்ச்சலுக்கும் வேலை செய்யும்",
+     "en": "They work on every fever"
+    },
+    {
+     "ta": "வைரஸ் சளிக்கு உதவும்",
+     "en": "They help a viral cold"
+    },
+    {
+     "ta": "மருத்துவர் சொல்லாவிட்டாலும் சேர்த்தால் நல்லது",
+     "en": "Taking extra even without a doctor’s advice is good"
+    },
+    {
+     "ta": "பாக்டீரியாவைத் தாக்கும்; வைரஸுக்கு வேலை செய்யாது",
+     "en": "They act on bacteria; they do not work on viruses"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "பாக்டீரியாவும் வைரஸும் வெவ்வேறு. மருந்தைத் தேர்வு செய்வது மருத்துவரின் வேலை.",
+    "en": "Bacteria and viruses are different. Choosing the medicine is the doctor’s job."
+   }
+  },
+  {
+   "q": {
+    "ta": "நுண்ணுயிர்க்கொல்லியைத் தவறாகப் பயன்படுத்தினால் **ஏன்** எதிர்ப்புத் திறன் வளர்கிறது?",
+    "en": "**Why** does misusing antibiotics create resistance?"
+   },
+   "options": [
+    {
+     "ta": "மருந்து பழசாகிவிடுவதால்",
+     "en": "Because the medicine gets old"
+    },
+    {
+     "ta": "பலவீனமான பாக்டீரியா சாகும்; மருந்தை எதிர்க்கும் வலிமையானவை உயிர் பிழைத்துப் பெருகும்",
+     "en": "The weak bacteria die; the ones that resist survive and multiply"
+    },
+    {
+     "ta": "உடலே மருந்தை எதிர்க்க ஆரம்பிக்கிறது",
+     "en": "The body itself starts resisting the medicine"
+    },
+    {
+     "ta": "வைரஸ் பாக்டீரியாவாக மாறுவதால்",
+     "en": "Because viruses turn into bacteria"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இது பரிணாமத்தின் எளிய எடுத்துக்காட்டு: எதிர்க்கும் பாக்டீரியாவின் DNA அடுத்த தலைமுறைக்குப் போகிறது.",
+    "en": "A simple example of selection: the resistant bacteria pass their DNA to the next generation."
+   }
+  },
+  {
+   "q": {
+    "ta": "2020 வேதியியல் நோபல் பரிசு எதற்காக வழங்கப்பட்டது?",
+    "en": "What was the 2020 Nobel Prize in Chemistry given for?"
+   },
+   "options": [
+    {
+     "ta": "கொரோனா தடுப்பூசி கண்டுபிடிப்புக்காக",
+     "en": "For inventing the coronavirus vaccine"
+    },
+    {
+     "ta": "DNA ஏணி வடிவத்தைக் கண்டுபிடித்ததற்காக",
+     "en": "For discovering the ladder shape of DNA"
+    },
+    {
+     "ta": "மரபணுவைத் திருத்தும் முறையை (genome editing) உருவாக்கியதற்காக",
+     "en": "For developing a method of genome editing"
+    },
+    {
+     "ta": "புதிய நுண்ணோக்கிக்காக",
+     "en": "For a new microscope"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "எம்மானுவேல் ஷார்பென்டியே, ஜெனிஃபர் டவுட்னா — CRISPR முறைக்காக. DNA வடிவத்தைக் கண்டுபிடித்தது வேறு; அது பல ஆண்டுகளுக்கு முந்தைய சாதனை.",
+    "en": "Emmanuelle Charpentier and Jennifer Doudna, for the CRISPR method. The discovery of DNA’s structure was a different achievement from much earlier."
+   }
+  }
+ ]
+}

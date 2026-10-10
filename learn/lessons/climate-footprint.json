@@ -1,0 +1,668 @@
+{
+ "id": "climate-footprint",
+ "minutes": 30,
+ "title": {
+  "ta": "காலநிலை மாற்றமும் உன் கரிமத் தடமும்",
+  "en": "Climate change and your carbon footprint"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "காலநிலை மாற்றம், புவி வெப்பமாதல் (அறிவியல் மற்றும் சமூக அறிவியல்)",
+    "en": "Climate change and global warming (Science & Social Science)"
+   }
+  },
+  {
+   "b": "Science",
+   "w": {
+    "ta": "பசுமை இல்ல விளைவு, தணிப்பு, தகவமைத்தல்",
+    "en": "Greenhouse effect, mitigation, adaptation"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "பசுமை இல்ல விளைவை விளக்க",
+   "en": "Explain the greenhouse effect"
+  },
+  {
+   "ta": "உலகம் வெப்பமாகிறது என்பதற்கான பல சான்றுகளைச் சொல்ல",
+   "en": "Name several lines of evidence for warming"
+  },
+  {
+   "ta": "மின்சாரம், பெட்ரோல், LPG-யிலிருந்து குடும்ப CO₂-ஐக் கணக்கிட",
+   "en": "Calculate household CO₂ from electricity, petrol and LPG"
+  },
+  {
+   "ta": "தணிப்புக்கும் தகவமைத்தலுக்கும் வேறுபாடு சொல்ல",
+   "en": "Tell mitigation from adaptation"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "கோடை மதியம். வெயிலில் நிறுத்தப்பட்ட மூடிய ஆட்டோவுக்குள் கார்த்திக் கையை வைத்தான் — அடடா, வெளியே இருப்பதைவிட உள்ளே எவ்வளவு சூடு! சன்னல் வழியாக வெயில் உள்ளே போகிறது; ஆனால் சன்னல்கள் மூடியிருப்பதால் சூடான காற்று வெளியே போக முடிவதில்லை. அதனால் உள்ளே சூடு சேர்கிறது.\n\nஇது உனக்கு ஏன் முக்கியம்? பூமியைச் சுற்றியுள்ள காற்றும் ஒரு மெல்லிய போர்வை போலச் செயல்படுகிறது. நாம் அந்தப் போர்வையைக் கொஞ்சம் தடிமனாக்குகிறோம். இதன் விளைவுகள் உன் வாழ்நாளில் உன் ஊரிலும் தெரியலாம். இதற்கு நாம் என்ன செய்யலாம் என்று இன்று கணக்குப் போட்டுப் பார்ப்போம் — பயப்பட அல்ல, புரிந்துகொண்டு செயல்பட.",
+    "en": "Summer noon. Karthik put his hand inside an auto parked in the sun with its windows shut — how much hotter inside than outside! Sunlight comes in through the glass, but the warm air cannot escape because the windows are shut, so the inside keeps getting warmer.\n\nWhy does this matter to you? The air around Earth acts like a thin blanket, and we are making that blanket a little thicker. Its effects may show in your own town within your lifetime. Today we do the sums on what we can do about it — not to be afraid, but to understand and act."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "பூமியைச் சுற்றி வெப்பத்தைப் பிடித்து வைக்கும் வாயுக்கள் (இயற்கையான பசுமை இல்ல விளைவு) சிறிதும் இல்லையென்றால், பூமியின் சராசரி வெப்பநிலை சுமார் எவ்வளவு இருக்கும்?",
+    "en": "If there were none of the heat-trapping gases around Earth (the natural greenhouse effect), what would Earth's average temperature be, roughly?"
+   },
+   "options": [
+    {
+     "ta": "இப்போது போலவே, சுமார் 15 °C",
+     "en": "Same as now, about 15 °C"
+    },
+    {
+     "ta": "சுமார் 30 °C — இன்னும் சூடு",
+     "en": "About 30 °C — even hotter"
+    },
+    {
+     "ta": "சுமார் −18 °C — உறைந்த பனிக்கட்டிப் பூமி",
+     "en": "About −18 °C — a frozen world"
+    },
+    {
+     "ta": "சுமார் 50 °C",
+     "en": "About 50 °C"
+    }
+   ],
+   "answer": 2,
+   "reveal": {
+    "ta": "வாயுக்கள் இல்லாவிட்டால் சராசரி சுமார் −18 °C ஆகும்; வாயுக்கள் இருப்பதால் இன்று சுமார் 15 °C. எனவே **சிறிதளவு பசுமை இல்ல விளைவு நமக்கு நல்லது** — அது இல்லாமல் உயிர்கள் வாழ்வது கடினம். சிக்கல் என்னவென்றால், அந்தப் போர்வை **மேலும் தடிமனாவது**தான்.",
+    "en": "Without the gases the average would be about −18 °C; with them it is about 15 °C today. So **a little greenhouse effect is good for us** — life would find it hard without it. The problem is the blanket getting **thicker**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பசுமை இல்ல விளைவு — போர்வை போல",
+    "en": "The greenhouse effect — like a blanket"
+   },
+   "text": {
+    "ta": "சூரியனின் ஒளி பூமியைச் சூடாக்குகிறது. சூடான பூமி அந்த ஆற்றலை அகச்சிவப்புக் கதிர்களாக (வெப்பக் கதிர்கள்) மீண்டும் வானத்தை நோக்கி விடுகிறது. காற்றில் உள்ள **கார்பன் டைஆக்சைடு (CO₂), மீத்தேன், நீராவி** போன்ற வாயுக்கள் அந்தக் கதிர்களில் ஒரு பகுதியைப் பிடித்து மீண்டும் கீழே அனுப்புகின்றன. இதுவே **பசுமை இல்ல விளைவு**.\n\nஇரவில் போர்வையைப் போர்த்தினால் உன் உடல் சூடு தப்பிப் போகாமல் வெதுவெதுப்பாக இருக்கும்; இரண்டு போர்வை போர்த்தினால் இன்னும் சூடாக இருக்கும். வாயுக்கள் அதிகமானால் போர்வை தடிமனாகிறது — பூமி மெதுவாகச் சூடாகிறது. (இது ஒரு எளிய மாதிரி. உண்மையில் கடல், மேகம், பனி போன்றவையும் பங்கு வகிக்கின்றன.)",
+    "en": "Sunlight warms the Earth. The warm Earth sends that energy back towards space as infrared rays (heat rays). Gases in the air such as **carbon dioxide (CO₂), methane and water vapour** catch part of those rays and send them back down. This is the **greenhouse effect**.\n\nWhen you pull a blanket over yourself at night, your body heat cannot escape and you stay warm; two blankets, even warmer. More of these gases make the blanket thicker — and the Earth slowly warms. (This is a simple model. In reality oceans, clouds and ice also play a part.)"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "எரிபொருளிலிருந்து CO₂ எப்படி?",
+    "en": "How does fuel make CO₂?"
+   },
+   "text": {
+    "ta": "பெட்ரோல், டீசல், நிலக்கரி, எரிவாயு எல்லாம் **கார்பன்** நிறைந்தவை. அவற்றை எரிக்கும்போது கார்பன் காற்றிலுள்ள ஆக்சிஜனுடன் சேர்ந்து **CO₂** ஆகிறது. அதனால் 1 லிட்டர் பெட்ரோல் (சுமார் 0.75 kg) எரிந்தால் சுமார் **2.31 kg CO₂** உண்டாகிறது. இது எரிபொருளின் எடையைவிட அதிகம், ஏனெனில் காற்றின் ஆக்சிஜனும் சேர்கிறது.\n\nதொழிற்புரட்சிக்கு முன் காற்றில் CO₂ சுமார் 280 ppm (பத்து லட்சத்தில் 280 பங்கு) இருந்தது. IPCC அறிக்கை 2019-இல் அது 410 ppm என்றும், குறைந்தது 20 லட்சம் ஆண்டுகளில் இல்லாத அளவு என்றும் சொல்கிறது. நிலக்கரி மின் நிலையம், பெட்ரோல்-டீசல் வாகனம், சிமெண்ட் தயாரிப்பு, காடுகளை அழித்தல் ஆகியவை முக்கிய காரணங்கள்; மீத்தேன் நெல் வயல், கால்நடை, குப்பை மேடு போன்றவற்றிலிருந்தும் வருகிறது.",
+    "en": "Petrol, diesel, coal and gas are full of **carbon**. When you burn them, the carbon joins oxygen from the air and becomes **CO₂**. So 1 litre of petrol (about 0.75 kg) makes about **2.31 kg of CO₂** — heavier than the fuel, because oxygen from the air is added.\n\nBefore the industrial age the air held about 280 ppm of CO₂ (280 parts per million); the IPCC reported about 410 ppm in 2019, higher than at any time in at least 2 million years. Coal power stations, petrol and diesel vehicles, cement and clearing forests are main causes; methane also comes from paddy fields, cattle and rubbish dumps."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "உலகம் வெப்பமாகிறது என்று எப்படித் தெரியும்?",
+    "en": "How do we know the world is warming?"
+   },
+   "text": {
+    "ta": "ஒரே ஒரு கருவியை மட்டும் நம்பி அல்ல; **பல வேறு வழிகள் ஒரே திசையைக் காட்டுகின்றன:**\n\n1. உலகெங்கும் வெப்பமானிப் பதிவுகள் — பல நாடுகளின் தனித்தனி அமைப்புகள் தனித்தனியாகக் கணக்கிட்டாலும் ஒரே போக்கு தெரிகிறது. IPCC: 2011–2020-இல் உலக மேற்பரப்பு வெப்பநிலை 1850–1900-ஐவிட சுமார் 1.1 °C அதிகம்.\n2. கடல் வெப்பம் உயர்கிறது; கடல்மட்டம் உயர்கிறது (IPCC: 1901–2018-இல் சுமார் 20 cm).\n3. பனிமலைகளும் துருவப் பனியும் சுருங்குகின்றன.\n4. பனிக்கட்டிக்குள் சிக்கிய பழைய காற்றுக் குமிழ்கள், முன்பு CO₂ குறைவாக இருந்ததைக் காட்டுகின்றன.\n5. செடிகள் பூக்கும் நேரம் போன்ற இயற்கை மாற்றங்கள்.\n\n**வானிலையும் காலநிலையும்:** இன்று குளிராக இருந்தால் அது வானிலை (weather). காலநிலை (climate) என்பது பல பத்து ஆண்டுகளின் சராசரி.",
+    "en": "Not by trusting one instrument; **many different methods point the same way:**\n\n1. Thermometer records around the world — separate organisations in several countries compute them separately and find the same trend. IPCC: in 2011–2020 global surface temperature was about 1.1 °C above 1850–1900.\n2. Oceans are warming and sea level is rising (IPCC: about 20 cm from 1901 to 2018).\n3. Mountain glaciers and polar ice are shrinking.\n4. Old air bubbles trapped in ice show that CO₂ used to be lower.\n5. Natural signs such as the timing of flowering.\n\n**Weather vs climate:** a cold day is weather. Climate is the average over many decades."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒருவர் சொல்கிறார்: \"நேற்று இரவு மிகவும் குளிர்ந்தது, அதனால் உலகம் வெப்பமாவது பொய்.\" சிறந்த பதில்?",
+    "en": "Someone says: \"Last night was very cold, so global warming is false.\" The best reply?"
+   },
+   "options": [
+    {
+     "ta": "ஒரு நாளின் வானிலை காலநிலையைக் காட்டாது; பல பத்து ஆண்டுகளின் சராசரியைப் பார்க்க வேண்டும்",
+     "en": "One day's weather does not show climate; we must look at averages over decades"
+    },
+    {
+     "ta": "சரி, நீ சொல்வது முற்றிலும் உண்மை",
+     "en": "Yes, you are completely right"
+    },
+    {
+     "ta": "குளிர் நாட்கள் இனி வரவே வராது",
+     "en": "Cold days will never come again"
+    }
+   ],
+   "correct": 0,
+   "hint": {
+    "ta": "வானிலைக்கும் காலநிலைக்கும் என்ன வேறுபாடு?",
+    "en": "What is the difference between weather and climate?"
+   },
+   "solution": {
+    "ta": "குளிர்ந்த இரவுகள் வெப்பமான உலகிலும் வரும். காலநிலை என்பது பல பத்து ஆண்டுகளின் சராசரிப் போக்கு.",
+    "en": "Cold nights still happen in a warming world. Climate is the average trend over many decades."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இந்தியாவுக்கும் தமிழ்நாட்டுக்கும் என்ன பொருள்?",
+    "en": "What does it mean for India and Tamil Nadu?"
+   },
+   "text": {
+    "ta": "இந்திய அரசின் புவி அறிவியல் அமைச்சகம் (MoES) 2020-இல் வெளியிட்ட மதிப்பீடு: இந்தியாவின் சராசரி வெப்பநிலை 1901–2018 காலத்தில் சுமார் 0.7 °C உயர்ந்துள்ளது; வட இந்தியப் பெருங்கடலில் கடல்மட்டம் 1993–2017-இல் ஆண்டுக்கு சுமார் 3.3 மிமீ உயர்ந்தது. வெப்ப அலைகளும் அதிக மழைப் பொழிவுகளும் இனி அடிக்கடி வரலாம் என்று அறிவியலாளர்கள் எதிர்பார்க்கிறார்கள்; இது பகுதிக்குப் பகுதி மாறுபடும்.\n\n**கவனம்:** ஒரு குறிப்பிட்ட புயல் அல்லது வெள்ளம் \"இதனால்தான்\" வந்தது என்று சொல்ல முடியாது. அறிவியலாளர்கள் பல ஆண்டுப் புள்ளிவிவரங்களில் போக்கைப் பார்க்கிறார்கள். தமிழ்நாட்டுக்கு நீண்ட கடற்கரை, வேளாண்மை, நகரங்கள் உள்ளன; எனவே வெப்பம், கடல்மட்டம், மழை மாற்றம் பற்றி உன் ஊருக்கான அரசுத் தகவலை (IMD, மாநில அரசு) கவனித்துப் பார்.",
+    "en": "The Government of India's Ministry of Earth Sciences (MoES) assessment of 2020 says India's average temperature rose by about 0.7 °C between 1901 and 2018, and sea level in the north Indian Ocean rose about 3.3 mm a year in 1993–2017. Scientists expect heat waves and heavy-rain events may become more frequent; it will differ from region to region.\n\n**Be careful:** you cannot say a particular storm or flood happened \"because of\" climate change. Scientists look at the trend in many years of data. Tamil Nadu has a long coast, farming and cities; so watch the local information from official sources (IMD, the State government) on heat, sea level and rain."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "footprint",
+   "text": {
+    "ta": "இயல்புநிலை: மாதம் **150 யூனிட்** மின்சாரம், **20 லிட்டர்** பெட்ரோல், **1 சிலிண்டர்** LPG. மூன்று பட்டைகளையும் பார். பிறகு பெட்ரோலை 100 லிட்டராக்கிப் பார்; மின்சாரத்தை 300 ஆக்கிப் பார்.",
+    "en": "Default: **150 units** of electricity, **20 litres** of petrol, **1 cylinder** of LPG a month. Look at the three bars. Then set petrol to 100 litres; then set electricity to 300."
+   },
+   "q": {
+    "ta": "இயல்புநிலை அமைப்பில் எந்தப் பழக்கம் மிக அதிக CO₂ தருகிறது?",
+    "en": "With the default settings, which habit produces the most CO₂?"
+   },
+   "options": [
+    {
+     "ta": "மின்சாரம் (105 kg/மாதம்)",
+     "en": "Electricity (105 kg/month)"
+    },
+    {
+     "ta": "பெட்ரோல் (46 kg/மாதம்)",
+     "en": "Petrol (46 kg/month)"
+    },
+    {
+     "ta": "LPG (42 kg/மாதம்)",
+     "en": "LPG (42 kg/month)"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "இயல்புநிலையில் மின்சாரம் மிக அதிகம்: 150 × 0.7 = 105 kg; பெட்ரோல் 20 × 2.31 = 46.2 kg; LPG 14.2 × 2.98 ≈ 42.3 kg. ஆனால் இது குடும்பத்துக்கு ஏற்ப மாறும்: பெட்ரோல் 100 L ஆனால் 231 kg — அது முன்னிலைக்கு வந்துவிடும். காரணம்: 1 லிட்டர் பெட்ரோல் 2.31 kg CO₂ தருகிறது; 1 யூனிட் மின்சாரம் சுமார் 0.7 kg (தோராயம்). மின்சாரச் சராசரி இந்தியா முழுமைக்குமானது; தமிழ்நாட்டின் உண்மை எண் வேறாக இருக்கலாம். இந்தக் கருவி மூன்றை மட்டுமே கணக்கிடுகிறது — உணவு, பொருட்கள், பயணம் ஆகியவை இதில் இல்லை.",
+    "en": "At the default, electricity is highest: 150 × 0.7 = 105 kg; petrol 20 × 2.31 = 46.2 kg; LPG 14.2 × 2.98 ≈ 42.3 kg. But it depends on the household: with 100 L of petrol it is 231 kg and petrol takes the lead. Reason: 1 litre of petrol gives 2.31 kg CO₂; 1 unit of electricity about 0.7 kg (approximate). The electricity figure is an all-India average; Tamil Nadu's real number may differ. This tool counts only three things — not food, goods or travel."
+   }
+  },
+  {
+   "type": "example",
+   "q": {
+    "ta": "மாதம் 150 யூனிட் மின்சாரம், 20 L பெட்ரோல், 1 LPG சிலிண்டர் (14.2 kg) பயன்படுத்தும் குடும்பத்தின் CO₂ ஆண்டுக்கு? எத்தனை மரங்கள்? (மின்சாரம் 0.7 kg/யூனிட், பெட்ரோல் 2.31 kg/L, LPG 2.98 kg/kg, மரம் 20 kg/ஆண்டு)",
+    "en": "A household uses 150 units of electricity, 20 L of petrol and 1 LPG cylinder (14.2 kg) a month. Its CO₂ per year? How many trees? (electricity 0.7 kg/unit, petrol 2.31 kg/L, LPG 2.98 kg/kg, a tree 20 kg/year)"
+   },
+   "steps": [
+    {
+     "ta": "மின்சாரம்: 150 × 0.7 = 105 kg",
+     "en": "Electricity: 150 × 0.7 = 105 kg"
+    },
+    {
+     "ta": "பெட்ரோல்: 20 × 2.31 = 46.2 kg",
+     "en": "Petrol: 20 × 2.31 = 46.2 kg"
+    },
+    {
+     "ta": "LPG: 14.2 × 2.98 ≈ 42.3 kg",
+     "en": "LPG: 14.2 × 2.98 ≈ 42.3 kg"
+    },
+    {
+     "ta": "மாதம்: 105 + 46.2 + 42.3 ≈ 193.5 kg → ஆண்டு: 193.5 × 12 ≈ 2,322 kg ≈ 2.3 டன்",
+     "en": "Month: 105 + 46.2 + 42.3 ≈ 193.5 kg → year: 193.5 × 12 ≈ 2,322 kg ≈ 2.3 t"
+    },
+    {
+     "ta": "மரங்கள்: 2,322 ÷ 20 ≈ 116",
+     "en": "Trees: 2,322 ÷ 20 ≈ 116"
+    }
+   ],
+   "answer": {
+    "ta": "≈ 2,322 kg CO₂ / ஆண்டு; ≈ 116 மரங்கள்",
+    "en": "≈ 2,322 kg CO₂ per year; ≈ 116 trees"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "வீட்டில் மாதம் 40 யூனிட் மின்சாரத்தைக் குறைத்தால் ஆண்டுக்கு எவ்வளவு kg CO₂ குறையும்? (0.7 kg/யூனிட்)",
+    "en": "If your home saves 40 units of electricity a month, how many kg of CO₂ a year are saved? (0.7 kg/unit)"
+   },
+   "answer": 336,
+   "tol": 0.5,
+   "unit": {
+    "ta": "kg",
+    "en": "kg"
+   },
+   "hint": {
+    "ta": "40 × 0.7 × 12",
+    "en": "40 × 0.7 × 12"
+   },
+   "solution": {
+    "ta": "40 × 0.7 = 28 kg / மாதம்; × 12 = 336 kg / ஆண்டு. (இது சுமார் 17 மரங்கள் உறிஞ்சுவதற்குச் சமம்.)",
+    "en": "40 × 0.7 = 28 kg a month; × 12 = 336 kg a year. (About what 17 trees absorb.)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "மாதம் 30 லிட்டர் பெட்ரோல் பயன்படுத்தும் ஒரு வீடு ஆண்டுக்கு எவ்வளவு kg CO₂ வெளியிடுகிறது? (2.31 kg/L)",
+    "en": "A home using 30 litres of petrol a month releases how many kg of CO₂ a year? (2.31 kg/L)"
+   },
+   "answer": 831.6,
+   "tol": 1,
+   "unit": {
+    "ta": "kg",
+    "en": "kg"
+   },
+   "hint": {
+    "ta": "30 × 2.31 × 12",
+    "en": "30 × 2.31 × 12"
+   },
+   "solution": {
+    "ta": "30 × 2.31 = 69.3 kg / மாதம்; × 12 = 831.6 kg / ஆண்டு.",
+    "en": "30 × 2.31 = 69.3 kg a month; × 12 = 831.6 kg a year."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "குடும்பம் என்ன செய்யலாம்? மரங்களின் பங்கு",
+    "en": "What can a household do? The role of trees"
+   },
+   "text": {
+    "ta": "**பெரிய அளவு குறைக்க:** தேவையற்ற மின்விளக்கு, மின்விசிறி, ஃப்ரிட்ஜ் பயன்பாட்டைக் குறைத்தல்; அதிகத் திறனுள்ள (நட்சத்திரக் குறியீடு அதிகமுள்ள) சாதனங்கள்; அருகிலுள்ள இடங்களுக்கு நடை / சைக்கிள் / பேருந்து; வாகனத்தைப் பகிர்தல்; சமையலில் மூடி போட்டுச் சமைத்தல்; சூரிய ஆற்றல் (சாத்தியமான இடங்களில்). எதில் பெரிய அளவு குறையும் என்பதை மேல் கருவியில் கணக்கிட்டுப் பார்.\n\n**மரங்கள் நல்லவை — ஆனால் அவை நம் உமிழ்வுக்கான அனுமதிச் சீட்டு அல்ல.** மேலே 2,322 kg-ஐ உறிஞ்ச 116 மரங்கள் **ஒவ்வோர் ஆண்டும்** வேண்டும்; ஒரு நாற்று முதிர்ந்த மரமாக ஆண்டுகள் ஆகும்; மரம் வெட்டப்பட்டாலோ எரிந்தாலோ சேமித்த கார்பன் திரும்பக் காற்றுக்குப் போகும். எனவே: **முதலில் உமிழ்வைக் குறை; மரம் நடுவதையும் செய்.**",
+    "en": "**To cut a lot:** avoid needless lights, fans and fridge use; efficient appliances (higher star rating); walk, cycle or take a bus for nearby trips; share vehicles; cook with lids on; solar power where possible. Use the tool above to see which cuts most.\n\n**Trees are good — but not a licence.** To absorb the 2,322 kg above you would need 116 trees **every year**; a sapling takes years to become a mature tree; and if a tree is cut or burnt its stored carbon goes back to the air. So: **cut emissions first, and plant trees as well.**"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு குடும்பம் மாதம் 200 யூனிட் மின்சாரம் மட்டும் பயன்படுத்துகிறது (பெட்ரோல், LPG இல்லை). ஆண்டு CO₂-ஐ உறிஞ்ச எத்தனை மரங்கள்? (0.7 kg/யூனிட்; மரம் 20 kg/ஆண்டு)",
+    "en": "A household uses only 200 units of electricity a month (no petrol, no LPG). How many trees to absorb its yearly CO₂? (0.7 kg/unit; a tree 20 kg/year)"
+   },
+   "answer": 84,
+   "tol": 0.5,
+   "unit": {
+    "ta": "மரங்கள்",
+    "en": "trees"
+   },
+   "hint": {
+    "ta": "200 × 0.7 × 12 ÷ 20",
+    "en": "200 × 0.7 × 12 ÷ 20"
+   },
+   "solution": {
+    "ta": "200 × 0.7 = 140 kg / மாதம்; × 12 = 1,680 kg / ஆண்டு; ÷ 20 = 84 மரங்கள்.",
+    "en": "200 × 0.7 = 140 kg a month; × 12 = 1,680 kg a year; ÷ 20 = 84 trees."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தகவமைத்தல் (adaptation) — மாற்றத்துக்குத் தயாராதல்",
+    "en": "Adaptation — getting ready for change"
+   },
+   "text": {
+    "ta": "உமிழ்வைக் குறைப்பது ஒரு பாதி; ஏற்கெனவே நடக்கும் மாற்றங்களுக்குத் தயாராவது மறு பாதி.\n\n**மழைநீர் சேகரிப்பு:** 2003-இல் வறட்சிக்குப் பின் தமிழ்நாடு அரசு நகராட்சி / மாநகராட்சிச் சட்டத் திருத்தம் மூலம் (முக்கியமாக நகரங்களில்) கட்டடங்களில் மழைநீர் சேகரிப்பு அமைப்பைக் கட்டாயமாக்கியது. சில கட்டடங்களில் அமைப்புகள் சரியாகப் பராமரிக்கப்படவில்லை என்று பிறகு ஆய்வுகள் காட்டின — விதி மட்டும் போதாது, பராமரிப்பும் வேண்டும்.\n\n**கடலோரப் பாதுகாப்பு:** தமிழ்நாடு அரசு 2023 முதல் கடலோர வாழிடங்களை மீட்கும் திட்டத்தில் அலையாத்திக் காடுகளை (mangroves) நடுகிறது, மீட்கிறது; இவை கடல் அரிப்பையும் அலை வேகத்தையும் குறைக்க உதவலாம்.\n\n**வெப்பம்:** வெயிலில் நடுப்பகல் வேலையைத் தவிர்த்தல், நிழல், குடிநீர், ORS; IMD வெப்ப அலை எச்சரிக்கையைப் பார். உடல்நலம் கெட்டால் மருத்துவரிடமோ பெரியவரிடமோ சொல்.",
+    "en": "Cutting emissions is one half; preparing for the changes already under way is the other half.\n\n**Rainwater harvesting:** in 2003, after drought, the Tamil Nadu government made rainwater harvesting structures compulsory in buildings (through changes to the municipal laws, so mainly in towns and cities). Later studies found that some were not well maintained — a rule alone is not enough, upkeep is needed too.\n\n**Coastal protection:** since 2023 the Tamil Nadu government has been planting and restoring mangroves under a programme to rehabilitate coastal habitats; mangroves may help reduce erosion and wave force.\n\n**Heat:** avoid midday outdoor work, find shade, drink water and ORS; follow IMD heat-wave warnings. If you feel unwell, tell a doctor or an adult."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "எது தணிப்பு (mitigation — உமிழ்வைக் குறைத்தல்), எது தகவமைத்தல் (adaptation)? \"வீட்டு மொட்டை மாடியில் மழைநீர் சேகரிப்பு\" எது?",
+    "en": "Which is mitigation (cutting emissions) and which is adaptation? \"Rainwater harvesting on a house terrace\" is?"
+   },
+   "options": [
+    {
+     "ta": "தணிப்பு (mitigation)",
+     "en": "Mitigation"
+    },
+    {
+     "ta": "தகவமைத்தல் (adaptation)",
+     "en": "Adaptation"
+    },
+    {
+     "ta": "இரண்டுமே இல்லை, மரம் நடுவதே ஒரே வழி",
+     "en": "Neither; planting trees is the only way"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "இது CO₂ குறைக்கிறதா, அல்லது நீர்ப் பற்றாக்குறையையும் வெள்ளத்தையும் சமாளிக்க உதவுகிறதா?",
+    "en": "Does it cut CO₂, or help us cope with water shortage and floods?"
+   },
+   "solution": {
+    "ta": "மழைநீர் சேகரிப்பு மாறும் மழைப் பாங்கைச் சமாளிக்க உதவுவதால் தகவமைத்தல். (மின்சாரத்தைச் சேமித்தல் = தணிப்பு.)",
+    "en": "Rainwater harvesting helps us cope with changing rain patterns, so it is adaptation. (Saving electricity = mitigation.)"
+   }
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🌧️",
+     "title": {
+      "ta": "மழைநீர் சேகரிப்பு",
+      "en": "Rainwater harvesting"
+     },
+     "text": {
+      "ta": "தமிழ்நாட்டில் கட்டடங்களில் மழைநீர் சேகரிப்பு அமைப்பு கட்டாயம் என்ற விதி 2003 முதல் உள்ளது; உன் பள்ளியில் அது செயல்படுகிறதா என்று பார்க்கலாம்.",
+      "en": "In Tamil Nadu a rule has required rainwater harvesting in buildings since 2003; you can check whether it works in your school."
+     }
+    },
+    {
+     "icon": "🌿",
+     "title": {
+      "ta": "அலையாத்திக் காடுகள்",
+      "en": "Mangroves"
+     },
+     "text": {
+      "ta": "கடலோரப் பகுதிகளில் அலையாத்திக் காடுகளை நடுவதும் மீட்பதும் அரசின் திட்டங்களில் உள்ளது.",
+      "en": "Planting and restoring mangroves on the coast is part of State government programmes."
+     }
+    },
+    {
+     "icon": "☀️",
+     "title": {
+      "ta": "வெப்ப அலை எச்சரிக்கை",
+      "en": "Heat-wave warnings"
+     },
+     "text": {
+      "ta": "இந்திய வானிலை ஆய்வுத் துறை (IMD) வெப்ப அலை எச்சரிக்கைகளை வெளியிடுகிறது.",
+      "en": "The India Meteorological Department (IMD) issues heat-wave warnings."
+     }
+    },
+    {
+     "icon": "💡",
+     "title": {
+      "ta": "வீட்டு மின் கட்டணச் சீட்டு",
+      "en": "Your home electricity bill"
+     },
+     "text": {
+      "ta": "மின் கட்டணச் சீட்டில் உள்ள யூனிட்டே உன் குடும்பத்தின் CO₂ கணக்குக்கு முதல் எண்.",
+      "en": "The units on your electricity bill are the first number for your family's CO₂ sum."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "தூய்மையான மின்சாரம் (சூரியன், காற்று) அதிகமாகலாம்; மின் வாகனங்களும் திறன் கூடிய சாதனங்களும் பரவலாகலாம்; நகரங்கள் வெப்பத்தையும் மழையையும் சமாளிக்க வடிவமைக்கப்படலாம். எவ்வளவு வேகமாக என்பது உலகமும் நாமும் எடுக்கும் முடிவுகளைப் பொறுத்தது.",
+    "en": "Cleaner electricity (sun, wind) may grow; electric vehicles and efficient appliances may spread; cities may be designed to cope with heat and rain. How fast depends on the decisions the world and we make."
+   },
+   "risk": {
+    "ta": "வெப்ப அலைகள், கடல்மட்ட உயர்வு, மழைப் பாங்கு மாற்றம் ஆகியவை விவசாயத்தையும் கடலோர மக்களையும் பாதிக்கலாம்.",
+    "en": "Heat waves, sea-level rise and changing rain patterns may affect farming and coastal communities."
+   },
+   "fix": {
+    "ta": "உமிழ்வைக் குறைத்தல் + தகவமைத்தல்; உள்ளூர்த் தகவல்; எல்லோருக்கும் நியாயமான வழிகள்; அறிவியல் தரவுகளை நம்புதல்.",
+    "en": "Cutting emissions + adaptation; local information; fair solutions for everyone; trusting scientific data."
+   },
+   "q": {
+    "ta": "உன் ஊருக்குத் தேவையான ஒரு தணிப்புச் செயலையும், ஒரு தகவமைத்தல் செயலையும் எழுது. ஏன்?",
+    "en": "Write one mitigation action and one adaptation action your town needs. Why?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உன் குடும்ப CO₂ கணக்கு",
+    "en": "Your family's CO₂ sum"
+   },
+   "text": {
+    "ta": "மின் கட்டணச் சீட்டிலிருந்து மாத யூனிட்டையும், பெட்ரோல் வாங்கிய லிட்டரையும், LPG சிலிண்டர் எத்தனை மாதத்துக்கு ஒன்று என்பதையும் பெரியவர்களிடம் கேட்டு எழுது. மேல் கருவியில் போட்டு மாத, ஆண்டு CO₂-ஐப் பார். பிறகு குடும்பத்துடன் அமர்ந்து ஒரு குறைப்பைத் தேர்ந்தெடு (எ.கா. சில மின்விளக்குகளை அணைத்தல், வாரம் ஒரு நாள் நடந்து செல்லுதல்). ஒரு மாதம் செய்து, மின் கட்டணச் சீட்டில் மாற்றம் தெரிகிறதா என்று பார். இன்னொரு நாள், உன் தெருவில் மழைநீர் எங்கே ஓடுகிறது என்று கவனித்து ஒரு படம் வரை.",
+    "en": "Ask the adults for the monthly units from the electricity bill, the litres of petrol bought, and how many months one LPG cylinder lasts, and write them down. Put them in the tool above to see monthly and yearly CO₂. Then sit with the family and choose one reduction (for example switching off some lights, walking one day a week); do it for a month and see whether the bill changes. Another day, watch where rainwater flows in your street and draw a map."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "பசுமை இல்ல விளைவு என்றால் என்ன? ஏன் மரம் நடுவது மட்டும் போதாது?",
+    "en": "What is the greenhouse effect? Why is planting trees alone not enough?"
+   },
+   "keywords": [
+    {
+     "ta": "வாயுக்கள்",
+     "en": "gases",
+     "alt": [
+      "CO₂",
+      "கார்பன் டைஆக்சைடு",
+      "carbon dioxide"
+     ]
+    },
+    {
+     "ta": "வெப்பம்",
+     "en": "heat",
+     "alt": [
+      "சூடு",
+      "போர்வை",
+      "blanket"
+     ]
+    },
+    {
+     "ta": "உமிழ்வு",
+     "en": "emissions",
+     "alt": [
+      "குறை",
+      "reduce",
+      "எரிபொருள்",
+      "fuel"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "காற்றிலுள்ள CO₂ போன்ற வாயுக்கள் வெப்பத்தைப் பிடித்து வைத்துப் பூமியைச் சூடாக்குகின்றன — சிறிது இருந்தால் நல்லது, அதிகமானால் பூமி சூடாகும். மரங்கள் மெதுவாகத்தான் CO₂-ஐ உறிஞ்சுகின்றன; எனவே எரிபொருள் உமிழ்வையும் குறைக்க வேண்டும்.",
+    "en": "Gases like CO₂ in the air hold heat and warm the Earth — a little is good, too much warms it. Trees absorb CO₂ only slowly, so we must also cut emissions from fuel."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "இயற்கையான பசுமை இல்ல விளைவு பூமியை வாழத் தகுந்த (சுமார் 15 °C) சூட்டில் வைத்திருக்கிறது; எரிபொருள் எரிப்பு அதை அதிகப்படுத்துகிறது.",
+     "en": "The natural greenhouse effect keeps Earth habitable (about 15 °C); burning fuel strengthens it."
+    },
+    {
+     "ta": "பல வேறு சான்றுகள் (வெப்பமானி, கடல், பனி, காற்றுக் குமிழ்கள்) உலகம் சூடாகிறது என்று ஒரே திசையில் காட்டுகின்றன.",
+     "en": "Many different lines of evidence (thermometers, oceans, ice, air bubbles) point to warming."
+    },
+    {
+     "ta": "ஒரு புயலையோ வெள்ளத்தையோ தனியாக இதனுடன் இணைக்க முடியாது; நீண்டகாலப் போக்கைத்தான் பார்க்க வேண்டும்.",
+     "en": "A single storm or flood cannot be tied to it alone; we look at long-term trends."
+    },
+    {
+     "ta": "1 L பெட்ரோல் ≈ 2.31 kg CO₂; 1 யூனிட் மின்சாரம் ≈ 0.7 kg (தோராயம்). உன் வீட்டுக் கணக்கைப் போட்டுப் பார்.",
+     "en": "1 L petrol ≈ 2.31 kg CO₂; 1 unit of electricity ≈ 0.7 kg (approx.). Do your own home sum."
+    },
+    {
+     "ta": "மரம் நடு, ஆனால் முதலில் உமிழ்வைக் குறை; தகவமைத்தலும் (மழைநீர், கடலோரக் காடுகள், வெப்பப் பாதுகாப்பு) தேவை.",
+     "en": "Plant trees, but cut emissions first; adaptation (rainwater, coastal forests, heat protection) is needed too."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "இயற்கையான பசுமை இல்ல விளைவு பற்றி எது சரி?",
+    "en": "Which is right about the natural greenhouse effect?"
+   },
+   "options": [
+    {
+     "ta": "அது முழுவதும் தீமை",
+     "en": "It is entirely bad"
+    },
+    {
+     "ta": "அது இல்லாவிட்டால் பூமி மிகக் குளிராகும்; சிறிதளவு நல்லது",
+     "en": "Without it Earth would be very cold; a little is good"
+    },
+    {
+     "ta": "அது நம் தவறால் மட்டுமே உண்டாகிறது",
+     "en": "It is caused only by us"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "வாயுக்கள் இல்லையெனில் சராசரி சுமார் −18 °C; இருப்பதால் சுமார் 15 °C.",
+    "en": "Without the gases the average would be about −18 °C; with them about 15 °C."
+   }
+  },
+  {
+   "q": {
+    "ta": "பெட்ரோல் எரிந்தால் உண்டாகும் முக்கிய பசுமை இல்ல வாயு?",
+    "en": "The main greenhouse gas made when petrol burns?"
+   },
+   "options": [
+    {
+     "ta": "கார்பன் டைஆக்சைடு (CO₂)",
+     "en": "Carbon dioxide (CO₂)"
+    },
+    {
+     "ta": "ஆக்சிஜன்",
+     "en": "Oxygen"
+    },
+    {
+     "ta": "நைட்ரஜன்",
+     "en": "Nitrogen"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "எரிபொருளின் கார்பன் ஆக்சிஜனுடன் சேர்ந்து CO₂ ஆகிறது.",
+    "en": "Carbon in the fuel joins oxygen to form CO₂."
+   }
+  },
+  {
+   "q": {
+    "ta": "1 லிட்டர் பெட்ரோல் எரிந்தால் சுமார் எவ்வளவு CO₂?",
+    "en": "About how much CO₂ does 1 litre of burnt petrol make?"
+   },
+   "options": [
+    {
+     "ta": "0.23 kg",
+     "en": "0.23 kg"
+    },
+    {
+     "ta": "0.75 kg",
+     "en": "0.75 kg"
+    },
+    {
+     "ta": "2.31 kg",
+     "en": "2.31 kg"
+    },
+    {
+     "ta": "23 kg",
+     "en": "23 kg"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "2.31 kg — பெட்ரோலின் எடையைவிட அதிகம், ஏனெனில் காற்றின் ஆக்சிஜனும் சேர்கிறது.",
+    "en": "2.31 kg — more than the weight of the petrol, because oxygen from the air joins in."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"நேற்று குளிர் அதிகம், எனவே வெப்பமாதல் இல்லை\" ஏன் சரியான வாதம் அல்ல?",
+    "en": "Why is \"yesterday was cold, so there is no warming\" not a sound argument?"
+   },
+   "options": [
+    {
+     "ta": "குளிர்ச்சி உண்மையல்ல என்பதால்",
+     "en": "Because cold is not real"
+    },
+    {
+     "ta": "வானிலை நாளுக்கு நாள் மாறும்; காலநிலை பல பத்தாண்டுச் சராசரி என்பதால்",
+     "en": "Weather changes day to day; climate is a decades-long average"
+    },
+    {
+     "ta": "இரவில் வெப்பமானி வேலை செய்யாது என்பதால்",
+     "en": "Thermometers do not work at night"
+    },
+    {
+     "ta": "எல்லா நாட்களும் சூடாகவே இருக்க வேண்டும் என்பதால்",
+     "en": "Because every day must be hot"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஒரு நாள் வானிலை, நீண்டகாலப் போக்கை மறுக்காது.",
+    "en": "One day's weather does not cancel a long-term trend."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு வீடு எதைச் செய்தால் ஆண்டுக்கு அதிக CO₂ குறையும்? (0.7 kg/யூனிட், 2.31 kg/L, LPG 42.3 kg/சிலிண்டர்)",
+    "en": "Which action saves the most CO₂ a year? (0.7 kg/unit, 2.31 kg/L, LPG 42.3 kg/cylinder)"
+   },
+   "options": [
+    {
+     "ta": "மாதம் 40 யூனிட் மின்சாரம் குறைத்தல் (336 kg)",
+     "en": "Cutting 40 units of electricity a month (336 kg)"
+    },
+    {
+     "ta": "மாதம் 5 L பெட்ரோல் குறைத்தல் (138.6 kg)",
+     "en": "Cutting 5 L of petrol a month (138.6 kg)"
+    },
+    {
+     "ta": "மாதம் கால் சிலிண்டர் LPG குறைத்தல் (≈127 kg)",
+     "en": "Cutting a quarter cylinder of LPG a month (≈127 kg)"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "கணக்கு: 40 × 0.7 × 12 = 336; 5 × 2.31 × 12 = 138.6; 0.25 × 42.3 × 12 ≈ 127 kg.",
+    "en": "40 × 0.7 × 12 = 336; 5 × 2.31 × 12 = 138.6; 0.25 × 42.3 × 12 ≈ 127 kg."
+   }
+  },
+  {
+   "q": {
+    "ta": "மரம் நடுவது மட்டும் ஏன் போதாது?",
+    "en": "Why is planting trees alone not enough?"
+   },
+   "options": [
+    {
+     "ta": "மரங்கள் CO₂-ஐ உறிஞ்சவே உறிஞ்சாது",
+     "en": "Trees never absorb CO₂"
+    },
+    {
+     "ta": "வளர ஆண்டுகள் ஆகும், ஒரு மரம் ஆண்டுக்குக் குறைவாகவே உறிஞ்சும்; எனவே உமிழ்வையும் குறைக்க வேண்டும்",
+     "en": "They take years to grow and each absorbs only a little a year; so emissions must be cut too"
+    },
+    {
+     "ta": "மரங்கள் வெப்பத்தை உண்டாக்கும்",
+     "en": "Trees create heat"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஒரு குடும்பத்தின் ஆண்டு உமிழ்வுக்குப் பல நூறு மரங்கள் வேண்டியிருக்கும்.",
+    "en": "A family's yearly emissions can need over a hundred trees."
+   }
+  },
+  {
+   "q": {
+    "ta": "இவற்றில் தகவமைத்தல் (adaptation) எது?",
+    "en": "Which of these is adaptation?"
+   },
+   "options": [
+    {
+     "ta": "வீட்டில் மின்விளக்கை அணைத்தல்",
+     "en": "Switching off a light at home"
+    },
+    {
+     "ta": "பேருந்தில் பள்ளிக்குப் போதல்",
+     "en": "Going to school by bus"
+    },
+    {
+     "ta": "கடலோரத்தில் அலையாத்திக் காடுகளை மீட்டல்",
+     "en": "Restoring mangroves on the coast"
+    },
+    {
+     "ta": "மின் ஸ்கூட்டர் வாங்குதல்",
+     "en": "Buying an electric scooter"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "அலையாத்திக் காடுகள் ஏற்கெனவே நடக்கும் கடல் அரிப்பையும் புயல் அலையையும் சமாளிக்க உதவலாம்; மற்றவை உமிழ்வைக் குறைக்கும் தணிப்புகள்.",
+    "en": "Mangroves may help cope with erosion and storm waves that already occur; the others are mitigation (cutting emissions)."
+   }
+  }
+ ]
+}

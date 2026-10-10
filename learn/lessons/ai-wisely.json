@@ -1,0 +1,783 @@
+{
+ "id": "ai-wisely",
+ "minutes": 30,
+ "title": {
+  "ta": "AI-ஐ அறிவுடன் பயன்படுத்துவது எப்படி?",
+  "en": "How to use AI wisely"
+ },
+ "curriculum": [
+  {
+   "b": "CBSE",
+   "w": {
+    "ta": "AI திறன் பாடம் மற்றும் இணையப் பாதுகாப்பு, வகுப்பு 9–10",
+    "en": "Artificial Intelligence skill subject & cyber safety, Classes 9–10"
+   }
+  },
+  {
+   "b": "UNESCO",
+   "w": {
+    "ta": "மாணவர்களுக்கான AI திறன் கட்டமைப்பு (2024)",
+    "en": "AI competency framework for students (2024)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "இன்றைய AI என்ன, என்ன இல்லை என்பதைச் சொல்ல",
+   "en": "Say what today’s AI is and is not"
+  },
+  {
+   "ta": "நல்ல கேள்வி கேட்கவும், பதிலை இரண்டு மூலங்களில் சரிபார்க்கவும்",
+   "en": "Ask good questions and verify answers with two sources"
+  },
+  {
+   "ta": "தனியுரிமையையும், போலிக் குரல் மோசடிகளிலிருந்து பாதுகாப்பையும் கடைப்பிடிக்க",
+   "en": "Protect privacy and guard against voice-clone scams"
+  },
+  {
+   "ta": "AI-யுடன் கற்கவும், AI-யிடமிருந்து நகலெடுக்காமல் இருக்கவும்",
+   "en": "Learn with AI, not copy from it"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "கவிதா தன் அண்ணனின் போனில் ஒரு AI அரட்டைக் கருவியிடம் கணக்கைக் கேட்டாள். அது அழகாகப் படிப்படியாக விளக்கி ஒரு விடை சொன்னது. அவள் அப்படியே எழுதிக்கொண்டு போனாள். ஆசிரியர் அதைத் தவறு என்று குறித்தார் — நடுவில் ஒரு கூட்டல் பிழை. AI மிகுந்த நம்பிக்கையுடன் பேசியிருந்தது.\n\n**இது எனக்கு என்ன பயன்?** இன்று நீ படிக்க, எழுத, வேலை தேட, பணத்தைப் பாதுகாக்க AI கருவிகளை எதிர்கொள்வாய். அவற்றை அறிவுடன் பயன்படுத்துபவர் பலன் பெறுவார்; கண்மூடி நம்புபவர் ஏமாறலாம். முந்தைய பாடத்தில் (\"AI எப்படிக் கற்கிறது?\") AI ஒரு pattern இயந்திரம் என்று பார்த்தோம். இப்போது அதைச் சரியாகப் பயன்படுத்துவது எப்படி என்று பார்ப்போம்.",
+    "en": "Kavitha asked an AI chat tool on her brother’s phone to solve a maths problem. It explained neatly, step by step, and gave an answer. She copied it down. Her teacher marked it wrong — there was an addition slip in the middle. The AI had spoken with great confidence.\n\n**What is in it for me?** Today you meet AI tools when you study, write, look for work and protect your money. People who use them wisely gain; people who trust them blindly can be fooled. In the earlier lesson (\"How does AI learn?\") we saw that AI is a pattern machine. Now let us learn to use it well."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு AI தெளிவான, அழகான நீண்ட பதிலைத் தந்தது. அதன் பதில் எவ்வளவு நம்பகமானது?",
+    "en": "An AI gives a clear, beautifully written, long answer. How reliable is it?"
+   },
+   "options": [
+    {
+     "ta": "நன்றாக எழுதியிருப்பதால் கட்டாயம் சரி",
+     "en": "It must be right because it is well written"
+    },
+    {
+     "ta": "எவ்வளவு நன்றாக எழுதியிருந்தாலும் தவறாக இருக்கலாம்; சரிபார்க்க வேண்டும்",
+     "en": "It can be wrong however well written; it needs checking"
+    },
+    {
+     "ta": "நீளமாக இருந்தால் மட்டும் சரி",
+     "en": "Right only if it is long"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "AI-யின் எழுத்து நடை அதன் சரியான தன்மையைக் காட்டாது. அது \"அடுத்து வர வாய்ப்புள்ள சொற்களை\" அடுக்குகிறது; அதனால் தவறையும் அழகாக, உறுதியாகச் சொல்லலாம். இதற்குப் பெயர் **ஹாலுசினேஷன் (hallucination)** — AI தவறான அல்லது இல்லாத ஒன்றை உண்மையைப் போல் சொல்வது.",
+    "en": "How well AI writes says nothing about whether it is correct. It strings together likely next words, so it can state a mistake beautifully and firmly. This is called **hallucination** — AI presenting something wrong or non-existent as if it were true."
+   }
+  },
+  {
+   "type": "widget",
+   "name": "aiTrainer",
+   "params": {
+    "start": "biased"
+   },
+   "title": {
+    "ta": "நினைவூட்டல்: மாம்பழ AI-ஐ ஒரு நிமிடம் சோதி",
+    "en": "Recap: test the mango AI for a minute"
+   },
+   "text": {
+    "ta": "\"புதிய மாம்பழத்தைச் சோதி\" பொத்தானைச் சில முறை அழுத்து. AI ஒவ்வொரு முறையும் உறுதியாக விடை சொல்கிறது — \"எனக்கு உறுதியில்லை\" என்று அது சொல்வதில்லை. அதன் எடுத்துக்காட்டுகளில் இல்லாத பகுதிகளில் அது தவறலாம். இன்று இதற்கான பழக்கங்களைக் கற்போம்.",
+    "en": "Press “Test a new mango” a few times. The AI answers firmly every time — it never says “I am not sure”. In areas missing from its examples it can be wrong. Today we learn the habits that deal with this."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இன்றைய AI என்ன? என்ன இல்லை?",
+    "en": "What today’s AI is — and is not"
+   },
+   "text": {
+    "ta": "**என்ன:** AI அரட்டைக் கருவிகளும், படம் வரையும் கருவிகளும் மிகப் பெரிய அளவிலான எழுத்து, படங்களிலிருந்து **வடிவங்களைக் (pattern) கற்றவை**. நீ கேட்டால், கற்ற வடிவங்களை வைத்து \"பொருத்தமான\" பதிலை உருவாக்குகின்றன.\n\n**இல்லை:**\n- **மனிதர் அல்ல.** அதற்கு உணர்வு, அனுபவம் இல்லை; உன்மீது அக்கறையும் இல்லை.\n- **தேடு பொறி அல்ல.** தேடு பொறி இருக்கும் பக்கங்களைக் காட்டும். AI புதிதாக ஒரு பதிலை உருவாக்கும்; சில கருவிகள் இணையத் தேடலையும் சேர்த்துக்கொள்ளும் — அப்போதும் சரிபார்க்க வேண்டும்.\n- **எப்போதும் சரியானது அல்ல.** இல்லாத புத்தகப் பெயர், போலி மேற்கோள், தவறான தேதி — இவற்றையும் நம்பிக்கையுடன் சொல்லலாம்.",
+    "en": "**What it is:** AI chat tools and picture-making tools **learnt patterns** from a huge amount of text and images. When you ask, they use those patterns to produce a “fitting” reply.\n\n**What it is not:**\n- **Not a person.** It has no feelings, no experience, no care for you.\n- **Not a search engine.** A search engine shows pages that exist. AI creates a fresh answer; some tools add web search — even then, check.\n- **Not always right.** It may confidently give a book that does not exist, a fake quote or a wrong date."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சார்பு: பயிற்சித் தரவின் நிழல்",
+    "en": "Bias: the shadow of the training data"
+   },
+   "text": {
+    "ta": "AI தான் கற்ற தரவைப் போலவே இருக்கும். **எடுத்துக்காட்டு 1:** ஒரு படக் கருவியிடம் \"ஒரு விஞ்ஞானி\" என்று கேட்டால், அது கற்ற படங்களில் பெரும்பாலும் ஒரே மாதிரியான மனிதர்கள் இருந்தால் அதே மாதிரிதான் வரையும். **எடுத்துக்காட்டு 2:** ஒரு கருவி பெரும்பாலும் ஆங்கில எழுத்திலிருந்து கற்றிருந்தால், தமிழ்நாட்டுக் கிராமத்தின் வாழ்க்கை, தமிழ்ச் சொற்களின் நுணுக்கம் பற்றி அது தவறாகவோ மேலோட்டமாகவோ சொல்லலாம்.\n\nஎனவே AI சொல்வதில் \"யார் விடுபட்டிருக்கிறார்கள்?\" என்று கேள். சார்பு இருப்பது AI-யின் \"கெட்ட எண்ணம்\" அல்ல; அது தரவின் பிரதிபலிப்பு. அதைச் சரிசெய்யவும் மனிதர்கள்தான் வேண்டும்.",
+    "en": "AI resembles the data it learnt from. **Example 1:** ask a picture tool for “a scientist”; if most of its training pictures show one kind of person, that is the kind it will draw. **Example 2:** if a tool learnt mostly from English writing, it may describe village life in Tamil Nadu, or the shades of Tamil words, wrongly or shallowly.\n\nSo when AI answers, ask “who is missing?” Bias is not the AI’s “bad intent”; it is a reflection of the data. Fixing it also needs people."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "நல்ல கேள்வி கேட்பது எப்படி?",
+    "en": "How to ask well"
+   },
+   "head": [
+    {
+     "ta": "பழக்கம்",
+     "en": "Habit"
+    },
+    {
+     "ta": "மோசமான கேள்வி",
+     "en": "Weak question"
+    },
+    {
+     "ta": "நல்ல கேள்வி",
+     "en": "Better question"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "தெளிவாகக் கேள்",
+      "en": "Be clear"
+     },
+     {
+      "ta": "\"மழை பற்றி சொல்\"",
+      "en": "“Tell me about rain”"
+     },
+     {
+      "ta": "\"வகுப்பு 8 மாணவிக்குப் புரியும்படி, மழை எப்படி உருவாகிறது என்று 5 வாக்கியங்களில் சொல்\"",
+      "en": "“Explain in 5 sentences how rain forms, for a Class 8 student”"
+     }
+    ],
+    [
+     {
+      "ta": "சூழலைச் சொல்",
+      "en": "Give context"
+     },
+     {
+      "ta": "\"இதைச் சரிசெய்\"",
+      "en": "“Fix this”"
+     },
+     {
+      "ta": "\"இது என் கட்டுரை. எழுத்துப் பிழைகளை மட்டும் காட்டு; வாக்கியங்களை மாற்றாதே\"",
+      "en": "“This is my essay. Only point out spelling errors; do not rewrite my sentences”"
+     }
+    ],
+    [
+     {
+      "ta": "படிகளைக் கேள்",
+      "en": "Ask for steps"
+     },
+     {
+      "ta": "\"விடை என்ன?\"",
+      "en": "“What is the answer?”"
+     },
+     {
+      "ta": "\"எனக்கு ஒரு குறிப்பு மட்டும் கொடு; நான் முயற்சி செய்கிறேன்\"",
+      "en": "“Give me just one hint; I will try myself”"
+     }
+    ],
+    [
+     {
+      "ta": "நம்பகத்தன்மையைக் கேள்",
+      "en": "Ask how sure"
+     },
+     {
+      "ta": "(எதுவும் கேட்காமல் நம்புவது)",
+      "en": "(trusting without asking)"
+     },
+     {
+      "ta": "\"இதில் எது உனக்கு உறுதியில்லை? எங்கே தவறாக இருக்கலாம்?\"",
+      "en": "“Which parts are you unsure about? Where could this be wrong?”"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "**கடைசிப் பழக்கத்தில் ஒரு எச்சரிக்கை:** AI தன் நம்பிக்கை அளவைச் சொன்னாலும் அதுவும் தவறாக இருக்கலாம். அது உதவும், ஆனால் **சரிபார்ப்புக்கு மாற்று அல்ல.**",
+    "en": "One warning about the last habit: even when AI states how sure it is, that statement can also be wrong. It helps, but it is **not a replacement for checking.**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இரண்டு நம்பகமான மூலங்களில் சரிபார்",
+    "en": "Check with two reliable sources"
+   },
+   "text": {
+    "ta": "AI சொன்ன **எண், தேதி, பெயர், விதி** ஆகியவற்றை இரண்டு இடங்களில் சரிபார்: (1) உன் பாடப் புத்தகம் அல்லது ஆசிரியர்; (2) அரசு அல்லது அதிகாரப்பூர்வ இணையதளம் (.gov.in போன்றவை) அல்லது நம்பகமான கலைக்களஞ்சியம். இரண்டும் ஒத்துவந்தால் நம்பலாம். AI ஒரு புத்தகம் அல்லது கட்டுரையின் பெயரைச் சொன்னால், அது உண்மையில் இருக்கிறதா என்று பார். ஆசிரியரிடம் கேட்பதும் சரிபார்ப்புதான்.",
+    "en": "Take the **numbers, dates, names and rules** the AI gave and check them against: (1) your textbook or teacher, and (2) a government or official website (such as .gov.in) or a trustworthy encyclopedia. If both agree, you can trust it more. If the AI names a book or article, check that it really exists. Asking your teacher counts as checking."
+   }
+  },
+  {
+   "type": "table",
+   "title": {
+    "ta": "AI எதில் நல்லது? எதில் கவனம் வேண்டும்?",
+    "en": "Where AI is good — and where to be careful"
+   },
+   "head": [
+    {
+     "ta": "நன்றாகச் செய்யக்கூடியவை",
+     "en": "Often good at"
+    },
+    {
+     "ta": "கவனமாக இருக்க வேண்டியவை",
+     "en": "Be careful with"
+    }
+   ],
+   "rows": [
+    [
+     {
+      "ta": "கடினமான பகுதியை எளிய சொற்களில் விளக்குதல்",
+      "en": "Explaining a hard idea in simpler words"
+     },
+     {
+      "ta": "எண்கள், தேதிகள், மேற்கோள்கள் — தவறாக இருக்கலாம்",
+      "en": "Numbers, dates and quotes — may be wrong"
+     }
+    ],
+    [
+     {
+      "ta": "பயிற்சிக் கேள்விகள் உருவாக்குதல்",
+      "en": "Making practice questions"
+     },
+     {
+      "ta": "மருத்துவம், சட்டம், பணம் — மருத்துவர் / பெரியவர் / அதிகாரப்பூர்வ மூலத்திடம் கேள்",
+      "en": "Health, law, money — ask a doctor, an adult or an official source"
+     }
+    ],
+    [
+     {
+      "ta": "உன் எழுத்துப் பிழைகளைக் காட்டுதல்",
+      "en": "Pointing out mistakes in your writing"
+     },
+     {
+      "ta": "உன் ஊர் பற்றிய உள்ளூர்த் தகவல்கள்",
+      "en": "Local facts about your own town"
+     }
+    ],
+    [
+     {
+      "ta": "மொழிபெயர்ப்பின் முதல் வரைவு",
+      "en": "A first draft of a translation"
+     },
+     {
+      "ta": "அரிய சொற்கள், நுணுக்கமான தமிழ் — சரிபார்",
+      "en": "Rare words and fine shades of Tamil — verify"
+     }
+    ],
+    [
+     {
+      "ta": "யோசனைகளுக்குத் தூண்டுதல்",
+      "en": "Sparking ideas"
+     },
+     {
+      "ta": "உனக்காக முழுப் பாடத்தையும் புரிந்துகொள்வது — அதை நீதான் செய்ய முடியும்",
+      "en": "Understanding the lesson for you — only you can do that"
+     }
+    ]
+   ]
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "கட்டுரைக்காக AI ஒரு புத்தகப் பெயரையும் அதிலிருந்து ஒரு மேற்கோளையும் தந்தது. நீ என்ன செய்வாய்?",
+    "en": "For an essay, an AI gave a book title and a quote from it. What do you do?"
+   },
+   "options": [
+    {
+     "ta": "அப்படியே எழுதுவேன் — புத்தகப் பெயர் தெளிவாக உள்ளதே",
+     "en": "Write it as it is — the title is specific"
+    },
+    {
+     "ta": "நூலகத்திலோ ஆசிரியரிடமோ அந்தப் புத்தகம் இருக்கிறதா, மேற்கோள் உண்மையா என்று சரிபார்ப்பேன்",
+     "en": "Check with the library or teacher that the book and quote exist"
+    },
+    {
+     "ta": "AI-யிடம் \"உண்மையா?\" என்று மட்டும் மீண்டும் கேட்பேன்",
+     "en": "Just ask the AI again “is it true?”"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "AI இல்லாத மேற்கோளையும் உருவாக்கலாம்.",
+    "en": "AI can invent quotes that do not exist."
+   },
+   "solution": {
+    "ta": "AI ஹாலுசினேஷனால் போலி மேற்கோள்களைத் தரலாம். அதையே மீண்டும் AI-யிடம் கேட்பது போதுமான சரிபார்ப்பு அல்ல; வேறு நம்பகமான மூலத்தில் பார்.",
+    "en": "AI can produce fake quotes through hallucination. Asking the same AI again is not real checking; look in another reliable source."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "தனியுரிமை: AI-க்கு ஒருபோதும் தரக்கூடாதவை",
+    "en": "Privacy: never give these to any AI tool"
+   },
+   "text": {
+    "ta": "AI கருவியில் நீ தட்டச்சு செய்வதை யார் பார்க்கலாம், எவ்வளவு காலம் வைத்திருக்கப்படலாம் என்று உனக்கு உறுதியாகத் தெரியாது. அதனால் **ஒருபோதும் உள்ளிடாதே:**\n- OTP, கடவுச்சொல், ATM / UPI PIN\n- ஆதார் போன்ற அடையாள எண்கள், வங்கிக் கணக்கு எண்\n- குடும்பப் புகைப்படங்கள், பிற மாணவர்களின் படங்கள்\n- வீட்டு முகவரி, பள்ளி அடையாள விவரங்கள்\n\nஉதவி வேண்டுமானால் இவற்றைப் பெயர் மறைத்து (எ.கா. \"ஒரு மாணவி\") எழுது. வங்கிகள் உன்னிடம் OTP கேட்காது; யார் கேட்டாலும் தரக்கூடாது.",
+    "en": "You cannot be sure who can see what you type into an AI tool, or how long it may be kept. So **never enter:**\n- OTPs, passwords, ATM / UPI PINs\n- ID numbers such as Aadhaar, bank account numbers\n- Family photos, photos of other students\n- Your home address, school identity details\n\nIf you need help, write these without identifying details (say “a student”). Banks never ask you for an OTP; never give it to anyone who asks."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "வீட்டுப்பாட வழக்கம்",
+    "en": "A homework routine"
+   },
+   "q": {
+    "ta": "AI உதவியுடன் கற்கும் 4 படி வழக்கம் — ஒரு கணக்குக்கு:",
+    "en": "A 4-step routine for learning WITH AI — for one maths problem:"
+   },
+   "steps": [
+    {
+     "ta": "**1. முதலில் நீயே முயற்சி:** 10–15 நிமிடம் தனியாக எழுதிப் பார்.",
+     "en": "**1. Try first:** spend 10–15 minutes on your own."
+    },
+    {
+     "ta": "**2. சிக்கினால் குறிப்பு கேள்:** \"விடை சொல்லாதே; எனக்கு ஒரு குறிப்பு மட்டும் கொடு.\" முடிந்த பிறகு \"என் படிகளைச் சரிபார்\".",
+     "en": "**2. Ask for a hint, not the answer:** “Don’t tell me the answer; give one hint.” Afterwards: “Check my steps.”"
+    },
+    {
+     "ta": "**3. உன் சொற்களில் மீண்டும் சொல்:** புத்தகத்தைப் பார்க்காமல் வீட்டில் ஒருவருக்கு விளக்கு.",
+     "en": "**3. Explain back in your own words:** to someone at home, without looking."
+    },
+    {
+     "ta": "**4. சரிபார்:** பாடப் புத்தகம் அல்லது ஆசிரியரிடம் சரிபார்.",
+     "en": "**4. Verify:** with your textbook or teacher."
+    }
+   ],
+   "answer": {
+    "ta": "விளக்க முடிந்தால்தான் கற்றுக்கொண்டாய். AI எழுதியதை உன் வேலை என்று காட்டுவது ஏமாற்று; ஆசிரியரின் AI விதிகளைப் பின்பற்று.",
+    "en": "If you can explain it, you have learnt it. Presenting AI’s writing as your own is cheating; follow your teacher’s rules on AI."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "இரவில் \"மாமா\" குரலில் ஒரு அழைப்பு: \"நான் ஆபத்தில் இருக்கிறேன், உடனே UPI-இல் பணம் அனுப்பு, யாரிடமும் சொல்லாதே!\" முதலில் என்ன செய்வாய்?",
+    "en": "At night a call in “uncle’s” voice: “I’m in trouble, send money by UPI right now, tell no one!” What do you do first?"
+   },
+   "options": [
+    {
+     "ta": "குரல் மாமாவுடையது; உடனே அனுப்புவேன்",
+     "en": "It sounds like uncle; send immediately"
+    },
+    {
+     "ta": "அழைப்பை நிறுத்தி, மாமாவின் உண்மையான எண்ணை நானே அழைத்து, வீட்டுப் பெரியவர்களிடம் சொல்வேன்",
+     "en": "Hang up, call uncle’s real number myself and tell the elders at home"
+    },
+    {
+     "ta": "பணத்தின் பாதியை மட்டும் அனுப்புவேன்",
+     "en": "Send only half the money"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "\"உடனே\", \"யாரிடமும் சொல்லாதே\" என்ற அழுத்தம் ஏன்?",
+    "en": "Why the pressure of “right now” and “tell no one”?"
+   },
+   "solution": {
+    "ta": "குரலையும் வீடியோவையும் AI-யால் போலச் செய்ய முடியும். அவசரப்படுத்துவதும் ரகசியம் கேட்பதும் மோசடி அடையாளங்கள். நிறுத்து, தெரிந்த எண்ணில் மீண்டும் அழை, பெரியவர்களிடம் சொல்.",
+    "en": "AI can imitate voices and video. Pressure to hurry and to keep it secret are scam signs. Stop, call back on a known number, tell the elders."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "போலி குரல், போலி வீடியோ: குடும்ப \"ரகசிய வார்த்தை\"",
+    "en": "Fake voices and videos: a family “safe word”"
+   },
+   "text": {
+    "ta": "சில நொடிப் பதிவிலிருந்தே ஒருவரின் குரலை AI போலச் செய்ய முடியும் (**voice cloning**). முகத்தை மாற்றிய போலி வீடியோ **deepfake** எனப்படும். மோசடிக்காரர் உனக்குத் தெரிந்தவர் குரலில் பணமோ OTP-யோ கேட்கலாம்.\n\n**குடும்பத்துக்கு ஒரு ரகசிய வார்த்தை:** எல்லோரும் சேர்ந்து ஒரு வார்த்தையை முடிவு செய்யுங்கள் — சமூக ஊடகத்தில் இல்லாத, பிறந்தநாள் அல்லது செல்லப்பிராணிப் பெயர் அல்லாத ஒன்று. அவசரப் பணக்கோரிக்கை வந்தால் அந்த வார்த்தையைக் கேளுங்கள். சொல்லாவிட்டால் நம்பாதீர்கள்.\n\nமோசடிக்கு ஆளானால் பெரியவர்களுடன் சேர்ந்து உடனே **1930** (தேசிய இணையக் குற்றப் புகார் உதவி எண்) அல்லது cybercrime.gov.in-இல் புகார் செய்யலாம்.",
+    "en": "AI can imitate a person’s voice from a short recording (**voice cloning**). A fake video with a swapped face is a **deepfake**. A scammer may ask for money or an OTP in the voice of someone you know.\n\n**A family safe word:** decide on one word together — one that is not on social media and is not a birthday or a pet’s name. If an urgent money request comes, ask for that word. If it is not given, do not trust the call.\n\nIf someone is scammed, along with an adult report quickly on **1930** (the national cyber-crime helpline) or at cybercrime.gov.in."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "வீட்டுப்பாடத்தில் கடினமான ஒரு கேள்வி. கற்பதற்கு எது சிறந்த வழி?",
+    "en": "A hard homework question. Which is the best way to learn?"
+   },
+   "options": [
+    {
+     "ta": "AI-யிடம் முழு விடையையும் கேட்டு நோட்டில் எழுதுவது",
+     "en": "Ask AI for the full answer and copy it"
+    },
+    {
+     "ta": "நானே முயன்று, சிக்கிய இடத்தில் ஒரு குறிப்பு கேட்டு, பிறகு என் சொற்களில் விளக்கிப் பார்ப்பது",
+     "en": "Try myself, ask for a hint where stuck, then explain it in my own words"
+    },
+    {
+     "ta": "முயற்சியே செய்யாமல் விட்டுவிடுவது",
+     "en": "Not try at all"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "எது உன் மூளையைப் பயிற்றுவிக்கிறது?",
+    "en": "Which one trains your brain?"
+   },
+   "solution": {
+    "ta": "முயற்சி, குறிப்பு, விளக்கம், சரிபார்ப்பு — இதுவே AI-யுடன் கற்றல். நகலெடுத்தால் தேர்வில் நீ தனியாக இருப்பாய்.",
+    "en": "Try, hint, explain, verify — that is learning with AI. If you copy, you are alone in the exam hall."
+   }
+  },
+  {
+   "type": "world",
+   "title": {
+    "ta": "இன்று எங்கெல்லாம்?",
+    "en": "Where it shows up today"
+   },
+   "items": [
+    {
+     "icon": "🗣️",
+     "title": {
+      "ta": "குரலில் தட்டச்சு, மொழிபெயர்ப்பு",
+      "en": "Voice typing and translation"
+     },
+     "text": {
+      "ta": "போனில் தமிழில் பேசி எழுத வைப்பது; நுணுக்கமான இடங்களில் தவறுகள் வரலாம்.",
+      "en": "Speaking Tamil to type on a phone; slips can appear in subtle places."
+     }
+    },
+    {
+     "icon": "🎓",
+     "title": {
+      "ta": "பாடத்துணை",
+      "en": "Study helpers"
+     },
+     "text": {
+      "ta": "கடினமான பகுதியை விளக்கவும் பயிற்சிக் கேள்விகள் தரவும் உதவும்; உன் சிந்தனைக்குப் பதிலாகாது.",
+      "en": "Can explain hard parts and give practice questions; cannot replace your thinking."
+     }
+    },
+    {
+     "icon": "📞",
+     "title": {
+      "ta": "மோசடி அழைப்புகள்",
+      "en": "Scam calls"
+     },
+     "text": {
+      "ta": "போலிக் குரல், போலி வீடியோவால் மோசடி; குடும்ப ரகசிய வார்த்தை உதவும்.",
+      "en": "Fake voices and videos used in scams; a family safe word helps."
+     }
+    },
+    {
+     "icon": "💬",
+     "title": {
+      "ta": "வங்கி, சேவை அரட்டை உதவியாளர்",
+      "en": "Bank and service chat helpers"
+     },
+     "text": {
+      "ta": "எளிய கேள்விகளுக்குப் பதில் தரும்; முக்கியமான சிக்கலில் மனிதரிடம் பேசக் கேள்.",
+      "en": "They answer simple questions; for something serious, ask to speak to a human."
+     }
+    }
+   ]
+  },
+  {
+   "type": "future",
+   "title": {
+    "ta": "வேலைகள் மாறும்",
+    "en": "Jobs will change"
+   },
+   "text": {
+    "ta": "AI வேலைகளை முழுவதுமாக அழிக்கிறது என்பதைவிட, வேலைகளுக்குள் உள்ள **பணிகளை** மாற்றுகிறது. சில பணிகள் தானியங்கியாகலாம்; சில புதிய பணிகள் வரலாம் (AI-ஐச் சோதிப்பவர், அதன் முடிவை மேற்பார்வை செய்பவர்…). யார் எந்த அளவு பாதிக்கப்படுவார் என்பது இன்று யாருக்கும் உறுதியாகத் தெரியாது.",
+    "en": "AI is less about wiping out whole jobs and more about changing the **tasks** inside jobs. Some tasks may be automated; new ones may appear (people who test AI, who supervise its decisions…). Nobody today knows for sure who will be affected, or how much."
+   },
+   "risk": {
+    "ta": "AI-ஐ நம்பி நாமே கற்பதை நிறுத்துவது; போலிகளுக்கு ஏமாறுவது; சிலருக்கு மட்டும் AI வசதி கிடைப்பது.",
+    "en": "Stopping our own learning because we trust AI; being fooled by fakes; only some people having access to AI."
+   },
+   "fix": {
+    "ta": "சிந்தித்தல், கேள்வி கேட்டல், சரிபார்த்தல், தமிழிலும் ஆங்கிலத்திலும் தெளிவாக எழுதுதல், நேர்மை, குழுவாக வேலை — இவை எந்தக் கருவியாலும் மாறாத திறன்கள்.",
+    "en": "Thinking, questioning, checking, clear writing and speaking, honesty and teamwork — skills that no tool replaces."
+   },
+   "q": {
+    "ta": "உன் பெற்றோர் செய்யும் வேலையில் எந்தப் பணிகளை AI செய்யலாம்? எவை மனிதரிடமே இருக்க வேண்டும்?",
+    "en": "In your parents’ work, which tasks could AI do? Which should stay with people?"
+   }
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "AI பதிலை பாடப்புத்தகத்துடன் சரிபார்",
+    "en": "Fact-check an AI answer against your textbook"
+   },
+   "text": {
+    "ta": "**பெரியவர் / ஆசிரியர் அனுமதியுடன்** (தனிப்பட்ட தகவல் இல்லாமல்) அனுமதிக்கப்பட்ட ஒரு AI கருவியிடம் (பல AI அரட்டைக் கருவிகள் பயன்படுத்தக் குறைந்தது 13 வயது தேவை என்றும், 18-க்குக் கீழே பெற்றோர் அனுமதியுடன் மட்டுமே என்றும் விதிக்கின்றன; பள்ளி / பெற்றோர் ஒப்புக்கொண்ட கருவிகளை மட்டும் பயன்படுத்து) உன் அறிவியல் அல்லது சமூக அறிவியல் பாடத்திலிருந்து ஒரு கேள்வி கேள். AI-யின் பதிலில் 3 தகவல்களைத் தேர்ந்தெடு. ஒவ்வொன்றையும் பாடப் புத்தகத்தில் தேடி ✔ (ஒத்துவருகிறது), ✘ (தவறு), ? (புத்தகத்தில் இல்லை) என்று குறி. எந்தத் தகவலுக்கு இரண்டாவது மூலம் தேவைப்பட்டது? உன் முடிவுகளை வகுப்பில் பகிர்.\n\nAI வசதி இல்லையா? ஆசிரியர் ஒரு AI பதிலை அச்சிட்டுத் தரலாம். அதுவும் இல்லையா? ஒரு நண்பர் பாடப் பகுதியிலிருந்து 3 வாக்கியங்களை எழுதட்டும்; அவற்றில் ஒன்றைத் தவறாக மாற்றி வைக்கட்டும். மற்றவர்கள் தவறானதைக் கண்டுபிடிக்கட்டும்.",
+    "en": "**With an adult’s or teacher’s permission** (and no personal details) ask an approved AI tool (many AI chat tools require users to be at least 13, and under 18 only with a parent’s permission — use only tools your school or parent approves) a question from your science or social-science lesson. Pick 3 facts from its answer. Look up each in your textbook and mark ✔ (matches), ✘ (wrong), ? (not in the book). Which fact needed a second source? Share your results in class.\n\nNo AI access? Your teacher can print an AI answer. Not even that? Let a friend write 3 sentences from the lesson, secretly changing one to a mistake. The others must find the false one."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "AI-ஐ அறிவுடன் பயன்படுத்த நீ பின்பற்றும் 3 பழக்கங்கள் என்ன?",
+    "en": "What 3 habits will you follow to use AI wisely?"
+   },
+   "keywords": [
+    {
+     "ta": "சரிபார்",
+     "en": "verify",
+     "alt": [
+      "சரிபார்ப்பு",
+      "check",
+      "இரண்டு மூலம்"
+     ]
+    },
+    {
+     "ta": "தனியுரிமை",
+     "en": "privacy",
+     "alt": [
+      "OTP",
+      "கடவுச்சொல்",
+      "personal"
+     ]
+    },
+    {
+     "ta": "முயற்சி",
+     "en": "try first",
+     "alt": [
+      "நானே",
+      "own effort",
+      "explain",
+      "விளக்கு"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "AI சொன்னதை இரண்டு நம்பகமான மூலங்களில் சரிபார்ப்பேன்; OTP, கடவுச்சொல், அடையாள எண், குடும்பப் படங்களை அதில் கொடுக்க மாட்டேன்; முதலில் நானே முயன்று, பிறகு AI-யிடம் குறிப்பு கேட்டு, என் சொற்களில் விளக்குவேன்.",
+    "en": "I will check what AI says with two reliable sources; I will never give it OTPs, passwords, ID numbers or family photos; I will try first myself, then ask AI for a hint, then explain in my own words."
+   }
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "AI pattern-களைக் கற்ற கருவி; மனிதரோ தேடு பொறியோ அல்ல; நம்பிக்கையுடன் தவறலாம் (ஹாலுசினேஷன்).",
+     "en": "AI is a pattern-learning tool — not a person or a search engine — and can be confidently wrong (hallucination)."
+    },
+    {
+     "ta": "தரவில் உள்ள சார்பு AI-யிலும் வரும்; \"யார் விடுபட்டார்?\" என்று கேள்.",
+     "en": "Bias in the data shows up in AI; ask “who is missing?”"
+    },
+    {
+     "ta": "தெளிவாக, சூழலுடன் கேள்; படிகளையும் \"எங்கே தவறலாம்?\" என்பதையும் கேள்; இரண்டு மூலங்களில் சரிபார்.",
+     "en": "Ask clearly with context; ask for steps and “where could this be wrong?”; verify with two sources."
+    },
+    {
+     "ta": "OTP, கடவுச்சொல், அடையாள எண், குடும்பப் படங்களை எந்த AI-யிலும் தராதே.",
+     "en": "Never give OTPs, passwords, ID numbers or family photos to any AI."
+    },
+    {
+     "ta": "முதலில் முயற்சி, பிறகு குறிப்பு, பிறகு விளக்கம்: AI-யுடன் கற்கலாம், AI-யிடமிருந்து நகலெடுக்காதே. போலிக் குரலுக்குக் குடும்ப ரகசிய வார்த்தை.",
+     "en": "Try, then hint, then explain: learn WITH AI, don’t copy FROM it. Use a family safe word against fake voices."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "\"ஹாலுசினேஷன்\" (hallucination) என்றால் AI-யில் என்ன?",
+    "en": "What does “hallucination” mean for AI?"
+   },
+   "options": [
+    {
+     "ta": "AI தூங்கிவிடுவது",
+     "en": "The AI falling asleep"
+    },
+    {
+     "ta": "AI தவறான அல்லது இல்லாத ஒன்றை உண்மை போல நம்பிக்கையுடன் சொல்வது",
+     "en": "The AI stating something wrong or non-existent as if true"
+    },
+    {
+     "ta": "AI மிக வேகமாகப் பதில் சொல்வது",
+     "en": "The AI replying very fast"
+    },
+    {
+     "ta": "AI படம் வரைவது",
+     "en": "The AI drawing a picture"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "அதனால்தான் எண், தேதி, மேற்கோளைச் சரிபார்க்க வேண்டும்.",
+    "en": "That is why numbers, dates and quotes need checking."
+   }
+  },
+  {
+   "q": {
+    "ta": "AI-யின் பதிலைச் சரிபார்க்க சிறந்த வழி?",
+    "en": "What is the best way to check an AI’s answer?"
+   },
+   "options": [
+    {
+     "ta": "அதே AI-யிடம் \"உறுதியா?\" என்று கேட்பது",
+     "en": "Ask the same AI “are you sure?”"
+    },
+    {
+     "ta": "பதில் நீளமாக இருக்கிறதா என்று பார்ப்பது",
+     "en": "See whether the answer is long"
+    },
+    {
+     "ta": "நண்பர் ஒருவர் \"சரி\" என்றால் போதும்",
+     "en": "If a friend says “fine”, it’s enough"
+    },
+    {
+     "ta": "பாடப் புத்தகம் / ஆசிரியர் மற்றும் அதிகாரப்பூர்வ மூலம் ஆகிய இரண்டிலும் ஒப்பிட்டுப் பார்ப்பது",
+     "en": "Compare with two sources, such as the textbook or teacher and an official source"
+    }
+   ],
+   "correct": 3,
+   "explain": {
+    "ta": "இரண்டு தனித்தனியான மூலங்கள் ஒத்துவந்தால் நம்பிக்கை அதிகம்.",
+    "en": "When two independent sources agree, trust rises."
+   }
+  },
+  {
+   "q": {
+    "ta": "கீழ்வருவனவற்றில் எதை AI கருவியில் உள்ளிடக்கூடாது?",
+    "en": "Which of these must you NOT type into an AI tool?"
+   },
+   "options": [
+    {
+     "ta": "உன் வங்கிக் கணக்கின் OTP",
+     "en": "The OTP of your bank account"
+    },
+    {
+     "ta": "\"ஒளிச்சேர்க்கையை எளிதாக விளக்கு\"",
+     "en": "“Explain photosynthesis simply”"
+    },
+    {
+     "ta": "\"10 பயிற்சிக் கேள்விகள் கொடு\"",
+     "en": "“Give me 10 practice questions”"
+    },
+    {
+     "ta": "\"என் கட்டுரையில் எழுத்துப் பிழை காட்டு\" (பெயர் இல்லாமல்)",
+     "en": "“Point out spelling errors in my essay” (without names)"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "OTP, கடவுச்சொல், அடையாள எண் ஒருபோதும் வேண்டாம்.",
+    "en": "Never share OTPs, passwords or ID numbers."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒரு படக் கருவி \"விஞ்ஞானி\" என்றதும் ஒரே மாதிரி மனிதர்களையே வரைகிறது. இதற்கு மிகப் பொருத்தமான காரணம்?",
+    "en": "A picture tool draws only one kind of person for “scientist”. The most likely reason?"
+   },
+   "options": [
+    {
+     "ta": "அந்த AI-க்குக் கெட்ட எண்ணம்",
+     "en": "The AI has bad intentions"
+    },
+    {
+     "ta": "அதன் பயிற்சித் தரவில் அப்படிப்பட்ட படங்களே அதிகம் இருந்திருக்கலாம்",
+     "en": "Its training data may have contained mostly such pictures"
+    },
+    {
+     "ta": "மற்ற மனிதர்கள் விஞ்ஞானிகளாக முடியாது",
+     "en": "Other people cannot be scientists"
+    },
+    {
+     "ta": "படம் வரைவது எப்படி என்று அதற்குத் தெரியாது",
+     "en": "It does not know how to draw"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "சார்பு பெரும்பாலும் தரவிலிருந்து வருகிறது; மனிதர்கள் அதைக் கவனித்துத் திருத்த வேண்டும்.",
+    "en": "Bias mostly comes from the data; people must notice and correct it."
+   }
+  },
+  {
+   "q": {
+    "ta": "கடினமான வீட்டுப்பாடக் கணக்குக்கு AI-யுடன் கற்கும் சரியான வரிசை?",
+    "en": "What is the right order for learning WITH AI on a hard homework problem?"
+   },
+   "options": [
+    {
+     "ta": "AI விடை → நகல் → சமர்ப்பிப்பு",
+     "en": "AI answer → copy → submit"
+    },
+    {
+     "ta": "நீயே முயற்சி → குறிப்பு கேள் → உன் சொற்களில் விளக்கு → சரிபார்",
+     "en": "Try yourself → ask a hint → explain in your words → verify"
+    },
+    {
+     "ta": "குறிப்பு → முயற்சி இல்லை → நகல்",
+     "en": "Hint → no attempt → copy"
+    },
+    {
+     "ta": "நண்பரின் நோட்டு → AI",
+     "en": "A friend’s notebook → AI"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இந்த வரிசை உன் மூளையைப் பயிற்றுவிக்கிறது.",
+    "en": "This order trains your brain."
+   }
+  },
+  {
+   "q": {
+    "ta": "போலிக் குரல் மோசடியிலிருந்து குடும்பத்தைக் காக்க நல்ல வழி?",
+    "en": "A good way to protect a family from voice-clone scams?"
+   },
+   "options": [
+    {
+     "ta": "எல்லா அழைப்புகளையும் நம்புவது",
+     "en": "Trust every call"
+    },
+    {
+     "ta": "சமூக ஊடகத்தில் நம் ரகசிய வார்த்தையைப் பதிவிடுவது",
+     "en": "Post our secret word on social media"
+    },
+    {
+     "ta": "அவசரப் பணக் கோரிக்கையில் குடும்ப ரகசிய வார்த்தையைக் கேட்டு, அழைப்பை நிறுத்தி, தெரிந்த எண்ணில் மீண்டும் அழைப்பது",
+     "en": "Ask for the family safe word on an urgent money request, hang up and call back on a known number"
+    },
+    {
+     "ta": "கோரிய பணத்தில் பாதியை மட்டும் அனுப்புவது",
+     "en": "Send only half the money asked"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "நிறுத்து, உறுதிசெய், பிறகே செயல்படு.",
+    "en": "Stop, confirm, then act."
+   }
+  },
+  {
+   "q": {
+    "ta": "வேலைகள் பற்றி எது நேர்மையான கூற்று?",
+    "en": "Which statement about jobs is honest?"
+   },
+   "options": [
+    {
+     "ta": "AI எல்லா வேலைகளையும் உடனே எடுத்துக்கொள்ளும்",
+     "en": "AI will take all jobs immediately"
+    },
+    {
+     "ta": "எந்த வேலையும் மாறாது",
+     "en": "No job will change"
+    },
+    {
+     "ta": "பல வேலைகளுக்குள் உள்ள பணிகள் மாறலாம்; புதியவை வரலாம்; தொடர்ந்து கற்பவர்களுக்குத் தயாராக இருக்க முடியும்",
+     "en": "Tasks inside many jobs may change and new ones may appear; those who keep learning can be ready"
+    },
+    {
+     "ta": "AI வந்தால் படிக்க வேண்டியதில்லை",
+     "en": "If AI exists, there is no need to study"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "மாற்றம் உறுதி; விவரம் தெரியாது — அதனால் கற்கும் திறன் முக்கியம்.",
+    "en": "Change is certain; details are not — so the ability to learn matters."
+   }
+  }
+ ]
+}

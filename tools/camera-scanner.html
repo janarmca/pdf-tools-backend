@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ta">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,47 +14,69 @@
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">[{"@context":"https://schema.org","@type":"SoftwareApplication","name":"📷 Camera Scanner","description":"AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","url":"https://pdftoolsindia.com/tools/camera-scanner","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"inLanguage":["en","ta"]},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is 📷 Camera Scanner free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. 📷 Camera Scanner is free on PDF Tools India — no signup, no watermark and no daily limit."}},{"@type":"Question","name":"Is my data safe when I use 📷 Camera Scanner?","acceptedAnswer":{"@type":"Answer","text":"Your file is sent only to the AI service needed to produce the result, over an encrypted connection, and is not kept after processing."}},{"@type":"Question","name":"Does 📷 Camera Scanner work on mobile?","acceptedAnswer":{"@type":"Answer","text":"Yes. 📷 Camera Scanner works on Android phones, iPhones, tablets and desktop browsers. The interface is available in Tamil and English."}},{"@type":"Question","name":"What does 📷 Camera Scanner do?","acceptedAnswer":{"@type":"Answer","text":"AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)."}}]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"PDF Tools India","item":"https://pdftoolsindia.com/"},{"@type":"ListItem","position":2,"name":"AI","item":"https://pdftoolsindia.com/ai-tools"},{"@type":"ListItem","position":3,"name":"📷 Camera Scanner","item":"https://pdftoolsindia.com/tools/camera-scanner"}]}]</script>
 <style>
-  :root{--brand:#B5482A;--ink:#1a1a2e;--sub:#5a6072;--line:#e6e8ec;--bg:#f7f8fa;}
+  :root{--ink:#20242B;--sub:#6B7280;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;}
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);}
-  .wrap{max-width:680px;margin:0 auto;padding:28px 20px 60px;}
-  .crumb{font-size:13px;color:var(--sub);margin-bottom:18px;}
-  .crumb a{color:var(--sub);text-decoration:none;}
-  .crumb a:hover{text-decoration:underline;}
-  .hero{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;text-align:center;}
-  .icon{font-size:40px;line-height:1;margin-bottom:10px;}
-  h1{font-size:24px;margin:0 0 8px;}
-  .sub{color:var(--sub);font-size:15px;margin:0 0 20px;}
-  .cta{display:inline-block;background:var(--brand);color:#fff;font-weight:800;font-size:15px;padding:13px 28px;border-radius:12px;text-decoration:none;}
-  .note{font-size:13px;color:var(--sub);margin-top:16px;}
-  .section{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;}
-  .section h2{font-size:16px;margin:0 0 10px;}
-  .faq h3{font-size:14.5px;margin:14px 0 4px;}
-  .section p{font-size:14px;line-height:1.7;color:#333;margin:0;}
-  .section ol{font-size:14px;line-height:1.8;color:#333;margin:0;padding-left:20px;}
-  .related ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .related a{display:block;font-size:13.5px;color:var(--ink);text-decoration:none;padding:9px 12px;background:var(--bg);border-radius:10px;}
-  .related a:hover{background:var(--line);}
-  footer{margin-top:28px;text-align:center;font-size:12.5px;color:var(--sub);}
-  footer a{color:var(--sub);}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;font-family:'Noto Sans Tamil',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+  a{color:inherit;}
+  .top{max-width:1000px;margin:0 auto;padding:14px 16px 4px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .top img{height:40px;width:auto;display:block;}
+  .home{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:800;font-size:13px;text-decoration:none;color:var(--brand);}
+  .wrap{max-width:1000px;margin:0 auto;padding:10px 16px 60px;}
+  .hero{border-radius:24px;padding:26px 22px;color:#fff;position:relative;overflow:hidden;box-shadow:0 10px 26px rgba(20,30,60,.2);}
+  .hero::after{content:'';position:absolute;right:-50px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),transparent 70%);}
+  .hero .row{display:flex;align-items:center;gap:16px;position:relative;z-index:1;}
+  .hero .big{width:70px;height:70px;border-radius:20px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;flex:0 0 auto;}
+  .hero h1{margin:0;font-size:26px;line-height:1.3;font-weight:900;}
+  .hero .en{font-size:13px;font-weight:700;opacity:.9;margin-top:2px;}
+  .hero p{position:relative;z-index:1;margin:14px 0 0;font-size:14.5px;line-height:1.7;opacity:.96;max-width:720px;}
+  .cta{position:relative;z-index:1;display:inline-block;margin-top:18px;background:#fff;color:#20242B;font-weight:900;font-size:16px;padding:14px 30px;border-radius:14px;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.2);}
+  .cta:hover{transform:translateY(-2px);}
+  .pills{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .pill{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;}
+  .section{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;}
+  .section h2{font-size:17px;margin:0 0 10px;font-weight:900;}
+  .section h2 small{font-weight:600;color:var(--sub);font-size:12px;margin-left:8px;}
+  .section p,.section li{font-size:14.5px;line-height:1.75;color:#333;}
+  .section p{margin:0;} .section ol,.section ul{margin:0;padding-left:22px;}
+  .faq h3{font-size:14.5px;margin:16px 0 4px;} .faq h3:first-of-type{margin-top:4px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;}
+  .tc{display:flex;align-items:center;gap:13px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:16px;text-decoration:none;color:var(--ink);transition:transform .12s,box-shadow .12s;}
+  .tc:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(20,30,60,.1);}
+  .tc .ic{flex:0 0 auto;width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;}
+  .tc .tx{flex:1;min-width:0;} .tc .nm{font-weight:900;font-size:15px;line-height:1.3;}
+  .tc .nm small{display:block;font-weight:600;font-size:11px;color:var(--sub);}
+  .tc .ds{font-size:12.5px;color:var(--sub);line-height:1.45;margin-top:2px;}
+  .tc .bd{flex:0 0 auto;align-self:flex-start;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:#E3F6EB;color:#176B45;}
+  .tc .bd.ai{background:#FFF3E0;color:#9A6700;}
+  .crumb{font-size:12.5px;color:var(--sub);margin:6px 2px 12px;} .crumb a{text-decoration:none;color:var(--sub);} .crumb a:hover{text-decoration:underline;}
+  footer{margin-top:30px;text-align:center;font-size:12.5px;color:var(--sub);} footer a{color:var(--sub);margin:0 6px;}
+  @media (max-width:600px){.hero h1{font-size:21px}.hero{padding:20px 16px;border-radius:20px}.hero .big{width:56px;height:56px;font-size:28px}.grid{grid-template-columns:1fr}}
+
+  :root{--brand:#B5482A;}
 </style>
 </head>
 <body>
+  <div class="top"><a href="/"><img src="/lockup.svg" alt="PDF Tools India" height="40"></a><a class="home" href="/">← முதன்மைப் பக்கம்</a></div>
   <div class="wrap">
-    <div class="crumb"><a href="/">PDF Tools India</a> › AI › 📷 Camera Scanner</div>
-    <div class="hero">
-      <div class="icon">📷</div>
-      <h1>📷 Camera Scanner</h1>
-      <p class="sub">AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)</p>
-      <a class="cta" href="/?tool=camscan">Open 📷 Camera Scanner →</a>
-      <p class="note">🔒 Powered by AI — reads, writes or generates content a simple script cannot.</p>
+    <div class="crumb"><a href="/">PDF Tools India</a> › <a href="/ai-tools">AI கருவிகள்</a> › 📷 Camera Scanner</div>
+    <div class="hero" style="background:linear-gradient(135deg,#B5482A,#1d2540);">
+      <div class="row">
+        <div class="big">📷</div>
+        <div><h1>கேமரா ஸ்கேனர்</h1><div class="en">📷 Camera Scanner</div></div>
+      </div>
+      <p>ஆவணத்தை ஸ்கேன் செய்து PDF ஆக்கு</p>
+      <p style="margin-top:6px;opacity:.85;font-size:13.5px;">AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)</p>
+      <a class="cta" href="/?tool=camscan">இப்போதே திற · Open →</a>
+      <div class="pills"><span class="pill">✓ இலவசம்</span><span class="pill">🔒 கோப்பு உங்கள் சாதனத்திலேயே</span><span class="pill">📱 மொபைல் + கணினி</span></div>
     </div>
     <div class="section">
-      <h2>About this tool</h2>
+      <h2>இந்தக் கருவி பற்றி <small>About this tool</small></h2>
       <p>📷 Camera Scanner is part of PDF Tools India's AI toolkit. AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text). Powered by AI — reads, writes or generates content a simple script cannot. Available in Tamil and English, on both mobile and desktop, with no account required to try it.</p>
+      <p style="margin-top:8px;">🔒 Powered by AI — reads, writes or generates content a simple script cannot.</p>
     </div>
     <div class="section">
-      <h2>How it works</h2>
+      <h2>எப்படிப் பயன்படுத்துவது? <small>How it works</small></h2>
       <ol>
         <li>Click "Open 📷 Camera Scanner" above.</li>
         <li>Follow the simple on-screen steps — add a file, type your input, or record, depending on the tool.</li>
@@ -62,26 +84,24 @@
       </ol>
     </div>
     <div class="section faq">
-      <h2>Frequently asked questions</h2>
+      <h2>அடிக்கடி கேட்கப்படும் கேள்விகள் <small>FAQ</small></h2>
       <h3>Is 📷 Camera Scanner free to use?</h3><p>Yes. 📷 Camera Scanner is free on PDF Tools India — no signup, no watermark and no daily limit.</p>
       <h3>Is my data safe when I use 📷 Camera Scanner?</h3><p>Your file is sent only to the AI service needed to produce the result, over an encrypted connection, and is not kept after processing.</p>
       <h3>Does 📷 Camera Scanner work on mobile?</h3><p>Yes. 📷 Camera Scanner works on Android phones, iPhones, tablets and desktop browsers. The interface is available in Tamil and English.</p>
       <h3>What does 📷 Camera Scanner do?</h3><p>AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text).</p>
     </div>
-    <div class="section related">
-      <h2>Related tools</h2>
-      <ul>
-        <li><a href="/tools/ask-ai-about-document">💬 Ask AI About Document</a></li>
-        <li><a href="/tools/ai-summarize">📋 AI Summarize</a></li>
-        <li><a href="/tools/ai-translate-document">🌐 AI Translate Document</a></li>
-        <li><a href="/tools/receipt-invoice-excel">🧾 Receipt/Invoice → Excel</a></li>
-        <li><a href="/tools/ai-resume-reviewer">📄 AI Resume Reviewer</a></li>
-        <li><a href="/tools/ai-compare-excel-files">📊 AI Compare Excel Files</a></li>
-      </ul>
+    <div class="section">
+      <h2>தொடர்புடைய கருவிகள் <small>Related tools</small></h2>
+      <div class="grid">
+        <a class="tc" href="/tools/ask-ai-about-document"><span class="ic" style="background:#0E6655">💬</span><span class="tx"><div class="nm">ஆவணத்திடம் கேள் (AI)<small>Ask AI About Document</small></div></span></a>
+        <a class="tc" href="/tools/ai-summarize"><span class="ic" style="background:#1F618D">📋</span><span class="tx"><div class="nm">சுருக்கம் (AI)<small>AI Summarize</small></div></span></a>
+        <a class="tc" href="/tools/ai-translate-document"><span class="ic" style="background:#117A65">🌐</span><span class="tx"><div class="nm">மொழிபெயர்ப்பு (AI)<small>AI Translate Document</small></div></span></a>
+        <a class="tc" href="/tools/receipt-invoice-excel"><span class="ic" style="background:#B7950B">🧾</span><span class="tx"><div class="nm">ரசீது → Excel (AI)<small>Receipt/Invoice → Excel</small></div></span></a>
+        <a class="tc" href="/tools/ai-resume-reviewer"><span class="ic" style="background:#C0392B">📄</span><span class="tx"><div class="nm">Resume சரிபார்ப்பு (AI)<small>AI Resume Reviewer</small></div></span></a>
+        <a class="tc" href="/tools/ai-compare-excel-files"><span class="ic" style="background:#1F618D">📊</span><span class="tx"><div class="nm">Excel ஒப்பீடு (AI)<small>AI Compare Excel Files</small></div></span></a>
+      </div>
     </div>
-    <footer>
-      <a href="/">← All 100+ tools at PDF Tools India</a> · <a href="/ai-tools">AI tools</a>
-    </footer>
+    <footer><div><a href="/">முதன்மை</a><a href="/pdf-tools">PDF</a><a href="/image-tools">படம்</a><a href="/video-tools">வீடியோ</a><a href="/business-tools">வணிகம்</a><a href="/ai-tools">AI</a><a href="/education-tools">கல்வி</a><a href="/learn/">கல்வி களஞ்சியம்</a></div><div style="margin-top:8px;"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/contact">Contact</a></div><div style="margin-top:8px;">உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும் · Your files stay on your device</div></footer>
   </div>
 </body>
 </html>

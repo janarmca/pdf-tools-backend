@@ -110,8 +110,8 @@
     "en": "Every AI learns roughly like this"
    },
    "text": {
-    "ta": "**1. தரவு (data):** நிறைய எடுத்துக்காட்டுகள் — சரியான விடையுடன் (லேபிள்).\n**2. Pattern கண்டுபிடித்தல்:** எடுத்துக்காட்டுகளில் உள்ள ஒழுங்கை AI கணக்கிடுகிறது. நம் மாம்பழ AI: \"அருகிலுள்ள 3 எடுத்துக்காட்டுகள் என்ன சொல்கின்றன?\" (இதன் பெயர் k-nearest neighbours).\n**3. ஊகித்தல் (prediction):** புதிய ஒன்றைப் பார்த்ததும் pattern-ஐ வைத்து ஊகிக்கிறது.\n**4. திருத்தம்:** தவறு என்று சொன்னால், அதை வைத்து மீண்டும் கற்கிறது.\n\nChatGPT போன்ற பெரிய AI-களும் அடிப்படையில் இதேதான் — மிகப் பிரமாண்டமான அளவில். அவை கோடிக்கணக்கான பக்கங்களிலிருந்து **சொற்களின் pattern-ஐ** கற்று, \"அடுத்து வர வாய்ப்புள்ள சொல்\" என்ன என்று ஊகிக்கின்றன. அவற்றுக்குக் கண்கள் இல்லை, அனுபவம் இல்லை — அதனால் சில நேரம் முழு நம்பிக்கையுடன் தவறான தகவலைச் சொல்லும்.",
-    "en": "**1. Data:** lots of examples — with the right answer attached (a label).\n**2. Finding patterns:** the AI calculates the regularities in the examples. Our mango AI: \"what do the 3 nearest examples say?\" (this is called k-nearest neighbours).\n**3. Prediction:** shown something new, it guesses using the pattern.\n**4. Correction:** told it was wrong, it learns again.\n\nBig AIs like ChatGPT work on the same basic idea — at an enormous scale. They learn **patterns of words** from vast amounts of text and predict \"the word most likely to come next\". They have no eyes and no experience — so sometimes they state wrong information with complete confidence."
+    "ta": "**1. தரவு (data):** நிறைய எடுத்துக்காட்டுகள் — சரியான விடையுடன் (லேபிள்).\n**2. Pattern கண்டுபிடித்தல்:** எடுத்துக்காட்டுகளில் உள்ள ஒழுங்கை AI கணக்கிடுகிறது. நம் மாம்பழ AI: \"அருகிலுள்ள 3 எடுத்துக்காட்டுகள் என்ன சொல்கின்றன?\" (இதன் பெயர் k-nearest neighbours).\n**3. ஊகித்தல் (prediction):** புதிய ஒன்றைப் பார்த்ததும் pattern-ஐ வைத்து ஊகிக்கிறது.\n**4. திருத்தம்:** தவறு என்று சொன்னால், அதை வைத்து மீண்டும் கற்கிறது.\n\nChatGPT போன்ற பெரிய AI-களும் அடிப்படையில் இதேதான் — மிகப் பிரமாண்டமான அளவில். அவை கோடிக்கணக்கான பக்கங்களிலிருந்து **சொற்களின் pattern-ஐ** கற்று, \"அடுத்து வர வாய்ப்புள்ள சொல்\" என்ன என்று ஊகிக்கின்றன. அவற்றுக்கு உடலும் நேரடி உலக அனுபவமும் இல்லை — அதனால் சில நேரம் முழு நம்பிக்கையுடன் தவறான தகவலைச் சொல்லும்.",
+    "en": "**1. Data:** lots of examples — with the right answer attached (a label).\n**2. Finding patterns:** the AI calculates the regularities in the examples. Our mango AI: \"what do the 3 nearest examples say?\" (this is called k-nearest neighbours).\n**3. Prediction:** shown something new, it guesses using the pattern.\n**4. Correction:** told it was wrong, it learns again.\n\nBig AIs like ChatGPT work on the same basic idea — at an enormous scale. They learn **patterns of words** from vast amounts of text and predict \"the word most likely to come next\". They have no body and no real-world experience — so sometimes they state wrong information with complete confidence."
    }
   },
   {
@@ -318,19 +318,19 @@
    },
    "options": [
     {
-     "ta": "மனிதர்கள் எழுதிய விதிகள் மட்டும்",
-     "en": "Only rules written by people"
-    },
-    {
      "ta": "எடுத்துக்காட்டுகள் (தரவு)",
      "en": "Examples (data)"
+    },
+    {
+     "ta": "மனிதர்கள் எழுதிய விதிகள் மட்டும்",
+     "en": "Only rules written by people"
     },
     {
      "ta": "தானாகவே, எதுவும் இல்லாமல்",
      "en": "By itself, from nothing"
     }
    ],
-   "correct": 1,
+   "correct": 0,
    "explain": {
     "ta": "தரவிலிருந்து pattern கற்கிறது.",
     "en": "It learns patterns from data."
@@ -347,15 +347,15 @@
      "en": "The AI being very fast"
     },
     {
-     "ta": "ஒருபக்கமான தரவால் சில வகைகளுக்கு எப்போதும் தவறாக முடிவெடுப்பது",
-     "en": "Consistently wrong decisions for some groups because of one-sided data"
-    },
-    {
      "ta": "AI-க்கு மின்சாரம் போதாதது",
      "en": "The AI not having enough power"
+    },
+    {
+     "ta": "ஒருபக்கமான தரவால் சில வகைகளுக்கு எப்போதும் தவறாக முடிவெடுப்பது",
+     "en": "Consistently wrong decisions for some groups because of one-sided data"
     }
    ],
-   "correct": 1,
+   "correct": 2,
    "explain": {
     "ta": "தரவு ஒருபக்கம் → முடிவும் ஒருபக்கம்.",
     "en": "One-sided data → one-sided decisions."
@@ -397,15 +397,15 @@
      "en": "Tells only the truth from the internet"
     },
     {
-     "ta": "அடுத்து வர வாய்ப்புள்ள சொற்களை pattern வைத்து ஊகிக்கிறது",
-     "en": "Predicts likely next words from patterns"
-    },
-    {
      "ta": "மனிதரைப் போல உணர்ந்து சிந்திக்கிறது",
      "en": "Feels and thinks like a human"
+    },
+    {
+     "ta": "அடுத்து வர வாய்ப்புள்ள சொற்களை pattern வைத்து ஊகிக்கிறது",
+     "en": "Predicts likely next words from patterns"
     }
    ],
-   "correct": 1,
+   "correct": 2,
    "explain": {
     "ta": "அதனால்தான் அது தவறையும் நம்பிக்கையுடன் சொல்லும்.",
     "en": "That’s why it can say wrong things confidently."
@@ -418,19 +418,19 @@
    },
    "options": [
     {
-     "ta": "AI-ஐத் திட்டினோம்",
-     "en": "We scolded the AI"
-    },
-    {
      "ta": "அப்படிப்பட்ட எடுத்துக்காட்டுகளைச் சேர்த்தோம்",
      "en": "We added examples of that kind"
+    },
+    {
+     "ta": "AI-ஐத் திட்டினோம்",
+     "en": "We scolded the AI"
     },
     {
      "ta": "வரைபடத்தை அழித்தோம்",
      "en": "We deleted the chart"
     }
    ],
-   "correct": 1,
+   "correct": 0,
    "explain": {
     "ta": "பல்வகைத் தரவு = நியாயமான AI.",
     "en": "Varied data = fairer AI."
