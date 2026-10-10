@@ -4,13 +4,11 @@
 -- Timestamps are ISO-8601 UTC text ('2026-10-10T12:00:00.000Z') so they sort and compare as strings.
 -- JSON values (pref, photos, data) are stored as JSON text.
 
--- ---------------------------------------------------------------- auth
+-- ---------------------------------------------------------------- auth (no passwords: Google sign-in or a 6-digit e-mail code)
 create table if not exists users (
   id text primary key,
   email text not null unique collate nocase,
-  password_hash text,
   google_sub text unique,
-  email_confirmed_at text,
   created_at text not null default (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
@@ -23,19 +21,20 @@ create table if not exists sessions (
 );
 create index if not exists sessions_user on sessions (user_id);
 
--- one-time e-mail links: 'confirm' (sign-up) and 'recovery' (forgot password)
-create table if not exists auth_tokens (
-  token_hash text primary key,
-  user_id text not null references users(id) on delete cascade,
-  kind text not null check (kind in ('confirm', 'recovery')),
-  expires_at text not null
+-- one pending e-mail login code per address (only a keyed hash of the code is stored)
+create table if not exists otp_codes (
+  email text primary key collate nocase,
+  code_hash text not null,
+  expires_at text not null,
+  attempts integer not null default 0
 );
 
-create table if not exists login_failures (
-  email text not null collate nocase,
+-- simple sliding-window rate limits: one row per event (key = 'otp:<email>', 'otpip:<ip>', 'redeem:<user>' ...)
+create table if not exists rate_events (
+  key text not null,
   at text not null default (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
-create index if not exists login_failures_email on login_failures (email, at);
+create index if not exists rate_events_key on rate_events (key, at);
 
 -- ---------------------------------------------------------------- credits & payments
 create table if not exists profiles (

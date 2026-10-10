@@ -201,13 +201,6 @@
       if (!changed) return; await M.setUser(u);
       if (!/^#\/(login|register|forgot)/.test(location.hash)) M.route();   // the login/register forms navigate by themselves
     });
-    B.onRecovery(function () {
-      var w = M.modal('<h2>' + t('புதிய கடவுச்சொல்', 'Set a new password') + '</h2><label class="fld"><span>' + t('புதிய கடவுச்சொல் (8+ எழுத்து)', 'New password (8+ characters)') + '</span><input id="np" type="password" autocomplete="new-password" minlength="8"></label><p class="err" id="nperr"></p><button class="btn pri full" id="npok">' + t('சேமி', 'Save') + '</button>');
-      M.$('#npok', w).addEventListener('click', async function () {
-        var pw = M.$('#np').value; if (pw.length < 8) { M.$('#nperr').textContent = t('குறைந்தது 8 எழுத்து', 'At least 8 characters'); return; }
-        var r = await B.setPassword(pw); if (r.ok) { M.closeModal(); M.toast(t('கடவுச்சொல் மாற்றப்பட்டது ✓', 'Password changed ✓'), 'ok'); } else M.$('#nperr').textContent = r.message || '';
-      });
-    });
     M.st.ready = true; M.mountShell();
     window.addEventListener('hashchange', function () { M.markNav(); M.route(); });
     M.route();

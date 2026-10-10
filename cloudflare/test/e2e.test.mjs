@@ -21,37 +21,49 @@ async function call(path, { method = 'POST', body, token, headers = {}, raw } = 
 const rpc = (name, args, token) => call('/mat/rpc/' + name, { body: args || {}, token }).then((r) => r.j);
 const sql = (statements) => call('/internal/sql', { body: { statements }, headers: { 'X-Internal-Key': IKEY } });
 
-async function signup(name, pw = 'secret123') {
-  const r = await call('/auth/v1/signup', { body: { email: mail(name), password: pw } });
-  assert.equal(r.s, 200, JSON.stringify(r.j));
-  return r.j.session;
+async function signup(name) {
+  const email = mail(name);
+  const o = await call('/auth/v1/otp', { body: { email } });
+  assert.equal(o.s, 200, JSON.stringify(o.j));
+  assert.match(o.j.dev_code, /^\d{6}$/);
+  const v = await call('/auth/v1/verify', { body: { email, token: o.j.dev_code } });
+  assert.equal(v.s, 200, JSON.stringify(v.j));
+  return v.j;
 }
 
 const profile = (name, gender, dob, extra = {}) => ({ name, gender, dob, community: 'kannada_devanga', consent: true, city: 'Salem', about: 'Simple person', ...extra });
 
-test('auth: sign-up, login, refresh rotation, user update, logout', async () => {
-  const s = await signup('alice');
+test('auth: e-mail code login, wrong codes, rate limits, refresh rotation, logout', async () => {
+  const email = mail('alice');
+  assert.equal((await call('/auth/v1/otp', { body: { email: 'not-an-email' } })).s, 400);
+  const o = await call('/auth/v1/otp', { body: { email } });
+  assert.equal(o.s, 200);
+  assert.equal((await call('/auth/v1/otp', { body: { email } })).s, 429, 'one code per minute');
+  const wrong = o.j.dev_code === '000000' ? '111111' : '000000';
+  const w = await call('/auth/v1/verify', { body: { email, token: wrong } });
+  assert.equal(w.j.code, 'otp_wrong');
+  const s = (await call('/auth/v1/verify', { body: { email: email.toUpperCase(), token: o.j.dev_code } })).j;
   assert.ok(s.access_token && s.refresh_token && s.user.id);
-  assert.equal((await call('/auth/v1/signup', { body: { email: mail('alice'), password: 'secret123' } })).j.error, 'User already registered');
-  assert.equal((await call('/auth/v1/token?grant_type=password', { body: { email: mail('alice'), password: 'wrong' } })).j.error, 'Invalid login credentials');
-  const l = await call('/auth/v1/token?grant_type=password', { body: { email: mail('ALICE'), password: 'secret123' } });
-  assert.equal(l.s, 200);
-  assert.equal(l.j.user.id, s.user.id);
-  const me = await call('/auth/v1/user', { method: 'GET', token: l.j.access_token });
-  assert.equal(me.j.email, mail('alice'));
-  assert.equal((await call('/auth/v1/user', { method: 'GET', token: l.j.access_token + 'x' })).s, 401);
-  const r1 = await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: l.j.refresh_token } });
+  assert.equal(s.new_user, true);
+  assert.equal((await call('/auth/v1/verify', { body: { email, token: o.j.dev_code } })).j.code, 'otp_expired', 'a code works once');
+  // 5 wrong tries lock the code
+  const lockEmail = mail('lock');
+  const o2 = await call('/auth/v1/otp', { body: { email: lockEmail } });
+  for (let i = 0; i < 5; i++) await call('/auth/v1/verify', { body: { email: lockEmail, token: o2.j.dev_code === '999999' ? '888888' : '999999' } });
+  assert.equal((await call('/auth/v1/verify', { body: { email: lockEmail, token: o2.j.dev_code } })).j.code, 'otp_locked');
+
+  const me = await call('/auth/v1/user', { method: 'GET', token: s.access_token });
+  assert.equal(me.j.email, email);
+  assert.equal((await call('/auth/v1/user', { method: 'GET', token: s.access_token + 'x' })).s, 401);
+  const r1 = await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: s.refresh_token } });
   assert.equal(r1.s, 200);
-  assert.notEqual(r1.j.refresh_token, l.j.refresh_token);
-  assert.equal((await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: l.j.refresh_token } })).s, 401, 'old refresh token is single-use');
-  assert.equal((await call('/auth/v1/user', { method: 'PUT', token: r1.j.access_token, body: { password: 'newpass1' } })).s, 200);
-  assert.equal((await call('/auth/v1/token?grant_type=password', { body: { email: mail('alice'), password: 'newpass1' } })).s, 200);
+  assert.notEqual(r1.j.refresh_token, s.refresh_token);
+  assert.equal((await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: s.refresh_token } })).s, 401, 'old refresh token is single-use');
   await call('/auth/v1/logout', { body: { refresh_token: r1.j.refresh_token }, token: r1.j.access_token });
   assert.equal((await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: r1.j.refresh_token } })).s, 401);
-  // without an e-mail service: reset is refused clearly, Google not configured
-  assert.equal((await call('/auth/v1/recover', { body: { email: mail('alice') } })).s, 503);
+  // passwords are gone; Google not configured in tests
+  assert.equal((await call('/auth/v1/signup', { body: { email, password: 'x' } })).s, 404);
   assert.equal((await call('/auth/v1/authorize?provider=google&redirect_to=https://pdftoolsindia.com/', { method: 'GET' })).s, 503);
-  // profile row with 5 free credits exists
   const p = await sql([{ sql: 'select credits, plan from profiles where id = ?', params: [s.user.id] }]);
   assert.deepEqual(p.j.results[0][0], { credits: 5, plan: 'free' });
 });

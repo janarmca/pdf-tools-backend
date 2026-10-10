@@ -15,15 +15,13 @@
 * தொலைபேசி எண் / email: சரிபார்ப்புக்காக **admin-க்கு மட்டும்** தெரியும்; உறுப்பினர்களுக்கு எங்கும் வராது.
 * Chat-ல் எண் / email / WhatsApp / Instagram / link எந்த வடிவில் அனுப்பினாலும் **server-ல்** தடுக்கப்படும் (பார்க்க §6).
 
-## 2. Database + login — Cloudflare (Supabase-க்குப் பதிலாக)
-Login, சுயவிவரங்கள், chat, படங்கள் எல்லாம் இப்போது Cloudflare Worker `pdf-tools-api` (D1 database + KV photos)-ல். அமைப்பு: [`cloudflare/README.md`](../cloudflare/README.md) — GitHub secrets சேர்த்து "Deploy Cloudflare API" workflow-ஐ ஓட்டினால் போதும்; SQL எதையும் கையால் இயக்கத் தேவையில்லை.
-* முன்பு Postgres functions-ஆக இருந்த அனைத்தும் (`mat_search`, `mat_send_message`, …) இப்போது `cloudflare/src/mat.js`-ல் — அதே பெயர்கள், அதே பதில்கள்.
-* Admin ஆக: GitHub secret `MAT_ADMIN_EMAILS`-ல் உங்கள் email-ஐச் சேர்த்து, தளத்தில் அந்த email-ல் login செய்யுங்கள். பிறகு "என் கணக்கு" → "🛡 நிர்வாகப் பக்கம்".
-* Chat கட்டணம் ON: Cloudflare dashboard → D1 → `pdftools-db` → Console: `update mat_settings set value = 'on' where key = 'chat_fee';` (+ `m-config.js`-ல் `FEE_ON: true`).
-* `supabase/schema.sql` இப்போது **demo முறைக்கு மட்டும்** (`?demo=1`, உலாவிக்குள் PGlite).
-
-## 3. Cloud Run server (₹50 payment)
-`matrimony-api.js` ஏற்கனவே `server.js`-ல் இணைக்கப்பட்டுள்ளது (`registerMatrimonyRoutes(app, { db, … })`, webhook-ல் `matrimonyOnCaptured(db, payment)`). புதிய environment variable தேவையில்லை (Cloud Run-க்கு `CF_API_URL`, `CF_INTERNAL_KEY`, `AUTH_JWT_SECRET` deploy workflow-ஏ அனுப்பும்). கட்டணத்தை மாற்ற: `MATRIMONY_FEE_PAISE` (இயல்பு `5000` = ₹50) **மற்றும்** `matrimony/m-config.js`-ல் `FEE_RS`.
+## 2. Database + login + payments — Cloudflare (இலவசம்)
+முழு backend-உம் Cloudflare Worker `pdf-tools-api`-ல் (D1 database + KV photos) — அமைப்பு: [`cloudflare/README.md`](../cloudflare/README.md). GitHub secrets சேர்த்து "Deploy Cloudflare API" workflow-ஐ ஓட்டினால் போதும்.
+* **Login:** email-க்கு வரும் 6 இலக்க code அல்லது Google — கடவுச்சொல் இல்லை. "பதிவு செய்க" பக்கத்தில் விதிமுறைகளை ஏற்ற பின் அதே முறை.
+* முன்பு Postgres functions-ஆக இருந்தவை (`mat_search`, `mat_send_message`, …) இப்போது `cloudflare/src/mat.js`-ல்; ₹50 chat payment + AI ஜாதகம் `cloudflare/src/api.js`-ல் — அதே பெயர்கள், அதே பதில்கள்.
+* Admin ஆக: GitHub secret `MAT_ADMIN_EMAILS`-ல் உங்கள் email → அந்த email-ல் login → "என் கணக்கு" → "🛡 நிர்வாகப் பக்கம்".
+* Chat கட்டணம் ON: Cloudflare dashboard → D1 → `pdftools-db` → Console: `update mat_settings set value = 'on' where key = 'chat_fee';` (+ `m-config.js`-ல் `FEE_ON: true`). கட்டணத் தொகை: Worker variable `MATRIMONY_FEE_PAISE` (இயல்பு 5000) + `m-config.js`-ல் `FEE_RS`.
+* `supabase/schema.sql` இப்போது **demo முறைக்கு மட்டும்** (`?demo=1`, உலாவிக்குள் PGlite; demo login code எப்போதும் `123456`).
 
 ## 4. தளக் கோப்புகள் (GitHub-ல் ஏற்ற)
 `matrimony/` கோப்புறை முழுவதும் + `matrimony-api.js` + மாற்றப்பட்ட `index.source.html`, `index.html`, `sw.js`, `sitemap.xml`, `generate-tool-pages.mjs`. (முதன்மைப் பக்கத்தில் 💍 banner + footer link சேர்ந்துள்ளது.)
@@ -56,13 +54,13 @@ Login, சுயவிவரங்கள், chat, படங்கள் எல�
 Email/WhatsApp அறிவிப்புகள் (புதிய Interest வந்தால்), ஜாதகப் பொருத்தம் (பத்துப் பொருத்தம்), கன்னட மொழி இடைமுகம், அடையாள ஆவணச் சரிபார்ப்பு badge, சந்தா திட்டங்கள்.
 
 ## 10. சோதனைகள் (dev)
-`node matrimony/tests/filter.test.js` · `node matrimony/tests/sql-parity.test.mjs` (JS = SQL, 1667 வழக்குகள்) · `node matrimony/tests/sql-flow.test.mjs` (demo முறையின் SQL; PGlite `npm i @electric-sql/pglite` தேவை). Live Worker: `cloudflare/README.md` → Local development / tests. Payment module: repo root-ல் `node matrimony/tests/api.test.mjs`.
+`node matrimony/tests/filter.test.js` · `node matrimony/tests/sql-parity.test.mjs` (JS = SQL, 1667 வழக்குகள்) · `node matrimony/tests/sql-flow.test.mjs` (demo முறையின் SQL; PGlite `npm i @electric-sql/pglite` தேவை). Live Worker (login, matrimony functions, payments, AI ஜாதகம்): `cloudflare/README.md` → Local development / tests.
 
 
 ## ✨ AI ஜாதகம் → அடிப்படை விவரங்கள் (புதிது)
 - பதிவு படிவத்தின் முதல் பக்கத்தில் "ஜாதகம் பதிவேற்று" பொத்தான்: படம்/PDF → AI பெயர், பாலினம், பிறந்த தேதி, நட்சத்திரம், ராசி நிரப்பும். உறுப்பினர் சரிபார்த்துத் திருத்தலாம்.
 - **AI = கட்டணம்**: ஒரு முறைக்கு 2 credits (`JATHAGAM_CREDITS` in `matrimony-api.js`), பிற tools-ல் உள்ள அதே credit balance. தோல்வியடைந்தால் credits திரும்பக் கிடைக்கும். ஜாதகக் கோப்பு உடனே நீக்கப்படும், சேமிக்கப்படாது.
-- தேவை: Cloud Run-ல் `GEMINI_API_KEY` ஏற்கனவே உள்ளது; `server.js`-ல் patch-ன் கடைசி வரி (`upload: uploadImage, deductCredits, refundCredits`) சேர்க்க வேண்டும். இது இல்லாவிட்டால் AI பொத்தான் "AI error" காட்டும்; மற்ற அனைத்தும் வேலை செய்யும்.
+- தேவை: GitHub secret `GEMINI_API_KEY` (இலவசம், aistudio.google.com). இது இல்லாவிட்டால் AI பொத்தான் "AI இன்னும் அமைக்கப்படவில்லை" காட்டும்; மற்ற அனைத்தும் வேலை செய்யும்.
 - Demo முறை (`?demo=1`): மாதிரி விவரங்களை நிரப்பும் (உண்மை AI இல்லை).
 
 

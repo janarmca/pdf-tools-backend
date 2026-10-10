@@ -1,12 +1,14 @@
-// pdf-tools-api — Cloudflare Worker that replaces Supabase.
-// Served at https://pdftoolsindia.com/cfapi/* (same site as the frontend, so ISP blocks on *.supabase.co no longer matter).
-//   /cfapi/auth/v1/*          login (e-mail/password, Google), sessions, password reset
+// pdf-tools-api — the whole backend on the Cloudflare Workers FREE plan (replaced Supabase + Google Cloud Run).
+// Served at https://pdftoolsindia.com/cfapi/* (same site as the frontend, so ISP blocks on third-party domains don't matter).
+//   /cfapi/auth/v1/*          login: Google, or a 6-digit e-mail code (no passwords); sessions
+//   /cfapi/api/*              credits, promo codes, Razorpay payments + webhook, AI tools, Astrology+, matrimony payments
 //   /cfapi/mat/rpc/<name>     matrimony functions (former Postgres functions)
 //   /cfapi/mat/photo*         matrimony photos (KV, private, signed URLs)
-//   /cfapi/internal/*         used ONLY by the Cloud Run server (X-Internal-Key): credits, payments
+//   /cfapi/internal/*         maintenance/tests only — disabled unless the INTERNAL_KEY secret is set
 //   /cfapi/health
 import { corsHeaders, json, err, readJson, userFromRequest, hmac, safeEqual, randomToken } from './util.js';
-import { handleAuth } from './auth.js';
+import { handleAuth, mailProvider } from './auth.js';
+import { handleApi } from './api.js';
 import { matRpc, matRecordUnlock } from './mat.js';
 
 const PREFIX = '/cfapi';
@@ -75,9 +77,13 @@ async function route(req, env) {
 
   if (path === '/health') {
     const r = await env.DB.prepare('select count(*) as n from pricing_plans').first().catch(() => null);
-    return json({ ok: !!r, db: !!r, google: !!env.GOOGLE_CLIENT_ID, email: !!env.RESEND_API_KEY, time: new Date().toISOString() });
+    return json({
+      ok: !!r, db: !!r, google: !!env.GOOGLE_CLIENT_ID, email: mailProvider(env), ai: { gemini: !!env.GEMINI_API_KEY, nvidia: !!env.NVIDIA_API_KEY, image: !!env.AI },
+      razorpay: !!env.RAZORPAY_KEY_ID, astrology: !!env.ASTROLOGER_API_KEY, time: new Date().toISOString(),
+    });
   }
   if (path.startsWith('/auth/v1/')) return handleAuth(req, env, path.slice('/auth/v1'.length), url);
+  if (path.startsWith('/api/')) return handleApi(req, env, path);
 
   if (path.startsWith('/mat/rpc/') && m === 'POST') {
     const me = await userFromRequest(req, env);

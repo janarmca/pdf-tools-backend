@@ -44,63 +44,61 @@
   function faq(q, a) { return '<details class="faq"><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>'; }
 
   function authBox(title, body) { return '<div class="wrap narrow"><div class="box"><h1 class="h2">' + title + '</h1>' + body + '</div></div>'; }
-  var pwField = function (id, label, ac) { return '<label class="fld"><span>' + label + '</span><div class="pw"><input id="' + id + '" type="password" autocomplete="' + ac + '" minlength="8" required><button type="button" class="eye" data-act="eye" data-for="' + id + '" aria-label="show">👁</button></div></label>'; };
-  M.acts.eye = function (a) { var i = document.getElementById(a.getAttribute('data-for')); i.type = i.type === 'password' ? 'text' : 'password'; };
-
-  M.views.login = async function (v) {
-    if (M.st.user) return M.nav('#/');
+  // login and sign-up are the same thing now: e-mail -> 6-digit code (no passwords), or Google.
+  // A new e-mail address gets a new account automatically.
+  async function otpFlow(v, isNew) {
     var demo = B.mode === 'demo';
-    v.innerHTML = authBox(t('உள்நுழைய', 'Login'),
-      '<form id="lf" novalidate><label class="fld"><span>Email</span><input id="le" type="email" autocomplete="email" required></label>' + pwField('lp', t('கடவுச்சொல்', 'Password'), 'current-password') +
-      '<p class="err" id="lerr" role="alert"></p><button class="btn big full pri" type="submit">' + t('உள்நுழை', 'Login') + '</button></form>' +
-      '<p class="mut c"><a href="#/forgot">' + t('கடவுச்சொல் மறந்துவிட்டதா?', 'Forgot password?') + '</a></p>' +
-      '<p class="mut c">' + t('புதியவரா?', 'New here?') + ' <a href="#/register">' + t('பதிவு செய்க', 'Register') + '</a></p>' +
-      (demo ? '<div class="notice"><b>' + t('டெமோ', 'Demo') + '</b><p>' + t('நிர்வாகியாகப் பார்க்க:', 'To see the admin side:') + ' <code>admin@demo.test</code> / <code>admin123</code> <button class="btn sm ghost" type="button" data-act="fillAdmin">' + t('நிரப்பு', 'Fill') + '</button></p></div>' : ''));
-    var f = M.$('#lf');
-    f.addEventListener('submit', async function (e) {
+    var googleBtn = demo ? '' : '<button class="btn big full" type="button" data-act="googleLogin">' + t('Google மூலம் தொடர்க', 'Continue with Google') + '</button><p class="mut c">' + t('அல்லது', 'or') + '</p>';
+    var agree = isNew ? '<label class="chk"><input id="ragree" type="checkbox"> <span>' + t('நான் ', 'I accept the ') + '<a href="#/terms" target="_blank">' + t('விதிமுறைகள்', 'Terms') + '</a>, <a href="#/privacy" target="_blank">' + t('தனியுரிமை', 'Privacy') + '</a> ' + t('ஆகியவற்றை ஏற்கிறேன்; எனக்கு குறைந்தது 18 வயது.', 'and confirm I am at least 18.') + '</span></label>' : '';
+    v.innerHTML = authBox(isNew ? t('புதிய கணக்கு', 'Create account') : t('உள்நுழைய', 'Login'),
+      googleBtn +
+      '<form id="lf" novalidate><label class="fld"><span>Email</span><input id="le" type="email" autocomplete="email" required></label>' + agree +
+      '<p class="mut">' + t('உங்கள் email-க்கு 6 இலக்க code அனுப்புவோம் — கடவுச்சொல் தேவையில்லை.', 'We will e-mail you a 6-digit code — no password needed.') + '</p>' +
+      '<p class="err" id="lerr" role="alert"></p><button class="btn big full pri" type="submit">' + t('Code அனுப்பு', 'Send code') + '</button></form>' +
+      '<form id="cf" hidden novalidate><p id="csent"></p><label class="fld"><span>' + t('6 இலக்க code', '6-digit code') + '</span><input id="lc" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></label>' +
+      '<p class="err" id="cerr" role="alert"></p><button class="btn big full pri" type="submit">' + t('உள்நுழை', 'Login') + '</button>' +
+      '<p class="mut c"><a href="#" data-act="otpBack">' + t('← வேறு email', '← Different e-mail') + '</a> · <a href="#" data-act="otpResend">' + t('மீண்டும் அனுப்பு', 'Resend code') + '</a></p></form>' +
+      (isNew ? '<p class="mut c">' + t('ஏற்கனவே கணக்கு உள்ளதா?', 'Have an account?') + ' <a href="#/login">' + t('உள்நுழை', 'Login') + '</a></p>'
+             : '<p class="mut c">' + t('புதியவரா?', 'New here?') + ' <a href="#/register">' + t('பதிவு செய்க', 'Register') + '</a></p>') +
+      (demo ? '<div class="notice"><b>' + t('டெமோ', 'Demo') + '</b><p>' + t('டெமோவில் code எப்போதும்', 'In the demo the code is always') + ' <code>123456</code>. ' + t('நிர்வாகியாகப் பார்க்க:', 'To see the admin side:') + ' <code>admin@demo.test</code> <button class="btn sm ghost" type="button" data-act="fillAdmin">' + t('நிரப்பு', 'Fill') + '</button></p></div>' : ''));
+    var email = '';
+    var lf = M.$('#lf'), cf = M.$('#cf');
+    async function send() {
+      var r = await B.sendCode(email);
+      if (!r.ok) return r.status === 429 ? t('சற்று காத்திருந்து மீண்டும் முயற்சிக்கவும்', 'Please wait a moment and try again') : (r.message || t('Code அனுப்ப முடியவில்லை', 'Could not send the code'));
+      return '';
+    }
+    lf.addEventListener('submit', async function (e) {
       e.preventDefault(); var err = M.$('#lerr'); err.textContent = '';
-      var email = M.$('#le').value.trim(), pw = M.$('#lp').value;
-      if (!/^\S+@\S+\.\S+$/.test(email) || !pw) { err.textContent = t('Email மற்றும் கடவுச்சொல்லை உள்ளிடுங்கள்', 'Enter e-mail and password'); return; }
-      var btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-      var r = await B.signIn(email, pw); btn.disabled = false;
-      if (!r.ok) { err.textContent = /Email not confirmed/i.test(r.message || '') ? t('உங்கள் email-ஐ உறுதிப்படுத்துங்கள் (இன்பாக்ஸில் உள்ள link).', 'Please confirm your e-mail (link in your inbox).') : t('Email அல்லது கடவுச்சொல் தவறு', 'Wrong e-mail or password'); return; }
+      email = M.$('#le').value.trim();
+      if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = t('சரியான email உள்ளிடுங்கள்', 'Enter a valid e-mail'); return; }
+      if (isNew && !M.$('#ragree').checked) { err.textContent = t('விதிமுறைகளை ஏற்க வேண்டும்', 'Please accept the terms'); return; }
+      var btn = lf.querySelector('button[type=submit]'); btn.disabled = true;
+      var m = await send(); btn.disabled = false;
+      if (m) { err.textContent = m; return; }
+      M.$('#csent').textContent = t(email + ' -க்கு code அனுப்பப்பட்டது (10 நிமிடம் செல்லும்; spam folder-ஐயும் பாருங்கள்).', 'Code sent to ' + email + ' (valid 10 minutes; check spam too).');
+      lf.hidden = true; cf.hidden = false; M.$('#lc').focus();
+    });
+    cf.addEventListener('submit', async function (e) {
+      e.preventDefault(); var err = M.$('#cerr'); err.textContent = '';
+      var code = M.$('#lc').value.replace(/\D/g, '');
+      if (code.length !== 6) { err.textContent = t('6 இலக்க code-ஐ உள்ளிடுங்கள்', 'Enter the 6-digit code'); return; }
+      var btn = cf.querySelector('button[type=submit]'); btn.disabled = true;
+      var r = await B.verifyCode(email, code); btn.disabled = false;
+      if (!r.ok) { err.textContent = /expired|new one|new code/i.test(r.message || '') ? t('Code காலாவதியானது — மீண்டும் அனுப்புங்கள்', 'The code expired — please resend') : t('Code தவறு', 'Wrong code'); return; }
       await M.setUser(await B.user());
       var next = sessionStorage.getItem('mat_next'); sessionStorage.removeItem('mat_next');
-      M.nav(next && next !== '#/login' ? next : '#/');
+      M.nav(isNew ? '#/wizard' : next && next !== '#/login' ? next : '#/');
     });
-  };
-  M.acts.fillAdmin = function () { M.$('#le').value = 'admin@demo.test'; M.$('#lp').value = 'admin123'; };
+    M.acts.otpBack = function () { cf.hidden = true; lf.hidden = false; };
+    M.acts.otpResend = async function () { var m = await send(); M.toast(m || t('புதிய code அனுப்பப்பட்டது', 'A new code was sent'), m ? 'err' : 'ok'); };
+  }
+  M.acts.googleLogin = async function () { var r = await B.google(); if (!r.ok) M.toast(r.message || 'Google sign-in failed', 'err'); };
 
-  M.views.register = async function (v) {
-    if (M.st.user) return M.nav('#/');
-    v.innerHTML = authBox(t('புதிய கணக்கு', 'Create account'),
-      '<form id="rf" novalidate><label class="fld"><span>Email</span><input id="re" type="email" autocomplete="email" required></label>' + pwField('rp', t('கடவுச்சொல் (8+ எழுத்து)', 'Password (8+ characters)'), 'new-password') + pwField('rp2', t('மீண்டும் கடவுச்சொல்', 'Confirm password'), 'new-password') +
-      '<label class="chk"><input id="ragree" type="checkbox"> <span>' + t('நான் ', 'I accept the ') + '<a href="#/terms" target="_blank">' + t('விதிமுறைகள்', 'Terms') + '</a>, <a href="#/privacy" target="_blank">' + t('தனியுரிமை', 'Privacy') + '</a> ' + t('ஆகியவற்றை ஏற்கிறேன்; எனக்கு குறைந்தது 18 வயது.', 'and confirm I am at least 18.') + '</span></label>' +
-      '<p class="err" id="rerr" role="alert"></p><button class="btn big full pri" type="submit">' + t('கணக்கு உருவாக்கு', 'Create account') + '</button></form>' +
-      '<p class="mut c">' + t('ஏற்கனவே கணக்கு உள்ளதா?', 'Have an account?') + ' <a href="#/login">' + t('உள்நுழை', 'Login') + '</a></p>');
-    var f = M.$('#rf');
-    f.addEventListener('submit', async function (e) {
-      e.preventDefault(); var err = M.$('#rerr'); err.textContent = '';
-      var email = M.$('#re').value.trim(), p1 = M.$('#rp').value, p2 = M.$('#rp2').value;
-      if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = t('சரியான email உள்ளிடுங்கள்', 'Enter a valid e-mail'); return; }
-      if (p1.length < 8) { err.textContent = t('கடவுச்சொல் குறைந்தது 8 எழுத்து', 'Password must be at least 8 characters'); return; }
-      if (p1 !== p2) { err.textContent = t('கடவுச்சொற்கள் பொருந்தவில்லை', 'Passwords do not match'); return; }
-      if (!M.$('#ragree').checked) { err.textContent = t('விதிமுறைகளை ஏற்க வேண்டும்', 'Please accept the terms'); return; }
-      var btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-      var r = await B.signUp(email, p1); btn.disabled = false;
-      if (!r.ok) { err.textContent = /already/i.test(r.message || '') ? t('இந்த email ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது — உள்நுழையுங்கள்', 'This e-mail is already registered — please login') : (r.message || t('பதிவு தோல்வி', 'Sign-up failed')); return; }
-      if (r.needsConfirm) { M.$('#view').innerHTML = authBox(t('Email-ஐ உறுதிப்படுத்துங்கள்', 'Confirm your e-mail'), '<p>' + t('உங்கள் email-க்கு ஒரு உறுதிப்படுத்தும் link அனுப்பப்பட்டுள்ளது. அதைத் திறந்த பின் உள்நுழையுங்கள். (Spam folder-ஐயும் பாருங்கள்.)', 'We sent a confirmation link to your e-mail. Open it, then login. (Check spam too.)') + '</p><a class="btn" href="#/login">' + t('உள்நுழை', 'Login') + '</a>'); return; }
-      await M.setUser(await B.user()); M.nav('#/wizard');
-    });
-  };
-
-  M.views.forgot = async function (v) {
-    v.innerHTML = authBox(t('கடவுச்சொல் மீட்பு', 'Reset password'), '<form id="ff"><label class="fld"><span>Email</span><input id="fe" type="email" required></label><p class="err" id="ferr" role="alert"></p><p class="ok" id="fok"></p><button class="btn big full pri" type="submit">' + t('Reset link அனுப்பு', 'Send reset link') + '</button></form>');
-    M.$('#ff').addEventListener('submit', async function (e) {
-      e.preventDefault(); var em = M.$('#fe').value.trim(); if (!/^\S+@\S+\.\S+$/.test(em)) { M.$('#ferr').textContent = t('சரியான email உள்ளிடுங்கள்', 'Enter a valid e-mail'); return; }
-      var r = await B.reset(em); if (r.ok) { M.$('#ferr').textContent = ''; M.$('#fok').textContent = t('Link அனுப்பப்பட்டது (email இருந்தால்).', 'Link sent (if the e-mail exists).'); } else M.$('#ferr').textContent = r.message || '';
-    });
-  };
+  M.views.login = async function (v) { if (M.st.user) return M.nav('#/'); return otpFlow(v, false); };
+  M.acts.fillAdmin = function () { M.$('#le').value = 'admin@demo.test'; };
+  M.views.register = async function (v) { if (M.st.user) return M.nav('#/'); return otpFlow(v, true); };
+  M.views.forgot = async function () { M.nav('#/login'); }; // no passwords any more
 
   /* ---- static pages ---- */
   function page(title, html) { return function (v) { M.pageTitle = title; v.innerHTML = '<div class="wrap narrow doc"><h1>' + esc(title) + '</h1>' + html + '<p><a href="#/">← ' + t('முகப்பு', 'Home') + '</a></p></div>'; }; }

@@ -1,28 +1,37 @@
-// Login: e-mail + password, Google sign-in, e-mail confirmation, forgot password.
+// Login without passwords: Google sign-in, or a 6-digit code sent by e-mail (free: Brevo or Resend).
+// No password hashing means no heavy CPU work — fits the Workers free plan (10 ms CPU per request).
 // Sessions = short-lived JWT access token (1 h) + rotating refresh token (60 days, stored hashed).
 import {
   json, err, readJson, now, addSeconds, randomToken, sha256, hmac, safeEqual, b64url, b64urlDecode,
-  signJwt, hashPassword, checkPassword, userFromRequest,
+  signJwt, userFromRequest, rateLimit, clientIp,
 } from './util.js';
 
 const ACCESS_TTL = 3600;
 const REFRESH_TTL = 60 * 24 * 3600;
+const OTP_TTL = 10 * 60;
+const OTP_MAX_TRIES = 5;
 const SITE = 'https://pdftoolsindia.com/';
 const REDIRECT_OK = /^(https:\/\/((www\.)?pdftoolsindia\.com|[a-z0-9-]+\.pages\.dev)|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)(\/|$)/;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const safeRedirect = (u) => (u && REDIRECT_OK.test(u) ? u : SITE);
 const apiBase = (env) => (env.PUBLIC_API_URL || 'https://pdftoolsindia.com/cfapi').replace(/\/$/, '');
-const mailEnabled = (env) => !!env.RESEND_API_KEY;
+export const mailProvider = (env) => (env.BREVO_API_KEY ? 'brevo' : env.RESEND_API_KEY ? 'resend' : null);
 
-async function createUser(env, email, passwordHash, googleSub, confirmed) {
+async function findOrCreateUser(env, email, googleSub) {
+  let u = googleSub ? await env.DB.prepare('select id, email from users where google_sub = ?').bind(googleSub).first() : null;
+  if (u) return { user: u, created: false };
+  u = await env.DB.prepare('select id, email, google_sub from users where email = ?').bind(email).first();
+  if (u) {
+    if (googleSub && !u.google_sub) await env.DB.prepare('update users set google_sub = ? where id = ?').bind(googleSub, u.id).run();
+    return { user: { id: u.id, email: u.email }, created: false };
+  }
   const id = crypto.randomUUID();
   await env.DB.batch([
-    env.DB.prepare('insert into users (id, email, password_hash, google_sub, email_confirmed_at) values (?, ?, ?, ?, ?)')
-      .bind(id, email, passwordHash, googleSub, confirmed ? now() : null),
-    env.DB.prepare('insert or ignore into profiles (id, email, credits) values (?, ?, 5)').bind(id, email),
+    env.DB.prepare('insert into users (id, email, google_sub) values (?, ?, ?)').bind(id, email, googleSub || null),
+    env.DB.prepare('insert or ignore into profiles (id, email, credits) values (?, ?, 5)').bind(id, email), // 5 free credits
   ]);
-  return { id, email };
+  return { user: { id, email }, created: true };
 }
 
 async function createSession(env, user) {
@@ -45,64 +54,83 @@ function sessionHash(s, type) {
   return '#' + q.toString();
 }
 
-async function sendMail(env, to, subject, html) {
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: env.EMAIL_FROM || 'PDF Tools India <no-reply@pdftoolsindia.com>', to: [to], subject, html }),
-  });
-  if (!r.ok) throw new Error('E-mail could not be sent (' + r.status + ')');
+// ---------- e-mail (Brevo: 300/day free, no domain needed — just verify the sender address; Resend: 100/day free)
+function parseFrom(env) {
+  const raw = env.EMAIL_FROM || 'PDF Tools India <no-reply@pdftoolsindia.com>';
+  const m = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(raw);
+  return m ? { name: m[1] || 'PDF Tools India', email: m[2] } : { name: 'PDF Tools India', email: raw.trim() };
 }
 
-async function mailLink(env, user, kind, redirectTo) {
-  const token = randomToken(32);
-  await env.DB.batch([
-    env.DB.prepare('delete from auth_tokens where user_id = ? and kind = ?').bind(user.id, kind),
-    env.DB.prepare('insert into auth_tokens (token_hash, user_id, kind, expires_at) values (?, ?, ?, ?)').bind(await sha256(token), user.id, kind, addSeconds(kind === 'confirm' ? 3 * 24 * 3600 : 3600)),
-  ]);
-  const link = `${apiBase(env)}/auth/v1/verify?` + new URLSearchParams({ token, type: kind, redirect_to: safeRedirect(redirectTo) });
-  const isConfirm = kind === 'confirm';
-  const subject = isConfirm ? 'உங்கள் e-mail-ஐ உறுதிப்படுத்துங்கள் / Confirm your e-mail' : 'புதிய password அமைக்க / Reset your password';
-  const button = isConfirm ? 'E-mail-ஐ உறுதிப்படுத்து / Confirm e-mail' : 'புதிய password அமை / Set new password';
-  await sendMail(env, user.email, subject,
-    `<div style="font-family:sans-serif;font-size:15px;line-height:1.6"><p>வணக்கம்,</p><p>${isConfirm ? 'கணக்கைச் செயல்படுத்த கீழே உள்ள பொத்தானை அழுத்துங்கள்.' : 'புதிய password அமைக்க கீழே உள்ள பொத்தானை அழுத்துங்கள் (1 மணி நேரம் மட்டும் செல்லும்).'}</p>` +
-    `<p><a href="${link}" style="background:#1E7145;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;display:inline-block">${button}</a></p>` +
-    `<p style="color:#777;font-size:12px">நீங்கள் இதைக் கேட்கவில்லை என்றால் இந்த mail-ஐ விட்டுவிடுங்கள். If you did not ask for this, ignore this e-mail.</p></div>`);
+export async function sendMail(env, to, subject, html) {
+  const from = parseFrom(env);
+  let r;
+  if (env.BREVO_API_KEY) {
+    r = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ sender: from, to: [{ email: to }], subject, htmlContent: html }),
+    });
+  } else if (env.RESEND_API_KEY) {
+    r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: `${from.name} <${from.email}>`, to: [to], subject, html }),
+    });
+  } else throw new Error('no e-mail service');
+  if (!r.ok) {
+    console.error('mail failed', r.status, await r.text().catch(() => ''));
+    throw new Error('The e-mail could not be sent right now. Please try again, or sign in with Google.');
+  }
 }
 
-async function tooManyFailures(env, email) {
-  const r = await env.DB.prepare('select count(*) as n from login_failures where email = ? and at > ?').bind(email, addSeconds(-15 * 60)).first();
-  return (r?.n || 0) >= 10;
+const codeHash = (env, email, code) => hmac(env.AUTH_JWT_SECRET, `otp:${email.toLowerCase()}:${code}`);
+
+function newCode() {
+  const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+  return String(n).padStart(6, '0');
 }
 
 // ---------------------------------------------------------------- handlers
-async function signup(req, env) {
+async function sendCode(req, env) {
   const b = await readJson(req);
   const email = String(b.email || '').trim().toLowerCase();
-  const password = String(b.password || '');
-  if (!EMAIL_RE.test(email)) return err(400, 'Please enter a valid e-mail address');
-  if (password.length < 6) return err(400, 'Password should be at least 6 characters');
-  const existing = await env.DB.prepare('select id from users where email = ?').bind(email).first();
-  if (existing) return err(400, 'User already registered');
-  const confirmed = !mailEnabled(env); // without an e-mail service, accounts are confirmed immediately
-  const user = await createUser(env, email, await hashPassword(password), null, confirmed);
-  if (confirmed) return json({ user, session: await createSession(env, user) });
-  await mailLink(env, user, 'confirm', b.redirect_to);
-  return json({ user, session: null });
+  if (!EMAIL_RE.test(email) || email.length > 120) return err(400, 'Please enter a valid e-mail address');
+  // local tests only: return the code instead of e-mailing it (ignored unless the request is to localhost)
+  const devEcho = env.OTP_DEV_ECHO === '1' && /^(localhost|127\.0\.0\.1)$/.test(new URL(req.url).hostname);
+  if (!mailProvider(env) && !devEcho) return err(503, 'E-mail login is not set up yet. Please sign in with Google.');
+  if (!(await rateLimit(env, 'otp1:' + email, 1, 50))) return err(429, 'Please wait a minute before asking for another code.');
+  if (!(await rateLimit(env, 'otp:' + email, 6, 3600)) || !(await rateLimit(env, 'otpip:' + clientIp(req), 200, 3600))) {
+    return err(429, 'Too many codes requested — please try again in an hour.');
+  }
+  const code = newCode();
+  await env.DB.prepare('insert into otp_codes (email, code_hash, expires_at, attempts) values (?, ?, ?, 0) on conflict (email) do update set code_hash = excluded.code_hash, expires_at = excluded.expires_at, attempts = 0')
+    .bind(email, await codeHash(env, email, code), addSeconds(OTP_TTL)).run();
+  if (devEcho && !mailProvider(env)) return json({ ok: true, dev_code: code });
+  await sendMail(env, email, `${code} — உங்கள் login code / your login code`,
+    `<div style="font-family:sans-serif;font-size:15px;line-height:1.6;color:#222"><p>வணக்கம்,</p>` +
+    `<p>PDF Tools India-வில் உள்நுழைய இந்த code-ஐ உள்ளிடுங்கள் (10 நிமிடம் மட்டும்):<br>Enter this code to sign in (valid for 10 minutes):</p>` +
+    `<p style="font-size:30px;font-weight:800;letter-spacing:8px;margin:18px 0">${code}</p>` +
+    `<p style="color:#777;font-size:12px">இந்த code-ஐ யாரிடமும் பகிர வேண்டாம். நீங்கள் கேட்கவில்லை என்றால் இந்த mail-ஐ விட்டுவிடுங்கள்.<br>Never share this code. If you did not ask for it, ignore this e-mail.</p></div>`);
+  return json({ ok: true });
 }
 
-async function passwordGrant(req, env) {
+async function verifyCode(req, env) {
   const b = await readJson(req);
   const email = String(b.email || '').trim().toLowerCase();
-  if (await tooManyFailures(env, email)) return err(429, 'Too many attempts — please wait 15 minutes and try again.');
-  const u = await env.DB.prepare('select id, email, password_hash, email_confirmed_at from users where email = ?').bind(email).first();
-  if (!u || !(await checkPassword(String(b.password || ''), u.password_hash))) {
-    await env.DB.prepare('insert into login_failures (email) values (?)').bind(email).run();
-    return err(400, 'Invalid login credentials');
+  const code = String(b.token || b.code || '').replace(/\D/g, '');
+  const row = await env.DB.prepare('select code_hash, expires_at, attempts from otp_codes where email = ?').bind(email).first();
+  if (!row || row.expires_at < now()) return err(400, 'The code has expired — please ask for a new one.', 'otp_expired');
+  if (row.attempts >= OTP_MAX_TRIES) {
+    await env.DB.prepare('delete from otp_codes where email = ?').bind(email).run();
+    return err(429, 'Too many wrong tries — please ask for a new code.', 'otp_locked');
   }
-  if (!u.email_confirmed_at) return err(400, 'Email not confirmed');
-  await env.DB.prepare('delete from login_failures where email = ?').bind(email).run();
-  return json(await createSession(env, u));
+  if (code.length !== 6 || !safeEqual(await codeHash(env, email, code), row.code_hash)) {
+    await env.DB.prepare('update otp_codes set attempts = attempts + 1 where email = ?').bind(email).run();
+    return err(400, 'Wrong code — please check and try again.', 'otp_wrong');
+  }
+  await env.DB.prepare('delete from otp_codes where email = ?').bind(email).run();
+  const { user, created } = await findOrCreateUser(env, email, null);
+  return json({ ...(await createSession(env, user)), new_user: created });
 }
 
 async function refreshGrant(req, env) {
@@ -120,47 +148,13 @@ async function logout(req, env) {
   return json({ ok: true });
 }
 
-async function recover(req, env) {
-  const b = await readJson(req);
-  if (!mailEnabled(env)) return err(503, 'Password reset e-mails are not set up yet. Please contact support.');
-  const email = String(b.email || '').trim().toLowerCase();
-  const u = await env.DB.prepare('select id, email from users where email = ?').bind(email).first();
-  if (u) await mailLink(env, u, 'recovery', b.redirect_to);
-  return json({ ok: true }); // same answer whether or not the account exists
-}
-
 async function getUser(req, env) {
   const me = await userFromRequest(req, env);
   if (!me) return err(401, 'Invalid JWT');
   return json({ id: me.id, email: me.email });
 }
 
-async function updateUser(req, env) {
-  const me = await userFromRequest(req, env);
-  if (!me) return err(401, 'Invalid JWT');
-  const b = await readJson(req);
-  if (b.password !== undefined) {
-    if (String(b.password).length < 6) return err(400, 'Password should be at least 6 characters');
-    await env.DB.prepare('update users set password_hash = ?, email_confirmed_at = coalesce(email_confirmed_at, ?) where id = ?').bind(await hashPassword(String(b.password)), now(), me.id).run();
-  }
-  return json({ id: me.id, email: me.email });
-}
-
-async function verifyLink(url, env) {
-  const type = url.searchParams.get('type') === 'recovery' ? 'recovery' : 'confirm';
-  const target = safeRedirect(url.searchParams.get('redirect_to'));
-  const h = await sha256(url.searchParams.get('token') || '');
-  const row = await env.DB.prepare('select t.user_id, t.expires_at, u.email from auth_tokens t join users u on u.id = t.user_id where t.token_hash = ? and t.kind = ?').bind(h, type).first();
-  if (!row || row.expires_at < now()) return Response.redirect(target.split('#')[0] + '#error=access_denied&error_description=' + encodeURIComponent('Link is invalid or has expired'), 302);
-  await env.DB.batch([
-    env.DB.prepare('delete from auth_tokens where token_hash = ?').bind(h),
-    env.DB.prepare('update users set email_confirmed_at = coalesce(email_confirmed_at, ?) where id = ?').bind(now(), row.user_id),
-  ]);
-  const s = await createSession(env, { id: row.user_id, email: row.email });
-  return Response.redirect(target.split('#')[0] + sessionHash(s, type === 'recovery' ? 'recovery' : 'signup'), 302);
-}
-
-// ---------- Google sign-in (OAuth 2.0 authorization-code flow)
+// ---------- Google sign-in (OAuth 2.0 authorization-code flow, free)
 async function signState(env, data) {
   const body = b64url(new TextEncoder().encode(JSON.stringify(data)));
   return `${body}.${await hmac(env.AUTH_JWT_SECRET, 'oauth:' + body)}`;
@@ -204,31 +198,20 @@ async function callback(url, env) {
   let claims;
   try { claims = JSON.parse(new TextDecoder().decode(b64urlDecode(tok.id_token.split('.')[1]))); } catch { return fail('Google sign-in failed'); }
   if (claims.aud !== env.GOOGLE_CLIENT_ID || !claims.sub || !claims.email || !claims.email_verified) return fail('Google account e-mail is not verified');
-  const email = String(claims.email).toLowerCase();
-  let u = await env.DB.prepare('select id, email from users where google_sub = ?').bind(claims.sub).first();
-  let type = 'magiclink';
-  if (!u) {
-    u = await env.DB.prepare('select id, email from users where email = ?').bind(email).first();
-    if (u) await env.DB.prepare('update users set google_sub = ?, email_confirmed_at = coalesce(email_confirmed_at, ?) where id = ?').bind(claims.sub, now(), u.id).run();
-    else { u = await createUser(env, email, null, claims.sub, true); type = 'signup'; }
-  }
-  return Response.redirect(back + sessionHash(await createSession(env, u), type), 302);
+  const { user, created } = await findOrCreateUser(env, String(claims.email).toLowerCase(), claims.sub);
+  return Response.redirect(back + sessionHash(await createSession(env, user), created ? 'signup' : 'magiclink'), 302);
 }
 
 export async function handleAuth(req, env, path, url) {
   const m = req.method;
-  if (path === '/signup' && m === 'POST') return signup(req, env);
+  if (path === '/otp' && m === 'POST') return sendCode(req, env);
+  if (path === '/verify' && m === 'POST') return verifyCode(req, env);
   if (path === '/token' && m === 'POST') {
-    const g = url.searchParams.get('grant_type');
-    if (g === 'password') return passwordGrant(req, env);
-    if (g === 'refresh_token') return refreshGrant(req, env);
+    if (url.searchParams.get('grant_type') === 'refresh_token') return refreshGrant(req, env);
     return err(400, 'Unsupported grant_type');
   }
   if (path === '/logout' && m === 'POST') return logout(req, env);
-  if (path === '/recover' && m === 'POST') return recover(req, env);
   if (path === '/user' && m === 'GET') return getUser(req, env);
-  if (path === '/user' && m === 'PUT') return updateUser(req, env);
-  if (path === '/verify' && m === 'GET') return verifyLink(url, env);
   if (path === '/authorize' && m === 'GET') return authorize(url, env);
   if (path === '/callback' && m === 'GET') return callback(url, env);
   return err(404, 'Not found');

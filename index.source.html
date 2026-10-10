@@ -546,7 +546,8 @@ const APP_CONFIG = {
   // the earlier Supabase setup: cf-auth.js provides the same client API.)
   SUPABASE_URL: 'https://pdftoolsindia.com/cfapi',
   SUPABASE_ANON_KEY: '',
-  BACKEND_URL: 'https://all-in-one-tools-22743935825.asia-south1.run.app'
+  BACKEND_URL: 'https://pdftoolsindia.com/cfapi',  // AI, credits, payments — the same Cloudflare Worker (Google Cloud Run retired)
+  FAST_SERVER: false  // server-side ffmpeg ("Fast Server Mode") retired to stay on free plans; video tools run in the browser
 };
 const AUTH_CONFIGURED = !APP_CONFIG.SUPABASE_URL.includes('YOUR-PROJECT');
 if(AUTH_CONFIGURED && !/^https?:\/\/.+/.test(APP_CONFIG.BACKEND_URL)){
@@ -630,7 +631,6 @@ async function initAuth(){
     // starting screen with no warning and no error. Only actual sign-in/out
     // events should rebuild the page.
     if(event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
-    if(event === 'PASSWORD_RECOVERY'){ mountNewPasswordModal(); return; }
     // The supabase-js client also re-validates the session whenever the tab
     // regains focus/visibility — which happens EVERY time the native file/
     // photo picker closes and the person returns to the tab, since opening
@@ -678,15 +678,16 @@ async function refreshProfile(){
     if(!data.error) authState.profile = data;
   }catch(e){ /* backend maybe not deployed yet, or still waking up — app still works client-side-only */ }
 }
-async function authSignUp(email, password){
+// Login has no passwords: a 6-digit code is e-mailed (or "Continue with Google").
+// A new e-mail address simply gets a new account (5 free credits) on first sign-in.
+async function authSendCode(email){
   if(!sb) throw new Error(friendlyErrorMessage(null));
-  const { data, error } = await sb.auth.signUp({ email, password });
+  const { error } = await sb.auth.signInWithOtp({ email });
   if(error) throw new Error(friendlyErrorMessage(error));
-  return !!(data && data.session); // true = signed in already (no e-mail confirmation step)
 }
-async function authSignIn(email, password){
+async function authVerifyCode(email, code){
   if(!sb) throw new Error(friendlyErrorMessage(null));
-  const { error } = await sb.auth.signInWithPassword({ email, password });
+  const { error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
   if(error) throw new Error(friendlyErrorMessage(error));
 }
 async function authSignOut(){
@@ -702,159 +703,84 @@ function isPro(){
   return !p.plan_expires_at || new Date(p.plan_expires_at) > new Date();
 }
 
-// Shown when Supabase fires a PASSWORD_RECOVERY event — the user just clicked
-// the reset link in their email and is now briefly authenticated specifically
-// to set a new password.
-function mountNewPasswordModal(){
-  const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
-  const card = el(`
-    <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
-      <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Set New Password</div>
-      <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Enter a new password for your account.</div>
-      <div class="field" style="margin-bottom:14px;"><label>New Password</label><input type="password" id="newPass" placeholder="••••••••"></div>
-      <div id="newPassErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
-      <button id="newPassSubmit" class="btn" style="width:100%;">Update Password</button>
-    </div>
-  `);
-  overlay.appendChild(card);
-  card.querySelector('#newPassSubmit').onclick = async ()=>{
-    const pass = card.querySelector('#newPass').value;
-    const errEl = card.querySelector('#newPassErr');
-    errEl.textContent = '';
-    if(!pass || pass.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
-    try{
-      const { error } = await sb.auth.updateUser({ password: pass });
-      if(error) throw new Error(friendlyErrorMessage(error));
-      card.innerHTML = `
-        <div style="text-align:center; padding:8px 0;">
-          <div style="font-size:40px; margin-bottom:10px;">✅</div>
-          <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Password Updated!</div>
-          <div style="font-size:13px; color:var(--sub); margin-bottom:18px;">You can now sign in with your new password.</div>
-          <button id="newPassOkClose" class="btn" style="width:100%;">Continue</button>
-        </div>
-      `;
-      card.querySelector('#newPassOkClose').onclick = ()=>{ overlay.remove(); render(); };
-    }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
-  };
-  document.body.appendChild(overlay);
-}
 function mountAuthModal(){
-  let mode = 'signin';
+  let step = 'email', email = '', resendTimer = null;
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"></div>`);
+  const close = ()=>{ clearInterval(resendTimer); overlay.remove(); };
   function paint(){
+    clearInterval(resendTimer);
     overlay.innerHTML = '';
-    if(mode === 'forgot'){
-      const card = el(`
-        <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
-          <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Reset Password</div>
-          <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Enter your email — we'll send you a link to reset your password.</div>
-          <div class="field" style="margin-bottom:14px;"><label>Email</label><input type="email" id="forgotEmail" placeholder="you@example.com"></div>
-          <div id="forgotErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
-          <button id="forgotSubmit" class="btn" style="width:100%; margin-bottom:10px;">Send Reset Link</button>
-          <div style="text-align:center; font-size:12.5px;"><a href="#" id="backToSignin" style="color:var(--brand-dark); font-weight:700;">← Back to Sign In</a></div>
-          <button id="authClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button>
-        </div>
-      `);
-      overlay.appendChild(card);
-      card.querySelector('#authClose').onclick = ()=> overlay.remove();
-      card.querySelector('#backToSignin').onclick = (e)=>{ e.preventDefault(); mode='signin'; paint(); };
-      card.querySelector('#forgotSubmit').onclick = async ()=>{
-        const email = card.querySelector('#forgotEmail').value.trim();
-        const errEl = card.querySelector('#forgotErr');
-        errEl.textContent = '';
-        if(!email){ errEl.textContent = 'Please enter your email.'; return; }
-        try{
-          if(!sb) throw new Error(friendlyErrorMessage(null));
-          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
-          if(error) throw new Error(friendlyErrorMessage(error));
-          card.innerHTML = `
-            <div style="text-align:center; padding:8px 0;">
-              <div style="font-size:40px; margin-bottom:10px;">📧</div>
-              <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Check your email</div>
-              <div style="font-size:13px; color:var(--sub); line-height:1.6; margin-bottom:18px;">
-                If an account exists for <b>${email}</b>, we've sent a password reset link. Please check your email (and spam folder).
-              </div>
-              <button id="forgotOkClose" class="btn" style="width:100%;">OK, Got it</button>
-            </div>
-          `;
-          card.querySelector('#forgotOkClose').onclick = ()=> overlay.remove();
-        }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
-      };
-      overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
-      document.body.appendChild(overlay);
-      return;
-    }
-    const card = el(`
-      <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%;">
-        <div style="font-weight:900; font-size:17px; margin-bottom:4px;">${mode==='signin' ? 'Sign In' : 'Create Account'}</div>
-        <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">Sign in to use Fast Server Mode and see your credits history.</div>
+    const card = el(step === 'email' ? `
+      <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
+        <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Sign In / உள்நுழை</div>
+        <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px;">No password needed. New here? Your account is created automatically — with 5 free credits.</div>
         <button id="authGoogle" style="width:100%; padding:11px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-weight:700; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; margin-bottom:14px;">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.96 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.97H.96A8.996 8.996 0 000 9c0 1.45.35 2.83.96 4.03l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.97l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
           Continue with Google
         </button>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;"><div style="flex:1; height:1px; background:var(--line);"></div><span style="font-size:11px; color:var(--sub);">OR</span><div style="flex:1; height:1px; background:var(--line);"></div></div>
-        <div class="field" style="margin-bottom:10px;"><label>Email</label><input type="email" id="authEmail" placeholder="you@example.com"></div>
-        <div class="field" style="margin-bottom:6px;"><label>Password</label><input type="password" id="authPass" placeholder="••••••••"></div>
-        ${mode==='signin' ? '<div style="text-align:right; margin-bottom:8px;"><a href="#" id="toForgot" style="color:var(--sub); font-size:11.5px;">Forgot password?</a></div>' : '<div style="margin-bottom:8px;"></div>'}
+        <div class="field" style="margin-bottom:10px;"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
         <div id="authErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
-        <button id="authSubmit" class="btn" style="width:100%; margin-bottom:10px;">${mode==='signin' ? 'Sign In' : 'Create Account'}</button>
-        <div style="text-align:center; font-size:12.5px;">
-          ${mode==='signin' ? 'Don\'t have an account? <a href="#" id="toSignup" style="color:var(--brand-dark); font-weight:700;">Create one</a>' : 'Already have an account? <a href="#" id="toSignin" style="color:var(--brand-dark); font-weight:700;">Sign In</a>'}
+        <button id="authSubmit" class="btn" style="width:100%;">Send login code</button>
+        <button id="authClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button>
+      </div>` : `
+      <div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:380px; width:100%; position:relative;">
+        <div style="font-weight:900; font-size:17px; margin-bottom:4px;">Enter the code / Code-ஐ உள்ளிடுங்கள்</div>
+        <div style="font-size:12.5px; color:var(--sub); margin-bottom:16px; line-height:1.6;">We e-mailed a 6-digit code to <b>${escapeHtml(email)}</b>. It is valid for 10 minutes — check your spam folder too.</div>
+        <div class="field" style="margin-bottom:10px;"><label>6-digit code</label><input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" style="font-size:22px; letter-spacing:8px; text-align:center;"></div>
+        <div id="authErr" style="color:#C0392B; font-size:12px; margin-bottom:10px;"></div>
+        <button id="authSubmit" class="btn" style="width:100%; margin-bottom:12px;">Verify & Sign In</button>
+        <div style="display:flex; justify-content:space-between; font-size:12.5px;">
+          <a href="#" id="authBack" style="color:var(--sub);">← Change e-mail</a>
+          <a href="#" id="authResend" style="color:var(--brand-dark); font-weight:700;"></a>
         </div>
         <button id="authClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button>
-      </div>
-    `);
-    card.style.position = 'relative';
+      </div>`);
     overlay.appendChild(card);
-    card.querySelector('#authClose').onclick = ()=> overlay.remove();
-    card.querySelector('#authGoogle').onclick = async ()=>{
-      const errEl = card.querySelector('#authErr');
-      try{
+    const errEl = card.querySelector('#authErr');
+    const btn = card.querySelector('#authSubmit');
+    card.querySelector('#authClose').onclick = close;
+    const busy = async (fn)=>{ errEl.textContent = ''; btn.disabled = true; try{ await fn(); }catch(err){ errEl.textContent = friendlyErrorMessage(err); } btn.disabled = false; };
+    if(step === 'email'){
+      const input = card.querySelector('#authEmail');
+      input.value = email;
+      card.querySelector('#authGoogle').onclick = ()=> busy(async ()=>{
         if(!sb) throw new Error(friendlyErrorMessage(null));
         const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.origin + window.location.pathname } });
         if(error) throw new Error(friendlyErrorMessage(error));
-        // On success, Supabase redirects the whole page to Google — no further
-        // code runs here; the app re-initializes auth state on return.
-      }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
-    };
-    const swap = card.querySelector('#toSignup') || card.querySelector('#toSignin');
-    if(swap) swap.onclick = (e)=>{ e.preventDefault(); mode = mode==='signin'?'signup':'signin'; paint(); };
-    const forgotLink = card.querySelector('#toForgot');
-    if(forgotLink) forgotLink.onclick = (e)=>{ e.preventDefault(); mode='forgot'; paint(); };
-    card.querySelector('#authSubmit').onclick = async ()=>{
-      const email = card.querySelector('#authEmail').value.trim();
-      const pass = card.querySelector('#authPass').value;
-      const errEl = card.querySelector('#authErr');
-      errEl.textContent = '';
-      if(!email || !pass){ errEl.textContent = 'Please fill in both email and password.'; return; }
-      try{
-        if(mode==='signin'){
-          await authSignIn(email, pass);
-          overlay.remove(); render();
-        } else {
-          // Signed in straight away when no e-mail confirmation is required (no mail service set up on the API)
-          if(await authSignUp(email, pass)){ overlay.remove(); render(); return; }
-          // When e-mail confirmation IS required, signUp() succeeding does NOT
-          // mean the user is logged in yet. Show a clear message instead of
-          // silently closing the modal with no feedback, which previously left
-          // users confused about what to do next.
-          card.innerHTML = `
-            <div style="text-align:center; padding:8px 0;">
-              <div style="font-size:40px; margin-bottom:10px;">📧</div>
-              <div style="font-weight:900; font-size:16px; margin-bottom:8px;">Almost there!</div>
-              <div style="font-size:13px; color:var(--sub); line-height:1.6; margin-bottom:18px;">
-                We've sent a confirmation link to <b>${email}</b>.<br>Please check your email (and spam folder) and click the link to activate your account.
-              </div>
-              <button id="authOkClose" class="btn" style="width:100%;">OK, Got it</button>
-            </div>
-          `;
-          card.querySelector('#authOkClose').onclick = ()=> overlay.remove();
-        }
-      }catch(err){ errEl.textContent = friendlyErrorMessage(err); }
-    };
+        // the whole page now goes to Google; auth state is picked up again on return
+      });
+      const send = ()=> busy(async ()=>{
+        const v = input.value.trim();
+        if(!/^\S+@\S+\.\S+$/.test(v)){ errEl.textContent = 'Please enter a valid e-mail address.'; return; }
+        await authSendCode(v);
+        email = v; step = 'code'; paint();
+      });
+      btn.onclick = send;
+      input.onkeydown = (e)=>{ if(e.key === 'Enter') send(); };
+      setTimeout(()=> input.focus(), 50);
+    } else {
+      const input = card.querySelector('#authCode');
+      const verify = ()=> busy(async ()=>{
+        const code = input.value.replace(/\D/g, '');
+        if(code.length !== 6){ errEl.textContent = 'Please enter the 6-digit code.'; return; }
+        await authVerifyCode(email, code);
+        close(); render();
+      });
+      btn.onclick = verify;
+      input.oninput = ()=>{ input.value = input.value.replace(/\D/g, '').slice(0, 6); if(input.value.length === 6) verify(); };
+      card.querySelector('#authBack').onclick = (e)=>{ e.preventDefault(); step = 'email'; paint(); };
+      const resend = card.querySelector('#authResend');
+      let wait = 60;
+      const tick = ()=>{ resend.textContent = wait > 0 ? `Resend in ${wait}s` : 'Resend code'; resend.style.opacity = wait > 0 ? '.5' : '1'; };
+      tick();
+      resendTimer = setInterval(()=>{ wait--; tick(); if(wait <= 0) clearInterval(resendTimer); }, 1000);
+      resend.onclick = (e)=>{ e.preventDefault(); if(wait > 0) return; busy(async ()=>{ await authSendCode(email); paint(); showToast('A new code has been sent.'); }); };
+      setTimeout(()=> input.focus(), 50);
+    }
   }
   paint();
-  overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.addEventListener('click',(e)=>{ if(e.target===overlay) close(); });
   document.body.appendChild(overlay);
 }
 
@@ -1202,7 +1128,7 @@ function renderSettingsPage(){
       body.appendChild(el(`<div class="note">Sign-in isn't set up on this deployment yet.</div>`));
     } else if(!authState.session){
       const row = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:20px;">
-        <div style="font-size:13px; color:var(--sub); margin-bottom:12px;">You're not signed in. Sign in to use Fast Server Mode, credits, and Pro features.</div>
+        <div style="font-size:13px; color:var(--sub); margin-bottom:12px;">You're not signed in. Sign in to use AI tools, credits, and Pro features.</div>
       </div>`);
       const btn = el(`<button class="btn">Sign In</button>`);
       btn.onclick = ()=> mountAuthModal();
@@ -1293,7 +1219,7 @@ function maybeShowDiscoverModal(forceShow){
     ['🤖 AI', '7 AI tools that read your documents', 'Ask AI About Document, Summarize, Translate, Handwriting to Text, Receipt to Excel, Resume Review, and Compare Excel Files.', '💬'],
     ['🆕 NEW', 'AI Image Upscaler — genuinely free', 'A real neural network sharpens and upscales your photos up to 4x, running entirely in your browser — no per-image charge.', '🔍'],
     ['💼 BUSINESS', 'GST invoices and accounting, free', 'GST Invoice Generator, Quotation/Bill/PO/Performa, Salary Slip, Payment Voucher, Rent Receipt, Prescription Pad — all free.', '🧾'],
-    ['🔒 PRIVATE', 'Most tools stay on your device', 'PDF, Image, and Business tools run fully in your browser — only AI tools and Fast Server Mode reach our server.', '🛡️'],
+    ['🔒 PRIVATE', 'Most tools stay on your device', 'PDF, Image, and Business tools run fully in your browser — only AI tools reach our server.', '🛡️'],
   ];
   const card = el(`
     <div style="background:#fff; border-radius:20px; padding:26px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; position:relative;">
@@ -1351,7 +1277,7 @@ function setAppLang(lang){
 }
 const I18N = {
   heroTitle: { en:'PDF, Business, Video, AI & More — All in One Place', ta:'PDF, வணிகம், வீடியோ, AI மற்றும் பல — அனைத்தும் ஒரே இடத்தில்', hi:'PDF, बिज़नेस, वीडियो, AI और भी बहुत कुछ — सब एक ही जगह' },
-  heroSub: { en:"Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device unless you choose Fast Server Mode.", ta:'இணைத்தல், சுருக்குதல், மாற்றுதல், மொழிபெயர்ப்பு, விலைப்பட்டியல் மற்றும் பல — ஆவணங்கள், படங்கள், வீடியோ, வணிகம், கல்விக்கான ஒரே தூய்மையான கருவித்தொகுப்பு. Fast Server Mode தேர்வு செய்யாத வரை உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும்.', hi:'मर्ज, कंप्रेस, कन्वर्ट, ट्रांसलेट, इनवॉइस और भी बहुत कुछ — दस्तावेज़ों, इमेज, वीडियो, बिज़नेस और शिक्षा के लिए एक साफ़-सुथरा टूलकिट। जब तक आप Fast Server Mode न चुनें, आपकी फ़ाइलें आपके डिवाइस पर ही रहती हैं।' },
+  heroSub: { en:"Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device — only AI tools send what you choose to our server.", ta:'இணைத்தல், சுருக்குதல், மாற்றுதல், மொழிபெயர்ப்பு, விலைப்பட்டியல் மற்றும் பல — ஆவணங்கள், படங்கள், வீடியோ, வணிகம், கல்விக்கான ஒரே தூய்மையான கருவித்தொகுப்பு. AI கருவிகள் தவிர, உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும்.', hi:'मर्ज, कंप्रेस, कन्वर्ट, ट्रांसलेट, इनवॉइस और भी बहुत कुछ — दस्तावेज़ों, इमेज, वीडियो, बिज़नेस और शिक्षा के लिए एक साफ़-सुथरा टूलकिट। जब तक आप Fast Server Mode न चुनें, आपकी फ़ाइलें आपके डिवाइस पर ही रहती हैं।' },
   trustTitle: { en:'Quality software built by a Tamilian, for Tamil people', ta:'ஒரு தமிழன் தமிழ் மக்களுக்காக உருவாக்கிக் கொண்டிருக்கும் தரமான மென்பொருள்', hi:'एक तमिल व्यक्ति द्वारा तमिल लोगों के लिए बनाया गया गुणवत्तापूर्ण सॉफ़्टवेयर' },
   freeTitle: { en:'✓ Always Free', ta:'✓ எப்போதும் இலவசம்', hi:'✓ हमेशा मुफ़्त' },
   freeDesc: { en:'Most tools like Merge, Compress, Convert run entirely in your browser — no server cost.', ta:'Merge, Compress, Convert போன்ற பெரும்பாலான tools உங்க browser-லேயே இயங்கும் — server cost இல்லாதவை.', hi:'Merge, Compress, Convert जैसे अधिकांश tools पूरी तरह आपके browser में चलते हैं — कोई server cost नहीं।' },
@@ -1725,7 +1651,7 @@ const CATEGORY_META = {
   pdf:   { label: 'PDF', icon:'📄', sub: 'Runs entirely in your browser', isFree: true },
   business: { label: 'Business', icon:'💼', sub: 'GST, invoicing & accounting templates', isFree: true },
   image: { label: 'Image', icon:'🖼️', sub: 'Runs entirely in your browser', isFree: true },
-  video: { label: 'Video', icon:'🎬', sub: 'Free — optional paid Fast Server upgrade', isFree: true },
+  video: { label: 'Video', icon:'🎬', sub: 'Free — runs in your browser', isFree: true },
   ai:    { label: 'AI', icon:'🤖', sub: 'Powered by AI — 1 credit per use', isFree: false },
   education: { label: 'Education', icon:'🎓', sub: 'Learning games for Grades 1-12', isFree: true },
 };
@@ -8480,7 +8406,7 @@ TOOL_IMPL.videothumb = {
 // to the slower/less reliable ffmpeg.wasm-in-browser path, without repeating
 // this logic in every single tool.
 function mountFastServerNote(body, creditCost, checkboxId, fileSizeBytes){
-  if(!AUTH_CONFIGURED) return null;
+  if(!AUTH_CONFIGURED || !APP_CONFIG.FAST_SERVER) return null;
   const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=creditCost));
   // Large-file threshold — above this, browser-side (WASM) processing gets
   // noticeably slow/heavy on most phones, so it's worth clearly telling the
@@ -8511,6 +8437,7 @@ function mountFastServerNote(body, creditCost, checkboxId, fileSizeBytes){
   return fastNote;
 }
 function isFastModeChecked(checkboxId){
+  if(!APP_CONFIG.FAST_SERVER) return false;
   const cb = document.getElementById(checkboxId);
   return !!(cb && cb.checked);
 }
@@ -8587,7 +8514,7 @@ TOOL_IMPL.videocompress = {
         mountFileList(body, [file], ()=>{ file=null; paint(); });
         body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
         body.appendChild(el(`<div class="note">Current Size: <b>${fmtBytes(file.size)}</b></div>`));
-        if(AUTH_CONFIGURED){
+        if(AUTH_CONFIGURED && APP_CONFIG.FAST_SERVER){
           const fastAvailable = authState.session && (isPro() || (authState.profile && authState.profile.credits>=2));
           const fastNote = el(`<div  style="background:${fastAvailable?'#E8F8EF':'#FFF3E0'}; border:1px solid ${fastAvailable?'#B7E4C7':'#FFD699'}; border-radius:12px; padding:12px 14px; margin-top:12px; font-size:12.5px;"></div>`);
           if(fastAvailable){

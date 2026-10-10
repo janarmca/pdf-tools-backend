@@ -1,68 +1,89 @@
-# pdf-tools-api — Cloudflare Worker (Supabase-க்குப் பதிலாக)
+# pdf-tools-api — முழு backend, Cloudflare இலவச plan-ல் (₹0)
 
-Login, credits database, payment records, திருமண அமைப்பகம் (matrimony) data — எல்லாம் இப்போது **Cloudflare**-ல்:
+Supabase, Google Cloud Run இரண்டும் நீக்கப்பட்டன. இப்போது எல்லாமே **ஒரே Cloudflare Worker** — `https://pdftoolsindia.com/cfapi/*`:
 
-| பகுதி | Cloudflare சேவை |
-|---|---|
-| API (login, matrimony functions) | Worker `pdf-tools-api` → `https://pdftoolsindia.com/cfapi/*` |
-| Database | D1 `pdftools-db` (SQLite) — schema: `migrations/` |
-| Matrimony photos | KV namespace `pdftools-mat-photos` (private; signed URLs, 1 மணி நேரம்) |
+| பகுதி | இலவச சேவை | இலவச வரம்பு |
+|---|---|---|
+| Website | Cloudflare Pages (மாற்றமில்லை) | வரம்பில்லை |
+| API (login, AI, payments, credits, matrimony) | Cloudflare Workers Free | 1 லட்சம் requests/நாள், 10 ms CPU/request |
+| Database | Cloudflare D1 Free (`pdftools-db`, SQLite) | 5 GB, 50 லட்சம் reads/நாள் |
+| Matrimony படங்கள் | Cloudflare KV Free (`pdftools-mat-photos`) | 1 GB, 1,000 uploads/நாள் |
+| Text→Image AI | Workers AI (FLUX.1-schnell) | 10,000 Neurons/நாள் |
+| Login | **Google** அல்லது **email-ல் 6 இலக்க code** (Brevo 300/நாள் அல்லது Resend 100/நாள்) — கடவுச்சொல் இல்லை | — |
+| Document/photo AI | Gemini (AI Studio இலவச key), NVIDIA Build (இலவசம்) | அவர்களின் இலவச வரம்பு |
+| Payments | Razorpay | மாதக் கட்டணம் இல்லை; ஒவ்வொரு payment-லும் Razorpay ~2% |
+| Video tools | உலாவியிலேயே ffmpeg.wasm (open source) | வரம்பில்லை |
 
-Frontend (Cloudflare Pages) மாற்றமில்லை. Cloud Run (`server.js`) AI, ffmpeg, Razorpay-ஐத் தொடர்ந்து கையாளும்; database-ஐ Worker-ன் internal endpoint வழியாக அணுகும் (`../cf-db.js`).
+10 ms CPU வரம்புக்குள் இருக்க: கடவுச்சொல் hashing இல்லை (OTP), பெரிய படங்கள் base64 ஆக்கப்படாமல் Gemini Files API-க்கு நேரடியாக stream செய்யப்படும் (பதில் வந்ததும் அழிக்கப்படும்), video-வை server-ல் process செய்வதில்லை ("Fast Server Mode" நிறுத்தப்பட்டது).
 
 ```
-browser ── cf-auth.js ──► /cfapi/auth/v1/*        (login, Google, sessions)
-browser ── m-backend.js ─► /cfapi/mat/rpc/<name>  (matrimony)
-browser ── Authorization: Bearer <JWT> ──► Cloud Run /api/*  (JWT சரிபார்ப்பு offline-ல், AUTH_JWT_SECRET)
-Cloud Run ── X-Internal-Key ──► /cfapi/internal/sql   (credits, payments — ஒரு batch = ஒரு transaction)
+browser ── cf-auth.js ──► /cfapi/auth/v1/otp, /verify, /authorize (Google), /token (refresh)
+browser ── Bearer JWT ──► /cfapi/api/*      (me, credits, redeem, ai/ask|text|image, payment/*, astrology, matrimony payments)
+browser ── m-backend.js ► /cfapi/mat/rpc/*  (matrimony functions), /cfapi/mat/photo*
+Razorpay ── webhook ────► /cfapi/api/payment/webhook
 ```
 
-## ஒருமுறை அமைப்பு (One-time setup)
+## ஒருமுறை அமைப்பு (எல்லாம் இலவசம், card தேவையில்லை)
 
-GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**:
+GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**. ஒவ்வொரு secret-ஐச் சேர்த்த பின் அந்த வசதி வேலை செய்யும்.
 
-| Secret | எங்கிருந்து |
-|---|---|
-| `CLOUDFLARE_ACCOUNT_ID` | dash.cloudflare.com → pdftoolsindia.com இருக்கும் account → வலது பக்கம் "Account ID" |
-| `CLOUDFLARE_API_TOKEN` | My Profile → API Tokens → Create Token → **"Edit Cloudflare Workers"** template. Permissions-ல் **D1: Edit** சேர்க்கவும். Zone resources: `pdftoolsindia.com` |
-| `AUTH_JWT_SECRET` | Cloud Shell-ல் `openssl rand -hex 32` |
-| `CF_INTERNAL_KEY` | இன்னொரு முறை `openssl rand -hex 32` (வேறு மதிப்பு) |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in — கீழே பார்க்கவும் |
-| `MAT_ADMIN_EMAILS` (விருப்பம்) | திருமண அமைப்பக admin email(கள்), comma பிரித்து. அந்த email-ல் login செய்தவுடன் admin ஆகிவிடுவார் |
-| `RESEND_API_KEY`, `EMAIL_FROM` (விருப்பம்) | Email confirmation / "Forgot password" mail-க்கு — resend.com (இலவசம்), domain `pdftoolsindia.com` verify. இல்லாவிட்டால்: பதிவு உடனே confirm ஆகும், password reset mail அனுப்பப்படாது |
+| Secret | எங்கிருந்து | கட்டாயமா |
+|---|---|---|
+| `CLOUDFLARE_ACCOUNT_ID` | dash.cloudflare.com → pdftoolsindia.com இருக்கும் account → வலது பக்கம் "Account ID" | ✅ |
+| `CLOUDFLARE_API_TOKEN` | My Profile → API Tokens → Create Token → **"Edit Cloudflare Workers"** template → *Add more*: **D1 → Edit**, **Workers AI → Read** → Zone: `pdftoolsindia.com` | ✅ |
+| `AUTH_JWT_SECRET` | எந்த terminal-லும் `openssl rand -hex 32` (அல்லது 64 எழுத்து random) | ✅ |
+| `BREVO_API_KEY` | brevo.com இலவச account → **SMTP & API → API keys**. **Senders** பகுதியில் `no-reply@pdftoolsindia.com` (அல்லது உங்கள் email) சேர்த்து verify செய்யவும் | Email login-க்கு |
+| `EMAIL_FROM` | எ.கா. `PDF Tools India <no-reply@pdftoolsindia.com>` — Brevo-வில் verify செய்த அதே முகவரி | Email login-க்கு |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | கீழே "Google sign-in" | Google login-க்கு |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay Dashboard → Account & Settings → API Keys | Payments-க்கு |
+| `RAZORPAY_WEBHOOK_SECRET` | Razorpay → Webhooks → Add: URL `https://pdftoolsindia.com/cfapi/api/payment/webhook`, event `payment.captured`, ஒரு secret கொடுங்கள் → அதையே இங்கே | விருப்பம் (backup) |
+| `GEMINI_API_KEY` | aistudio.google.com → Get API key (இலவசம்) | Document/photo AI |
+| `NVIDIA_API_KEY` | build.nvidia.com → Get API Key (இலவசம்) | Text AI |
+| `ASTROLOGER_API_KEY` | RapidAPI → Astrologer API (இலவச tier) | Astrology+ |
+| `MAT_ADMIN_EMAILS` | திருமண அமைப்பக admin email(கள்), comma பிரித்து | விருப்பம் |
 
-பிறகு GitHub → **Actions → "Deploy Cloudflare API" → Run workflow** (அல்லது `cloudflare/`-ல் எதையாவது push செய்யுங்கள்). முதல் run D1 database-ஐயும் KV-ஐயும் தானாக உருவாக்கும். Cloud Run deploy (`deploy.yml`) அதே `AUTH_JWT_SECRET`, `CF_INTERNAL_KEY`-ஐ Cloud Run env-க்கு அனுப்பும் — ஆகவே secrets சேர்த்த பின் Cloud Run-ஐயும் ஒருமுறை re-run செய்யுங்கள் (Actions → "Deploy to Cloud Run" → Re-run).
+(Brevo-க்குப் பதில் Resend பயன்படுத்தினால்: `RESEND_API_KEY` + Cloudflare DNS-ல் domain verify.)
 
-சரிபார்க்க: `https://pdftoolsindia.com/cfapi/health` → `{"ok":true,"db":true,...}`
+பிறகு: GitHub → **Actions → "Deploy Cloudflare API" → Run workflow**. முதல் run D1 database-ஐயும் KV-ஐயும் தானாக உருவாக்கும். ஒரு secret-ஐச் சேர்த்த/மாற்றிய பின் இதையே மீண்டும் Run செய்யுங்கள்.
 
-### Google sign-in
-Google Cloud Console → APIs & Services → **Credentials → Create credentials → OAuth client ID** → *Web application*:
+சரிபார்க்க: `https://pdftoolsindia.com/cfapi/health` → `"ok":true` மற்றும் எந்த வசதிகள் இயங்குகின்றன (`email`, `google`, `ai`, `razorpay`, `astrology`).
+
+### Google sign-in (billing தேவையில்லை)
+console.cloud.google.com → APIs & Services → **OAuth consent screen** (External, app name, support email) → **Credentials → Create credentials → OAuth client ID** → *Web application*:
 - Authorized JavaScript origins: `https://pdftoolsindia.com`
 - Authorized redirect URIs: `https://pdftoolsindia.com/cfapi/auth/v1/callback`
 
-(முதல் முறை என்றால் OAuth consent screen-ஐ "External" ஆக அமைக்கவும்.) Client ID / Secret-ஐ மேலே உள்ள GitHub secrets-ல் சேர்க்கவும்.
-
-### Razorpay
-மாற்றம் இல்லை — webhook URL இன்னும் Cloud Run (`/api/payment/webhook`).
+### பழைய Google Cloud Run-ஐ நிறுத்த (எல்லாம் வேலை செய்வதை உறுதிசெய்த பின்)
+Cloud Run → `all-in-one-tools` → Delete. Artifact Registry → பழைய images → Delete. Billing → project-ஐ billing-லிருந்து unlink. அப்போது Google-ல் எந்த செலவும் வர வாய்ப்பில்லை.
 
 ## Database கட்டளைகள் (Cloudflare dashboard → D1 → pdftools-db → Console)
 ```sql
--- promo code
-insert into redeem_codes (code, credits, max_uses) values ('WELCOME10', 10, 100);
--- matrimony chat fee ON (இயல்பு: OFF / இலவசம்)
-update mat_settings set value = 'on' where key = 'chat_fee';
--- ஒருவரை matrimony admin ஆக்க (MAT_ADMIN_EMAILS-க்கு மாற்று)
-insert into mat_admins (user_id) select id from users where email = 'you@example.com';
+insert into redeem_codes (code, credits, max_uses) values ('WELCOME10', 10, 100);   -- promo code
+update mat_settings set value = 'on' where key = 'chat_fee';                         -- matrimony chat fee ON
+insert into mat_admins (user_id) select id from users where email = 'you@example.com'; -- matrimony admin
 ```
-Schema மாற்றம் → `migrations/000N_name.sql` என்று புதிய file சேர்க்கவும் (பழையதை மாற்ற வேண்டாம்); workflow அதைத் தானாக apply செய்யும்.
+Schema மாற்றம் → `migrations/000N_name.sql` என்று புதிய file (பழையதை மாற்ற வேண்டாம்); workflow தானாக apply செய்யும்.
 
 ## Local development / tests
 ```bash
 cd cloudflare
-printf 'AUTH_JWT_SECRET=test-secret-123\nINTERNAL_KEY=int-key-456\n' > .dev.vars
+cat > .dev.vars <<'V'
+AUTH_JWT_SECRET=test-secret-123
+INTERNAL_KEY=int-key-456
+OTP_DEV_ECHO=1
+RAZORPAY_KEY_ID=rzp_test_key
+RAZORPAY_KEY_SECRET=rzp-secret
+RAZORPAY_WEBHOOK_SECRET=whsec
+GEMINI_API_KEY=g-key
+NVIDIA_API_KEY=n-key
+ASTROLOGER_API_KEY=a-key
+GEMINI_API_BASE=http://127.0.0.1:8790
+NVIDIA_API_BASE=http://127.0.0.1:8790
+RAZORPAY_API_BASE=http://127.0.0.1:8790
+ASTROLOGER_API_BASE=http://127.0.0.1:8790
+V
 npx wrangler d1 migrations apply pdftools-db --local
-npx wrangler dev --port 8787
-# another terminal:
-node --test test/*.test.mjs          # login, sessions, matrimony (all functions), photos, internal SQL, CORS
+npx wrangler dev --port 8787        # (remove the [ai] block from a copy of wrangler.toml for fully offline runs)
+node --test --test-concurrency=1 test/*.test.mjs   # another terminal; the AI/payment providers are mocked
 ```
-Matrimony payment routes (Cloud Run side) are tested without the Worker: `node matrimony/tests/api.test.mjs` (real SQLite with these migrations).
+`OTP_DEV_ECHO=1` returns the login code in the response instead of e-mailing it, and `INTERNAL_KEY` enables `/cfapi/internal/sql` for test setup — **never set either in production**.

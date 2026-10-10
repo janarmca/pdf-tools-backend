@@ -7,8 +7,7 @@
   var C = window.MAT_CONFIG, demo = /[?&]demo=1/.test(location.search) || (function () { try { return localStorage.getItem('mat_demo') === '1'; } catch (e) { return false; } })();
   if (/[?&]demo=0/.test(location.search)) { demo = false; try { localStorage.removeItem('mat_demo'); } catch (e) {} }
   if (demo) try { localStorage.setItem('mat_demo', '1'); } catch (e) {}
-  var B = { mode: demo ? 'demo' : 'live' }, listeners = [], recovery = [];
-  B.onRecovery = function (f) { recovery.push(f); };
+  var B = { mode: demo ? 'demo' : 'live' }, listeners = [];
   function emit(u) { listeners.forEach(function (f) { try { f(u); } catch (e) {} }); }
   B.onAuth = function (f) { listeners.push(f); };
   function loadScript(src) { return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = function () { rej(new Error('load ' + src)); }; document.head.appendChild(s); }); }
@@ -21,20 +20,15 @@
       if (!window.CfAuth) await loadScript('/cf-auth.js?v=1');
       sb = window.CfAuth.createClient(C.API_URL);
       sb.auth.onAuthStateChange(function (ev, session) {
-        if (ev === 'PASSWORD_RECOVERY') recovery.forEach(function (f) { try { f(); } catch (e) {} });
         emit(session ? { id: session.user.id, email: session.user.email } : null);
       });
     },
     user: async function () { var r = await sb.auth.getSession(); var s = r.data && r.data.session; return s ? { id: s.user.id, email: s.user.email } : null; },
-    signUp: async function (email, pw) {
-      var r = await sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: C.SITE_URL } });
-      if (r.error) return { ok: false, message: r.error.message };
-      return { ok: true, needsConfirm: !r.data.session };
-    },
-    signIn: async function (email, pw) { var r = await sb.auth.signInWithPassword({ email: email, password: pw }); return r.error ? { ok: false, message: r.error.message } : { ok: true }; },
+    // login = 6-digit code by e-mail (no passwords) or Google
+    sendCode: async function (email) { var r = await sb.auth.signInWithOtp({ email: email }); return r.error ? { ok: false, message: r.error.message, status: r.error.status } : { ok: true }; },
+    verifyCode: async function (email, code) { var r = await sb.auth.verifyOtp({ email: email, token: code, type: 'email' }); return r.error ? { ok: false, message: r.error.message } : { ok: true }; },
+    google: async function () { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: C.SITE_URL } }); return { ok: true }; },
     signOut: async function () { await sb.auth.signOut(); },
-    setPassword: async function (pw) { var r = await sb.auth.updateUser({ password: pw }); return r.error ? { ok: false, message: r.error.message } : { ok: true }; },
-    reset: async function (email) { var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: C.SITE_URL }); return r.error ? { ok: false, message: r.error.message } : { ok: true }; },
     rpc: async function (name, args) {
       var r = await sb.rpc(name, args || {});
       if (r.error) {
@@ -133,27 +127,23 @@
       demoUid = null; try { demoUid = localStorage.getItem('mat_demo_uid'); } catch (e) {}
     },
     user: async function () { if (!demoUid) return null; var r = await serial(function () { return db.query('select id, email from demo_users where id = $1', [demoUid]); }); return r.rows[0] || null; },
-    signUp: async function (email, pw) {
+    // demo login: the "e-mail code" is always 123456 (nothing is really sent)
+    sendCode: async function () { return { ok: true, demo: true }; },
+    verifyCode: async function (email, code) {
+      if (String(code) !== '123456') return { ok: false, message: 'Wrong code' };
       email = String(email).trim().toLowerCase();
       var id = await serial(async function () {
-        var ex = await db.query('select 1 from demo_users where email = $1', [email]);
-        if (ex.rows.length) return null;
+        var ex = await db.query('select id from demo_users where email = $1', [email]);
+        if (ex.rows.length) return ex.rows[0].id;
         var nid = (await db.query('insert into auth.users(email) values ($1) returning id', [email])).rows[0].id;
-        await db.query('insert into demo_users(id, email, pw) values ($1,$2,$3)', [nid, email, pw]);
+        await db.query('insert into demo_users(id, email, pw) values ($1,$2,$3)', [nid, email, '']);
         return nid;
       });
-      if (!id) return { ok: false, message: 'User already registered' };
       demoUid = id; try { localStorage.setItem('mat_demo_uid', id); } catch (e) {} emit({ id: id, email: email });
-      return { ok: true, needsConfirm: false };
+      return { ok: true };
     },
-    signIn: async function (email, pw) {
-      var r = await serial(function () { return db.query('select id, email from demo_users where email = $1 and pw = $2', [String(email).trim().toLowerCase(), pw]); });
-      if (!r.rows.length) return { ok: false, message: 'Invalid login credentials' };
-      demoUid = r.rows[0].id; try { localStorage.setItem('mat_demo_uid', demoUid); } catch (e) {} emit(r.rows[0]); return { ok: true };
-    },
+    google: async function () { return { ok: false, message: 'Google sign-in is not available in demo mode' }; },
     signOut: async function () { demoUid = null; try { localStorage.removeItem('mat_demo_uid'); } catch (e) {} emit(null); },
-    reset: async function () { return { ok: true }; },
-    setPassword: async function () { return { ok: true }; },
     rpc: async function (name, args) {
       args = args || {}; var keys = Object.keys(args);
       var sql = 'select ' + name + '(' + keys.map(function (k, i) { return k + ' => $' + (i + 1); }).join(', ') + ') as r';
@@ -227,7 +217,7 @@
   }
 
   var impl = demo ? demoImpl : live;
-  ['init', 'user', 'signUp', 'signIn', 'signOut', 'reset', 'setPassword', 'rpc', 'uploadPhoto', 'removePhoto', 'photoUrl', 'pay', 'jathagam'].forEach(function (k) { B[k] = function () { return impl[k].apply(null, arguments); }; });
+  ['init', 'user', 'sendCode', 'verifyCode', 'google', 'signOut', 'rpc', 'uploadPhoto', 'removePhoto', 'photoUrl', 'pay', 'jathagam'].forEach(function (k) { B[k] = function () { return impl[k].apply(null, arguments); }; });
   B.resetDemo = demoImpl.resetDemo;
   window.MatBackend = B;
 })();

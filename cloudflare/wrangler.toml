@@ -1,9 +1,10 @@
-# pdf-tools-api — Cloudflare Worker that replaces Supabase (login, credits, matrimony data).
+# pdf-tools-api — the whole backend on the Cloudflare Workers FREE plan (replaced Supabase + Google Cloud Run).
 # Deployed by .github/workflows/deploy-cloudflare.yml. The two __..._ID__ placeholders are filled in
 # by that workflow (it creates the D1 database / KV namespace the first time) — leave them as they are.
 name = "pdf-tools-api"
 main = "src/index.js"
 compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 # same site as the Cloudflare Pages frontend: https://pdftoolsindia.com/cfapi/*
@@ -24,12 +25,17 @@ migrations_dir = "migrations"
 binding = "MAT_PHOTOS"
 id = "__KV_NAMESPACE_ID__"
 
+# Workers AI (text-to-image, FLUX.1-schnell) — free 10,000 Neurons/day
+[ai]
+binding = "AI"
+
 [observability]
 enabled = true
 
 # Secrets (set by the workflow from GitHub repository secrets, never stored here):
-#   AUTH_JWT_SECRET   — same value as Cloud Run's AUTH_JWT_SECRET
-#   INTERNAL_KEY      — same value as Cloud Run's CF_INTERNAL_KEY
-#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET — Google sign-in
-#   RESEND_API_KEY, EMAIL_FROM             — optional: confirmation / password-reset e-mails
-#   MAT_ADMIN_EMAILS  — optional: comma-separated e-mails that become matrimony admins on sign-in
+#   AUTH_JWT_SECRET                         — signs login tokens (openssl rand -hex 32)
+#   BREVO_API_KEY or RESEND_API_KEY, EMAIL_FROM — e-mail login codes (free tiers)
+#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET  — Google sign-in
+#   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
+#   GEMINI_API_KEY, NVIDIA_API_KEY, ASTROLOGER_API_KEY — AI tools / Astrology+
+#   MAT_ADMIN_EMAILS                        — optional: comma-separated matrimony admin e-mails

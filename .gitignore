@@ -2,3 +2,4 @@ node_modules/
 package-lock.json
 cloudflare/.dev.vars
 cloudflare/.wrangler/
+cloudflare/wrangler.test.toml

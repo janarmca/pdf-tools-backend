@@ -1,7 +1,7 @@
 /* cf-auth.js — login client for the pdf-tools-api Cloudflare Worker (replaces supabase-js).
- * Drop-in: exposes window.supabase.createClient(url) with the same `auth` methods the site already uses
- * (getSession, onAuthStateChange, signUp, signInWithPassword, signInWithOAuth, resetPasswordForEmail,
- *  updateUser, signOut) and the same { data, error } answers, so app code did not need rewriting.
+ * Exposes window.supabase.createClient(url) with supabase-js style `auth` methods and { data, error } answers:
+ * getSession, onAuthStateChange, signInWithOtp + verifyOtp (6-digit e-mail code — there are no passwords),
+ * signInWithOAuth (Google), signOut.
  * Also: client.rpc(name, args) -> POST <url>/mat/rpc/<name> (matrimony functions).
  */
 (function () {
@@ -66,7 +66,7 @@
       return session;
     }
 
-    // tokens handed back in the URL hash after Google sign-in / e-mail links
+    // tokens handed back in the URL hash after Google sign-in
     (function readHash() {
       if (!/access_token=|error_description=/.test(location.hash)) return;
       var q = new URLSearchParams(location.hash.slice(1));
@@ -76,7 +76,7 @@
         var s = { access_token: at, refresh_token: q.get('refresh_token'), token_type: 'bearer', expires_in: +q.get('expires_in') || 3600,
                   expires_at: +q.get('expires_at') || c.exp, user: { id: c.sub, email: c.email } };
         session = s; store(s);
-        pending = q.get('type') === 'recovery' ? 'PASSWORD_RECOVERY' : 'SIGNED_IN';
+        pending = 'SIGNED_IN';
       } else if (q.get('error_description')) {
         setTimeout(function () { try { alert(q.get('error_description')); } catch (e) {} }, 300);
       }
@@ -105,16 +105,15 @@
           }, 0);
           return { data: { subscription: { unsubscribe: function () { listeners = listeners.filter(function (f) { return f !== cb; }); } } } };
         },
-        signUp: async function (o) {
-          try {
-            var r = await call('/signup', { email: o.email, password: o.password, redirect_to: (o.options && o.options.emailRedirectTo) || location.href.split('#')[0] });
-            if (r.session) setSession(r.session, 'SIGNED_IN');
-            return { data: { user: r.user, session: r.session || null }, error: null };
-          } catch (e) { return { data: { user: null, session: null }, error: e }; }
+        // step 1: e-mail a 6-digit code (a new address gets a new account on first sign-in)
+        signInWithOtp: async function (o) {
+          try { await call('/otp', { email: o.email }); return { data: {}, error: null }; }
+          catch (e) { return { data: null, error: e }; }
         },
-        signInWithPassword: async function (o) {
+        // step 2: the code -> session
+        verifyOtp: async function (o) {
           try {
-            var s = await call('/token?grant_type=password', { email: o.email, password: o.password });
+            var s = await call('/verify', { email: o.email, token: o.token, type: o.type || 'email' });
             setSession(s, 'SIGNED_IN');
             return { data: { session: s, user: s.user }, error: null };
           } catch (e) { return { data: { session: null, user: null }, error: e }; }
@@ -123,19 +122,6 @@
           var to = (o.options && o.options.redirectTo) || location.href.split('#')[0];
           location.assign(auth + '/authorize?provider=' + encodeURIComponent(o.provider) + '&redirect_to=' + encodeURIComponent(to));
           return { data: { provider: o.provider }, error: null };
-        },
-        resetPasswordForEmail: async function (email, o) {
-          try { await call('/recover', { email: email, redirect_to: (o && o.redirectTo) || location.href.split('#')[0] }); return { data: {}, error: null }; }
-          catch (e) { return { data: null, error: e }; }
-        },
-        updateUser: async function (o) {
-          var s = await current();
-          if (!s) return { data: { user: null }, error: errObj('Auth session missing!', 401) };
-          try {
-            var u = await call('/user', o, s.access_token, 'PUT');
-            emit('USER_UPDATED', session);
-            return { data: { user: u }, error: null };
-          } catch (e) { return { data: { user: null }, error: e }; }
         },
         signOut: async function () {
           var s = session;

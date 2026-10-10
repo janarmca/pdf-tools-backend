@@ -86,24 +86,19 @@ export async function verifyJwt(token, secret) {
   } catch { return null; }
 }
 
-// ---------- password hashing: PBKDF2-SHA256 (100k iterations is the Workers maximum)
-const PBKDF2_ITER = 100000;
-
-async function pbkdf2(password, salt, iter) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, key, 256));
+// sliding-window rate limit stored in D1: true = allowed (and the event is recorded)
+export async function rateLimit(env, key, limit, windowSec) {
+  const since = addSeconds(-windowSec);
+  const r = await env.DB.prepare('select count(*) as n from rate_events where key = ? and at > ?').bind(key, since).first();
+  if ((r?.n || 0) >= limit) return false;
+  await env.DB.batch([
+    env.DB.prepare('insert into rate_events (key) values (?)').bind(key),
+    env.DB.prepare('delete from rate_events where key = ? and at <= ?').bind(key, since),
+  ]);
+  return true;
 }
 
-export async function hashPassword(password) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  return `pbkdf2$${PBKDF2_ITER}$${b64url(salt)}$${b64url(await pbkdf2(password, salt, PBKDF2_ITER))}`;
-}
-
-export async function checkPassword(password, stored) {
-  const [kind, iter, salt, hash] = String(stored || '').split('$');
-  if (kind !== 'pbkdf2' || !hash) return false;
-  return safeEqual(b64url(await pbkdf2(password, b64urlDecode(salt), +iter)), hash);
-}
+export const clientIp = (req) => req.headers.get('CF-Connecting-IP') || 'local';
 
 // bearer token -> { id, email } or null
 export async function userFromRequest(req, env) {
