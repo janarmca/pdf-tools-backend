@@ -8,7 +8,7 @@ export const CAT_THEME = {
   ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', icon:'🤖', ta:'AI கருவிகள்', en:'AI Tools',          line:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)' },
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', icon:'🎓', ta:'கல்விக் கருவிகள்', en:'Education Tools', line:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் மற்றும் மாணவர் கருவிகள்' },
 };
-export const BASE_CSS = `
+export const BASE_CSS = `@import url('/fonts/tamil.css');
   :root{--ink:#20242B;--sub:#566070;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;}
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}

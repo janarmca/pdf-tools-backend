@@ -28,7 +28,7 @@ const log = (toolId, status, id, error) => sql('insert into promo_posts (tool_id
 
 function slideHtml(t, text) {
   const [ta, en] = String(text || '').split('\n');
-  return `<!doctype html><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;800&family=Inter:wght@600;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  return `<!doctype html><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;800&family=Inter:wght@600;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet"><link href="https://pdftoolsindia.com/fonts/tamil.css" rel="stylesheet">
 <style>*{box-sizing:border-box}html,body{margin:0;width:1080px;height:1920px;overflow:hidden}
 body{font-family:'Noto Sans Tamil','Inter',sans-serif;color:#fff;background:linear-gradient(160deg,${t.color} 0%,#14182b 100%);display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:110px 80px 120px}
 .mid{display:flex;flex-direction:column;align-items:center}
