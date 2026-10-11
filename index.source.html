@@ -1923,7 +1923,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261010c`;
+    s.src = `category-${cat}.js?v=20261011a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -13352,7 +13352,7 @@ TOOL_IMPL.gstinvoice = {
       const gstOpts = el(`
         <div class="opts one" style="margin-top:14px;">
           <div class="field"><label>GST Rate</label>
-            <select id="gstRate"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select>
+            <select id="gstRate"><option value="0">0%</option><option value="3">3% (gold, silver)</option><option value="5">5%</option><option value="12">12% (old rate)</option><option value="18" selected>18%</option><option value="28">28% (old rate)</option><option value="40">40% (luxury and sin goods)</option></select>
           </div>
         </div>
       `);

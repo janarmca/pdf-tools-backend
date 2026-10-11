@@ -4,6 +4,7 @@
  *   examphoto, cgpacalc, unitconv, vaippadu, studytimer, wordcount,
  *   sipcalc, gstcalc, discountcalc, datecalc, passgen
  *   + rupeewords, interestcalc, landconv, bmicalc, numsys, casecvt, jsonfmt, b64, textdiff, markscalc, namepicker
+ *   + tneacutoff, biodata
  *
  * Plain browser JS (no modules / build step / network). Each tool registers
  * TOOL_IMPL.<id> = { mount(body){...} }. Globals used from the host page:
@@ -2985,5 +2986,438 @@
     }
   };
   TOOL_IMPL.igtools._f = { map: IG_map, tags: IG_tags, count: IG_count };
+
+  /* =====================================================================
+   * tneacutoff — TNEA engineering cut-off (out of 200)
+   * Cut-off = Maths + Physics/2 + Chemistry/2, each subject out of 100.
+   * Ranking tie-break (TNEA): Maths, Physics, 4th optional subject, then the older candidate.
+   * ===================================================================== */
+  function TN_cut(m, p, c) { return m + p / 2 + c / 2; }
+  // marks needed in one subject (m / p / c) for a target cut-off, given the other two
+  function TN_need(target, which, v) {
+    if (which === 'm') return target - v.p / 2 - v.c / 2;
+    if (which === 'p') return 2 * (target - v.m - v.c / 2);
+    return 2 * (target - v.m - v.p / 2);
+  }
+  // minimum average of Maths + Physics + Chemistry to be eligible (AICTE norm followed by TNEA)
+  const TN_MIN = { oc: 45, bc: 40, bcm: 40, mbc: 40, sc: 40, sca: 40, st: 40 };
+  function TN_dob(s) { // dd-mm-yyyy or yyyy-mm-dd -> sortable number, NaN if missing
+    let m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/.exec(s || '');
+    if (m) return +m[3] * 10000 + +m[2] * 100 + +m[1];
+    m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+    return m ? +m[1] * 10000 + +m[2] * 100 + +m[3] : NaN;
+  }
+  function TN_rank(list) { // higher cut-off first; ties -> Maths, Physics, 4th subject, older first
+    const n = x => (isFinite(x) ? x : -1);
+    return list.slice().sort((a, b) => (b.cut - a.cut) || (b.m - a.m) || (b.p - a.p) || (n(b.f) - n(a.f)) ||
+      ((isFinite(a.dob) ? a.dob : 1e9) - (isFinite(b.dob) ? b.dob : 1e9)));
+  }
+  function TN_parseList(text, scale) {
+    const rows = [], bad = [];
+    String(text || '').split(/\r?\n/).forEach((line, i) => {
+      if (!line.trim()) return;
+      const c = line.split(/\t|,|;/).map(s => s.trim());
+      const m = parseNum(c[1]) * 100 / scale, p = parseNum(c[2]) * 100 / scale, ch = parseNum(c[3]) * 100 / scale;
+      if (!c[0] || ![m, p, ch].every(x => x >= 0 && x <= 100)) { if (i > 0 || isFinite(parseNum(c[1]))) bad.push(i + 1); return; }
+      rows.push({ name: c[0], m: m, p: p, c: ch, f: c[4] ? parseNum(c[4]) * 100 / scale : NaN, dob: TN_dob(c[5]), dobTxt: c[5] || '', cut: TN_cut(m, p, ch) });
+    });
+    return { rows: rows, bad: bad };
+  }
+  function TN_injectStyle() {
+    if (document.getElementById('cx-tn-style')) return;
+    const s = document.createElement('style');
+    s.id = 'cx-tn-style';
+    s.textContent = '.cx-tn-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}' +
+      '.cx-tn-sub .cx-stat .v{font-size:20px}' +
+      '.cx-tn-tbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;background:#fff;border:1px solid var(--line)}' +
+      '.cx-tn-tbl th,.cx-tn-tbl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}' +
+      '.cx-tn-tbl th{background:#EAF0FF;color:var(--brand-dark);font-weight:900}' +
+      '.cx-tn-tbl td:nth-child(2),.cx-tn-tbl th:nth-child(2){text-align:left}' +
+      '.cx-tn-wrap{overflow-x:auto;max-width:100%}' +
+      '.cx-root textarea.cx-ta{width:100%;min-height:150px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;background:#fff;color:var(--ink)}';
+    document.head.appendChild(s);
+  }
+  TOOL_IMPL.tneacutoff = {
+    mount(body) {
+      TN_injectStyle();
+      const root = makeRoot(body);
+      const S = lsGet('tnea-cutoff', null) || { tab: 'one', scale: '100', m: '', p: '', c: '', comm: 'oc', target: '190', which: 'm', list: '' };
+      function save() { lsSet('tnea-cutoff', S); }
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? 12-ஆம் வகுப்பு கணிதம், இயற்பியல், வேதியியல் மதிப்பெண்ணிலிருந்து TNEA பொறியியல் கட்-ஆஃப் (200-க்கு) கணக்கிட; இலக்கை அடைய எவ்வளவு மதிப்பெண் தேவை என்று பார்க்க; ஆசிரியர்கள் முழு வகுப்புக்கும் தரவரிசை எடுக்க.',
+          'TNEA engineering cut-off out of 200 from 12th Maths, Physics and Chemistry, the marks you need for a target, and a ranked list for a whole class.') +
+          tabsHtml([['one', T('என் கட்-ஆஃப்', 'My cut-off')], ['need', T('தேவையான மதிப்பெண்', 'Marks needed')], ['class', T('வகுப்பு தரவரிசை', 'Class rank list')]], S.tab) +
+          '<div class="cx-grid">' + selectField(T('மதிப்பெண் எத்தனைக்கு?', 'Marks are out of'), 'scale', [['100', '100 (TN / CBSE)'], ['200', T('200 (பழைய TN முறை)', '200 (old TN pattern)')]], S.scale) +
+          (S.tab === 'class' ? '' : selectField(T('பிரிவு', 'Community'), 'comm', [['oc', 'OC'], ['bc', 'BC'], ['bcm', 'BCM'], ['mbc', 'MBC / DNC'], ['sc', 'SC'], ['sca', 'SCA'], ['st', 'ST']], S.comm)) + '</div>' +
+          '<div data-k="pane"></div>';
+        bindTabs(root, t => { S.tab = t; save(); draw(); });
+        $(root, '[data-k=scale]').onchange = e => { S.scale = e.target.value; save(); draw(); };
+        const cm = $(root, '[data-k=comm]'); if (cm) cm.onchange = e => { S.comm = e.target.value; save(); calc(); };
+        const pane = $(root, '[data-k=pane]'), mx = S.scale;
+        if (S.tab === 'one') {
+          pane.innerHTML = '<div class="cx-grid three">' + field(T('கணிதம்', 'Maths'), 'm', S.m, { ph: '/' + mx }) + field(T('இயற்பியல்', 'Physics'), 'p', S.p, { ph: '/' + mx }) + field(T('வேதியியல்', 'Chemistry'), 'c', S.c, { ph: '/' + mx }) + '</div><div data-k="out"></div>';
+        } else if (S.tab === 'need') {
+          pane.innerHTML = '<div class="cx-grid">' + field(T('இலக்கு கட்-ஆஃப் (200-க்கு)', 'Target cut-off (out of 200)'), 'target', S.target) +
+            selectField(T('எந்தப் பாடத்துக்கு கணக்கிட?', 'Find marks needed in'), 'which', [['m', T('கணிதம்', 'Maths')], ['p', T('இயற்பியல்', 'Physics')], ['c', T('வேதியியல்', 'Chemistry')]], S.which) + '</div>' +
+            '<div class="cx-grid">' + ['m', 'p', 'c'].filter(k => k !== S.which).map(k => field(({ m: T('கணிதம்', 'Maths'), p: T('இயற்பியல்', 'Physics'), c: T('வேதியியல்', 'Chemistry') })[k] + ' (' + T('கிடைத்தது / எதிர்பார்ப்பு', 'got / expected') + ')', k, S[k], { ph: '/' + mx })).join('') + '</div><div data-k="out"></div>';
+          $(root, '[data-k=which]').onchange = e => { S.which = e.target.value; save(); draw(); };
+        } else {
+          pane.innerHTML = '<div class="cx-f"><label>' + T('ஒவ்வொரு வரியிலும்: பெயர், கணிதம், இயற்பியல், வேதியியல் [, 4-வது பாடம் [, பிறந்த தேதி dd-mm-yyyy]]', 'One student per line: Name, Maths, Physics, Chemistry [, 4th subject [, DOB dd-mm-yyyy]]') + '</label>' +
+            '<textarea class="cx-ta" data-k="list" spellcheck="false" placeholder="Kavin, 98, 95, 97, 90, 14-03-2008&#10;Meena, 98, 95, 97, 92&#10;Arun, 100, 88, 90">' + esc(S.list) + '</textarea></div>' +
+            '<div class="cx-small">' + T('Excel-லிருந்து நேரடியாக copy-paste செய்யலாம் (tab பிரிப்பு). சம மதிப்பெண்ணில்: கணிதம் → இயற்பியல் → 4-வது பாடம் → வயதில் மூத்தவர் என்ற TNEA முறைப்படி வரிசை.', 'Paste straight from Excel (tab separated). Ties are broken the TNEA way: Maths → Physics → 4th subject → older candidate.') + '</div><div data-k="out"></div>';
+        }
+        root.querySelectorAll('input[data-k],textarea[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; save(); calc(); }));
+        calc();
+      }
+      function calc() {
+        const out = $(root, '[data-k=out]'); if (!out) return;
+        const sc = +S.scale, k100 = x => parseNum(x) * 100 / sc, lbl = { m: T('கணிதம்', 'Maths'), p: T('இயற்பியல்', 'Physics'), c: T('வேதியியல்', 'Chemistry') };
+        root.querySelectorAll('input[data-k]').forEach(i => i.classList.remove('bad'));
+        if (S.tab === 'one') {
+          const v = { m: k100(S.m), p: k100(S.p), c: k100(S.c) };
+          if (['m', 'p', 'c'].every(k => S[k] === '')) { out.innerHTML = ''; return; }
+          const badK = ['m', 'p', 'c'].filter(k => !(v[k] >= 0 && v[k] <= 100));
+          if (badK.length) { badK.forEach(k => $(root, '[data-k=' + k + ']').classList.add('bad')); out.innerHTML = msgHtml(T('மூன்று பாடங்களுக்கும் 0 முதல் ' + sc + ' வரை மதிப்பெண் எழுதவும்.', 'Enter all three marks between 0 and ' + sc + '.')); return; }
+          const cut = TN_cut(v.m, v.p, v.c), avg = (v.m + v.p + v.c) / 3, min = TN_MIN[S.comm], ok = avg >= min;
+          const txt = 'TNEA cut-off: ' + fmt(cut, 2) + ' / 200 (Maths ' + fmt(v.m, 2) + ' + Physics ' + fmt(v.p / 2, 2) + ' + Chemistry ' + fmt(v.c / 2, 2) + ')';
+          out.innerHTML = resCard(T('உங்கள் TNEA கட்-ஆஃப்', 'Your TNEA cut-off'), fmt(cut, 2) + ' <span style="font-size:18px;opacity:.85">/ 200</span>', fmt(cut / 2, 2) + '%', null, ok ? 'ok' : 'bad') +
+            '<div class="cx-tn-sub">' + [['m', v.m, 1], ['p', v.p, 0.5], ['c', v.c, 0.5]].map(r => '<div class="cx-stat"><div class="k">' + lbl[r[0]] + (r[2] < 1 ? ' ÷ 2' : '') + '</div><div class="v">' + fmt(r[1] * r[2], 2) + '</div></div>').join('') + '</div>' +
+            '<div class="cx-meter"><i style="width:' + (cut / 2) + '%;background:var(--brand)"></i></div>' +
+            (ok ? '<div class="cx-ok">✓ ' + T('தகுதி உண்டு: கணிதம்+இயற்பியல்+வேதியியல் சராசரி ' + fmt(avg, 2) + '% (குறைந்தபட்சம் ' + min + '%)', 'Eligible: Maths+Physics+Chemistry average ' + fmt(avg, 2) + '% (minimum ' + min + '%)') + '</div>'
+              : msgHtml(T('சராசரி ' + fmt(avg, 2) + '% — இந்தப் பிரிவுக்குக் குறைந்தபட்சம் ' + min + '% தேவை.', 'Average ' + fmt(avg, 2) + '% — this community needs at least ' + min + '%.'))) +
+            '<div class="cx-info">' + T('தகுதி விதிகள், கடந்த ஆண்டு கட்-ஆஃப் ஆகியவற்றை tneaonline.org-ல் வெளியாகும் அதிகாரப்பூர்வ அறிவிப்பில் சரிபார்க்கவும்.', 'Check eligibility rules and last year\'s cut-offs in the official notice on tneaonline.org.') + '</div>' +
+            '<details class="cx-det"><summary>' + T('கணக்கு முறை', 'How it is calculated') + '</summary><div>' + T('கட்-ஆஃப் = கணிதம் + (இயற்பியல் ÷ 2) + (வேதியியல் ÷ 2). ஒவ்வொரு பாடமும் 100-க்கு. சம கட்-ஆஃப் வந்தால் கணிதம், பிறகு இயற்பியல், பிறகு 4-வது பாடம், பிறகு வயதில் மூத்தவர் முன்னுரிமை பெறுவார்.', 'Cut-off = Maths + Physics/2 + Chemistry/2, each out of 100. Ties go to higher Maths, then Physics, then the 4th subject, then the older candidate.') + '</div></details>';
+          out.appendChild(actionsEl(() => txt));
+        } else if (S.tab === 'need') {
+          const target = parseNum(S.target), v = { m: k100(S.m), p: k100(S.p), c: k100(S.c) }, others = ['m', 'p', 'c'].filter(k => k !== S.which);
+          if (!(target > 0 && target <= 200)) { $(root, '[data-k=target]').classList.add('bad'); out.innerHTML = msgHtml(T('இலக்கை 1 முதல் 200-க்குள் எழுதவும்.', 'Enter a target between 1 and 200.')); return; }
+          if (others.some(k => S[k] === '')) { out.innerHTML = ''; return; }
+          const badK = others.filter(k => !(v[k] >= 0 && v[k] <= 100));
+          if (badK.length) { badK.forEach(k => $(root, '[data-k=' + k + ']').classList.add('bad')); out.innerHTML = msgHtml(T('மதிப்பெண்ணை 0 முதல் ' + sc + ' வரை எழுதவும்.', 'Enter marks between 0 and ' + sc + '.')); return; }
+          const need = TN_need(target, S.which, v), needSc = need * sc / 100;
+          if (need > 100) out.innerHTML = resCard(T('இந்த இலக்கை அடைய முடியாது', 'Target not reachable'), T(lbl[S.which] + '-ல் ' + sc + '/' + sc + ' எடுத்தாலும் போதாது', 'Even ' + sc + '/' + sc + ' in ' + lbl[S.which] + ' is not enough'), T('அதிகபட்சம் சாத்தியம்: ', 'Best possible: ') + fmt(TN_cut(S.which === 'm' ? 100 : v.m, S.which === 'p' ? 100 : v.p, S.which === 'c' ? 100 : v.c), 2) + ' / 200', null, 'bad');
+          else out.innerHTML = resCard(T(lbl[S.which] + '-ல் தேவையான மதிப்பெண்', 'Marks needed in ' + lbl[S.which]), need <= 0 ? T('ஏற்கனவே அடைந்துவிட்டீர்கள் 🎉', 'Already reached 🎉') : fmt(Math.ceil(needSc * 100) / 100, 2) + ' <span style="font-size:18px;opacity:.85">/ ' + sc + '</span>', T('இலக்கு ', 'Target ') + fmt(target, 2) + ' / 200', null, 'ok');
+        } else {
+          const r = TN_parseList(S.list, sc);
+          if (!r.rows.length) { out.innerHTML = r.bad.length ? msgHtml(T('வரிகளைப் படிக்க முடியவில்லை: ', 'Could not read lines: ') + r.bad.join(', ')) : ''; return; }
+          const ranked = TN_rank(r.rows);
+          out.innerHTML = (r.bad.length ? msgHtml(T('இந்த வரிகள் விடப்பட்டன (மதிப்பெண் தவறு): ', 'Skipped lines (bad marks): ') + r.bad.join(', ')) : '') +
+            '<div class="cx-tn-sub"><div class="cx-stat"><div class="k">' + T('மாணவர்கள்', 'Students') + '</div><div class="v">' + ranked.length + '</div></div>' +
+            '<div class="cx-stat"><div class="k">' + T('அதிகபட்சம்', 'Highest') + '</div><div class="v">' + fmt(ranked[0].cut, 2) + '</div></div>' +
+            '<div class="cx-stat"><div class="k">' + T('சராசரி', 'Average') + '</div><div class="v">' + fmt(ranked.reduce((s, x) => s + x.cut, 0) / ranked.length, 2) + '</div></div></div>' +
+            '<div class="cx-tn-wrap"><table class="cx-tn-tbl"><thead><tr><th>#</th><th>' + T('பெயர்', 'Name') + '</th><th>' + T('கணிதம்', 'Maths') + '</th><th>' + T('இயற்.', 'Phy') + '</th><th>' + T('வேதி.', 'Chem') + '</th><th>' + T('கட்-ஆஃப்', 'Cut-off') + '</th></tr></thead><tbody>' +
+            ranked.map((x, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(x.name) + '</td><td>' + fmt(x.m, 2) + '</td><td>' + fmt(x.p, 2) + '</td><td>' + fmt(x.c, 2) + '</td><td><b>' + fmt(x.cut, 2) + '</b></td></tr>').join('') + '</tbody></table></div>' +
+            '<div class="cx-actions"><button type="button" class="cx-btn" data-act="csv">⬇ ' + T('Excel (CSV) பதிவிறக்கு', 'Download Excel (CSV)') + '</button></div>';
+          $(out, '[data-act=csv]').onclick = () => {
+            const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+            const csv = '﻿Rank,Name,Maths,Physics,Chemistry,4th subject,DOB,Cut-off\n' + ranked.map((x, i) => [i + 1, q(x.name), x.m, x.p, x.c, isFinite(x.f) ? x.f : '', q(x.dobTxt), round2(x.cut)].join(',')).join('\n');
+            downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'tnea-cutoff-rank-list.csv');
+          };
+        }
+      }
+      draw();
+    }
+  };
+  TOOL_IMPL.tneacutoff._f = { cut: TN_cut, need: TN_need, rank: TN_rank, parse: TN_parseList };
+
+  /* =====================================================================
+   * biodata — Marriage Biodata Maker (Tamil / English, photo, rasi & navamsam charts)
+   * Everything stays in this browser (draft in localStorage). Export: PDF (A4), PNG, print.
+   * ===================================================================== */
+  const BD_STARS = [['அசுவினி', 'Ashwini'], ['பரணி', 'Bharani'], ['கார்த்திகை', 'Karthigai'], ['ரோகிணி', 'Rohini'], ['மிருகசீரிடம்', 'Mirugasirisham'], ['திருவாதிரை', 'Thiruvathirai'], ['புனர்பூசம்', 'Punarpoosam'], ['பூசம்', 'Poosam'], ['ஆயில்யம்', 'Ayilyam'],
+    ['மகம்', 'Magam'], ['பூரம்', 'Pooram'], ['உத்திரம்', 'Uthiram'], ['அஸ்தம்', 'Hastham'], ['சித்திரை', 'Chithirai'], ['சுவாதி', 'Swathi'], ['விசாகம்', 'Visakam'], ['அனுஷம்', 'Anusham'], ['கேட்டை', 'Kettai'],
+    ['மூலம்', 'Moolam'], ['பூராடம்', 'Pooradam'], ['உத்திராடம்', 'Uthiradam'], ['திருவோணம்', 'Thiruvonam'], ['அவிட்டம்', 'Avittam'], ['சதயம்', 'Sathayam'], ['பூரட்டாதி', 'Poorattathi'], ['உத்திரட்டாதி', 'Uthirattathi'], ['ரேவதி', 'Revathi']];
+  const BD_RASI = [['மேஷம்', 'Mesham (Aries)'], ['ரிஷபம்', 'Rishabam (Taurus)'], ['மிதுனம்', 'Mithunam (Gemini)'], ['கடகம்', 'Kadagam (Cancer)'], ['சிம்மம்', 'Simmam (Leo)'], ['கன்னி', 'Kanni (Virgo)'],
+    ['துலாம்', 'Thulam (Libra)'], ['விருச்சிகம்', 'Viruchigam (Scorpio)'], ['தனுசு', 'Dhanusu (Sagittarius)'], ['மகரம்', 'Magaram (Capricorn)'], ['கும்பம்', 'Kumbam (Aquarius)'], ['மீனம்', 'Meenam (Pisces)']];
+  // South Indian chart: fixed sign positions on a 4x4 grid (row, col); the centre 2x2 holds the title
+  const BD_CELL = [[0, 1], [0, 2], [0, 3], [1, 3], [2, 3], [3, 3], [3, 2], [3, 1], [3, 0], [2, 0], [1, 0], [0, 0]];
+  const BD_PLANETS = [['ல', 'Asc'], ['சூ', 'Su'], ['சந்', 'Mo'], ['செ', 'Ma'], ['பு', 'Me'], ['கு', 'Ju'], ['சு', 'Ve'], ['ச', 'Sa'], ['ரா', 'Ra'], ['கே', 'Ke'], ['மா', 'Md']];
+  const BD_OPT = {
+    gender: [['', '—', '—'], ['M', 'ஆண்', 'Male'], ['F', 'பெண்', 'Female']],
+    marital: [['', '—', '—'], ['never', 'திருமணம் ஆகாதவர்', 'Never married'], ['divorced', 'விவாகரத்து ஆனவர்', 'Divorced'], ['widowed', 'துணையை இழந்தவர்', 'Widowed']],
+    star: [['', '—', '—']].concat(BD_STARS.map((s, i) => [String(i), s[0], s[1]])),
+    padham: [['', '—', '—'], ['1', '1', '1'], ['2', '2', '2'], ['3', '3', '3'], ['4', '4', '4']],
+    raasi: [['', '—', '—']].concat(BD_RASI.map((s, i) => [String(i), s[0], s[1]])),
+  };
+  BD_OPT.lagnam = BD_OPT.raasi;
+  // [key, Tamil label, English label, input type]
+  const BD_SECTIONS = [
+    ['personal', 'சுய விவரம்', 'Personal details', [['name', 'பெயர்', 'Name'], ['gender', 'பாலினம்', 'Gender', 'sel'], ['dob', 'பிறந்த தேதி', 'Date of birth', 'date'], ['tob', 'பிறந்த நேரம்', 'Time of birth', 'time'],
+      ['pob', 'பிறந்த ஊர்', 'Place of birth'], ['height', 'உயரம்', 'Height'], ['complexion', 'நிறம்', 'Complexion'], ['marital', 'திருமண நிலை', 'Marital status', 'sel'], ['religion', 'மதம்', 'Religion'],
+      ['caste', 'சாதி / உட்பிரிவு', 'Caste / sub-caste'], ['tongue', 'தாய்மொழி', 'Mother tongue']]],
+    ['horo', 'ஜாதக விவரம்', 'Horoscope', [['star', 'நட்சத்திரம்', 'Star (Nakshatra)', 'sel'], ['padham', 'பாதம்', 'Padham', 'sel'], ['raasi', 'ராசி', 'Raasi', 'sel'], ['lagnam', 'லக்னம்', 'Lagnam', 'sel'],
+      ['kulam', 'குலம் / கோத்திரம்', 'Kulam / Gotra'], ['deity', 'குலதெய்வம்', 'Family deity'], ['dosham', 'தோஷம்', 'Dosham'], ['dasa', 'நடப்பு தசை இருப்பு', 'Dasa balance at birth']]],
+    ['work', 'கல்வி & தொழில்', 'Education & work', [['edu', 'கல்வித் தகுதி', 'Education'], ['job', 'தொழில் / பணி', 'Occupation'], ['company', 'பணியிடம்', 'Company / place of work'], ['income', 'வருமானம்', 'Income']]],
+    ['family', 'குடும்ப விவரம்', 'Family details', [['father', 'தந்தை பெயர்', "Father's name"], ['father_job', 'தந்தை தொழில்', "Father's occupation"], ['mother', 'தாய் பெயர்', "Mother's name"], ['mother_job', 'தாய் தொழில்', "Mother's occupation"],
+      ['siblings', 'உடன்பிறந்தோர்', 'Siblings', 'area'], ['native', 'பூர்வீகம்', 'Native place'], ['property', 'சொத்து விவரம்', 'Property', 'area']]],
+    ['contact', 'தொடர்புக்கு', 'Contact', [['address', 'முகவரி', 'Address', 'area'], ['phone', 'தொலைபேசி', 'Phone'], ['email', 'மின்னஞ்சல்', 'E-mail']]],
+    ['expect', 'எதிர்பார்ப்பு', 'Expectations', [['expect', 'எதிர்பார்ப்பு', 'Partner expectations', 'area']]],
+  ];
+  const BD_INVOKE = ['', 'ஓம்', 'ஸ்ரீ ராம ஜெயம்', 'ஸ்ரீ விநாயகர் துணை', 'ஓம் நமசிவாய', 'ஸ்ரீ முருகன் துணை', '✝ கர்த்தர் துணை', '☪ அல்லாஹ் துணை'];
+  const BD_THEMES = [['maroon', 'பாரம்பரியம்', 'Traditional'], ['blue', 'நவீனம்', 'Modern'], ['green', 'பசுமை', 'Green'], ['simple', 'எளிமை (அச்சுக்கு)', 'Plain (for printing)']];
+  const BD_SAMPLE = { name: 'சு. கார்த்திகேயன்', gender: 'M', dob: '1996-05-12', tob: '06:45', pob: 'ஈரோடு', height: "5' 9\" (175 cm)", complexion: 'மாநிறம்', marital: 'never', religion: 'இந்து', caste: 'தேவாங்கர்', tongue: 'தமிழ்',
+    star: '3', padham: '2', raasi: '1', lagnam: '0', kulam: 'சிவ கோத்திரம்', deity: 'ஸ்ரீ சௌடேஸ்வரி அம்மன்', dosham: 'இல்லை', dasa: 'சந்திர தசை 6 வருடம் 4 மாதம்',
+    edu: 'B.E. (Computer Science)', job: 'Software Engineer', company: 'Chennai', income: '₹ 85,000 / மாதம்',
+    father: 'திரு. சுப்பிரமணியம்', father_job: 'விவசாயம்', mother: 'திருமதி. வசந்தா', mother_job: 'இல்லத்தரசி', siblings: 'ஒரு அக்கா (திருமணம் ஆனவர்)', native: 'பவானி', property: 'சொந்த வீடு, 3 ஏக்கர் நிலம்',
+    address: '12, பெரியார் நகர், ஈரோடு - 638 001', phone: '98765 43210', email: '', expect: 'படித்த, நல்ல குடும்பப் பெண். சாதி தடையில்லை.' };
+
+  function BD_age(iso) {
+    const t = isoToUTC(iso); if (t == null) return null;
+    const b = partsOf(t), n = new Date(); let a = n.getFullYear() - b.y;
+    if (n.getMonth() + 1 < b.m || (n.getMonth() + 1 === b.m && n.getDate() < b.d)) a--;
+    return a >= 0 && a < 120 ? a : null;
+  }
+  function BD_time(s, en) { // "18:45" -> "6:45 PM" / "மாலை 6:45"
+    const m = /^(\d{1,2}):(\d{2})/.exec(s || ''); if (!m) return s || '';
+    const h = +m[1], h12 = ((h + 11) % 12) + 1;
+    if (en) return h12 + ':' + m[2] + (h < 12 ? ' AM' : ' PM');
+    return (h < 4 ? 'இரவு ' : h < 12 ? 'காலை ' : h < 16 ? 'மதியம் ' : h < 19 ? 'மாலை ' : 'இரவு ') + h12 + ':' + m[2];
+  }
+  function BD_value(S, f) {
+    const v = S.d[f[0]], en = S.lang === 'en';
+    if (v == null || v === '') return '';
+    if (f[3] === 'sel') { const o = BD_OPT[f[0]].find(x => x[0] === v); return o && o[0] ? o[en ? 2 : 1] : ''; }
+    if (f[3] === 'date') { const t = isoToUTC(v); if (t == null) return v; const a = BD_age(v); return fmtDMY(t) + (a != null ? (en ? ' (' + a + ' years)' : ' (' + a + ' வயது)') : ''); }
+    if (f[3] === 'time') return BD_time(v, en);
+    return v;
+  }
+  function BD_chartHtml(cells, title) {
+    if (!cells || !cells.some(x => x && x.trim())) return '';
+    let h = '<table class="bd-chart"><tbody>';
+    for (let r = 0; r < 4; r++) {
+      h += '<tr>';
+      for (let c = 0; c < 4; c++) {
+        if (r === 1 && c === 1) { h += '<td class="bd-cc" rowspan="2" colspan="2">' + esc(title) + '</td>'; continue; }
+        if ((r === 1 || r === 2) && (c === 1 || c === 2)) continue;
+        const i = BD_CELL.findIndex(p => p[0] === r && p[1] === c);
+        h += '<td>' + esc(cells[i] || '') + '</td>';
+      }
+      h += '</tr>';
+    }
+    return h + '</tbody></table>';
+  }
+  function BD_pageHtml(S) {
+    const en = S.lang === 'en', L = f => (en ? f[2] : f[1]);
+    const rows = list => list.map(f => { const v = BD_value(S, f); return v ? '<tr><th>' + esc(L(f)) + '</th><td>:</td><td>' + esc(v) + '</td></tr>' : ''; }).join('');
+    const sec = s => { const r = rows(s[3]); return r ? '<div class="bd-sec"><div class="bd-sh">' + esc(en ? s[2] : s[1]) + '</div><table class="bd-tb"><tbody>' + r + '</tbody></table></div>' : ''; };
+    const personal = rows(BD_SECTIONS[0][3]);
+    const charts = S.charts ? BD_chartHtml(S.rasi, en ? 'Rasi' : 'ராசி') + BD_chartHtml(S.amsam, en ? 'Navamsam' : 'நவாம்சம்') : '';
+    return '<div class="bd-page bd-t-' + esc(S.theme) + '"><div class="bd-frame">' +
+      (S.invoke ? '<div class="bd-inv">' + esc(S.invoke) + '</div>' : '') +
+      '<div class="bd-title">' + esc(S.title || (en ? 'Marriage Biodata' : 'திருமண விவரம்')) + '</div>' +
+      '<div class="bd-top"><div class="bd-sec" style="flex:1"><div class="bd-sh">' + esc(en ? BD_SECTIONS[0][2] : BD_SECTIONS[0][1]) + '</div><table class="bd-tb"><tbody>' + personal + '</tbody></table></div>' +
+      (S.photo ? '<img class="bd-ph" alt="" src="' + S.photo + '">' : '') + '</div>' +
+      (charts ? (() => { const r = rows(BD_SECTIONS[1][3]); return '<div class="bd-sec"><div class="bd-sh">' + esc(en ? BD_SECTIONS[1][2] : BD_SECTIONS[1][1]) + '</div><div class="bd-hz">' +
+        (r ? '<table class="bd-tb"><tbody>' + r + '</tbody></table>' : '<div style="flex:1"></div>') + '<div class="bd-charts">' + charts + '</div></div></div>'; })() : sec(BD_SECTIONS[1])) +
+      BD_SECTIONS.slice(2).map(sec).join('') +
+      '</div></div>';
+  }
+  function BD_injectStyle() {
+    if (document.getElementById('cx-bd-style')) return;
+    const s = document.createElement('style');
+    s.id = 'cx-bd-style';
+    s.textContent = `
+    .bd-form .cx-f input[type=time]{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px;font-family:inherit;background:#fff}
+    .bd-form textarea{min-height:64px}
+    .bd-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;max-width:360px}
+    .bd-grid4 input{width:100%;min-height:52px;border:1.5px solid var(--line);border-radius:8px;padding:4px;font-size:14px;text-align:center;font-family:inherit;background:#fff}
+    .bd-grid4 .mid{grid-column:2/4;grid-row:2/4;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--brand-dark);background:var(--chip);border-radius:8px}
+    .bd-prevbox{margin-top:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#EEE}
+    .bd-prevbox .bd-scale{transform-origin:0 0}
+    .bd-page{width:794px;min-height:1123px;padding:26px;box-sizing:border-box;background:#fff;color:#222;font-family:'Noto Sans Tamil','Noto Sans','Inter',sans-serif;font-size:14px;line-height:1.38}
+    .bd-page *{box-sizing:border-box}
+    .bd-frame{min-height:1071px;padding:16px 22px;border:2px solid #999}
+    .bd-inv{text-align:center;font-weight:700;font-size:15px;letter-spacing:.5px}
+    .bd-title{text-align:center;font-size:25px;font-weight:900;margin:2px 0 8px}
+    .bd-top{display:flex;gap:18px;align-items:flex-start}
+    .bd-ph{width:150px;height:200px;object-fit:cover;border-radius:6px;border:3px solid #ccc;flex:none;margin-top:6px}
+    .bd-sec{margin-top:7px}
+    .bd-sh{font-weight:900;font-size:15px;padding:3px 10px;border-radius:4px;margin-bottom:3px}
+    .bd-tb{border-collapse:collapse;width:100%}
+    .bd-tb th{text-align:left;font-weight:700;padding:1.5px 6px;vertical-align:top}
+    .bd-tb td{padding:1.5px 4px;vertical-align:top;white-space:pre-line}
+    .bd-tb td:nth-child(2){width:12px}
+    .bd-hz{display:flex;gap:12px;align-items:flex-start}
+    .bd-hz .bd-tb{flex:1}
+    .bd-hz .bd-tb th{width:1%;white-space:nowrap;padding-right:10px}
+    .bd-tb th{width:200px}
+    .bd-charts{display:flex;gap:10px;flex:none}
+    .bd-chart{border-collapse:collapse;width:172px;table-layout:fixed}
+    .bd-chart td{border:1.5px solid #555;height:43px;text-align:center;vertical-align:middle;font-size:11.5px;font-weight:700;padding:1px;line-height:1.2;word-break:break-word}
+    .bd-chart td.bd-cc{font-size:14px;font-weight:900}
+    .bd-t-maroon{background:#FFFBF0}
+    .bd-t-maroon .bd-frame{border:6px double #8B1A1A}
+    .bd-t-maroon .bd-inv,.bd-t-maroon .bd-title{color:#8B1A1A}
+    .bd-t-maroon .bd-sh{background:#F3E2BF;color:#6B1010;border-left:5px solid #C9A227}
+    .bd-t-maroon .bd-ph{border-color:#C9A227}
+    .bd-t-maroon .bd-chart td{border-color:#8B1A1A}
+    .bd-t-blue .bd-frame{border:none;padding-top:0}
+    .bd-t-blue .bd-title{background:#1F3C88;color:#fff;margin:0 -26px 14px;padding:14px;border-radius:0 0 14px 14px}
+    .bd-t-blue .bd-inv{color:#1F3C88;margin-bottom:6px}
+    .bd-t-blue .bd-sh{color:#1F3C88;border-bottom:2px solid #1F3C88;border-radius:0;padding-left:0}
+    .bd-t-blue .bd-ph{border-color:#1F3C88}
+    .bd-t-blue .bd-chart td{border-color:#1F3C88}
+    .bd-t-green{background:#F7FBF4}
+    .bd-t-green .bd-frame{border:3px solid #2E6B30;border-radius:14px}
+    .bd-t-green .bd-inv,.bd-t-green .bd-title{color:#2E6B30}
+    .bd-t-green .bd-sh{background:#DCEFD8;color:#1E4D20}
+    .bd-t-green .bd-ph{border-color:#2E6B30}
+    .bd-t-simple .bd-frame{border:1.5px solid #000}
+    .bd-t-simple .bd-sh{border-bottom:1.5px solid #000;border-radius:0;padding-left:0}
+    .bd-t-simple .bd-chart td{border-color:#000}
+    `;
+    document.head.appendChild(s);
+  }
+  async function BD_photo(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('img')); i.src = url; });
+      const W = 450, H = 600, r = W / H; let sw = img.width, sh = img.height, sx = 0, sy = 0;
+      if (sw / sh > r) { sw = sh * r; sx = (img.width - sw) / 2; } else { sh = sw / r; sy = Math.max(0, (img.height - sh) * 0.3); } // keep the face (upper part)
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      return c.toDataURL('image/jpeg', 0.85);
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function BD_canvas(S) {
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;z-index:-1';
+    holder.innerHTML = BD_pageHtml(S);
+    document.body.appendChild(holder);
+    try {
+      try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) { /* ignore */ }
+      const imgs = Array.from(holder.querySelectorAll('img'));
+      await Promise.all(imgs.map(i => (i.complete ? null : new Promise(r => { i.onload = i.onerror = r; }))));
+      return await window.html2canvas(holder.firstChild, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    } finally { holder.remove(); }
+  }
+  TOOL_IMPL.biodata = {
+    mount(body) {
+      BD_injectStyle();
+      const root = makeRoot(body);
+      const blank = () => ({ lang: 'ta', theme: 'maroon', invoke: 'ஓம்', title: '', photo: '', charts: false, rasi: Array(12).fill(''), amsam: Array(12).fill(''), d: {} });
+      let S = Object.assign(blank(), lsGet('biodata-draft', null) || {});
+      let saveT = 0, drawT = 0, lastBox = null;
+      function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem('biodata-draft', JSON.stringify(S)); } catch (e) { /* photo too big for storage: keep the rest */ try { localStorage.setItem('biodata-draft', JSON.stringify(Object.assign({}, S, { photo: '' }))); } catch (e2) { /* ignore */ } } }, 300); }
+      function inputFor(f) {
+        const v = S.d[f[0]] == null ? '' : S.d[f[0]], lab = T(f[1], f[2]);
+        if (f[3] === 'sel') return '<div class="cx-f"><label>' + lab + '</label><select data-d="' + f[0] + '">' + BD_OPT[f[0]].map(o => '<option value="' + o[0] + '"' + (o[0] === v ? ' selected' : '') + '>' + esc(isEn() ? o[2] : o[1]) + '</option>').join('') + '</select></div>';
+        if (f[3] === 'area') return '<div class="cx-f" style="grid-column:1/-1"><label>' + lab + '</label><textarea rows="2" data-d="' + f[0] + '">' + esc(v) + '</textarea></div>';
+        return '<div class="cx-f"><label>' + lab + '</label><input type="' + (f[3] === 'date' ? 'date' : f[3] === 'time' ? 'time' : 'text') + '" data-d="' + f[0] + '" value="' + esc(v) + '" autocomplete="off"></div>';
+      }
+      function gridInputs(key) {
+        let h = '<div class="bd-grid4">';
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+          if (r === 1 && c === 1) { h += '<div class="mid">' + (key === 'rasi' ? T('ராசி', 'Rasi') : T('நவாம்சம்', 'Navamsam')) + '</div>'; continue; }
+          if ((r === 1 || r === 2) && (c === 1 || c === 2)) continue;
+          const i = BD_CELL.findIndex(p => p[0] === r && p[1] === c);
+          h += '<input data-g="' + key + '" data-i="' + i + '" value="' + esc(S[key][i] || '') + '" title="' + esc(BD_RASI[i][isEn() ? 1 : 0]) + '" placeholder="' + esc(BD_RASI[i][0].slice(0, 3)) + '">';
+        }
+        return h + '</div>';
+      }
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? புகைப்படம், ஜாதகக் கட்டத்துடன் அழகான திருமணப் பயோடேட்டா — தமிழ் அல்லது ஆங்கிலத்தில். PDF / படமாகப் பதிவிறக்கி WhatsApp-ல் அனுப்பலாம், அச்சிடலாம். உங்கள் தகவல்கள் இந்த உலாவியிலேயே இருக்கும்; எங்கும் அனுப்பப்படாது.',
+          'A neat marriage biodata with photo and horoscope charts, in Tamil or English. Download PDF / image for WhatsApp or print. Your details stay in this browser.') +
+          '<div class="bd-form">' +
+          '<div class="cx-h">' + T('வடிவமைப்பு', 'Design') + '</div>' +
+          '<div class="cx-grid">' + selectField(T('பயோடேட்டா மொழி', 'Biodata language'), 'lang', [['ta', 'தமிழ்'], ['en', 'English']], S.lang) +
+          selectField(T('வடிவம்', 'Style'), 'theme', BD_THEMES.map(t => [t[0], T(t[1], t[2])]), S.theme) + '</div>' +
+          '<div class="cx-grid"><div class="cx-f"><label>' + T('மேல் வாசகம்', 'Top line') + '</label><input type="text" data-s="invoke" value="' + esc(S.invoke) + '" list="bd-inv-list"><datalist id="bd-inv-list">' + BD_INVOKE.filter(Boolean).map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' +
+          '<div class="cx-f"><label>' + T('தலைப்பு', 'Heading') + '</label><input type="text" data-s="title" value="' + esc(S.title) + '" placeholder="' + esc(S.lang === 'en' ? 'Marriage Biodata' : 'திருமண விவரம்') + '"></div></div>' +
+          '<div class="cx-h">' + T('புகைப்படம்', 'Photo') + '</div>' +
+          '<div class="cx-actions" style="align-items:center">' + (S.photo ? '<img src="' + S.photo + '" alt="" style="width:72px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">' : '') +
+          '<label class="cx-btn sec" style="position:relative;display:inline-flex;align-items:center">📷 ' + (S.photo ? T('மாற்று', 'Change') : T('புகைப்படம் சேர்', 'Add photo')) + '<input type="file" accept="image/*" data-k="photo" style="position:absolute;opacity:0;width:1px;height:1px"></label>' +
+          (S.photo ? '<button type="button" class="cx-btn sec" data-act="nophoto">🗑 ' + T('நீக்கு', 'Remove') + '</button>' : '') + '</div>' +
+          BD_SECTIONS.map(s => '<div class="cx-h">' + T(s[1], s[2]) + '</div><div class="cx-grid">' + s[3].map(inputFor).join('') + '</div>' +
+            (s[0] === 'horo' ? '<label class="cx-chk" style="margin-top:10px"><input type="checkbox" data-k="charts"' + (S.charts ? ' checked' : '') + '> ' + T('ராசி / நவாம்சம் கட்டம் சேர்க்க', 'Add Rasi / Navamsam charts') + '</label>' +
+              (S.charts ? '<div class="cx-small">' + T('கட்டத்தைத் தொட்டு, கீழே உள்ள கிரகத்தை அழுத்துங்கள் (அல்லது நேரடியாக type செய்யுங்கள்). கட்டங்கள் தென்னிந்திய முறைப்படி: மேல் வரிசை மீனம், மேஷம், ரிஷபம், மிதுனம்.', 'Tap a box, then tap a planet below (or type). South Indian layout: top row Meenam, Mesham, Rishabam, Mithunam.') + '</div>' +
+                '<div class="cx-chips">' + BD_PLANETS.map(p => '<button type="button" class="cx-chip" data-pl="' + p[0] + '">' + p[0] + ' <small>' + p[1] + '</small></button>').join('') + '<button type="button" class="cx-chip" data-pl="">⌫</button></div>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:16px">' + gridInputs('rasi') + gridInputs('amsam') + '</div>' : '') : '')).join('') +
+          '</div>' +
+          '<div class="cx-actions"><button type="button" class="cx-btn" data-act="pdf">⬇ PDF</button><button type="button" class="cx-btn" data-act="png">🖼 ' + T('படம் (WhatsApp)', 'Image (WhatsApp)') + '</button>' +
+          '<button type="button" class="cx-btn sec" data-act="print">🖨 ' + T('அச்சிடு', 'Print') + '</button><button type="button" class="cx-btn sec" data-act="sample">✨ ' + T('மாதிரி நிரப்பு', 'Fill sample') + '</button>' +
+          '<button type="button" class="cx-btn sec" data-act="clear">🧹 ' + T('அனைத்தும் அழி', 'Clear all') + '</button></div><div data-k="msg"></div>' +
+          '<div class="cx-h">' + T('முன்னோட்டம்', 'Preview') + '</div><div class="bd-prevbox"><div class="bd-scale" data-k="prev"></div></div>';
+        wire(); preview();
+      }
+      function preview() {
+        const box = $(root, '[data-k=prev]'); if (!box) return;
+        box.innerHTML = BD_pageHtml(S);
+        const w = box.parentNode.clientWidth || 794, k = Math.min(1, w / 794);
+        box.style.transform = 'scale(' + k + ')';
+        box.parentNode.style.height = Math.ceil(box.firstChild.offsetHeight * k) + 'px';
+      }
+      function later() { clearTimeout(drawT); drawT = setTimeout(preview, 150); save(); }
+      function msg(h) { const m = $(root, '[data-k=msg]'); if (m) m.innerHTML = h; }
+      function wire() {
+        root.querySelectorAll('[data-d]').forEach(i => i.addEventListener(i.tagName === 'SELECT' ? 'change' : 'input', () => { S.d[i.getAttribute('data-d')] = i.value; later(); }));
+        root.querySelectorAll('[data-s]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-s')] = i.value; later(); }));
+        root.querySelectorAll('[data-g]').forEach(i => {
+          i.addEventListener('focus', () => { lastBox = i; });
+          i.addEventListener('input', () => { S[i.getAttribute('data-g')][+i.getAttribute('data-i')] = i.value; later(); });
+        });
+        root.querySelectorAll('[data-pl]').forEach(b => b.addEventListener('mousedown', e => e.preventDefault()));
+        root.querySelectorAll('[data-pl]').forEach(b => b.onclick = () => {
+          if (!lastBox) { msg('<div class="cx-info">' + T('முதலில் ஒரு கட்டத்தைத் தொடுங்கள்.', 'Tap a box first.') + '</div>'); return; }
+          const p = b.getAttribute('data-pl'), cur = lastBox.value.trim();
+          lastBox.value = p ? (cur ? cur + ' ' + p : p) : cur.split(/\s+/).slice(0, -1).join(' ');
+          lastBox.dispatchEvent(new Event('input')); lastBox.focus();
+        });
+        $(root, '[data-k=lang]').onchange = e => { S.lang = e.target.value; save(); draw(); };
+        $(root, '[data-k=theme]').onchange = e => { S.theme = e.target.value; later(); };
+        $(root, '[data-k=charts]').onchange = e => { S.charts = e.target.checked; save(); draw(); };
+        $(root, '[data-k=photo]').onchange = async e => {
+          const f = e.target.files && e.target.files[0]; if (!f) return;
+          if (!/^image\//.test(f.type)) { msg(msgHtml(T('படக் கோப்பை மட்டும் தேர்வு செய்யவும்.', 'Please choose an image file.'))); return; }
+          try { S.photo = await BD_photo(f); save(); draw(); } catch (x) { msg(msgHtml(T('இந்தப் படத்தைத் திறக்க முடியவில்லை (JPG / PNG முயற்சிக்கவும்).', 'Could not open this image (try JPG / PNG).'))); }
+        };
+        const np = $(root, '[data-act=nophoto]'); if (np) np.onclick = () => { S.photo = ''; save(); draw(); };
+        $(root, '[data-act=sample]').onclick = () => {
+          S.d = Object.assign({}, BD_SAMPLE); S.lang = 'ta'; S.charts = true;
+          S.rasi = ['ல', 'சந் கு', '', 'ரா', '', '', 'சு', '', 'கே', 'ச', '', 'சூ பு செ'];
+          S.amsam = ['', 'சு', 'செ', '', 'ச', 'கு', '', 'சந்', '', 'சூ', 'பு ரா', 'கே ல'];
+          save(); draw();
+        };
+        $(root, '[data-act=clear]').onclick = () => { if (!confirm(T('எல்லா விவரங்களையும் அழிக்கவா?', 'Clear all details?'))) return; S = blank(); save(); draw(); };
+        $(root, '[data-act=pdf]').onclick = () => run(async () => {
+          const cv = await BD_canvas(S), png = await new Promise(r => cv.toBlob(b => r(b), 'image/png'));
+          const doc = await window.PDFLib.PDFDocument.create(), img = await doc.embedPng(await png.arrayBuffer());
+          const pw = 595.28, ph = 841.89, k = Math.min(pw / img.width, ph / img.height), w = img.width * k, h = img.height * k;
+          doc.addPage([pw, ph]).drawImage(img, { x: (pw - w) / 2, y: ph - h, width: w, height: h });
+          doc.setTitle(S.d.name ? S.d.name + ' - Biodata' : 'Marriage Biodata');
+          await downloadBlob(new Blob([await doc.save()], { type: 'application/pdf' }), BD_fname(S) + '.pdf');
+        });
+        $(root, '[data-act=png]').onclick = () => run(async () => {
+          const cv = await BD_canvas(S);
+          await downloadBlob(await new Promise(r => cv.toBlob(b => r(b), 'image/jpeg', 0.92)), BD_fname(S) + '.jpg');
+        });
+        $(root, '[data-act=print]').onclick = () => run(async () => {
+          const url = (await BD_canvas(S)).toDataURL('image/png');
+          const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+          document.body.appendChild(f);
+          const d = f.contentWindow.document;
+          d.open(); d.write('<!doctype html><title>Biodata</title><style>@page{size:A4;margin:0}html,body{margin:0}img{width:100%;display:block}</style><img src="' + url + '">'); d.close();
+          await new Promise(r => { const i = d.querySelector('img'); if (i.complete) r(); else i.onload = r; });
+          f.contentWindow.focus(); f.contentWindow.print();
+          setTimeout(() => f.remove(), 60000);
+        });
+      }
+      async function run(fn) {
+        const bs = root.querySelectorAll('[data-act=pdf],[data-act=png],[data-act=print]');
+        if (!S.d.name) { msg(msgHtml(T('முதலில் பெயரை எழுதவும்.', 'Please enter the name first.'))); return; }
+        bs.forEach(b => (b.disabled = true)); msg('<div class="cx-info">⏳ ' + T('தயாராகிறது…', 'Preparing…') + '</div>');
+        try { await fn(); msg('<div class="cx-ok">✓ ' + T('தயார்', 'Done') + '</div>'); }
+        catch (e) { msg(msgHtml(T('உருவாக்க முடியவில்லை: ', 'Could not create it: ') + esc(e.message || e))); }
+        finally { bs.forEach(b => (b.disabled = false)); }
+      }
+      draw();
+      window.addEventListener('resize', () => { if (root.isConnected) preview(); });
+    }
+  };
+  function BD_fname(S) { // ASCII only: some browsers drop non-Latin download names
+    const n = String(S.d.name || '').normalize('NFKD').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    return 'biodata' + (n ? '-' + n : '');
+  }
+  TOOL_IMPL.biodata._f = { page: BD_pageHtml, value: BD_value, age: BD_age, time: BD_time };
 
 })();
