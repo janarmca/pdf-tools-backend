@@ -104,6 +104,8 @@ async function route(req, env) {
 
 export default {
   async fetch(req, env) {
+    // secrets pasted with a stray space / new line ("Key not found") — use them trimmed
+    for (const k of Object.keys(env)) if (typeof env[k] === 'string' && env[k] !== env[k].trim()) env = { ...env, [k]: env[k].trim() };
     const cors = corsHeaders(req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     let res;
