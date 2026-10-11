@@ -531,6 +531,11 @@ const TOOLS = [
   {id:'namepicker', name:'Name Picker & Groups — பெயர் சீட்டு', desc:'Pick a student at random or make fair groups — for teachers', icon:'🎲', color:'#D6336C', cat:'education', cost:0, lazy:'extra'},
   {id:'numsys', name:'Number Systems — எண் முறை மாற்றி', desc:'Decimal, binary, octal and hex with step-by-step working', icon:'🧮', color:'#1971C2', cat:'education', cost:0, lazy:'extra'},
   {id:'tneacutoff', name:'TNEA Cut-off Calculator — பொறியியல் கட்-ஆஃப்', desc:'Engineering cut-off out of 200 from 12th Maths, Physics, Chemistry, plus the Maths mark you need for a target', icon:'🎯', color:'#0B7285', cat:'education', cost:0, lazy:'extra'},
+  {id:'starfinder', name:'Birth Star Finder — நட்சத்திரம் கண்டுபிடி', desc:'Find your star (natchathiram) with padam, raasi, lagnam, thithi and dasa balance from birth date, time and place', icon:'🔭', color:'#5B2C83', cat:'business', cost:0, lazy:'extra'},
+  {id:'porutham', name:'Marriage Porutham — திருமணப் பொருத்தம்', desc:'All 10 poruthams from the bride\'s and groom\'s stars — dina, gana, rajju, vedhai and more, with reasons', icon:'💑', color:'#B03A64', cat:'business', cost:0, lazy:'extra'},
+  {id:'goldcalc', name:'Gold Price & Gold Loan — தங்க நகை கணிப்பான்', desc:'Jewellery price with wastage, making charge and GST; old gold exchange value; gold-loan amount and interest', icon:'🪙', color:'#B8860B', cat:'business', cost:0, lazy:'extra'},
+  {id:'pfcalc', name:'PF & Gratuity Calculator — வருங்கால வைப்பு நிதி / கிராஜுவிட்டி', desc:'EPF balance at retirement, year by year, and the gratuity you get when you leave a job', icon:'🏦', color:'#1F6F8B', cat:'business', cost:0, lazy:'extra'},
+  {id:'ebbill', name:'TNEB Bill Calculator — மின் கட்டணம்', desc:'Tamil Nadu electricity bill for two months, slab by slab, plus an appliance-wise usage estimate', icon:'💡', color:'#E67E22', cat:'business', cost:0, lazy:'extra'},
 
 ];
 
@@ -1493,6 +1498,11 @@ interestcalc:['வட்டிக் கணிப்பான்','தனி வ
 casecvt:['எழுத்து வடிவ மாற்றி','பெரிய / சிறிய எழுத்து, வரிகளை ஒழுங்குபடுத்து'],
 biodata:['திருமணப் பயோடேட்டா','புகைப்படத்துடன் அழகான பயோடேட்டா — PDF / படம், இலவசம்'],
 tneacutoff:['பொறியியல் கட்-ஆஃப்','12-ஆம் வகுப்பு Maths, Physics, Chemistry-யிலிருந்து 200-க்கு கட்-ஆஃப்'],
+starfinder:['நட்சத்திரம் கண்டுபிடி','பிறந்த நேரத்திலிருந்து நட்சத்திரம், ராசி, லக்னம், தசை இருப்பு'],
+porutham:['திருமணப் பொருத்தம்','10 பொருத்தம் — நட்சத்திரப்படி விளக்கத்துடன்'],
+goldcalc:['தங்க நகை கணிப்பான்','நகை விலை, பழைய நகை மாற்று, நகைக் கடன்'],
+pfcalc:['PF / கிராஜுவிட்டி','ஓய்வின்போது PF இருப்பு, கிராஜுவிட்டி தொகை'],
+ebbill:['மின் கட்டணம் (TNEB)','2 மாத யூனிட்டுக்கு கட்டணம், மின்சாதனக் கணக்கு'],
 jsonfmt:['JSON சரிபார்ப்பு','JSON-ஐ அழகாக்கு, சரிபார்'],
 b64:['Base64 மாற்றி','எழுத்து ↔ Base64 (தமிழும் சரியாக வரும்)'],
 textdiff:['உரை ஒப்பீடு','இரு உரைகளின் வேறுபாடு'],
@@ -1508,6 +1518,7 @@ const TOOL_ALIAS = {
   emicalc:'loan emi bank கடன்', resumebuilder:'cv biodata resume', ocr:'text from image scan', camscan:'scanner camscanner scan', qrgen:'qr code', imgpassport:'passport photo id photo',
   examphoto:'exam photo signature neet tnpsc upsc ssc', sign:'signature sign', pdfprotect:'password lock', pdfunlock:'password remove unlock', agecalc:'age birthday வயது', interestcalc:'interest vatti meter vatti வட்டி',
   unitconv:'cent acre land sqft nilam நிலம்', percentcalc:'percentage percent', datecalc:'date days difference', kalvikalanjiyam:'kalvi kalanjiyam school class students கல்வி களஞ்சியம்', cgpacalc:'cgpa marks percentage mark',
+  starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
   namepicker:'random name group lucky draw', jsonfmt:'json format', b64:'base64 encode decode', videotogif:'gif', heic2jpg:'iphone heic', pdf2img:'pdf to jpg', pdf2excel:'pdf table excel', excel2pdf:'xls xlsx pdf',
 };
 function taOn(){ return __appLang === 'ta'; }
@@ -1536,7 +1547,7 @@ const CAT_V2 = {
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
 };
 const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','gstinvoice','tamiltyping','rupeewords','resumebuilder','emicalc'];
-const NEW_TOOL_IDS = ['tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
+const NEW_TOOL_IDS = ['starfinder','porutham','goldcalc','pfcalc','ebbill','tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
 function esc2(s){ return escapeHtml(String(s)); }
 
 function renderHero(){
@@ -1923,7 +1934,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261011a`;
+    s.src = `category-${cat}.js?v=20261011b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);

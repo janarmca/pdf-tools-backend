@@ -4,7 +4,7 @@
  *   examphoto, cgpacalc, unitconv, vaippadu, studytimer, wordcount,
  *   sipcalc, gstcalc, discountcalc, datecalc, passgen
  *   + rupeewords, interestcalc, landconv, bmicalc, numsys, casecvt, jsonfmt, b64, textdiff, markscalc, namepicker
- *   + tneacutoff, biodata
+ *   + tneacutoff, biodata, starfinder, porutham, goldcalc, pfcalc, ebbill
  *
  * Plain browser JS (no modules / build step / network). Each tool registers
  * TOOL_IMPL.<id> = { mount(body){...} }. Globals used from the host page:
@@ -3419,5 +3419,453 @@
     return 'biodata' + (n ? '-' + n : '');
   }
   TOOL_IMPL.biodata._f = { page: BD_pageHtml, value: BD_value, age: BD_age, time: BD_time };
+
+  /* =====================================================================
+   * Shared Vedic astronomy for starfinder + porutham (verified against astronomy-engine:
+   * Moon within 0.01°, Sun within 0.01°, ascendant on the horizon within 0.01°, 1950–2040).
+   * ===================================================================== */
+  const AS_MOON = [[0,0,1,0,6288774],[2,0,-1,0,1274027],[2,0,0,0,658314],[0,0,2,0,213618],[0,1,0,0,-185116],[0,0,0,2,-114332],[2,0,-2,0,58793],[2,-1,-1,0,57066],[2,0,1,0,53322],[2,-1,0,0,45758],
+    [0,1,-1,0,-40923],[1,0,0,0,-34720],[0,1,1,0,-30383],[2,0,0,-2,15327],[0,0,1,2,-12528],[0,0,1,-2,10980],[4,0,-1,0,10675],[0,0,3,0,10034],[4,0,-2,0,8548],[2,1,-1,0,-7888],
+    [2,1,0,0,-6766],[1,0,-1,0,-5163],[1,1,0,0,4987],[2,-1,1,0,4036],[2,0,2,0,3994],[4,0,0,0,3861],[2,0,-3,0,3665],[0,1,-2,0,-2689],[2,0,-1,2,-2602],[2,-1,-2,0,2390],
+    [1,0,1,0,-2348],[2,-2,0,0,2236],[0,1,2,0,-2120],[0,2,0,0,-2069],[2,-2,-1,0,2048],[2,0,1,-2,-1773],[2,0,0,2,-1595],[4,-1,-1,0,1215],[0,0,2,2,-1110],[3,0,-1,0,-892],
+    [2,1,1,0,-810],[4,-1,-2,0,759],[0,2,-1,0,-713],[2,2,-1,0,-700],[2,1,-2,0,691],[2,-1,0,-2,596],[4,0,1,0,549],[0,0,4,0,537],[4,-1,0,0,520],[1,0,-2,0,-487],
+    [2,1,0,-2,-399],[0,0,2,-2,-381],[1,1,1,0,351],[3,0,-2,0,-340],[4,0,-3,0,330],[2,-1,2,0,327],[0,2,1,0,-323],[1,1,-1,0,299],[2,0,3,0,294]];
+  const AS_R = Math.PI / 180, AS_N = x => ((x % 360) + 360) % 360;
+  function AS_moon(jde) { // Meeus ch. 47, apparent geocentric longitude
+    const T = (jde - 2451545) / 36525;
+    const Lp = AS_N(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T), D = AS_N(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T),
+      M = AS_N(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T), Mp = AS_N(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T), F = AS_N(93.272095 + 483202.0175233 * T - 0.0036539 * T * T);
+    const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+    let s = 0;
+    for (const t of AS_MOON) s += t[4] * (Math.abs(t[1]) === 1 ? E : t[1] ? E * E : 1) * Math.sin((t[0] * D + t[1] * M + t[2] * Mp + t[3] * F) * AS_R);
+    s += 3958 * Math.sin(AS_N(119.75 + 131.849 * T) * AS_R) + 1962 * Math.sin((Lp - F) * AS_R) + 318 * Math.sin(AS_N(53.09 + 479264.29 * T) * AS_R);
+    const om = AS_N(125.04452 - 1934.136261 * T);
+    return AS_N(Lp + s / 1e6 - 0.004778 * Math.sin(om * AS_R) - 0.0003667 * Math.sin(2 * Lp * AS_R));
+  }
+  function AS_sun(jde) { // Meeus ch. 25, apparent longitude
+    const T = (jde - 2451545) / 36525, M = AS_N(357.52911 + 35999.05029 * T - 0.0001537 * T * T);
+    const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M * AS_R) + (0.019993 - 0.000101 * T) * Math.sin(2 * M * AS_R) + 0.000289 * Math.sin(3 * M * AS_R);
+    return AS_N(280.46646 + 36000.76983 * T + 0.0003032 * T * T + C - 0.00569 - 0.00478 * Math.sin((125.04 - 1934.136 * T) * AS_R));
+  }
+  function AS_asc(jd, lat, lonE) { // tropical longitude of the rising ecliptic point
+    const T = (jd - 2451545) / 36525, ramc = AS_N(280.46061837 + 360.98564736629 * (jd - 2451545) + 0.000387933 * T * T + lonE) * AS_R;
+    const eps = (23.439291 - 0.0130042 * T) * AS_R;
+    return AS_N(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(lat * AS_R) * Math.sin(eps))) / AS_R);
+  }
+  const AS_lahiri = jde => { const T = (jde - 2451545) / 36525; return 23.85305 + (5028.796195 * T + 1.1054348 * T * T) / 3600; };
+  function AS_deltaT(y) { const t = y - 2000, u = y - 1975; return y >= 1986 && y < 2050 ? 62.92 + 0.32217 * t + 0.005589 * t * t : y >= 1961 && y < 1986 ? 45.45 + 1.067 * u - u * u / 260 - u * u * u / 718 : y < 1961 && y >= 1900 ? 29 : 70; }
+  // one-stop birth details (sidereal, Lahiri). date "YYYY-MM-DD", time "HH:MM", tz in hours east of UTC
+  function AS_birth(date, time, lat, lon, tz) {
+    const dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date || ''), tm = /^(\d{1,2}):(\d{2})/.exec(time || '');
+    if (!dm || !tm) return null;
+    const ms = Date.UTC(+dm[1], +dm[2] - 1, +dm[3], +tm[1], +tm[2]) - tz * 3600000, jd = ms / 86400000 + 2440587.5, jde = jd + AS_deltaT(+dm[1]) / 86400;
+    const ay = AS_lahiri(jde), moon = AS_N(AS_moon(jde) - ay), sun = AS_N(AS_sun(jde) - ay), lag = AS_N(AS_asc(jd, lat, lon) - ay);
+    const SPAN = 360 / 27, star = Math.floor(moon / SPAN), inStar = moon - star * SPAN;
+    const lordIdx = star % 9, left = (SPAN - inStar) / SPAN; // Vimshottari: share of the birth star still to run
+    const elong = AS_N(moon - sun), tithi = Math.floor(elong / 12);
+    return {
+      moon: moon, sun: sun, lagnaDeg: lag, star: star, pada: Math.floor(inStar / (SPAN / 4)) + 1, rasi: Math.floor(moon / 30), lagna: Math.floor(lag / 30), sunRasi: Math.floor(sun / 30),
+      tithi: tithi, yoga: Math.floor(AS_N(moon + sun) / SPAN), karana: Math.floor(elong / 6), weekday: new Date(Date.UTC(+dm[1], +dm[2] - 1, +dm[3])).getUTCDay(),
+      dasaLord: lordIdx, dasaLeft: left * AS_DASA[lordIdx][2],
+      edgeStar: Math.min(inStar, SPAN - inStar) / 0.55, // hours of birth time to the nearest star boundary (Moon ~0.55°/h)
+      edgeLagna: Math.min(lag % 30, 30 - (lag % 30)) * 4, // minutes to the nearest lagna boundary (~1° per 4 min)
+    };
+  }
+  const AS_DASA = [['கேது', 'Ketu', 7], ['சுக்கிரன்', 'Venus', 20], ['சூரியன்', 'Sun', 6], ['சந்திரன்', 'Moon', 10], ['செவ்வாய்', 'Mars', 7], ['ராகு', 'Rahu', 18], ['குரு', 'Jupiter', 16], ['சனி', 'Saturn', 19], ['புதன்', 'Mercury', 17]];
+  const AS_STARS = [['அசுவினி', 'Ashwini'], ['பரணி', 'Bharani'], ['கார்த்திகை', 'Karthigai'], ['ரோகிணி', 'Rohini'], ['மிருகசீரிடம்', 'Mirugasirisham'], ['திருவாதிரை', 'Thiruvathirai'], ['புனர்பூசம்', 'Punarpoosam'], ['பூசம்', 'Poosam'], ['ஆயில்யம்', 'Ayilyam'],
+    ['மகம்', 'Magam'], ['பூரம்', 'Pooram'], ['உத்திரம்', 'Uthiram'], ['அஸ்தம்', 'Hastham'], ['சித்திரை', 'Chithirai'], ['சுவாதி', 'Swathi'], ['விசாகம்', 'Visakam'], ['அனுஷம்', 'Anusham'], ['கேட்டை', 'Kettai'],
+    ['மூலம்', 'Moolam'], ['பூராடம்', 'Pooradam'], ['உத்திராடம்', 'Uthiradam'], ['திருவோணம்', 'Thiruvonam'], ['அவிட்டம்', 'Avittam'], ['சதயம்', 'Sathayam'], ['பூரட்டாதி', 'Poorattathi'], ['உத்திரட்டாதி', 'Uthirattathi'], ['ரேவதி', 'Revathi']];
+  const AS_RASI = [['மேஷம்', 'Mesham'], ['ரிஷபம்', 'Rishabam'], ['மிதுனம்', 'Mithunam'], ['கடகம்', 'Kadagam'], ['சிம்மம்', 'Simmam'], ['கன்னி', 'Kanni'], ['துலாம்', 'Thulam'], ['விருச்சிகம்', 'Viruchigam'], ['தனுசு', 'Dhanusu'], ['மகரம்', 'Magaram'], ['கும்பம்', 'Kumbam'], ['மீனம்', 'Meenam']];
+  const AS_TITHI = ['பிரதமை', 'துவிதியை', 'திருதியை', 'சதுர்த்தி', 'பஞ்சமி', 'சஷ்டி', 'சப்தமி', 'அஷ்டமி', 'நவமி', 'தசமி', 'ஏகாதசி', 'துவாதசி', 'திரயோதசி', 'சதுர்த்தசி'];
+  const AS_TITHI_EN = ['Prathamai', 'Dwithiyai', 'Thrithiyai', 'Chathurthi', 'Panchami', 'Sashti', 'Sapthami', 'Ashtami', 'Navami', 'Dasami', 'Ekadasi', 'Dwadasi', 'Thrayodasi', 'Chathurdasi'];
+  const AS_YOGA = ['விஷ்கம்பம்', 'பிரீதி', 'ஆயுஷ்மான்', 'சௌபாக்கியம்', 'சோபனம்', 'அதிகண்டம்', 'சுகர்மம்', 'திருதி', 'சூலம்', 'கண்டம்', 'விருத்தி', 'துருவம்', 'வியாகாதம்', 'ஹர்ஷணம்', 'வஜ்ரம்', 'சித்தி', 'வியதீபாதம்', 'வரீயான்', 'பரிகம்', 'சிவம்', 'சித்தம்', 'சாத்தியம்', 'சுபம்', 'சுப்பிரம்', 'பிராம்யம்', 'ஐந்திரம்', 'வைதிருதி'];
+  const AS_KARANA = ['பவம்', 'பாலவம்', 'கௌலவம்', 'தைதுலம்', 'கரசை', 'வணிசை', 'பத்திரை'];
+  function AS_karanaName(k) { if (k === 0) return 'கிம்ஸ்துக்னம்'; if (k >= 57) return ['சகுனி', 'சதுஷ்பாதம்', 'நாகவம்'][k - 57]; return AS_KARANA[(k - 1) % 7]; }
+  const AS_WEEK = [['ஞாயிறு', 'Sunday'], ['திங்கள்', 'Monday'], ['செவ்வாய்', 'Tuesday'], ['புதன்', 'Wednesday'], ['வியாழன்', 'Thursday'], ['வெள்ளி', 'Friday'], ['சனி', 'Saturday']];
+  // [Tamil, English, lat, lon, UTC offset]
+  const AS_PLACES = [['சென்னை', 'Chennai', 13.0827, 80.2707], ['கோயம்புத்தூர்', 'Coimbatore', 11.0168, 76.9558], ['மதுரை', 'Madurai', 9.9252, 78.1198], ['திருச்சி', 'Tiruchirappalli', 10.7905, 78.7047], ['சேலம்', 'Salem', 11.6643, 78.146],
+    ['திருநெல்வேலி', 'Tirunelveli', 8.7139, 77.7567], ['ஈரோடு', 'Erode', 11.341, 77.7172], ['திருப்பூர்', 'Tiruppur', 11.1085, 77.3411], ['வேலூர்', 'Vellore', 12.9165, 79.1325], ['தூத்துக்குடி', 'Thoothukudi', 8.7642, 78.1348],
+    ['தஞ்சாவூர்', 'Thanjavur', 10.787, 79.1378], ['திண்டுக்கல்', 'Dindigul', 10.3673, 77.9803], ['காஞ்சிபுரம்', 'Kanchipuram', 12.8342, 79.7036], ['நாகர்கோவில்', 'Nagercoil', 8.1833, 77.4119], ['கும்பகோணம்', 'Kumbakonam', 10.9617, 79.3881],
+    ['கரூர்', 'Karur', 10.9601, 78.0766], ['ஓசூர்', 'Hosur', 12.7409, 77.8253], ['நாமக்கல்', 'Namakkal', 11.2189, 78.1674], ['கடலூர்', 'Cuddalore', 11.748, 79.7714], ['விழுப்புரம்', 'Villupuram', 11.9401, 79.4861],
+    ['புதுக்கோட்டை', 'Pudukkottai', 10.3833, 78.8001], ['சிவகாசி', 'Sivakasi', 9.4533, 77.7967], ['ராமநாதபுரம்', 'Ramanathapuram', 9.3639, 78.8395], ['விருதுநகர்', 'Virudhunagar', 9.568, 77.9624], ['நாகப்பட்டினம்', 'Nagapattinam', 10.7672, 79.8449],
+    ['கிருஷ்ணகிரி', 'Krishnagiri', 12.5266, 78.215], ['தருமபுரி', 'Dharmapuri', 12.1211, 78.1582], ['ஊட்டி', 'Ooty', 11.4102, 76.695], ['பொள்ளாச்சி', 'Pollachi', 10.6586, 77.0085], ['பழனி', 'Palani', 10.4504, 77.5204],
+    ['தேனி', 'Theni', 10.0104, 77.4768], ['சிவகங்கை', 'Sivaganga', 9.8433, 78.4809], ['திருவண்ணாமலை', 'Tiruvannamalai', 12.2253, 79.0747], ['அரியலூர்', 'Ariyalur', 11.1401, 79.0786], ['பெரம்பலூர்', 'Perambalur', 11.2342, 78.8807],
+    ['திருவாரூர்', 'Thiruvarur', 10.7661, 79.6344], ['மயிலாடுதுறை', 'Mayiladuthurai', 11.1035, 79.6550], ['கள்ளக்குறிச்சி', 'Kallakurichi', 11.7383, 78.9639], ['செங்கல்பட்டு', 'Chengalpattu', 12.6819, 79.9888], ['திருவள்ளூர்', 'Tiruvallur', 13.1231, 79.912],
+    ['ராணிப்பேட்டை', 'Ranipet', 12.9224, 79.3326], ['திருப்பத்தூர்', 'Tirupattur', 12.4955, 78.5730], ['தென்காசி', 'Tenkasi', 8.9594, 77.3152], ['புதுச்சேரி', 'Puducherry', 11.9416, 79.8083], ['பெங்களூரு', 'Bengaluru', 12.9716, 77.5946],
+    ['மைசூரு', 'Mysuru', 12.2958, 76.6394], ['ஹைதராபாத்', 'Hyderabad', 17.385, 78.4867], ['மும்பை', 'Mumbai', 19.076, 72.8777], ['டெல்லி', 'Delhi', 28.6139, 77.209], ['கொல்கத்தா', 'Kolkata', 22.5726, 88.3639],
+    ['கொச்சி', 'Kochi', 9.9312, 76.2673], ['திருவனந்தபுரம்', 'Thiruvananthapuram', 8.5241, 76.9366], ['திருப்பதி', 'Tirupati', 13.6288, 79.4192], ['கொழும்பு', 'Colombo', 6.9271, 79.8612], ['யாழ்ப்பாணம்', 'Jaffna', 9.6615, 80.0255],
+    ['சிங்கப்பூர்', 'Singapore', 1.3521, 103.8198, 8], ['கோலாலம்பூர்', 'Kuala Lumpur', 3.139, 101.6869, 8], ['துபாய்', 'Dubai', 25.2048, 55.2708, 4]];
+  function AS_injectStyle() {
+    if (document.getElementById('cx-as-style')) return;
+    const s = document.createElement('style');
+    s.id = 'cx-as-style';
+    s.textContent = '.cx-root input.cx-in{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}' +
+      '.cx-pt{width:100%;border-collapse:collapse;margin-top:12px;background:#fff;border:1px solid var(--line);font-size:14px}' +
+      '.cx-pt td,.cx-pt th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.cx-pt th{background:#EAF0FF;color:var(--brand-dark)}' +
+      '.cx-pt .g{color:#176B45;font-weight:900}.cx-pt .m{color:#8A6100;font-weight:900}.cx-pt .b{color:#B03A2E;font-weight:900}.cx-pt small{display:block;color:var(--sub);font-weight:600}' +
+      '.cx-ebt{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}.cx-ebt td{padding:4px 6px;border-bottom:1px solid var(--line)}.cx-ebt input{width:90px;min-height:38px;border:1.5px solid var(--line);border-radius:8px;padding:4px 8px;font-size:15px}';
+    document.head.appendChild(s);
+  }
+  function AS_placeSelect(cur) {
+    return '<div class="cx-f"><label>' + T('பிறந்த ஊர்', 'Place of birth') + '</label><select data-k="place">' + AS_PLACES.map((p, i) => '<option value="' + i + '"' + (String(i) === String(cur) ? ' selected' : '') + '>' + esc(isEn() ? p[1] : p[0] + ' · ' + p[1]) + '</option>').join('') +
+      '<option value="x"' + (cur === 'x' ? ' selected' : '') + '>' + T('வேறு ஊர் (அட்சரேகை / தீர்க்கரேகை)', 'Other place (latitude / longitude)') + '</option></select></div>';
+  }
+  const AS_star = i => (isEn() ? AS_STARS[i][1] + ' · ' + AS_STARS[i][0] : AS_STARS[i][0]);
+  const AS_rasi = i => (isEn() ? AS_RASI[i][1] + ' · ' + AS_RASI[i][0] : AS_RASI[i][0]);
+  function AS_yrs(y) { const yy = Math.floor(y), mm = Math.floor((y - yy) * 12), dd = Math.floor(((y - yy) * 12 - mm) * 30.4375); return T(yy + ' வருடம் ' + mm + ' மாதம் ' + dd + ' நாள்', yy + ' y ' + mm + ' m ' + dd + ' d'); }
+
+  /* =====================================================================
+   * starfinder — நட்சத்திரம், ராசி, லக்னம், திதி, தசை இருப்பு from birth date/time/place
+   * ===================================================================== */
+  TOOL_IMPL.starfinder = {
+    mount(body) {
+      AS_injectStyle();
+      const root = makeRoot(body);
+      const S = Object.assign({ date: '', time: '', place: '0', lat: '', lon: '', tz: '5.5' }, lsGet('starfinder', {}));
+      root.innerHTML = purpose('இது எதற்கு? பிறந்த தேதி, நேரம், ஊர் கொடுத்தால் நட்சத்திரம் (பாதம்), ராசி, லக்னம், திதி, யோகம், கரணம், பிறந்த கிழமை, தசை இருப்பு — அனைத்தும் உடனே. திருக்கணித முறை, லஹிரி அயனாம்சம். எல்லாம் உங்கள் phone-லேயே கணக்கிடப்படும்.',
+        'Birth star (with padam), raasi, lagnam, thithi, yogam, karanam and dasa balance from date, time and place. Thirukanitha (Lahiri) method, calculated on your device.') +
+        '<div class="cx-grid"><div class="cx-f"><label>' + T('பிறந்த தேதி', 'Date of birth') + '</label><input class="cx-in" type="date" data-k="date" value="' + esc(S.date) + '"></div>' +
+        '<div class="cx-f"><label>' + T('பிறந்த நேரம்', 'Time of birth') + '</label><input class="cx-in" type="time" data-k="time" value="' + esc(S.time) + '"></div></div>' +
+        AS_placeSelect(S.place) + '<div data-k="ll"></div><div data-k="out"></div>';
+      const out = $(root, '[data-k=out]'), ll = $(root, '[data-k=ll]');
+      function drawLL() {
+        ll.innerHTML = S.place === 'x' ? '<div class="cx-grid three">' + field(T('அட்சரேகை (N)', 'Latitude (N)'), 'lat', S.lat, { ph: '11.34' }) + field(T('தீர்க்கரேகை (E)', 'Longitude (E)'), 'lon', S.lon, { ph: '77.72' }) + field(T('நேர மண்டலம் (UTC+)', 'Time zone (UTC+)'), 'tz', S.tz) + '</div>' +
+          '<div class="cx-small">' + T('Google Maps-ல் ஊரை அழுத்திப் பிடித்தால் அட்சரேகை, தீர்க்கரேகை தெரியும்.', 'Long-press the place on Google Maps to see its latitude and longitude.') + '</div>' : '';
+        ll.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+      }
+      let txt = '';
+      function calc() {
+        lsSet('starfinder', S);
+        if (!S.date || !S.time) { out.innerHTML = '<div class="cx-info">' + T('பிறந்த தேதியும் நேரமும் கொடுங்கள். நேரம் தெரியாவிட்டால் தோராயமான நேரம் கொடுங்கள் — நட்சத்திரம் பெரும்பாலும் சரியாக வரும்; லக்னம் வராது.', 'Enter the date and time of birth. If you only know the approximate time the star is usually still right; the lagnam is not.') + '</div>'; return; }
+        let lat, lon, tz, placeName;
+        if (S.place === 'x') { lat = parseNum(S.lat); lon = parseNum(S.lon); tz = parseNum(S.tz); placeName = lat + ', ' + lon; }
+        else { const p = AS_PLACES[+S.place] || AS_PLACES[0]; lat = p[2]; lon = p[3]; tz = p[4] || 5.5; placeName = isEn() ? p[1] : p[0]; }
+        if (!(Math.abs(lat) < 66 && lon >= -180 && lon <= 180 && Math.abs(tz) <= 14)) { out.innerHTML = msgHtml(T('சரியான அட்சரேகை / தீர்க்கரேகை / நேர மண்டலம் கொடுங்கள்.', 'Enter a valid latitude, longitude and time zone.')); return; }
+        const b = AS_birth(S.date, S.time, lat, lon, tz);
+        if (!b) { out.innerHTML = ''; return; }
+        const tith = b.tithi % 15, paksha = b.tithi < 15 ? T('வளர்பிறை', 'Valarpirai (waxing)') : T('தேய்பிறை', 'Theipirai (waning)');
+        const tName = b.tithi === 14 ? T('பௌர்ணமி', 'Pournami') : b.tithi === 29 ? T('அமாவாசை', 'Amavasai') : (isEn() ? AS_TITHI_EN[tith] : AS_TITHI[tith]);
+        const d = AS_DASA[b.dasaLord];
+        const rows = [[T('நட்சத்திரம்', 'Star'), AS_star(b.star) + ' — ' + T(b.pada + ' ஆம் பாதம்', 'padam ' + b.pada), true],
+          [T('ராசி', 'Raasi'), AS_rasi(b.rasi), true], [T('லக்னம்', 'Lagnam'), AS_rasi(b.lagna), true],
+          [T('திதி', 'Thithi'), paksha + ' ' + tName], [T('யோகம்', 'Yogam'), AS_YOGA[b.yoga]], [T('கரணம்', 'Karanam'), AS_karanaName(b.karana)],
+          [T('பிறந்த கிழமை', 'Day'), AS_WEEK[b.weekday][isEn() ? 1 : 0] + (parseInt(S.time, 10) < 6 ? T(' (சூரிய உதயத்துக்கு முன் — பஞ்சாங்கப்படி ' + AS_WEEK[(b.weekday + 6) % 7][0] + ')', ' (before sunrise — by the almanac ' + AS_WEEK[(b.weekday + 6) % 7][1] + ')') : '')], [T('சூரியன் நிற்கும் ராசி (தமிழ் மாதம்)', 'Sun in (Tamil month)'), AS_rasi(b.sunRasi)],
+          [T('தசை இருப்பு (பிறக்கும்போது)', 'Dasa balance at birth'), T(d[0] + ' தசை ', d[1] + ' dasa ') + AS_yrs(b.dasaLeft)],
+          [T('சந்திரன் (நிராயன)', 'Moon (sidereal)'), fmt(b.moon, 2) + '°'], [T('லக்னம் (நிராயன)', 'Lagnam (sidereal)'), fmt(b.lagnaDeg, 2) + '°']];
+        txt = rows.map(r => r[0].replace(/<[^>]+>/g, '') + ': ' + String(r[1]).replace(/<[^>]+>/g, '')).join('\n') + '\n(' + S.date + ' ' + S.time + ', ' + placeName + ') — pdftoolsindia.com';
+        out.innerHTML = resCard(T('உங்கள் நட்சத்திரம்', 'Your birth star'), esc(AS_star(b.star)), T(b.pada + ' ஆம் பாதம் · ', 'Padam ' + b.pada + ' · ') + esc(AS_rasi(b.rasi)) + T(' ராசி', ' raasi'), null, 'ok') +
+          tableHtml(rows.map(r => [r[0], esc(r[1]), r[2]])) +
+          (b.edgeStar < 1 ? '<div class="cx-info">⚠ ' + T('பிறந்த நேரம் நட்சத்திர மாற்ற நேரத்துக்கு ' + Math.round(b.edgeStar * 60) + ' நிமிடத்துக்குள் இருக்கிறது. நேரம் சரியாகத் தெரியாவிட்டால் அடுத்த/முந்தைய நட்சத்திரமாகவும் இருக்கலாம்.', 'The birth time is within ' + Math.round(b.edgeStar * 60) + ' minutes of a star change; if the time is not exact the star could be the neighbouring one.') + '</div>' : '') +
+          (b.edgeLagna < 10 ? '<div class="cx-info">⚠ ' + T('லக்னம் மாறும் நேரத்துக்கு மிக அருகில் (' + Math.round(b.edgeLagna) + ' நிமிடம்) — நேரம் சரியாக இருந்தால் மட்டுமே லக்னம் சரி.', 'Very close (' + Math.round(b.edgeLagna) + ' min) to a lagnam change — the lagnam is right only if the time is exact.') + '</div>' : '') +
+          '<div class="cx-small">' + T('திருக்கணித (லஹிரி அயனாம்சம்) முறை. வாக்கிய பஞ்சாங்கக் கணக்கில் சில நேரம் சிறிய வேறுபாடு இருக்கலாம். முக்கிய முடிவுகளுக்கு ஜோதிடரிடம் உறுதிசெய்யவும்.', 'Thirukanitha (Lahiri ayanamsa). Vakya almanacs can differ slightly. Confirm with an astrologer for important decisions.') + '</div>' +
+          '<div class="cx-actions"><a class="cx-btn sec" href="?tool=porutham" style="text-decoration:none;display:inline-flex;align-items:center">💑 ' + T('திருமணப் பொருத்தம் பார்க்க', 'Check marriage porutham') + '</a></div>';
+        out.appendChild(actionsEl(() => txt));
+      }
+      root.querySelectorAll('[data-k=date],[data-k=time]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+      $(root, '[data-k=place]').onchange = e => { S.place = e.target.value; drawLL(); calc(); };
+      drawLL(); calc();
+    }
+  };
+  TOOL_IMPL.starfinder._f = { birth: AS_birth, moon: AS_moon, sun: AS_sun, asc: AS_asc };
+
+  /* =====================================================================
+   * porutham — 10 பொருத்தம் from the bride's and groom's stars (South Indian rules)
+   * ===================================================================== */
+  const PR_GANA = [0, 1, 2, 1, 0, 1, 0, 0, 2, 2, 1, 1, 0, 2, 0, 2, 0, 2, 2, 1, 1, 0, 2, 2, 1, 1, 0]; // 0 deva, 1 manushya, 2 rakshasa
+  const PR_YONI = [0, 1, 2, 3, 3, 4, 5, 2, 5, 6, 6, 7, 8, 9, 8, 9, 10, 10, 4, 11, 12, 11, 13, 0, 13, 7, 1]; // animal per star
+  const PR_YONI_NAME = [['குதிரை', 'Horse'], ['யானை', 'Elephant'], ['ஆடு', 'Goat'], ['பாம்பு', 'Serpent'], ['நாய்', 'Dog'], ['பூனை', 'Cat'], ['எலி', 'Rat'], ['பசு', 'Cow'], ['எருமை', 'Buffalo'], ['புலி', 'Tiger'], ['மான்', 'Deer'], ['குரங்கு', 'Monkey'], ['கீரி', 'Mongoose'], ['சிங்கம்', 'Lion']];
+  const PR_YONI_ENEMY = [[0, 8], [1, 13], [2, 11], [3, 12], [4, 10], [5, 6], [7, 9]];
+  const PR_RAJJU = [4, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 4]; // 0 head .. 4 foot
+  const PR_RAJJU_NAME = [['சிரசு', 'Head'], ['கண்டம்', 'Neck'], ['உதரம்', 'Stomach'], ['ஊரு (தொடை)', 'Thigh'], ['பாதம்', 'Foot']];
+  const PR_VEDHA = [[0, 17], [1, 16], [2, 15], [3, 14], [5, 21], [6, 20], [7, 19], [8, 18], [9, 26], [10, 25], [11, 24], [12, 23], [4, 13], [13, 22], [4, 22]];
+  const PR_LORD = [2, 5, 3, 1, 0, 3, 5, 2, 4, 6, 6, 4]; // per rasi: 0 Sun 1 Moon 2 Mars 3 Mercury 4 Jupiter 5 Venus 6 Saturn
+  const PR_FRIEND = [[1, 1, 1, 0, 1, -1, -1], [1, 1, 0, 1, 0, 0, 0], [1, 1, 1, -1, 1, 0, 0], [1, -1, 0, 1, 0, 1, 0], [1, 1, 1, -1, 1, -1, 0], [-1, -1, 0, 1, 0, 1, 1], [-1, -1, -1, 1, 0, 1, 1]];
+  const PR_VASYA = [[4, 7], [3, 6], [5], [7, 8], [6], [1, 11], [9], [3], [11], [10], [11], [9]];
+  const PR_PLANET = ['சூரியன்', 'சந்திரன்', 'செவ்வாய்', 'புதன்', 'குரு', 'சுக்கிரன்', 'சனி'];
+  const PR_rasiOf = (star, pada) => Math.floor((star * 4 + (pada - 1)) / 9);
+  // returns [{key, ta, en, v: 2 good / 1 average / 0 not matching, why}]
+  function PR_match(bStar, bPada, gStar, gPada) {
+    const n = ((gStar - bStar + 27) % 27) + 1, br = PR_rasiOf(bStar, bPada), gr = PR_rasiOf(gStar, gPada), rn = ((gr - br + 12) % 12) + 1;
+    const out = [];
+    const add = (key, ta, en, v, why) => out.push({ key: key, ta: ta, en: en, v: v, why: why });
+    add('dina', 'தினப் பொருத்தம்', 'Dina', [2, 4, 6, 8, 0].includes(n % 9) ? 2 : 0, T('பெண் நட்சத்திரத்திலிருந்து ஆண் நட்சத்திரம் ' + n + '-வது', 'Groom\'s star is ' + n + ' from the bride\'s'));
+    const gb = PR_GANA[bStar], gg = PR_GANA[gStar], GN = [T('தேவ', 'Deva'), T('மனுஷ்ய', 'Manushya'), T('ராட்சச', 'Rakshasa')];
+    add('gana', 'கணப் பொருத்தம்', 'Gana', gb === gg ? 2 : (gb !== 2 && gg !== 2) ? 1 : (gg === 2 && gb === 1) ? 1 : 0, T('பெண் ', 'Bride ') + GN[gb] + T(' கணம், ஆண் ', ' gana, groom ') + GN[gg] + T(' கணம்', ' gana'));
+    add('mahendra', 'மகேந்திரப் பொருத்தம்', 'Mahendra', [4, 7, 10, 13, 16, 19, 22, 25].includes(n) ? 2 : 0, T('எண்ணிக்கை ' + n, 'Count ' + n));
+    add('stree', 'ஸ்த்ரீ தீர்க்கம்', 'Stree Deergha', n > 13 ? 2 : n > 7 ? 1 : 0, T('எண்ணிக்கை ' + n + ' (13-க்கு மேல் உத்தமம்)', 'Count ' + n + ' (above 13 is best)'));
+    const yb = PR_YONI[bStar], yg = PR_YONI[gStar], enemy = PR_YONI_ENEMY.some(p => (p[0] === yb && p[1] === yg) || (p[0] === yg && p[1] === yb));
+    add('yoni', 'யோனிப் பொருத்தம்', 'Yoni', yb === yg ? 2 : enemy ? 0 : 1, T('பெண் ', 'Bride ') + PR_YONI_NAME[yb][isEn() ? 1 : 0] + ', ' + T('ஆண் ', 'groom ') + PR_YONI_NAME[yg][isEn() ? 1 : 0] + (enemy ? T(' — பகை', ' — enemies') : ''));
+    add('rasi', 'ராசிப் பொருத்தம்', 'Rasi', rn === 1 || rn >= 7 && rn !== 8 && rn !== 12 ? 2 : rn === 3 || rn === 4 || rn === 5 ? 1 : 0, T('பெண் ராசியிலிருந்து ஆண் ராசி ' + rn + '-வது', 'Groom\'s raasi is ' + rn + ' from the bride\'s') + (rn === 6 || rn === 8 ? T(' (சஷ்டாஷ்டகம்)', ' (6/8)') : rn === 2 || rn === 12 ? ' (2/12)' : ''));
+    const lb = PR_LORD[br], lg = PR_LORD[gr], f1 = PR_FRIEND[lb][lg], f2 = PR_FRIEND[lg][lb];
+    add('lord', 'ராசி அதிபதிப் பொருத்தம்', 'Rasi lord', lb === lg || (f1 === 1 && f2 === 1) ? 2 : f1 === -1 || f2 === -1 ? 0 : 1, PR_PLANET[lb] + ' — ' + PR_PLANET[lg]);
+    add('vasya', 'வசியப் பொருத்தம்', 'Vasya', PR_VASYA[br].includes(gr) || PR_VASYA[gr].includes(br) ? 2 : 0, AS_rasi(br) + ' — ' + AS_rasi(gr));
+    const rb = PR_RAJJU[bStar], rg = PR_RAJJU[gStar];
+    add('rajju', 'ரஜ்ஜுப் பொருத்தம்', 'Rajju', rb !== rg ? 2 : 0, T('பெண் ', 'Bride ') + PR_RAJJU_NAME[rb][isEn() ? 1 : 0] + T(' ரஜ்ஜு, ஆண் ', ' rajju, groom ') + PR_RAJJU_NAME[rg][isEn() ? 1 : 0] + T(' ரஜ்ஜு', ' rajju'));
+    const vedha = PR_VEDHA.some(p => (p[0] === bStar && p[1] === gStar) || (p[0] === gStar && p[1] === bStar));
+    add('vedhai', 'வேதைப் பொருத்தம்', 'Vedhai', vedha ? 0 : 2, vedha ? T('இந்த இரு நட்சத்திரங்களும் வேதை', 'These two stars are vedhai') : T('வேதை இல்லை', 'No vedhai'));
+    return { list: out, n: n, br: br, gr: gr, score: out.reduce((s, x) => s + x.v, 0) / 2 };
+  }
+  TOOL_IMPL.porutham = {
+    mount(body) {
+      AS_injectStyle();
+      const root = makeRoot(body);
+      const S = Object.assign({ b: '', bp: '1', g: '', gp: '1' }, lsGet('porutham', {}));
+      const starOpts = [['', T('— நட்சத்திரம் —', '— star —')]].concat(AS_STARS.map((s, i) => [String(i), isEn() ? s[1] + ' · ' + s[0] : s[0]]));
+      const padaOpts = [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']];
+      root.innerHTML = purpose('இது எதற்கு? பெண், ஆண் இருவரின் நட்சத்திரம், பாதம் கொடுத்தால் 10 பொருத்தங்களும் (தினம், கணம், மகேந்திரம், ஸ்த்ரீ தீர்க்கம், யோனி, ராசி, ராசி அதிபதி, வசியம், ரஜ்ஜு, வேதை) விளக்கத்துடன். நட்சத்திரம் தெரியாவிட்டால் கீழே உள்ள "நட்சத்திரம் கண்டுபிடி" உதவும்.',
+        'All 10 poruthams from the bride\'s and groom\'s stars and padam, with reasons. Use the star finder if you do not know the star.') +
+        '<div class="cx-h">👰 ' + T('பெண்', 'Bride') + '</div><div class="cx-grid">' + selectField(T('நட்சத்திரம்', 'Star'), 'b', starOpts, S.b) + selectField(T('பாதம்', 'Padam'), 'bp', padaOpts, S.bp) + '</div>' +
+        '<div class="cx-h">🤵 ' + T('ஆண்', 'Groom') + '</div><div class="cx-grid">' + selectField(T('நட்சத்திரம்', 'Star'), 'g', starOpts, S.g) + selectField(T('பாதம்', 'Padam'), 'gp', padaOpts, S.gp) + '</div>' +
+        '<div class="cx-actions"><a class="cx-btn sec" href="?tool=starfinder" style="text-decoration:none;display:inline-flex;align-items:center">🔭 ' + T('நட்சத்திரம் தெரியவில்லையா? கண்டுபிடி', 'Don\'t know the star? Find it') + '</a></div><div data-k="out"></div>';
+      const out = $(root, '[data-k=out]');
+      let txt = '';
+      function calc() {
+        lsSet('porutham', S);
+        if (S.b === '' || S.g === '') { out.innerHTML = ''; return; }
+        const r = PR_match(+S.b, +S.bp, +S.g, +S.gp), V = ['b', 'm', 'g'], VL = [T('இல்லை', 'No'), T('மத்திமம்', 'Average'), T('உத்தமம்', 'Good')], VI = ['✗', '±', '✓'];
+        const rajju = r.list.find(x => x.key === 'rajju').v === 0, vedhai = r.list.find(x => x.key === 'vedhai').v === 0;
+        const verdict = rajju || vedhai ? T('ரஜ்ஜு / வேதை பொருத்தம் இல்லை — பொதுவாக இதை முக்கியத் தடையாகக் கருதுவார்கள்', 'Rajju / vedhai does not match — usually treated as a major dosham')
+          : r.score >= 7 ? T('நல்ல பொருத்தம்', 'Good match') : r.score >= 5 ? T('சராசரிப் பொருத்தம்', 'Average match') : T('குறைவான பொருத்தம்', 'Weak match');
+        txt = T('பெண்: ', 'Bride: ') + AS_star(+S.b) + ' ' + S.bp + ' (' + AS_rasi(r.br) + ')\n' + T('ஆண்: ', 'Groom: ') + AS_star(+S.g) + ' ' + S.gp + ' (' + AS_rasi(r.gr) + ')\n' +
+          r.list.map(x => (isEn() ? x.en : x.ta) + ': ' + VL[x.v]).join('\n') + '\n' + T('மொத்தம்: ', 'Total: ') + fmt(r.score, 1) + ' / 10 — ' + verdict + '\npdftoolsindia.com';
+        out.innerHTML = resCard(T('மொத்தப் பொருத்தம்', 'Total'), fmt(r.score, 1) + ' <span style="font-size:18px;opacity:.85">/ 10</span>', esc(verdict), null, rajju || vedhai ? 'bad' : r.score >= 7 ? 'ok' : '') +
+          '<div class="cx-small">' + T('பெண் ராசி: ', 'Bride raasi: ') + esc(AS_rasi(r.br)) + ' · ' + T('ஆண் ராசி: ', 'Groom raasi: ') + esc(AS_rasi(r.gr)) + '</div>' +
+          '<table class="cx-pt"><thead><tr><th>' + T('பொருத்தம்', 'Porutham') + '</th><th>' + T('முடிவு', 'Result') + '</th></tr></thead><tbody>' +
+          r.list.map(x => '<tr><td><b>' + esc(isEn() ? x.en + ' · ' + x.ta : x.ta) + '</b><small>' + esc(x.why) + '</small></td><td class="' + V[x.v] + '">' + VI[x.v] + ' ' + VL[x.v] + '</td></tr>').join('') + '</tbody></table>' +
+          (+S.b === +S.g ? '<div class="cx-info">' + T('இருவருக்கும் ஒரே நட்சத்திரம். சில நட்சத்திரங்களுக்கு (ரோகிணி, திருவாதிரை, மகம், அஸ்தம், விசாகம், திருவோணம், உத்திரட்டாதி, ரேவதி) இது ஏற்கப்படும்; மற்றவற்றுக்கு ஜோதிடரிடம் கேளுங்கள்.', 'Same star for both — accepted for some stars, ask an astrologer for the rest.') + '</div>' : '') +
+          '<div class="cx-info">' + T('நட்சத்திரப் பொருத்தம் மட்டுமே இது. செவ்வாய் தோஷம், ராகு-கேது, தசா சந்திப்பு போன்றவை ஜாதகத்தைப் பார்த்துதான் சொல்ல முடியும். ஊருக்கு ஊர் விதிகள் சிறிது மாறும் — இறுதி முடிவுக்கு ஜோதிடரிடம் உறுதிசெய்யவும்.', 'Star-based porutham only. Sevvai dosham, Rahu-Ketu and dasa sandhi need the full horoscope; rules vary a little by region — confirm with an astrologer.') + '</div>';
+        out.appendChild(actionsEl(() => txt));
+      }
+      root.querySelectorAll('select[data-k]').forEach(s => s.onchange = () => { S[s.getAttribute('data-k')] = s.value; calc(); });
+      calc();
+    }
+  };
+  TOOL_IMPL.porutham._f = { match: PR_match, rasiOf: PR_rasiOf };
+
+  /* =====================================================================
+   * goldcalc — jewellery price, old-gold exchange, gold loan
+   * ===================================================================== */
+  const GC_PUR = [['22', '22K (916)', 22 / 24], ['24', '24K (999)', 0.999], ['18', '18K (750)', 0.75], ['20', '20K (833)', 20 / 24], ['14', '14K (585)', 0.585]];
+  TOOL_IMPL.goldcalc = {
+    mount(body) {
+      AS_injectStyle();
+      const root = makeRoot(body);
+      const S = Object.assign({ tab: 'buy', w: '8', rate: '', rk: '22', va: '12', mk: '0', mkType: 'g', stone: '0', gst: '3', ow: '', ok: '22', ded: '2', lw: '', lk: '22', ltv: '75', lr: '', li: '12', lm: '12' }, lsGet('goldcalc', {}));
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? நகை வாங்கும்போது சேதாரம் (VA), செய்கூலி, கல் விலை, GST சேர்த்து சரியான விலை; பழைய நகைக்கு எவ்வளவு கிடைக்கும்; நகைக் கடனில் எவ்வளவு பணம், எவ்வளவு வட்டி — கடையில் பில் வாங்கும் முன் நீங்களே சரிபார்க்கலாம்.',
+          'Jewellery price with wastage (VA), making charge, stones and GST; old-gold exchange value; gold-loan amount and interest. Check the bill yourself before you pay.') +
+          tabsHtml([['buy', T('நகை விலை', 'Jewellery price')], ['old', T('பழைய நகை மாற்று', 'Old gold')], ['loan', T('நகைக் கடன்', 'Gold loan')]], S.tab) + '<div data-k="pane"></div><div data-k="out"></div>';
+        bindTabs(root, t => { S.tab = t; draw(); });
+        const pane = $(root, '[data-k=pane]'), purOpts = GC_PUR.map(p => [p[0], p[1]]);
+        if (S.tab === 'buy') pane.innerHTML = '<div class="cx-grid">' + field(T('எடை (கிராம்)', 'Weight (grams)'), 'w', S.w) + selectField(T('தூய்மை', 'Purity'), 'rk', purOpts, S.rk) + '</div>' +
+          '<div class="cx-grid one">' + field(T('இன்றைய தங்க விலை — இந்தத் தூய்மைக்கு, 1 கிராம் (₹)', 'Today\'s rate for this purity, per gram (₹)'), 'rate', S.rate, { ph: '9500' }) + '</div>' +
+          '<div class="cx-grid">' + field(T('சேதாரம் / VA (%)', 'Wastage / VA (%)'), 'va', S.va) + field(T('கல் / மற்ற கட்டணம் (₹)', 'Stones / other (₹)'), 'stone', S.stone) + '</div>' +
+          '<div class="cx-grid">' + field(T('செய்கூலி', 'Making charge'), 'mk', S.mk) + selectField(T('செய்கூலி வகை', 'Making charge type'), 'mkType', [['g', T('₹ / கிராம்', '₹ per gram')], ['p', T('% தங்க மதிப்பில்', '% of gold value')], ['f', T('மொத்தம் ₹', 'Flat ₹')]], S.mkType) + '</div>' +
+          '<div class="cx-grid one">' + field(T('GST (%)', 'GST (%)'), 'gst', S.gst) + '</div>';
+        else if (S.tab === 'old') pane.innerHTML = '<div class="cx-grid">' + field(T('பழைய நகை எடை (கிராம்)', 'Old gold weight (grams)'), 'ow', S.ow) + selectField(T('தூய்மை', 'Purity'), 'ok', purOpts, S.ok) + '</div>' +
+          '<div class="cx-grid">' + field(T('இன்றைய 24K விலை / கிராம் (₹)', 'Today\'s 24K rate per gram (₹)'), 'rate', S.rate, { ph: '10300' }) + field(T('கடை கழிவு (%)', 'Shop deduction (%)'), 'ded', S.ded) + '</div>';
+        else pane.innerHTML = '<div class="cx-grid">' + field(T('நகை எடை (கிராம்)', 'Jewel weight (grams)'), 'lw', S.lw) + selectField(T('தூய்மை', 'Purity'), 'lk', purOpts, S.lk) + '</div>' +
+          '<div class="cx-grid">' + field(T('வங்கி மதிப்பிடும் 22K விலை / கிராம் (₹)', 'Bank\'s 22K value per gram (₹)'), 'lr', S.lr, { ph: '9000' }) + field(T('கடன் விகிதம் LTV (%)', 'Loan-to-value (%)'), 'ltv', S.ltv) + '</div>' +
+          '<div class="cx-grid">' + field(T('வட்டி (% ஆண்டுக்கு)', 'Interest (% per year)'), 'li', S.li) + field(T('காலம் (மாதம்)', 'Period (months)'), 'lm', S.lm) + '</div>';
+        root.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        root.querySelectorAll('select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        calc();
+      }
+      let txt = '';
+      function calc() {
+        lsSet('goldcalc', S);
+        const out = $(root, '[data-k=out]'), P = k => parseNum(S[k]);
+        const pur = k => (GC_PUR.find(p => p[0] === S[k]) || GC_PUR[0]);
+        if (S.tab === 'buy') {
+          const w = P('w'), rate = P('rate'), va = P('va') || 0, mk = P('mk') || 0, stone = P('stone') || 0, gst = P('gst') || 0;
+          if (!(w > 0 && rate > 0)) { out.innerHTML = '<div class="cx-info">' + T('எடையும் இன்றைய விலையும் கொடுங்கள்.', 'Enter the weight and today\'s rate.') + '</div>'; return; }
+          const gold = w * rate, vaAmt = gold * va / 100, mkAmt = S.mkType === 'g' ? mk * w : S.mkType === 'p' ? gold * mk / 100 : mk;
+          const taxable = gold + vaAmt + mkAmt + stone, tax = taxable * gst / 100, total = taxable + tax;
+          txt = T('நகை விலை', 'Jewellery price') + ': ' + inr0(total) + ' (' + fmt(w, 3) + 'g ' + pur('rk')[1] + ')';
+          out.innerHTML = resCard(T('மொத்த விலை', 'Total price'), inr0(total), T('கிராமுக்கு சராசரி ', 'Effective per gram ') + inr0(total / w)) +
+            tableHtml([[T('தங்க மதிப்பு', 'Gold value') + ' (' + fmt(w, 3) + 'g × ' + inr2(rate) + ')', inr2(gold)], [T('சேதாரம் ', 'Wastage ') + fmt(va, 2) + '%', inr2(vaAmt)], [T('செய்கூலி', 'Making charge'), inr2(mkAmt)],
+              [T('கல் / மற்றவை', 'Stones / other'), inr2(stone)], ['GST ' + fmt(gst, 2) + '%', inr2(tax)], [T('மொத்தம்', 'Total'), inr2(total), true]]) +
+            '<div class="cx-info">' + T('சேதாரம் ' + fmt(va, 2) + '% என்றால் ' + fmt(w * va / 100, 3) + ' கிராம் தங்கத்துக்குக் கூடுதலாகப் பணம் செலுத்துகிறீர்கள். BIS HUID முத்திரை உள்ளதா என்று பார்த்து வாங்குங்கள்.', 'A ' + fmt(va, 2) + '% wastage means you pay for ' + fmt(w * va / 100, 3) + ' g extra. Buy only BIS hallmarked (HUID) jewellery.') + '</div>';
+        } else if (S.tab === 'old') {
+          const w = P('ow'), rate = P('rate'), ded = P('ded') || 0;
+          if (!(w > 0 && rate > 0)) { out.innerHTML = '<div class="cx-info">' + T('எடையும் 24K விலையும் கொடுங்கள்.', 'Enter the weight and the 24K rate.') + '</div>'; return; }
+          const fine = w * pur('ok')[2], val = fine * rate, net = val * (1 - ded / 100);
+          txt = T('பழைய நகை மதிப்பு', 'Old gold value') + ': ' + inr0(net);
+          out.innerHTML = resCard(T('உங்களுக்குக் கிடைக்க வேண்டியது', 'You should get about'), inr0(net), fmt(fine, 3) + T(' கிராம் சுத்தத் தங்கம்', ' g of pure gold')) +
+            tableHtml([[T('சுத்தத் தங்கம்', 'Pure gold') + ' (' + fmt(w, 3) + 'g × ' + fmt(pur('ok')[2] * 100, 1) + '%)', fmt(fine, 3) + ' g'], [T('24K மதிப்பு', '24K value'), inr2(val)], [T('கழிவு ', 'Deduction ') + fmt(ded, 2) + '%', '− ' + inr2(val - net)], [T('நிகரம்', 'Net'), inr2(net), true]]) +
+            '<div class="cx-info">' + T('கடையில் தூய்மையை (karat meter) உங்கள் கண் முன் சோதிக்கச் சொல்லுங்கள்.', 'Ask the shop to test the purity (karat meter) in front of you.') + '</div>';
+        } else {
+          const w = P('lw'), rate = P('lr'), ltv = P('ltv'), ir = P('li'), m = P('lm');
+          if (!(w > 0 && rate > 0 && ltv > 0 && ltv <= 100)) { out.innerHTML = '<div class="cx-info">' + T('எடை, 22K மதிப்பு, LTV கொடுங்கள்.', 'Enter the weight, 22K value and LTV.') + '</div>'; return; }
+          const value = w * pur('lk')[2] / (22 / 24) * rate, loan = value * ltv / 100, intr = ir > 0 && m > 0 ? loan * ir / 100 * m / 12 : 0;
+          txt = T('நகைக் கடன்', 'Gold loan') + ': ' + inr0(loan) + (intr ? ', ' + T('வட்டி ', 'interest ') + inr0(intr) : '');
+          out.innerHTML = resCard(T('கிடைக்கக்கூடிய கடன்', 'Loan you can get'), inr0(loan), T('நகை மதிப்பு ', 'Jewel value ') + inr0(value) + ' · LTV ' + fmt(ltv, 1) + '%') +
+            (intr ? tableHtml([[T('கடன்', 'Loan'), inr2(loan)], [T('வட்டி ', 'Interest ') + fmt(ir, 2) + '% × ' + fmt(m, 0) + T(' மாதம்', ' months'), inr2(intr)], [T('திருப்பிச் செலுத்த வேண்டியது', 'To repay'), inr2(loan + intr), true], [T('மாத வட்டி', 'Interest per month'), inr2(intr / m)]]) : '') +
+            '<div class="cx-info">' + T('LTV வரம்பு RBI விதிப்படி வங்கிக்கு வங்கி மாறும் (சிறு கடன்களுக்கு அதிகம்). கல், அரக்கு எடை கழிக்கப்படும். உங்கள் வங்கியில் உறுதிசெய்யவும்.', 'The LTV limit follows RBI rules and differs by bank and loan size; stones and lac are not counted. Confirm with your bank.') + '</div>';
+        }
+        out.appendChild(actionsEl(() => txt));
+      }
+      draw();
+    }
+  };
+
+  /* =====================================================================
+   * pfcalc — EPF corpus projection + gratuity
+   * ===================================================================== */
+  function PF_project(o) { // o: {wage, age, retire, bal, hike, rate, cap}; interest on the monthly running balance, credited yearly (EPFO method)
+    const rows = []; let bal = o.bal || 0, wage = o.wage, totalOwn = 0, totalEr = 0, totalInt = 0;
+    for (let a = o.age; a < o.retire; a++) {
+      const base = o.cap ? Math.min(wage, 15000) : wage, ownM = base * 0.12, eps = Math.min(wage, 15000) * 0.0833, erM = base * 0.12 - Math.min(eps, 1250);
+      let run = bal, intr = 0;
+      for (let mth = 0; mth < 12; mth++) { intr += run * o.rate / 1200; run += ownM + erM; }
+      bal = run + intr; totalOwn += ownM * 12; totalEr += erM * 12; totalInt += intr;
+      rows.push({ age: a + 1, wage: wage, own: ownM * 12, er: erM * 12, intr: intr, bal: bal });
+      wage = wage * (1 + o.hike / 100);
+    }
+    return { rows: rows, bal: bal, own: totalOwn, er: totalEr, intr: totalInt };
+  }
+  function PF_gratuity(wage, years, months, covered) {
+    const yrs = covered ? years + (months >= 6 ? 1 : 0) : years + months / 12;
+    return { yrs: yrs, amt: covered ? wage * 15 / 26 * yrs : wage * 15 / 30 * Math.floor(years + months / 12) };
+  }
+  TOOL_IMPL.pfcalc = {
+    mount(body) {
+      AS_injectStyle(); TN_injectStyle();
+      const root = makeRoot(body);
+      const S = Object.assign({ tab: 'pf', wage: '25000', age: '30', retire: '58', bal: '0', hike: '5', rate: '8.25', cap: '0', gw: '', gy: '', gm: '0', gc: '1' }, lsGet('pfcalc', {}));
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? ஓய்வு பெறும்போது உங்கள் PF கணக்கில் எவ்வளவு சேரும் என்று ஆண்டுவாரியாகப் பார்க்க; வேலை விடும்போது கிராஜுவிட்டி (Gratuity) எவ்வளவு கிடைக்கும் என்று கணக்கிட.',
+          'See year by year how much your EPF will grow to by retirement, and how much gratuity you get when you leave.') +
+          tabsHtml([['pf', T('PF சேமிப்பு', 'EPF corpus')], ['gr', T('கிராஜுவிட்டி', 'Gratuity')]], S.tab) + '<div data-k="pane"></div><div data-k="out"></div>';
+        bindTabs(root, t => { S.tab = t; draw(); });
+        const pane = $(root, '[data-k=pane]');
+        if (S.tab === 'pf') pane.innerHTML = '<div class="cx-grid">' + field(T('மாத அடிப்படை + DA (₹)', 'Monthly basic + DA (₹)'), 'wage', S.wage) + field(T('இப்போதைய PF இருப்பு (₹)', 'Current EPF balance (₹)'), 'bal', S.bal) + '</div>' +
+          '<div class="cx-grid three">' + field(T('வயது', 'Age'), 'age', S.age) + field(T('ஓய்வு வயது', 'Retire at'), 'retire', S.retire) + field(T('ஆண்டு ஊதிய உயர்வு %', 'Yearly raise %'), 'hike', S.hike) + '</div>' +
+          '<div class="cx-grid">' + field(T('PF வட்டி % (ஆண்டு)', 'EPF interest % a year'), 'rate', S.rate) +
+          selectField(T('நிறுவனப் பங்கு', 'Employer share on'), 'cap', [['0', T('முழு ஊதியத்தில்', 'Full wage')], ['1', T('₹15,000 வரம்பில் மட்டும்', 'Capped at ₹15,000')]], S.cap) + '</div>';
+        else pane.innerHTML = '<div class="cx-grid one">' + field(T('கடைசி மாத அடிப்படை + DA (₹)', 'Last monthly basic + DA (₹)'), 'gw', S.gw) + '</div>' +
+          '<div class="cx-grid">' + field(T('பணிக்காலம் — ஆண்டுகள்', 'Service — years'), 'gy', S.gy) + field(T('+ மாதங்கள்', '+ months'), 'gm', S.gm) + '</div>' +
+          selectField(T('நிறுவனம் Gratuity சட்டத்தின் கீழ் வருகிறதா? (10+ பணியாளர்)', 'Covered by the Gratuity Act? (10+ employees)'), 'gc', [['1', T('ஆம்', 'Yes')], ['0', T('இல்லை', 'No')]], S.gc);
+        root.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        root.querySelectorAll('select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        calc();
+      }
+      let txt = '';
+      function calc() {
+        lsSet('pfcalc', S);
+        const out = $(root, '[data-k=out]'), P = k => parseNum(S[k]);
+        if (S.tab === 'pf') {
+          const o = { wage: P('wage'), age: Math.floor(P('age')), retire: Math.floor(P('retire')), bal: P('bal') || 0, hike: P('hike') || 0, rate: P('rate'), cap: S.cap === '1' };
+          if (!(o.wage > 0 && o.age >= 15 && o.retire > o.age && o.retire <= 70 && o.rate >= 0 && o.rate < 20)) { out.innerHTML = msgHtml(T('ஊதியம், வயது (ஓய்வு வயதைவிடக் குறைவு), வட்டியைச் சரியாகக் கொடுங்கள்.', 'Enter a valid wage, ages and interest rate.')); return; }
+          const r = PF_project(o);
+          txt = T('ஓய்வின்போது PF', 'EPF at retirement') + ' (' + o.retire + '): ' + inr0(r.bal);
+          out.innerHTML = resCard(T(o.retire + ' வயதில் PF இருப்பு', 'EPF at age ' + o.retire), inr0(r.bal), T('உங்கள் பங்கு ', 'Your share ') + inr0(r.own) + ' · ' + T('நிறுவனம் ', 'Employer ') + inr0(r.er) + ' · ' + T('வட்டி ', 'Interest ') + inr0(r.intr), null, 'ok') +
+            '<div class="cx-bar"><i style="width:' + (r.own / r.bal * 100) + '%;background:#3752A6"></i><i style="width:' + (r.er / r.bal * 100) + '%;background:#1E8E5A"></i><i style="width:' + (r.intr / r.bal * 100) + '%;background:#E0A100"></i><i style="flex:1;background:#999"></i></div>' +
+            '<div class="cx-leg"><span><b style="background:#3752A6"></b>' + T('உங்கள் பங்கு', 'You') + '</span><span><b style="background:#1E8E5A"></b>' + T('நிறுவனம்', 'Employer') + '</span><span><b style="background:#E0A100"></b>' + T('வட்டி', 'Interest') + '</span><span><b style="background:#999"></b>' + T('இப்போதைய இருப்பு', 'Opening balance') + '</span></div>' +
+            '<details class="cx-det"><summary>' + T('ஆண்டுவாரி அட்டவணை', 'Year-by-year table') + '</summary><div class="cx-tn-wrap"><table class="cx-tn-tbl"><thead><tr><th>' + T('வயது', 'Age') + '</th><th>' + T('மாத ஊதியம்', 'Wage') + '</th><th>' + T('சேர்ப்பு', 'Added') + '</th><th>' + T('வட்டி', 'Interest') + '</th><th>' + T('இருப்பு', 'Balance') + '</th></tr></thead><tbody>' +
+            r.rows.map(x => '<tr><td>' + x.age + '</td><td>' + inr0(x.wage) + '</td><td>' + inr0(x.own + x.er) + '</td><td>' + inr0(x.intr) + '</td><td><b>' + inr0(x.bal) + '</b></td></tr>').join('') + '</tbody></table></div></details>' +
+            '<div class="cx-info">' + T('நீங்கள் 12%; நிறுவனத்தின் 12%-ல் 8.33% (அதிகபட்சம் ₹1,250) ஓய்வூதியத்துக்கு (EPS) போகும் — அது இந்த இருப்பில் சேராது. வட்டி விகிதம் ஒவ்வொரு ஆண்டும் EPFO அறிவிக்கும் — மாற்றிப் பாருங்கள்.', 'You pay 12%; of the employer\'s 12%, 8.33% (max ₹1,250) goes to the pension (EPS) and is not in this balance. EPFO declares the rate every year — try other rates.') + '</div>';
+        } else {
+          const w = P('gw'), y = Math.floor(P('gy')), m = Math.floor(P('gm') || 0), cov = S.gc === '1';
+          if (!(w > 0 && y >= 0 && m >= 0 && m < 12)) { out.innerHTML = '<div class="cx-info">' + T('கடைசி ஊதியமும் பணிக்காலமும் கொடுங்கள்.', 'Enter the last wage and the years of service.') + '</div>'; return; }
+          const g = PF_gratuity(w, y, m, cov), eligible = y >= 5;
+          txt = T('கிராஜுவிட்டி', 'Gratuity') + ': ' + inr0(g.amt);
+          out.innerHTML = resCard(T('கிராஜுவிட்டி', 'Gratuity'), inr0(g.amt), cov ? '₹' + fmt(w, 0) + ' × 15/26 × ' + fmt(g.yrs, 0) + T(' ஆண்டு', ' years') : '₹' + fmt(w, 0) + ' × 15/30 × ' + fmt(Math.floor(y + m / 12), 0) + T(' ஆண்டு', ' years'), null, eligible ? 'ok' : 'bad') +
+            (eligible ? '' : msgHtml(T('பொதுவாக 5 ஆண்டு தொடர் பணிக்குப் பிறகே கிராஜுவிட்டி கிடைக்கும் (மரணம் / ஊனம் தவிர). புதிய தொழிலாளர் சட்டப்படி குறிப்பிட்ட கால ஒப்பந்தப் பணியாளர்களுக்கு 1 ஆண்டிலேயே கிடைக்கலாம்.', 'Gratuity is normally paid after 5 years of continuous service (except death or disability). Under the new labour codes, fixed-term employees may qualify after 1 year.'))) +
+            '<div class="cx-info">' + T('6 மாதத்துக்கு மேலான பகுதி முழு ஆண்டாகக் கணக்கிடப்படும் (சட்டத்தின் கீழ் வரும் நிறுவனங்களுக்கு). தனியார் ஊழியர்களுக்கு ₹20 லட்சம் வரை வரி இல்லை.', 'More than 6 months counts as a full year (covered employers). Up to ₹20 lakh is tax-free for private employees.') + '</div>';
+        }
+        out.appendChild(actionsEl(() => txt));
+      }
+      draw();
+    }
+  };
+  TOOL_IMPL.pfcalc._f = { project: PF_project, gratuity: PF_gratuity };
+
+  /* =====================================================================
+   * ebbill — TNEB / TANGEDCO domestic bill (bi-monthly) + appliance estimate
+   * ===================================================================== */
+  // slab tables per bi-monthly cycle; [upto units, rate ₹/unit]. Domestic LT-IA, tariff from 1 July 2024.
+  const EB_LOW = [[100, 0], [200, 2.35], [400, 4.7], [500, 6.3]];
+  const EB_HIGH = [[100, 0], [400, 4.7], [500, 6.3], [600, 8.4], [800, 9.45], [1000, 10.5], [Infinity, 11.55]];
+  function EB_bill(units, low, high) {
+    const tbl = units <= 500 ? low : high, rows = []; let prev = 0, total = 0;
+    for (const [upto, rate] of tbl) {
+      if (units <= prev) break;
+      const u = Math.min(units, upto) - prev, amt = u * rate;
+      rows.push({ from: prev + 1, to: Math.min(units, upto), units: u, rate: rate, amt: amt });
+      total += amt; prev = upto;
+    }
+    return { rows: rows, total: total };
+  }
+  const EB_APPL = [['fan', 'மின்விசிறி', 'Ceiling fan', 75, 10], ['tube', 'LED டியூப் லைட்', 'LED tube light', 20, 6], ['tv', 'டிவி', 'TV', 100, 5], ['fridge', 'ஃப்ரிட்ஜ்', 'Fridge', 150, 10],
+    ['ac', 'AC (1.5 டன்)', 'AC (1.5 ton)', 1500, 6], ['heater', 'வாட்டர் ஹீட்டர்', 'Water heater', 2000, 1], ['wm', 'வாஷிங் மெஷின்', 'Washing machine', 500, 1], ['mixie', 'மிக்ஸி', 'Mixer', 750, 0.5],
+    ['motor', 'மோட்டார் (1 HP)', 'Water motor (1 HP)', 750, 1], ['iron', 'அயர்ன் பாக்ஸ்', 'Iron box', 1000, 0.5], ['pc', 'கம்ப்யூட்டர் / லேப்டாப்', 'Computer / laptop', 100, 4]];
+  TOOL_IMPL.ebbill = {
+    mount(body) {
+      AS_injectStyle();
+      const root = makeRoot(body);
+      const S = Object.assign({ tab: 'bill', mode: 'units', units: '350', prev: '', cur: '', low: EB_LOW.map(r => r[1]), high: EB_HIGH.map(r => r[1]), appl: {} }, lsGet('ebbill', {}));
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? இரண்டு மாத மின் அளவீட்டிலிருந்து (யூனிட்) TNEB வீட்டு மின் கட்டணத்தை slab வாரியாகக் கணக்கிட; எந்தெந்த மின்சாதனம் எவ்வளவு யூனிட் எடுக்கும் என்று பார்த்து கட்டணத்தைக் குறைக்க.',
+          'TNEB domestic bill for a two-month reading, slab by slab, and an appliance-wise estimate to see what to cut.') +
+          tabsHtml([['bill', T('கட்டணம்', 'Bill')], ['appl', T('மின்சாதனக் கணக்கு', 'Appliance estimate')], ['rates', T('கட்டண விகிதங்கள்', 'Rates')]], S.tab) + '<div data-k="pane"></div><div data-k="out"></div>';
+        bindTabs(root, t => { S.tab = t; draw(); });
+        const pane = $(root, '[data-k=pane]');
+        if (S.tab === 'bill') {
+          pane.innerHTML = selectField(T('எப்படி கொடுக்கிறீர்கள்?', 'Enter as'), 'mode', [['units', T('மொத்த யூனிட்', 'Total units')], ['meter', T('மீட்டர் ரீடிங் (முந்தைய / இப்போது)', 'Meter readings (previous / now)')]], S.mode) +
+            (S.mode === 'units' ? '<div class="cx-grid one">' + field(T('2 மாத யூனிட்', 'Units in 2 months'), 'units', S.units) + '</div>'
+              : '<div class="cx-grid">' + field(T('முந்தைய ரீடிங்', 'Previous reading'), 'prev', S.prev) + field(T('இப்போதைய ரீடிங்', 'Current reading'), 'cur', S.cur) + '</div>');
+        } else if (S.tab === 'appl') {
+          pane.innerHTML = '<div class="cx-small">' + T('ஒவ்வொரு சாதனத்துக்கும் எண்ணிக்கையும் தினசரி மணி நேரமும் மாற்றுங்கள்.', 'Set how many of each and hours used per day.') + '</div><table class="cx-ebt"><tbody>' +
+            EB_APPL.map(a => { const v = S.appl[a[0]] || { n: a[0] === 'fan' ? '3' : a[0] === 'tube' ? '4' : a[0] === 'fridge' || a[0] === 'tv' ? '1' : '0', h: String(a[4]), w: String(a[3]) };
+              return '<tr><td><b>' + esc(isEn() ? a[2] : a[1]) + '</b></td><td>' + T('எண்', 'No.') + ' <input data-a="' + a[0] + '" data-f="n" inputmode="numeric" value="' + esc(v.n) + '"></td><td>' + T('மணி/நாள்', 'h/day') + ' <input data-a="' + a[0] + '" data-f="h" inputmode="decimal" value="' + esc(v.h) + '"></td><td>' + T('வாட்', 'W') + ' <input data-a="' + a[0] + '" data-f="w" inputmode="numeric" value="' + esc(v.w) + '"></td></tr>'; }).join('') + '</tbody></table>';
+          pane.querySelectorAll('[data-a]').forEach(i => i.addEventListener('input', () => {
+            const id = i.getAttribute('data-a'), a = EB_APPL.find(x => x[0] === id);
+            S.appl[id] = Object.assign({ n: '0', h: String(a[4]), w: String(a[3]) }, S.appl[id] || {}, { [i.getAttribute('data-f')]: i.value }); calc();
+          }));
+        } else {
+          const rt = (tbl, key, def) => '<table class="cx-ebt"><tbody>' + def.map((r, i) => '<tr><td>' + (i ? def[i - 1][0] + 1 : 1) + ' – ' + (r[0] === Infinity ? '…' : r[0]) + T(' யூனிட்', ' units') + '</td><td>₹ <input data-r="' + key + '" data-i="' + i + '" inputmode="decimal" value="' + esc(S[key][i]) + '"></td></tr>').join('') + '</tbody></table>';
+          pane.innerHTML = '<div class="cx-h">' + T('500 யூனிட் வரை (2 மாதம்)', 'Up to 500 units (2 months)') + '</div>' + rt(EB_LOW, 'low', EB_LOW) +
+            '<div class="cx-h">' + T('500 யூனிட்டுக்கு மேல்', 'Above 500 units') + '</div>' + rt(EB_HIGH, 'high', EB_HIGH) +
+            '<div class="cx-actions"><button type="button" class="cx-btn sec" data-act="reset">↺ ' + T('இயல்பு விகிதங்கள்', 'Default rates') + '</button></div>' +
+            '<div class="cx-small">' + T('இயல்பு: 1 ஜூலை 2024 முதலான TNEB வீட்டு (LT-IA) கட்டணம்; முதல் 100 யூனிட் இலவசம். அரசு மாற்றினால் இங்கே திருத்தலாம் — tnebltd.gov.in-ல் சரிபார்க்கவும்.', 'Default: TNEB domestic (LT-IA) tariff from 1 July 2024; first 100 units free. Edit here if it changes — check tnebltd.gov.in.') + '</div>';
+          pane.querySelectorAll('[data-r]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-r')][+i.getAttribute('data-i')] = i.value; lsSet('ebbill', S); }));
+          $(pane, '[data-act=reset]').onclick = () => { S.low = EB_LOW.map(r => r[1]); S.high = EB_HIGH.map(r => r[1]); draw(); };
+        }
+        root.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        root.querySelectorAll('select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; draw(); }));
+        calc();
+      }
+      const tables = () => [EB_LOW.map((r, i) => [r[0], parseNum(S.low[i]) || 0]), EB_HIGH.map((r, i) => [r[0], parseNum(S.high[i]) || 0])];
+      let txt = '';
+      function billHtml(units) {
+        const [lo, hi] = tables(), b = EB_bill(units, lo, hi);
+        txt = T('மின் கட்டணம்', 'EB bill') + ' (' + fmt(units, 0) + T(' யூனிட்', ' units') + '): ' + inr0(b.total);
+        return resCard(T('2 மாத மின் கட்டணம் (தோராயம்)', 'Two-month bill (approx.)'), inr0(b.total), fmt(units, 0) + T(' யூனிட் · மாதம் சுமார் ', ' units · about ') + inr0(b.total / 2) + T('', ' a month')) +
+          tableHtml(b.rows.map(r => [r.from + ' – ' + r.to + ' (' + fmt(r.units, 0) + ' × ₹' + fmt(r.rate, 2) + ')', inr2(r.amt)]).concat([[T('மொத்தம்', 'Total'), inr2(b.total), true]])) +
+          (units > 500 ? '<div class="cx-info">' + T('500 யூனிட்டைத் தாண்டியதால் 101–200 யூனிட் சலுகை விலை கிடைக்காது. ' + fmt(units - 500, 0) + ' யூனிட் குறைத்தால் கட்டணம் ' + inr0(EB_bill(500, lo, hi).total) + ' ஆகும்.', 'Above 500 units the 101–200 concession is lost. Using ' + fmt(units - 500, 0) + ' fewer units would bring the bill to ' + inr0(EB_bill(500, lo, hi).total) + '.') + '</div>' : '') +
+          '<div class="cx-small">' + T('மின் வரி / நிலைக் கட்டணம் போன்றவை உண்டானால் பில்லில் சிறிது வேறுபடலாம்.', 'Taxes or fixed charges, if any, can make the actual bill differ slightly.') + '</div>';
+      }
+      function calc() {
+        lsSet('ebbill', S);
+        const out = $(root, '[data-k=out]');
+        if (S.tab === 'rates') { out.innerHTML = ''; return; }
+        if (S.tab === 'bill') {
+          const units = S.mode === 'units' ? parseNum(S.units) : parseNum(S.cur) - parseNum(S.prev);
+          if (!(units >= 0 && units < 100000)) { out.innerHTML = S.mode === 'meter' && S.cur && S.prev ? msgHtml(T('இப்போதைய ரீடிங் முந்தையதைவிட அதிகமாக இருக்க வேண்டும்.', 'The current reading must be higher than the previous one.')) : ''; return; }
+          out.innerHTML = billHtml(units);
+        } else {
+          let tot = 0; const rows = [];
+          EB_APPL.forEach(a => { const v = S.appl[a[0]] || { n: a[0] === 'fan' ? '3' : a[0] === 'tube' ? '4' : a[0] === 'fridge' || a[0] === 'tv' ? '1' : '0', h: String(a[4]), w: String(a[3]) };
+            const u = (parseNum(v.n) || 0) * (parseNum(v.h) || 0) * (parseNum(v.w) || 0) / 1000 * 60 * (a[0] === 'fridge' ? 0.5 : a[0] === 'ac' ? 0.7 : 1); // fridge/AC compressors cycle
+            if (u > 0) { rows.push([esc(isEn() ? a[2] : a[1]), fmt(u, 0) + T(' யூனிட்', ' units')]); tot += u; } });
+          out.innerHTML = (rows.length ? tableHtml(rows.sort((x, y) => parseNum(y[1]) - parseNum(x[1]))) : '') + billHtml(Math.round(tot));
+        }
+        out.appendChild(actionsEl(() => txt));
+      }
+      draw();
+    }
+  };
+  TOOL_IMPL.ebbill._f = { bill: EB_bill, LOW: EB_LOW, HIGH: EB_HIGH };
 
 })();
