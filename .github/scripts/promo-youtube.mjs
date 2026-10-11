@@ -1,0 +1,98 @@
+// Daily YouTube Short for the promotion agent (run by .github/workflows/promo-youtube.yml).
+// 1. reads today's promotion post (tool + AI text) and the YouTube connection from D1 (Cloudflare REST API)
+// 2. renders a 1080x1920 Tamil + English slide with headless Chrome, 3. makes a 10 s video with ffmpeg,
+// 4. uploads it with the YouTube Data API (refresh token saved by "Connect YouTube" on the admin page), 5. logs it in D1.
+// Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET; optional TOOL (force a tool id), DRY_RUN=1.
+import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
+
+const { CLOUDFLARE_API_TOKEN: CF_TOKEN, CLOUDFLARE_ACCOUNT_ID: ACC, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
+const CF = `https://api.cloudflare.com/client/v4/accounts/${ACC}/d1/database`;
+const H = { Authorization: `Bearer ${CF_TOKEN}`, 'Content-Type': 'application/json' };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let DB;
+async function sql(q, params = []) {
+  if (!DB) {
+    const r = await (await fetch(`${CF}?name=pdftools-db`, { headers: H })).json();
+    DB = r.result?.find((d) => d.name === 'pdftools-db')?.uuid;
+    if (!DB) throw new Error('D1 database pdftools-db not found: ' + JSON.stringify(r.errors || r).slice(0, 300));
+  }
+  const r = await (await fetch(`${CF}/${DB}/query`, { method: 'POST', headers: H, body: JSON.stringify({ sql: q, params }) })).json();
+  if (!r.success) throw new Error('D1: ' + JSON.stringify(r.errors).slice(0, 300));
+  return r.result[0].results;
+}
+const setting = async (k) => (await sql('select value from promo_settings where key = ?', [k]))[0]?.value || null;
+const log = (toolId, status, id, error) => sql('insert into promo_posts (tool_id, platform, status, message_id, error) values (?, ?, ?, ?, ?)', [toolId, 'youtube', status, id, error]);
+
+function slideHtml(t, text) {
+  const [ta, en] = String(text || '').split('\n');
+  return `<!doctype html><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;800&family=Inter:wght@600;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box}html,body{margin:0;width:1080px;height:1920px;overflow:hidden}
+body{font-family:'Noto Sans Tamil','Inter',sans-serif;color:#fff;background:linear-gradient(160deg,${t.color} 0%,#14182b 100%);display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:110px 80px 120px}
+.mid{display:flex;flex-direction:column;align-items:center}
+.icon{font:300px/1 'Noto Color Emoji',sans-serif;margin-top:10px}
+.pts{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:40px}.pts span{background:rgba(255,255,255,.16);border-radius:999px;padding:14px 28px;font-size:36px;font-weight:800}
+.brand{font:900 44px Inter,sans-serif;letter-spacing:1px;opacity:.95}.brand b{color:#FFD54A}
+.img{width:620px;height:620px;border-radius:48px;background:#fff center/cover no-repeat;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+h1{font-size:${(t.ta || '').length > 18 ? 68 : 84}px;font-weight:800;margin:60px 0 6px;line-height:1.25}
+h2{font:900 52px Inter,sans-serif;margin:0;opacity:.92}
+p{font-size:40px;font-weight:500;line-height:1.5;margin:46px 0 0;opacity:.95;max-height:420px;overflow:hidden}
+.foot{background:#FFD54A;color:#14182b;font:900 46px Inter,sans-serif;padding:26px 46px;border-radius:999px}
+.foot span{font-family:'Noto Sans Tamil';font-weight:800}</style>
+<div class="brand">PDF Tools <b>India</b></div>
+<div class="mid">${t.img ? `<div class="img" style="background-image:url('${esc(t.img)}')"></div>` : `<div class="icon">${esc(t.icon || '🛠')}</div>`}
+<h1>${esc(t.ta || t.name)}</h1><h2>${esc(t.name)}</h2>
+<p>${esc(ta || t.taDesc || t.desc)}</p>
+<div class="pts"><span>✓ இலவசம்</span><span>✓ Login இல்லை</span><span>✓ Phone-லேயே</span></div></div>
+<div class="foot"><span>இலவசம்</span> · FREE · pdftoolsindia.com</div>`;
+}
+
+async function accessToken(refresh) {
+  const r = await (await fetch('https://oauth2.googleapis.com/token', { method: 'POST', body: new URLSearchParams({ client_id: GOOGLE_CLIENT_ID, client_secret: GOOGLE_CLIENT_SECRET, refresh_token: refresh, grant_type: 'refresh_token' }) })).json();
+  if (!r.access_token) throw new Error('Google token: ' + (r.error_description || r.error || 'failed') + ' — press "Connect YouTube" again on the admin page');
+  return r.access_token;
+}
+
+async function upload(token, file, t, text) {
+  const [ta, en] = String(text || '').split('\n');
+  const meta = {
+    snippet: { title: `${t.ta ? t.ta + ' | ' : ''}${t.name} — Free Online Tool #Shorts`.slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
+      description: `${ta || t.taDesc}\n${en || t.desc}\n\n👉 ${t.url}\n\nஇலவசம் · login தேவையில்லை · Free, no sign-up\n#Shorts #PDFToolsIndia #Tamil`, tags: ['pdftoolsindia', 'free tools', 'tamil', t.name, t.ta].filter(Boolean) },
+    status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+  };
+  const size = fs.statSync(file).size;
+  const start = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': 'video/mp4', 'X-Upload-Content-Length': String(size) }, body: JSON.stringify(meta) });
+  if (!start.ok) throw new Error('YouTube: ' + (await start.text()).slice(0, 300));
+  const put = await fetch(start.headers.get('location'), { method: 'PUT', headers: { 'Content-Type': 'video/mp4', 'Content-Length': String(size) }, body: fs.readFileSync(file) });
+  const j = await put.json().catch(() => ({}));
+  if (!put.ok || !j.id) throw new Error('YouTube upload: ' + JSON.stringify(j.error || j).slice(0, 300));
+  return j;
+}
+
+const main = async () => {
+  if ((await setting('enabled')) === 'off') return console.log('Promotion is switched off on the admin page.');
+  const refresh = await setting('yt_refresh');
+  if (!refresh && !process.env.DRY_RUN) return console.log('YouTube is not connected yet (admin page → Promotion → Connect YouTube).');
+  if (!process.env.TOOL && (await sql("select 1 from promo_posts where platform = 'youtube' and status = 'sent' and created_at >= date('now')")).length) return console.log('Already uploaded today.');
+  const post = process.env.TOOL ? null : (await sql("select tool_id, text from promo_posts where platform = 'telegram' and status = 'sent' order by id desc limit 1"))[0];
+  const t = CATALOG.find((x) => x.id === (process.env.TOOL || post?.tool_id)) || CATALOG.find((x) => !x.paid);
+  console.log('Tool:', t.id);
+  fs.writeFileSync('slide.html', slideHtml(t, post?.text));
+  const chrome = process.env.CHROME || 'google-chrome';
+  execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-loop', '1', '-i', 'slide.png', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-t', '10',
+    '-vf', "crop=1080:1920:0:0,scale=1188:2112,zoompan=z='min(zoom+0.0005,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=300:s=1080x1920:fps=30", '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', 'short.mp4'], { stdio: 'inherit' });
+  if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
+  try {
+    const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);
+    await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : null);
+    console.log('Uploaded https://youtube.com/shorts/' + v.id, v.status?.privacyStatus);
+  } catch (e) {
+    await log(t.id, 'failed', null, String(e.message).slice(0, 300));
+    throw e;
+  }
+};
+main().catch((e) => { console.error(e.message || e); process.exit(1); });

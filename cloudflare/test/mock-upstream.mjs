@@ -1,6 +1,7 @@
 // Stand-in for Gemini / NVIDIA / Razorpay / Astrologer API during tests (the Worker's *_API_BASE vars point here).
 // Every request is recorded in `calls` so tests can check what the Worker sent.
 import http from 'node:http';
+import crypto from 'node:crypto';
 
 export const calls = [];
 export const behaviour = { geminiFail: false, telegramPhotoFail: false };
@@ -13,7 +14,7 @@ export function startMock(port = 8790) {
     req.on('end', () => {
       const bytes = Buffer.concat(chunks), body = bytes.toString();
       let j = null; try { j = JSON.parse(body); } catch {}
-      calls.push({ method: req.method, url: req.url, headers: req.headers, body: j });
+      calls.push({ method: req.method, url: req.url, headers: req.headers, body: j, raw: body });
       const send = (status, obj) => { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(obj)); };
       // Gemini Files API (resumable upload)
       if (req.url.startsWith('/upload/v1beta/files')) {
@@ -38,6 +39,41 @@ export function startMock(port = 8790) {
         if (fd) { const f = files[+fd.file_data.file_uri.split('/f').pop()]; return send(200, { candidates: [{ content: { parts: [{ text: `file ${f.mime} ${f.size} bytes (first ${f.first})` }] } }] }); }
         const img = parts.find((p) => p.inline_data);
         return send(200, { candidates: [{ content: { parts: [{ text: img ? `saw ${img.inline_data.mime_type} ${img.inline_data.data}` : `answer to: ${txt.slice(0, 40)}` }] } }] });
+      }
+      // Facebook Graph API (+ Instagram)
+      if (req.url.startsWith('/graph/v23.0/')) {
+        const u = new URL(req.url, 'http://x'), p = u.pathname.slice('/graph/v23.0'.length), f = new URLSearchParams(body);
+        if (p === '/oauth/access_token') return send(200, u.searchParams.get('code') === 'fbcode' ? { access_token: 'short' } : u.searchParams.get('fb_exchange_token') === 'short' ? { access_token: 'long' } : { error: { message: 'bad code' } });
+        if (p === '/me/accounts') return send(200, u.searchParams.get('access_token') === 'long' ? { data: [{ id: 'other', name: 'Other', access_token: 'x' }, { id: 'pg1', name: 'PDF Tools India', access_token: 'pagetok', instagram_business_account: { id: 'ig1' } }] } : { error: { message: 'bad token' } });
+        if (f.get('access_token') !== 'pagetok' && u.searchParams.get('access_token') !== 'pagetok') return send(400, { error: { message: 'bad page token' } });
+        if (p === '/pg1/photos') return send(200, { id: 'ph1', post_id: 'pg1_1' });
+        if (p === '/pg1/feed') return send(200, { id: 'pg1_2' });
+        if (p === '/ig1/media') return send(200, { id: 'c1' });
+        if (p === '/c1') return send(200, { status_code: 'FINISHED', id: 'c1' });
+        if (p === '/ig1/media_publish') return send(200, f.get('creation_id') === 'c1' ? { id: 'igm1' } : { error: { message: 'no container' } });
+      }
+      // Pinterest API v5
+      if (req.url.startsWith('/pin/v5/')) {
+        const p = req.url.split('?')[0].slice(4), f = new URLSearchParams(body);
+        if (p === '/v5/oauth/token') {
+          if (req.headers.authorization !== 'Basic ' + Buffer.from('pinapp:pinsec').toString('base64')) return send(401, { message: 'bad client' });
+          if (f.get('grant_type') === 'authorization_code') return send(200, f.get('code') === 'pincode' ? { access_token: 'pa1', refresh_token: 'pr1', expires_in: 2592000 } : { message: 'bad code' });
+          return send(200, f.get('refresh_token') === 'pr1' ? { access_token: 'pa2', expires_in: 2592000 } : { message: 'bad refresh' });
+        }
+        if (!/^Bearer pa[12]$/.test(req.headers.authorization || '')) return send(401, { message: 'bad token' });
+        if (p === '/v5/boards' && req.method === 'GET') return send(200, { items: [] });
+        if (p === '/v5/boards') return send(201, { id: 'b1', name: j.name });
+        if (p === '/v5/pins') return send(201, j.board_id === 'b1' && j.media_source?.url ? { id: 'pin1' } : { message: 'bad pin' });
+      }
+      // X API v2 — checks the OAuth 1.0a signature exactly like X does
+      if (req.url === '/x/2/tweets') {
+        const h = Object.fromEntries((req.headers.authorization || '').replace(/^OAuth /, '').split(', ').map((kv) => kv.split('=')).map(([k, v]) => [decodeURIComponent(k), decodeURIComponent(v.slice(1, -1))]));
+        const pe = (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+        const params = Object.keys(h).filter((k) => k !== 'oauth_signature').sort().map((k) => `${pe(k)}=${pe(h[k])}`).join('&');
+        const base = `POST&${pe(`http://127.0.0.1:${port}/x/2/tweets`)}&${pe(params)}`;
+        const sig = crypto.createHmac('sha1', `${pe('xsec')}&${pe('xtoksec')}`).update(base).digest('base64');
+        if (sig !== h.oauth_signature || h.oauth_consumer_key !== 'xkey' || h.oauth_token !== 'xtok') return send(401, { title: 'Unauthorized', detail: 'bad signature' });
+        return send(201, { data: { id: 'tw1', text: j.text } });
       }
       // Telegram Bot API
       if (/^\/botTG-TOKEN\/send(Photo|Message)$/.test(req.url)) {

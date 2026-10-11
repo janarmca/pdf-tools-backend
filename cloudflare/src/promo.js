@@ -2,12 +2,14 @@
 // let AI write a short Tamil + English post about it, and publish it with the tool's
 // picture and link. Runs inside the free plan: only network waits, no media work.
 //
-//   Platforms: Telegram channel (TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL). More can be added in PLATFORMS.
+//   Platforms: Telegram channel (TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL) plus Facebook, Instagram, X and Pinterest
+//   (src/social.js; connected from the admin page). YouTube Shorts are made by .github/workflows/promo-youtube.yml.
 //   Kill switch: promo_settings.enabled = 'off' (POST /cfapi/promo/enabled {on:false}, matrimony admins only).
 //   Admin: GET /cfapi/promo/status, POST /cfapi/promo/run {tool?} to post now.
 import { CATALOG } from './promo-catalog.js';
 import { gemini } from './api.js';
 import { json, err, readJson, userFromRequest } from './util.js';
+import { SOCIAL, loadSocial, socialStatus, connectUrl, oauthCallback, disconnect } from './social.js';
 
 const TG_API = (env) => (env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/$/, '');
 const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -64,11 +66,13 @@ async function telegram(env, t, post) {
 
 const PLATFORMS = [
   { name: 'telegram', ready: (env) => !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHANNEL), send: telegram },
+  ...SOCIAL,
 ];
 
 export async function runPromo(env, opts = {}) {
   if (!opts.force && !(await promoEnabled(env))) return { ok: true, skipped: 'disabled' };
-  const ready = PLATFORMS.filter((p) => p.ready(env));
+  const social = await loadSocial(env);
+  const ready = PLATFORMS.filter((p) => p.ready(env, social));
   if (!ready.length) return { ok: true, skipped: 'no platform configured' };
   const t = opts.tool ? CATALOG.find((x) => x.id === opts.tool) : await pickTool(env);
   if (!t) return { ok: false, error: 'unknown tool' };
@@ -76,12 +80,12 @@ export async function runPromo(env, opts = {}) {
   const results = [];
   for (const p of ready) {
     let status = 'sent', messageId = null, error = null;
-    try { messageId = await p.send(env, t, post); } catch (e) { status = 'failed'; error = String(e.message || e).slice(0, 300); }
+    try { messageId = await p.send(env, t, post, social); if (messageId === null) status = 'skipped'; } catch (e) { status = 'failed'; error = String(e.message || e).slice(0, 300); }
     await env.DB.prepare('insert into promo_posts (tool_id, platform, status, message_id, text, error) values (?, ?, ?, ?, ?, ?)')
       .bind(t.id, p.name, status, messageId, post.ta + '\n' + post.en, error).run();
     results.push({ platform: p.name, status, error });
   }
-  return { ok: results.every((r) => r.status === 'sent'), tool: t.id, results };
+  return { ok: results.every((r) => r.status !== 'failed'), tool: t.id, results };
 }
 
 async function isAdmin(env, req) {
@@ -89,11 +93,19 @@ async function isAdmin(env, req) {
   return !!(me && (await env.DB.prepare('select 1 from mat_admins where user_id = ?').bind(me.id).first()));
 }
 
-export async function handlePromo(req, env, path) {
+export async function handlePromo(req, env, path, url) {
+  // the platform sends the browser back here after "Connect"; it is checked by the signed state, not a login
+  if (path.startsWith('/promo/oauth/') && req.method === 'GET') return oauthCallback(env, path.slice('/promo/oauth/'.length), url);
   if (!(await isAdmin(env, req))) return err(403, 'Admins only');
+  if (path.startsWith('/promo/connect/') && req.method === 'GET') {
+    const link = await connectUrl(env, path.slice('/promo/connect/'.length));
+    return link ? json({ url: link }) : err(400, 'This platform is not set up yet (app keys missing)');
+  }
+  if (path === '/promo/disconnect' && req.method === 'POST') { await disconnect(env, String((await readJson(req)).platform || '')); return json({ ok: true }); }
   if (path === '/promo/status' && req.method === 'GET') {
     const { results } = await env.DB.prepare('select tool_id, platform, status, error, created_at from promo_posts order by id desc limit 20').all();
-    return json({ enabled: await promoEnabled(env), platforms: PLATFORMS.map((p) => ({ name: p.name, ready: p.ready(env) })), tools: CATALOG.length, recent: results });
+    const social = await loadSocial(env);
+    return json({ enabled: await promoEnabled(env), platforms: PLATFORMS.map((p) => ({ name: p.name, ready: p.ready(env, social) })), social: socialStatus(env, social), tools: CATALOG.length, recent: results });
   }
   if (path === '/promo/run' && req.method === 'POST') {
     const b = await readJson(req);

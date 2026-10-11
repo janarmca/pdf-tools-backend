@@ -18,6 +18,15 @@
         '<p><b>' + t('நிலை', 'Status') + ':</b> ' + (ps.enabled ? '🟢 ' + t('இயங்குகிறது', 'On') : '🔴 ' + t('நிறுத்தப்பட்டது', 'Off')) + ' · Telegram: ' + (tg && tg.ready ? '✅' : '❌ ' + t('secrets இல்லை', 'secrets missing')) + ' · ' + ps.tools + ' tools</p>' +
         '<div class="rowb"><button class="btn pri" data-act="pRun">📣 ' + t('இப்போதே ஒரு post', 'Post one now') + '</button>' +
         '<button class="btn" data-act="pOn" data-on="' + (ps.enabled ? '0' : '1') + '">' + (ps.enabled ? '⏸ ' + t('நிறுத்து', 'Turn off') : '▶ ' + t('தொடங்கு', 'Turn on')) + '</button></div></div>' +
+        '<h3 class="h3">' + t('தளங்கள்', 'Platforms') + '</h3><div class="box">' +
+        '<div class="arow">✈️ <b>Telegram</b> · ' + (tg && tg.ready ? '✅ ' + t('இணைந்தது', 'connected') : '❌') + '</div>' +
+        (ps.social || []).map(function (x) {
+          var nm = { facebook: '📘 Facebook Page', instagram: '📸 Instagram', x: '𝕏 X (Twitter)', pinterest: '📌 Pinterest', youtube: '▶️ YouTube Shorts' }[x.name] || x.name;
+          var btn = x.name === 'instagram' || x.name === 'x' ? '' : x.canConnect ? '<button class="btn sm' + (x.connected ? ' ghost' : ' pri') + '" data-act="pConnect" data-p="' + esc(x.name) + '">' + (x.connected ? t('மீண்டும் இணை', 'Reconnect') : t('இணை (Connect)', 'Connect')) + '</button>' +
+            (x.connected ? ' <button class="btn sm ghost" data-act="pDisc" data-p="' + esc(x.name) + '">' + t('துண்டி', 'Disconnect') + '</button>' : '') : '<span class="mut sm">' + t('App keys இன்னும் சேர்க்கப்படவில்லை', 'App keys not added yet') + '</span>';
+          return '<div class="arow"><b>' + esc(nm) + '</b> · ' + (x.connected ? '✅ ' + esc(x.detail || t('இணைந்தது', 'connected')) : '❌ ' + t('இணைக்கப்படவில்லை', 'not connected')) +
+            (x.name === 'instagram' ? ' <span class="mut sm">' + t('(Facebook Page மூலம்)', '(through the Facebook Page)') + '</span>' : x.name === 'x' ? ' <span class="mut sm">(GitHub secrets)</span>' : '') + '<div class="rowb">' + btn + '</div></div>';
+        }).join('') + '</div>' +
         '<h3 class="h3">' + t('சமீபத்திய posts', 'Recent posts') + '</h3>' +
         ((ps.recent || []).length ? ps.recent.map(function (x) {
           return '<div class="arow"><b>' + esc(x.tool_id) + '</b> · ' + esc(x.platform) + ' · ' + (x.status === 'sent' ? '✅' : '❌ ' + esc(x.error || '')) + ' <span class="mut sm">' + M.ago(x.created_at) + '</span></div>';
@@ -109,6 +118,14 @@
     a.disabled = true; var r = await M.B.promo('run', {}); a.disabled = false;
     if (r.ok) M.toast('✓ ' + r.tool, 'ok'); else M.toast(r.message || (r.results && r.results[0] && r.results[0].error) || r.skipped || 'error', 'bad');
     M.route();
+  };
+  M.acts.pConnect = async function (a) {
+    var r = await M.B.promo('connect/' + a.getAttribute('data-p'));
+    if (r.url) location.href = r.url; else M.toast(r.message || 'error', 'bad');
+  };
+  M.acts.pDisc = async function (a) {
+    if (!confirm(t('துண்டிக்கவா?', 'Disconnect?'))) return;
+    await M.B.promo('disconnect', { platform: a.getAttribute('data-p') }); M.route();
   };
   M.acts.pOn = async function (a) {
     var r = await M.B.promo('enabled', { on: a.getAttribute('data-on') === '1' });

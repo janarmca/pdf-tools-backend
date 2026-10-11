@@ -5,7 +5,8 @@ name: Deploy Cloudflare API
 # Required repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, AUTH_JWT_SECRET
 # Others (each feature works once its secret is added): BREVO_API_KEY or RESEND_API_KEY, EMAIL_FROM,
 #   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET,
-#   GEMINI_API_KEY, NVIDIA_API_KEY, ASTROLOGER_API_KEY, MAT_ADMIN_EMAILS, TELEGRAM_BOT_TOKEN
+#   GEMINI_API_KEY, NVIDIA_API_KEY, ASTROLOGER_API_KEY, MAT_ADMIN_EMAILS, TELEGRAM_BOT_TOKEN,
+#   FB_APP_ID, FB_APP_SECRET, PINTEREST_APP_ID, PINTEREST_APP_SECRET, X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET (promotion)
 on:
   push:
     branches: [ main ]
@@ -85,8 +86,16 @@ jobs:
           ASTROLOGER_API_KEY: ${{ secrets.ASTROLOGER_API_KEY }}
           MAT_ADMIN_EMAILS: ${{ secrets.MAT_ADMIN_EMAILS }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FB_APP_ID: ${{ secrets.FB_APP_ID }}
+          FB_APP_SECRET: ${{ secrets.FB_APP_SECRET }}
+          PINTEREST_APP_ID: ${{ secrets.PINTEREST_APP_ID }}
+          PINTEREST_APP_SECRET: ${{ secrets.PINTEREST_APP_SECRET }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
         run: |
-          node -e 'const k=["AUTH_JWT_SECRET","BREVO_API_KEY","RESEND_API_KEY","EMAIL_FROM","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET","RAZORPAY_KEY_ID","RAZORPAY_KEY_SECRET","RAZORPAY_WEBHOOK_SECRET","GEMINI_API_KEY","NVIDIA_API_KEY","ASTROLOGER_API_KEY","MAT_ADMIN_EMAILS","TELEGRAM_BOT_TOKEN"];const o={};for(const n of k)if(process.env[n])o[n]=process.env[n];require("fs").writeFileSync("/tmp/secrets.json",JSON.stringify(o))'
+          node -e 'const k=["AUTH_JWT_SECRET","BREVO_API_KEY","RESEND_API_KEY","EMAIL_FROM","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET","RAZORPAY_KEY_ID","RAZORPAY_KEY_SECRET","RAZORPAY_WEBHOOK_SECRET","GEMINI_API_KEY","NVIDIA_API_KEY","ASTROLOGER_API_KEY","MAT_ADMIN_EMAILS","TELEGRAM_BOT_TOKEN","FB_APP_ID","FB_APP_SECRET","PINTEREST_APP_ID","PINTEREST_APP_SECRET","X_API_KEY","X_API_SECRET","X_ACCESS_TOKEN","X_ACCESS_SECRET"];const o={};for(const n of k)if(process.env[n])o[n]=process.env[n];require("fs").writeFileSync("/tmp/secrets.json",JSON.stringify(o))'
           wrangler secret bulk /tmp/secrets.json
           rm -f /tmp/secrets.json
 

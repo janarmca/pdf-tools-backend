@@ -81,12 +81,12 @@ async function route(req, env) {
     const r = await env.DB.prepare('select count(*) as n from pricing_plans').first().catch(() => null);
     return json({
       ok: !!r, db: !!r, google: !!env.GOOGLE_CLIENT_ID, email: mailProvider(env), ai: { gemini: !!env.GEMINI_API_KEY, nvidia: !!env.NVIDIA_API_KEY, image: !!env.AI },
-      razorpay: !!env.RAZORPAY_KEY_ID, astrology: !!env.ASTROLOGER_API_KEY, promo: { telegram: !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHANNEL) }, time: new Date().toISOString(),
+      razorpay: !!env.RAZORPAY_KEY_ID, astrology: !!env.ASTROLOGER_API_KEY, promo: { telegram: !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHANNEL), x: !!(env.X_API_KEY && env.X_ACCESS_TOKEN), facebookApp: !!env.FB_APP_ID, pinterestApp: !!env.PINTEREST_APP_ID }, time: new Date().toISOString(),
     });
   }
   if (path.startsWith('/auth/v1/')) return handleAuth(req, env, path.slice('/auth/v1'.length), url);
   if (path.startsWith('/api/')) return handleApi(req, env, path);
-  if (path.startsWith('/promo/')) return handlePromo(req, env, path);
+  if (path.startsWith('/promo/')) return handlePromo(req, env, path, url);
 
   if (path.startsWith('/mat/rpc/') && m === 'POST') {
     const me = await userFromRequest(req, env);

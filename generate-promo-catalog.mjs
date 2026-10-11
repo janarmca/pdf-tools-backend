@@ -34,7 +34,7 @@ const slug = (n) => (n === 'Type Race — Typing Practice Game' ? 'typing-race-g
 const out = TOOLS.map((t) => {
   const page = STANDALONE[t.id] || (fs.existsSync(`tools/${slug(t.name)}.html`) ? `/tools/${slug(t.name)}` : `/?tool=${t.id}`);
   const img = fs.existsSync(`images/tools/${t.id}.jpg`) ? `${SITE}/images/tools/${t.id}.jpg` : '';
-  return { id: t.id, cat: t.cat, paid: !!t.cost, name: t.name.split(' — ')[0], desc: t.desc || '', ta: (TA[t.id] || [])[0] || '', taDesc: (TA[t.id] || [])[1] || '', url: SITE + page, img };
+  return { id: t.id, cat: t.cat, paid: !!t.cost, color: t.color || '#28407F', icon: t.icon || '🛠', name: t.name.split(' — ')[0], desc: t.desc || '', ta: (TA[t.id] || [])[0] || '', taDesc: (TA[t.id] || [])[1] || '', url: SITE + page, img };
 });
 
 fs.writeFileSync('cloudflare/src/promo-catalog.js',

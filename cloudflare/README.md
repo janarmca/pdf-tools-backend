@@ -42,6 +42,9 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `ASTROLOGER_API_KEY` | RapidAPI → Astrologer API (இலவச tier) | Astrology+ |
 | `MAT_ADMIN_EMAILS` | திருமண அமைப்பக admin email(கள்), comma பிரித்து | விருப்பம் |
 | `TELEGRAM_BOT_TOKEN` | Telegram → @BotFather → `/newbot` தரும் token. Bot-ஐ `@pdftoolsindia` channel-ல் Admin ஆக்கவும் (channel பெயர் `wrangler.toml`-ல் உள்ளது) | தினசரி promotion post-க்கு |
+| `FB_APP_ID`, `FB_APP_SECRET` | developers.facebook.com → My Apps → Create app (Business) → Settings → Basic. *Facebook Login for Business* → Valid OAuth Redirect URI: `https://pdftoolsindia.com/cfapi/promo/oauth/facebook` | Facebook Page + Instagram post-க்கு |
+| `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET` | developers.pinterest.com → My apps → Connect app. Redirect URI: `https://pdftoolsindia.com/cfapi/promo/oauth/pinterest` | Pinterest pin-க்கு |
+| `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | developer.x.com → Project → App → User authentication: **Read and write** → Keys and tokens → API Key & Secret + Access Token & Secret | X (Twitter) post-க்கு |
 
 (Brevo-க்குப் பதில் Resend பயன்படுத்தினால்: `RESEND_API_KEY` + Cloudflare DNS-ல் domain verify.)
 
@@ -63,6 +66,8 @@ Cloud Run → `all-in-one-tools` → Delete. Artifact Registry → பழைய 
 - இப்போதே ஒரு post: `POST /cfapi/promo/run` (`{"tool":"biodata"}` கொடுத்தால் அந்த tool)
 - நிலை: `GET /cfapi/promo/status` (கடைசி 20 posts)
 - புதிய tools சேர்த்தால்: repo root-ல் `node generate-promo-catalog.mjs`
+- மற்ற தளங்கள்: matrimony → Admin → **விளம்பரம் / Promotion** → Facebook / Pinterest / YouTube **Connect** (app keys சேர்த்த பின்). Instagram = Facebook Page-உடன் இணைந்த Professional account. X = மேலே உள்ள 4 secrets.
+- YouTube Shorts: `.github/workflows/promo-youtube.yml` தினமும் 9:20-க்கு அன்றைய tool-க்கு 10 வினாடி video உருவாக்கி upload செய்யும் (Google OAuth client-ல் redirect URI `https://pdftoolsindia.com/cfapi/promo/oauth/youtube` சேர்க்கவும்; YouTube Data API v3-ஐ enable செய்யவும்). API audit ஆகும் வரை YouTube அவற்றை *private* ஆக வைக்கலாம்.
 
 ## Database கட்டளைகள் (Cloudflare dashboard → D1 → pdftools-db → Console)
 ```sql

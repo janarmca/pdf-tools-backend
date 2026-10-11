@@ -203,7 +203,7 @@ test('promotion agent: admin-only, AI post to Telegram, picture fallback, rotati
   await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [a.user.id] }, { sql: 'delete from promo_posts' }, { sql: "update promo_settings set value = 'on' where key = 'enabled'" }]);
   const st = (await call('/promo/status', { method: 'GET', token: a.access_token })).j;
   assert.equal(st.enabled, true);
-  assert.deepEqual(st.platforms, [{ name: 'telegram', ready: true }]);
+  assert.deepEqual(st.platforms.find((p) => p.name === 'telegram'), { name: 'telegram', ready: true });
   assert.ok(st.tools > 100);
 
   const n0 = calls.length;
@@ -242,7 +242,7 @@ test('promotion agent: admin-only, AI post to Telegram, picture fallback, rotati
   await new Promise((r) => setTimeout(r, 1500));
   assert.equal(calls.slice(n3).filter((c) => c.url.startsWith('/botTG-TOKEN/')).length, 1, 'cron posts once when on');
   const recent = (await call('/promo/status', { method: 'GET', token: a.access_token })).j.recent;
-  assert.equal(recent.length, 4);
+  assert.equal(recent.filter((x) => x.platform === 'telegram').length, 4);
   assert.ok(recent.every((x) => x.status === 'sent'));
 });
 
@@ -266,4 +266,58 @@ test('health check AI: red flags skip AI, vetted remedies only, 2 credits, refun
   assert.equal(bad.s, 502);
   assert.equal(await credits(u), 8, 'refunded');
   assert.equal((await call('/api/ai/health', { body: { complaint: 'x' } })).s, 401);
+});
+
+test('promotion: connect Facebook/Instagram and Pinterest, post to them and to X', async () => {
+  const a = await user('social-admin');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [a.user.id] }, { sql: "delete from promo_settings where key <> 'enabled'" }, { sql: "update promo_settings set value = 'on' where key = 'enabled'" }]);
+  const get = (p) => call(p, { method: 'GET', token: a.access_token });
+  assert.equal((await call('/promo/connect/facebook', { method: 'GET' })).s, 403);
+  assert.equal((await get('/promo/connect/youtube')).s, 400, 'Google keys are not set in tests');
+
+  // Facebook: dialog URL -> callback with the signed state
+  const fb = new URL((await get('/promo/connect/facebook')).j.url);
+  assert.equal(fb.searchParams.get('client_id'), 'fbapp');
+  assert.match(fb.searchParams.get('scope'), /pages_manage_posts.*instagram_content_publish/);
+  const back = (p, q) => fetch(`${API}/promo/oauth/${p}?${new URLSearchParams(q)}`).then(async (r) => ({ s: r.status, t: await r.text() }));
+  assert.equal((await back('facebook', { code: 'fbcode', state: 'forged.sig' })).s, 400, 'unsigned state is refused');
+  const pstate = new URL((await get('/promo/connect/pinterest')).j.url).searchParams.get('state');
+  assert.equal((await back('facebook', { code: 'fbcode', state: pstate })).s, 400, 'state is bound to the platform');
+  const ok = await back('facebook', { code: 'fbcode', state: fb.searchParams.get('state') });
+  assert.equal(ok.s, 200); assert.match(ok.t, /PDF Tools India/); assert.match(ok.t, /Instagram: ✅/);
+
+  // Pinterest: no boards yet -> one is created
+  const pin = await back('pinterest', { code: 'pincode', state: pstate });
+  assert.equal(pin.s, 200, pin.t); assert.match(pin.t, /PDF Tools India/);
+
+  const st = (await get('/promo/status')).j;
+  const conn = Object.fromEntries(st.social.map((x) => [x.name, x.connected]));
+  assert.deepEqual(conn, { facebook: true, instagram: true, x: true, pinterest: true, youtube: false });
+
+  // one run posts everywhere
+  const n0 = calls.length;
+  const r = (await call('/promo/run', { body: { tool: 'merge' }, token: a.access_token })).j;
+  assert.equal(r.ok, true, JSON.stringify(r));
+  assert.deepEqual(r.results.map((x) => x.platform + ':' + x.status), ['telegram:sent', 'facebook:sent', 'instagram:sent', 'x:sent', 'pinterest:sent']);
+  const after = calls.slice(n0);
+  assert.match(new URLSearchParams(after.find((c) => c.url === '/graph/v23.0/pg1/photos').raw).get('url'), /images\/tools\/merge\.jpg$/);
+  assert.ok(after.some((c) => c.url === '/graph/v23.0/ig1/media_publish'));
+  const tw = after.find((c) => c.url === '/x/2/tweets');
+  assert.match(tw.body.text, /^Merge PDF/); assert.match(tw.body.text, /https:\/\/pdftoolsindia\.com\/tools\/merge-pdf$/);
+  assert.equal(after.find((c) => c.url === '/pin/v5/pins').body.link, 'https://pdftoolsindia.com/tools/merge-pdf');
+
+  // a tool without a picture: Facebook posts text, Instagram and Pinterest skip
+  const r2 = (await call('/promo/run', { body: { tool: 'porutham' }, token: a.access_token })).j;
+  assert.deepEqual(r2.results.map((x) => x.platform + ':' + x.status), ['telegram:sent', 'facebook:sent', 'instagram:skipped', 'x:sent', 'pinterest:skipped']);
+
+  // expired Pinterest access token -> refreshed with the refresh token
+  await sql([{ sql: "update promo_settings set value = ? where key = 'pin_access'", params: [JSON.stringify({ token: 'old', exp: Date.now() - 1000 })] }]);
+  const n1 = calls.length;
+  const r3 = (await call('/promo/run', { body: { tool: 'split' }, token: a.access_token })).j;
+  assert.equal(r3.results.find((x) => x.platform === 'pinterest').status, 'sent');
+  assert.ok(calls.slice(n1).some((c) => c.url === '/pin/v5/oauth/token' && new URLSearchParams(c.raw).get('grant_type') === 'refresh_token'));
+
+  // disconnect
+  await call('/promo/disconnect', { body: { platform: 'facebook' }, token: a.access_token });
+  assert.equal((await get('/promo/status')).j.social.find((x) => x.name === 'facebook').connected, false);
 });
