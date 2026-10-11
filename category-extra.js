@@ -4,7 +4,7 @@
  *   examphoto, cgpacalc, unitconv, vaippadu, studytimer, wordcount,
  *   sipcalc, gstcalc, discountcalc, datecalc, passgen
  *   + rupeewords, interestcalc, landconv, bmicalc, numsys, casecvt, jsonfmt, b64, textdiff, markscalc, namepicker
- *   + tneacutoff, biodata, starfinder, porutham, goldcalc, pfcalc, ebbill
+ *   + tneacutoff, biodata, starfinder, porutham, goldcalc, pfcalc, ebbill, invitation
  *
  * Plain browser JS (no modules / build step / network). Each tool registers
  * TOOL_IMPL.<id> = { mount(body){...} }. Globals used from the host page:
@@ -3867,5 +3867,147 @@
     }
   };
   TOOL_IMPL.ebbill._f = { bill: EB_bill, LOW: EB_LOW, HIGH: EB_HIGH };
+
+  /* =====================================================================
+   * invitation — wedding invitation (திருமண அழைப்பிதழ்) as image / PDF, Tamil or English
+   * ===================================================================== */
+  const IV_FIELDS = [
+    ['invoke', 'மேல் வாசகம்', 'Top line'], ['title', 'தலைப்பு', 'Heading'],
+    ['g_parents', 'மணமகன் பெற்றோர்', "Groom's parents"], ['groom', 'மணமகன் பெயர்', 'Groom'], ['g_note', 'மணமகன் — படிப்பு / பணி', 'Groom — education / job'],
+    ['b_parents', 'மணமகள் பெற்றோர்', "Bride's parents"], ['bride', 'மணமகள் பெயர்', 'Bride'], ['b_note', 'மணமகள் — படிப்பு / பணி', 'Bride — education / job'],
+    ['date', 'தேதி', 'Date', 'date'], ['tamil_date', 'தமிழ் தேதி (விருப்பம்)', 'Tamil calendar date (optional)'], ['muhurtham', 'முகூர்த்த நேரம்', 'Muhurtham time'],
+    ['venue', 'மண்டபம்', 'Venue'], ['address', 'முகவரி', 'Address', 'area'],
+    ['reception', 'வரவேற்பு (விருப்பம்)', 'Reception (optional)'], ['inviters', 'அன்புடன் அழைப்பவர்கள்', 'With love, from', 'area'], ['phone', 'தொடர்புக்கு', 'Contact'],
+  ];
+  const IV_SAMPLE = { invoke: 'ஸ்ரீ விநாயகர் துணை', title: 'திருமண அழைப்பிதழ்', g_parents: 'திரு. சு. ராஜேந்திரன் – திருமதி. ர. லட்சுமி அவர்களின் அன்பு மகன்', groom: 'ர. கார்த்திகேயன்', g_note: 'B.E., Software Engineer, சென்னை',
+    b_parents: 'திரு. க. முருகேசன் – திருமதி. மு. சாந்தி அவர்களின் அன்பு மகள்', bride: 'மு. தேவிப்பிரியா', b_note: 'M.Sc., B.Ed., ஆசிரியை',
+    date: '2027-02-10', tamil_date: 'தை 27, புதன்கிழமை', muhurtham: 'காலை 9.00 – 10.30 மணிக்குள் (கும்ப லக்னம்)', venue: 'ஸ்ரீ லட்சுமி திருமண மண்டபம்', address: 'பெருந்துறை ரோடு, ஈரோடு – 638 011',
+    reception: '9-02-2027 மாலை 6.30 மணி, அதே மண்டபத்தில்', inviters: 'இருவீட்டார் உற்றார் உறவினர்கள்', phone: '98765 43210' };
+  const IV_THEMES = [['temple', 'கோயில் (மெரூன்-தங்கம்)', 'Temple (maroon & gold)'], ['banana', 'வாழை இலை (பச்சை)', 'Banana leaf (green)'], ['royal', 'அரச நீலம்', 'Royal blue'], ['rose', 'ரோஜா (இளஞ்சிவப்பு)', 'Rose (pink)']];
+  function IV_injectStyle() {
+    if (document.getElementById('cx-iv-style')) return;
+    const s = document.createElement('style');
+    s.id = 'cx-iv-style';
+    s.textContent = `
+    .iv-page{width:794px;min-height:1123px;padding:30px;box-sizing:border-box;font-family:'Noto Sans Tamil','Noto Sans','Inter',sans-serif;color:#2b1a12;text-align:center;line-height:1.5}
+    .iv-page *{box-sizing:border-box}
+    .iv-frame{min-height:1063px;padding:34px 40px;border-radius:6px;display:flex;flex-direction:column;align-items:center;gap:6px}
+    .iv-inv{font-size:17px;font-weight:700;letter-spacing:.5px}
+    .iv-om{font-size:40px;line-height:1;margin:4px 0}
+    .iv-title{font-size:38px;font-weight:900;margin:4px 0 10px}
+    .iv-intro{font-size:16px;max-width:620px;margin:0 auto 8px}
+    .iv-par{font-size:16px;margin-top:10px}
+    .iv-name{font-size:34px;font-weight:900;margin:2px 0}
+    .iv-note{font-size:15px;opacity:.85}
+    .iv-and{font-size:26px;font-weight:900;margin:8px 0}
+    .iv-box{margin-top:16px;padding:14px 22px;border-radius:14px;min-width:70%}
+    .iv-when{font-size:22px;font-weight:900}
+    .iv-mu{font-size:17px;font-weight:700;margin-top:2px}
+    .iv-venue{font-size:22px;font-weight:900;margin-top:12px}
+    .iv-addr{font-size:15px;white-space:pre-line}
+    .iv-rec{font-size:15px;margin-top:10px}
+    .iv-from{margin-top:auto;padding-top:18px;font-size:15px;white-space:pre-line}
+    .iv-from b{display:block;font-size:13px;letter-spacing:1px;opacity:.8}
+    .iv-t-temple{background:#7A1020}.iv-t-temple .iv-frame{background:#FFF8E7;border:10px double #C9A227;box-shadow:inset 0 0 0 4px #FFF8E7,inset 0 0 0 6px #C9A227}
+    .iv-t-temple .iv-title,.iv-t-temple .iv-name{color:#7A1020}.iv-t-temple .iv-inv,.iv-t-temple .iv-om,.iv-t-temple .iv-and{color:#B8860B}.iv-t-temple .iv-box{background:#7A1020;color:#FFE9A8}
+    .iv-t-banana{background:#1E5E20}.iv-t-banana .iv-frame{background:#F6FBEF;border:8px solid #4C9A2A;border-radius:28px}
+    .iv-t-banana .iv-title,.iv-t-banana .iv-name{color:#1E5E20}.iv-t-banana .iv-inv,.iv-t-banana .iv-om,.iv-t-banana .iv-and{color:#C27C0E}.iv-t-banana .iv-box{background:#DCEFD0;color:#1E4D20}
+    .iv-t-royal{background:#14275C}.iv-t-royal .iv-frame{background:#FBFAF5;border:6px solid #C9A227;border-radius:4px}
+    .iv-t-royal .iv-title,.iv-t-royal .iv-name{color:#14275C}.iv-t-royal .iv-inv,.iv-t-royal .iv-om,.iv-t-royal .iv-and{color:#B8860B}.iv-t-royal .iv-box{background:#14275C;color:#fff}
+    .iv-t-rose{background:#B03A64}.iv-t-rose .iv-frame{background:#FFF5F8;border:6px dashed #E58FB0;border-radius:24px}
+    .iv-t-rose .iv-title,.iv-t-rose .iv-name{color:#9C2552}.iv-t-rose .iv-inv,.iv-t-rose .iv-om,.iv-t-rose .iv-and{color:#C2185B}.iv-t-rose .iv-box{background:#FCE4EC;color:#7A1F45}
+    `;
+    document.head.appendChild(s);
+  }
+  function IV_dateText(iso, en) {
+    const t = isoToUTC(iso); if (t == null) return iso || '';
+    const p = partsOf(t), wd = new Date(t).getUTCDay();
+    const MON_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return en ? WEEK_EN[wd] + ', ' + p.d + ' ' + MON_EN[p.m - 1] + ' ' + p.y : fmtDMY(t) + ', ' + ['ஞாயிற்றுக்கிழமை', 'திங்கள்கிழமை', 'செவ்வாய்க்கிழமை', 'புதன்கிழமை', 'வியாழக்கிழமை', 'வெள்ளிக்கிழமை', 'சனிக்கிழமை'][wd];
+  }
+  function IV_pageHtml(S) {
+    const en = S.lang === 'en', d = S.d, e = x => esc(x || '');
+    return '<div class="iv-page iv-t-' + e(S.theme) + '"><div class="iv-frame">' +
+      (d.invoke ? '<div class="iv-inv">' + e(d.invoke) + '</div>' : '') + '<div class="iv-om">' + (S.symbol || '') + '</div>' +
+      '<div class="iv-title">' + e(d.title || (en ? 'Wedding Invitation' : 'திருமண அழைப்பிதழ்')) + '</div>' +
+      '<div class="iv-intro">' + e(S.intro || (en ? 'With the blessings of the Almighty and our elders, we joyfully invite you with your family to the wedding of' : 'இறையருளாலும் பெரியோர்களின் ஆசியாலும் நிகழவிருக்கும் திருமணத்துக்குத் தாங்கள் குடும்பத்துடன் வருகை தந்து மணமக்களை வாழ்த்தியருள அன்புடன் அழைக்கிறோம்')) + '</div>' +
+      (d.g_parents ? '<div class="iv-par">' + e(d.g_parents) + '</div>' : '') + '<div class="iv-name">' + e(d.groom || (en ? 'Groom' : 'மணமகன்')) + '</div>' + (d.g_note ? '<div class="iv-note">' + e(d.g_note) + '</div>' : '') +
+      '<div class="iv-and">' + (en ? '&' : 'மணமகள்') + '</div>' +
+      (d.b_parents ? '<div class="iv-par">' + e(d.b_parents) + '</div>' : '') + '<div class="iv-name">' + e(d.bride || (en ? 'Bride' : 'மணமகள்')) + '</div>' + (d.b_note ? '<div class="iv-note">' + e(d.b_note) + '</div>' : '') +
+      '<div class="iv-box"><div class="iv-when">' + e(IV_dateText(d.date, en)) + '</div>' + (d.tamil_date ? '<div class="iv-mu">' + e(d.tamil_date) + '</div>' : '') + (d.muhurtham ? '<div class="iv-mu">' + (en ? 'Muhurtham: ' : 'முகூர்த்தம்: ') + e(d.muhurtham) + '</div>' : '') + '</div>' +
+      (d.venue ? '<div class="iv-venue">' + e(d.venue) + '</div>' : '') + (d.address ? '<div class="iv-addr">' + e(d.address) + '</div>' : '') +
+      (d.reception ? '<div class="iv-rec"><b>' + (en ? 'Reception: ' : 'வரவேற்பு: ') + '</b>' + e(d.reception) + '</div>' : '') +
+      '<div class="iv-from"><b>' + (en ? 'WITH LOVE, FROM' : 'அன்புடன் அழைக்கும்') + '</b>' + e(d.inviters || '') + (d.phone ? '\n📞 ' + e(d.phone) : '') + '</div>' +
+      '</div></div>';
+  }
+  TOOL_IMPL.invitation = {
+    mount(body) {
+      IV_injectStyle();
+      const root = makeRoot(body);
+      const blank = () => ({ lang: 'ta', theme: 'temple', symbol: 'ॐ', intro: '', d: {} });
+      let S = Object.assign(blank(), lsGet('invitation-draft', null) || {});
+      let drawT = 0;
+      const save = () => lsSet('invitation-draft', S);
+      function input(f) {
+        const v = S.d[f[0]] == null ? '' : S.d[f[0]], lab = T(f[1], f[2]);
+        if (f[3] === 'area') return '<div class="cx-f" style="grid-column:1/-1"><label>' + lab + '</label><textarea rows="2" data-d="' + f[0] + '">' + esc(v) + '</textarea></div>';
+        return '<div class="cx-f"><label>' + lab + '</label><input type="' + (f[3] || 'text') + '" class="cx-in" data-d="' + f[0] + '" value="' + esc(v) + '" autocomplete="off"></div>';
+      }
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? அழகான திருமண அழைப்பிதழை நிமிடங்களில் உருவாக்கி WhatsApp-ல் படமாக அனுப்ப அல்லது PDF-ஆக அச்சிட. தமிழ் / ஆங்கிலம், 4 வடிவமைப்புகள். தகவல்கள் உங்கள் phone-லேயே இருக்கும்.',
+          'Make a beautiful wedding invitation in minutes — share it on WhatsApp as an image or print the PDF. Tamil or English, four designs; your details stay on your phone.') +
+          '<div class="cx-grid">' + selectField(T('மொழி', 'Language'), 'lang', [['ta', 'தமிழ்'], ['en', 'English']], S.lang) + selectField(T('வடிவம்', 'Design'), 'theme', IV_THEMES.map(t => [t[0], T(t[1], t[2])]), S.theme) + '</div>' +
+          '<div class="cx-grid">' + selectField(T('சின்னம்', 'Symbol'), 'symbol', [['ॐ', 'ॐ'], ['🪔', '🪔'], ['🌺', '🌺'], ['✝', '✝'], ['☪', '☪'], ['💍', '💍'], ['', T('இல்லை', 'None')]], S.symbol) + '</div>' +
+          '<div class="cx-grid">' + IV_FIELDS.map(input).join('') + '</div>' +
+          '<div class="cx-f"><label>' + T('அழைப்பு வாசகம் (விருப்பம் — காலியாக விட்டால் இயல்பான வாசகம்)', 'Invitation text (optional — leave empty for the default)') + '</label><textarea rows="2" data-s="intro">' + esc(S.intro) + '</textarea></div>' +
+          '<div class="cx-actions"><button type="button" class="cx-btn" data-act="png">🖼 ' + T('படம் (WhatsApp)', 'Image (WhatsApp)') + '</button><button type="button" class="cx-btn" data-act="pdf">⬇ PDF</button>' +
+          '<button type="button" class="cx-btn sec" data-act="sample">✨ ' + T('மாதிரி நிரப்பு', 'Fill sample') + '</button><button type="button" class="cx-btn sec" data-act="clear">🧹 ' + T('அழி', 'Clear') + '</button></div><div data-k="msg"></div>' +
+          '<div class="cx-h">' + T('முன்னோட்டம்', 'Preview') + '</div><div class="bd-prevbox"><div class="bd-scale" data-k="prev"></div></div>';
+        wire(); preview();
+      }
+      function preview() {
+        const box = $(root, '[data-k=prev]'); if (!box) return;
+        box.innerHTML = IV_pageHtml(S);
+        const k = Math.min(1, (box.parentNode.clientWidth || 794) / 794);
+        box.style.transform = 'scale(' + k + ')'; box.parentNode.style.height = Math.ceil(box.firstChild.offsetHeight * k) + 'px';
+      }
+      const later = () => { clearTimeout(drawT); drawT = setTimeout(preview, 150); save(); };
+      const msg = h => { const m = $(root, '[data-k=msg]'); if (m) m.innerHTML = h; };
+      async function render() {
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;z-index:-1';
+        holder.innerHTML = IV_pageHtml(S); document.body.appendChild(holder);
+        try { try { await document.fonts.ready; } catch (e) { /* ignore */ } return await window.html2canvas(holder.firstChild, { scale: 2, backgroundColor: null, logging: false }); }
+        finally { holder.remove(); }
+      }
+      const fname = () => 'wedding-invitation' + ((S.d.groom || '') + (S.d.bride || '') ? '-' + String(S.d.groom + '-' + S.d.bride).normalize('NFKD').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) : '').replace(/-$/, '');
+      async function run(fn) {
+        if (!S.d.groom || !S.d.bride) { msg(msgHtml(T('மணமகன், மணமகள் பெயர்களை எழுதவும்.', 'Enter the groom\'s and bride\'s names.'))); return; }
+        const bs = root.querySelectorAll('[data-act=png],[data-act=pdf]'); bs.forEach(b => (b.disabled = true));
+        msg('<div class="cx-info">⏳ ' + T('தயாராகிறது…', 'Preparing…') + '</div>');
+        try { await fn(); msg('<div class="cx-ok">✓ ' + T('தயார்', 'Done') + '</div>'); } catch (e) { msg(msgHtml(T('உருவாக்க முடியவில்லை: ', 'Could not create it: ') + esc(e.message || e))); }
+        finally { bs.forEach(b => (b.disabled = false)); }
+      }
+      function wire() {
+        root.querySelectorAll('[data-d]').forEach(i => i.addEventListener('input', () => { S.d[i.getAttribute('data-d')] = i.value; later(); }));
+        root.querySelectorAll('[data-s]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-s')] = i.value; later(); }));
+        ['lang', 'theme', 'symbol'].forEach(k => { $(root, '[data-k=' + k + ']').onchange = e => { S[k] = e.target.value; save(); if (k === 'lang') draw(); else preview(); }; });
+        $(root, '[data-act=sample]').onclick = () => { S.d = Object.assign({}, IV_SAMPLE); S.lang = 'ta'; save(); draw(); };
+        $(root, '[data-act=clear]').onclick = () => { if (confirm(T('எல்லாவற்றையும் அழிக்கவா?', 'Clear everything?'))) { S = blank(); save(); draw(); } };
+        $(root, '[data-act=png]').onclick = () => run(async () => { const cv = await render(); await downloadBlob(await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92)), fname() + '.jpg'); });
+        $(root, '[data-act=pdf]').onclick = () => run(async () => {
+          const cv = await render(), png = await new Promise(r => cv.toBlob(r, 'image/png'));
+          const doc = await window.PDFLib.PDFDocument.create(), img = await doc.embedPng(await png.arrayBuffer());
+          const pw = 595.28, ph = 841.89, k = Math.min(pw / img.width, ph / img.height), w = img.width * k, h = img.height * k;
+          doc.addPage([pw, ph]).drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
+          await downloadBlob(new Blob([await doc.save()], { type: 'application/pdf' }), fname() + '.pdf');
+        });
+      }
+      BD_injectStyle(); AS_injectStyle(); // preview box + input styles
+      draw();
+      window.addEventListener('resize', () => { if (root.isConnected) preview(); });
+    }
+  };
+  TOOL_IMPL.invitation._f = { page: IV_pageHtml, dateText: IV_dateText };
 
 })();
