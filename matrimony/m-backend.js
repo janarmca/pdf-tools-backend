@@ -39,6 +39,15 @@
       }
       return r.data;
     },
+    // daily promotion agent (site admins): GET status, or POST run / enabled
+    promo: async function (path, body) {
+      var h = await authHeader(); if (body) h['Content-Type'] = 'application/json';
+      try {
+        var r = await fetch(C.API_URL + '/promo/' + path, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined });
+        var j = await r.json().catch(function () { return {}; });
+        return r.ok ? j : { ok: false, message: j.error || ('Error ' + r.status) };
+      } catch (e) { return { ok: false, message: String(e.message || e) }; }
+    },
     // the server picks the file name: <your user id>/... or submissions/... (public sign-up form)
     uploadPhoto: async function (blob, uid) {
       var folder = uid === 'submissions' ? 'submissions' : 'me';
@@ -219,5 +228,6 @@
   var impl = demo ? demoImpl : live;
   ['init', 'user', 'sendCode', 'verifyCode', 'google', 'signOut', 'rpc', 'uploadPhoto', 'removePhoto', 'photoUrl', 'pay', 'jathagam'].forEach(function (k) { B[k] = function () { return impl[k].apply(null, arguments); }; });
   B.resetDemo = demoImpl.resetDemo;
+  if (!demo) B.promo = live.promo; // site admins only; not in demo mode
   window.MatBackend = B;
 })();

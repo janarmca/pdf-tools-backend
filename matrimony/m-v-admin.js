@@ -6,8 +6,24 @@
   M.views.admin = async function (v, tab) {
     if (!M.st.me || !M.st.me.is_admin) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p>' + esc(t(M.ERR.forbidden[0], M.ERR.forbidden[1])) + '</p></div></div>'; return; }
     tab = tab || 'subs';
-    var tabs = [['subs', t('புதிய பதிவுகள்', 'New sign-ups')], ['reqs', t('தொடர்பு கோரிக்கைகள்', 'Contact requests')], ['pending', t('காத்திருப்பவை', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['rejected', t('நிராகரிக்கப்பட்டவை', 'Rejected')], ['hidden', t('மறைக்கப்பட்டவை', 'Hidden')], ['reports', t('புகார்கள்', 'Reports')], ['stats', t('புள்ளிவிவரம்', 'Stats')]];
+    var tabs = [['subs', t('புதிய பதிவுகள்', 'New sign-ups')], ['reqs', t('தொடர்பு கோரிக்கைகள்', 'Contact requests')], ['pending', t('காத்திருப்பவை', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['rejected', t('நிராகரிக்கப்பட்டவை', 'Rejected')], ['hidden', t('மறைக்கப்பட்டவை', 'Hidden')], ['reports', t('புகார்கள்', 'Reports')], ['promo', t('விளம்பரம்', 'Promotion')], ['stats', t('புள்ளிவிவரம்', 'Stats')]];
     var head = '<div class="wrap"><h1 class="h2">🛡 ' + t('நிர்வாகம்', 'Admin') + '</h1><div class="tabsx">' + tabs.map(function (x) { return '<a class="' + (tab === x[0] ? 'on' : '') + '" href="#/admin/' + x[0] + '">' + esc(x[1]) + '</a>'; }).join('') + '</div>';
+    if (tab === 'promo') {
+      if (!M.B.promo) { v.innerHTML = head + '<p class="mut">' + t('demo-வில் இது இல்லை.', 'Not available in demo mode.') + '</p></div>'; return; }
+      var ps = await M.B.promo('status');
+      if (!v.isConnected) return;
+      if (ps.ok === false) { v.innerHTML = head + '<p class="err">' + esc(ps.message) + '</p></div>'; return; }
+      var tg = (ps.platforms || []).filter(function (p) { return p.name === 'telegram'; })[0];
+      v.innerHTML = head + '<div class="box"><p>' + t('தினமும் காலை 9:05-க்கு ஒரு tool பற்றிய தமிழ் + English post (படம், link உடன்) தானாகப் போகும்.', 'Every day at 9:05 AM one tool is posted automatically in Tamil + English with its picture and link.') + '</p>' +
+        '<p><b>' + t('நிலை', 'Status') + ':</b> ' + (ps.enabled ? '🟢 ' + t('இயங்குகிறது', 'On') : '🔴 ' + t('நிறுத்தப்பட்டது', 'Off')) + ' · Telegram: ' + (tg && tg.ready ? '✅' : '❌ ' + t('secrets இல்லை', 'secrets missing')) + ' · ' + ps.tools + ' tools</p>' +
+        '<div class="rowb"><button class="btn pri" data-act="pRun">📣 ' + t('இப்போதே ஒரு post', 'Post one now') + '</button>' +
+        '<button class="btn" data-act="pOn" data-on="' + (ps.enabled ? '0' : '1') + '">' + (ps.enabled ? '⏸ ' + t('நிறுத்து', 'Turn off') : '▶ ' + t('தொடங்கு', 'Turn on')) + '</button></div></div>' +
+        '<h3 class="h3">' + t('சமீபத்திய posts', 'Recent posts') + '</h3>' +
+        ((ps.recent || []).length ? ps.recent.map(function (x) {
+          return '<div class="arow"><b>' + esc(x.tool_id) + '</b> · ' + esc(x.platform) + ' · ' + (x.status === 'sent' ? '✅' : '❌ ' + esc(x.error || '')) + ' <span class="mut sm">' + M.ago(x.created_at) + '</span></div>';
+        }).join('') : '<p class="mut">' + t('இன்னும் post இல்லை.', 'No posts yet.') + '</p>') + '</div>';
+      return;
+    }
     if (tab === 'reqs') {
       var rq = await M.api('mat_admin_contact_requests', { st: 'new' });
       if (!v.isConnected) return;
@@ -88,6 +104,15 @@
   M.acts.aList = async function (a) {
     var r = await M.api('mat_admin_submission_list', { sid: a.getAttribute('data-id'), on: a.getAttribute('data-on') === '1' });
     if (!r.ok) return M.toast(M.err(r), 'bad'); M.toast('✓', 'ok'); M.route();
+  };
+  M.acts.pRun = async function (a) {
+    a.disabled = true; var r = await M.B.promo('run', {}); a.disabled = false;
+    if (r.ok) M.toast('✓ ' + r.tool, 'ok'); else M.toast(r.message || (r.results && r.results[0] && r.results[0].error) || r.skipped || 'error', 'bad');
+    M.route();
+  };
+  M.acts.pOn = async function (a) {
+    var r = await M.B.promo('enabled', { on: a.getAttribute('data-on') === '1' });
+    if (r.ok === false) return M.toast(r.message, 'bad'); M.route();
   };
   M.acts.aReq = async function (a) {
     var r = await M.api('mat_admin_contact_request_set', { rid: a.getAttribute('data-id'), st: 'done' });
