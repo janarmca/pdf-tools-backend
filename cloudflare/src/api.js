@@ -492,12 +492,64 @@ async function matJathagam(env, req, user) {
   }
 }
 
+// ---------------------------------------------------------------- health check (health-check.html), 2 credits
+// The page screens emergency red flags first; the AI only explains likely causes from every angle.
+// Siddha / home remedies come ONLY from this vetted list — the AI may pick keys, the text below is fixed.
+const SIDDHA = {
+  nilavembu: [['நிலவேம்புக் குடிநீர்', 'Nilavembu kudineer'], ['ஒரு டம்ளர் நீரில் 5 கிராம் பொடியைக் கொதிக்கவைத்து கால் பங்காகச் சுண்டியதும் வடிகட்டி, நாளுக்கு 2 முறை 30–60 மி.லி.', 'Boil 5 g powder in a glass of water down to a quarter, strain; 30–60 ml twice a day.'], ['கர்ப்பிணிகள், 5 நாளுக்கு மேல் காய்ச்சல் — மருத்துவரைப் பாருங்கள்.', 'Not in pregnancy; fever over 5 days needs a doctor.']],
+  kabasura: [['கபசுரக் குடிநீர்', 'Kabasura kudineer'], ['5 கிராம் பொடியை 240 மி.லி. நீரில் 60 மி.லி. ஆகும் வரை கொதிக்கவைத்து, காலை–மாலை குடிக்கவும்.', 'Boil 5 g powder in 240 ml water down to 60 ml; drink morning and evening.'], ['கர்ப்பிணிகள், சிறு குழந்தைகளுக்கு மருத்துவர் ஆலோசனையுடன் மட்டும்.', 'Pregnancy and young children only on a doctor\'s advice.']],
+  adathodai: [['ஆடாதோடை இலைக் கஷாயம்', 'Adathodai (Vasaka) leaf decoction'], ['2–3 இலைகளை நீரில் கொதிக்கவைத்து, தேன் சேர்த்து நாளுக்கு 2 முறை.', 'Boil 2–3 leaves in water, add honey; twice a day.'], ['கர்ப்ப காலத்தில் தவிர்க்கவும்.', 'Avoid in pregnancy.']],
+  thulasi: [['துளசி இலை', 'Thulasi (holy basil)'], ['5–6 இலைகளை வெந்நீரில் போட்டு ஆவி பிடிக்கலாம் அல்லது தேநீராகக் குடிக்கலாம்.', 'Steep 5–6 leaves in hot water as a tea, or for steam.'], ['இரத்தம் உறையாமைக்கான மருந்து சாப்பிடுபவர்கள் மருத்துவரிடம் கேளுங்கள்.', 'Ask a doctor if you take blood thinners.']],
+  ginger_honey: [['இஞ்சிச் சாறு + தேன்', 'Ginger juice with honey'], ['ஒரு தேக்கரண்டி இஞ்சிச் சாற்றுடன் தேன் கலந்து நாளுக்கு 2–3 முறை.', 'One teaspoon ginger juice with honey, 2–3 times a day.'], ['1 வயதுக்குக் குறைந்த குழந்தைக்குத் தேன் கொடுக்கக் கூடாது.', 'Never give honey to a baby under 1 year.']],
+  seeragam: [['சீரகத் தண்ணீர்', 'Cumin (seeragam) water'], ['ஒரு தேக்கரண்டி சீரகத்தை நீரில் கொதிக்கவைத்து, ஆறியதும் சிறிது சிறிதாகக் குடிக்கவும்.', 'Boil a teaspoon of cumin in water; sip when warm.'], ['', '']],
+  omam: [['ஓமம் தண்ணீர்', 'Ajwain (omam) water'], ['அரை தேக்கரண்டி ஓமத்தை வெந்நீரில் ஊறவைத்து வடிகட்டிக் குடிக்கவும்.', 'Soak half a teaspoon of ajwain in hot water, strain and drink.'], ['கர்ப்ப காலத்தில் அதிகம் வேண்டாம்.', 'Not in large amounts in pregnancy.']],
+  turmeric_milk: [['மஞ்சள் பால்', 'Turmeric milk'], ['ஒரு டம்ளர் வெதுவெதுப்பான பாலில் கால் தேக்கரண்டி மஞ்சள், சிறிது மிளகுத்தூள்; இரவில்.', 'A quarter teaspoon of turmeric and a pinch of pepper in warm milk at night.'], ['பித்தப்பைக் கல் உள்ளவர்கள் தவிர்க்கவும்.', 'Avoid if you have gallstones.']],
+  salt_gargle: [['உப்புநீர் கொப்பளித்தல்', 'Salt-water gargle'], ['ஒரு டம்ளர் வெதுவெதுப்பான நீரில் அரை தேக்கரண்டி உப்பு; நாளுக்கு 3–4 முறை கொப்பளிக்கவும்.', 'Half a teaspoon of salt in a glass of warm water; gargle 3–4 times a day.'], ['விழுங்க வேண்டாம்.', 'Do not swallow.']],
+  triphala: [['திரிபலா சூரணம்', 'Triphala powder'], ['இரவு உணவுக்குப் பின் அரை–1 தேக்கரண்டி வெந்நீருடன்.', 'Half to one teaspoon with warm water after dinner.'], ['கர்ப்பம், வயிற்றுப்போக்கு இருந்தால் தவிர்க்கவும்.', 'Avoid in pregnancy or with diarrhoea.']],
+};
+const URGENCY = ['self_care', 'see_doctor_soon', 'see_doctor_today', 'emergency'];
+const ANGLES = ['infection', 'food_water', 'sleep', 'stress', 'environment', 'chronic', 'medicine', 'other'];
+const strList = (a, n = 8) => (Array.isArray(a) ? a.filter((x) => typeof x === 'string' && x.trim()).slice(0, n).map((x) => x.trim().slice(0, 300)) : []);
+
+async function aiHealth(env, user, b) {
+  if (!env.GEMINI_API_KEY) return err(501, 'AI feature not set up yet (GEMINI_API_KEY missing).');
+  const ta = b.lang !== 'en';
+  if (Array.isArray(b.redFlags) && b.redFlags.length) {
+    return json({ ok: true, result: { urgency: 'emergency', urgency_reason: ta ? 'அவசர அறிகுறிகள் உள்ளன — உடனே 108 அழைக்கவும் அல்லது அருகிலுள்ள மருத்துவமனைக்குச் செல்லவும்.' : 'Emergency signs — call 108 or go to the nearest hospital now.' } });
+  }
+  const p = b.profile || {}, c = b.context || {};
+  const facts = JSON.stringify({ age: p.age, sex: p.sex, pregnant: !!p.pregnant, complaint: b.complaint, details: b.details, duration: `${b.durationValue || ''} ${b.durationUnit || ''}`.trim(), severity_out_of_10: b.severity, ...c }).slice(0, 6000);
+  if (!String(b.complaint || '').trim() && !String(b.details || '').trim()) return err(400, ta ? 'பிரச்சனையை எழுதுங்கள்.' : 'Describe the problem.');
+  return charged(env, user.id, 2, 'healthcheck', async () => {
+    const prompt = `You are a careful general physician in Tamil Nadu helping a person understand a health problem before they see a doctor. You do NOT diagnose and you never prescribe.
+Facts given by the person (JSON): ${facts}
+Look at every angle: infection, food and water, sleep, stress, weather/environment, long-term illness, medicines they take. Be honest about uncertainty; prefer common causes; mention dengue, typhoid or malaria only when the facts fit (fever days, season, symptoms).
+Rules: no prescription medicines, no antibiotics, no doses except "paracetamol as per the label" if fever; urgency must be 'see_doctor_today' or 'emergency' for anything worrying (children under 5, over 65, pregnancy, fever 3+ days, high fever, severe pain). Choose home remedies only from these keys if they truly fit (or none): ${Object.keys(SIDDHA).join(', ')}.
+Write all text in ${ta ? 'simple spoken Tamil' : 'simple English'}.
+Return JSON: {"urgency": one of ${JSON.stringify(URGENCY)}, "urgency_reason": "...", "summary": "2-3 sentences", "possible_causes": [{"cause": "...", "likelihood": "high|medium|low", "angle": one of ${JSON.stringify(ANGLES)}, "why": "..."}] (max 5), "root_cause_insight": "...", "self_care": ["..."], "siddha_keys": ["..."], "medicine_advice": "...", "tests_to_consider": ["..."], "see_doctor_if": ["..."], "questions_for_doctor": ["..."], "missing_info": ["..."]}`;
+    let o;
+    try { o = JSON.parse(await gemini(env, [{ text: prompt }], { generationConfig: { response_mime_type: 'application/json', temperature: 0.2 } })); } catch (e) { throw fail(502, e.status ? e.message : 'The AI answer could not be read — please try again.'); }
+    const L = ta ? 0 : 1;
+    const result = {
+      urgency: URGENCY.includes(o.urgency) ? o.urgency : 'see_doctor_soon',
+      urgency_reason: String(o.urgency_reason || '').slice(0, 500), summary: String(o.summary || '').slice(0, 1200),
+      possible_causes: (Array.isArray(o.possible_causes) ? o.possible_causes : []).slice(0, 5).map((x) => ({ cause: String(x.cause || '').slice(0, 200), likelihood: ['high', 'medium', 'low'].includes(x.likelihood) ? x.likelihood : 'medium', angle: ANGLES.includes(x.angle) ? x.angle : 'other', why: String(x.why || '').slice(0, 400) })).filter((x) => x.cause),
+      root_cause_insight: String(o.root_cause_insight || '').slice(0, 800),
+      self_care: strList(o.self_care), medicine_advice: String(o.medicine_advice || '').slice(0, 600),
+      siddha_remedies: strList(o.siddha_keys, 3).filter((k) => SIDDHA[k]).map((k) => ({ name: SIDDHA[k][0][L], how: SIDDHA[k][1][L], caution: SIDDHA[k][2][L] })),
+      tests_to_consider: strList(o.tests_to_consider), see_doctor_if: strList(o.see_doctor_if), questions_for_doctor: strList(o.questions_for_doctor), missing_info: strList(o.missing_info, 5),
+    };
+    return json({ ok: true, result });
+  });
+}
+
 // ---------------------------------------------------------------- router
 const AUTHED_POST = {
   '/api/credits/use': (env, req, u, b) => creditsUse(env, u, b),
   '/api/redeem': (env, req, u, b) => redeem(env, req, u, b),
   '/api/ai/text': (env, req, u, b) => aiText(env, u, b),
   '/api/ai/image': (env, req, u, b) => aiImage(env, u, b),
+  '/api/ai/health': (env, req, u, b) => aiHealth(env, u, b),
   '/api/payment/create-order': (env, req, u, b) => createOrder(env, u, b),
   '/api/payment/verify': (env, req, u, b) => verifyPayment(env, u, b),
   '/api/astrology/calculate': (env, req, u, b) => astrologyCalculate(env, u, b),

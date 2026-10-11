@@ -245,3 +245,25 @@ test('promotion agent: admin-only, AI post to Telegram, picture fallback, rotati
   assert.equal(recent.length, 4);
   assert.ok(recent.every((x) => x.status === 'sent'));
 });
+
+test('health check AI: red flags skip AI, vetted remedies only, 2 credits, refund on failure', async () => {
+  const u = await user('health');
+  await setCredits(u, 10);
+  const red = await call('/api/ai/health', { body: { lang: 'ta', redFlags: ['chest pain'], complaint: 'x' }, token: u.access_token });
+  assert.equal(red.j.result.urgency, 'emergency');
+  assert.equal(await credits(u), 10, 'emergency answer is free and needs no AI');
+  const r = await call('/api/ai/health', { body: { lang: 'en', redFlags: [], complaint: 'Fever', profile: { age: 30 }, context: {} }, token: u.access_token });
+  assert.equal(r.s, 200);
+  assert.equal(r.j.result.urgency, 'see_doctor_soon');
+  assert.deepEqual(r.j.result.siddha_remedies.map((x) => x.name), ['Nilavembu kudineer'], 'unknown remedies are dropped');
+  assert.match(r.j.result.siddha_remedies[0].caution, /pregnancy/);
+  assert.deepEqual(r.j.result.self_care, ['rest']);
+  assert.deepEqual(r.j.result.possible_causes[1], { cause: 'x', likelihood: 'medium', angle: 'other', why: '' });
+  assert.equal(await credits(u), 8);
+  behaviour.geminiFail = true;
+  const bad = await call('/api/ai/health', { body: { lang: 'ta', complaint: 'Fever' }, token: u.access_token });
+  behaviour.geminiFail = false;
+  assert.equal(bad.s, 502);
+  assert.equal(await credits(u), 8, 'refunded');
+  assert.equal((await call('/api/ai/health', { body: { complaint: 'x' } })).s, 401);
+});

@@ -31,6 +31,7 @@ export function startMock(port = 8790) {
         if (behaviour.geminiFail) return send(500, { error: { message: 'mock gemini down' } });
         const parts = j?.contents?.[0]?.parts || [];
         const txt = parts[0]?.text || '';
+        if (/general physician/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: JSON.stringify({ urgency: 'see_doctor_soon', urgency_reason: 'r', summary: 's', possible_causes: [{ cause: 'Viral fever', likelihood: 'high', angle: 'infection', why: 'w' }, { cause: 'x', likelihood: 'weird', angle: 'nope' }], self_care: ['rest', 3], siddha_keys: ['nilavembu', 'made_up_herb'], medicine_advice: 'paracetamol as per label', tests_to_consider: [], see_doctor_if: ['fever > 3 days'], questions_for_doctor: [], missing_info: [] }) }] } }] });
         if (/social media post/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"ta":"தமிழ் பதிவு <b>சோதனை</b>","en":"English post"}' }] } }] });
         if (/horoscope/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"name":"Kavya R","gender":"F","dob":"1999-04-12","star":"rohini","raasi":"rishabam","phone":"9876543210"}' }] } }] });
         const fd = parts.find((p) => p.file_data);
