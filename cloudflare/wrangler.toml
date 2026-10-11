@@ -14,6 +14,7 @@ routes = [
 
 [vars]
 PUBLIC_API_URL = "https://pdftoolsindia.com/cfapi"
+TELEGRAM_CHANNEL = "@pdftoolsindia"   # public channel for the daily promotion posts (not a secret)
 
 [[d1_databases]]
 binding = "DB"
@@ -43,4 +44,4 @@ crons = ["35 3 * * *"]
 #   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
 #   GEMINI_API_KEY, NVIDIA_API_KEY, ASTROLOGER_API_KEY — AI tools / Astrology+
 #   MAT_ADMIN_EMAILS                        — optional: comma-separated matrimony admin e-mails
-#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL    — optional: daily promotion posts to a Telegram channel (@BotFather)
+#   TELEGRAM_BOT_TOKEN                      — optional: daily promotion posts to the Telegram channel above (@BotFather)

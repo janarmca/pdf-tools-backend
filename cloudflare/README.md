@@ -41,8 +41,7 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `NVIDIA_API_KEY` | build.nvidia.com → Get API Key (இலவசம்) | Text AI |
 | `ASTROLOGER_API_KEY` | RapidAPI → Astrologer API (இலவச tier) | Astrology+ |
 | `MAT_ADMIN_EMAILS` | திருமண அமைப்பக admin email(கள்), comma பிரித்து | விருப்பம் |
-| `TELEGRAM_BOT_TOKEN` | Telegram → @BotFather → `/newbot` தரும் token | தினசரி promotion post-க்கு |
-| `TELEGRAM_CHANNEL` | உங்கள் channel, எ.கா. `@pdftoolsindia` (bot-ஐ அதில் Admin ஆக்கவும்) | தினசரி promotion post-க்கு |
+| `TELEGRAM_BOT_TOKEN` | Telegram → @BotFather → `/newbot` தரும் token. Bot-ஐ `@pdftoolsindia` channel-ல் Admin ஆக்கவும் (channel பெயர் `wrangler.toml`-ல் உள்ளது) | தினசரி promotion post-க்கு |
 
 (Brevo-க்குப் பதில் Resend பயன்படுத்தினால்: `RESEND_API_KEY` + Cloudflare DNS-ல் domain verify.)
 
