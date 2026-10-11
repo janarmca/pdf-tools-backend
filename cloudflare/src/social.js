@@ -114,7 +114,7 @@ export function socialStatus(env, s) {
   return [
     { name: 'facebook', canConnect: !!(env.FB_APP_ID && env.FB_APP_SECRET), connected: !!s.fb_page_token, detail: s.fb_page_name || '' },
     { name: 'instagram', canConnect: !!(env.FB_APP_ID && env.FB_APP_SECRET), connected: !!s.ig_user_id, detail: s.ig_user_id ? 'via Facebook Page' : '' },
-    { name: 'x', canConnect: false, connected: !!(env.X_API_KEY && env.X_ACCESS_TOKEN), detail: 'GitHub secrets' },
+    { name: 'x', canConnect: false, connected: !!(env.X_API_KEY && env.X_ACCESS_TOKEN), detail: '' },
     { name: 'pinterest', canConnect: !!(env.PINTEREST_APP_ID && env.PINTEREST_APP_SECRET), connected: !!s.pin_refresh, detail: '' },
     { name: 'youtube', canConnect: !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET), connected: !!s.yt_refresh, detail: s.yt_channel || '' },
   ];

@@ -25,7 +25,7 @@
           var btn = x.name === 'instagram' || x.name === 'x' ? '' : x.canConnect ? '<button class="btn sm' + (x.connected ? ' ghost' : ' pri') + '" data-act="pConnect" data-p="' + esc(x.name) + '">' + (x.connected ? t('மீண்டும் இணை', 'Reconnect') : t('இணை (Connect)', 'Connect')) + '</button>' +
             (x.connected ? ' <button class="btn sm ghost" data-act="pDisc" data-p="' + esc(x.name) + '">' + t('துண்டி', 'Disconnect') + '</button>' : '') : '<span class="mut sm">' + t('App keys இன்னும் சேர்க்கப்படவில்லை', 'App keys not added yet') + '</span>';
           return '<div class="arow"><b>' + esc(nm) + '</b> · ' + (x.connected ? '✅ ' + esc(x.detail || t('இணைந்தது', 'connected')) : '❌ ' + t('இணைக்கப்படவில்லை', 'not connected')) +
-            (x.name === 'instagram' ? ' <span class="mut sm">' + t('(Facebook Page மூலம்)', '(through the Facebook Page)') + '</span>' : x.name === 'x' ? ' <span class="mut sm">(GitHub secrets)</span>' : '') + '<div class="rowb">' + btn + '</div></div>';
+            (x.name === 'instagram' ? ' <span class="mut sm">' + t('(Facebook Page மூலம்)', '(through the Facebook Page)') + '</span>' : x.name === 'x' ? ' <span class="mut sm">(GitHub secrets)</span>' : '') + (btn ? '<div class="rowb">' + btn + '</div>' : '') + '</div>';
         }).join('') + '</div>' +
         '<h3 class="h3">' + t('சமீபத்திய posts', 'Recent posts') + '</h3>' +
         ((ps.recent || []).length ? ps.recent.map(function (x) {
