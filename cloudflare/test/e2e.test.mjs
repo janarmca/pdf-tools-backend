@@ -63,7 +63,9 @@ test('auth: e-mail code login, wrong codes, rate limits, refresh rotation, logou
   assert.equal((await call('/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: r1.j.refresh_token } })).s, 401);
   // passwords are gone; Google not configured in tests
   assert.equal((await call('/auth/v1/signup', { body: { email, password: 'x' } })).s, 404);
-  assert.equal((await call('/auth/v1/authorize?provider=google&redirect_to=https://pdftoolsindia.com/', { method: 'GET' })).s, 503);
+  const g = await fetch(API + '/auth/v1/authorize?provider=google&redirect_to=https://pdftoolsindia.com/', { redirect: 'manual' });
+  assert.equal(g.status, 302);
+  assert.match(g.headers.get('location'), /^https:\/\/pdftoolsindia\.com\/#error=unavailable&error_description=Google/);
   const p = await sql([{ sql: 'select credits, plan from profiles where id = ?', params: [s.user.id] }]);
   assert.deepEqual(p.j.results[0][0], { credits: 5, plan: 'free' });
 });

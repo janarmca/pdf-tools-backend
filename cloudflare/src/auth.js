@@ -78,8 +78,12 @@ export async function sendMail(env, to, subject, html) {
     });
   } else throw new Error('no e-mail service');
   if (!r.ok) {
-    console.error('mail failed', r.status, await r.text().catch(() => ''));
-    throw new Error('The e-mail could not be sent right now. Please try again, or sign in with Google.');
+    const body = await r.text().catch(() => '');
+    console.error('mail failed', r.status, body);
+    let why = '';
+    try { const j = JSON.parse(body); why = j.message || j.code || j.name || ''; } catch {}
+    // the provider's reason (e.g. "unrecognised IP address", "sender not valid") — no secrets in it — helps fix setup problems
+    throw new Error('The e-mail could not be sent right now. Please try again, or sign in with Google.' + (why ? ` (${String(why).slice(0, 160)})` : ` (mail ${r.status})`));
   }
 }
 
@@ -171,7 +175,9 @@ async function readState(env, state) {
 
 async function authorize(url, env) {
   if (url.searchParams.get('provider') !== 'google') return err(400, 'Unsupported provider');
-  if (!env.GOOGLE_CLIENT_ID) return err(503, 'Google sign-in is not set up yet');
+  const back = safeRedirect(url.searchParams.get('redirect_to')).split('#')[0];
+  // not configured yet: go back to the site with a readable message instead of showing raw JSON
+  if (!env.GOOGLE_CLIENT_ID) return Response.redirect(back + '#error=unavailable&error_description=' + encodeURIComponent('Google sign-in is not set up yet — please use the e-mail code.'), 302);
   const state = await signState(env, { r: safeRedirect(url.searchParams.get('redirect_to')), exp: Date.now() + 10 * 60 * 1000 });
   const q = new URLSearchParams({
     client_id: env.GOOGLE_CLIENT_ID, redirect_uri: `${apiBase(env)}/auth/v1/callback`, response_type: 'code',
