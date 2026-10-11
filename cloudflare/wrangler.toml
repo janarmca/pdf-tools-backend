@@ -32,6 +32,10 @@ binding = "AI"
 [observability]
 enabled = true
 
+# Daily promotion post (src/promo.js) at 09:05 IST (03:35 UTC). Switch off: POST /cfapi/promo/enabled {"on":false}
+[triggers]
+crons = ["35 3 * * *"]
+
 # Secrets (set by the workflow from GitHub repository secrets, never stored here):
 #   AUTH_JWT_SECRET                         — signs login tokens (openssl rand -hex 32)
 #   BREVO_API_KEY or RESEND_API_KEY, EMAIL_FROM — e-mail login codes (free tiers)
@@ -39,3 +43,4 @@ enabled = true
 #   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
 #   GEMINI_API_KEY, NVIDIA_API_KEY, ASTROLOGER_API_KEY — AI tools / Astrology+
 #   MAT_ADMIN_EMAILS                        — optional: comma-separated matrimony admin e-mails
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL    — optional: daily promotion posts to a Telegram channel (@BotFather)

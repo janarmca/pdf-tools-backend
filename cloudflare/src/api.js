@@ -78,7 +78,7 @@ async function validPaymentSignature(env, orderId, paymentId, signature) {
   return safeEqual(await hmacHex(env.RAZORPAY_KEY_SECRET, `${orderId}|${paymentId}`), String(signature));
 }
 
-async function gemini(env, parts, extra = {}) {
+export async function gemini(env, parts, extra = {}) {
   if (!env.GEMINI_API_KEY) throw fail(501, 'AI feature not set up yet (GEMINI_API_KEY missing).');
   const files = parts.filter((p) => p._name).map((p) => ({ _name: p._name }));
   parts = parts.map(({ _name, ...p }) => p);

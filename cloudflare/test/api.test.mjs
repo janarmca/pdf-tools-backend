@@ -194,3 +194,54 @@ test('Astrology+: birth chart, porutham, AI reading', async () => {
   const combo = await call('/api/claude/analyze', { body: { question: 'Career? Marriage?' }, token: u.access_token });
   assert.equal(combo.s, 402, 'multi-part question costs 50');
 });
+
+test('promotion agent: admin-only, AI post to Telegram, picture fallback, rotation, off switch', async () => {
+  const u = await user('promo-user');
+  assert.equal((await call('/promo/status', { method: 'GET', token: u.access_token })).s, 403);
+  assert.equal((await call('/promo/run', { body: {} })).s, 403);
+  const a = await user('promo-admin');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [a.user.id] }, { sql: 'delete from promo_posts' }, { sql: "update promo_settings set value = 'on' where key = 'enabled'" }]);
+  const st = (await call('/promo/status', { method: 'GET', token: a.access_token })).j;
+  assert.equal(st.enabled, true);
+  assert.deepEqual(st.platforms, [{ name: 'telegram', ready: true }]);
+  assert.ok(st.tools > 100);
+
+  const n0 = calls.length;
+  const r1 = (await call('/promo/run', { body: {}, token: a.access_token })).j;
+  assert.equal(r1.ok, true);
+  assert.equal(r1.tool, 'merge', 'first never-posted free tool');
+  const tg = calls.slice(n0).find((c) => c.url === '/botTG-TOKEN/sendPhoto');
+  assert.equal(tg.body.chat_id, '@test');
+  assert.equal(tg.body.photo, 'https://pdftoolsindia.com/images/tools/merge.jpg');
+  assert.match(tg.body.caption, /தமிழ் பதிவு &lt;b&gt;சோதனை&lt;\/b&gt;/, 'AI text is escaped');
+  assert.match(tg.body.caption, /English post/);
+  assert.equal(tg.body.reply_markup.inline_keyboard[0][0].url, 'https://pdftoolsindia.com/tools/merge-pdf');
+
+  behaviour.telegramPhotoFail = true;
+  const n1 = calls.length;
+  const r2 = (await call('/promo/run', { body: {}, token: a.access_token })).j;
+  behaviour.telegramPhotoFail = false;
+  assert.equal(r2.ok, true);
+  assert.notEqual(r2.tool, 'merge', 'rotates to the next tool');
+  assert.ok(calls.slice(n1).some((c) => c.url === '/botTG-TOKEN/sendMessage'), 'falls back to a text message');
+
+  behaviour.geminiFail = true;
+  const r3 = (await call('/promo/run', { body: { tool: 'tneacutoff' }, token: a.access_token })).j;
+  behaviour.geminiFail = false;
+  assert.equal(r3.ok, true, 'AI down -> template post still goes out');
+
+  // off switch stops the daily cron run
+  assert.equal((await call('/promo/enabled', { body: { on: false }, token: a.access_token })).j.enabled, false);
+  const n2 = calls.length;
+  await fetch(API.replace(/\/cfapi$/, '') + '/__scheduled?cron=35+3+*+*+*');
+  await new Promise((r) => setTimeout(r, 800));
+  assert.equal(calls.slice(n2).filter((c) => c.url.startsWith('/botTG-TOKEN/')).length, 0);
+  await call('/promo/enabled', { body: { on: true }, token: a.access_token });
+  const n3 = calls.length;
+  await fetch(API.replace(/\/cfapi$/, '') + '/__scheduled?cron=35+3+*+*+*');
+  await new Promise((r) => setTimeout(r, 1500));
+  assert.equal(calls.slice(n3).filter((c) => c.url.startsWith('/botTG-TOKEN/')).length, 1, 'cron posts once when on');
+  const recent = (await call('/promo/status', { method: 'GET', token: a.access_token })).j.recent;
+  assert.equal(recent.length, 4);
+  assert.ok(recent.every((x) => x.status === 'sent'));
+});

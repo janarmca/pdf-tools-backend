@@ -4,12 +4,14 @@
 //   /cfapi/api/*              credits, promo codes, Razorpay payments + webhook, AI tools, Astrology+, matrimony payments
 //   /cfapi/mat/rpc/<name>     matrimony functions (former Postgres functions)
 //   /cfapi/mat/photo*         matrimony photos (KV, private, signed URLs)
+//   /cfapi/promo/*            daily promotion agent: status / run now / on-off (admins only); runs itself on the cron in wrangler.toml
 //   /cfapi/internal/*         maintenance/tests only — disabled unless the INTERNAL_KEY secret is set
 //   /cfapi/health
 import { corsHeaders, json, err, readJson, userFromRequest, hmac, safeEqual, randomToken } from './util.js';
 import { handleAuth, mailProvider } from './auth.js';
 import { handleApi } from './api.js';
 import { matRpc, matRecordUnlock } from './mat.js';
+import { handlePromo, runPromo } from './promo.js';
 
 const PREFIX = '/cfapi';
 const MAX_PHOTO = 1.5 * 1024 * 1024;
@@ -79,11 +81,12 @@ async function route(req, env) {
     const r = await env.DB.prepare('select count(*) as n from pricing_plans').first().catch(() => null);
     return json({
       ok: !!r, db: !!r, google: !!env.GOOGLE_CLIENT_ID, email: mailProvider(env), ai: { gemini: !!env.GEMINI_API_KEY, nvidia: !!env.NVIDIA_API_KEY, image: !!env.AI },
-      razorpay: !!env.RAZORPAY_KEY_ID, astrology: !!env.ASTROLOGER_API_KEY, time: new Date().toISOString(),
+      razorpay: !!env.RAZORPAY_KEY_ID, astrology: !!env.ASTROLOGER_API_KEY, promo: { telegram: !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHANNEL) }, time: new Date().toISOString(),
     });
   }
   if (path.startsWith('/auth/v1/')) return handleAuth(req, env, path.slice('/auth/v1'.length), url);
   if (path.startsWith('/api/')) return handleApi(req, env, path);
+  if (path.startsWith('/promo/')) return handlePromo(req, env, path);
 
   if (path.startsWith('/mat/rpc/') && m === 'POST') {
     const me = await userFromRequest(req, env);
@@ -102,10 +105,19 @@ async function route(req, env) {
   return err(404, 'Route not found');
 }
 
+// secrets pasted with a stray space / new line ("Key not found") — use them trimmed
+function trimmed(env) {
+  for (const k of Object.keys(env)) if (typeof env[k] === 'string' && env[k] !== env[k].trim()) env = { ...env, [k]: env[k].trim() };
+  return env;
+}
+
 export default {
+  // Cron Trigger (wrangler.toml [triggers]): the daily promotion post
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runPromo(trimmed(env)).then((r) => console.log('promo', JSON.stringify(r)), (e) => console.error('promo', e)));
+  },
   async fetch(req, env) {
-    // secrets pasted with a stray space / new line ("Key not found") — use them trimmed
-    for (const k of Object.keys(env)) if (typeof env[k] === 'string' && env[k] !== env[k].trim()) env = { ...env, [k]: env[k].trim() };
+    env = trimmed(env);
     const cors = corsHeaders(req);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     let res;

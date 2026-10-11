@@ -41,6 +41,8 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `NVIDIA_API_KEY` | build.nvidia.com → Get API Key (இலவசம்) | Text AI |
 | `ASTROLOGER_API_KEY` | RapidAPI → Astrologer API (இலவச tier) | Astrology+ |
 | `MAT_ADMIN_EMAILS` | திருமண அமைப்பக admin email(கள்), comma பிரித்து | விருப்பம் |
+| `TELEGRAM_BOT_TOKEN` | Telegram → @BotFather → `/newbot` தரும் token | தினசரி promotion post-க்கு |
+| `TELEGRAM_CHANNEL` | உங்கள் channel, எ.கா. `@pdftoolsindia` (bot-ஐ அதில் Admin ஆக்கவும்) | தினசரி promotion post-க்கு |
 
 (Brevo-க்குப் பதில் Resend பயன்படுத்தினால்: `RESEND_API_KEY` + Cloudflare DNS-ல் domain verify.)
 
@@ -55,6 +57,13 @@ console.cloud.google.com → APIs & Services → **OAuth consent screen** (Exter
 
 ### பழைய Google Cloud Run-ஐ நிறுத்த (எல்லாம் வேலை செய்வதை உறுதிசெய்த பின்)
 Cloud Run → `all-in-one-tools` → Delete. Artifact Registry → பழைய images → Delete. Billing → project-ஐ billing-லிருந்து unlink. அப்போது Google-ல் எந்த செலவும் வர வாய்ப்பில்லை.
+
+## தினசரி promotion (src/promo.js)
+தினமும் காலை 9:05 (IST) ஒரு tool-ஐத் தேர்ந்தெடுத்து, AI (Gemini) தமிழ் + English post எழுதி, படம் + link-உடன் Telegram channel-ல் போடும். எல்லா tools-ம் ஒருமுறை வந்த பிறகே மீண்டும் தொடங்கும். AI வேலை செய்யாவிட்டாலும் ஒரு எளிய post போகும்.
+- நிறுத்த: login செய்த matrimony admin → `POST /cfapi/promo/enabled {"on":false}` (அல்லது D1 Console: `update promo_settings set value='off' where key='enabled';`)
+- இப்போதே ஒரு post: `POST /cfapi/promo/run` (`{"tool":"biodata"}` கொடுத்தால் அந்த tool)
+- நிலை: `GET /cfapi/promo/status` (கடைசி 20 posts)
+- புதிய tools சேர்த்தால்: repo root-ல் `node generate-promo-catalog.mjs`
 
 ## Database கட்டளைகள் (Cloudflare dashboard → D1 → pdftools-db → Console)
 ```sql
@@ -81,9 +90,12 @@ GEMINI_API_BASE=http://127.0.0.1:8790
 NVIDIA_API_BASE=http://127.0.0.1:8790
 RAZORPAY_API_BASE=http://127.0.0.1:8790
 ASTROLOGER_API_BASE=http://127.0.0.1:8790
+TELEGRAM_API_BASE=http://127.0.0.1:8790
+TELEGRAM_BOT_TOKEN=TG-TOKEN
+TELEGRAM_CHANNEL=@test
 V
 npx wrangler d1 migrations apply pdftools-db --local
-npx wrangler dev --port 8787        # (remove the [ai] block from a copy of wrangler.toml for fully offline runs)
+npx wrangler dev --port 8787 --test-scheduled   # (remove the [ai] block from a copy of wrangler.toml for fully offline runs)
 node --test --test-concurrency=1 test/*.test.mjs   # another terminal; the AI/payment providers are mocked
 ```
 `OTP_DEV_ECHO=1` returns the login code in the response instead of e-mailing it, and `INTERNAL_KEY` enables `/cfapi/internal/sql` for test setup — **never set either in production**.

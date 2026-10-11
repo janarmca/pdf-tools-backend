@@ -3,7 +3,7 @@
 import http from 'node:http';
 
 export const calls = [];
-export const behaviour = { geminiFail: false };
+export const behaviour = { geminiFail: false, telegramPhotoFail: false };
 export const files = [], deleted = [];
 
 export function startMock(port = 8790) {
@@ -31,11 +31,17 @@ export function startMock(port = 8790) {
         if (behaviour.geminiFail) return send(500, { error: { message: 'mock gemini down' } });
         const parts = j?.contents?.[0]?.parts || [];
         const txt = parts[0]?.text || '';
+        if (/social media post/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"ta":"தமிழ் பதிவு <b>சோதனை</b>","en":"English post"}' }] } }] });
         if (/horoscope/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"name":"Kavya R","gender":"F","dob":"1999-04-12","star":"rohini","raasi":"rishabam","phone":"9876543210"}' }] } }] });
         const fd = parts.find((p) => p.file_data);
         if (fd) { const f = files[+fd.file_data.file_uri.split('/f').pop()]; return send(200, { candidates: [{ content: { parts: [{ text: `file ${f.mime} ${f.size} bytes (first ${f.first})` }] } }] }); }
         const img = parts.find((p) => p.inline_data);
         return send(200, { candidates: [{ content: { parts: [{ text: img ? `saw ${img.inline_data.mime_type} ${img.inline_data.data}` : `answer to: ${txt.slice(0, 40)}` }] } }] });
+      }
+      // Telegram Bot API
+      if (/^\/botTG-TOKEN\/send(Photo|Message)$/.test(req.url)) {
+        if (req.url.endsWith('sendPhoto') && behaviour.telegramPhotoFail) return send(400, { ok: false, description: 'Bad Request: wrong file identifier/HTTP URL specified' });
+        return send(200, { ok: true, result: { message_id: calls.length } });
       }
       if (req.url === '/v1/chat/completions') return send(200, { choices: [{ message: { content: 'nvidia: ' + j.messages[1].content.slice(0, 30) } }] });
       if (req.url === '/v1/orders') return send(200, { id: 'order_' + Math.random().toString(36).slice(2, 10), amount: j.amount, currency: j.currency });
