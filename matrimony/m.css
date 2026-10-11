@@ -98,3 +98,8 @@ textarea{resize:vertical}.pw{position:relative}.pw input{padding-right:46px}.eye
 
 .okph{display:flex;align-items:center;justify-content:center;height:100%;min-height:90px;font-size:28px;color:#1a6b3a;background:#eaf6ee}
 .sdl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:10px 0;font-size:14px}.sdl dt{color:#5a4a44;font-weight:700}.sdl dd{margin:0;overflow-wrap:anywhere}
+
+.horo{margin:10px 0}.horo a{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}.horo img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid #e6d9c8;background:#fff}.horo span{font-weight:700;color:var(--m,#7A1233)}
+.bfilter{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end;margin:12px 0}.bfilter .two{display:flex;gap:8px}.bfilter .two input{min-width:0;width:100%}
+.psec{margin:14px 0}.psec h3{margin:0 0 4px;font-size:16px}.pvh{display:flex;gap:14px;align-items:center}.cr{margin-top:14px}
+.pvh .av.big{width:84px;height:84px;flex:none;font-size:34px}.pvh>div:last-child{min-width:0}

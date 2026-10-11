@@ -235,6 +235,62 @@ test('matrimony: public submission form + photos', async () => {
   assert.equal((await call('/mat/photo?path=' + encodeURIComponent(mineUp.j.path), { method: 'DELETE', token: me.access_token })).s, 200);
 });
 
+test('matrimony: public browsing shows only safe fields; contact requests; horoscope for admin', async () => {
+  const jpg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]);
+  const up = await call('/mat/photo?folder=submissions', { body: jpg, raw: true, headers: { 'Content-Type': 'image/jpeg' } });
+  const horo = await call('/mat/photo?folder=submissions', { body: jpg, raw: true, headers: { 'Content-Type': 'image/jpeg' } });
+  const phone = '9' + String(Date.now()).slice(-9);
+  const sub = await rpc('mat_submit_public', { p: { ...profile('Lakshmi', 'F', '1998-04-04'), photos: [up.j.path], horoscope: horo.j.path, father_name: 'Murugan', native_place: 'Hosur', income_band: '5-10', family_about: 'secret family note', star: 'rohini', education: 'ug', occupation: 'Teacher' }, phone, email: 'l@x.in' }, null);
+  assert.equal(sub.ok, true);
+  assert.equal((await rpc('mat_submit_public', { p: { ...profile('Bad', 'F', '1998-04-04'), horoscope: 'someone/x.jpg' }, phone: '9876501234' }, null)).code, 'photos');
+
+  // not listed yet -> invisible to the public
+  assert.equal((await rpc('mat_public_profile', { id: sub.id }, null)).code, 'not_found');
+  assert.equal((await rpc('mat_public_list', { f: {}, lim: 24 }, null)).items.some((x) => x.id === sub.id), false);
+
+  const admin = await signup('admin3');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [admin.user.id] }]);
+  const row = (await rpc('mat_admin_submissions', { st: 'new' }, admin.access_token)).items.find((x) => x.id === sub.id);
+  assert.equal(row.horoscope, horo.j.path);
+  assert.equal((await rpc('mat_admin_submission_list', { sid: sub.id, on: true }, null)).ok, false);        // not an admin
+  assert.equal((await rpc('mat_admin_submission_list', { sid: sub.id, on: true }, admin.access_token)).ok, true);
+
+  // anonymous: safe fields only, no photo
+  const list = await rpc('mat_public_list', { f: { gender: 'F' }, lim: 24 }, null);
+  const it = list.items.find((x) => x.id === sub.id);
+  assert.ok(it);
+  assert.equal(it.name, 'Lakshmi'); assert.equal(it.star, 'rohini'); assert.equal(typeof it.age, 'number'); assert.equal(it.photo_count, 1);
+  const leak = JSON.stringify(list) + JSON.stringify(await rpc('mat_public_profile', { id: sub.id }, null));
+  for (const bad of [phone, 'l@x.in', '1998-04-04', 'Murugan', 'Hosur', 'secret family note', '5-10', up.j.path, horo.j.path]) assert.equal(leak.includes(bad), false, 'leaked ' + bad);
+  assert.equal('photo' in it, false);
+
+  // filters
+  assert.equal((await rpc('mat_public_list', { f: { gender: 'M' }, lim: 24 }, null)).items.some((x) => x.id === sub.id), false);
+  assert.equal((await rpc('mat_public_list', { f: { min_age: 40 }, lim: 24 }, null)).items.some((x) => x.id === sub.id), false);
+
+  // a logged-in visitor WITHOUT an approved profile still gets no photos; the admin does
+  const visitor = await signup('visitor');
+  assert.equal('photo' in (await rpc('mat_public_profile', { id: sub.id }, visitor.access_token)).profile, false);
+  assert.equal((await rpc('mat_public_profile', { id: sub.id }, admin.access_token)).profile.photo, up.j.path);
+
+  // contact request: validated, rate limited, visible to the admin with the target's phone
+  assert.equal((await rpc('mat_request_contact', { target: sub.id, name: 'R', phone: '9876543210' }, null)).code, 'name');
+  assert.equal((await rpc('mat_request_contact', { target: sub.id, name: 'Ravi', phone: '12' }, null)).code, 'phone');
+  assert.equal((await rpc('mat_request_contact', { target: 'nope', name: 'Ravi', phone: '9876543210' }, null)).code, 'not_found');
+  const rp = '8' + String(Date.now()).slice(-9);
+  assert.equal((await rpc('mat_request_contact', { target: sub.id, name: 'Ravi', phone: rp, note: 'Please call' }, null)).ok, true);
+  const reqs = await rpc('mat_admin_contact_requests', { st: 'new' }, admin.access_token);
+  const rq = reqs.items.find((x) => x.from_phone === rp);
+  assert.equal(rq.target_phone, phone); assert.equal(rq.from_name, 'Ravi'); assert.equal(rq.note, 'Please call');
+  assert.equal((await rpc('mat_admin_contact_requests', { st: 'new' }, null)).ok, false);
+  assert.equal((await rpc('mat_admin_stats', {}, admin.access_token)).new_requests >= 1, true);
+  assert.equal((await rpc('mat_admin_contact_request_set', { rid: rq.id, st: 'done' }, admin.access_token)).ok, true);
+
+  // un-list -> disappears again
+  await rpc('mat_admin_submission_list', { sid: sub.id, on: false }, admin.access_token);
+  assert.equal((await rpc('mat_public_profile', { id: sub.id }, null)).code, 'not_found');
+});
+
 test('CORS + unknown routes', async () => {
   const r = await fetch(API + '/auth/v1/user', { method: 'OPTIONS', headers: { Origin: 'https://pdftoolsindia.com' } });
   assert.equal(r.status, 204);

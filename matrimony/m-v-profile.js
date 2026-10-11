@@ -50,7 +50,10 @@
       fld(t('குலம்', 'Kulam'), inp('kulam', 'text', 'maxlength="40"')) + fld(t('கோத்திரம்', 'Gotra'), inp('gotra', 'text', 'maxlength="40"')) +
       fld(t('தாய்மொழி', 'Mother tongue'), sel('mother_tongue', 'mother_tongue')) + '</div>';
     if (i === 1) return '<p class="mut">' + t('தெரியாவிட்டால் காலியாக விடலாம்; பின்னர் சேர்க்கலாம்.', 'Leave blank if unknown; you can add it later.') + '</p><div class="gridf">' +
-      fld(t('நட்சத்திரம்', 'Star (Nakshatra)'), sel('star', 'star')) + fld(t('ராசி', 'Raasi'), sel('raasi', 'raasi')) + fld(t('தோஷம்', 'Dosham'), sel('dosham', 'dosham', false)) + '</div>';
+      fld(t('நட்சத்திரம்', 'Star (Nakshatra)'), sel('star', 'star')) + fld(t('ராசி', 'Raasi'), sel('raasi', 'raasi')) + fld(t('தோஷம்', 'Dosham'), sel('dosham', 'dosham', false)) + '</div>' + (W.pub ? '<div class="fld"><span>' + t('ஜாதகப் படம் (விருப்பம்)', 'Horoscope picture (optional)') + '</span>' +
+      (d.horoscope ? '<div class="horo">' + (W.hthumb ? '<img alt="" src="' + esc(W.hthumb) + '">' : '<span class="okph">✓</span>') + '<button type="button" class="btn sm ghost" data-act="hsDel">🗑 ' + t('நீக்கு', 'Remove') + '</button></div>' :
+        '<label class="btn ghost"><input id="hsin" type="file" accept="image/*" hidden>📄 ' + t('ஜாதகத்தைப் பதிவேற்று', 'Upload horoscope') + '</label>') +
+      '<small>' + t('ஜாதகத்தின் தெளிவான படம் / screenshot. நிர்வாகி மட்டுமே பார்ப்பார்; வலைத்தளத்தில் வெளியிடப்படாது.', 'A clear photo / screenshot of the horoscope. Only the administrator sees it; it is never shown on the website.') + '</small><p class="err" id="hserr"></p></div>' : '');
     if (i === 2) return '<div class="gridf">' +
       fld(t('கல்வி', 'Education'), sel('education', 'education')) + fld(t('படிப்பு விவரம்', 'Course / college'), inp('education_detail', 'text', 'maxlength="80"'), t('எ.கா. B.E ECE', 'e.g. B.E ECE')) +
       fld(t('பணி வகை', 'Employment type'), sel('employer_type', 'employer_type')) + fld(t('தொழில் / பதவி', 'Occupation'), inp('occupation', 'text', 'maxlength="60"')) +
@@ -77,7 +80,7 @@
       '<div class="ph-grid" id="phg">' + (d.photos || []).map(function (p, i) { return '<div class="ph">' + (W.pub ? (W.thumbs && W.thumbs[p] ? '<img alt="" src="' + esc(W.thumbs[p]) + '">' : '<span class="okph">✓</span>') : '<img alt="" data-ph="' + esc(p) + '">') + '<div class="phb">' + (i ? '<button type="button" data-act="phMain" data-i="' + i + '">★</button>' : '<span class="main">' + t('முதன்மை', 'Main') + '</span>') + '<button type="button" data-act="phDel" data-i="' + i + '" aria-label="delete">🗑</button></div></div>'; }).join('') +
       (n < 6 ? '<label class="ph add"><input id="phin" type="file" accept="image/*" multiple hidden><span>＋<br>' + t('படம் சேர்', 'Add photo') + '</span></label>' : '') + '</div><p class="err" id="pherr"></p>' +
       '<div class="notice">' + t('நிர்வாகி சரிபார்த்த பின்பே உங்கள் சுயவிவரம் மற்றவர்களுக்குத் தெரியும் (பொதுவாக 24 மணி நேரத்தில்).', 'Your profile becomes visible after admin verification (usually within 24 hours).') + '</div>' +
-      (W.edit ? '' : '<label class="chk"><input id="consent" type="checkbox"' + (hasConsent ? ' checked' : '') + '> <span>' + t('நான் கொடுத்த தகவல்கள் உண்மை; என் சுயவிவரத்தை அங்கீகரிக்கப்பட்ட உறுப்பினர்கள் பார்க்க ஒப்புக்கொள்கிறேன்; ', 'The details are true; I agree that approved members may view my profile; ') + '<a href="#/terms" target="_blank">' + t('விதிமுறைகள்', 'Terms') + '</a></span></label>');
+      (W.edit ? '' : '<label class="chk"><input id="consent" type="checkbox"' + (hasConsent ? ' checked' : '') + '> <span>' + (W.pub ? t('நான் கொடுத்த தகவல்கள் உண்மை; என் பாதுகாப்பான விவரங்கள் (பெயர், வயது, படிப்பு, தொழில், ஊர் போன்றவை) இணையதளத்தில் அனைவரும் பார்க்க ஒப்புக்கொள்கிறேன். தொலைபேசி எண், email, பிறந்த தேதி, ஜாதகம் வெளியிடப்படாது; படங்கள் பதிவு செய்த உறுப்பினர்களுக்கு மட்டுமே தெரியும்; ', 'The details are true; I agree that my safe details (name, age, education, occupation, place etc.) may be seen by everyone on the website. Phone, e-mail, date of birth and horoscope are never published; photos are visible only to registered members; ') : t('நான் கொடுத்த தகவல்கள் உண்மை; என் சுயவிவரத்தை அங்கீகரிக்கப்பட்ட உறுப்பினர்கள் பார்க்க ஒப்புக்கொள்கிறேன்; ', 'The details are true; I agree that approved members may view my profile; ')) + '<a href="#/terms" target="_blank">' + t('விதிமுறைகள்', 'Terms') + '</a></span></label>');
   }
 
   function renderWizard() {
@@ -95,6 +98,7 @@
     body.addEventListener('input', onField); body.addEventListener('change', onField);
     var ph = M.$('#phin'); if (ph) ph.addEventListener('change', onPhotos);
     var jg = M.$('#jgin'); if (jg) jg.addEventListener('change', onJathagam);
+    var hs = M.$('#hsin'); if (hs) hs.addEventListener('change', onHoroscope);
   }
   function onField(e) {
     var el = e.target;
@@ -142,13 +146,13 @@
   M.acts.phDel = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; if (!W.pub) B.removePhoto(p); saveDraft(); renderWizard(); };
   M.acts.phMain = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; W.d.photos.unshift(p); saveDraft(); renderWizard(); };
 
-  function resize(file) {
+  function resize(file, max, q) {
     return new Promise(function (res, rej) {
       var img = new Image(), url = URL.createObjectURL(file);
       img.onload = function () {
-        var max = 900, s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        var s = Math.min(1, (max || 900) / Math.max(img.width, img.height)), c = document.createElement('canvas');
         c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        c.toBlob(function (b) { URL.revokeObjectURL(url); b ? res(b) : rej(new Error('blob')); }, 'image/jpeg', 0.82);
+        c.toBlob(function (b) { URL.revokeObjectURL(url); b ? res(b) : rej(new Error('blob')); }, 'image/jpeg', q || 0.82);
       };
       img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('img')); }; img.src = url;
     });
@@ -171,6 +175,17 @@
     saveDraft(); renderWizard();
     M.toast(n ? t('AI ' + n + ' விவரங்களை நிரப்பியது — சரிபார்த்துத் திருத்துங்கள்', 'AI filled ' + n + ' fields — please review and correct') : t('தெளிவான விவரம் கிடைக்கவில்லை', 'Nothing clear found'), n ? 'ok' : 'err');
   }
+  async function onHoroscope(e) {
+    var f = e.target.files && e.target.files[0], err = M.$('#hserr'); if (!f) return; err.textContent = '';
+    if (!/^image\//.test(f.type)) { err.textContent = t('படக் கோப்பு மட்டும் (படம் / screenshot)', 'Images only (photo / screenshot)'); return; }
+    if (f.size > 15 * 1024 * 1024) { err.textContent = t('படம் மிகப் பெரியது (15MB வரை)', 'Image too large (max 15MB)'); return; }
+    err.textContent = t('பதிவேற்றுகிறது…', 'Uploading…');
+    try {
+      var blob = await resize(f, 1600, 0.8), pth = await B.uploadPhoto(blob, 'submissions');
+      W.d.horoscope = pth; W.hthumb = URL.createObjectURL(blob); saveDraft(); renderWizard();
+    } catch (x) { err.textContent = t('பதிவேற்ற முடியவில்லை: ', 'Upload failed: ') + (x.message || ''); }
+  }
+  M.acts.hsDel = function () { delete W.d.horoscope; W.hthumb = null; saveDraft(); renderWizard(); };
   async function onPhotos(e) {
     var files = Array.prototype.slice.call(e.target.files || []), err = M.$('#pherr'); err.textContent = '';
     for (var f of files) {

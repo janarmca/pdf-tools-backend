@@ -139,7 +139,7 @@
     M.$$('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-nav') === key); });
   };
 
-  var PUBLIC = { '': 1, login: 1, register: 1, terms: 1, privacy: 1, contact: 1, join: 1, joined: 1, safety: 1, about: 1, forgot: 1 };
+  var PUBLIC = { '': 1, login: 1, register: 1, terms: 1, privacy: 1, contact: 1, browse: 1, p: 1, join: 1, joined: 1, safety: 1, about: 1, forgot: 1 };
   M.route = async function () {
     M.clearTimers();
     var parts = location.hash.replace(/^#\/?/, '').split('?')[0].split('/'), name = parts[0] || '', arg = parts[1];

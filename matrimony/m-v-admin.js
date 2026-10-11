@@ -6,8 +6,21 @@
   M.views.admin = async function (v, tab) {
     if (!M.st.me || !M.st.me.is_admin) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p>' + esc(t(M.ERR.forbidden[0], M.ERR.forbidden[1])) + '</p></div></div>'; return; }
     tab = tab || 'subs';
-    var tabs = [['subs', t('புதிய பதிவுகள்', 'New sign-ups')], ['pending', t('காத்திருப்பவை', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['rejected', t('நிராகரிக்கப்பட்டவை', 'Rejected')], ['hidden', t('மறைக்கப்பட்டவை', 'Hidden')], ['reports', t('புகார்கள்', 'Reports')], ['stats', t('புள்ளிவிவரம்', 'Stats')]];
+    var tabs = [['subs', t('புதிய பதிவுகள்', 'New sign-ups')], ['reqs', t('தொடர்பு கோரிக்கைகள்', 'Contact requests')], ['pending', t('காத்திருப்பவை', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['rejected', t('நிராகரிக்கப்பட்டவை', 'Rejected')], ['hidden', t('மறைக்கப்பட்டவை', 'Hidden')], ['reports', t('புகார்கள்', 'Reports')], ['stats', t('புள்ளிவிவரம்', 'Stats')]];
     var head = '<div class="wrap"><h1 class="h2">🛡 ' + t('நிர்வாகம்', 'Admin') + '</h1><div class="tabsx">' + tabs.map(function (x) { return '<a class="' + (tab === x[0] ? 'on' : '') + '" href="#/admin/' + x[0] + '">' + esc(x[1]) + '</a>'; }).join('') + '</div>';
+    if (tab === 'reqs') {
+      var rq = await M.api('mat_admin_contact_requests', { st: 'new' });
+      if (!v.isConnected) return;
+      v.innerHTML = head + '<p class="mut">' + t('இருவீட்டாரையும் அழைத்து இணைத்து வையுங்கள்; முடிந்ததும் "முடிந்தது" அழுத்துங்கள்.', 'Phone both families to connect them, then press Done.') + '</p>' +
+        ((rq.items || []).length ? rq.items.map(function (x) {
+          return '<div class="arow big"><div class="ahd"><b>' + esc(x.from_name) + '</b> → <b>' + esc(x.target_name || '?') + '</b> <span class="tg">SC-' + esc(x.code) + '</span> <span class="mut sm">' + M.ago(x.created_at) + '</span></div>' +
+            '<div class="pvt2">📞 ' + esc(t('கேட்பவர்: ', 'Requester: ')) + '<a href="tel:' + esc(x.from_phone) + '"><b>' + esc(x.from_phone) + '</b></a></div>' +
+            '<div class="pvt2">📞 ' + esc(t('சுயவிவரம்: ', 'Profile: ')) + (x.target_phone ? '<a href="tel:' + esc(x.target_phone) + '"><b>' + esc(x.target_phone) + '</b></a>' : '—') + '</div>' +
+            (x.note ? '<p class="about">' + esc(x.note) + '</p>' : '') +
+            '<div class="rowb"><button class="btn pri sm" data-act="aReq" data-id="' + esc(x.id) + '">✓ ' + t('முடிந்தது', 'Done') + '</button></div></div>';
+        }).join('') : '<p class="mut">' + t('புதிய கோரிக்கைகள் இல்லை.', 'No new requests.') + '</p>') + '</div>';
+      return;
+    }
     if (tab === 'subs' || tab === 'subs-contacted' || tab === 'subs-done') {
       var sst = tab === 'subs' ? 'new' : tab === 'subs-contacted' ? 'contacted' : 'done';
       var sq = await M.api('mat_admin_submissions', { st: sst });
@@ -21,12 +34,13 @@
           [t('சகோதரர்/சகோதரி', 'Siblings'), (d.brothers != null ? d.brothers + ' B' + (d.brothers_married != null ? ' (' + d.brothers_married + ' married)' : '') : '') + ' ' + (d.sisters != null ? d.sisters + ' S' + (d.sisters_married != null ? ' (' + d.sisters_married + ' married)' : '') : '')],
           [t('சொந்த ஊர்', 'Native'), d.native_place], [t('ஊர்', 'City'), [d.city, d.district, M.label('state', d.state), d.country].filter(Boolean).join(', ')], [t('குடும்பம்', 'Family'), [M.label('family_type', d.family_type), M.label('family_status', d.family_status)].filter(Boolean).join(' · ')],
           [t('குடும்பம் பற்றி', 'About family'), d.family_about], [t('பற்றி', 'About'), d.about], [t('பதிவு செய்தவர்', 'By'), M.label('created_for', d.created_for)]].filter(function (x) { return x[1] && String(x[1]).trim(); });
-        return '<div class="arow big"><div class="ahd"><b>' + esc(d.name || '?') + '</b> · ' + (d.gender === 'M' ? t('ஆண்', 'M') : t('பெண்', 'F')) + ' · ' + (r.age != null ? r.age : '') + ' · ' + esc(M.commLabel(d)) + ' <span class="mut sm">' + M.ago(r.created_at) + '</span></div>' +
+        return '<div class="arow big"><div class="ahd"><b>' + esc(d.name || '?') + '</b> · ' + (d.gender === 'M' ? t('ஆண்', 'M') : t('பெண்', 'F')) + ' · ' + (r.age != null ? r.age : '') + ' · ' + esc(M.commLabel(d)) + ' <span class="mut sm">' + M.ago(r.created_at) + '</span>' + (r.listed ? ' <span class="tg">🌐 ' + t('பட்டியலில் உள்ளது', 'Public') + '</span>' : '') + '</div>' +
           '<div class="aph">' + (ph || '<span class="mut">' + t('படம் இல்லை', 'No photo') + '</span>') + '</div>' +
+          (r.horoscope ? '<div class="horo"><a href="#" data-act="aHoro" data-p="' + esc(r.horoscope) + '"><img alt="" data-ph="' + esc(r.horoscope) + '"><span>📄 ' + t('ஜாதகத்தைப் பெரிதாகப் பார்க்க / பதிவிறக்க', 'Open / download horoscope') + '</span></a></div>' : '<p class="mut sm">📄 ' + t('ஜாதகம் பதிவேற்றப்படவில்லை', 'No horoscope uploaded') + '</p>') +
           '<div class="pvt2">📞 <a href="tel:' + esc(r.phone) + '"><b>' + esc(r.phone) + '</b></a> &nbsp; ✉ <b>' + esc(r.email || '—') + '</b></div>' +
           '<dl class="sdl">' + rows.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>' +
           (r.note ? '<p class="mut sm">' + t('குறிப்பு: ', 'Note: ') + esc(r.note) + '</p>' : '') +
-          '<div class="rowb">' + (r.status !== 'contacted' ? '<button class="btn sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="contacted">📞 ' + t('தொடர்பு கொண்டேன்', 'Contacted') + '</button>' : '') + (r.status !== 'done' ? '<button class="btn pri sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="done">✓ ' + t('முடிந்தது', 'Done') + '</button>' : '') + (r.status !== 'new' ? '<button class="btn ghost sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="new">↺ ' + t('புதியது', 'New') + '</button>' : '') + '</div></div>';
+          '<div class="rowb">' + (r.status !== 'contacted' ? '<button class="btn sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="contacted">📞 ' + t('தொடர்பு கொண்டேன்', 'Contacted') + '</button>' : '') + (r.status !== 'done' ? '<button class="btn pri sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="done">✓ ' + t('முடிந்தது', 'Done') + '</button>' : '') + (r.status !== 'new' ? '<button class="btn ghost sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="new">↺ ' + t('புதியது', 'New') + '</button>' : '') + '<button class="btn sm ' + (r.listed ? 'ghost' : 'pri') + '" data-act="aList" data-id="' + esc(r.id) + '" data-on="' + (r.listed ? '0' : '1') + '">' + (r.listed ? '🚫 ' + t('பட்டியலிலிருந்து நீக்கு', 'Remove from public list') : '🌐 ' + t('பொதுப் பட்டியலில் சேர்', 'Publish to public list')) + '</button>' + '</div></div>';
       }).join('') : '<p class="mut">' + t('இங்கு எதுவும் இல்லை.', 'Nothing here.') + '</p>') + '</div>';
       M.hydrate(v);
       return;
@@ -65,6 +79,19 @@
         (tab === 'approved' ? '<button class="btn ghost sm" data-act="aSet" data-id="' + esc(p.user_id) + '" data-s="hidden">🙈 ' + t('மறை', 'Hide') + '</button>' : '') +
         '<a class="btn ghost sm" href="#/profile/' + esc(p.user_id) + '">' + t('முழு சுயவிவரம்', 'Full profile') + '</a></div></div>';
     }).join('') : '<p class="mut c pad">' + t('இங்கே எதுவும் இல்லை 🎉', 'Nothing here 🎉') + '</p>') + '</div>';
+  };
+  M.acts.aHoro = async function (a, e) {
+    e.preventDefault(); var w = window.open('', '_blank');
+    var u = await M.B.photoUrl(a.getAttribute('data-p'));
+    if (u && w) w.location = u; else if (w) w.close();
+  };
+  M.acts.aList = async function (a) {
+    var r = await M.api('mat_admin_submission_list', { sid: a.getAttribute('data-id'), on: a.getAttribute('data-on') === '1' });
+    if (!r.ok) return M.toast(M.err(r), 'bad'); M.toast('✓', 'ok'); M.route();
+  };
+  M.acts.aReq = async function (a) {
+    var r = await M.api('mat_admin_contact_request_set', { rid: a.getAttribute('data-id'), st: 'done' });
+    if (!r.ok) return M.toast(M.err(r), 'bad'); M.toast('✓', 'ok'); M.route();
   };
   M.acts.aSub = async function (a) {
     var r = await M.api('mat_admin_submission_set', { sid: a.getAttribute('data-id'), st: a.getAttribute('data-s'), note: null });

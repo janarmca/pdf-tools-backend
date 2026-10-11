@@ -13,7 +13,7 @@
         '<p class="kick">' + t('கன்னட தேவாங்கர் சமூகத்திற்காக • அனைத்து சமூகத்தினரும் வரவேற்கப்படுகிறார்கள்', 'Made for the Kannada Devanga community • All communities welcome') + '</p>' +
         '<h1>' + t('ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்', 'Sri Chowdeshwari Thirumana Amaippagam') + '</h1>' +
         '<p class="lead">' + t('நம்பகமான, சரிபார்க்கப்பட்ட சுயவிவரங்கள். உங்கள் தொலைபேசி எண்ணும் email-உம் யாருக்கும் தெரியாது. Interest அனுப்புவது இலவசம்.', 'Verified profiles you can trust. Your phone number and e-mail stay private. Sending interest is free.') + '</p>' +
-        '<div class="cta"><a class="btn big" href="#/join">' + t('இலவசமாகப் பதிவு செய்க', 'Register free') + '</a><a class="btn ghost big" href="#/login">' + t('உள்நுழை', 'Login') + '</a></div>' +
+        '<div class="cta"><a class="btn big" href="#/join">' + t('இலவசமாகப் பதிவு செய்க', 'Register free') + '</a><a class="btn ghost big" href="#/browse">' + t('பதிவு செய்தவர்களைப் பார்க்க', 'Browse profiles') + '</a><a class="btn ghost big" href="#/login">' + t('உள்நுழை', 'Login') + '</a></div>' +
         (members != null ? '<p class="stat"><b>' + members + '</b> ' + t('அங்கீகரிக்கப்பட்ட சுயவிவரங்கள்', 'approved profiles') + (st.devanga ? ' · <b>' + st.devanga + '</b> ' + t('கன்னட தேவாங்கர்', 'Kannada Devanga') : '') + '</p>' : '') +
       '</div></section>' +
       (M.st.bootError ? '<div class="wrap"><div class="notice warn"><b>' + t('இணைப்புப் பிழை', 'Connection problem') + '</b><p>' + t('சேவையகத்துடன் இணைக்க முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் திறக்கவும்.', 'Could not reach the server. Check your internet and reload.') + '</p></div></div>' : '') +
@@ -143,13 +143,101 @@
     v.innerHTML = '<div class="wrap narrow doc"><h1>' + t('தொடர்பு கொள்ள', 'Contact us') + '</h1>' +
       '<p class="mut">' + t('பதிவு, படங்கள், ஜாதகம், கணக்கு அல்லது எந்த சந்தேகமாக இருந்தாலும் எங்களிடம் கேளுங்கள். நாங்கள் உதவ தயார்.', 'Questions about registration, photos, horoscope or your account? We are happy to help.') + '</p>' +
       '<div class="ctc"><div class="ctc-card"><div class="ctc-ic" aria-hidden="true">📞</div><div><b>' + t('தொலைபேசி', 'Phone') + '</b><span>' + esc(t(C.SUPPORT_NAME, C.SUPPORT_NAME_EN)) + ' · <a href="tel:+91' + esc(ph) + '">+91 ' + esc(phs) + '</a></span></div><a class="btn pri sm" href="tel:+91' + esc(ph) + '">' + t('அழைக்க', 'Call') + '</a></div>' +
-      (wa ? '<div class="ctc-card"><div class="ctc-ic" aria-hidden="true">💬</div><div><b>WhatsApp</b><span>' + t('செய்தி அனுப்புங்கள்', 'Send a message') + '</span></div><a class="btn sm" href="' + esc(wa) + '" target="_blank" rel="noopener">' + t('திற', 'Open') + '</a></div>' : '') +
+      (wa ? '<div class="ctc-card"><div class="ctc-ic" aria-hidden="true">💬</div><div><b>WhatsApp</b><span>+91 ' + esc(C.SUPPORT_WHATSAPP.replace(/^91/, '').replace(/(\d{5})(\d{5})/, '$1 $2')) + '</span></div><a class="btn sm" href="' + esc(wa) + '" target="_blank" rel="noopener">' + t('திற', 'Open') + '</a></div>' : '') +
       '<div class="ctc-card"><div class="ctc-ic" aria-hidden="true">✉️</div><div><b>Email</b><span><a href="mailto:' + esc(C.SUPPORT_EMAIL) + '">' + esc(C.SUPPORT_EMAIL) + '</a></span></div><a class="btn sm" href="mailto:' + esc(C.SUPPORT_EMAIL) + '?subject=' + encodeURIComponent('Matrimony enquiry') + '">' + t('எழுத', 'Write') + '</a></div></div>' +
       '<h2 class="h3">' + t('தொடர்புகொள்ளும் முன்', 'Before you write') + '</h2><ul class="tick">' +
       '<li>' + t('உங்கள் பதிவு செய்த email-ஐ குறிப்பிடுங்கள்.', 'Mention the e-mail you registered with.') + '</li>' +
       '<li>' + t('பாதுகாப்புக்காக உங்கள் கடவுச்சொல்லை யாரிடமும் பகிராதீர்கள் — நாங்கள் ஒருபோதும் கேட்கமாட்டோம்.', 'For your safety never share your password — we will never ask for it.') + '</li>' +
       '<li>' + t('தவறான நடத்தை அல்லது போலி சுயவிவரத்தை சுயவிவரப் பக்கத்தில் "புகார்" மூலம் தெரிவிக்கலாம்.', 'Report misuse or a fake profile with "Report" on the profile page.') + '</li></ul>' +
       '<p><a href="#/">← ' + t('முகப்பு', 'Home') + '</a></p></div>';
+  };
+
+  /* ---- public browsing: anyone can see the safe fields of listed sign-ups (no login) ---- */
+  var BR = { f: { gender: '', min_age: '', max_age: '', community: '' }, items: [], total: 0, loaded: false };
+  function codeOf(p) { return 'SC-' + (p.code || ''); }
+  function waLink(p) {
+    var C = M.C; if (!C.SUPPORT_WHATSAPP) return '';
+    return 'https://wa.me/' + encodeURIComponent(C.SUPPORT_WHATSAPP) + '?text=' + encodeURIComponent(t('வணக்கம், சுயவிவர எண் ', 'Hello, about profile ') + codeOf(p) + ' (' + p.name + ') ' + t('பற்றி பேச வேண்டும்.', 'I would like to talk.'));
+  }
+  function pcard(c) {
+    return '<a class="pc" href="#/p/' + esc(c.id) + '">' + M.avatar(c) +
+      '<div class="pi"><div class="pn">' + esc(c.name) + (c.community === 'kannada_devanga' ? ' <span class="kd" title="Kannada Devanga">★</span>' : '') + '</div>' +
+      '<div class="ps">' + esc(M.sub(c)) + '</div>' +
+      '<div class="pt"><span class="tg">' + esc(M.commLabel(c)) + '</span>' + (c.star ? '<span class="tg">' + esc(M.label('star', c.star)) + '</span>' : '') + '<span class="tg">' + esc(codeOf(c)) + '</span></div></div></a>';
+  }
+  async function browseLoad(reset) {
+    var f = {}; Object.keys(BR.f).forEach(function (k) { if (BR.f[k]) f[k] = BR.f[k]; });
+    var r = await M.api('mat_public_list', { f: f, lim: 12, off: reset ? 0 : BR.items.length });
+    if (!r.ok) return r;
+    BR.items = reset ? r.items : BR.items.concat(r.items); BR.total = r.total; BR.loaded = true; return r;
+  }
+  function browseHtml() {
+    var f = BR.f, sel = function (k, list, blank) { return '<select data-bf="' + k + '"><option value="">' + esc(blank) + '</option>' + M.D[list].map(function (x) { return '<option value="' + esc(x.v) + '"' + (f[k] === x.v ? ' selected' : '') + '>' + esc(M.st.lang === 'en' ? x.en : x.ta) + '</option>'; }).join('') + '</select>'; };
+    return '<div class="wrap"><h1 class="h2">' + t('பதிவு செய்தவர்கள்', 'Registered profiles') + '</h1>' +
+      '<p class="mut">' + t('பாதுகாப்பான விவரங்கள் மட்டும் இங்கே தெரியும். தொலைபேசி எண், email, பிறந்த தேதி, ஜாதகம் வெளியிடப்படாது. தொடர்புக்கு சுயவிவரப் பக்கத்தில் "தொடர்பு கோரிக்கை" அனுப்புங்கள்.', 'Only safe details are shown here. Phone, e-mail, date of birth and horoscope are never published. To get in touch, send a contact request from the profile page.') + '</p>' +
+      '<form class="bfilter" id="bf" novalidate><label class="fld"><span>' + t('பாலினம்', 'Gender') + '</span><select data-bf="gender"><option value="">' + t('அனைவரும்', 'All') + '</option><option value="F"' + (f.gender === 'F' ? ' selected' : '') + '>' + t('மணமகள்', 'Brides') + '</option><option value="M"' + (f.gender === 'M' ? ' selected' : '') + '>' + t('மணமகன்', 'Grooms') + '</option></select></label>' +
+      '<label class="fld"><span>' + t('வயது', 'Age') + '</span><span class="two"><input data-bf="min_age" type="number" min="18" max="80" placeholder="18" value="' + esc(f.min_age) + '"><input data-bf="max_age" type="number" min="18" max="80" placeholder="40" value="' + esc(f.max_age) + '"></span></label>' +
+      '<label class="fld"><span>' + t('சமூகம்', 'Community') + '</span>' + sel('community', 'community', t('அனைத்தும்', 'All')) + '</label>' +
+      '<button class="btn pri" type="submit">' + t('தேடு', 'Search') + '</button></form>' +
+      '<div id="bres">' + (BR.items.length ? BR.items.map(pcard).join('') : '<p class="mut">' + t('இன்னும் சுயவிவரங்கள் இல்லை. முதலில் பதிவு செய்யுங்கள்!', 'No profiles yet. Be the first to register!') + '</p>') + '</div>' +
+      (BR.items.length < BR.total ? '<p class="c"><button class="btn" data-act="bMore">' + t('மேலும் காட்டு', 'Show more') + '</button></p>' : '') +
+      '<div class="cta c"><a class="btn big" href="#/join">' + t('இலவசமாகப் பதிவு செய்க', 'Register free') + '</a></div></div>';
+  }
+  M.views.browse = async function (v) {
+    M.pageTitle = t('பதிவு செய்தவர்கள்', 'Registered profiles');
+    var r = await browseLoad(true);
+    if (!v.isConnected) return;
+    if (r && !r.ok) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p class="mut">' + t('இந்த வசதி இப்போது கிடைக்கவில்லை. சிறிது நேரம் கழித்து முயலுங்கள்.', 'This is not available right now. Please try again shortly.') + '</p><a class="btn" href="#/">' + t('முகப்பு', 'Home') + '</a></div></div>'; return; }
+    v.innerHTML = browseHtml(); rebind(v);
+  };
+  M.acts.bMore = async function (a) {
+    var v = a.closest('.vh'); await browseLoad(false); if (!v || !v.isConnected) return;
+    v.innerHTML = browseHtml(); M.hydrate(v); rebind(v);
+  };
+  function rebind(v) {
+    v.querySelector('#bf').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      v.querySelectorAll('[data-bf]').forEach(function (el) { BR.f[el.getAttribute('data-bf')] = el.value; });
+      await browseLoad(true); if (v.isConnected) { v.innerHTML = browseHtml(); M.hydrate(v); rebind(v); }
+    });
+  }
+
+  M.views.p = async function (v, id) {
+    var r = await M.api('mat_public_profile', { id: id });
+    if (!v.isConnected) return;
+    if (!r.ok) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p>' + t('இந்த சுயவிவரம் கிடைக்கவில்லை.', 'This profile is not available.') + '</p><a class="btn" href="#/browse">' + t('பட்டியல்', 'All profiles') + '</a></div></div>'; return; }
+    var p = r.profile, row = function (k, val) { return val ? '<dt>' + esc(k) + '</dt><dd>' + esc(val) + '</dd>' : ''; };
+    var sec = function (title, rows) { var h = rows.join(''); return h ? '<section class="psec"><h3>' + esc(title) + '</h3><dl class="sdl">' + h + '</dl></section>' : ''; };
+    M.pageTitle = p.name + ' · ' + codeOf(p);
+    var photos = (p.photos || []).map(function (x) { return '<img alt="' + esc(p.name) + '" data-ph="' + esc(x) + '">'; }).join('');
+    var wa = waLink(p);
+    v.innerHTML = '<div class="wrap narrow"><p><a href="#/browse">← ' + t('பட்டியல்', 'All profiles') + '</a></p>' +
+      '<div class="box pv"><div class="pvh">' + M.avatar(p, true) + '<div><h1 class="h2">' + esc(p.name) + '</h1><div class="mut">' + esc(M.sub(p)) + '</div><div class="pt"><span class="tg">' + esc(M.commLabel(p)) + '</span><span class="tg">' + esc(codeOf(p)) + '</span></div></div></div>' +
+      (photos ? '<div class="aph">' + photos + '</div>' : (p.photo_count ? '<p class="mut sm">📷 ' + t('படங்கள் பதிவு செய்த உறுப்பினர்களுக்கு மட்டுமே தெரியும்.', 'Photos are visible to registered members only.') + '</p>' : '')) +
+      sec(t('அடிப்படை', 'Basics'), [row(t('வயது', 'Age'), p.age ? String(p.age) : ''), row(t('உயரம்', 'Height'), p.height_cm ? M.cm(p.height_cm) : ''), row(t('திருமண நிலை', 'Marital status'), M.label('marital', p.marital)), row(t('மதம்', 'Religion'), M.label('religion', p.religion)), row(t('தாய்மொழி', 'Mother tongue'), M.label('mother_tongue', p.mother_tongue)), row(t('உணவு', 'Diet'), M.label('diet', p.diet))]) +
+      sec(t('ஜாதகம்', 'Horoscope'), [row(t('குலம்', 'Kulam'), p.kulam), row(t('கோத்திரம்', 'Gotra'), p.gotra), row(t('நட்சத்திரம்', 'Star'), M.label('star', p.star)), row(t('ராசி', 'Raasi'), M.label('raasi', p.raasi)), row(t('தோஷம்', 'Dosham'), M.label('dosham', p.dosham))]) +
+      sec(t('கல்வி & தொழில்', 'Education & work'), [row(t('கல்வி', 'Education'), [M.label('education', p.education), p.education_detail].filter(Boolean).join(' – ')), row(t('தொழில்', 'Occupation'), p.occupation), row(t('பணி வகை', 'Employment'), M.label('employer_type', p.employer_type))]) +
+      sec(t('குடும்பம்', 'Family'), [row(t('தந்தை தொழில்', "Father's occupation"), p.father_occ), row(t('தாய் தொழில்', "Mother's occupation"), p.mother_occ), row(t('சகோதரர்கள்', 'Brothers'), p.brothers != null ? String(p.brothers) : ''), row(t('சகோதரிகள்', 'Sisters'), p.sisters != null ? String(p.sisters) : ''), row(t('குடும்ப வகை', 'Family type'), M.label('family_type', p.family_type)), row(t('குடும்ப நிலை', 'Family status'), M.label('family_status', p.family_status))]) +
+      sec(t('இருப்பிடம்', 'Place'), [row(t('ஊர்', 'City'), p.city), row(t('மாநிலம்', 'State'), M.label('state', p.state))]) +
+      (p.about ? '<section class="psec"><h3>' + t('பற்றி', 'About') + '</h3><p>' + esc(p.about) + '</p></section>' : '') + '</div>' +
+      '<div class="box cr"><h2 class="h3">' + t('தொடர்பு கொள்ள', 'Get in touch') + '</h2>' +
+      '<p class="mut">' + t('சுயவிவர எண்: ', 'Profile no.: ') + '<b>' + esc(codeOf(p)) + '</b> — ' + t('இந்த எண்ணைக் குறிப்பிடுங்கள். நாங்கள் இருவீட்டாரையும் இணைத்து வைக்கிறோம்.', 'quote this number. We will connect both families.') + '</p>' +
+      '<div class="rowb">' + (wa ? '<a class="btn pri" href="' + esc(wa) + '" target="_blank" rel="noopener">💬 WhatsApp</a>' : '') + '<a class="btn" href="tel:+91' + esc(M.C.SUPPORT_PHONE) + '">📞 ' + t('அழைக்க', 'Call') + '</a></div>' +
+      '<form id="crf" novalidate><h3 class="h3">' + t('அல்லது தொடர்பு கோரிக்கை அனுப்புங்கள்', 'Or send a contact request') + '</h3>' +
+      '<label class="fld"><span>' + t('உங்கள் பெயர்', 'Your name') + '</span><input id="crn" maxlength="60" autocomplete="name"></label>' +
+      '<label class="fld"><span>' + t('உங்கள் மொபைல் எண்', 'Your mobile number') + '</span><input id="crp" type="tel" inputmode="numeric" maxlength="15" autocomplete="tel"></label>' +
+      '<label class="fld"><span>' + t('செய்தி (விருப்பம்)', 'Message (optional)') + '</span><textarea id="crm" rows="2" maxlength="300"></textarea></label>' +
+      '<p class="err" id="crerr" role="alert"></p><button class="btn pri big full" type="submit">' + t('கோரிக்கை அனுப்பு', 'Send request') + '</button></form></div></div>';
+    M.$('#crf', v).addEventListener('submit', async function (e) {
+      e.preventDefault(); var er = M.$('#crerr', v); er.textContent = '';
+      var name = M.$('#crn', v).value.trim(), ph = M.$('#crp', v).value.replace(/[^\d+ ]/g, ''), note = M.$('#crm', v).value.trim();
+      if (name.length < 2) { er.textContent = t('பெயரை உள்ளிடுங்கள்', 'Enter your name'); return; }
+      if (ph.replace(/\D/g, '').length < 10) { er.textContent = t('சரியான மொபைல் எண்ணை உள்ளிடுங்கள்', 'Enter a valid mobile number'); return; }
+      var btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
+      var rr = await M.api('mat_request_contact', { target: id, name: name, phone: ph, note: note || null }); btn.disabled = false;
+      if (!rr.ok) { er.textContent = rr.code === 'rate_limited' ? t('இன்று அதிக கோரிக்கைகள் அனுப்பப்பட்டுவிட்டன; நாளை முயலுங்கள்.', 'Too many requests today; please try tomorrow.') : t('அனுப்ப முடியவில்லை; மீண்டும் முயலுங்கள்.', 'Could not send; please try again.'); return; }
+      e.target.outerHTML = '<div class="notice"><b>✓ ' + t('கோரிக்கை அனுப்பப்பட்டது', 'Request sent') + '</b><p>' + t('எங்கள் குழு உங்களை விரைவில் தொடர்புகொள்ளும்.', 'Our team will contact you shortly.') + '</p></div>';
+    });
   };
   M.views.about = M.views.safety;
   M.views.notfound = function (v) { v.innerHTML = '<div class="wrap narrow"><div class="box"><h1 class="h2">404</h1><p>' + t('பக்கம் கிடைக்கவில்லை.', 'Page not found.') + '</p><a class="btn" href="#/">' + t('முகப்பு', 'Home') + '</a></div></div>'; };

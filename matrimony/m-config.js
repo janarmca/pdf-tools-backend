@@ -9,5 +9,5 @@ window.MAT_CONFIG = {
   SUPPORT_NAME: 'தியாகராஜன்',
   SUPPORT_NAME_EN: 'Thiyagarajan',
   SUPPORT_PHONE: '9698777639',      // shown on the Contact page + footer
-  SUPPORT_WHATSAPP: '919698777639'  // wa.me number (country code first); empty = hide the WhatsApp button
+  SUPPORT_WHATSAPP: '919976015722'  // wa.me number (country code first); empty = hide the WhatsApp button
 };

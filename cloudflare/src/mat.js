@@ -453,7 +453,8 @@ F.mat_admin_stats = async (db, uid) => {
       (select count(*) from mat_unlocks) as unlocks,
       (select coalesce(sum(amount_paise), 0) from mat_unlocks) as revenue_paise,
       (select count(*) from mat_reports where status = 'open') as open_reports,
-      (select count(*) from mat_submissions where status = 'new') as new_submissions`).first();
+      (select count(*) from mat_submissions where status = 'new') as new_submissions,
+      (select count(*) from mat_contact_requests where status = 'new') as new_requests`).first();
   return { ok: true, ...r };
 };
 
@@ -508,6 +509,8 @@ F.mat_submit_public = async (db, uid, a) => {
   const ph = arr(p, 'photos');
   if (ph.length > 6) return { ok: false, code: 'photos' };
   if (ph.some((k) => k.slice(0, 12) !== 'submissions/' || k.includes('..'))) return { ok: false, code: 'photos' };
+  const horo = trimOrNull(p.horoscope);
+  if (horo && (horo.slice(0, 12) !== 'submissions/' || horo.includes('..'))) return { ok: false, code: 'photos' };
   const recent = (await db.prepare('select phone from mat_submissions where created_at > ?').bind(addSeconds(-86400)).all()).results;
   const lastHour = await db.prepare('select count(*) as n from mat_submissions where created_at > ?').bind(addSeconds(-3600)).first();
   if (recent.filter((r) => lastDigits(r.phone) === dig).length >= 3 || lastHour.n >= 300) return { ok: false, code: 'rate_limited' };
@@ -519,8 +522,8 @@ F.mat_submit_public = async (db, uid, a) => {
   if (p.pref && typeof p.pref === 'object' && !Array.isArray(p.pref)) clean.pref = p.pref;
   const sid = crypto.randomUUID();
   const email = trimOrNull(a.email);
-  await db.prepare('insert into mat_submissions (id, data, phone, email, photos) values (?, ?, ?, ?, ?)')
-    .bind(sid, JSON.stringify(clean), String(a.phone).trim().slice(0, 20), email ? email.slice(0, 120) : null, JSON.stringify(ph)).run();
+  await db.prepare('insert into mat_submissions (id, data, phone, email, photos, horoscope) values (?, ?, ?, ?, ?, ?)')
+    .bind(sid, JSON.stringify(clean), String(a.phone).trim().slice(0, 20), email ? email.slice(0, 120) : null, JSON.stringify(ph), horo).run();
   return { ok: true, id: sid };
 };
 
@@ -537,7 +540,105 @@ F.mat_admin_submission_set = async (db, uid, a) => {
   return { ok: true };
 };
 
-const PUBLIC = new Set(['mat_public_stats', 'mat_submit_public']);
+// ---------------------------------------------------------------- public browsing (NO login needed)
+// Only these fields are ever shown to the public. Never: phone, e-mail, date of birth, income, parents' names,
+// native place, family notes, district, photos, horoscope. (Photos are added for logged-in viewers only.)
+const PUBLIC_FIELDS = ['name', 'gender', 'height_cm', 'religion', 'community', 'community_other', 'kulam', 'gotra', 'mother_tongue', 'star', 'raasi', 'dosham', 'marital',
+  'diet', 'education', 'education_detail', 'occupation', 'employer_type', 'city', 'state', 'father_occ', 'mother_occ', 'brothers', 'sisters', 'family_type', 'family_status', 'about'];
+
+// photos are shown only to approved members (and the admin) — never to anonymous visitors
+async function canSeePhotos(db, uid) {
+  if (!uid) return false;
+  if (await isAdmin(db, uid)) return true;
+  return !!(await db.prepare("select 1 from mat_profiles where user_id = ? and status = 'approved'").bind(uid).first());
+}
+
+function publicShape(id, d, created, photos, see) {
+  const out = { id, code: String(id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase(), age: age(validDate(d.dob)), created_at: created };
+  for (const k of PUBLIC_FIELDS) if (d[k] != null && d[k] !== '') out[k] = d[k];
+  out.photo_count = photos.length;
+  if (see && photos.length) { out.photo = photos[0]; out.photos = photos; }
+  return out;
+}
+
+// Only public sign-ups that the admin has listed. (Member-account profiles agreed to be seen by approved members only, so they are NOT shown here.)
+async function publicRows(db, see) {
+  const subs = await db.prepare("select id, data, photos, created_at from mat_submissions where listed = 1 and status <> 'rejected' order by created_at desc limit 500").all();
+  return subs.results.map((s) => publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see));
+}
+
+F.mat_public_list = async (db, uid, a) => {
+  const f = a.f || {};
+  const lim = Math.min(Math.max(parseInt(a.lim, 10) || 12, 1), 24), off = Math.max(parseInt(a.off, 10) || 0, 0);
+  const minA = parseInt(f.min_age, 10), maxA = parseInt(f.max_age, 10);
+  let rows = await publicRows(db, await canSeePhotos(db, uid));
+  if (f.gender === 'M' || f.gender === 'F') rows = rows.filter((r) => r.gender === f.gender);
+  if (f.community) rows = rows.filter((r) => r.community === f.community);
+  if (f.state) rows = rows.filter((r) => r.state === f.state);
+  if (f.marital) rows = rows.filter((r) => r.marital === f.marital);
+  if (minA) rows = rows.filter((r) => r.age != null && r.age >= minA);
+  if (maxA) rows = rows.filter((r) => r.age != null && r.age <= maxA);
+  return { ok: true, total: rows.length, items: rows.slice(off, off + lim) };
+};
+
+async function findPublic(db, see, id) {
+  const s = await db.prepare("select id, data, photos, created_at from mat_submissions where id = ? and listed = 1 and status <> 'rejected'").bind(String(id)).first();
+  return s ? publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see) : null;
+}
+
+F.mat_public_profile = async (db, uid, a) => {
+  const p = await findPublic(db, await canSeePhotos(db, uid), a.id);
+  return p ? { ok: true, profile: p } : { ok: false, code: 'not_found' };
+};
+
+// a visitor asks the administrator to arrange contact (the admin phones both families)
+F.mat_request_contact = async (db, uid, a) => {
+  const target = await findPublic(db, false, a.target);
+  if (!target) return { ok: false, code: 'not_found' };
+  const nm = String(a.name ?? '').trim();
+  if ([...nm].length < 2 || [...nm].length > 60) return { ok: false, code: 'name' };
+  const dig = lastDigits(a.phone);
+  if (dig.length < 10) return { ok: false, code: 'phone' };
+  const note = trimOrNull(a.note);
+  if (note && [...note].length > 300) return { ok: false, code: 'note' };
+  const recent = (await db.prepare('select from_phone from mat_contact_requests where created_at > ?').bind(addSeconds(-86400)).all()).results;
+  const lastHour = await db.prepare('select count(*) as n from mat_contact_requests where created_at > ?').bind(addSeconds(-3600)).first();
+  if (recent.filter((r) => lastDigits(r.from_phone) === dig).length >= 5 || lastHour.n >= 200) return { ok: false, code: 'rate_limited' };
+  await db.prepare('insert into mat_contact_requests (id, target_id, target_name, from_name, from_phone, note) values (?, ?, ?, ?, ?, ?)')
+    .bind(crypto.randomUUID(), String(a.target), target.name, nm, String(a.phone).trim().slice(0, 20), note).run();
+  return { ok: true };
+};
+
+F.mat_admin_contact_requests = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const rows = (await db.prepare('select * from mat_contact_requests where status = ? order by created_at desc limit 200').bind(a.st || 'new').all()).results;
+  const items = [];
+  for (const r of rows) {
+    let phone = null, email = null;
+    const s = await db.prepare('select phone, email from mat_submissions where id = ?').bind(r.target_id).first();
+    if (s) { phone = s.phone; email = s.email; } else {
+      const v = await db.prepare('select phone, email from mat_private where user_id = ?').bind(r.target_id).first();
+      if (v) { phone = v.phone; email = v.email; }
+    }
+    items.push({ ...r, target_phone: phone, target_email: email, code: String(r.target_id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase() });
+  }
+  return { ok: true, items };
+};
+
+F.mat_admin_contact_request_set = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  if (!['new', 'done'].includes(a.st)) return { ok: false, code: 'bad_status' };
+  await db.prepare('update mat_contact_requests set status = ? where id = ?').bind(a.st, a.rid).run();
+  return { ok: true };
+};
+
+F.mat_admin_submission_list = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  await db.prepare('update mat_submissions set listed = ? where id = ?').bind(a.on === false || a.on === 'false' ? 0 : 1, a.sid).run();
+  return { ok: true };
+};
+
+const PUBLIC = new Set(['mat_public_stats', 'mat_submit_public', 'mat_public_list', 'mat_public_profile', 'mat_request_contact']);
 
 export async function matRpc(env, uid, name, args) {
   const fn = Object.prototype.hasOwnProperty.call(F, name) ? F[name] : null;
