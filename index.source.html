@@ -2705,19 +2705,70 @@ function loadScriptOnce(src){
    can't be fetched (e.g. no internet on first load), so English-only text still
    works even then. ================================================================ */
 let __fontkitPromise = null, __tamilFontBytesPromise = null;
+// fontkit 1.1.1 (a Babel build) calls a global `regeneratorRuntime`; when nothing else on the page defines it,
+// every PDF that contains Tamil fails with "regeneratorRuntime is not defined". Load our own copy first.
 function ensureFontkitLib(){
   if(!__fontkitPromise){
-    __fontkitPromise = loadScriptOnce('https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js')
+    __fontkitPromise = (typeof regeneratorRuntime !== 'undefined' ? Promise.resolve() : loadScriptOnce('/libs/regenerator-runtime.js').catch(()=>{}))
+      .then(()=> loadScriptOnce('/libs/fontkit.umd.min.js').catch(()=> loadScriptOnce('https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js')))
       .then(()=> window.fontkit);
+    __fontkitPromise.catch(()=>{ __fontkitPromise = null; });
   }
   return __fontkitPromise;
 }
+// our own copy of Noto Sans Tamil first (same site, cached by the browser), the public copy only as a fallback
 function ensureTamilFontBytes(){
   if(!__tamilFontBytesPromise){
-    __tamilFontBytesPromise = fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstamil/NotoSansTamil%5Bwdth%2Cwght%5D.ttf')
-      .then(r=>{ if(!r.ok) throw new Error('font fetch failed'); return r.arrayBuffer(); });
+    const get = (u)=> fetch(u).then(r=>{ if(!r.ok) throw new Error('font fetch failed'); return r.arrayBuffer(); });
+    __tamilFontBytesPromise = get('/fonts/NotoSansTamil.ttf')
+      .catch(()=> get('https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstamil/NotoSansTamil%5Bwdth%2Cwght%5D.ttf'));
+    __tamilFontBytesPromise.catch(()=>{ __tamilFontBytesPromise = null; });
   }
   return __tamilFontBytesPromise;
+}
+// Tamil letters need the Tamil shaper (vowel signs move in front of the consonant, க்ஷ / ஸ்ரீ / கொ join up) but fontkit
+// picks ONE script for a whole string from its first letters. So "Name: ரமேஷ் கொளத்தூர்" came out as broken forms
+// ("க ொ", "கலை"). Fix: draw / measure each Tamil and non-Tamil run on its own.
+const __TAMIL_CH = /[\u0B80-\u0BFF\u200C\u200D]/;
+function splitScriptRuns(str){
+  const runs = []; let cur = '', curTa = null, lead = '';
+  for(const ch of String(str)){
+    if(__TAMIL_CH.test(ch)){ if(curTa === false){ runs.push({t:cur, ta:false}); cur = ''; } curTa = true; cur = lead + cur + ch; lead = ''; }
+    else if(/\p{L}/u.test(ch)){ if(curTa === true){ runs.push({t:cur, ta:true}); cur = ''; } curTa = false; cur = lead + cur + ch; lead = ''; }
+    else if(curTa === null) lead += ch; // spaces / digits / punctuation before the first letter
+    else cur += ch;                     // ...otherwise stay with the run they follow
+  }
+  if(curTa === null) return [{t:lead, ta:false}];
+  runs.push({t:cur, ta:curTa});
+  return runs;
+}
+function makeMixedScriptFont(font){
+  if(font.__mixedShape) return font;
+  const widthOf = font.widthOfTextAtSize.bind(font);
+  font.__runWidth = widthOf;
+  font.widthOfTextAtSize = (text, size)=> splitScriptRuns(text).reduce((w, r)=> w + widthOf(r.t, size), 0);
+  font.__mixedShape = true;
+  const P = window.PDFLib.PDFPage.prototype;
+  if(!P.__mixedShapePatched){
+    const orig = P.drawText;
+    P.drawText = function(text, o){
+      o = o || {};
+      const f = o.font || this.font, s = String(text);
+      if(!f || !f.__mixedShape || o.maxWidth !== undefined || o.lineHeight !== undefined || s.indexOf('\n') >= 0) return orig.call(this, text, o);
+      const runs = splitScriptRuns(s);
+      if(runs.length < 2) return orig.call(this, text, o);
+      const size = o.size || this.getFontSize();
+      const rot = o.rotate ? (o.rotate.type === 'radians' ? o.rotate.angle : o.rotate.angle * Math.PI / 180) : 0;
+      let x = o.x === undefined ? this.getX() : o.x, y = o.y === undefined ? this.getY() : o.y;
+      for(const r of runs){
+        orig.call(this, r.t, Object.assign({}, o, {x, y}));
+        const w = f.__runWidth(r.t, size);
+        x += w * Math.cos(rot); y += w * Math.sin(rot);
+      }
+    };
+    P.__mixedShapePatched = true;
+  }
+  return font;
 }
 // Embeds a Unicode-capable font into `doc` and returns it. Use this instead of
 // StandardFonts.Helvetica/HelveticaBold for ANY text the person typed themselves
@@ -2823,7 +2874,7 @@ async function embedUnicodeFont(doc){
     const fk = await ensureFontkitLib();
     doc.registerFontkit(fk);
     const bytes = await ensureTamilFontBytes();
-    return await doc.embedFont(bytes, { subset: true });
+    return makeMixedScriptFont(await doc.embedFont(bytes, { subset: true }));
   }catch(e){
     return await doc.embedFont(StandardFonts.Helvetica); // offline fallback — English-only text still works
   }
