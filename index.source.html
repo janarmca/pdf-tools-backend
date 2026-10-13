@@ -430,14 +430,15 @@ const TOOLS = [
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'gstinvoice', name:'GST Invoice Generator', desc:'Tax invoice with CGST / SGST / IGST worked out per item and per rate, GSTIN check, round-off, amount in words, UPI QR', icon:'🧾', color:'#1E7145', cat:'business', lazy:'docs'},
   {id:'quotepo', name:'Quotation / Bill / PO / Proforma', desc:'Quotation, Proforma, Tax Invoice, Cash Bill, Bill of Supply, Purchase Order or Delivery Challan — correct IGST or CGST+SGST, discount, advance, HSN summary, PDF / Excel / Word / WhatsApp', icon:'📃', color:'#1A5276', cat:'business', lazy:'docs'},
+  {id:'receipts', name:'Receipts & Vouchers (all-in-one)', desc:'Rent receipt (up to 12 months at once), tuition fee receipt, money receipt and payment voucher — Tamil / English, amount in words, saved details', icon:'🧾', color:'#2E6F5E', cat:'business', lazy:'docs'},
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
-  {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business'},
+  {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business',lazy:'docs'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
-  {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business'},
-  {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business'},
+  {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business',lazy:'docs'},
+  {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business',lazy:'docs'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
@@ -1406,6 +1407,7 @@ gstinvoice:['GST பில்','GST விலைப்பட்டியல் �
 quotepo:['விலைப்புள்ளி / பில் / PO','Quotation, Bill, Purchase Order தயாரி'],
 salaryslip:['சம்பளச் சீட்டு','சம்பளச் சீட்டு உருவாக்கு'],
 paymentvoucher:['பணம் செலுத்தும் சீட்டு','Payment Voucher தயாரி'],
+receipts:['ரசீதுகள் & சீட்டுகள்','வாடகை, கல்விக் கட்டணம், பணம் பெற்ற ரசீது, Payment Voucher'],
 emicalc:['EMI / கடன் கணிப்பான்','மாதத் தவணை, வட்டி, அட்டவணை'],
 incometaxcalc:['வருமான வரி கணிப்பான்','பழைய / புதிய முறை ஒப்பீடு'],
 agecalc:['வயது கணிப்பான்','ஆண்டு, மாதம், நாளில் சரியான வயது'],
@@ -1937,7 +1939,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261013a`;
+    s.src = `category-${cat}.js?v=20261013b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3278,7 +3280,7 @@ const TOOL_LIBS = {
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
-  readaloud:['pdfjs'], rentreceipt:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
+  readaloud:['pdfjs'], rentreceipt:['pdflib'], receipts:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
   remove:['pdfjs','pdflib'], organize:['pdfjs','pdflib'], rotate:['pdfjs','pdflib'],
   split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], tuitionreceipt:['pdflib'], txt2pdf:['pdflib'],
   vidsplit:['jszip'], watermark:['pdflib'], word2pdf:['jszip','mammoth','pdflib'],
@@ -13998,288 +14000,9 @@ TOOL_IMPL.resumebuilder = { mount(container){ mountEmbeddedTool(container, 'Resu
 
 
 /* ===================== RENT RECEIPT GENERATOR ===================== */
-TOOL_IMPL.rentreceipt = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    const LS_KEY = 'rentReceipt_landlordDefaults';
-    function loadLandlordDefaults(){
-      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
-    }
-    function saveLandlordDefaults(){
-      try{
-        localStorage.setItem(LS_KEY, JSON.stringify({
-          name: body.querySelector('#rrLandlordName').value,
-          pan: body.querySelector('#rrLandlordPan').value,
-          addr: body.querySelector('#rrLandlordAddr').value
-        }));
-      }catch{}
-    }
-    function paint(){
-      body.innerHTML = '';
-      const d = loadLandlordDefaults();
-      body.appendChild(el(`<div class="note">Generates a rent receipt for HRA tax-exemption purposes. This tool doesn't provide tax advice — please verify requirements with your employer/CA if unsure.</div>`));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Tenant & Property</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Tenant Name</label><input type="text" id="rrTenant" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Rented Property Address</label><input type="text" id="rrPropertyAddr" autocomplete="off"></div>
-        </div>
-      `));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Payment Details</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field"><label>Monthly Rent ₹</label><input type="number" id="rrAmount" min="0" value="0"></div>
-          <div class="field"><label>Payment Mode</label><select id="rrMode"><option>UPI</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option></select></div>
-          <div class="field"><label>Rent Month</label><input type="month" id="rrFromMonth" value="${new Date().toISOString().slice(0,7)}"></div>
-          <div class="field"><label>To Month (optional)</label><input type="month" id="rrToMonth"></div>
-          <div class="field"><label>Payment Date</label><input type="date" id="rrDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>Receipt No. (optional)</label><input type="text" id="rrReceiptNo" autocomplete="off"></div>
-        </div>
-      `));
-      const stampNote = el(`<div id="rrStampNote"></div>`);
-      body.appendChild(stampNote);
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Landlord Details</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Landlord Name</label><input type="text" id="rrLandlordName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
-          <div class="field"><label>Landlord PAN</label><input type="text" id="rrLandlordPan" autocomplete="off" value="${escapeHtml(d.pan||'')}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Landlord Address</label><input type="text" id="rrLandlordAddr" autocomplete="off" value="${escapeHtml(d.addr||'')}"></div>
-        </div>
-      `));
-      const panNote = el(`<div id="rrPanNote"></div>`);
-      body.appendChild(panNote);
-
-      // Re-check the two conditional notes whenever amount/mode/PAN change —
-      // both are non-blocking (per spec: never hard-block the user).
-      function updateNotes(){
-        const amount = Number(body.querySelector('#rrAmount').value)||0;
-        const mode = body.querySelector('#rrMode').value;
-        const pan = body.querySelector('#rrLandlordPan').value.trim();
-        stampNote.innerHTML = (mode==='Cash' && amount>5000)
-          ? `<div class="note" style="background:#FFF3E0; border-color:#FFD699;">⚠️ Revenue stamp required by law for cash payments over ₹5,000. This PDF can't render a physical stamp — please affix and sign across a revenue stamp on the printed copy.</div>` : '';
-        panNote.innerHTML = (amount*12 > 100000 && !pan)
-          ? `<div class="note" style="background:#FFF3E0; border-color:#FFD699;">⚠️ Landlord PAN is legally required on rent receipts when annual rent exceeds ₹1,00,000. You can still generate without it, but your employer may ask for it separately.</div>` : '';
-      }
-      body.querySelectorAll('#rrAmount, #rrMode, #rrLandlordPan').forEach(elm=> elm.addEventListener('input', updateNotes));
-      updateNotes();
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🏠 Generate Receipt</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    function monthYearLabel(monthStr){
-      if(!monthStr) return '';
-      const [y,m] = monthStr.split('-');
-      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      return names[Number(m)-1] + ' ' + y;
-    }
-    function countMonths(from, to){
-      if(!from || !to) return 1;
-      const [fy,fm] = from.split('-').map(Number), [ty,tm] = to.split('-').map(Number);
-      return Math.max(1, (ty-fy)*12 + (tm-fm) + 1);
-    }
-    async function doGenerate(){
-      const tenant = body.querySelector('#rrTenant').value||'';
-      const propertyAddr = body.querySelector('#rrPropertyAddr').value||'';
-      const monthlyRent = Number(body.querySelector('#rrAmount').value)||0;
-      const mode = body.querySelector('#rrMode').value;
-      const fromMonth = body.querySelector('#rrFromMonth').value;
-      const toMonth = body.querySelector('#rrToMonth').value;
-      const date = body.querySelector('#rrDate').value;
-      const receiptNo = body.querySelector('#rrReceiptNo').value || ('RR-'+Date.now().toString().slice(-6));
-      const landlordName = body.querySelector('#rrLandlordName').value||'';
-      const landlordPan = body.querySelector('#rrLandlordPan').value||'';
-      const landlordAddr = body.querySelector('#rrLandlordAddr').value||'';
-      if(!tenant.trim() || !landlordName.trim() || !fromMonth){
-        mountResult(body, 'Please fill Tenant Name, Landlord Name, and Rent Month.').style.background='#FDEDEC';
-        return;
-      }
-      const monthCount = countMonths(fromMonth, toMonth);
-      const totalAmount = monthlyRent * monthCount;
-      const periodLabel = (toMonth && toMonth !== fromMonth)
-        ? `${monthYearLabel(fromMonth)} to ${monthYearLabel(toMonth)}`
-        : monthYearLabel(fromMonth);
-      const cashAboveLimit = mode==='Cash' && monthlyRent>5000;
-      saveLandlordDefaults();
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]);
-        const {width} = page.getSize();
-        let y = 800;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        const line = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
-
-        t('RENT RECEIPT', 50, y, 18, rgb(0.13,0.29,0.62));
-        t('Receipt No: '+receiptNo, 380, y+15, 10);
-        t('Date: '+date, 380, y, 10);
-        y -= 30; line(y); y -= 25;
-        t('Received from: '+tenant, 50, y, 12); y -= 25;
-        t('Sum of Rupees: '+numberToWordsINR(totalAmount)+' Only', 50, y, 11); y -= 25;
-        t('Towards rent for the month'+(monthCount>1?'s':'')+' of: '+periodLabel, 50, y, 11); y -= 25;
-        t('For the premises situated at:', 50, y, 11); y -= 16;
-        t(propertyAddr.slice(0,80), 50, y, 11); y -= 40;
-        t('Amount: ₹'+totalAmount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2));
-        t('Mode: '+mode, 300, y, 11); y -= 30;
-        line(y); y -= 25;
-        t('Landlord Name: '+landlordName, 50, y, 11); y -= 20;
-        t('Landlord PAN: '+(landlordPan||'—'), 50, y, 11); y -= 20;
-        t('Landlord Address: '+landlordAddr.slice(0,80), 50, y, 10, rgb(0.4,0.4,0.4)); y -= 45;
-        if(cashAboveLimit){
-          t('Note: Revenue stamp affixed on the original physical copy of this receipt.', 50, y, 9, rgb(0.6,0.4,0.1));
-          y -= 40;
-        } else { y -= 40; }
-        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        t('Landlord Signature', 50, y-14, 9, rgb(0.5,0.5,0.5));
-
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `rent-receipt-${fromMonth}-${tenant.replace(/\s+/g,'-')}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Rent receipt ready — ${periodLabel}, ₹${totalAmount.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
+// rentreceipt lives in category-docs.js (shared receipts engine)
 /* ===================== TUITION FEE RECEIPT ===================== */
-TOOL_IMPL.tuitionreceipt = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    const LS_KEY = 'tuitionReceipt_tutorDefaults';
-    let periodMode = 'monthly';
-    function loadTutorDefaults(){
-      try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
-    }
-    function saveTutorDefaults(){
-      try{
-        localStorage.setItem(LS_KEY, JSON.stringify({
-          name: body.querySelector('#trTutorName').value,
-          addr: body.querySelector('#trTutorAddr').value
-        }));
-      }catch{}
-    }
-    function paint(){
-      body.innerHTML = '';
-      const d = loadTutorDefaults();
-      body.appendChild(el(`<div class="note">Fee receipt for tuition/coaching classes — for the tutor's and parent's own records.</div>`));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Student Details</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Student Name</label><input type="text" id="trStudent" autocomplete="off"></div>
-          <div class="field"><label>Class/Grade</label><input type="text" id="trClass" autocomplete="off"></div>
-          <div class="field"><label>Subject(s) (optional)</label><input type="text" id="trSubjects" placeholder="e.g. Maths, Science" autocomplete="off"></div>
-        </div>
-      `));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Fee Period</div>`));
-      const periodRow = el(`<div class="filter-row"></div>`);
-      ['Monthly','Custom'].forEach(pm=>{
-        const chip = el(`<button class="filter-chip ${periodMode===pm.toLowerCase()?'active':''}">${pm}</button>`);
-        chip.onclick = ()=>{ periodMode = pm.toLowerCase(); paint(); };
-        periodRow.appendChild(chip);
-      });
-      body.appendChild(periodRow);
-      body.appendChild(periodMode==='monthly'
-        ? el(`<div class="field" style="margin-top:10px;"><label>Fee Month</label><input type="month" id="trPeriod" value="${new Date().toISOString().slice(0,7)}"></div>`)
-        : el(`<div class="field" style="margin-top:10px;"><label>Period Description</label><input type="text" id="trPeriod" placeholder="e.g. Term 1 (June-Sept 2026)" autocomplete="off"></div>`)
-      );
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Payment Details</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field"><label>Fee Amount ₹</label><input type="number" id="trAmount" min="0" value="0"></div>
-          <div class="field"><label>Payment Mode</label><select id="trMode"><option>UPI</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option></select></div>
-          <div class="field"><label>Payment Date</label><input type="date" id="trDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field"><label>Receipt No. (optional)</label><input type="text" id="trReceiptNo" autocomplete="off"></div>
-        </div>
-      `));
-
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Tutor / Institute Details</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Tutor/Institute Name</label><input type="text" id="trTutorName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Address/Phone (optional)</label><input type="text" id="trTutorAddr" autocomplete="off" value="${escapeHtml(d.addr||'')}"></div>
-        </div>
-      `));
-
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📚 Generate Receipt</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    function monthYearLabel(monthStr){
-      if(!monthStr) return '';
-      const [y,m] = monthStr.split('-');
-      const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      return names[Number(m)-1] + ' ' + y;
-    }
-    async function doGenerate(){
-      const student = body.querySelector('#trStudent').value||'';
-      const cls = body.querySelector('#trClass').value||'';
-      const subjects = body.querySelector('#trSubjects').value||'';
-      const periodRaw = body.querySelector('#trPeriod').value||'';
-      const period = periodMode==='monthly' ? monthYearLabel(periodRaw) : periodRaw;
-      const amount = Number(body.querySelector('#trAmount').value)||0;
-      const mode = body.querySelector('#trMode').value;
-      const date = body.querySelector('#trDate').value;
-      const receiptNo = body.querySelector('#trReceiptNo').value || ('TR-'+Date.now().toString().slice(-6));
-      const tutorName = body.querySelector('#trTutorName').value||'';
-      const tutorAddr = body.querySelector('#trTutorAddr').value||'';
-      if(!student.trim() || !tutorName.trim() || !periodRaw){
-        mountResult(body, 'Please fill Student Name, Tutor/Institute Name, and Fee Period.').style.background='#FDEDEC';
-        return;
-      }
-      saveTutorDefaults();
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 841.89]);
-        const {width} = page.getSize();
-        let y = 800;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        const line = (yy)=> page.drawLine({start:{x:50,y:yy},end:{x:width-50,y:yy},thickness:1,color:rgb(0.8,0.8,0.8)});
-
-        t('TUITION FEE RECEIPT', 50, y, 18, rgb(0.13,0.29,0.62));
-        t('Receipt No: '+receiptNo, 380, y+15, 10);
-        t('Date: '+date, 380, y, 10);
-        y -= 30; line(y); y -= 25;
-        t('Received from: '+student+(cls?' (Class: '+cls+')':''), 50, y, 12); y -= 25;
-        if(subjects.trim()){ t('Subject(s): '+subjects, 50, y, 11); y -= 22; }
-        t('Sum of Rupees: '+numberToWordsINR(amount)+' Only', 50, y, 11); y -= 25;
-        t('Towards tuition fee for: '+period, 50, y, 11); y -= 40;
-        t('Amount: ₹'+amount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2));
-        t('Mode: '+mode, 300, y, 11); y -= 30;
-        line(y); y -= 25;
-        t('Tutor/Institute Name: '+tutorName, 50, y, 11); y -= 20;
-        if(tutorAddr.trim()){ t('Address/Phone: '+tutorAddr, 50, y, 10, rgb(0.4,0.4,0.4)); y -= 20; }
-        y -= 45;
-        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        t('Tutor Signature', 50, y-14, 9, rgb(0.5,0.5,0.5));
-
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `tuition-receipt-${student.replace(/\s+/g,'-')}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Tuition receipt ready — ${period}, ₹${amount.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
+// tuitionreceipt lives in category-docs.js (shared receipts engine)
 /* ===================== PDF BOOKMARK ADDER ===================== */
 TOOL_IMPL.pdfbookmark = {
   mount(container){
@@ -15642,74 +15365,7 @@ TOOL_IMPL.businesscard = {
 
 /* ===================== TAMIL HANDWRITING TRACING ===================== */
 /* tamiltracing — moved to category-education.js (lazy-loaded) */
-TOOL_IMPL.paymentvoucher = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Company/Business Name</label><input type="text" id="pvCompany" autocomplete="off"></div>
-          <div class="field"><label>Voucher No.</label><input type="text" id="pvNo" autocomplete="off" value="PV-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="pvDate" value="${new Date().toISOString().slice(0,10)}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Paid To</label><input type="text" id="pvTo" autocomplete="off"></div>
-          <div class="field"><label>Amount ₹</label><input type="number" id="pvAmount" value="0"></div>
-          <div class="field"><label>Mode</label><select id="pvMode"><option>Cash</option><option>Bank Transfer</option><option>UPI</option><option>Cheque</option></select></div>
-          <div class="field" style="grid-column:1/-1;"><label>Towards / Purpose</label><input type="text" id="pvPurpose" autocomplete="off"></div>
-        </div>
-      `));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">🧮 Generate Voucher</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const company = body.querySelector('#pvCompany').value||'';
-      const no = body.querySelector('#pvNo').value||'PV-001';
-      const date = body.querySelector('#pvDate').value||'';
-      const to = body.querySelector('#pvTo').value||'';
-      const amount = Number(body.querySelector('#pvAmount').value)||0;
-      const mode = body.querySelector('#pvMode').value;
-      const purpose = body.querySelector('#pvPurpose').value||'';
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 350]);
-        const {width} = page.getSize();
-        let y = 300;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        t(company||'Business Name', 50, y, 15, rgb(0.13,0.29,0.62)); y-=22;
-        t('PAYMENT VOUCHER', width/2-70, y, 14); y-=22;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=22;
-        t('Voucher No: '+no, 50, y); t('Date: '+date, 350, y); y-=22;
-        t('Paid To:', 50, y, 10.5, rgb(0.4,0.4,0.4)); y-=16;
-        t(to, 50, y, 12.5); y-=24;
-        t('Amount: ₹'+amount.toFixed(2), 50, y, 13, rgb(0.1,0.45,0.2)); y-=18;
-        t('Amount in words: Rupees '+numberToWordsINR(amount)+' Only', 50, y, 10); y-=20;
-        t('Mode of Payment: '+mode, 50, y, 11); y-=20;
-        t('Towards: '+purpose, 50, y, 11); y-=50;
-        page.drawLine({start:{x:50,y},end:{x:200,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        page.drawLine({start:{x:width-200,y},end:{x:width-50,y},thickness:1,color:rgb(0.6,0.6,0.6)});
-        t('Received by', 50, y-14, 9, rgb(0.5,0.5,0.5)); t('Authorized Signatory', width-200, y-14, 9, rgb(0.5,0.5,0.5));
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `voucher-${no}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Payment Voucher downloaded.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
-/* Purchase Order Generator and Bill/Quotation Maker were removed and merged
-   into quotepo (Quotation/Bill/PO/Performa) — that tool already supported
-   all 4 document types with richer GST/HSN/SAC/bank-details features than
-   either standalone version had. */
-
+// paymentvoucher lives in category-docs.js (shared receipts engine)
 /* ===================== EXPENSE TRACKER TEMPLATE (Excel) ===================== */
 TOOL_IMPL.expensetracker = {
   mount(container){

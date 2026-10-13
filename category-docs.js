@@ -660,6 +660,287 @@
     return L.filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
   }
 
+
+  /* =====================================================================
+     RECEIPTS & VOUCHERS — rent, tuition, money receipt, payment voucher
+     One engine; the old tool ids (rentreceipt, tuitionreceipt, paymentvoucher)
+     open it locked to their own type so existing links keep working.
+     ===================================================================== */
+  const RC_SEQ = 'pti-rcpt-seq-v1', RC_ISS = 'pti-rcpt-issuer-v1';
+  const MON_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MON_TA = ['ஜனவரி', 'பிப்ரவரி', 'மார்ச்', 'ஏப்ரல்', 'மே', 'ஜூன்', 'ஜூலை', 'ஆகஸ்ட்', 'செப்டம்பர்', 'அக்டோபர்', 'நவம்பர்', 'டிசம்பர்'];
+  const RC = {
+    rent: { en: 'Rent Receipt', ta: 'வாடகை ரசீது', prefix: 'RR', icon: '🏠', series: true, issuer: ['வீட்டு உரிமையாளர்', 'Landlord'], payer: ['வாடகைதாரர்', 'Tenant'] },
+    tuition: { en: 'Tuition Fee Receipt', ta: 'கல்விக் கட்டண ரசீது', prefix: 'TF', icon: '📚', series: true, issuer: ['ஆசிரியர் / நிறுவனம்', 'Tutor / Institute'], payer: ['மாணவர் / பெற்றோர்', 'Student / Parent'] },
+    general: { en: 'Money Receipt', ta: 'பணம் பெற்ற ரசீது', prefix: 'RC', icon: '🧾', issuer: ['பணம் பெற்றவர்', 'Received by'], payer: ['பணம் கொடுத்தவர்', 'Received from'] },
+    voucher: { en: 'Payment Voucher', ta: 'பணம் செலுத்தும் சீட்டு', prefix: 'PV', icon: '🧮', issuer: ['நிறுவனம் (செலுத்துபவர்)', 'Company (paying)'], payer: ['பெறுபவர் (Payee)', 'Paid to (Payee)'] },
+  };
+  const HEADS = ['Salary / Wages', 'Rent', 'Electricity / Water', 'Travel / Fuel', 'Purchase / Materials', 'Office expenses', 'Repairs', 'Professional fees', 'Advance', 'Other'];
+  const MODES = ['UPI', 'Cash', 'Bank Transfer', 'Cheque', 'Card', 'DD'];
+  const tl = (lang, en, ta) => (lang === 'en' ? en : lang === 'ta' ? ta : en + ' / ' + ta);
+  const money = (v) => Math.round(num(v) * 100) / 100;
+  const validISO = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); if (!m) return false; const d = new Date(+m[1], +m[2] - 1, +m[3]); return d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]; };
+  const addMonthsISO = (iso, k) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso); const idx = +m[1] * 12 + (+m[2] - 1) + k, y = Math.floor(idx / 12), mo = idx % 12, dim = new Date(y, mo + 1, 0).getDate(); return y + '-' + pad2(mo + 1) + '-' + pad2(Math.min(+m[3], dim)); };
+  const incNo = (no, k) => { const m = /^(.*?)(\d+)\s*$/.exec(no || ''); return m ? m[1] + String(+m[2] + k).padStart(m[2].length, '0') : (no || '') + (k ? '-' + (k + 1) : ''); };
+  function rcNo(type, date) { const seqs = lsGet(RC_SEQ, {}), n = (seqs[type] || 0) + 1; return RC[type].prefix + '/' + fyOf(date) + '/' + String(n).padStart(3, '0'); }
+  function rcBump(type, no) { const m = /(\d+)\s*$/.exec(no || ''); if (!m) return; const seqs = lsGet(RC_SEQ, {}); seqs[type] = Math.max(seqs[type] || 0, +m[1]); lsSet(RC_SEQ, seqs); }
+  const rcIssuer = (type) => Object.assign({ name: '', addr: '', pan: '', phone: '' }, (lsGet(RC_ISS, {}) || {})[type] || {});
+  function blankRc(type) {
+    const date = localISO();
+    return {
+      v: 1, type, lang: 'bi', no: rcNo(type, date), date, issuer: rcIssuer(type), payer: { name: '', addr: '', pan: '', phone: '' },
+      amount: '', mode: 'UPI', ref: '', purpose: '',
+      x: { months: 1, fromMonth: date.slice(0, 7), single: false, property: '', student: '', cls: '', subjects: '', otherLabel: '', otherAmt: '', head: 'Other', invNo: '', balance: '', stampBox: false },
+      rows: [{ d: '', a: '' }],
+    };
+  }
+  const rcTotal = (S) => (S.type === 'voucher' ? S.rows.reduce((a, r) => a + money(r.a), 0) : money(S.amount));
+  function rcCount(S) { return RC[S.type].series ? Math.min(12, Math.max(1, Math.floor(num(S.x.months)) || 1)) : 1; }
+  function monthLabel(lang, iso, k) {
+    const m = /^(\d{4})-(\d{2})/.exec(iso || ''); if (!m) return '';
+    const idx = +m[1] * 12 + (+m[2] - 1) + (k || 0), y = Math.floor(idx / 12), mo = idx % 12;
+    return tl(lang, MON_EN[mo] + ' ' + y, MON_TA[mo] + ' ' + y);
+  }
+  function rcWords(lang, n) {
+    const en = 'Rupees ' + words(n) + ' Only';
+    let ta = en; try { if (typeof TamilCore !== 'undefined' && TamilCore.rupeesToWords) ta = TamilCore.rupeesToWords(n); } catch (e) { /* english only */ }
+    return lang === 'en' ? [en] : lang === 'ta' ? [ta] : [en, ta];
+  }
+  // every slip = one receipt (series types produce one per month)
+  function buildSlips(S) {
+    const R = RC[S.type], x = S.x, lang = S.lang, t = (en, ta) => tl(lang, en, ta);
+    const mode = S.mode + (S.ref.trim() ? ' (' + S.ref.trim() + ')' : '');
+    const base = { title: t(R.en, R.ta), role: t(R.issuer[1], R.issuer[0]), payRole: t(R.payer[1], R.payer[0]), issuer: S.issuer, payer: S.payer, mode, stamp: !!x.stampBox, type: S.type };
+    if (S.type === 'voucher') {
+      const rows = S.rows.filter((r) => String(r.d).trim() || money(r.a)).map((r) => ({ d: String(r.d || '—'), a: money(r.a) }));
+      return [Object.assign({}, base, { no: S.no, date: S.date, rows, amount: rcTotal(S), head: x.head, purpose: S.purpose })];
+    }
+    const per = money(S.amount), n = rcCount(S), other = money(x.otherAmt), out = [];
+    const mk = (i, count, amount) => {
+      const period = count > 1 ? monthLabel(lang, x.fromMonth, 0) + ' – ' + monthLabel(lang, x.fromMonth, count - 1) : monthLabel(lang, x.fromMonth, i);
+      const rows = [];
+      if (S.type === 'rent') {
+        rows.push([t('Received from', 'பெறப்பட்டது'), S.payer.name + (S.payer.pan ? ' (PAN ' + S.payer.pan + ')' : '')]);
+        rows.push([t('Rent for', 'வாடகை காலம்'), period]);
+        rows.push([t('Premises', 'இடம்'), x.property]);
+      } else if (S.type === 'tuition') {
+        rows.push([t('Received from', 'பெறப்பட்டது'), S.payer.name]);
+        rows.push([t('Student', 'மாணவர்'), [x.student, x.cls && (t('Class ', 'வகுப்பு ') + x.cls)].filter(Boolean).join(' — ')]);
+        if (x.subjects.trim()) rows.push([t('Subjects', 'பாடங்கள்'), x.subjects]);
+        rows.push([t('Fee for', 'கட்டணக் காலம்'), period]);
+        if (other && i === 0) rows.push([x.otherLabel || t('Other fee', 'பிற கட்டணம்'), '₹' + inrPlain(other)]);
+      } else {
+        rows.push([t('Received from', 'பெறப்பட்டது'), S.payer.name]);
+        rows.push([t('Towards', 'எதற்காக'), S.purpose]);
+        if (x.invNo.trim()) rows.push([t('Against invoice', 'விலைப்பட்டியல் எண்'), x.invNo]);
+        if (money(x.balance)) rows.push([t('Balance still due', 'நிலுவை'), '₹' + inrPlain(money(x.balance))]);
+      }
+      rows.push([t('Payment mode', 'செலுத்திய முறை'), mode]);
+      return { rows: rows.filter((r) => String(r[1]).trim()), amount };
+    };
+    if (RC[S.type].series && x.single && n > 1) {
+      const s = mk(0, n, per * n + (S.type === 'tuition' ? other : 0)); out.push(Object.assign({}, base, s, { no: S.no, date: S.date }));
+    } else {
+      for (let i = 0; i < n; i++) { const s = mk(i, 1, per + (S.type === 'tuition' && i === 0 ? other : 0)); out.push(Object.assign({}, base, s, { no: incNo(S.no, i), date: i ? addMonthsISO(S.date, i) : S.date })); }
+    }
+    return out;
+  }
+  function rcProblems(S) {
+    const errs = [], warns = [], R = RC[S.type], x = S.x, total = rcTotal(S);
+    if (!S.issuer.name.trim()) errs.push(B(R.issuer[0] + ' பெயர் தேவை', R.issuer[1] + ' name is required'));
+    if (!S.payer.name.trim()) errs.push(B(R.payer[0] + ' பெயர் தேவை', R.payer[1] + ' name is required'));
+    if (!(total > 0)) errs.push(B('தொகை 0-ஐ விட அதிகமாக இருக்க வேண்டும்', 'Amount must be more than 0'));
+    if (!validISO(S.date)) errs.push(B('சரியான தேதி தேர்வு செய்யுங்கள்', 'Choose a valid date'));
+    if (R.series) {
+      if (!/^\d{4}-\d{2}$/.test(x.fromMonth || '')) errs.push(B('மாதம் தேர்வு செய்யுங்கள்', 'Choose the month'));
+      if (!(num(x.months) >= 1 && num(x.months) <= 12)) errs.push(B('மாதங்கள் 1 முதல் 12 வரை', 'Months must be 1 to 12'));
+    }
+    if (S.type === 'rent' && !x.property.trim()) errs.push(B('வீட்டு முகவரி தேவை', 'Rented premises address is required'));
+    if (S.type === 'tuition' && !x.student.trim()) errs.push(B('மாணவர் பெயர் தேவை', 'Student name is required'));
+    if (S.type === 'general' && !S.purpose.trim()) errs.push(B('"எதற்காக" என்பதை எழுதுங்கள்', 'Write what the payment is for'));
+    if (S.type === 'voucher' && !S.rows.some((r) => money(r.a) > 0)) errs.push(B('குறைந்தது ஒரு வரியில் தொகை தேவை', 'Add at least one line with an amount'));
+    [['issuer', R.issuer], ['payer', R.payer]].forEach((p) => { const v = String(S[p[0]].pan || '').trim().toUpperCase(); if (v && !PAN_RE.test(v)) errs.push(B(p[1][0] + ' PAN வடிவம் தவறு (AAAAA0000A)', p[1][1] + ' PAN format looks wrong (AAAAA0000A)')); });
+    const perSlip = S.type === 'voucher' ? total : money(S.amount);
+    if (S.type === 'rent' && money(S.amount) * 12 > 100000 && !String(S.issuer.pan || '').trim()) warns.push(B('ஆண்டு வாடகை ₹1,00,000-ஐ தாண்டினால் HRA-க்கு வீட்டு உரிமையாளர் PAN தேவை', 'Annual rent above ₹1,00,000: landlord PAN is needed for an HRA claim'));
+    if (S.mode === 'Cash' && perSlip > 5000) warns.push(B('₹5,000-க்கு மேல் ரொக்க ரசீதுக்கு வருவாய் முத்திரை தேவைப்படலாம் (மாநில விதிப்படி) — தேவையெனில் "முத்திரை இடம்" தேர்வு செய்யுங்கள்', 'A revenue stamp may be needed on cash receipts above ₹5,000 (state rules) — tick "Revenue stamp box" if you need one'));
+    if (S.mode === 'Cash' && perSlip >= 200000 && S.type !== 'voucher') warns.push(B('₹2 லட்சம் அல்லது அதற்கு மேல் ரொக்கமாகப் பெறுவது வருமான வரிச் சட்டம் 269ST-ன்படி தடை', 'Receiving ₹2 lakh or more in cash is prohibited by Income Tax Act section 269ST'));
+    if (S.mode === 'Cash' && perSlip > 10000 && S.type === 'voucher') warns.push(B('ஒரு நாளில் ₹10,000-க்கு மேல் ரொக்கமாகச் செலுத்தினால் வணிகச் செலவாகக் கழிக்க முடியாமல் போகலாம் (பிரிவு 40A(3))', 'Cash payments above ₹10,000 a day to one person may be disallowed as a business expense (section 40A(3))'));
+    return { errs, warns };
+  }
+
+  function mountReceipts(container, toolId, lockedType) {
+    const host = root(container), DKEY = 'pti-rcpt-draft-' + toolId + '-v1';
+    let S = lsGet(DKEY, null);
+    if (!S || S.v !== 1 || !RC[S.type] || !Array.isArray(S.rows) || !S.rows.length) S = blankRc(lockedType || 'rent');
+    if (lockedType && S.type !== lockedType) S = blankRc(lockedType);
+    const saveDraft = () => lsSet(DKEY, S);
+    const fld = (label, path, o) => { o = o || {}; const v = getPath(S, path); return '<div class="dx-f"><label>' + label + '</label><input type="' + (o.type || 'text') + '" data-p="' + path + '" value="' + esc(v) + '"' + (o.mode ? ' inputmode="' + o.mode + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.min != null ? ' min="' + o.min + '"' : '') + (o.max != null ? ' max="' + o.max + '"' : '') + (o.step ? ' step="' + o.step + '"' : '') + ' autocomplete="off"></div>'; };
+    const area = (label, path, rows) => '<div class="dx-f"><label>' + label + '</label><textarea data-p="' + path + '" rows="' + rows + '">' + esc(getPath(S, path)) + '</textarea></div>';
+    const opts = (list, sel) => list.map((o) => '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>').join('');
+    const chk = (label, path) => '<label class="dx-chk"><input type="checkbox" data-p="' + path + '"' + (getPath(S, path) ? ' checked' : '') + '> ' + label + '</label>';
+
+    function paint() {
+      const R = RC[S.type];
+      const typeSel = lockedType ? '' : '<div class="dx-f"><label>' + B('ரசீது வகை', 'Receipt type') + '</label><select data-p="type">' + Object.keys(RC).map((k) => '<option value="' + k + '"' + (k === S.type ? ' selected' : '') + '>' + RC[k].icon + ' ' + esc(isEn() ? RC[k].en + ' · ' + RC[k].ta : RC[k].ta + ' · ' + RC[k].en) + '</option>').join('') + '</select></div>';
+      let h = '<div class="dx-note">' + RC[S.type].icon + ' <b>' + esc(isEn() ? R.en : R.ta) + '</b> — ' + B('உங்கள் விவரங்கள் இந்தச் சாதனத்திலேயே சேமிக்கப்படும்; எதுவும் சர்வருக்குப் போகாது.', 'your details stay on this device; nothing is sent to a server.') + '</div>' + typeSel +
+        '<div class="dx-grid"><div class="dx-f"><label>' + B('ஆவண மொழி', 'Document language') + '</label><select data-p="lang">' + [['bi', 'தமிழ் + EN'], ['ta', 'தமிழ்'], ['en', 'English']].map((o) => '<option value="' + o[0] + '"' + (S.lang === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' + fld(B('ரசீது எண்', 'Receipt no.'), 'no') + '</div>' +
+        '<div class="dx-grid">' + fld(B('தேதி', 'Date'), 'date', { type: 'date' }) + '<div class="dx-f"><label>' + B('செலுத்திய முறை', 'Payment mode') + '</label><select data-p="mode">' + opts(MODES, S.mode) + '</select></div></div>' +
+        fld(B('பரிவர்த்தனை / காசோலை எண் (விருப்பம்)', 'UPI ref / cheque no. (optional)'), 'ref') +
+        '<h3 class="dx-h">' + esc(R.issuer[isEn() ? 1 : 0]) + '</h3>' + fld(B('பெயர்', 'Name'), 'issuer.name') + area(B('முகவரி', 'Address'), 'issuer.addr', 2) +
+        '<div class="dx-grid">' + fld('PAN' + (S.type === 'rent' ? ' ' + B('(HRA-க்கு)', '(for HRA)') : ' ' + B('(விருப்பம்)', '(optional)')), 'issuer.pan', { ph: 'AAAAA0000A' }) + fld(B('கைபேசி', 'Mobile'), 'issuer.phone', { type: 'tel', mode: 'tel' }) + '</div>' +
+        '<h3 class="dx-h">' + esc(R.payer[isEn() ? 1 : 0]) + '</h3>' + fld(B('பெயர்', 'Name'), 'payer.name') + (S.type === 'voucher' || S.type === 'general' ? area(B('முகவரி (விருப்பம்)', 'Address (optional)'), 'payer.addr', 2) : '') +
+        (S.type === 'rent' || S.type === 'general' ? fld('PAN ' + B('(விருப்பம்)', '(optional)'), 'payer.pan', { ph: 'AAAAA0000A' }) : '');
+      if (S.type === 'rent') h += '<h3 class="dx-h">' + B('வாடகை விவரம்', 'Rent details') + '</h3>' + area(B('வாடகை வீட்டு முகவரி', 'Rented premises address'), 'x.property', 2);
+      if (S.type === 'tuition') h += '<h3 class="dx-h">' + B('மாணவர் விவரம்', 'Student details') + '</h3><div class="dx-grid">' + fld(B('மாணவர் பெயர்', 'Student name'), 'x.student') + fld(B('வகுப்பு', 'Class'), 'x.cls') + '</div>' + fld(B('பாடங்கள் (விருப்பம்)', 'Subjects (optional)'), 'x.subjects');
+      if (S.type === 'general') h += '<h3 class="dx-h">' + B('விவரம்', 'Details') + '</h3>' + fld(B('எதற்காக (Towards)', 'Towards'), 'purpose', { ph: B('எ.கா. முன்பணம் / பொருள் விலை', 'e.g. advance / goods') }) + '<div class="dx-grid">' + fld(B('விலைப்பட்டியல் எண் (விருப்பம்)', 'Invoice no. (optional)'), 'x.invNo') + fld(B('மீதமுள்ள நிலுவை ₹ (விருப்பம்)', 'Balance still due ₹ (optional)'), 'x.balance', { type: 'number', mode: 'decimal', min: 0, step: 'any' }) + '</div>';
+      if (S.type === 'voucher') {
+        h += '<h3 class="dx-h">' + B('செலவு விவரம்', 'Particulars') + '</h3><div class="dx-f"><label>' + B('கணக்குத் தலைப்பு', 'Account head') + '</label><select data-p="x.head">' + opts(HEADS, S.x.head) + '</select></div>' +
+          S.rows.map((r, i) => '<div class="dx-item"><div class="dx-ih"><span>#' + (i + 1) + '</span>' + (S.rows.length > 1 ? '<button type="button" class="dx-del" data-del="' + i + '" aria-label="' + esc(B('வரியை நீக்கு', 'Remove line')) + '">✕</button>' : '') + '</div>' +
+            '<input type="text" data-r="' + i + '.d" value="' + esc(r.d) + '" placeholder="' + esc(B('விளக்கம் / எதற்காக', 'Particulars / purpose')) + '" aria-label="' + esc(B('விளக்கம்', 'Particulars')) + '">' +
+            '<div class="dx-f"><label>' + B('தொகை ₹', 'Amount ₹') + '</label><input type="number" inputmode="decimal" min="0" step="any" data-r="' + i + '.a" value="' + esc(r.a) + '"></div></div>').join('') +
+          '<div class="dx-row"><button type="button" class="dx-btn sec" data-addrow="1">＋ ' + B('வரி சேர்', 'Add line') + '</button></div>' + fld(B('குறிப்பு (விருப்பம்)', 'Remarks (optional)'), 'purpose');
+      } else {
+        h += '<h3 class="dx-h">' + B('தொகை', 'Amount') + '</h3><div class="dx-grid">' + fld(R.series ? B('ஒரு மாதத்துக்கு ₹', 'Per month ₹') : B('தொகை ₹', 'Amount ₹'), 'amount', { type: 'number', mode: 'decimal', min: 0, step: 'any' }) +
+          (S.type === 'tuition' ? fld(B('பிற கட்டணம் ₹ (முதல் ரசீதில்)', 'Other fee ₹ (first receipt)'), 'x.otherAmt', { type: 'number', mode: 'decimal', min: 0, step: 'any' }) : '<div></div>') + '</div>' +
+          (S.type === 'tuition' ? fld(B('பிற கட்டணப் பெயர் (எ.கா. புத்தகம்)', 'Other fee name (e.g. books)'), 'x.otherLabel') : '');
+        if (R.series) h += '<div class="dx-grid"><div class="dx-f"><label>' + B('தொடக்க மாதம்', 'Starting month') + '</label><input type="month" data-p="x.fromMonth" value="' + esc(S.x.fromMonth) + '"></div>' + fld(B('எத்தனை மாதங்கள் (1–12)', 'How many months (1–12)'), 'x.months', { type: 'number', mode: 'numeric', min: 1, max: 12, step: 1 }) + '</div>' +
+          '<div id="rcSingleWrap">' + chk(B('எல்லா மாதங்களுக்கும் ஒரே ரசீது', 'One receipt for all the months'), 'x.single') + '</div>';
+      }
+      h += chk(B('வருவாய் முத்திரை இடம் (Revenue stamp box) சேர்', 'Add a revenue stamp box'), 'x.stampBox') +
+        '<div class="dx-sum" id="rcSum" aria-live="polite"></div><div id="rcWarn"></div><div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="pdf">📄 PDF</button><button type="button" class="dx-btn sec" data-out="print">🖨️ ' + B('திற / அச்சிடு', 'Open / Print') + '</button><button type="button" class="dx-btn sec" data-out="wa">💬 WhatsApp</button></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn sec" data-new="1">🆕 ' + B('புதிய ரசீது (உங்கள் விவரம் இருக்கும்)', 'New receipt (keeps your details)') + '</button></div>';
+      host.innerHTML = h; refresh();
+    }
+    function refresh() {
+      const sum = host.querySelector('#rcSum'); if (!sum) return;
+      const total = rcTotal(S), n = rcCount(S), series = RC[S.type].series, extra = S.type === 'tuition' ? money(S.x.otherAmt) : 0;
+      const grand = series ? money(S.amount) * n + extra : total;
+      const wrap = host.querySelector('#rcSingleWrap'); if (wrap) wrap.style.display = n > 1 ? '' : 'none';
+      sum.innerHTML = '<div class="tot">' + inr(grand) + '</div>' + (series && n > 1 ? '<div class="wd">' + n + ' ' + B('ரசீதுகள்', 'receipts') + (S.x.single ? ' → ' + B('ஒரே ரசீதாக', 'as one receipt') : ' × ' + inr(money(S.amount))) + '</div>' : '') +
+        (grand > 0 ? '<div class="wd">' + esc(rcWords(S.lang === 'en' ? 'en' : isEn() ? 'en' : 'ta', grand)[0]) + '</div>' : '');
+      const pr = rcProblems(S); host.querySelector('#rcWarn').innerHTML = pr.warns.length ? '<div class="dx-warn">⚠ ' + pr.warns.map(esc).join('<br>⚠ ') + '</div>' : '';
+    }
+    host.addEventListener('input', onIn); host.addEventListener('change', onIn);
+    function onIn(e) {
+      const t = e.target, p = t.getAttribute && t.getAttribute('data-p'), r = t.getAttribute && t.getAttribute('data-r');
+      if (r) { const m = /^(\d+)\.(d|a)$/.exec(r); if (m && S.rows[+m[1]]) S.rows[+m[1]][m[2]] = t.value; refresh(); saveDraft(); return; }
+      if (!p) return;
+      const v = t.type === 'checkbox' ? t.checked : t.value;
+      if (p === 'type') {
+        if (RC[v]) { S = blankRc(v); S.lang = host.querySelector('[data-p=lang]').value; S.mode = host.querySelector('[data-p=mode]').value; paint(); saveDraft(); }
+        return;
+      }
+      setPath(S, p, p === 'issuer.pan' || p === 'payer.pan' ? String(v).toUpperCase() : v);
+      if (p === 'date' && validISO(v) && /^\w+\/\d{4}-\d{2}\//.test(S.no)) S.no = S.no.replace(/\/\d{4}-\d{2}\//, '/' + fyOf(v) + '/');
+      if (p === 'x.months' || p === 'lang') paint(); else refresh();
+      saveDraft();
+    }
+    host.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-addrow')) { S.rows.push({ d: '', a: '' }); paint(); saveDraft(); }
+      else if (b.hasAttribute('data-del')) { S.rows.splice(+b.getAttribute('data-del'), 1); paint(); saveDraft(); }
+      else if (b.hasAttribute('data-new')) { const keep = { lang: S.lang, mode: S.mode, issuer: S.issuer }; S = blankRc(S.type); Object.assign(S, keep); S.no = rcNo(S.type, S.date); paint(); saveDraft(); }
+      else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
+    });
+    async function run(kind) {
+      const msg = host.querySelector('[data-k=msg]'), pr = rcProblems(S);
+      if (pr.errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + pr.errs.map(esc).join('<br>') + '</div>'; return; }
+      const btns = host.querySelectorAll('[data-out]'); btns.forEach((x) => (x.disabled = true));
+      msg.innerHTML = '<div class="dx-note">⏳ ' + B('தயாராகிறது…', 'Preparing…') + '</div>';
+      try {
+        const slips = buildSlips(S), base = fileSafe(RC[S.type].en + '-' + slips[0].no + (slips.length > 1 ? '-x' + slips.length : ''));
+        if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(rcWa(S, slips)), '_blank');
+        else {
+          const blob = new Blob([await rcPdf(S, slips)], { type: 'application/pdf' });
+          if (kind === 'print') { const url = URL.createObjectURL(blob); if (!window.open(url, '_blank')) downloadBlob(blob, base + '.pdf'); setTimeout(() => URL.revokeObjectURL(url), 120000); }
+          else downloadBlob(blob, base + '.pdf');
+        }
+        const all = lsGet(RC_ISS, {}) || {}; all[S.type] = S.issuer; lsSet(RC_ISS, all); rcBump(S.type, incNo(S.no, slips.length - 1)); saveDraft();
+        msg.innerHTML = '<div class="dx-ok">✓ ' + slips.length + ' ' + B('ரசீது தயார்', 'receipt(s) ready') + ' — ' + inr(slips.reduce((a, s) => a + s.amount, 0)) + '</div>' + (pr.warns.length ? '<div class="dx-warn">⚠ ' + pr.warns.map(esc).join('<br>⚠ ') + '</div>' : '');
+      } catch (err) { msg.innerHTML = '<div class="dx-err" role="alert">' + B('உருவாக்க முடியவில்லை: ', 'Could not create it: ') + esc(err && err.message || err) + '</div>'; }
+      finally { btns.forEach((x) => (x.disabled = false)); }
+    }
+    paint();
+  }
+
+  function rcWa(S, slips) {
+    const s = slips[0], L = ['*' + s.title + '*', 'No: ' + s.no + ' | Date: ' + fmtDMY(s.date), s.issuer.name ? s.role + ': ' + s.issuer.name : ''];
+    if (s.type === 'voucher') { L.push(s.payRole + ': ' + s.payer.name); s.rows.forEach((r) => L.push('• ' + r.d + ' — ₹' + inrPlain(r.a))); }
+    else s.rows.forEach((r) => L.push(r[0] + ': ' + r[1]));
+    L.push('*Amount: ₹' + inrPlain(slips.reduce((a, x) => a + x.amount, 0)) + '*', rcWords('en', slips.reduce((a, x) => a + x.amount, 0))[0]);
+    if (slips.length > 1) L.push('(' + slips.length + ' receipts)');
+    return L.filter(Boolean).join('\n');
+  }
+
+  async function rcPdf(S, slips) {
+    const doc = await PDFDocument.create(); doc.setTitle(RC[S.type].en + ' ' + S.no); doc.setCreator('pdftoolsindia.com');
+    const font = await embedUnicodeFont(doc), uni = !!font.__mixedShape;
+    const L = (s) => { s = String(s == null ? '' : s); return uni ? s : s.replace(/₹/g, 'Rs.').replace(/[^\x20-\x7E\xA0-\xFF]/g, '?'); };
+    const W = 595.28, H = 841.89, MX = 36;
+    const INK = rgb(0.1, 0.1, 0.12), GR = rgb(0.38, 0.4, 0.46), LN = rgb(0.78, 0.8, 0.85), BR = rgb(0.16, 0.25, 0.5), HD = rgb(0.92, 0.94, 0.99);
+    let page;
+    const txt = (s, x, y, size, color) => page.drawText(L(s), { x, y, size: size || 9, font, color: color || INK });
+    const bold = (s, x, y, size, color) => { txt(s, x, y, size, color); txt(s, x + 0.3, y, size, color); };
+    const wid = (s, size) => font.widthOfTextAtSize(L(s), size);
+    const wrap = (s, size, w, max) => wrapLines(font, L(s), size, w, max);
+    const hline = (y, x1, x2, th, col) => page.drawLine({ start: { x: x1, y }, end: { x: x2, y }, thickness: th || 0.6, color: col || LN });
+    const stampBox = (x, y) => { page.drawRectangle({ x, y, width: 80, height: 60, borderColor: LN, borderWidth: 0.8, borderDashArray: [3, 3] }); txt(S.lang === 'ta' ? 'வருவாய் முத்திரை' : S.lang === 'en' ? 'Revenue stamp' : 'Revenue stamp', x + 6, y + 36, 7, GR); if (S.lang === 'bi') txt('வருவாய் முத்திரை', x + 6, y + 26, 7, GR); };
+    const party = (p, x, y, w) => { wrap(p.name || '—', 11, w, 2).forEach((ln) => { bold(ln, x, y, 11); y -= 14; }); wrap(p.addr, 8.5, w, 3).forEach((ln) => { txt(ln, x, y, 8.5, GR); y -= 11; }); [p.pan ? 'PAN: ' + p.pan : '', p.phone ? 'Mob: ' + p.phone : ''].filter(Boolean).forEach((ln) => { txt(ln, x, y, 8.5); y -= 11; }); return y; };
+    const words = (amount) => rcWords(S.lang, amount);
+
+    function drawSlip(s, top) {
+      const SH = (H - 2 * MX) / 2 - 8, x0 = MX, cw = W - 2 * MX, ix = x0 + 16, iw = cw - 32, bottom = top - SH;
+      page.drawRectangle({ x: x0, y: bottom, width: cw, height: SH, borderColor: LN, borderWidth: 0.9 });
+      let y = top - 30; bold(s.title, ix, y, 15, BR);
+      const meta = [tl(S.lang, 'No', 'எண்') + ': ' + s.no, tl(S.lang, 'Date', 'தேதி') + ': ' + fmtDMY(s.date)];
+      meta.forEach((m, i) => txt(m, ix + iw - wid(m, 9), y + 2 - i * 12, 9)); y -= 22; hline(y, ix, ix + iw); y -= 18;
+      s.rows.forEach((r) => { const v = wrap(r[1], 10, iw - 168, 2); wrap(r[0], 8, 160, 2).forEach((ln, i) => txt(ln, ix, y - i * 10, 8, GR)); v.forEach((ln, i) => txt(ln, ix + 168, y - i * 12, 10)); y -= 12 * v.length + 7; });
+      y -= 2; const wl = words(s.amount).flatMap((w) => wrap(w, 8.5, iw - 20, 2)), bh = 38 + wl.length * 11;
+      page.drawRectangle({ x: ix, y: y - bh + 10, width: iw, height: bh, color: HD });
+      bold('₹ ' + inrPlain(s.amount), ix + 10, y - 14, 17, BR); wl.forEach((w, i) => txt(w, ix + 10, y - 30 - i * 11, 8.5));
+      y -= bh + 8;
+      const sy = Math.max(bottom + 70, y - 8);
+      txt(s.role, ix, sy, 8, GR); const endY = party(s.issuer, ix, sy - 13, iw * 0.55);
+      const sigX = ix + iw - 170, lineY = bottom + 30;
+      if (s.stamp) stampBox(sigX + 90, lineY + 8);
+      hline(lineY, sigX, ix + iw, 0.8, rgb(0.55, 0.57, 0.62)); wrap(tl(S.lang, 'Signature', 'கையொப்பம்') + ' — ' + (s.issuer.name || ''), 8, 170, 2).forEach((ln, i) => txt(ln, sigX, lineY - 11 - i * 10, 8, GR));
+      void endY;
+    }
+    function drawVoucher(s) {
+      page = doc.addPage([W, H]); let y = H - MX - 6, cw = W - 2 * MX;
+      wrap(s.issuer.name || '—', 15, cw, 2).forEach((ln) => { bold(ln, MX, y, 15); y -= 18; });
+      wrap(s.issuer.addr, 9, cw, 3).forEach((ln) => { txt(ln, MX, y, 9, GR); y -= 12; });
+      [s.issuer.pan ? 'PAN: ' + s.issuer.pan : '', s.issuer.phone ? 'Mob: ' + s.issuer.phone : ''].filter(Boolean).forEach((ln) => { txt(ln, MX, y, 9); y -= 12; });
+      y -= 6; hline(y, MX, W - MX, 1, BR); y -= 24; const tw = wid(s.title, 15); bold(s.title, (W - tw) / 2, y, 15, BR); y -= 26;
+      page.drawRectangle({ x: W - MX - 190, y: y - 18, width: 190, height: 40, color: HD });
+      txt(tl(S.lang, 'Voucher no', 'சீட்டு எண்') + ': ' + s.no, W - MX - 182, y + 8, 9); txt(tl(S.lang, 'Date', 'தேதி') + ': ' + fmtDMY(s.date), W - MX - 182, y - 8, 9);
+      txt(s.payRole, MX, y + 8, 8, GR); y = Math.min(party(s.payer, MX, y - 5, 300), y - 30) - 8;
+      txt(tl(S.lang, 'Account head', 'கணக்குத் தலைப்பு') + ': ' + s.head, MX, y, 9.5); txt(tl(S.lang, 'Mode', 'முறை') + ': ' + s.mode, MX + 270, y, 9.5); y -= 20;
+      const c1 = MX + 34, c2 = W - MX - 110; page.drawRectangle({ x: MX, y: y - 6, width: cw, height: 20, color: HD });
+      bold('#', MX + 8, y, 9, BR); bold(tl(S.lang, 'Particulars', 'விளக்கம்'), c1, y, 9, BR); { const ah = tl(S.lang, 'Amount ₹', 'தொகை ₹'); bold(ah, W - MX - 10 - wid(ah, 9), y, 9, BR); } y -= 22;
+      s.rows.forEach((r, i) => { const ln = wrap(r.d, 9.5, c2 - c1 - 12, 3); txt(String(i + 1), MX + 8, y, 9.5); ln.forEach((l, k) => txt(l, c1, y - k * 12, 9.5)); const a = inrPlain(r.a); txt(a, W - MX - 10 - wid(a, 9.5), y, 9.5); y -= 12 * ln.length + 5; hline(y + 2, MX, W - MX); y -= 8; });
+      y -= 4; const tt = '₹ ' + inrPlain(s.amount), tlb = tl(S.lang, 'Total', 'மொத்தம்'); bold(tt, W - MX - 10 - wid(tt, 11), y, 11, BR); bold(tlb, W - MX - 10 - wid(tt, 11) - 14 - wid(tlb, 11), y, 11); y -= 20;
+      words(s.amount).forEach((w) => wrap(w, 9, cw, 2).forEach((ln) => { txt(ln, MX, y, 9); y -= 12; }));
+      if (s.purpose) { y -= 6; wrap(tl(S.lang, 'Remarks', 'குறிப்பு') + ': ' + s.purpose, 9, cw, 3).forEach((ln) => { txt(ln, MX, y, 9, GR); y -= 12; }); }
+      const sy = Math.min(y - 60, 190), cols = [[tl(S.lang, 'Prepared by', 'தயாரித்தவர்'), MX], [tl(S.lang, 'Approved by', 'அனுமதித்தவர்'), MX + cw / 3 + 6], [tl(S.lang, 'Received by (Payee)', 'பெற்றவர் (கையொப்பம்)'), MX + 2 * cw / 3 + 12]];
+      if (s.stamp) stampBox(MX + cw - 18 - 80 + 0, sy + 12);
+      cols.forEach((c) => { hline(sy, c[1], c[1] + cw / 3 - 18, 0.8, rgb(0.55, 0.57, 0.62)); wrap(c[0], 8.5, cw / 3 - 18, 2).forEach((ln, i) => txt(ln, c[1], sy - 12 - i * 11, 8.5, GR)); });
+    }
+    if (S.type === 'voucher') drawVoucher(slips[0]);
+    else for (let i = 0; i < slips.length; i += 2) {
+      page = doc.addPage([W, H]); drawSlip(slips[i], H - MX);
+      if (slips[i + 1]) { const my = H / 2; page.drawLine({ start: { x: MX, y: my }, end: { x: W - MX, y: my }, thickness: 0.6, color: LN, dashArray: [4, 4] }); drawSlip(slips[i + 1], my - 8); }
+    }
+    return doc.save();
+  }
+
+  TOOL_IMPL.receipts = { mount(container) { mountReceipts(container, 'receipts', null); } };
+  TOOL_IMPL.rentreceipt = { mount(container) { mountReceipts(container, 'rentreceipt', 'rent'); } };
+  TOOL_IMPL.tuitionreceipt = { mount(container) { mountReceipts(container, 'tuitionreceipt', 'tuition'); } };
+  TOOL_IMPL.paymentvoucher = { mount(container) { mountReceipts(container, 'paymentvoucher', 'voucher'); } };
+  TOOL_IMPL.receipts._f = { buildSlips, rcProblems, rcTotal, incNo, addMonthsISO, rcWords, blankRc };
+
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.gstinvoice = { mount(container) { mountBizDoc(container, 'gstinvoice', 'tax'); } };
   TOOL_IMPL.quotepo._f = TOOL_IMPL.gstinvoice._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
