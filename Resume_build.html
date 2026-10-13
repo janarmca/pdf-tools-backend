@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resume Builder</title>
+<meta name="description" content="Free resume builder online — create a professional CV in Tamil or English, choose a template and download as PDF. இலவச ரெஸ்யூம் உருவாக்கி.">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#eef1f6;--line:#e2e8f0;--text:#0f172a;--accent:#2563eb;--radius:10px;
@@ -366,7 +367,7 @@ input[type=color]{width:36px;height:28px;padding:2px;border:1px solid #d7dee8;
     <details class="panel" open>
       <summary>📝 Professional summary</summary>
       <div class="panel-body">
-        <textarea id="f_summary" rows="5"></textarea>
+        <textarea id="f_summary" aria-label="Professional summary" rows="5"></textarea>
         <div class="btn-row">
           <button class="btn lite sm" onclick="aiSummary()">✨ AI suggest</button>
           <button class="btn lite sm" onclick="clearField('summary')">Clear</button>
@@ -1769,7 +1770,7 @@ function renderSectionList(){
       <input type="checkbox" ${state.hidden[key] ? "" : "checked"}
              onchange="toggleSection('${key}', this.checked)">
       <span class="name">${esc(sectionLabel(key))}</span>
-      <select class="place-sel ${isSide ? "side" : ""}"
+      <select aria-label="Section placement (main or sidebar)" class="place-sel ${isSide ? "side" : ""}"
               onchange="setPlacement('${key}', this.value)">
         <option value="main" ${isSide ? "" : "selected"}>Main</option>
         <option value="side" ${isSide ? "selected" : ""}>Side</option>
@@ -2309,5 +2310,6 @@ function refreshAll(){
   });
 })();
 </script>
+<script src="/a11y-labels.js" defer></script>
 </body>
 </html>
