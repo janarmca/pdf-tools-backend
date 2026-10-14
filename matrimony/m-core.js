@@ -110,7 +110,8 @@
   M.shell = function () {
     var u = M.st.user, c = M.st.counts || {}, approved = M.st.me && M.st.me.status === 'approved';
     var badge = function (n, k) { return '<i class="nb" data-badge="' + k + '"' + (n > 0 ? '' : ' hidden') + '>' + (n > 99 ? '99+' : (n || 0)) + '</i>'; };
-    var links = u ? NAV.map(function (n) {
+    var nav = NAV.slice(); if (M.st.me && M.st.me.is_admin) nav.splice(4, 0, ['admin', '🛡', 'நிர்வாகம்', 'Admin']);
+    var links = u ? nav.map(function (n) {
       var b = n[0] === 'interests' ? badge(c.interests_in, 'interests_in') : n[0] === 'messages' ? badge(c.unread, 'unread') : '';
       return '<a href="#/' + n[0] + '" data-nav="' + n[0] + '"><span class="ic" aria-hidden="true">' + n[1] + '</span><span class="lb">' + esc(t(n[2], n[3])) + '</span>' + b + '</a>';
     }).join('') : '';
@@ -135,7 +136,7 @@
   };
   M.markNav = function () {
     var r = (location.hash.replace(/^#\/?/, '').split('/')[0]) || '';
-    var key = r === 'chat' ? 'messages' : r === 'profile' || r === 'wizard' || r === 'settings' || r === 'admin' ? 'me' : r;
+    var key = r === 'chat' ? 'messages' : r === 'profile' || r === 'wizard' || r === 'settings' ? 'me' : r;
     M.$$('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-nav') === key); });
   };
 
