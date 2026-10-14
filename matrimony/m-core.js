@@ -74,9 +74,14 @@
       B.photoUrl(p).then(function (u) { photoCache[p] = { u: u, exp: Date.now() + 3000000 }; go(u); }).catch(function () {});
     });
   };
+  // no photo -> a neutral male / female silhouette (never a letter)
+  var SIL = {
+    M: '<svg viewBox="0 0 64 80" aria-hidden="true"><circle cx="32" cy="27" r="13"/><path d="M19 24c0-9 6-15 13-15s13 6 13 15c-3-5-8-7-13-7s-10 2-13 7z" class="hr"/><path d="M6 80c0-17 11-27 26-27s26 10 26 27z"/></svg>',
+    F: '<svg viewBox="0 0 64 80" aria-hidden="true"><path class="hr" d="M14 52c-4-22 2-42 18-42s22 20 18 42c-4 2-8-4-9-12H23c-1 8-5 14-9 12z"/><circle cx="32" cy="29" r="12"/><path d="M6 80c0-17 11-26 26-26s26 9 26 26z"/></svg>'
+  };
   M.avatar = function (c, big) {
-    var ini = esc((c.name || '?').replace(/^Demo /, '').trim().charAt(0).toUpperCase());
-    return '<div class="av ' + (c.gender === 'F' ? 'f' : 'm') + (big ? ' big' : '') + '"><span>' + ini + '</span>' + (c.photo ? '<img alt="" data-ph="' + esc(c.photo) + '">' : '') + '</div>';
+    var g = c.gender === 'F' ? 'F' : 'M';
+    return '<div class="av ' + (g === 'F' ? 'f' : 'm') + (big ? ' big' : '') + '" role="img" aria-label="' + esc(c.name || '') + '">' + SIL[g] + (c.photo ? '<img alt="" data-ph="' + esc(c.photo) + '">' : '') + '</div>';
   };
   M.sub = function (c) {
     return [c.age ? c.age + t(' வயது', ' yrs') : '', c.height_cm ? M.cm(c.height_cm) : '', M.label('education', c.education), c.occupation, [c.city, c.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
@@ -150,7 +155,7 @@
     if (!PUBLIC[name] && !M.st.user) { sessionStorage.setItem('mat_next', location.hash); return M.nav('#/login'); }
     if (M.st.user && !M.st.me) await M.refreshMe();
     var needsProfile = !PUBLIC[name] && name !== 'wizard' && name !== 'settings' && name !== 'me' && name !== 'admin';
-    if (M.st.user && M.st.me && M.st.me.none && needsProfile) return M.nav('#/wizard');
+    if (M.st.user && M.st.me && M.st.me.none && needsProfile && !(M.st.me.is_admin && (name === 'profile' || name === 'aedit'))) return M.nav(M.st.me.is_admin ? '#/admin' : '#/wizard');   // an admin without a profile of their own works in the admin panel
     var fn = M.views[name === '' ? (M.st.user ? 'dash' : 'home') : name];
     if (!fn) fn = M.views.notfound;
     var seq = M.seq = (M.seq || 0) + 1;

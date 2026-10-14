@@ -50,7 +50,7 @@
       fld(t('குலம்', 'Kulam'), inp('kulam', 'text', 'maxlength="40"')) + fld(t('கோத்திரம்', 'Gotra'), inp('gotra', 'text', 'maxlength="40"')) +
       fld(t('தாய்மொழி', 'Mother tongue'), sel('mother_tongue', 'mother_tongue')) + '</div>';
     if (i === 1) return '<p class="mut">' + t('தெரியாவிட்டால் காலியாக விடலாம்; பின்னர் சேர்க்கலாம்.', 'Leave blank if unknown; you can add it later.') + '</p><div class="gridf">' +
-      fld(t('நட்சத்திரம்', 'Star (Nakshatra)'), sel('star', 'star')) + fld(t('ராசி', 'Raasi'), sel('raasi', 'raasi')) + fld(t('தோஷம்', 'Dosham'), sel('dosham', 'dosham', false)) + '</div>' + (W.pub ? '<div class="fld"><span>' + t('ஜாதகப் படம் (விருப்பம்)', 'Horoscope picture (optional)') + '</span>' +
+      fld(t('நட்சத்திரம்', 'Star (Nakshatra)'), sel('star', 'star')) + fld(t('ராசி', 'Raasi'), sel('raasi', 'raasi')) + fld(t('தோஷம்', 'Dosham'), sel('dosham', 'dosham', false)) + '</div>' + ((W.pub || (W.admin && W.admin.kind === 's')) ? '<div class="fld"><span>' + t('ஜாதகப் படம் (விருப்பம்)', 'Horoscope picture (optional)') + '</span>' +
       (d.horoscope ? '<div class="horo">' + (W.hthumb ? '<img alt="" src="' + esc(W.hthumb) + '">' : '<span class="okph">✓</span>') + '<button type="button" class="btn sm ghost" data-act="hsDel">🗑 ' + t('நீக்கு', 'Remove') + '</button></div>' :
         '<label class="btn ghost"><input id="hsin" type="file" accept="image/*" hidden>📄 ' + t('ஜாதகத்தைப் பதிவேற்று', 'Upload horoscope') + '</label>') +
       '<small>' + t('ஜாதகத்தின் தெளிவான படம் / screenshot. நிர்வாகி மட்டுமே பார்ப்பார்; வலைத்தளத்தில் வெளியிடப்படாது.', 'A clear photo / screenshot of the horoscope. Only the administrator sees it; it is never shown on the website.') + '</small><p class="err" id="hserr"></p></div>' : '');
@@ -119,6 +119,7 @@
   function textFields() { return ['name', 'community_other', 'kulam', 'gotra', 'education_detail', 'occupation', 'father_occ', 'mother_occ', 'father_name', 'mother_name', 'native_place', 'family_about', 'about', 'city', 'district']; }
   function validate(i) {
     var d = W.d, e = '';
+    if (W.admin) return (i === 0 && (!d.name || d.name.trim().length < 2)) ? t('பெயரை உள்ளிடுங்கள்', 'Enter a name') : '';   // admin may save incomplete records; the server still checks gender / date of birth
     if (i === 0) {
       if (!d.name || d.name.trim().length < 2) e = t('பெயரை உள்ளிடுங்கள்', 'Enter a name');
       else if (!d.gender) e = t('பாலினத்தைத் தேர்வு செய்க', 'Choose gender');
@@ -143,7 +144,7 @@
   M.acts.wzNext = function () { var e = validate(W.step); if (e) return showErr(e); W.step++; saveDraft(); renderWizard(); window.scrollTo(0, 0); };
   M.acts.wzBack = function () { W.step = Math.max(0, W.step - 1); renderWizard(); window.scrollTo(0, 0); };
   M.acts.wzGo = function (a) { var to = +a.getAttribute('data-i'); if (to <= W.step) { W.step = to; renderWizard(); return; } for (var s = W.step; s < to; s++) { var e = validate(s); if (e) { W.step = s; renderWizard(); showErr(e); return; } } W.step = to; renderWizard(); };
-  M.acts.phDel = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; if (!W.pub) B.removePhoto(p); saveDraft(); renderWizard(); };
+  M.acts.phDel = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; if (!W.pub && !W.admin) B.removePhoto(p); saveDraft(); renderWizard(); };
   M.acts.phMain = function (a) { var i = +a.getAttribute('data-i'); var p = W.d.photos.splice(i, 1)[0]; W.d.photos.unshift(p); saveDraft(); renderWizard(); };
 
   function resize(file, max, q) {
@@ -187,14 +188,15 @@
   }
   M.acts.hsDel = function () { delete W.d.horoscope; W.hthumb = null; saveDraft(); renderWizard(); };
   async function onPhotos(e) {
-    var files = Array.prototype.slice.call(e.target.files || []), err = M.$('#pherr'); err.textContent = '';
+    var files = Array.prototype.slice.call(e.target.files || []), err = M.$('#pherr'), added = []; err.textContent = '';
     for (var f of files) {
       if (W.d.photos.length >= 6) break;
       if (!/^image\//.test(f.type)) { err.textContent = t('படக் கோப்பு மட்டும்', 'Images only'); continue; }
       if (f.size > 15 * 1024 * 1024) { err.textContent = t('படம் மிகப் பெரியது (15MB வரை)', 'Image too large (max 15MB)'); continue; }
-      try { var blob = await resize(f), pth = await B.uploadPhoto(blob, W.pub ? 'submissions' : M.st.user.id); W.d.photos.push(pth); if (W.pub) { W.thumbs = W.thumbs || {}; W.thumbs[pth] = URL.createObjectURL(blob); } }
+      try { var blob = await resize(f), pth = await B.uploadPhoto(blob, (W.pub || W.admin) ? 'submissions' : M.st.user.id); added.push(pth); W.d.photos.push(pth); if (W.pub || W.admin) { W.thumbs = W.thumbs || {}; W.thumbs[pth] = URL.createObjectURL(blob); } }
       catch (x) { err.textContent = t('படத்தைப் பதிவேற்ற முடியவில்லை: ', 'Upload failed: ') + (x.message || ''); }
     }
+    if (added.length && !W.pub && !W.admin) { /* a member's newest photo becomes the main one */ W.d.photos = added.concat(W.d.photos.filter(function (x) { return added.indexOf(x) < 0; })); }
     saveDraft(); renderWizard();
   }
   M.acts.wzSubmit = async function (a) {
@@ -203,6 +205,7 @@
     var p = Object.assign({}, W.d); p.consent = 'true';
     ['height_cm', 'brothers', 'sisters'].forEach(function (k) { if (p[k] === '' || p[k] == null) delete p[k]; });
     ['brothers_married', 'sisters_married'].forEach(function (k) { if (p[k] === '' || p[k] == null) delete p[k]; });
+    if (W.admin) { p.consent = 'true'; var ar = await M.api('mat_admin_save', { kind: W.admin.kind, id: W.admin.id, p: p, phone: W.phone || null, email: W.email || null }); a.disabled = false; if (!ar.ok) return showErr(M.err(ar)); var back = W.admin.back; W = null; M.toast(t('சேமிக்கப்பட்டது ✓', 'Saved ✓'), 'ok'); return M.nav(back); }
     var r = W.pub ? await M.api('mat_submit_public', { p: p, phone: W.phone || null, email: W.email || null }) : await M.api('mat_save_profile', { p: p, phone: W.phone || null, email: M.st.user.email || null });
     a.disabled = false;
     if (!r.ok) {
@@ -214,6 +217,20 @@
     W = null; await M.refreshMe(); M.mountShell();
     M.toast(r.status === 'approved' ? t('சேமிக்கப்பட்டது ✓', 'Saved ✓') : t('சமர்ப்பிக்கப்பட்டது — நிர்வாகி சரிபார்ப்பார்', 'Submitted — admin will verify'), 'ok');
     M.nav('#/');
+  };
+
+  /* ---- admin: edit any member profile / sign-up (reuses the same 6-step form) ---- */
+  M.views.aedit = async function (v, kind, rest) {
+    var id = rest && rest[1];
+    if (!M.st.me || !M.st.me.is_admin) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p>' + esc(t(M.ERR.forbidden[0], M.ERR.forbidden[1])) + '</p></div></div>'; return; }
+    var r = await M.api('mat_admin_get', { kind: kind === 's' ? 's' : 'm', id: id });
+    if (!v.isConnected) return;
+    if (!r.ok) { v.innerHTML = '<div class="wrap narrow"><div class="box"><p>' + esc(M.err(r)) + '</p><a class="btn" href="#/admin">← ' + t('நிர்வாகம்', 'Admin') + '</a></div></div>'; return; }
+    var d = Object.assign({}, r.p); d.pref = (r.p.pref && typeof r.p.pref === 'object') ? r.p.pref : {}; d.photos = (r.p.photos || []).slice(); d.consent = true;
+    ['income_band'].forEach(function (k) { if (d[k] == null) d[k] = ''; });
+    W = { step: 0, d: d, phone: r.phone || '', email: r.email || '', edit: true, thumbs: {}, admin: { kind: r.kind, id: r.id, back: '#/admin/' + (r.kind === 's' ? 'subs' : 'approved') } };
+    renderWizard();
+    var wz = M.$('.wz'); if (wz) wz.insertAdjacentHTML('afterbegin', '<div class="notice"><b>🛡 ' + t('நிர்வாகத் திருத்தம்', 'Admin edit') + '</b> — ' + esc(d.name || '') + ' · ' + (r.kind === 's' ? t('(login இல்லாத பதிவு)', '(sign-up)') : t('(உறுப்பினர்)', '(member)')) + ' · <a href="' + W.admin.back + '">' + t('ரத்து', 'Cancel') + '</a></div>');
   };
 
   M.views.join = async function (v) {
@@ -313,7 +330,6 @@
         '<div class="kv"><span>' + t('சுயவிவர நிலை', 'Profile status') + '</span><b>' + esc(st === 'approved' ? t('அங்கீகரிக்கப்பட்டது', 'Approved') : st === 'pending' ? t('காத்திருக்கிறது', 'Pending') : st === 'rejected' ? t('நிராகரிக்கப்பட்டது', 'Rejected') : t('மறைக்கப்பட்டுள்ளது', 'Hidden')) + '</b></div>' +
         '<div class="menu"><a href="#/profile/' + esc(u.id) + '">👁 ' + t('என் சுயவிவரத்தைப் பார்', 'View my profile') + '</a><a href="#/wizard">✎ ' + t('சுயவிவரத்தைத் திருத்து', 'Edit my profile') + '</a>' +
         (st === 'approved' ? '<a href="#" data-act="hideMe" data-v="1">🙈 ' + t('என் சுயவிவரத்தை மறை', 'Hide my profile') + '</a>' : st === 'hidden' ? '<a href="#" data-act="hideMe" data-v="0">👁 ' + t('சுயவிவரத்தை மீண்டும் காட்டு', 'Show my profile again') + '</a>' : '') + '</div>') +
-      (isAdm ? '<div class="menu"><a href="#/admin">🛡 ' + t('நிர்வாகப் பக்கம்', 'Admin panel') + '</a></div>' : '') +
       '<div class="menu"><a href="#/safety">🛟 ' + t('பாதுகாப்பு வழிகாட்டி', 'Safety guide') + '</a><a href="#" data-act="logout">⎋ ' + t('வெளியேறு', 'Logout') + '</a></div>' +
       (me.none ? '' : '<details class="danger"><summary>' + t('கணக்கு நீக்கம்', 'Delete account data') + '</summary><p>' + t('உங்கள் சுயவிவரம், Interest, செய்திகள் நிரந்தரமாக நீக்கப்படும்.', 'Your profile, interests and messages will be permanently deleted.') + '</p><button class="btn bad" data-act="delMe">' + t('என் தரவை நீக்கு', 'Delete my data') + '</button></details>') + '</div></div>';
   };
