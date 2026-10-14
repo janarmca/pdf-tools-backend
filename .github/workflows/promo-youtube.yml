@@ -5,8 +5,10 @@ name: Promotion — YouTube Short
 # connected on the admin page (matrimony → Admin → Promotion → Connect YouTube) or promotion is off.
 # Uses the existing secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
 on:
-  schedule:
-    - cron: '50 3 * * *'   # 09:20 IST
+  # The daily schedule is switched OFF (YouTube is not connected, so every run only burned CI minutes).
+  # To turn it back on after "Connect YouTube": remove the leading '#' of the two lines below.
+  # schedule:
+  #   - cron: '50 3 * * *'   # 09:20 IST
   workflow_dispatch:
     inputs:
       tool:
