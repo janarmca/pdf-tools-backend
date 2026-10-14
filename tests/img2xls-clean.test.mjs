@@ -37,6 +37,8 @@ const d = X.denoise({ rows: [['Name', 'Amount'], ['A', '100'], ['B', '200'], ['C
 ok(d.rows[3][1] === 'Nil' && d.rows[4][1] === '' && d.noise === 1, 'noise removal keeps "Nil" and removes a very unsure "SUR" in a numbers column');
 const keep = X.denoise({ rows: [['Name', 'Note'], ['A', 'paid late'], ['B', 'ok'], ['C', 'hold'], ['D', 'x ray']], conf: Array(5).fill([100, 30]) });
 ok(keep.noise === 0, 'low-confidence words in a TEXT column are never removed');
+{ const w = JSON.parse(fs.readFileSync(join(here, 'fixtures/img2xls-clean-words.json'), 'utf8')), tb = X.buildTable(w.words, w.grid), g = X.locateCells(tb, X.cleanWords(w.words));
+  ok(g.rows.filter(Boolean).length >= 12 && g.cols.filter(Boolean).length >= 2 && g.cols[2] && g.cols[3] && g.cols[3].x0 > g.cols[2].x1, 'locateCells: finds the rows and the two Amount column bands (used for the close-up number re-read)'); }
 const flags = X.denoise({ rows: [['Name', 'Amount', ''], ['A', '100', 'Y'], ['B', '200', 'N'], ['C', '300', 'Y'], ['D', '400', 'N']], conf: Array(5).fill([100, 100, 100]) });
 ok(flags.noise === 0, 'a clean headerless column of Y / N flags is kept');
 const blurry = X.denoise({ rows: [['Name', 'Remarks'], ['A', 'ok'], ['B', 'hold'], ['C', 'x ray'], ['D', 'paid late']], conf: Array(5).fill([100, 25]) });
