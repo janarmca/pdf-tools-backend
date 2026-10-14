@@ -1238,6 +1238,138 @@
   TOOL_IMPL.leaveletter = { mount(container) { mountLeave(container); } };
   TOOL_IMPL.leaveletter._f = { leaveDays, leaveBody, blankLv };
 
+
+  /* =====================================================================
+     PRESCRIPTION PAD — structured dosing (morning / noon / night, food timing),
+     vitals, follow-up, Tamil or English instructions, saved doctor + patients.
+     A formatting tool only — the doctor is responsible for the content.
+     ===================================================================== */
+  const RX_DOC = 'pti-rx-doctor-v1', RX_PAT = 'pti-rx-patients-v1', RX_DRAFT = 'pti-rx-draft-v1';
+  const RX_FORMS = ['Tab', 'Cap', 'Syrup', 'Inj', 'Drops', 'Ointment', 'Cream', 'Inhaler', 'Powder', 'Other'];
+  const RX_FOOD = [['', '—', '—'], ['after', 'After food', 'உணவுக்குப் பின்'], ['before', 'Before food', 'உணவுக்கு முன்'], ['with', 'With food', 'உணவுடன்'], ['empty', 'Empty stomach', 'வெறும் வயிற்றில்'], ['bed', 'At bedtime', 'படுக்கும் முன்']];
+  const RX_FREQ = [['1-0-1', '1-0-1'], ['1-1-1', '1-1-1'], ['1-0-0', '1-0-0'], ['0-0-1', '0-0-1'], ['0-1-0', '0-1-0'], ['0-1-1', '0-1-1'], ['1-1-0', '1-1-0'], ['1-1-1-1', '1-1-1-1'], ['SOS', 'SOS (needed)'], ['OD', 'Once a day'], ['BD', 'Twice a day'], ['TDS', 'Three times a day'], ['QID', 'Four times a day'], ['HS', 'At bedtime'], ['STAT', 'Immediately']];
+  const newMed = () => ({ n: '', f: 'Tab', s: '', q: '1-0-1', fd: 'after', d: '', note: '' });
+  function blankRx() {
+    const d = lsGet(RX_DOC, {});
+    return { v: 1, lang: 'bi', date: localISO(), doc: Object.assign({ name: '', qual: '', reg: '', clinic: '', addr: '', phone: '', timing: '' }, d), pat: { name: '', age: '', unit: 'Yrs', sex: 'Male', wt: '', phone: '', addr: '' }, vit: { bp: '', pulse: '', temp: '', spo2: '' }, co: '', dx: '', meds: [newMed()], tests: '', advice: '', follow: '', size: 'A4' };
+  }
+  const rxDur = (d, lang) => { const v = String(d || '').trim(); if (!v) return ''; return /^\d+$/.test(v) ? v + (lang === 'ta' ? ' நாட்கள்' : ' days') : v; };
+  function rxMedLine(m, lang) {
+    const food = RX_FOOD.find((x) => x[0] === m.fd), ft = food && food[0] ? (lang === 'ta' ? food[2] : food[1]) : '';
+    return [m.q, ft, rxDur(m.d, lang) && '× ' + rxDur(m.d, lang)].filter(Boolean).join('   ·   ');
+  }
+  function rxProblems(S) {
+    const errs = [], warns = [], meds = S.meds.filter((m) => m.n.trim());
+    if (!S.doc.name.trim()) errs.push(B('மருத்துவர் பெயர் தேவை', 'Doctor name is required'));
+    if (!S.pat.name.trim()) errs.push(B('நோயாளி பெயர் தேவை', 'Patient name is required'));
+    if (!meds.length && !S.advice.trim()) errs.push(B('குறைந்தது ஒரு மருந்து அல்லது அறிவுரை சேர்க்கவும்', 'Add at least one medicine or some advice'));
+    if (!validISO(S.date)) errs.push(B('தேதி தவறு', 'Date is not valid'));
+    if (S.follow && validISO(S.follow) && S.follow < S.date) errs.push(B('மீண்டும் வர வேண்டிய தேதி இன்றுக்கு முன் உள்ளது', 'Follow-up date is before the prescription date'));
+    if (S.pat.age && !(num(S.pat.age) > 0 && num(S.pat.age) < 130)) warns.push(B('வயதைச் சரிபார்க்கவும்', 'Please check the age'));
+    if (!S.doc.reg.trim()) warns.push(B('பதிவு எண் (Registration No.) இல்லை — மருந்துச் சீட்டில் இருப்பது நல்லது', 'No registration number — it is normally printed on a prescription'));
+    return { errs, warns };
+  }
+  function rxText(S) {
+    const L = ['*' + (S.doc.name || 'Doctor') + '*' + (S.doc.qual ? ' (' + S.doc.qual + ')' : ''), S.doc.clinic, 'Date: ' + fmtDMY(S.date), 'Patient: ' + S.pat.name + (S.pat.age ? ', ' + S.pat.age + ' ' + S.pat.unit : '') + ', ' + S.pat.sex, S.dx ? 'Diagnosis: ' + S.dx : '', '', 'Rx'];
+    S.meds.filter((m) => m.n.trim()).forEach((m, i) => L.push((i + 1) + '. ' + [m.f, m.n, m.s].filter(Boolean).join(' ') + ' — ' + rxMedLine(m, 'en') + (m.note ? ' (' + m.note + ')' : '')));
+    if (S.tests.trim()) L.push('', 'Tests: ' + S.tests.trim()); if (S.advice.trim()) L.push('', 'Advice: ' + S.advice.trim()); if (S.follow) L.push('', 'Review on: ' + fmtDMY(S.follow));
+    return L.filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+  }
+  function mountRx(container) {
+    const host = root(container); let S = lsGet(RX_DRAFT, null);
+    if (!S || S.v !== 1 || !Array.isArray(S.meds) || !S.meds.length) S = blankRx();
+    const save = () => lsSet(RX_DRAFT, S);
+    const fld = (label, path, o) => { o = o || {}; return '<div class="dx-f"><label>' + label + '</label>' + (o.area ? '<textarea data-p="' + path + '" rows="' + o.area + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + '>' + esc(getPath(S, path)) + '</textarea>' : '<input type="' + (o.type || 'text') + '" data-p="' + path + '" value="' + esc(getPath(S, path)) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.mode ? ' inputmode="' + o.mode + '"' : '') + ' autocomplete="off">') + '</div>'; };
+    const sel = (label, path, list, cls) => '<div class="dx-f"><label>' + label + '</label><select data-p="' + path + '">' + list.map((o) => { const v = Array.isArray(o) ? o[0] : o, t = Array.isArray(o) ? (o[2] ? (isEn() ? o[1] : o[2]) : o[1]) : o; return '<option value="' + esc(v) + '"' + (getPath(S, path) === v ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select></div>';
+    function paint() {
+      const pats = lsGet(RX_PAT, []);
+      host.innerHTML = '<div class="dx-note">⚕️ ' + B('இது வடிவமைப்புக் கருவி மட்டுமே — மருந்து விவரங்களுக்கு மருத்துவரே பொறுப்பு. விவரங்கள் இந்தச் சாதனத்திலேயே இருக்கும்.', 'A formatting tool only — the doctor is responsible for the content. Details stay on this device.') + '</div>' +
+        '<div class="dx-grid">' + sel(B('மொழி', 'Language'), 'lang', [['bi', 'தமிழ் + EN'], ['ta', 'தமிழ்'], ['en', 'English']]) + sel(B('தாள் அளவு', 'Paper size'), 'size', [['A4', 'A4'], ['A5', 'A5']]) + '</div>' +
+        '<details' + (S.doc.name ? '' : ' open') + '><summary>' + B('மருத்துவர் / கிளினிக்', 'Doctor / clinic') + (S.doc.name ? ' — ' + esc(S.doc.name) : '') + '</summary>' + fld(B('மருத்துவர் பெயர்', 'Doctor name'), 'doc.name', { ph: 'Dr. ...' }) + '<div class="dx-grid">' + fld(B('தகுதி', 'Qualification'), 'doc.qual', { ph: 'MBBS, MD' }) + fld(B('பதிவு எண்', 'Registration no.'), 'doc.reg') + '</div>' + fld(B('கிளினிக் / மருத்துவமனை', 'Clinic / hospital'), 'doc.clinic') + fld(B('முகவரி', 'Address'), 'doc.addr', { area: 2 }) + '<div class="dx-grid">' + fld(B('தொலைபேசி', 'Phone'), 'doc.phone', { type: 'tel' }) + fld(B('நேரம்', 'Timings'), 'doc.timing', { ph: '10am–1pm, 5pm–8pm' }) + '</div></details>' +
+        '<h3 class="dx-h">' + B('நோயாளி', 'Patient') + '</h3>' + (pats.length ? '<div class="dx-f"><label>' + B('சேமித்த நோயாளி', 'Saved patients') + '</label><select data-load="1"><option value="">' + esc(B('— தேர்வு செய் —', '— choose —')) + '</option>' + pats.map((p, i) => '<option value="' + i + '">' + esc(p.name + (p.age ? ' (' + p.age + ')' : '')) + '</option>').join('') + '</select></div>' : '') +
+        fld(B('பெயர்', 'Name'), 'pat.name') + '<div class="dx-grid three">' + fld(B('வயது', 'Age'), 'pat.age', { mode: 'numeric' }) + sel(B('அலகு', 'Unit'), 'pat.unit', ['Yrs', 'Months', 'Days']) + sel(B('பாலினம்', 'Sex'), 'pat.sex', ['Male', 'Female', 'Other']) + '</div><div class="dx-grid">' + fld(B('எடை (kg)', 'Weight (kg)'), 'pat.wt', { mode: 'decimal' }) + fld(B('கைபேசி', 'Mobile'), 'pat.phone', { type: 'tel' }) + '</div>' + fld(B('தேதி', 'Date'), 'date', { type: 'date' }) +
+        '<details><summary>' + B('உடல் அளவீடுகள் (BP, Pulse, Temp, SpO₂)', 'Vitals (BP, pulse, temp, SpO₂)') + '</summary><div class="dx-grid">' + fld('BP (mmHg)', 'vit.bp', { ph: '120/80' }) + fld('Pulse (/min)', 'vit.pulse', { mode: 'numeric' }) + '</div><div class="dx-grid">' + fld('Temp (°F)', 'vit.temp', { mode: 'decimal' }) + fld('SpO₂ (%)', 'vit.spo2', { mode: 'numeric' }) + '</div></details>' +
+        fld(B('புகார் (Complaints)', 'Complaints'), 'co', { area: 2 }) + fld(B('நோய் கண்டறிதல் (Diagnosis)', 'Diagnosis'), 'dx') +
+        '<h3 class="dx-h">Rx — ' + B('மருந்துகள்', 'Medicines') + '</h3>' + S.meds.map((m, i) => '<div class="dx-item"><div class="dx-ih"><span>#' + (i + 1) + '</span>' + (S.meds.length > 1 ? '<button type="button" class="dx-del" data-del="' + i + '" aria-label="' + esc(B('மருந்தை நீக்கு', 'Remove medicine')) + '">✕</button>' : '') + '</div>' +
+          '<div class="dx-grid"><div class="dx-f"><label>' + B('வகை', 'Form') + '</label><select data-p="meds.' + i + '.f">' + RX_FORMS.map((o) => '<option' + (m.f === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' + fld(B('வலிமை', 'Strength'), 'meds.' + i + '.s', { ph: '500 mg' }) + '</div>' + fld(B('மருந்தின் பெயர்', 'Medicine name'), 'meds.' + i + '.n') +
+          '<div class="dx-grid">' + sel(B('அளவு (காலை-மதியம்-இரவு)', 'Dose (morning-noon-night)'), 'meds.' + i + '.q', RX_FREQ) + sel(B('உணவு', 'Food'), 'meds.' + i + '.fd', RX_FOOD) + '</div><div class="dx-grid">' + fld(B('நாட்கள்', 'Days'), 'meds.' + i + '.d', { ph: '5' }) + fld(B('குறிப்பு', 'Note'), 'meds.' + i + '.note') + '</div></div>').join('') +
+        '<div class="dx-row"><button type="button" class="dx-btn sec" data-add="1">＋ ' + B('மருந்து சேர்', 'Add medicine') + '</button></div>' +
+        fld(B('பரிசோதனைகள் (Tests)', 'Tests advised'), 'tests', { area: 2 }) + fld(B('அறிவுரை (Advice)', 'Advice'), 'advice', { area: 3 }) + fld(B('மீண்டும் வர வேண்டிய நாள்', 'Review on'), 'follow', { type: 'date' }) + '<div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="pdf">📄 PDF</button><button type="button" class="dx-btn sec" data-out="print">🖨️ ' + B('திற / அச்சிடு', 'Open / Print') + '</button><button type="button" class="dx-btn sec" data-out="wa">💬 WhatsApp</button></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn sec" data-savepat="1">💾 ' + B('நோயாளியைச் சேமி', 'Save patient') + '</button><button type="button" class="dx-btn sec" data-next="1">➡️ ' + B('புதிய நோயாளி', 'New patient') + '</button></div>';
+    }
+    host.addEventListener('input', onIn); host.addEventListener('change', onIn);
+    function onIn(e) {
+      const t = e.target;
+      if (t.hasAttribute && t.hasAttribute('data-load')) { const p = lsGet(RX_PAT, [])[+t.value]; if (p) { S.pat = Object.assign(S.pat, p); paint(); save(); } return; }
+      const p = t.getAttribute && t.getAttribute('data-p'); if (!p) return;
+      const parts = p.split('.'); if (parts[0] === 'meds') { const i = +parts[1]; if (!S.meds[i]) return; S.meds[i][parts[2]] = t.value; } else setPath(S, p, t.value);
+      if (p === 'lang' || p === 'size') paint(); save();
+    }
+    host.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-add')) { S.meds.push(newMed()); paint(); save(); }
+      else if (b.hasAttribute('data-del')) { S.meds.splice(+b.getAttribute('data-del'), 1); paint(); save(); }
+      else if (b.hasAttribute('data-savepat')) { if (!S.pat.name.trim()) return; const list = lsGet(RX_PAT, []).filter((x) => !(x.name === S.pat.name && x.phone === S.pat.phone)); list.unshift(Object.assign({}, S.pat)); lsSet(RX_PAT, list.slice(0, 200)); paint(); host.querySelector('[data-k=msg]').innerHTML = '<div class="dx-ok">✓ ' + B('சேமிக்கப்பட்டது', 'Saved') + '</div>'; }
+      else if (b.hasAttribute('data-next')) { const d = S.doc, lang = S.lang, size = S.size; S = blankRx(); S.doc = d; S.lang = lang; S.size = size; paint(); save(); }
+      else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
+    });
+    async function run(kind) {
+      const msg = host.querySelector('[data-k=msg]'), pr = rxProblems(S);
+      if (pr.errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + pr.errs.map(esc).join('<br>') + '</div>'; return; }
+      try {
+        if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(rxText(S)), '_blank');
+        else {
+          const blob = new Blob([await rxPdf(S)], { type: 'application/pdf' }), name = 'Prescription-' + (fileSafe(S.pat.name) || 'patient') + '-' + S.date + '.pdf';
+          if (kind === 'print') { const url = URL.createObjectURL(blob); if (!window.open(url, '_blank')) downloadBlob(blob, name); setTimeout(() => URL.revokeObjectURL(url), 120000); } else downloadBlob(blob, name);
+        }
+        lsSet(RX_DOC, S.doc); save();
+        msg.innerHTML = '<div class="dx-ok">✓ ' + B('மருந்துச் சீட்டு தயார்', 'Prescription ready') + '</div>' + (pr.warns.length ? '<div class="dx-warn">⚠ ' + pr.warns.map(esc).join('<br>⚠ ') + '</div>' : '');
+      } catch (err) { msg.innerHTML = '<div class="dx-err" role="alert">' + esc(err && err.message || err) + '</div>'; }
+    }
+    paint();
+  }
+  async function rxPdf(S) {
+    const doc = await PDFDocument.create(); doc.setTitle('Prescription ' + S.pat.name); doc.setCreator('pdftoolsindia.com');
+    const font = await embedUnicodeFont(doc), uni = !!font.__mixedShape, t = (en, ta) => tl(S.lang, en, ta), Lx = (s) => { s = String(s == null ? '' : s); return uni ? s : s.replace(/[^\x20-\x7E\xA0-\xFF]/g, '?'); };
+    const A5 = S.size === 'A5', W = A5 ? 419.53 : 595.28, H = A5 ? 595.28 : 841.89, MX = A5 ? 30 : 40, CW = W - 2 * MX, FS = A5 ? 0.9 : 1;
+    const INK = rgb(0.1, 0.1, 0.12), GR = rgb(0.4, 0.42, 0.48), LN = rgb(0.8, 0.82, 0.86), BR = rgb(0, 0.45, 0.38);
+    let page, y, pageNo = 0;
+    const header = () => {
+      page = doc.addPage([W, H]); pageNo++; y = H - MX;
+      const tx = (s, yy, size, col, b) => { page.drawText(Lx(s), { x: MX, y: yy, size, font, color: col || INK }); if (b) page.drawText(Lx(s), { x: MX + 0.3, y: yy, size, font, color: col || INK }); };
+      wrapLines(font, Lx(S.doc.name), 16 * FS, CW, 2).forEach((ln) => { tx(ln, y - 14, 16 * FS, BR, true); y -= 19 * FS; });
+      if (S.doc.qual || S.doc.reg) { wrapLines(font, Lx(S.doc.qual + (S.doc.reg ? (S.doc.qual ? '  ·  ' : '') + t('Reg. No: ', 'பதிவு எண்: ') + S.doc.reg : '')), 9.5 * FS, CW, 2).forEach((ln) => { tx(ln, y - 10, 9.5 * FS, GR); y -= 12 * FS; }); }
+      [S.doc.clinic, S.doc.addr, [S.doc.phone && 'Ph: ' + S.doc.phone, S.doc.timing && t('Timings: ', 'நேரம்: ') + S.doc.timing].filter(Boolean).join('   ')].filter((x) => String(x || '').trim()).forEach((x) => wrapLines(font, Lx(x), 9 * FS, CW, 3).forEach((ln) => { tx(ln, y - 10, 9 * FS, GR); y -= 11.5 * FS; }));
+      y -= 6; page.drawLine({ start: { x: MX, y }, end: { x: W - MX, y }, thickness: 1.2, color: BR }); y -= 16;
+    };
+    header();
+    const draw = (s, x, size, col, b) => { if (y < 90) { header(); } page.drawText(Lx(s), { x, y, size, font, color: col || INK }); if (b) page.drawText(Lx(s), { x: x + 0.3, y, size, font, color: col || INK }); };
+    const para = (s, x, size, col, w, lh) => wrapLines(font, Lx(s), size, w || CW, 60).forEach((ln) => { draw(ln, x, size, col); y -= lh || size * 1.45; });
+    const pat = S.pat, ageS = pat.age ? pat.age + ' ' + pat.unit : '—';
+    draw(t('Patient', 'நோயாளி') + ': ' + pat.name, MX, 11 * FS, INK, true); const dt = t('Date', 'தேதி') + ': ' + fmtDMY(S.date); page.drawText(Lx(dt), { x: W - MX - font.widthOfTextAtSize(Lx(dt), 10 * FS), y, size: 10 * FS, font, color: INK }); y -= 15 * FS;
+    draw([t('Age/Sex', 'வயது/பாலினம்') + ': ' + ageS + ' / ' + pat.sex, pat.wt && t('Wt', 'எடை') + ': ' + pat.wt + ' kg', pat.phone && 'Ph: ' + pat.phone].filter(Boolean).join('    '), MX, 9.5 * FS, GR); y -= 14 * FS;
+    const v = S.vit, vit = [v.bp && 'BP ' + v.bp, v.pulse && 'Pulse ' + v.pulse + '/min', v.temp && 'Temp ' + v.temp + '°F', v.spo2 && 'SpO₂ ' + v.spo2 + '%'].filter(Boolean); if (vit.length) { draw(vit.join('    '), MX, 9.5 * FS, GR); y -= 14 * FS; }
+    if (S.co.trim()) { para(t('C/O', 'புகார்') + ': ' + S.co.trim(), MX, 10 * FS, INK); }
+    if (S.dx.trim()) { para(t('Diagnosis', 'நோய்') + ': ' + S.dx.trim(), MX, 10 * FS, INK); }
+    y -= 4; page.drawLine({ start: { x: MX, y }, end: { x: W - MX, y }, thickness: 0.7, color: LN }); y -= 26 * FS;
+    draw('Rx', MX, 20 * FS, BR, true); y -= 24 * FS;
+    S.meds.filter((m) => m.n.trim()).forEach((m, i) => {
+      if (y < 130) header();
+      const name = (i + 1) + '.  ' + [m.f, m.n.trim(), m.s].filter(Boolean).join(' ');
+      wrapLines(font, Lx(name), 11.5 * FS, CW - 16, 3).forEach((ln) => { draw(ln, MX + 8, 11.5 * FS, INK, true); y -= 15 * FS; });
+      const d = rxMedLine(m, S.lang === 'en' ? 'en' : 'ta'); if (d) { draw(d, MX + 26, 9.5 * FS, GR); y -= 13 * FS; } if (m.note.trim()) { para(m.note.trim(), MX + 26, 9 * FS, GR, CW - 34); } y -= 6 * FS;
+    });
+    if (S.tests.trim()) { y -= 6; draw(t('Tests advised', 'பரிசோதனைகள்') + ':', MX, 10 * FS, GR, true); y -= 14 * FS; para(S.tests.trim(), MX + 8, 10 * FS, INK, CW - 8); }
+    if (S.advice.trim()) { y -= 6; draw(t('Advice', 'அறிவுரை') + ':', MX, 10 * FS, GR, true); y -= 14 * FS; para(S.advice.trim(), MX + 8, 10 * FS, INK, CW - 8); }
+    if (S.follow) { y -= 6; draw(t('Review on', 'மீண்டும் வர வேண்டிய நாள்') + ': ' + fmtDMY(S.follow), MX, 10 * FS, BR, true); y -= 14 * FS; }
+    const sy = Math.max(50, Math.min(y - 40, 80)); page.drawLine({ start: { x: W - MX - 150, y: sy }, end: { x: W - MX, y: sy }, thickness: 0.8, color: rgb(0.55, 0.57, 0.62) });
+    wrapLines(font, Lx(t('Doctor signature', 'மருத்துவர் கையொப்பம்')), 8.5 * FS, 150, 2).forEach((ln, i) => page.drawText(ln, { x: W - MX - 150, y: sy - 11 - i * 10, size: 8.5 * FS, font, color: GR }));
+    return doc.save();
+  }
+  TOOL_IMPL.prescription = { mount(container) { mountRx(container); } };
+  TOOL_IMPL.prescription._f = { rxProblems, rxMedLine, blankRx };
+
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
 
