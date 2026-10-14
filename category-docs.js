@@ -29,7 +29,7 @@
   const words = (n) => numberToWordsINR(n);
   const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
   const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); const t = ks.reduce((a, k) => (a[k] = a[k] || {}), o); t[last] = v; };
-  const fileSafe = (s) => String(s || '').normalize('NFKD').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  const fileSafe = (s) => { const r = String(s || '').normalize('NFKD').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^[-.]+|[-.]+$/g, '').slice(0, 40); return /[A-Za-z0-9]/.test(r) ? r : ''; };
 
   let cssDone = false;
   function injectCss() {
@@ -1122,6 +1122,121 @@
   }
   TOOL_IMPL.salaryslip = { mount(container) { mountSalary(container); } };
   TOOL_IMPL.salaryslip._f = { salCalc, salProblems, blankSal };
+
+
+  /* =====================================================================
+     LEAVE LETTER — employee / student / parent, Tamil or English, editable body
+     ===================================================================== */
+  const LV_KEY = 'pti-leave-draft-v1', LV_ME = 'pti-leave-me-v1';
+  const LV_TYPES = [['Casual Leave', 'தற்செயல் விடுப்பு'], ['Sick Leave', 'மருத்துவ விடுப்பு'], ['Earned Leave', 'ஈட்டிய விடுப்பு'], ['Maternity Leave', 'மகப்பேறு விடுப்பு'], ['Paternity Leave', 'தந்தைமை விடுப்பு'], ['Marriage Leave', 'திருமண விடுப்பு'], ['Bereavement Leave', 'துக்க விடுப்பு'], ['Loss of Pay Leave', 'சம்பளமில்லா விடுப்பு'], ['Half-day Permission', 'அரை நாள் அனுமதி'], ['Leave', 'விடுப்பு']];
+  const dateLong = (iso, lang) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); if (!m) return iso || ''; return +m[3] + ' ' + (lang === 'ta' ? MON_TA : MON_EN)[+m[2] - 1] + ' ' + m[1]; };
+  function leaveDays(S) {
+    if (!validISO(S.from) || !validISO(S.to)) return 0;
+    const a = new Date(S.from + 'T00:00:00'), b = new Date(S.to + 'T00:00:00'); if (b < a) return 0;
+    let n = 0; for (const d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) { if (S.skipSun && d.getDay() === 0) continue; n++; }
+    return S.half ? (n === 1 ? 0.5 : n) : n;
+  }
+  const lvType = (S) => LV_TYPES.find((x) => x[0] === S.type) || LV_TYPES[0];
+  const lvDays = (n, lang) => (n === 0.5 ? (lang === 'ta' ? 'அரை நாள்' : 'half a day') : n + (lang === 'ta' ? ' நாட்கள்' : n === 1 ? ' day' : ' days'));
+  function leaveBody(S) {
+    const ta = S.lang === 'ta', lt = lvType(S)[ta ? 1 : 0], n = leaveDays(S), reason = S.reason.trim() || (ta ? 'சொந்தக் காரணங்கள்' : 'personal reasons');
+    const f = dateLong(S.from, S.lang), t = dateLong(S.to, S.lang), same = S.from === S.to, period = ta ? (same ? f + ' அன்று' : f + ' முதல் ' + t + ' வரை') : (same ? 'on ' + f : 'from ' + f + ' to ' + t);
+    const sessW = S.half && same ? (ta ? (S.session === 'am' ? 'காலை' : 'பிற்பகல்') : (S.session === 'am' ? 'forenoon' : 'afternoon')) : '', days = ' (' + lvDays(n, S.lang) + (sessW ? ', ' + sessW : '') + ')', sess = '';
+    const back = S.contact.trim() ? (ta ? ' விடுப்பில் இருக்கும் போது ' + S.contact.trim() + ' என்ற எண்ணில் தொடர்பு கொள்ளலாம்.' : ' I can be reached on ' + S.contact.trim() + ' during the leave.') : '';
+    const hand = S.role === 'employee' && S.handover.trim() ? (ta ? ' எனது பணிகளை ' + S.handover.trim() + ' கவனித்துக் கொள்வார்.' : ' ' + S.handover.trim() + ' will cover my duties in my absence.') : '';
+    if (S.role === 'parent') {
+      const kid = S.me.name || (ta ? 'என் பிள்ளை' : 'my ward'), cls = S.me.cls ? (ta ? ', ' + S.me.cls + ' வகுப்பு' : ' (' + S.me.cls + ')') : '';
+      return ta ? 'என் பிள்ளை ' + kid + cls + ' ' + reason + ' காரணமாக ' + period + days + sess + ' பள்ளிக்கு வர இயலாது. எனவே அந்த நாட்களுக்கு விடுப்பு அளிக்குமாறு தாழ்மையுடன் வேண்டுகிறேன்.' + back + '\n\nதயவுசெய்து விடுப்பை அனுமதிக்க வேண்டுகிறேன்.\n\nநன்றி.'
+        : 'I kindly request you to grant leave to ' + kid + cls + ' ' + period + days + sess + ' due to ' + reason + '. My child will not be able to attend school ' + (same ? 'on that day' : 'on these days') + '.' + back + '\n\nI request you to kindly grant the leave. Thank you.';
+    }
+    const who = S.role === 'student' ? (ta ? 'நான் தங்கள் ' + (S.me.cls ? S.me.cls + ' வகுப்பில் ' : '') + 'பயின்று வருகிறேன். ' : 'I am a student of ' + (S.me.cls || 'your institution') + '. ') : (ta ? 'நான் தங்கள் நிறுவனத்தில் பணிபுரிந்து வருகிறேன்' + (S.me.desig ? ' (பதவி: ' + S.me.desig + ')' : '') + '. ' : 'I work as ' + (S.me.desig || 'an employee') + ' in your organisation. ');
+    return ta ? who + reason + ' காரணமாக ' + period + days + sess + ' ' + lt + ' அளிக்குமாறு தாழ்மையுடன் கேட்டுக்கொள்கிறேன்.' + hand + back + '\n\nதயவுசெய்து எனது விடுப்பை அனுமதிக்க வேண்டுகிறேன்.\n\nநன்றி.'
+      : who + 'I request you to kindly grant me ' + lt.toLowerCase() + ' ' + period + days + sess + ' due to ' + reason + '.' + hand + back + '\n\nI request you to kindly approve my leave. Thank you.';
+  }
+  function leaveFull(S) {
+    const ta = S.lang === 'ta', lt = lvType(S)[ta ? 1 : 0];
+    const to = [S.toName.trim() || (ta ? 'மேலாளர் / தலைமையாசிரியர்' : 'The Manager / Principal'), S.org.trim()].filter(Boolean);
+    const subj = ta ? 'பொருள்: ' + lt + ' வேண்டி விண்ணப்பம்' : 'Subject: Application for ' + lt;
+    const sal = ta ? 'ஐயா / அம்மையீர்,' : 'Respected Sir / Madam,';
+    const sign = [S.me.name, S.me.desig && S.role === 'employee' ? S.me.desig : '', S.role === 'student' && S.me.cls ? (ta ? 'வகுப்பு ' : 'Class ') + S.me.cls + (S.me.roll ? (ta ? ', பதிவு எண் ' : ', Roll no. ') + S.me.roll : '') : '', S.me.id && S.role === 'employee' ? (ta ? 'ஊழியர் எண்: ' : 'Employee ID: ') + S.me.id : ''].filter(Boolean);
+    const sender = S.role === 'parent' ? [S.me.parent || '', (ta ? 'பெற்றோர் — ' : 'Parent of ') + (S.me.name || '')].filter((x) => x.trim()) : sign;
+    return { date: (ta ? 'இடம்: ' : 'Place: ') + (S.place || '') + '\n' + (ta ? 'நாள்: ' : 'Date: ') + dateLong(S.date, S.lang), to: (ta ? 'பெறுநர்,\n' : 'To,\n') + to.join('\n'), subj, sal, body: S.body, close: ta ? 'இப்படிக்கு,' : 'Yours faithfully,', sender };
+  }
+  function blankLv() {
+    const me = lsGet(LV_ME, {});
+    return { v: 1, role: 'employee', lang: 'ta', place: me.place || '', date: localISO(), toName: '', org: me.org || '', type: 'Casual Leave', from: localISO(), to: localISO(), half: false, session: 'am', skipSun: false, reason: '', contact: me.contact || '', handover: '', me: Object.assign({ name: '', desig: '', id: '', cls: '', roll: '', parent: '' }, me.me || {}), body: '', edited: false };
+  }
+  function mountLeave(container) {
+    const host = root(container); let S = lsGet(LV_KEY, null);
+    if (!S || S.v !== 1) S = blankLv();
+    const save = () => lsSet(LV_KEY, S);
+    const fld = (label, path, o) => { o = o || {}; return '<div class="dx-f"><label>' + label + '</label>' + (o.area ? '<textarea data-p="' + path + '" rows="' + o.area + '">' + esc(getPath(S, path)) + '</textarea>' : '<input type="' + (o.type || 'text') + '" data-p="' + path + '" value="' + esc(getPath(S, path)) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' autocomplete="off">') + '</div>'; };
+    const sel = (label, path, list) => '<div class="dx-f"><label>' + label + '</label><select data-p="' + path + '">' + list.map((o) => '<option value="' + o[0] + '"' + (getPath(S, path) === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>';
+    const regen = () => { if (!S.edited) S.body = leaveBody(S); const b = host.querySelector('[data-p=body]'); if (b && b !== document.activeElement) b.value = S.body; };
+    function paint() {
+      regen();
+      const emp = S.role === 'employee', stu = S.role === 'student', par = S.role === 'parent';
+      host.innerHTML = '<div class="dx-note">📝 ' + B('விவரங்களை நிரப்பினால் கடிதம் தானாக உருவாகும் — நீங்கள் திருத்தலாம்.', 'Fill the details and the letter writes itself — you can edit it.') + '</div>' +
+        '<div class="dx-grid">' + sel(B('நான்', 'I am a'), 'role', [['employee', B('ஊழியர்', 'Employee')], ['student', B('மாணவர்', 'Student')], ['parent', B('பெற்றோர் (பிள்ளைக்காக)', 'Parent (for my child)')]]) + sel(B('கடிதம் மொழி', 'Letter language'), 'lang', [['ta', 'தமிழ்'], ['en', 'English']]) + '</div>' +
+        '<h3 class="dx-h">' + B('யாருக்கு', 'To whom') + '</h3>' + fld(B('பெயர் / பதவி', 'Name / designation'), 'toName', { ph: B('எ.கா. தலைமையாசிரியர்', 'e.g. The Principal') }) + fld(B('நிறுவனம் / பள்ளி', 'Organisation / school'), 'org') + '<div class="dx-grid">' + fld(B('இடம்', 'Place'), 'place') + fld(B('நாள்', 'Date'), 'date', { type: 'date' }) + '</div>' +
+        '<h3 class="dx-h">' + B('உங்கள் விவரம்', 'Your details') + '</h3>' + fld(par ? B('பிள்ளையின் பெயர்', "Child's name") : B('பெயர்', 'Name'), 'me.name') + (par ? fld(B('பெற்றோர் பெயர்', "Parent's name"), 'me.parent') : '') +
+        (emp ? '<div class="dx-grid">' + fld(B('பதவி', 'Designation'), 'me.desig') + fld(B('ஊழியர் எண்', 'Employee ID'), 'me.id') + '</div>' : '<div class="dx-grid">' + fld(B('வகுப்பு / பிரிவு', 'Class / section'), 'me.cls') + (stu ? fld(B('பதிவு எண்', 'Roll no.'), 'me.roll') : '<div></div>') + '</div>') +
+        '<h3 class="dx-h">' + B('விடுப்பு', 'Leave') + '</h3>' + sel(B('வகை', 'Type'), 'type', LV_TYPES.map((x) => [x[0], isEn() ? x[0] + ' · ' + x[1] : x[1] + ' · ' + x[0]])) + '<div class="dx-grid">' + fld(B('முதல் நாள்', 'From'), 'from', { type: 'date' }) + fld(B('கடைசி நாள்', 'To'), 'to', { type: 'date' }) + '</div>' +
+        '<label class="dx-chk"><input type="checkbox" data-p="half"' + (S.half ? ' checked' : '') + '> ' + B('அரை நாள் மட்டும்', 'Half day only') + '</label>' + (S.half ? sel(B('நேரம்', 'Session'), 'session', [['am', B('காலை', 'Forenoon')], ['pm', B('பிற்பகல்', 'Afternoon')]]) : '') +
+        '<label class="dx-chk"><input type="checkbox" data-p="skipSun"' + (S.skipSun ? ' checked' : '') + '> ' + B('ஞாயிற்றுக்கிழமைகளை எண்ணாதே', 'Do not count Sundays') + '</label><div class="dx-hint" id="lvDays"></div>' +
+        fld(B('காரணம்', 'Reason'), 'reason', { area: 2, ph: B('எ.கா. காய்ச்சல் / குடும்ப நிகழ்ச்சி', 'e.g. fever / family function') }) + (emp ? fld(B('என் பணியைக் கவனிப்பவர் (விருப்பம்)', 'Who will cover my work (optional)'), 'handover') : '') + fld(B('விடுப்பில் தொடர்பு எண் (விருப்பம்)', 'Contact number during leave (optional)'), 'contact', { type: 'tel' }) +
+        '<h3 class="dx-h">' + B('கடிதம் (திருத்தலாம்)', 'Letter text (editable)') + '</h3><div class="dx-f"><textarea data-p="body" rows="9"></textarea></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn sec" data-regen="1">↻ ' + B('தானாக மீண்டும் எழுது', 'Rewrite automatically') + '</button></div><div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="pdf">📄 PDF</button><button type="button" class="dx-btn sec" data-out="print">🖨️ ' + B('திற / அச்சிடு', 'Open / Print') + '</button><button type="button" class="dx-btn sec" data-out="copy">📋 ' + B('நகலெடு', 'Copy text') + '</button><button type="button" class="dx-btn sec" data-out="wa">💬 WhatsApp</button></div>';
+      host.querySelector('[data-p=body]').value = S.body; hint();
+    }
+    function hint() { const n = leaveDays(S), h = host.querySelector('#lvDays'); if (!h) return; const bad = validISO(S.from) && validISO(S.to) && S.to < S.from; h.className = 'dx-hint ' + (bad ? 'bad' : 'ok'); h.textContent = bad ? B('கடைசி நாள் முதல் நாளுக்கு முன் இருக்கக் கூடாது', 'The last day cannot be before the first day') : '✓ ' + lvDays(n, isEn() ? 'en' : 'ta'); }
+    host.addEventListener('input', onIn); host.addEventListener('change', onIn);
+    function onIn(e) {
+      const t = e.target, p = t.getAttribute && t.getAttribute('data-p'); if (!p) return;
+      setPath(S, p, t.type === 'checkbox' ? t.checked : t.value);
+      if (p === 'body') { S.edited = true; save(); return; }
+      if (p === 'from' && validISO(t.value) && (!validISO(S.to) || S.to < t.value)) S.to = t.value;
+      if (['role', 'lang', 'half', 'from', 'to', 'type'].includes(p)) { if (p === 'role' || p === 'lang') S.edited = false; paint(); } else { regen(); hint(); }
+      save();
+    }
+    host.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-regen')) { S.edited = false; paint(); save(); } else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
+    });
+    async function run(kind) {
+      const msg = host.querySelector('[data-k=msg]'), errs = [];
+      if (!S.me.name.trim()) errs.push(B('பெயர் தேவை', 'Name is required'));
+      if (!validISO(S.from) || !validISO(S.to)) errs.push(B('தேதிகளைத் தேர்வு செய்யுங்கள்', 'Choose the dates')); else if (S.to < S.from) errs.push(B('கடைசி நாள் முதல் நாளுக்கு முன் உள்ளது', 'The last day is before the first day'));
+      if (!S.body.trim()) errs.push(B('கடிதம் காலியாக உள்ளது', 'The letter is empty'));
+      if (errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + errs.map(esc).join('<br>') + '</div>'; return; }
+      const L = leaveFull(S), plain = [L.date, '', L.to, '', L.subj, '', L.sal, '', L.body, '', L.close, ''].concat(L.sender).join('\n');
+      try {
+        if (kind === 'copy') { if (navigator.clipboard) await navigator.clipboard.writeText(plain); else { const ta = document.createElement('textarea'); ta.value = plain; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } msg.innerHTML = '<div class="dx-ok">✓ ' + B('நகலெடுக்கப்பட்டது', 'Copied') + '</div>'; }
+        else if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(plain), '_blank');
+        else {
+          const blob = new Blob([await leavePdf(S, L)], { type: 'application/pdf' }), name = 'Leave-letter-' + (fileSafe(S.me.name) || 'letter') + '-' + S.from + '.pdf';
+          if (kind === 'print') { const url = URL.createObjectURL(blob); if (!window.open(url, '_blank')) downloadBlob(blob, name); setTimeout(() => URL.revokeObjectURL(url), 120000); } else downloadBlob(blob, name);
+          msg.innerHTML = '<div class="dx-ok">✓ ' + B('கடிதம் தயார்', 'Letter ready') + ' — ' + lvDays(leaveDays(S), isEn() ? 'en' : 'ta') + '</div>';
+        }
+        lsSet(LV_ME, { me: S.me, place: S.place, org: S.org, contact: S.contact });
+      } catch (err) { msg.innerHTML = '<div class="dx-err" role="alert">' + esc(err && err.message || err) + '</div>'; }
+    }
+    paint();
+  }
+  async function leavePdf(S, L) {
+    const doc = await PDFDocument.create(); doc.setTitle('Leave letter'); doc.setCreator('pdftoolsindia.com');
+    const font = await embedUnicodeFont(doc), uni = !!font.__mixedShape, Lx = (s) => { s = String(s == null ? '' : s); return uni ? s : s.replace(/[^\x20-\x7E\xA0-\xFF]/g, '?'); };
+    const W = 595.28, H = 841.89, MX = 64, CW = W - 2 * MX; let page, y;
+    const np = () => { page = doc.addPage([W, H]); y = H - 70; }; np();
+    const draw = (s, x, size, bold) => { if (y < 80) np(); page.drawText(Lx(s), { x, y, size, font, color: rgb(0.08, 0.08, 0.1) }); if (bold) page.drawText(Lx(s), { x: x + 0.3, y, size, font, color: rgb(0.08, 0.08, 0.1) }); };
+    const block = (txt, size, gap, bold, rightX) => { txt.split('\n').forEach((para) => { wrapLines(font, Lx(para), size, CW, 40).forEach((ln) => { const x = rightX ? W - MX - font.widthOfTextAtSize(Lx(ln), size) : MX; draw(ln, x, size, bold); y -= size * 1.6; }); }); y -= gap; };
+    block(L.date, 10.5, 12, false, true); block(L.to, 11, 10); block(L.subj, 11.5, 10, true); block(L.sal, 11, 6); block(L.body, 11, 14); block(L.close, 11, 40);
+    L.sender.forEach((ln, i) => { draw(ln, MX, i ? 10.5 : 11.5, i === 0); y -= 15; });
+    return doc.save();
+  }
+  TOOL_IMPL.leaveletter = { mount(container) { mountLeave(container); } };
+  TOOL_IMPL.leaveletter._f = { leaveDays, leaveBody, blankLv };
 
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };

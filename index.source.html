@@ -436,7 +436,7 @@ const TOOLS = [
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
-  {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
+  {id:'leaveletter', name:'Leave Application Letter', desc:'Leave letter for employees, students and parents — Tamil or English, auto-written, half-day, PDF', icon:'📝', color:'#2E86AB', cat:'business',lazy:'docs'},
   {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0},
   {id:'resumebuilder', name:'Resume Builder', desc:'Build a resume from scratch — 4 templates, auto-saves your info, ATS-friendly', icon:'📋', color:'#1565C0', cat:'business', cost:0},
@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014b`;
+    s.src = `category-${cat}.js?v=20261014c`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -13607,116 +13607,7 @@ TOOL_IMPL.obituary = {
 // salaryslip lives in category-docs.js
 /* ===================== PAYMENT VOUCHER ===================== */
 /* ===================== LEAVE APPLICATION LETTER ===================== */
-TOOL_IMPL.leaveletter = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Fill your details — get a properly formatted leave application letter as a downloadable PDF.</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="llCompany" autocomplete="off"></div>
-          <div class="field"><label>Your Name</label><input type="text" id="llName" autocomplete="off"></div>
-          <div class="field"><label>Designation</label><input type="text" id="llDesig" autocomplete="off"></div>
-          <div class="field"><label>Department</label><input type="text" id="llDept" autocomplete="off"></div>
-          <div class="field"><label>Employee ID (optional)</label><input type="text" id="llEmpId" autocomplete="off"></div>
-          <div class="field"><label>Leave Type</label><select id="llType"><option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Maternity Leave</option><option>Paternity Leave</option><option>Unpaid Leave</option><option>Other</option></select></div>
-          <div class="field"><label>From Date</label><input type="date" id="llFrom"></div>
-          <div class="field"><label>To Date</label><input type="date" id="llTo"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Addressed To (Manager/HR Name)</label><input type="text" id="llManager" placeholder="e.g. Mr. Ravi Kumar, HR Manager" autocomplete="off"></div>
-          <div class="field" style="grid-column:1/-1;"><label>Reason</label><textarea id="llReason" placeholder="Briefly describe the reason for leave..."></textarea></div>
-        </div>
-      `));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📝 Generate Letter</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    function countLeaveDays(fromStr, toStr){
-      if(!fromStr || !toStr) return 0;
-      const from = new Date(fromStr), to = new Date(toStr);
-      const diff = Math.round((to - from) / 86400000) + 1; // inclusive of both start and end date
-      return diff > 0 ? diff : 0;
-    }
-    // Same word-wrapping approach used elsewhere in this app (e.g. txt2pdf) —
-    // measures actual text width per line instead of a fixed character
-    // count, and returns how many lines it used so the caller can correctly
-    // advance the Y position (avoiding the "next section overlaps" class of
-    // bug found and fixed in other tools this session).
-    function wrapText(font, text, size, maxWidth){
-      const words = String(text||'').split(/\s+/).filter(Boolean);
-      const lines = []; let cur = '';
-      words.forEach(w=>{
-        const test = cur ? cur+' '+w : w;
-        if(font.widthOfTextAtSize(test, size) > maxWidth && cur){ lines.push(cur); cur = w; } else cur = test;
-      });
-      if(cur) lines.push(cur);
-      return lines.length ? lines : [''];
-    }
-    async function doGenerate(){
-      const company = body.querySelector('#llCompany').value||'';
-      const name = body.querySelector('#llName').value||'';
-      const desig = body.querySelector('#llDesig').value||'';
-      const dept = body.querySelector('#llDept').value||'';
-      const empId = body.querySelector('#llEmpId').value||'';
-      const leaveType = body.querySelector('#llType').value;
-      const fromDate = body.querySelector('#llFrom').value;
-      const toDate = body.querySelector('#llTo').value;
-      const manager = body.querySelector('#llManager').value||'Sir/Madam';
-      const reason = body.querySelector('#llReason').value||'';
-      if(!name.trim() || !fromDate || !toDate){ mountResult(body, 'Please fill your name, From Date and To Date.').style.background='#FDEDEC'; return; }
-      const days = countLeaveDays(fromDate, toDate);
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        let page = doc.addPage([595.28, 841.89]); // A4
-        let {width, height} = page.getSize();
-        let y = height - 60;
-        let t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        const todayStr = new Date().toISOString().slice(0,10);
-
-        if(company) { t(company, 50, y, 14, rgb(0.13,0.29,0.62)); y -= 30; } else { y -= 10; }
-        t('Date: ' + todayStr, 50, y, 10.5); y -= 30;
-        t('To,', 50, y, 11); y -= 16;
-        t(manager, 50, y, 11); y -= 16;
-        if(company) { t(company, 50, y, 11); y -= 16; }
-        y -= 14;
-        t('Subject: Application for ' + leaveType, 50, y, 11.5, rgb(0.13,0.29,0.62)); y -= 30;
-        t('Dear ' + (manager.split(',')[0] || 'Sir/Madam') + ',', 50, y, 11); y -= 26;
-
-        const bodyText = `I am writing to formally request ${leaveType.toLowerCase()} from ${fromDate} to ${toDate} (${days} day${days===1?'':'s'}), due to the following reason: ${reason || '[reason not specified]'}. I kindly request you to grant me leave for the above-mentioned period. I will ensure that my pending work is handed over appropriately before my leave begins. Please let me know if any further information or documentation is required.`;
-        const bodyLines = wrapText(font, bodyText, 11, width - 100);
-        bodyLines.forEach(line=>{
-          if(y < 120){ // extra-long reason text gets a fresh page instead of silently running off — same fix pattern as the GST invoice / purchase order pagination fix earlier this session
-            page = doc.addPage([595.28, 841.89]);
-            ({width, height} = page.getSize());
-            y = height - 60;
-            t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-          }
-          t(line, 50, y, 11); y -= 17;
-        });
-        y -= 20;
-        t('Thank you for your consideration.', 50, y, 11); y -= 40;
-        t('Yours sincerely,', 50, y, 11); y -= 40;
-        t(name, 50, y, 12, rgb(0.1,0.1,0.1)); y -= 15;
-        if(desig) { t(desig, 50, y, 10.5, rgb(0.4,0.4,0.4)); y -= 14; }
-        if(dept) { t(dept, 50, y, 10.5, rgb(0.4,0.4,0.4)); y -= 14; }
-        if(empId) { t('Employee ID: ' + empId, 50, y, 10.5, rgb(0.4,0.4,0.4)); }
-
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `leave-application-${name.replace(/\s+/g,'-')||'letter'}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Leave application letter ready (${days} day${days===1?'':'s'} — ${fromDate} to ${toDate}).`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
+// leaveletter lives in category-docs.js
 /* ===================== PRESCRIPTION PAD GENERATOR (for doctors) ===================== */
 TOOL_IMPL.prescription = {
   mount(container){
