@@ -260,7 +260,7 @@ test('matrimony: public browsing shows only safe fields; contact requests; horos
   const it = list.items.find((x) => x.id === sub.id);
   assert.ok(it);
   assert.equal(it.name, 'Lakshmi'); assert.equal(it.star, 'rohini'); assert.equal(typeof it.age, 'number'); assert.equal(it.photo_count, 1);
-  const leak = JSON.stringify(list) + JSON.stringify(await rpc('mat_public_profile', { id: sub.id }, null));
+  const leak = JSON.stringify(it) + JSON.stringify(await rpc('mat_public_profile', { id: sub.id }, null));
   for (const bad of [phone, 'l@x.in', '1998-04-04', 'Murugan', 'Hosur', 'secret family note', '5-10', horo.j.path]) assert.equal(leak.includes(bad), false, 'leaked ' + bad);
   assert.equal(it.photo, up.j.path);
 
@@ -314,6 +314,37 @@ test('matrimony admin: extra stats, export, delete a sign-up (photos too)', asyn
   assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET', token: admin.access_token })).s, 200);
   const url = (await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET', token: admin.access_token })).j.url;
   assert.equal((await fetch(url)).status, 404);   // the photo file is gone with the sign-up
+});
+
+test('matrimony: admin lists an approved member publicly (safe fields + photo), unlisting/hiding removes it', async () => {
+  const admin = await signup('admin5');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [admin.user.id] }]);
+  const m = await signup('listme');
+  const jpg = Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=', 'base64');
+  const up = await call('/mat/photo', { body: jpg, raw: true, token: m.access_token, headers: { 'Content-Type': 'image/jpeg' } });
+  assert.ok(up.j.path, JSON.stringify(up));
+  const sv = await rpc('mat_save_profile', { p: profile('Meenakshi', 'F', '1996-06-06', { photos: [up.j.path], father_name: 'Secret Father', native_place: 'Hidden Town', star: 'rohini' }), phone: '9123456780', email: 'meen@x.in' }, m.access_token);
+  assert.equal(sv.ok, true, JSON.stringify(sv));
+  const pid = m.user.id;
+  const anon = async () => (await rpc('mat_public_list', { f: {}, lim: 24 }, null)).items.find((x) => x.id === pid);
+  assert.equal(await anon(), undefined);                                         // pending + not listed
+  await rpc('mat_admin_set_status', { pid, st: 'approved' }, admin.access_token);
+  assert.equal(await anon(), undefined);                                         // approved but not listed -> still private
+  assert.equal((await rpc('mat_admin_member_list', { pid, on: true }, m.access_token)).ok, false);   // not an admin
+  assert.equal((await rpc('mat_admin_member_list', { pid, on: true }, admin.access_token)).ok, true);
+  const it = await anon();
+  assert.ok(it); assert.equal(it.name, 'Meenakshi'); assert.equal(it.photo, up.j.path);
+  const leak = JSON.stringify(await anon()) + JSON.stringify(await rpc('mat_public_profile', { id: pid }, null));
+  for (const bad of ['9123456780', 'meen@x.in', '1996-06-06', 'Secret Father', 'Hidden Town']) assert.equal(leak.includes(bad), false, 'leaked ' + bad);
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET' })).s, 200);   // anonymous photo link works while listed
+  assert.equal((await rpc('mat_request_contact', { target: pid, name: 'Ravi', phone: '8' + String(Date.now()).slice(-9) }, null)).ok, true);
+  const rq = (await rpc('mat_admin_contact_requests', { st: 'new' }, admin.access_token)).items.find((x) => x.target_id === pid);
+  assert.equal(rq.target_phone, '9123456780');
+  const ex = (await rpc('mat_admin_export', {}, admin.access_token)).items.find((x) => x.source === 'member' && x.name === 'Meenakshi');
+  assert.equal(ex.phone, '9123456780');
+  await rpc('mat_admin_set_status', { pid, st: 'hidden' }, admin.access_token);
+  assert.equal(await anon(), undefined);                                         // hidden -> gone
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET' })).s, 401);
 });
 
 test('CORS + unknown routes', async () => {
