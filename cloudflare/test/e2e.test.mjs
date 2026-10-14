@@ -255,23 +255,27 @@ test('matrimony: public browsing shows only safe fields; contact requests; horos
   assert.equal((await rpc('mat_admin_submission_list', { sid: sub.id, on: true }, null)).ok, false);        // not an admin
   assert.equal((await rpc('mat_admin_submission_list', { sid: sub.id, on: true }, admin.access_token)).ok, true);
 
-  // anonymous: safe fields only, no photo
+  // anonymous: safe fields only; photos of listed profiles are public (owner's decision)
   const list = await rpc('mat_public_list', { f: { gender: 'F' }, lim: 24 }, null);
   const it = list.items.find((x) => x.id === sub.id);
   assert.ok(it);
   assert.equal(it.name, 'Lakshmi'); assert.equal(it.star, 'rohini'); assert.equal(typeof it.age, 'number'); assert.equal(it.photo_count, 1);
   const leak = JSON.stringify(list) + JSON.stringify(await rpc('mat_public_profile', { id: sub.id }, null));
-  for (const bad of [phone, 'l@x.in', '1998-04-04', 'Murugan', 'Hosur', 'secret family note', '5-10', up.j.path, horo.j.path]) assert.equal(leak.includes(bad), false, 'leaked ' + bad);
-  assert.equal('photo' in it, false);
+  for (const bad of [phone, 'l@x.in', '1998-04-04', 'Murugan', 'Hosur', 'secret family note', '5-10', horo.j.path]) assert.equal(leak.includes(bad), false, 'leaked ' + bad);
+  assert.equal(it.photo, up.j.path);
 
   // filters
   assert.equal((await rpc('mat_public_list', { f: { gender: 'M' }, lim: 24 }, null)).items.some((x) => x.id === sub.id), false);
   assert.equal((await rpc('mat_public_list', { f: { min_age: 40 }, lim: 24 }, null)).items.some((x) => x.id === sub.id), false);
 
-  // a logged-in visitor WITHOUT an approved profile still gets no photos; the admin does
+  // any visitor gets the photo; the horoscope is never public
   const visitor = await signup('visitor');
-  assert.equal('photo' in (await rpc('mat_public_profile', { id: sub.id }, visitor.access_token)).profile, false);
+  assert.equal((await rpc('mat_public_profile', { id: sub.id }, visitor.access_token)).profile.photo, up.j.path);
   assert.equal((await rpc('mat_public_profile', { id: sub.id }, admin.access_token)).profile.photo, up.j.path);
+  // anonymous photo link works only for listed public photos, never for the horoscope or other files
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET' })).s, 200);
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(horo.j.path), { method: 'GET' })).s, 401);
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent('someone/x.jpg'), { method: 'GET' })).s, 401);
 
   // contact request: validated, rate limited, visible to the admin with the target's phone
   assert.equal((await rpc('mat_request_contact', { target: sub.id, name: 'R', phone: '9876543210' }, null)).code, 'name');
@@ -289,6 +293,27 @@ test('matrimony: public browsing shows only safe fields; contact requests; horos
   // un-list -> disappears again
   await rpc('mat_admin_submission_list', { sid: sub.id, on: false }, admin.access_token);
   assert.equal((await rpc('mat_public_profile', { id: sub.id }, null)).code, 'not_found');
+});
+
+test('matrimony admin: extra stats, export, delete a sign-up (photos too)', async () => {
+  const admin = await signup('admin4');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [admin.user.id] }]);
+  const jpg = Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=', 'base64');
+  const up = await call('/mat/photo?folder=submissions', { body: jpg, raw: true, headers: { 'Content-Type': 'image/jpeg' } });
+  const phone = '7' + String(Date.now()).slice(-9);
+  const sub = await rpc('mat_submit_public', { p: { ...profile('Deleteme', 'M', '1991-01-01'), photos: [up.j.path] }, phone }, null);
+  assert.equal(sub.ok, true, JSON.stringify(sub));
+  const st = await rpc('mat_admin_stats', {}, admin.access_token);
+  assert.ok(st.submissions_total >= 1); assert.equal(typeof st.listed, 'number'); assert.equal(typeof st.members_total, 'number');
+  assert.equal((await rpc('mat_admin_export', {}, null)).ok, false);
+  const ex = await rpc('mat_admin_export', {}, admin.access_token);
+  assert.equal(ex.ok, true); assert.ok(ex.items.some((x) => x.name === 'Deleteme' && x.phone === phone));
+  assert.equal((await rpc('mat_admin_submission_delete', { sid: sub.id }, null)).ok, false);
+  assert.equal((await rpc('mat_admin_submission_delete', { sid: sub.id }, admin.access_token)).ok, true);
+  assert.equal((await rpc('mat_admin_submission_delete', { sid: sub.id }, admin.access_token)).code, 'not_found');
+  assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET', token: admin.access_token })).s, 200);
+  const url = (await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET', token: admin.access_token })).j.url;
+  assert.equal((await fetch(url)).status, 404);   // the photo file is gone with the sign-up
 });
 
 test('CORS + unknown routes', async () => {
