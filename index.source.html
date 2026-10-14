@@ -437,7 +437,7 @@ const TOOLS = [
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Leave letter for employees, students and parents — Tamil or English, auto-written, half-day, PDF', icon:'📝', color:'#2E86AB', cat:'business',lazy:'docs'},
-  {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
+  {id:'businesscard', name:'Business Card Maker', desc:'Business card with 4 layouts, Tamil name, QR (contact / UPI / website), 10-up A4 cut sheet, vCard', icon:'💳', color:'#1A5276', cat:'business',lazy:'docs'},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0,lazy:'docs'},
   {id:'resumebuilder', name:'Resume Builder', desc:'Build a resume from scratch — 4 templates, auto-saves your info, ATS-friendly', icon:'📋', color:'#1565C0', cat:'business', cost:0},
   {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014d`;
+    s.src = `category-${cat}.js?v=20261014g`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -14840,147 +14840,7 @@ TOOL_IMPL.tamiltext = {
 
 /* mathpractice — moved to category-education.js (lazy-loaded) */
 /* batchbgremove — moved to category-image.js (lazy-loaded) */
-TOOL_IMPL.businesscard = {
-  mount(container){
-    const LS_KEY = 'businessCard_defaults';
-    let style = 0;
-    const styles = [
-      { bg:'#1A5276', text:'#FFFFFF', accent:'#F4D03F' },
-      { bg:'#FFFFFF', text:'#20242B', accent:'#1A5276' },
-      { bg:'#2E6F5E', text:'#FFFFFF', accent:'#F4D03F' }
-    ];
-    const body = el(`<div></div>`); container.appendChild(body);
-    function loadDefaults(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch{ return {}; } }
-    function saveDefaults(){
-      try{ localStorage.setItem(LS_KEY, JSON.stringify({
-        name: body.querySelector('#bcName').value, phone: body.querySelector('#bcPhone').value,
-        email: body.querySelector('#bcEmail').value, company: body.querySelector('#bcCompany').value, gstin: body.querySelector('#bcGstin').value
-      })); }catch{}
-    }
-    function paint(){
-      body.innerHTML = '';
-      const d = loadDefaults();
-      body.appendChild(el(`<div class="note">Fill your details — preview updates live. Download as an 8-up print sheet (PDF) or a single card image (PNG).</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Name</label><input type="text" id="bcName" autocomplete="off" value="${escapeHtml(d.name||'')}"></div>
-          <div class="field"><label>Designation</label><input type="text" id="bcDesig" autocomplete="off"></div>
-          <div class="field"><label>Company (optional)</label><input type="text" id="bcCompany" autocomplete="off" value="${escapeHtml(d.company||'')}"></div>
-          <div class="field"><label>Phone</label><input type="text" id="bcPhone" autocomplete="off" value="${escapeHtml(d.phone||'')}"></div>
-          <div class="field"><label>Email (optional)</label><input type="email" id="bcEmail" autocomplete="off" value="${escapeHtml(d.email||'')}"></div>
-          <div class="field"><label>GSTIN (optional)</label><input type="text" id="bcGstin" autocomplete="off" value="${escapeHtml(d.gstin||'')}"></div>
-          <div class="field" style="grid-column:1/-1;"><label>UPI ID (optional — adds a scannable QR)</label><input type="text" id="bcUpi" placeholder="yourname@bank" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Style</div>`));
-      const styleRow = el(`<div class="filter-row"></div>`);
-      styles.forEach((s,i)=>{
-        const chip = el(`<button class="filter-chip ${style===i?'active':''}" style="background:${style===i?s.bg:'#fff'}; color:${style===i?s.text:'var(--ink)'};">Style ${i+1}</button>`);
-        chip.onclick = ()=>{ style=i; renderPreview(); };
-        styleRow.appendChild(chip);
-      });
-      body.appendChild(styleRow);
-
-      const previewWrap = el(`<div style="margin-top:16px; display:flex; justify-content:center;"></div>`);
-      const canvas = el(`<canvas width="700" height="400" style="max-width:100%; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.15);"></canvas>`);
-      previewWrap.appendChild(canvas);
-      body.appendChild(previewWrap);
-      body.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', renderPreview));
-
-      const row = el(`<div class="btn-row" style="margin-top:16px;"></div>`);
-      const bPng = el(`<button class="btn secondary">🖼️ Download PNG</button>`);
-      const bPdf = el(`<button class="btn">💳 Download 8-up PDF</button>`);
-      bPng.onclick = ()=> downloadPng(canvas);
-      bPdf.onclick = doPdfSheet;
-      row.appendChild(bPng); row.appendChild(bPdf);
-      body.appendChild(row);
-      renderPreview();
-    }
-    function renderQrToDataUrl(text, size){
-      return new Promise(resolve=>{
-        const holder = document.createElement('div');
-        holder.style.cssText = 'position:absolute; left:-9999px;';
-        document.body.appendChild(holder);
-        new QRCode(holder, { text, width:size, height:size, correctLevel: QRCode.CorrectLevel.M });
-        setTimeout(()=>{
-          const img = holder.querySelector('img') || holder.querySelector('canvas');
-          const url = img.tagName==='CANVAS' ? img.toDataURL() : img.src;
-          holder.remove();
-          resolve(url);
-        }, 60);
-      });
-    }
-    async function drawCard(ctx, w, h){
-      const s = styles[style];
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle = s.bg; ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = s.accent; ctx.fillRect(0,0,10,h);
-      const name = body.querySelector('#bcName').value||'Your Name';
-      const desig = body.querySelector('#bcDesig').value||'';
-      const company = body.querySelector('#bcCompany').value||'';
-      const phone = body.querySelector('#bcPhone').value||'';
-      const email = body.querySelector('#bcEmail').value||'';
-      const gstin = body.querySelector('#bcGstin').value||'';
-      const upi = body.querySelector('#bcUpi').value||'';
-      ctx.fillStyle = s.text; ctx.textBaseline = 'alphabetic';
-      ctx.font = '700 34px Inter, sans-serif'; ctx.fillText(name, 40, 90);
-      ctx.font = '500 18px Inter, sans-serif'; ctx.fillStyle = s.accent;
-      if(desig) ctx.fillText(desig, 40, 120);
-      ctx.fillStyle = s.text; ctx.font = '400 16px Inter, sans-serif';
-      let ly = 165;
-      if(company){ ctx.fillText(company, 40, ly); ly += 24; }
-      if(phone){ ctx.fillText('📞 '+phone, 40, ly); ly += 24; }
-      if(email){ ctx.fillText('✉️ '+email, 40, ly); ly += 24; }
-      if(gstin){ ctx.font = '400 13px Inter, sans-serif'; ctx.fillText('GSTIN: '+gstin, 40, 370); }
-      if(upi.trim()){
-        const qrUrl = await renderQrToDataUrl(`upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(name)}`, 200);
-        const qrImg = new Image();
-        await new Promise(res=>{ qrImg.onload=res; qrImg.src=qrUrl; });
-        ctx.drawImage(qrImg, w-160, h/2-70, 130, 130);
-      }
-    }
-    let renderSeq = 0;
-    async function renderPreview(){
-      const canvas = body.querySelector('canvas');
-      if(!canvas) return;
-      const mySeq = ++renderSeq;
-      const ctx = canvas.getContext('2d');
-      await drawCard(ctx, canvas.width, canvas.height);
-      if(mySeq !== renderSeq) return;
-    }
-    function downloadPng(canvas){
-      canvas.toBlob(blob=> downloadBlob(blob, 'business-card.png'), 'image/png');
-    }
-    async function doPdfSheet(){
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Preparing card image…');
-        const canvas = body.querySelector('canvas');
-        const cardBlob = await new Promise(res=> canvas.toBlob(res,'image/png'));
-        const cardBytes = new Uint8Array(await cardBlob.arrayBuffer());
-        const doc = await PDFDocument.create();
-        const cardImg = await doc.embedPng(cardBytes);
-        const page = doc.addPage([595.28, 841.89]);
-        const cardW = 252, cardH = cardW * (canvas.height/canvas.width);
-        const cols = 2, rows = 4, gapX = 20, gapY = 15;
-        const totalW = cols*cardW + (cols-1)*gapX, totalH = rows*cardH + (rows-1)*gapY;
-        const startX = (595.28-totalW)/2, startY = (841.89-totalH)/2 + totalH - cardH;
-        for(let r=0;r<rows;r++){
-          for(let c=0;c<cols;c++){
-            page.drawImage(cardImg, { x: startX + c*(cardW+gapX), y: startY - r*(cardH+gapY), width: cardW, height: cardH });
-          }
-        }
-        prog.set(85,'Saving…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'business-card-sheet.pdf');
-        saveDefaults();
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, '8-up business card sheet downloaded — cut along the card edges after printing.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
+// businesscard lives in category-docs.js
 
 /* ===================== TAMIL HANDWRITING TRACING ===================== */
 /* tamiltracing — moved to category-education.js (lazy-loaded) */

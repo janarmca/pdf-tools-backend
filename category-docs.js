@@ -165,17 +165,15 @@
     if (maxLines && out.length > maxLines) { const cut = out.slice(0, maxLines); cut[maxLines - 1] = cut[maxLines - 1].replace(/.{0,2}$/, '…'); return cut; }
     return out;
   }
-  async function qrDataUrl(text, px) {
+  let qrLibP = null;
+  const loadQrGen = () => qrLibP || (qrLibP = new Promise((res, rej) => { if (window.qrcode) return res(window.qrcode); const sc = document.createElement('script'); sc.src = '/libs/qrcode-generator.js?v=1'; sc.onload = () => res(window.qrcode); sc.onerror = () => { qrLibP = null; rej(new Error('QR library could not load')); }; document.head.appendChild(sc); }));
+  async function qrDataUrl(text, px) { // self-hosted generator (no CDN); UTF-8 safe so Tamil contact details encode correctly
     try {
-      if (typeof ensureQrLib === 'function') await ensureQrLib();
-      if (typeof QRCode === 'undefined') return null;
-      const holder = document.createElement('div'); holder.style.cssText = 'position:fixed;left:-9999px;top:0';
-      document.body.appendChild(holder);
-      new QRCode(holder, { text, width: px, height: px, correctLevel: QRCode.CorrectLevel.M });
-      await new Promise((r) => setTimeout(r, 60));
-      const c = holder.querySelector('canvas'), img = holder.querySelector('img');
-      const url = c ? c.toDataURL('image/png') : img ? img.src : null;
-      holder.remove(); return url;
+      const qrcode = await loadQrGen(), qr = qrcode(0, 'M'); qr.addData(unescape(encodeURIComponent(String(text)))); qr.make();
+      const n = qr.getModuleCount(), cell = Math.max(2, Math.floor(px / n)), size = cell * n, c = document.createElement('canvas'); c.width = c.height = size;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, size, size); g.fillStyle = '#000';
+      for (let r = 0; r < n; r++) for (let q = 0; q < n; q++) if (qr.isDark(r, q)) g.fillRect(q * cell, r * cell, cell, cell);
+      return c.toDataURL('image/png');
     } catch (e) { return null; }
   }
   const dataUrlBytes = (u) => { const b = atob(u.split(',')[1]); const a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
@@ -1369,6 +1367,140 @@
   }
   TOOL_IMPL.prescription = { mount(container) { mountRx(container); } };
   TOOL_IMPL.prescription._f = { rxProblems, rxMedLine, blankRx };
+
+
+  /* =====================================================================
+     BUSINESS CARD — 4 layouts, colours, Tamil-friendly, QR (UPI / website / contact),
+     PNG (300 dpi), 10-up A4 cut sheet with crop marks, single-card PDF, vCard
+     ===================================================================== */
+  const BC_KEY = 'pti-card-v1';
+  const BC_THEMES = { navy: ['#1A3C6E', '#FFFFFF', '#F4C430'], white: ['#FFFFFF', '#20242B', '#1A5276'], green: ['#1F6F54', '#FFFFFF', '#F4D03F'], maroon: ['#7A1233', '#FFFFFF', '#F2C14E'], black: ['#16181D', '#FFFFFF', '#3DDC97'], saffron: ['#FFF4E5', '#3A2A12', '#D9622B'], custom: null };
+  const BC_FONT = '"Noto Sans Tamil","Inter","Segoe UI",Arial,sans-serif';
+  const hexOk = (s) => /^#[0-9a-fA-F]{6}$/.test(s || '');
+  function blankCard() {
+    const d = lsGet(BC_KEY, {});
+    return Object.assign({ v: 1, layout: 'bar', theme: 'navy', cust: ['#1A3C6E', '#FFFFFF', '#F4C430'], name: '', name2: '', desig: '', company: '', tag: '', phone: '', phone2: '', email: '', web: '', addr: '', gstin: '', upi: '', qr: 'none' }, d);
+  }
+  const bcColors = (S) => { const t = S.theme === 'custom' ? S.cust : BC_THEMES[S.theme] || BC_THEMES.navy; return { bg: hexOk(t[0]) ? t[0] : '#1A3C6E', tx: hexOk(t[1]) ? t[1] : '#FFFFFF', ac: hexOk(t[2]) ? t[2] : '#F4C430' }; };
+  const bcWeb = (w) => { w = String(w || '').trim(); return w && !/^https?:\/\//i.test(w) ? 'https://' + w : w; };
+  function bcVcard(S, compact) {
+    if (compact) S = Object.assign({}, S, { phone2: '', addr: '' });
+    const e = (s) => String(s || '').replace(/[\\;,]/g, (m) => '\\' + m).replace(/\n/g, '\\n');
+    return ['BEGIN:VCARD', 'VERSION:3.0', 'FN:' + e(S.name), 'N:' + e(S.name) + ';;;;', S.company && 'ORG:' + e(S.company), S.desig && 'TITLE:' + e(S.desig), S.phone && 'TEL;TYPE=CELL:' + S.phone.replace(/[^\d+]/g, ''), S.phone2 && 'TEL;TYPE=WORK:' + S.phone2.replace(/[^\d+]/g, ''), S.email && 'EMAIL:' + S.email, S.web && 'URL:' + bcWeb(S.web), S.addr && 'ADR;TYPE=WORK:;;' + e(S.addr.replace(/\n/g, ', ')) + ';;;;', 'END:VCARD'].filter(Boolean).join('\r\n');
+  }
+  function bcQrText(S) {
+    if (S.qr === 'upi' && S.upi.trim()) return 'upi://pay?pa=' + encodeURIComponent(S.upi.trim()) + '&pn=' + encodeURIComponent(S.name || S.company || '') + '&cu=INR';
+    if (S.qr === 'web' && S.web.trim()) return bcWeb(S.web);
+    if (S.qr === 'vcard' && S.name.trim()) return bcVcard(S, true); // compact: fewer fields = a sparser, easier-to-scan code
+    return '';
+  }
+  async function drawCard(S, W, H) {
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'), k = W / 1050, col = bcColors(S);
+    try { await Promise.all([document.fonts.load('700 40px "Noto Sans Tamil"'), document.fonts.load('400 24px "Noto Sans Tamil"')]); } catch (e) { /* fall back to system fonts */ }
+    const px = (n) => n * k, font = (w, s) => w + ' ' + px(s) + 'px ' + BC_FONT;
+    const fit = (text, maxW, size, w, min) => { let s = size; x.font = font(w, s); while (s > (min || 14) && x.measureText(text).width > px(maxW)) { s -= 1; x.font = font(w, s); } return s; };
+    const wrap = (text, maxW, size, w, maxLines) => { x.font = font(w, size); const out = []; String(text || '').split('\n').forEach((para) => { let line = ''; para.split(/\s+/).filter(Boolean).forEach((wd) => { const t = line ? line + ' ' + wd : wd; if (x.measureText(t).width > px(maxW) && line) { out.push(line); line = wd; } else line = t; }); if (line) out.push(line); }); return out.slice(0, maxLines || 3); };
+    const qrText = bcQrText(S); let qrImg = null;
+    if (qrText) { const u = await qrDataUrl(qrText, 260); if (u) { qrImg = new Image(); await new Promise((r) => { qrImg.onload = r; qrImg.onerror = r; qrImg.src = u; }); } }
+    const qsz = 190, hasQr = !!(qrImg && qrImg.width);
+    const dark = (hex) => { const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 < 140; };
+    const icon = (kind, ix, iy, size, color) => {
+      x.save(); x.strokeStyle = color; x.fillStyle = color; x.lineWidth = px(2.4); x.lineJoin = 'round'; x.lineCap = 'round'; const s = px(size), X = px(ix), Y = px(iy) - s;
+      if (kind === 'phone') { x.beginPath(); x.roundRect ? x.roundRect(X + s * .25, Y, s * .5, s, s * .1) : x.rect(X + s * .25, Y, s * .5, s); x.stroke(); x.beginPath(); x.arc(X + s * .5, Y + s * .82, s * .04, 0, 7); x.fill(); }
+      else if (kind === 'mail') { x.strokeRect(X, Y + s * .2, s, s * .62); x.beginPath(); x.moveTo(X, Y + s * .2); x.lineTo(X + s / 2, Y + s * .55); x.lineTo(X + s, Y + s * .2); x.stroke(); }
+      else if (kind === 'web') { x.beginPath(); x.arc(X + s / 2, Y + s / 2, s * .46, 0, 7); x.stroke(); x.beginPath(); x.ellipse(X + s / 2, Y + s / 2, s * .2, s * .46, 0, 0, 7); x.stroke(); x.beginPath(); x.moveTo(X + s * .04, Y + s / 2); x.lineTo(X + s * .96, Y + s / 2); x.stroke(); }
+      else { x.beginPath(); x.arc(X + s / 2, Y + s * .38, s * .3, Math.PI, 0); x.lineTo(X + s / 2, Y + s * .95); x.closePath(); x.stroke(); x.beginPath(); x.arc(X + s / 2, Y + s * .38, s * .1, 0, 7); x.fill(); }
+      x.restore();
+    };
+    const contacts = [['phone', [S.phone, S.phone2].filter((v) => v.trim()).join('   ')], ['mail', S.email], ['web', S.web.replace(/^https?:\/\//i, '')], ['pin', S.addr]].filter((r) => String(r[1] || '').trim());
+    const drawContacts = (left, top, maxW, fg, ac, size, gap) => { let y = top; contacts.forEach((r) => { const lines = r[0] === 'pin' ? wrap(r[1], maxW - 52, size, 400, 2) : [r[1]]; icon(r[0], left, y, size * .95, ac); lines.forEach((ln, i) => { x.font = font(400, size); if (r[0] !== 'pin') x.font = font(400, fit(ln, maxW - 52, size, 400, 16)); x.fillStyle = fg; x.textBaseline = 'alphabetic'; x.fillText(ln, px(left + 46), px(y + i * (size * 1.3))); }); y += lines.length * size * 1.3 + gap; }); return y; };
+    const line = (txt, left, y, maxW, size, wgt, color, align) => { if (!String(txt || '').trim()) return; const s = fit(txt, maxW, size, wgt, 16); x.font = font(wgt, s); x.fillStyle = color; x.textAlign = align || 'left'; x.textBaseline = 'alphabetic'; x.fillText(txt, px(left), px(y)); x.textAlign = 'left'; };
+    const qrBox = (qx, qy, size, pad) => { if (!hasQr) return; x.fillStyle = '#fff'; x.fillRect(px(qx - pad), px(qy - pad), px(size + 2 * pad), px(size + 2 * pad)); x.drawImage(qrImg, px(qx), px(qy), px(size), px(size)); };
+    x.fillStyle = col.bg; x.fillRect(0, 0, W, H); const L = S.layout, tx = col.tx, ac = col.ac;
+    if (L === 'bar') {
+      x.fillStyle = ac; x.fillRect(0, 0, px(22), H); const left = 70, mw = hasQr ? 640 : 900;
+      line((S.company || '').toUpperCase(), left, 82, mw, 26, 700, ac);
+      line(S.name || 'Your Name', left, 165, mw, 60, 700, tx); line(S.name2, left, 218, mw, 32, 500, tx); line(S.desig, left, S.name2 ? 264 : 224, mw, 30, 500, ac);
+      x.fillStyle = ac; x.fillRect(px(left), px(292), px(90), px(5)); drawContacts(left, 352, mw, tx, ac, 27, 14);
+      if (hasQr) { qrBox(1050 - qsz - 70, 160, qsz, 12); } line(S.tag, left, 560, 700, 22, 400, tx);
+      if (S.gstin.trim()) line('GSTIN: ' + S.gstin, 1050 - 70, 560, 380, 20, 500, tx, 'right');
+    } else if (L === 'band') {
+      x.fillStyle = col.bg; x.fillRect(0, 0, W, px(255)); x.fillStyle = '#FFFFFF'; x.fillRect(0, px(255), W, H - px(255)); x.fillStyle = ac; x.fillRect(0, px(255), W, px(8));
+      const left = 60, mw = 930; line((S.company || '').toUpperCase(), left, 66, mw, 24, 700, ac); line(S.name || 'Your Name', left, 138, mw, 58, 700, tx); line(S.name2, left, 188, mw, 30, 500, tx); line(S.desig, left, S.name2 ? 232 : 192, mw, 28, 500, ac);
+      const ink = dark(col.bg) || col.bg.toLowerCase() === '#ffffff' ? '#20242B' : '#20242B'; drawContacts(left, 335, hasQr ? 640 : 900, ink, dark(col.bg) ? col.bg : ac, 27, 14);
+      if (hasQr) qrBox(1050 - qsz - 60, 300, qsz, 10); line(S.tag, left, 565, 700, 21, 400, '#5A6270'); if (S.gstin.trim()) line('GSTIN: ' + S.gstin, 990, 565, 380, 20, 500, '#5A6270', 'right');
+    } else if (L === 'center') {
+      x.fillStyle = ac; x.fillRect(px(60), px(52), W - px(120), px(4)); x.fillRect(px(60), H - px(56), W - px(120), px(4));
+      line((S.company || '').toUpperCase(), 525, 118, 900, 28, 700, ac, 'center'); line(S.name || 'Your Name', 525, 200, 900, 64, 700, tx, 'center'); line(S.name2, 525, 250, 900, 32, 500, tx, 'center'); line(S.desig, 525, S.name2 ? 298 : 256, 900, 30, 500, ac, 'center');
+      const items = [S.phone && S.phone, S.phone2, S.email, S.web && S.web.replace(/^https?:\/\//i, '')].filter((v) => v && String(v).trim()), rows = [items.slice(0, 2).join('    ·    '), items.slice(2).join('    ·    ')].filter(Boolean);
+      const tcx = hasQr ? 440 : 525, tmw = hasQr ? 740 : 900; rows.forEach((r, i) => line(r, tcx, 358 + i * 42, tmw, 27, 400, tx, 'center')); wrap(S.addr, tmw, 24, 400, 2).forEach((ln, i) => line(ln, tcx, 358 + rows.length * 42 + 6 + i * 32, tmw, 24, 400, tx, 'center'));
+      if (hasQr) qrBox(1050 - 60 - 150 - 8, 330, 150, 8); if (S.gstin.trim()) line('GSTIN: ' + S.gstin, 525, 524, 600, 19, 500, ac, 'center');
+    } else { // split
+      const pw = 410; x.fillStyle = col.bg; x.fillRect(0, 0, px(pw), H); x.fillStyle = '#FFFFFF'; x.fillRect(px(pw), 0, W - px(pw), H); x.fillStyle = ac; x.fillRect(px(pw), 0, px(8), H);
+      const left = 44, mw = pw - 80; line((S.company || '').toUpperCase(), left, 80, mw, 22, 700, ac); line(S.name || 'Your Name', left, 190, mw, 46, 700, tx);
+      let ny = 190; if (S.name2) { line(S.name2, left, 232, mw, 28, 500, tx); ny = 232; } line(S.desig, left, ny + 46, mw, 26, 500, ac);
+      if (hasQr) qrBox(left, 600 - qsz - 44, qsz - 30, 10); const ink = '#20242B'; drawContacts(pw + 60, 190, 1050 - pw - 110, ink, dark(col.bg) ? col.bg : ac, 27, 18); line(S.tag, pw + 60, 548, 1050 - pw - 110, 21, 400, '#5A6270'); if (S.gstin.trim()) line('GSTIN: ' + S.gstin, pw + 60, 100, 1050 - pw - 110, 20, 600, '#5A6270');
+    }
+    return c;
+  }
+  function mountCard(container) {
+    const host = root(container); let S = blankCard(), seq = 0;
+    const save = () => lsSet(BC_KEY, S);
+    const fld = (label, key, o) => { o = o || {}; return '<div class="dx-f"><label>' + label + '</label>' + (o.area ? '<textarea data-p="' + key + '" rows="2">' + esc(S[key]) + '</textarea>' : '<input type="' + (o.type || 'text') + '" data-p="' + key + '" value="' + esc(S[key]) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' autocomplete="off">') + '</div>'; };
+    function paint() {
+      host.innerHTML = '<div class="dx-note">💳 ' + B('விவரம் நிரப்பினால் அட்டை உடனே தெரியும். PNG (300 dpi), A4-இல் 10 அட்டைகள் (வெட்டுக் குறிகளுடன்), தனி அட்டை PDF, தொடர்பு கோப்பு (vCard) பதிவிறக்கலாம்.', 'Fill in the details and the card updates live. Download PNG (300 dpi), a 10-up A4 cut sheet with crop marks, a single-card PDF, or a contact file (vCard).') + '</div>' +
+        '<div class="dx-grid">' + fld(B('பெயர்', 'Name'), 'name') + fld(B('தமிழ் / 2வது மொழிப் பெயர் (விருப்பம்)', 'Name in 2nd language (optional)'), 'name2') + '</div><div class="dx-grid">' + fld(B('பதவி', 'Designation'), 'desig') + fld(B('நிறுவனம்', 'Company'), 'company') + '</div>' + fld(B('வாசகம் (விருப்பம்)', 'Tagline (optional)'), 'tag') +
+        '<div class="dx-grid">' + fld(B('கைபேசி', 'Phone'), 'phone', { type: 'tel' }) + fld(B('2வது எண் (விருப்பம்)', '2nd number (optional)'), 'phone2', { type: 'tel' }) + '</div><div class="dx-grid">' + fld('Email', 'email', { type: 'email' }) + fld(B('இணையதளம்', 'Website'), 'web', { ph: 'www.example.com' }) + '</div>' + fld(B('முகவரி', 'Address'), 'addr', { area: 1 }) + fld('GSTIN ' + B('(விருப்பம்)', '(optional)'), 'gstin') +
+        '<h3 class="dx-h">QR</h3><div class="dx-grid"><div class="dx-f"><label>' + B('QR வகை', 'QR type') + '</label><select data-p="qr">' + [['none', B('இல்லை', 'None')], ['vcard', B('தொடர்பு (vCard) — ஸ்கேன் செய்தால் சேமிக்கலாம்', 'Contact (vCard) — scan to save')], ['web', B('இணையதளம்', 'Website')], ['upi', 'UPI ' + B('கட்டணம்', 'payment')]].map((o) => '<option value="' + o[0] + '"' + (S.qr === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>' + (S.qr === 'upi' ? fld('UPI ID', 'upi', { ph: 'name@bank' }) : '<div></div>') + '</div>' +
+        '<h3 class="dx-h">' + B('வடிவமைப்பு', 'Design') + '</h3><div class="dx-grid"><div class="dx-f"><label>' + B('அமைப்பு', 'Layout') + '</label><select data-p="layout">' + [['bar', B('பக்கக் கோடு', 'Side bar')], ['band', B('மேல் பட்டை', 'Top band')], ['center', B('மையம்', 'Centered')], ['split', B('இரு பாதி', 'Split panel')]].map((o) => '<option value="' + o[0] + '"' + (S.layout === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div><div class="dx-f"><label>' + B('வண்ணம்', 'Colours') + '</label><select data-p="theme">' + Object.keys(BC_THEMES).map((k) => '<option value="' + k + '"' + (S.theme === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div></div>' +
+        (S.theme === 'custom' ? '<div class="dx-grid three">' + ['bg', 'text', 'accent'].map((n, i) => '<div class="dx-f"><label>' + n + '</label><input type="color" data-c="' + i + '" value="' + esc(S.cust[i]) + '" style="width:100%;height:44px;border:1.5px solid var(--line);border-radius:10px;padding:2px"></div>').join('') + '</div>' : '') +
+        '<div style="margin-top:14px"><canvas id="bcPrev" width="700" height="400" style="width:100%;max-width:520px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.18);display:block;margin:0 auto" role="img" aria-label="' + esc(B('அட்டை முன்னோட்டம்', 'Card preview')) + '"></canvas></div><div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="sheet">📄 ' + B('A4 தாள் (10 அட்டை)', 'A4 sheet (10 cards)') + '</button><button type="button" class="dx-btn sec" data-out="single">💳 ' + B('தனி அட்டை PDF', 'Single card PDF') + '</button></div><div class="dx-row"><button type="button" class="dx-btn sec" data-out="png">🖼️ PNG</button><button type="button" class="dx-btn sec" data-out="vcf">👤 vCard (.vcf)</button></div>';
+      preview();
+    }
+    async function preview() { const my = ++seq, cv = host.querySelector('#bcPrev'); if (!cv) return; const c = await drawCard(S, 700, 400); if (my !== seq) return; const g = cv.getContext('2d'); g.clearRect(0, 0, 700, 400); g.drawImage(c, 0, 0); }
+    let tmr; host.addEventListener('input', onIn); host.addEventListener('change', onIn);
+    function onIn(e) {
+      const t = e.target, p = t.getAttribute && t.getAttribute('data-p'), ci = t.getAttribute && t.getAttribute('data-c');
+      if (ci != null) { S.cust[+ci] = t.value; save(); clearTimeout(tmr); tmr = setTimeout(preview, 120); return; }
+      if (!p) return; S[p] = t.value; save();
+      if (p === 'theme' || p === 'qr') { paint(); return; } clearTimeout(tmr); tmr = setTimeout(preview, 150);
+    }
+    host.addEventListener('click', async (e) => {
+      const b = e.target.closest && e.target.closest('button[data-out]'); if (!b) return;
+      const msg = host.querySelector('[data-k=msg]'), kind = b.getAttribute('data-out'), errs = [];
+      if (!S.name.trim()) errs.push(B('பெயர் தேவை', 'Name is required'));
+      if (S.qr === 'upi' && !/^[\w.\-]{2,}@[\w.\-]{2,}$/.test(S.upi.trim())) errs.push(B('சரியான UPI ID தேவை (name@bank)', 'Enter a valid UPI ID (name@bank)'));
+      if (S.qr === 'web' && !S.web.trim()) errs.push(B('QR-க்கு இணையதளம் தேவை', 'Website is needed for the website QR'));
+      if (S.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email.trim())) errs.push(B('Email வடிவம் தவறு', 'Email format looks wrong'));
+      if (errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + errs.map(esc).join('<br>') + '</div>'; return; }
+      b.disabled = true; msg.innerHTML = '<div class="dx-note">⏳ ' + B('தயாராகிறது…', 'Preparing…') + '</div>';
+      try {
+        const base = 'Business-card-' + (fileSafe(S.name) || fileSafe(S.company) || 'card');
+        if (kind === 'vcf') downloadBlob(new Blob([bcVcard(S)], { type: 'text/vcard' }), base + '.vcf');
+        else {
+          const c = await drawCard(S, 1050, 600), blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+          if (kind === 'png') downloadBlob(blob, base + '.png');
+          else {
+            const doc = await PDFDocument.create(), img = await doc.embedPng(new Uint8Array(await blob.arrayBuffer())), CW = 252, CH = 144;
+            if (kind === 'single') { const pg = doc.addPage([CW, CH]); pg.drawImage(img, { x: 0, y: 0, width: CW, height: CH }); }
+            else {
+              const pg = doc.addPage([595.28, 841.89]), gx = 14, gy = 14, tw = 2 * CW + gx, th = 5 * CH + 4 * gy, sx = (595.28 - tw) / 2, sy = (841.89 + th) / 2 - CH, mk = rgb(0.45, 0.45, 0.5);
+              for (let r = 0; r < 5; r++) for (let q = 0; q < 2; q++) {
+                const cx = sx + q * (CW + gx), cy = sy - r * (CH + gy); pg.drawImage(img, { x: cx, y: cy, width: CW, height: CH });
+                [[cx, cy], [cx + CW, cy], [cx, cy + CH], [cx + CW, cy + CH]].forEach((p, i) => { const dx = i % 2 ? 1 : -1, dy = i < 2 ? -1 : 1; pg.drawLine({ start: { x: p[0] + dx * 2, y: p[1] }, end: { x: p[0] + dx * 8, y: p[1] }, thickness: 0.4, color: mk }); pg.drawLine({ start: { x: p[0], y: p[1] + dy * 2 }, end: { x: p[0], y: p[1] + dy * 8 }, thickness: 0.4, color: mk }); });
+              }
+            }
+            downloadBlob(new Blob([await doc.save()], { type: 'application/pdf' }), base + (kind === 'single' ? '-3.5x2in' : '-sheet') + '.pdf');
+          }
+        }
+        msg.innerHTML = '<div class="dx-ok">✓ ' + B('தயார்', 'Ready') + (kind === 'sheet' ? ' — ' + B('அச்சிட்ட பின் குறிகளில் வெட்டுங்கள் (100% அளவில் அச்சிடவும்)', 'cut at the crop marks after printing (print at 100% scale)') : '') + '</div>';
+      } catch (err) { msg.innerHTML = '<div class="dx-err" role="alert">' + B('உருவாக்க முடியவில்லை: ', 'Could not create it: ') + esc(err && err.message || err) + '</div>'; } finally { b.disabled = false; }
+    });
+    paint();
+  }
+  TOOL_IMPL.businesscard = { mount(container) { mountCard(container); } };
+  TOOL_IMPL.businesscard._f = { bcVcard, bcQrText, blankCard };
 
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
