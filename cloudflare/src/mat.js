@@ -140,6 +140,22 @@ function checkConstraints(r) {
 // ---------------------------------------------------------------- functions (same names as before)
 const F = {};
 
+function memberRow(p, g, d, ph) {
+  return {
+    created_for: nz(p.created_for) || 'self', name: String(p.name ?? '').trim(), gender: g, dob: d,
+    religion: nz(p.religion) || 'hindu', community: nz(p.community) || 'other',
+    community_other: trimOrNull(p.community_other), kulam: trimOrNull(p.kulam), gotra: trimOrNull(p.gotra), mother_tongue: nz(p.mother_tongue),
+    star: nz(p.star), raasi: nz(p.raasi), dosham: nz(p.dosham) || 'no', marital: nz(p.marital) || 'never',
+    height_cm: toInt(p.height_cm), diet: nz(p.diet), education: nz(p.education), education_detail: trimOrNull(p.education_detail), occupation: trimOrNull(p.occupation),
+    employer_type: nz(p.employer_type), income_band: nz(p.income_band), city: trimOrNull(p.city), district: trimOrNull(p.district), state: nz(p.state),
+    country: nz(p.country) || 'India', father_occ: trimOrNull(p.father_occ), mother_occ: trimOrNull(p.mother_occ),
+    brothers: toInt(p.brothers), sisters: toInt(p.sisters), family_type: nz(p.family_type), family_status: nz(p.family_status),
+    father_name: trimOrNull(p.father_name), mother_name: trimOrNull(p.mother_name), native_place: trimOrNull(p.native_place),
+    brothers_married: toInt(p.brothers_married), sisters_married: toInt(p.sisters_married), family_about: trimOrNull(p.family_about),
+    about: trimOrNull(p.about), pref: JSON.stringify(p.pref && typeof p.pref === 'object' ? p.pref : {}), photos: JSON.stringify(ph),
+  };
+}
+
 F.mat_save_profile = async (db, uid, a) => {
   const p = a.p || {};
   if (!uid) return { ok: false, code: 'not_logged_in' };
@@ -160,19 +176,7 @@ F.mat_save_profile = async (db, uid, a) => {
   if (ph.length > 6) return { ok: false, code: 'photos' };
   if (ph.some((k) => k.slice(0, 37) !== uid + '/' || k.includes('..'))) return { ok: false, code: 'photos' };
 
-  const r = {
-    created_for: nz(p.created_for) || 'self', name: String(p.name ?? '').trim(), gender: g, dob: d,
-    religion: nz(p.religion) || 'hindu', community: nz(p.community) || 'other',
-    community_other: trimOrNull(p.community_other), kulam: trimOrNull(p.kulam), gotra: trimOrNull(p.gotra), mother_tongue: nz(p.mother_tongue),
-    star: nz(p.star), raasi: nz(p.raasi), dosham: nz(p.dosham) || 'no', marital: nz(p.marital) || 'never',
-    height_cm: toInt(p.height_cm), diet: nz(p.diet), education: nz(p.education), education_detail: trimOrNull(p.education_detail), occupation: trimOrNull(p.occupation),
-    employer_type: nz(p.employer_type), income_band: nz(p.income_band), city: trimOrNull(p.city), district: trimOrNull(p.district), state: nz(p.state),
-    country: nz(p.country) || 'India', father_occ: trimOrNull(p.father_occ), mother_occ: trimOrNull(p.mother_occ),
-    brothers: toInt(p.brothers), sisters: toInt(p.sisters), family_type: nz(p.family_type), family_status: nz(p.family_status),
-    father_name: trimOrNull(p.father_name), mother_name: trimOrNull(p.mother_name), native_place: trimOrNull(p.native_place),
-    brothers_married: toInt(p.brothers_married), sisters_married: toInt(p.sisters_married), family_about: trimOrNull(p.family_about),
-    about: trimOrNull(p.about), pref: JSON.stringify(p.pref && typeof p.pref === 'object' ? p.pref : {}), photos: JSON.stringify(ph),
-  };
+  const r = memberRow(p, g, d, ph);
   checkConstraints(r);
   const cols = Object.keys(r);
   let status = existing ? existing.status : 'pending';
@@ -454,7 +458,11 @@ F.mat_admin_stats = async (db, uid) => {
       (select coalesce(sum(amount_paise), 0) from mat_unlocks) as revenue_paise,
       (select count(*) from mat_reports where status = 'open') as open_reports,
       (select count(*) from mat_submissions where status = 'new') as new_submissions,
-      (select count(*) from mat_contact_requests where status = 'new') as new_requests`).first();
+      (select count(*) from mat_contact_requests where status = 'new') as new_requests,
+      (select count(*) from mat_submissions) as submissions_total,
+      ((select count(*) from mat_submissions where listed = 1) + (select count(*) from mat_profiles where listed = 1 and status = 'approved')) as listed,
+      (select count(*) from mat_contact_requests) as requests_total,
+      (select count(*) from mat_profiles) as members_total`).first();
   return { ok: true, ...r };
 };
 
@@ -533,6 +541,78 @@ F.mat_admin_submissions = async (db, uid, a) => {
   return { ok: true, items: rows.map((s) => { const data = safeParse(s.data, {}); return { ...s, data, photos: safeParse(s.photos, []), age: age(validDate(data.dob)) }; }) };
 };
 
+// ---------------------------------------------------------------- admin: read & edit any profile / sign-up
+F.mat_admin_get = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  if (a.kind === 's') {
+    const s = await db.prepare('select * from mat_submissions where id = ?').bind(String(a.id)).first();
+    if (!s) return { ok: false, code: 'not_found' };
+    return { ok: true, kind: 's', id: s.id, p: { ...safeParse(s.data, {}), photos: safeParse(s.photos, []), horoscope: s.horoscope || null }, phone: s.phone || '', email: s.email || '', status: s.status, listed: !!s.listed };
+  }
+  const r = await db.prepare('select p.*, v.phone as v_phone, v.email as v_email from mat_profiles p left join mat_private v on v.user_id = p.user_id where p.user_id = ?').bind(String(a.id)).first();
+  if (!r) return { ok: false, code: 'not_found' };
+  const o = profileOut(omit(r, ['v_phone', 'v_email']));
+  return { ok: true, kind: 'm', id: r.user_id, p: o, phone: r.v_phone || '', email: r.v_email || '', status: r.status, listed: !!r.listed };
+};
+
+F.mat_admin_save = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const p = a.p || {}, id = String(a.id || '');
+  const nm = String(p.name ?? '').trim();
+  if ([...nm].length < 2 || [...nm].length > 60) return { ok: false, code: 'name' };
+  const g = p.gender;
+  if (g !== 'M' && g !== 'F') return { ok: false, code: 'gender' };
+  const d = validDate(p.dob);
+  if (!d) return { ok: false, code: 'dob' };
+  const ph = arr(p, 'photos');
+  if (ph.length > 6) return { ok: false, code: 'photos' };
+  const okPath = (k) => !k.includes('..') && (k.slice(0, 12) === 'submissions/' || (a.kind !== 's' && k.slice(0, id.length + 1) === id + '/'));
+  if (ph.some((k) => !okPath(k))) return { ok: false, code: 'photos' };
+  const phone = trimOrNull(a.phone), email = trimOrNull(a.email);
+  if (a.kind === 's') {
+    const horo = trimOrNull(p.horoscope);
+    if (horo && !okPath(horo)) return { ok: false, code: 'photos' };
+    const clean = {};
+    for (const k of SUBMIT_FIELDS) { const v = trimOrNull(p[k] == null ? null : String(p[k])); if (v != null) clean[k] = [...v].slice(0, 600).join(''); }
+    if (p.pref && typeof p.pref === 'object' && !Array.isArray(p.pref)) clean.pref = p.pref;
+    const res = await db.prepare('update mat_submissions set data = ?, photos = ?, horoscope = ?, phone = ?, email = ? where id = ?')
+      .bind(JSON.stringify(clean), JSON.stringify(ph), horo, phone ? phone.slice(0, 20) : '', email ? email.slice(0, 120) : null, id).run();
+    return res.meta.changes ? { ok: true } : { ok: false, code: 'not_found' };
+  }
+  const r = memberRow(p, g, d, ph);
+  r.name = nm;
+  checkConstraints(r);
+  const cols = Object.keys(r);
+  const res = await db.prepare(`update mat_profiles set ${cols.map((c) => c + ' = ?').join(', ')}, updated_at = ? where user_id = ?`).bind(...cols.map((c) => r[c]), now(), id).run();
+  if (!res.meta.changes) return { ok: false, code: 'not_found' };
+  await db.prepare('insert into mat_private (user_id, phone, email) values (?1, ?2, ?3) on conflict (user_id) do update set phone = coalesce(?2, mat_private.phone), email = coalesce(?3, mat_private.email)').bind(id, phone, email).run();
+  return { ok: true };
+};
+
+
+// every sign-up as flat rows (the admin page turns them into a CSV / Excel-openable download)
+F.mat_admin_export = async (db, uid) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const rows = (await db.prepare('select id, data, phone, email, status, listed, created_at from mat_submissions order by created_at desc limit 5000').all()).results;
+  const flat = (code, d, extra) => ({ code, name: d.name || '', gender: d.gender || '', age: age(validDate(d.dob)), phone: '', email: '', community: d.community || '', kulam: d.kulam || '', star: d.star || '', raasi: d.raasi || '', education: d.education || '', occupation: d.occupation || '', city: d.city || '', state: d.state || '', ...extra });
+  const code6 = (id) => String(id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase();
+  const items = rows.map((s) => flat(code6(s.id), safeParse(s.data, {}), { source: 'sign-up', phone: s.phone || '', email: s.email || '', status: s.status, listed: s.listed ? 'yes' : 'no', created_at: s.created_at }));
+  const mem = (await db.prepare('select p.*, v.phone as v_phone, v.email as v_email from mat_profiles p left join mat_private v on v.user_id = p.user_id order by p.created_at desc limit 5000').all()).results;
+  for (const m of mem) items.push(flat(code6(m.user_id), m, { source: 'member', phone: m.v_phone || '', email: m.v_email || '', status: m.status, listed: m.listed ? 'yes' : 'no', created_at: m.created_at }));
+  return { ok: true, items };
+};
+
+// remove a sign-up for good (wrong / duplicate / asked to be removed); its photos are deleted too
+F.mat_admin_submission_delete = async (db, uid, a, env) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const s = await db.prepare('select photos, horoscope from mat_submissions where id = ?').bind(String(a.sid)).first();
+  if (!s) return { ok: false, code: 'not_found' };
+  await db.prepare('delete from mat_submissions where id = ?').bind(String(a.sid)).run();
+  const files = [...safeParse(s.photos, []), ...(s.horoscope ? [s.horoscope] : [])];
+  try { if (env && env.MAT_PHOTOS) for (const f of files) await env.MAT_PHOTOS.delete(f); } catch { /* best effort */ }
+  return { ok: true };
+};
+
 F.mat_admin_submission_set = async (db, uid, a) => {
   if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
   if (!['new', 'contacted', 'done', 'rejected'].includes(a.st)) return { ok: false, code: 'bad_status' };
@@ -542,16 +622,12 @@ F.mat_admin_submission_set = async (db, uid, a) => {
 
 // ---------------------------------------------------------------- public browsing (NO login needed)
 // Only these fields are ever shown to the public. Never: phone, e-mail, date of birth, income, parents' names,
-// native place, family notes, district, photos, horoscope. (Photos are added for logged-in viewers only.)
+// native place, family notes, district, horoscope. Photos of admin-listed profiles are visible to everyone (owner's decision).
 const PUBLIC_FIELDS = ['name', 'gender', 'height_cm', 'religion', 'community', 'community_other', 'kulam', 'gotra', 'mother_tongue', 'star', 'raasi', 'dosham', 'marital',
   'diet', 'education', 'education_detail', 'occupation', 'employer_type', 'city', 'state', 'father_occ', 'mother_occ', 'brothers', 'sisters', 'family_type', 'family_status', 'about'];
 
-// photos are shown only to approved members (and the admin) — never to anonymous visitors
-async function canSeePhotos(db, uid) {
-  if (!uid) return false;
-  if (await isAdmin(db, uid)) return true;
-  return !!(await db.prepare("select 1 from mat_profiles where user_id = ? and status = 'approved'").bind(uid).first());
-}
+// photos of admin-listed public sign-ups are visible to everyone (owner's decision); the admin approves the listing
+async function canSeePhotos() { return true; }
 
 function publicShape(id, d, created, photos, see) {
   const out = { id, code: String(id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase(), age: age(validDate(d.dob)), created_at: created };
@@ -561,10 +637,13 @@ function publicShape(id, d, created, photos, see) {
   return out;
 }
 
-// Only public sign-ups that the admin has listed. (Member-account profiles agreed to be seen by approved members only, so they are NOT shown here.)
+// Only profiles the admin has listed: public sign-ups (mat_submissions.listed) and approved member accounts (mat_profiles.listed).
 async function publicRows(db, see) {
   const subs = await db.prepare("select id, data, photos, created_at from mat_submissions where listed = 1 and status <> 'rejected' order by created_at desc limit 500").all();
-  return subs.results.map((s) => publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see));
+  const mem = await db.prepare("select * from mat_profiles where listed = 1 and status = 'approved' order by created_at desc limit 500").all();
+  return [...subs.results.map((s) => publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see)),
+    ...mem.results.map((m) => publicShape(m.user_id, m, m.created_at, safeParse(m.photos, []), see))]
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
 }
 
 F.mat_public_list = async (db, uid, a) => {
@@ -583,7 +662,9 @@ F.mat_public_list = async (db, uid, a) => {
 
 async function findPublic(db, see, id) {
   const s = await db.prepare("select id, data, photos, created_at from mat_submissions where id = ? and listed = 1 and status <> 'rejected'").bind(String(id)).first();
-  return s ? publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see) : null;
+  if (s) return publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see);
+  const m = await db.prepare("select * from mat_profiles where user_id = ? and listed = 1 and status = 'approved'").bind(String(id)).first();
+  return m ? publicShape(m.user_id, m, m.created_at, safeParse(m.photos, []), see) : null;
 }
 
 F.mat_public_profile = async (db, uid, a) => {
@@ -632,6 +713,13 @@ F.mat_admin_contact_request_set = async (db, uid, a) => {
   return { ok: true };
 };
 
+// list / unlist an approved member-account profile on the public page
+F.mat_admin_member_list = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  await db.prepare('update mat_profiles set listed = ? where user_id = ?').bind(a.on === false || a.on === 'false' ? 0 : 1, String(a.pid)).run();
+  return { ok: true };
+};
+
 F.mat_admin_submission_list = async (db, uid, a) => {
   if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
   await db.prepare('update mat_submissions set listed = ? where id = ?').bind(a.on === false || a.on === 'false' ? 0 : 1, a.sid).run();
@@ -645,7 +733,7 @@ export async function matRpc(env, uid, name, args) {
   if (!fn) return { ok: false, code: 'not_installed' };
   if (!uid && !PUBLIC.has(name) && name !== 'mat_my_profile' && name !== 'mat_counts') return { ok: false, code: 'not_logged_in' };
   try {
-    return await fn(env.DB, uid, args || {});
+    return await fn(env.DB, uid, args || {}, env);
   } catch (e) {
     if (e instanceof Code) return { ok: false, code: e.message };
     return { ok: false, code: 'error', message: e.message };

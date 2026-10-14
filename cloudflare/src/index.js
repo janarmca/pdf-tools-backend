@@ -45,9 +45,14 @@ async function photoDelete(req, env, url) {
 
 async function photoSignedUrl(req, env, url) {
   const me = await userFromRequest(req, env);
-  if (!me) return err(401, 'not_logged_in');
   const path = url.searchParams.get('path') || '';
   if (!path || path.includes('..')) return err(400, 'bad path');
+  if (!me) {
+    // visitors without login may only see photos of profiles the admin has listed publicly
+    const ok = (await env.DB.prepare("select 1 from mat_submissions where listed = 1 and status <> 'rejected' and instr(photos, ?) > 0").bind(path).first())
+      || (await env.DB.prepare("select 1 from mat_profiles where listed = 1 and status = 'approved' and instr(photos, ?) > 0").bind(path).first());
+    if (!ok) return err(401, 'not_logged_in');
+  }
   const exp = Math.floor(Date.now() / 1000) + PHOTO_URL_TTL;
   const sig = await hmac(env.AUTH_JWT_SECRET, `photo:${path}:${exp}`);
   return json({ url: `${url.origin}${PREFIX}/mat/photo/${encodeURIComponent(path)}?exp=${exp}&sig=${sig}` });
