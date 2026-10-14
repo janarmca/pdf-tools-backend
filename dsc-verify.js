@@ -265,6 +265,7 @@
     r.bytesAfter = Math.max(0, real - endCovered);
     r.coversWholeFile = r.bytesAfter === 0;
     if (!r.coversWholeFile) r.problems.push({ level: 'warn', code: 'APPENDED', extra: r.bytesAfter });
+    if (!r.coversWholeFile) { let tail = ''; for (let i = endCovered; i < Math.min(real, endCovered + 120); i++) tail += String.fromCharCode(u8[i]); r.stampedCopy = tail.indexOf('%PTI-VERIFIED-STAMP') >= 0; } // a copy that carries the pdftoolsindia tick stamp (verify the ORIGINAL file, not this copy)
     let cms;
     try { cms = parseCms(sig.contents); } catch (e) { r.integrity = 'broken'; r.problems.push({ level: 'bad', code: 'CMS_PARSE', extra: e.message }); return r; }
     if (!cms.signers.length) { r.problems.push({ level: 'bad', code: 'NO_SIGNER' }); return r; }

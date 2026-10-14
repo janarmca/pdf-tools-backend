@@ -390,7 +390,7 @@ const TOOLS = [
   {id:'pdfgray', name:'PDF → Grayscale', desc:'Convert to Grayscale / B&W', icon:'⚫', color:'#4A4A4A', cat:'pdf'},
   {id:'pdfcrop', name:'Crop PDF Margins', desc:'Trim white space from pages', icon:'📐', color:'#5B6B73', cat:'pdf'},
   {id:'pdfmeta', name:'Edit PDF Info', desc:'Change Title / Author / Subject / Keywords / Creator', icon:'🏷️', color:'#7D6608', cat:'pdf'},
-  {id:'dscverify', name:'DSC / e-Sign Verifier', desc:'Check digital signatures in a PDF — valid, edited after signing, expired, who signed', icon:'🔏', color:'#1B5E20', cat:'pdf'},
+  {id:'dscverify', name:'DSC / e-Sign Verifier', desc:'Check digital signatures in a PDF — valid, edited after signing, expired, who signed — report PDF + ✔ tick copy', icon:'🔏', color:'#1B5E20', cat:'pdf'},
   {id:'dscbulk', name:'Bulk Form 16 / 130 Signature Check', desc:'Check many signed PDFs or a TRACES ZIP at once — signed, broken or unsigned, with CSV', icon:'🗂️', color:'#1B5E20', cat:'business', lazy:'tds'},
   {id:'pantan', name:'PAN / TAN Checker', desc:'Paste many PAN / TAN numbers — wrong format, holder type, duplicates — before filing a TDS return', icon:'🪪', color:'#6C3483', cat:'business', lazy:'tds'},
   {id:'tdsdates', name:'TDS Due Date Calendar', desc:'TDS deposit and quarterly return dates for any financial year — new Income-tax Act 2025 and old forms', icon:'📅', color:'#1F618D', cat:'business', lazy:'tds'},
@@ -3302,10 +3302,13 @@ function ensureTdsCore(){
   return ensureLib('tdscore', ()=>!!window.TdsCore, '/tds-core.js?v=2', 'TDS helper');
 }
 function ensureDscVerify(){
-  return ensureLib('dscverify', ()=>!!window.DscVerify, '/dsc-verify.js?v=2', 'Signature checker');
+  return ensureLib('dscverify', ()=>!!window.DscVerify, '/dsc-verify.js?v=3', 'Signature checker');
+}
+function ensureDscStamp(){
+  return ensureLib('dscstamp', ()=>!!window.DscStamp, '/dsc-stamp.js?v=1', 'Tick stamp');
 }
 const LIB_LOADERS = {
-  tdscore: ensureTdsCore, dscverify: ensureDscVerify, pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
+  tdscore: ensureTdsCore, dscverify: ensureDscVerify, dscstamp: ensureDscStamp, pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
   xlsx: ensureXlsx, mammoth: ensureMammoth, html2canvas: ensureHtml2Canvas, docx: ensureDocxLib,
   pptxgenjs: ensurePptxGenJs, exceljs: ensureExcelJs
 };
@@ -3330,7 +3333,7 @@ const TOOL_LIBS = {
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
@@ -8366,7 +8369,7 @@ TOOL_IMPL.dscverify = {
         let h = `<div style="font-weight:700;font-size:15px;">${OKTXT[v]} கையொப்பம் ${sig.index}${sig.isDocTimeStamp?' (Time-stamp)':''}${sg?` — ${E(sg.subjectCn)}`:''}</div>`;
         sig.problems.filter(p=>!(p.code==='APPENDED' && !sig.isLatest)).forEach(p=>{
           const m = MSG[p.code] || ['warn',p.code,p.code];
-          h += `<div style="margin:6px 0;padding:8px 10px;border-radius:8px;background:${m[0]==='bad'?'#FDEDEC':'#FFF8E1'};font-size:13px;line-height:1.5;">${m[0]==='bad'?'❌':'⚠️'} ${E(m[1])}${p.code==='APPENDED'?` (${p.extra} bytes)`:''}<div style="color:var(--sub);font-size:12px;">${E(m[2])}</div></div>`;
+          h += `<div style="margin:6px 0;padding:8px 10px;border-radius:8px;background:${m[0]==='bad'?'#FDEDEC':'#FFF8E1'};font-size:13px;line-height:1.5;">${m[0]==='bad'?'❌':'⚠️'} ${E(m[1])}${p.code==='APPENDED'?` (${p.extra} bytes)`:''}<div style="color:var(--sub);font-size:12px;">${E(m[2])}</div>${p.code==='APPENDED' && sig.stampedCopy ? '<div style="margin-top:4px;font-size:12px;color:#1565C0;">ℹ️ இந்தக் கோப்பில் pdftoolsindia tick முத்திரை சேர்க்கப்பட்டுள்ளது — சரிபார்ப்புக்கு மூல (அசல்) கோப்பைப் பயன்படுத்துங்கள். · This copy carries the pdftoolsindia tick stamp; verify the ORIGINAL file.</div>' : ''}</div>`;
         });
         if(sig.problems.every(p=>p.code==='APPENDED' && !sig.isLatest) || !sig.problems.length){
           h += `<div style="margin:6px 0;font-size:13px;">✅ ஆவணம் கையொப்பத்துக்குப் பின் மாறவில்லை${sig.isLatest?' (முழு கோப்பையும் உள்ளடக்கியது)':' (இது முந்தைய கையொப்பம்; பின்னர் வந்த கையொப்பங்கள் இதை உடைக்காது)'} · ✅ கையொப்பம் கணித ரீதியாகச் சரி${sig.signatureValid ? '' : ' (சரிபார்க்க முடியவில்லை)'}</div>`;
@@ -8400,6 +8403,40 @@ TOOL_IMPL.dscverify = {
           • கணினியில் Adobe Acrobat / Reader (இணையத்துடன், புதிய பதிப்பு) பொதுவாக CCA India சங்கிலிக்குப் பச்சை ✔ காட்டும் — இது உங்கள் Adobe பதிப்பு / அமைப்பைப் பொறுத்தது.<br>
           • PDF-க்குள் இருக்கும் அந்த “?” படத்தை ஆவணத்தை உருவாக்கியவரே சேர்த்தார். அதை மாற்றினால் கையொப்பம் உடையும் அல்லது போலிச் சரிபார்ப்பாகும் — அதனால் நாங்கள் PDF-ஐ மாற்றுவதில்லை. அதற்குப் பதிலாக கீழே உள்ள <b>“Verification report”</b> தனி PDF-ஐப் பயன்படுத்துங்கள்.<br>
           <span style="color:#456;">In many viewers the yellow “?” only means “this viewer does not know the issuing CA” — it does not mean the signature is bad. We never edit your PDF (that would break the signature); use the separate verification report below instead.</span></div>`));
+      }
+      // "Verified copy": a NEW PDF with a visible tick. Only when every signature checked out; the original bytes are not touched (an incremental update is appended).
+      const stamped = rep.signatures.some(x => x.stampedCopy);
+      if(worst === 'ok' && !stamped && window.DscStamp){
+        const box = el(`<div class="note tamil" style="background:#E8F5E9;border:1px solid #A5D6A7;font-size:12.5px;line-height:1.65;"></div>`);
+        box.innerHTML = `<b>✔ tick உடன் புதிய PDF (Verified copy)</b><br>கையொப்பம் முழுமையாகச் சரியாக இருப்பதால், அசல் கோப்பின் ஒரு பைட்டையும் மாற்றாமல் ஒரு tick முத்திரையைச் சேர்த்து புதிய PDF தரலாம். <span style="color:#456;">(A new PDF with a visible tick; the original signed bytes stay exactly as they are.)</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;"><label style="font-size:12.5px;font-weight:700;">tick எங்கே · where
+          <select id="stPlace" style="margin-left:6px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;"><option value="strip">பக்கத்தின் கீழே காலிப் பட்டை — எதையும் மறைக்காது · blank strip under the page (covers nothing)</option><option value="sigbox">கையொப்பப் பெட்டியில் (viewer-ன் “?” இடத்தில்) · on the signature box</option><option value="br">கீழ் வலது மூலை · bottom-right</option><option value="bl">கீழ் இடது மூலை · bottom-left</option><option value="tr">மேல் வலது மூலை · top-right</option><option value="tl">மேல் இடது மூலை · top-left</option></select></label></div>
+          <div id="stMsg"></div>
+          <ul style="margin:6px 0 0;padding-left:18px;color:#355;">
+          <li>இது <b>எங்கள் முத்திரை</b> (pdftoolsindia.com) — Adobe அல்லது CA வழங்கியது அல்ல. “சான்றிதழ் ரத்து சோதிக்கப்படவில்லை” என்று முத்திரையிலேயே எழுதப்படும். <span style="color:#567">It is our own note, not an Adobe / CA mark, and it says revocation was not checked.</span></li>
+          <li>புதிய கோப்பிலும் அசல் கையொப்பம் கணித ரீதியாகச் சரியாகவே இருக்கும் (பதிவிறக்கும் முன் தானாகச் சோதிக்கிறோம்; இல்லையெனில் தரமாட்டோம்). ஆனால் கோப்பில் கூடுதல் பகுதி இருப்பதால் சில viewers “கையொப்பத்துக்குப் பின் மாற்றம்” என்று சொல்லலாம். <b>TRACES / GST போன்ற தளங்களுக்கு அசல் கோப்பையே பதிவேற்றுங்கள்.</b> <span style="color:#567">Some viewers may say “changed after signing”; upload the ORIGINAL to portals.</span></li></ul>`;
+        const sb = el(`<button class="btn" style="background:#1B5E20;color:#fff;">⬇️ tick உடன் புதிய PDF · PDF with tick</button>`);
+        sb.onclick = async ()=>{
+          const msg = box.querySelector('#stMsg'); sb.disabled = true; const old = sb.textContent; sb.textContent = '⏳…'; msg.innerHTML = '';
+          try{
+            const bytes = new Uint8Array(file._buf), dig = await crypto.subtle.digest('SHA-256', bytes), hex = Array.from(new Uint8Array(dig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+            const s0 = rep.signatures.find(x => x.signer) || rep.signatures[0];
+            const r = await window.DscStamp.stamp(bytes, { place: box.querySelector('#stPlace').value, signer: s0.signer ? s0.signer.subjectCn : '', count: rep.signatures.length, signedAt: s0.timeUsed ? fd(s0.timeUsed) : '', checkedAt: fdd(new Date()), sha256: hex }, window.PDFLib);
+            // safety net: the new file must still carry the ORIGINAL bytes and every signature must still verify exactly as before
+            let same = r.bytes.length > bytes.length; for(let i = 0; same && i < bytes.length; i += 1) if(r.bytes[i] !== bytes[i]) same = false;
+            const chk = await window.DscVerify.analyze(r.bytes.buffer.slice(r.bytes.byteOffset, r.bytes.byteOffset + r.bytes.byteLength));
+            if(!same || chk.signatures.length !== rep.signatures.length || !chk.signatures.every(x => x.integrity === 'ok' && x.signatureValid === true)) throw new Error('The stamped file did not pass our own safety check, so it was NOT given to you. Please use the original file.');
+            await downloadBlob(new Blob([r.bytes], { type: 'application/pdf' }), file.name.replace(/\.pdf$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-').slice(0, 60) + '-checked.pdf');
+            msg.innerHTML = `<div style="background:#fff;border:1px solid #A5D6A7;border-radius:8px;padding:6px 10px;margin:6px 0;">✅ பதிவிறக்கப்பட்டது — page ${r.page}${r.onSignatureBox ? ', கையொப்பப் பெட்டியில்' : r.mode === 'band' ? ', கீழ்ப் பட்டையில்' : ''}. அசல் கையொப்பம் மாறவில்லை என்பதைச் சோதித்துள்ளோம். · Downloaded; original signature re-checked and intact.</div>`;
+            sb.textContent = old;
+          }catch(e){ msg.innerHTML = `<div style="background:#FDEDEC;border:1px solid #F5C6C2;border-radius:8px;padding:6px 10px;margin:6px 0;">⚠️ ${E(e && e.message || String(e))}</div>`; sb.textContent = old; }
+          sb.disabled = false;
+        };
+        box.appendChild(sb); out.appendChild(box);
+      }else if(stamped){
+        out.appendChild(el(`<div class="note tamil" style="font-size:12.5px;line-height:1.6;">ℹ️ இந்தக் கோப்பில் ஏற்கெனவே pdftoolsindia tick முத்திரை உள்ளது. புதிதாக tick சேர்க்க மூல (அசல்) கோப்பைப் பயன்படுத்துங்கள். · This copy already has our tick stamp; use the original file to make a new one.</div>`));
+      }else if(worst === 'warn'){
+        out.appendChild(el(`<div class="note tamil" style="font-size:12.5px;line-height:1.6;">ℹ️ tick உடன் புதிய PDF, கையொப்பம் <b>முழுமையாகச் சரி</b> என்றால் மட்டுமே தரப்படும் (இங்கே கவனிக்க வேண்டியவை உள்ளன). · The tick copy is offered only when the check is fully OK.</div>`));
       }
       const row = el(`<div class="btn-row"></div>`);
       const cp = el(`<button class="btn" style="background:#fff;color:var(--ink);border:1px solid var(--line);">📋 அறிக்கையை நகலெடு · Copy report</button>`);
