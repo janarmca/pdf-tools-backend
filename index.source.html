@@ -5205,7 +5205,7 @@ const Img2Xls = (function(){
         // several text lines inside one cell: top to bottom
         ws.sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = []; for(const w of ws){ const cy = (w.y0 + w.y1) / 2, L = lines[lines.length - 1]; if(L && Math.abs(cy - L.cy) < mh * 0.6) L.ws.push(w); else lines.push({cy, ws: [w]}); }
         rows[r].push(lines.map(L => joinWords(L.ws)).join(' ')); conf[r].push(Math.min(...ws.map(w => w.c))); } }
-      return repairCodes(stripTitles(stripSheetChrome(trim({rows, conf, mode: 'grid'}))));
+      return repairCodes(stripTitles(stripSheetChrome(trim(denoise({rows, conf, mode: 'grid'})))));
     }
     // rows by y
     const sorted = words.slice().sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2); const lines = [];
@@ -5240,7 +5240,7 @@ const Img2Xls = (function(){
     const C = cuts.length + 1; const rows = [], conf = [];
     for(const L of lines){ const cells = Array.from({length: C}, () => []); for(const w of L.ws) cells[colOf(w)].push(w);
       rows.push(cells.map(ws => ws.length ? joinWords(ws) : '')); conf.push(cells.map(ws => ws.length ? Math.min(...ws.map(w => w.c)) : 100)); }
-    return repairCodes(stripTitles(stripSheetChrome(trim({rows, conf, mode: 'gutter'}))));
+    return repairCodes(stripTitles(stripSheetChrome(trim(denoise({rows, conf, mode: 'gutter'})))));
   }
   // Excel/Sheets screenshots carry a column-letter bar (A B C …) and a row-number strip (1 2 3 …) — not data
   function stripSheetChrome(t){
@@ -5276,6 +5276,64 @@ const Img2Xls = (function(){
     }
     if(k){ t.rows.splice(0, k); t.conf.splice(0, k); t.titles = titles; }
     return t;
+  }
+  // OCR also "reads" paper texture, shadows and grid-line fragments as short, very unsure words. Where a column is clearly NUMBERS such words are noise:
+  // remove them (never in text columns, never the header, never real words such as "Nil"). Without this the stray text made the whole column count as "text",
+  // so real amounts stayed text in Excel and could not be summed.
+  function denoise(t){
+    if(!t.rows || t.rows.length < 4) return t;
+    const R = t.rows.length, C = Math.max.apply(null, t.rows.map(r => r.length)), cf = (r, c) => t.conf[r] && t.conf[r][c] != null ? t.conf[r][c] : 100;
+    const PLACE = /^(nil|n\/?a|na|none|[-–—.]+|x)$/i;
+    const isNum = s => { if(parseNumber(s)) return true; const a = fixDigits(s); if(a && parseNumber(a)) return true; const b = repairNumber(s, 0); return !!(b && parseNumber(b)); };
+    let removed = 0;
+    for(let c = 0; c < C; c++){
+      let n = 0, w = 0;
+      for(let r = 1; r < R; r++){ const v = (t.rows[r][c] || '').trim(); if(!v) continue; if(/\d/.test(v)){ if(isNum(v)) n++; } else if(cf(r, c) >= 60 && /[A-Za-z]{2,}/.test(v) && !PLACE.test(v)) w++; }
+      if(n < 2 || n < w) continue; // not a column of numbers
+      for(let r = 1; r < R; r++){ const v = (t.rows[r][c] || '').trim(); if(!v || PLACE.test(v)) continue; const k = cf(r, c);
+        if(/\d/.test(v) ? (!isNum(v) && k < 45) : (k < 45 || (k < 60 && v.length <= 6))){ t.rows[r][c] = ''; t.conf[r][c] = 100; removed++; } }
+    }
+    // a margin / shadow strip read as a column — only at the left or right EDGE, with no header, no real number, and nothing but tiny or very unsure specks
+    const lastC = (() => { let m = 0; for(let c = 0; c < C; c++) for(let r = 0; r < R; r++) if((t.rows[r][c] || '').trim()){ m = c; break; } return m; })();
+    for(const c of (lastC > 0 ? [0, lastC] : [])){
+      const head = (t.rows[0][c] || '').trim(); if(head && !(head.length <= 2 && cf(0, c) < 50)) continue; // a real header word means a real column
+      const cells = []; for(let r = 1; r < R; r++){ const v = (t.rows[r][c] || '').trim(); if(v) cells.push({v, k: cf(r, c)}); }
+      if(!cells.length || cells.some(x => /\d{2}/.test(x.v)) || cells.filter(x => /^\d{1,4}$/.test(x.v)).length >= 3) continue;
+      const mean = cells.reduce((a, x) => a + x.k, 0) / cells.length; if(mean >= 70) continue; // clean short entries (Y / N flags, codes) are data
+      const tiny = cells.filter(x => x.v.length <= 4).length >= cells.length * 0.85;
+      if(tiny || cells.length <= 3){ for(let r = 0; r < R; r++) if((t.rows[r][c] || '').trim()){ t.rows[r][c] = ''; t.conf[r][c] = 100; removed++; } }
+    }
+    // a whole row of very unsure fragments with no real number in it is a smudge, not data
+    if(R >= 6) for(let r = 1; r < R; r++){ const cells = t.rows[r].map((v, c) => ({v: (v || '').trim(), k: cf(r, c)})).filter(x => x.v); if(cells.length && cells.every(x => x.k < 50 && !/\d{3}/.test(x.v))){ t.rows[r] = t.rows[r].map(() => ''); removed += cells.length; } }
+    t.noise = removed; return t;
+  }
+  // Reconcile every "Total" row with the numbers above it. Reports only — it never changes a value.
+  function checkTotals(ty, t){
+    const out = {ok: [], bad: []}; if(!ty || !ty.cells || !ty.cells.length) return out;
+    const R = ty.cells.length, C = ty.cols.length, start = ty.header ? 1 : 0, conf = (t && t.conf) || [];
+    const isLabel = r => ty.cells[r].some(c => c.t === 's' && /total/i.test(String(c.v || '')));
+    const val = (r, c) => { const x = ty.cells[r][c]; return x && x.t === 'n' && !x.pct ? x.v : null; };
+    let seg = start;
+    for(let r = start; r < R; r++){
+      if(!isLabel(r)) continue;
+      for(let c = 0; c < C; c++){
+        if(ty.cols[c] !== 'n') continue; const tv = val(r, c); if(tv == null) continue;
+        let sum = 0, cnt = 0; const members = [], missing = [];
+        for(let q = seg; q < r; q++){ if(isLabel(q)) continue; const v = val(q, c); if(v != null){ sum += v; cnt++; members.push(q); } else if(ty.cells[q].some(x => x.t === 's' && x.v) && !ty.cells[q][c].raw) missing.push(q); }
+        if(cnt < 2) continue;
+        const dec = (ty.fmt[c] && ty.fmt[c].dec) || 0, tol = Math.pow(10, -dec) / 2 + 1e-9; sum = Math.round(sum * Math.pow(10, dec)) / Math.pow(10, dec);
+        const rec = {r, c, total: tv, sum, diff: Math.round((tv - sum) * 1e6) / 1e6, rows: cnt};
+        if(Math.abs(tv - sum) <= tol) out.ok.push(rec);
+        else { rec.suspects = members.map(q => ({r: q, c, k: conf[q] && conf[q][c] != null ? conf[q][c] : 100})).filter(x => x.k < 85).sort((a, b) => a.k - b.k).slice(0, 4); rec.missing = cnt / (cnt + missing.length) >= 0.7 ? missing : []; out.bad.push(rec); }
+      }
+      // a "Total" right under a "Grand Total" row is usually the sum of that row's amounts
+      if(r > start && isLabel(r - 1)){
+        const nc = []; for(let c = 0; c < C; c++) if(ty.cols[c] === 'n' && val(r - 1, c) != null) nc.push(c);
+        if(nc.length >= 2){ const c0 = nc[0], tv = val(r, c0); if(tv != null && nc.every(c => c === c0 || val(r, c) == null)){ const sum = nc.reduce((a, c) => a + val(r - 1, c), 0), rec = {r, c: c0, total: tv, sum, diff: tv - sum, rows: nc.length, across: true}; if(Math.abs(tv - sum) < 0.5) out.ok.push(rec); else { rec.suspects = []; rec.missing = []; out.bad.push(rec); } } }
+      }
+      seg = r + 1;
+    }
+    return out;
   }
   // ID / code columns (INV-0001, 0433026TP0B00030 …): OCR slips on the same positions again and again — use the other rows as a witness
   function repairCodes(t){
@@ -5355,12 +5413,16 @@ const Img2Xls = (function(){
       // repairable cells (O/l/S) count towards the numeric vote
       let rep = 0; for(let r = start; r < R; r++){ const s = rows[r][c]; if(s && kind(s) === 's'){ const f = fixDigits(s); if(f && parseNumber(f)) rep++; } }
       const type = tot && k.d / tot >= 0.6 ? 'd' : tot && (k.n + rep) / tot >= 0.6 && k.n >= 1 ? 'n' : 's'; cols.push(type); }
-    const colDec = cols.map((type, c) => { if(type !== 'n') return 0; const cnt = {}; let tot = 0; for(let r = start; r < R; r++){ const p = parseNumber(rows[r][c] || ''); if(p && !p.pct){ cnt[p.dec] = (cnt[p.dec] || 0) + 1; tot++; } } let best = 0, bc = 0; for(const k in cnt) if(cnt[k] > bc){ bc = cnt[k]; best = +k; } return tot >= 3 && bc / tot >= 0.7 ? best : 0; });
+    const colInt = [];
+    const colDec = cols.map((type, c) => { if(type !== 'n') return 0; const cnt = {}; let tot = 0; for(let r = start; r < R; r++){ const p = parseNumber(rows[r][c] || ''); if(p && !p.pct){ cnt[p.dec] = (cnt[p.dec] || 0) + 1; tot++; } } let best = 0, bc = 0; for(const k in cnt) if(cnt[k] > bc){ bc = cnt[k]; best = +k; }
+      // comma-grouped whole numbers (5,19,574) or multi-dot ones (1.42.190) in the same column = whole money; a lone 29.487 there is a misread thousands separator, not 3 decimals
+      let ev = 0; for(let r = start; r < R; r++){ const x = String(rows[r][c] || '').replace(/\s+/g, ''); if(/^\D*\d{1,3}(,\d{2,3})+$/.test(x) || /^\D*\d{1,3}(\.\d{2,3}){2,}$/.test(x)) ev++; }
+      colInt[c] = ev >= 2; return ev >= 2 ? 0 : (tot >= 3 && bc / tot >= 0.7 ? best : 0); });
     for(let r = 0; r < R; r++){ const row = []; for(let c = 0; c < C; c++){ const s = rows[r][c], conf = t.conf[r][c], base = {raw: s, low: conf < 55};
       if(!s){ row.push(Object.assign(base, {t: 'e'})); continue; }
       if(header && r === 0){ row.push(Object.assign(base, {t: 's', v: s, head: true})); continue; }
       if(cols[c] === 'd'){ const ds = parseDate(s, o.dayFirst); if(ds != null){ row.push(Object.assign(base, {t: 'd', v: ds})); continue; } }
-      if(cols[c] === 'n'){ let p = parseNumber(s), fixed = false; if(!p){ const f = fixDigits(s); p = f && parseNumber(f); fixed = !!p; } if(!p){ const f = repairNumber(s, colDec[c]); p = f && parseNumber(f); fixed = !!p; } if(p){ row.push(Object.assign(base, {t: 'n', v: p.n, dec: p.dec, pct: p.pct, cur: p.cur, comma: p.comma, low: base.low || fixed || (colDec[c] > 0 && !p.pct && p.dec === 0)})); continue; } }
+      if(cols[c] === 'n'){ let p = parseNumber(s), fixed = false; if(p && !p.pct && ((p.dec === 3 && !colDec[c]) || (p.dec >= 4 && colInt[c])) && /^\D*\d{1,3}\.\d{3,6}$/.test(String(s).replace(/\s+/g, ''))){ const f0 = repairNumber(s, 0), q0 = f0 && parseNumber(f0); if(q0){ p = q0; fixed = true; } } if(!p){ const f = fixDigits(s); p = f && parseNumber(f); fixed = !!p; } if(!p){ const f = repairNumber(s, colDec[c]); p = f && parseNumber(f); fixed = !!p; } if(p){ row.push(Object.assign(base, {t: 'n', v: p.n, dec: p.dec, pct: p.pct, cur: p.cur, comma: p.comma, low: base.low || fixed || (colDec[c] > 0 && !p.pct && p.dec === 0)})); continue; } }
       row.push(Object.assign(base, {t: 's', v: s})); }
       out.push(row); }
     // per-column number format
@@ -5374,7 +5436,7 @@ const Img2Xls = (function(){
     base = indian ? `[>=10000000]##\\,##\\,##\\,##0${d};[>=100000]##\\,##\\,##0${d};##,##0${d}` : '#,##0' + d;
     return f.cur ? (indian ? base.replace(/(\[>=\d+\])/g, '$1' + '"' + f.cur + '"').replace(/;##,##0/, ';"' + f.cur + '"##,##0') : '"' + f.cur + '"' + base) : base;
   }
-  return {prepare, buildTable, typeTable, numFmt, parseNumber, parseDate, fixDigits, findGrid, skewAngle};
+  return {prepare, buildTable, typeTable, numFmt, parseNumber, parseDate, fixDigits, findGrid, skewAngle, denoise, checkTotals};
 })();
 
 
@@ -5449,6 +5511,7 @@ TOOL_IMPL.img2excel = {
       }
       it.conf = Math.round(data.confidence || 0); it.mode = it.table.mode; it.force = [];
       if(it.table.chrome) it.notes.push('📑 spreadsheet row/column labels removed');
+      if(it.table.noise) it.notes.push('🧹 ' + it.table.noise + ' stray mark' + (it.table.noise > 1 ? 's' : '') + ' removed');
       if(it.table.titles && it.table.titles.length) it.notes.push('📝 title line removed: ' + it.table.titles.join(' / ').slice(0, 80));
       it.status = it.table.rows.length ? 'done' : 'empty';
     }
@@ -5476,7 +5539,7 @@ TOOL_IMPL.img2excel = {
       for(const g of groups()){
         const ws = wb.addWorksheet(safeSheetName(g.name, used)); let rowNo = 0, headerRow = 0, firstData = 0, lastData = 0, colFmt = null, cols = 0, ty0 = null;
         g.parts.forEach((it, pi) => {
-          const ty = typed(it); cols = ty.cols.length; ty0 = ty0 || ty; colFmt = colFmt || ty;
+          const ty = typed(it), sus = totalsInfo(it, ty).sus; cols = ty.cols.length; ty0 = ty0 || ty; colFmt = colFmt || ty;
           ty.cells.forEach((cells, r) => {
             if(pi > 0 && r === 0 && ty.header) return; // repeated header of a combined sheet
             rowNo++; const row = ws.getRow(rowNo);
@@ -5489,6 +5552,7 @@ TOOL_IMPL.img2excel = {
               cell.border = { top: { style: 'thin', color: { argb: 'FFD0D5DD' } }, left: { style: 'thin', color: { argb: 'FFD0D5DD' } }, bottom: { style: 'thin', color: { argb: 'FFD0D5DD' } }, right: { style: 'thin', color: { argb: 'FFD0D5DD' } } };
               if(c.head){ cell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF217346' } }; cell.alignment = { horizontal: 'center', vertical: 'middle' }; }
               else if(S.highlight && c.low && c.t !== 'e') cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF2CC' } };
+              const sk = !c.head && sus.get(r + ',' + ci); if(sk){ cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFD9A8' } }; if(sk === 'total') cell.note = 'This total does not match the numbers above it — please check the orange cells.'; }
             });
             if(ty.header && r === 0 && pi === 0){ headerRow = rowNo; firstData = rowNo + 1; } else if(!firstData) firstData = rowNo; lastData = rowNo;
           });
@@ -5515,7 +5579,7 @@ TOOL_IMPL.img2excel = {
       for(const g of groups()) g.parts.forEach((it, pi) => { const ty = typed(it); ty.cells.forEach((cells, r) => { if(pi > 0 && r === 0 && ty.header) return; out.push(cells.map((c, ci) => c.t === 'n' ? String(c.pct ? +(c.v * 100).toFixed(8) + '%' : c.v) : c.t === 'd' ? fmtSerial(c.v) : q(c.v == null ? '' : String(c.v))).join(',')); }); });
       return out.join('\r\n');
     }
-    function tsvText(){ const out = []; for(const g of groups()) g.parts.forEach(it => it.table.rows.forEach(r => out.push(r.join('\t')))); return out.join('\n'); }
+    function tsvText(){ const out = []; for(const g of groups()) g.parts.forEach((it, pi) => { const ty = typed(it); ty.cells.forEach((cells, r) => { if(pi > 0 && r === 0 && ty.header) return; out.push(cells.map(c => c.t === 'n' ? String(c.pct ? +(c.v * 100).toFixed(8) + '%' : c.v) : c.t === 'd' ? fmtSerial(c.v) : String(c.v == null ? '' : c.v).replace(/[\t\r\n]+/g, ' ')).join('\t')); }); }); return out.join('\n'); }
 
     /* ---------------- UI ---------------- */
     function addFiles(files){
@@ -5541,8 +5605,38 @@ TOOL_IMPL.img2excel = {
       w.querySelector('input').onchange = e => { S[key] = e.target.checked; paint(); }; return w;
     }
     const TYPE_LABEL = { s: 'Aa text', n: '123 number', d: '📅 date' };
+    const groupIN = i => i.length <= 3 ? i : i.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + i.slice(-3);
+    const groupEN = i => i.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // what the cell will really be in Excel — so the table on screen and "Copy" match the .xlsx instead of showing the raw reading
+    function disp(cell, f){
+      if(cell.t !== 'n' || !f) return cell.raw; const dec = f.dec || 0, v = cell.pct ? cell.v * 100 : cell.v;
+      const parts = Math.abs(v).toFixed(Math.min(dec, 8)).split('.'); let i = parts[0];
+      if(f.comma || f.cur) i = S.indian ? groupIN(i) : groupEN(i);
+      return (v < 0 ? '-' : '') + (cell.cur || '') + i + (parts[1] ? '.' + parts[1] : '') + (cell.pct ? '%' : '');
+    }
+    function totalsInfo(it, ty){
+      const chk = Img2Xls.checkTotals(ty, it.table), sus = new Map();
+      chk.bad.forEach(b => { sus.set(b.r + ',' + b.c, 'total'); (b.suspects || []).forEach(x => { if(!sus.has(x.r + ',' + x.c)) sus.set(x.r + ',' + x.c, 'check'); }); (b.missing || []).forEach(q => { if(!sus.has(q + ',' + b.c)) sus.set(q + ',' + b.c, 'blank'); }); });
+      return {chk, sus};
+    }
+    function totalsBanner(it, ty, chk, host){
+      if(!chk.ok.length && !chk.bad.length) return;
+      const fmtN = (n, c) => { const f = ty.fmt[c] || {dec: 0}, parts = Math.abs(n).toFixed(f.dec || 0).split('.'); return (n < 0 ? '-' : '') + (f.comma ? (S.indian ? groupIN(parts[0]) : groupEN(parts[0])) : parts[0]) + (parts[1] ? '.' + parts[1] : ''); };
+      const lab = r => { const x = ty.cells[r].find(c => c.t === 's' && /total/i.test(String(c.v || ''))); return x ? x.v : 'Total'; };
+      const box = el(`<div style="margin:0 0 10px;"></div>`);
+      if(chk.ok.length && !chk.bad.length) box.appendChild(el(`<div class="tamil" style="background:#E8F5E9; border:1px solid #A5D6A7; color:#1B5E20; border-radius:10px; padding:8px 12px; font-size:13px; font-weight:600;">✅ Totals match — ${chk.ok.map(o => esc(lab(o.r)) + ' ' + fmtN(o.total, o.c)).join(' · ')} <span style="font-weight:500;">(கூட்டுத் தொகை சரியாக உள்ளது)</span></div>`));
+      chk.bad.forEach(b => {
+        const d = el(`<div class="tamil" style="background:#FFF3E0; border:1px solid #FFCC80; color:#7A4A00; border-radius:10px; padding:9px 12px; margin-top:6px; font-size:13px; line-height:1.6;"></div>`);
+        d.innerHTML = `⚠️ <b>${esc(lab(b.r))}</b> reads <b>${fmtN(b.total, b.c)}</b>, but ${b.across ? 'the row above adds up to' : 'the ' + b.rows + ' numbers above add up to'} <b>${fmtN(b.sum, b.c)}</b> (difference ${fmtN(Math.abs(b.diff), b.c)}). A digit may have been misread — check the <span style="background:#FFD9A8; padding:0 6px; border-radius:4px;">orange</span> cells against your picture. <span style="font-size:12px;">(கூட்டுத் தொகை பொருந்தவில்லை — ஆரஞ்சு கட்டங்களைப் படத்துடன் சரிபாருங்கள்)</span>`;
+        const row = el(`<div style="margin-top:6px;"><button style="border:1px solid #E0A44C; background:#fff; color:#7A4A00; border-radius:8px; padding:5px 10px; font-weight:700; font-size:12.5px; cursor:pointer;">Use ${fmtN(b.sum, b.c)} as the total</button> <span style="font-size:11.5px;">only if the numbers above are right</span></div>`);
+        row.querySelector('button').onclick = () => { it.table.rows[b.r][b.c] = fmtN(b.sum, b.c); it.table.conf[b.r][b.c] = 100; renderTable(it, host); };
+        d.appendChild(row); box.appendChild(d);
+      });
+      host.appendChild(box);
+    }
     function renderTable(it, host){
       host.innerHTML = ''; const ty = typed(it); const rows = it.table.rows; const C = rows[0].length;
+      const tinfo = totalsInfo(it, ty), sus = tinfo.sus; totalsBanner(it, ty, tinfo.chk, host);
       const wrap = el(`<div style="overflow:auto; max-height:420px; border:1px solid var(--line); border-radius:12px; background:#fff;"></div>`);
       const tb = document.createElement('table'); tb.style.cssText = 'border-collapse:collapse; font-size:13.5px; min-width:100%;';
       // column controls: type chip + delete
@@ -5560,12 +5654,12 @@ TOOL_IMPL.img2excel = {
         d0.querySelector('button').onclick = () => { it.table.rows.splice(r, 1); it.table.conf.splice(r, 1); if(!it.table.rows.length){ it.status = 'empty'; paint(); } else renderTable(it, host); };
         tr.appendChild(d0);
         cells.forEach((cell, c) => {
-          const td = document.createElement('td'); td.contentEditable = 'true'; td.spellcheck = false; td.textContent = cell.raw;
+          const td = document.createElement('td'); td.contentEditable = 'true'; td.spellcheck = false; td.textContent = disp(cell, ty.fmt[c]); td.dataset.d = td.textContent;
           const isHead = ty.header && r === 0; const num = cell.t === 'n' || cell.t === 'd';
-          td.style.cssText = `padding:6px 10px; border:1px solid #E4E8EE; min-width:70px; white-space:nowrap; outline:none; ${isHead ? 'background:#217346; color:#fff; font-weight:800;' : (S.highlight && cell.low ? 'background:#FFF2CC;' : '')} ${num && !isHead ? 'text-align:right; font-variant-numeric:tabular-nums;' : ''}`;
-          td.title = cell.low && !isHead ? 'The reader was not sure about this one — please check' : '';
+          td.style.cssText = `padding:6px 10px; border:1px solid #E4E8EE; min-width:70px; white-space:nowrap; outline:none; ${isHead ? 'background:#217346; color:#fff; font-weight:800;' : (sus.has(r + ',' + c) ? 'background:#FFD9A8;' : (S.highlight && cell.low ? 'background:#FFF2CC;' : ''))} ${num && !isHead ? 'text-align:right; font-variant-numeric:tabular-nums;' : ''}`;
+          td.title = sus.has(r + ',' + c) ? (sus.get(r + ',' + c) === 'total' ? 'This total does not match the numbers above' : sus.get(r + ',' + c) === 'blank' ? 'This amount is empty — a number may have been missed' : 'The reader was unsure here and the total does not add up — check this number') : (cell.low && !isHead ? 'The reader was not sure about this one — please check' : '');
           td.onfocus = () => { td.style.boxShadow = 'inset 0 0 0 2px #217346'; };
-          td.onblur = () => { td.style.boxShadow = ''; const v = td.textContent.replace(/\s+/g, ' ').trim(); if(v !== it.table.rows[r][c]){ it.table.rows[r][c] = v; it.table.conf[r][c] = 100; renderTable(it, host); } };
+          td.onblur = () => { td.style.boxShadow = ''; const v = td.textContent.replace(/\s+/g, ' ').trim(); if(v !== (td.dataset.d || '')){ it.table.rows[r][c] = v; it.table.conf[r][c] = 100; renderTable(it, host); } };
           td.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); td.blur(); } };
           tr.appendChild(td); });
         tb.appendChild(tr); });
