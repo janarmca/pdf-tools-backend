@@ -1,6 +1,6 @@
 /* category-docs.js — lazy-loaded business & personal document tools for pdftoolsindia.com
  *
- *   quotepo, gstinvoice   — Quotation / Proforma / Tax Invoice / Cash Bill / Bill of Supply / Purchase Order / Delivery Challan
+ *   quotepo   — Quotation / Proforma / Tax Invoice / Cash Bill / Bill of Supply / Purchase Order / Delivery Challan
  *   (receipts and letters are added further down in this file)
  *
  * Plain browser JS, no build step. Globals from the host page: TOOL_IMPL, el, mountResult, mountProgress, downloadBlob,
@@ -936,13 +936,9 @@
   }
 
   TOOL_IMPL.receipts = { mount(container) { mountReceipts(container, 'receipts', null); } };
-  TOOL_IMPL.rentreceipt = { mount(container) { mountReceipts(container, 'rentreceipt', 'rent'); } };
-  TOOL_IMPL.tuitionreceipt = { mount(container) { mountReceipts(container, 'tuitionreceipt', 'tuition'); } };
-  TOOL_IMPL.paymentvoucher = { mount(container) { mountReceipts(container, 'paymentvoucher', 'voucher'); } };
   TOOL_IMPL.receipts._f = { buildSlips, rcProblems, rcTotal, incNo, addMonthsISO, rcWords, blankRc };
 
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
-  TOOL_IMPL.gstinvoice = { mount(container) { mountBizDoc(container, 'gstinvoice', 'tax'); } };
-  TOOL_IMPL.quotepo._f = TOOL_IMPL.gstinvoice._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
+  TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
 
 })();

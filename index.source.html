@@ -428,17 +428,13 @@ const TOOLS = [
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
   {id:'readaloud', name:'Read Aloud', desc:'Listen to a PDF/text via Text‑to‑Speech', icon:'🔊', color:'#117864', cat:'pdf'},
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
-  {id:'gstinvoice', name:'GST Invoice Generator', desc:'Tax invoice with CGST / SGST / IGST worked out per item and per rate, GSTIN check, round-off, amount in words, UPI QR', icon:'🧾', color:'#1E7145', cat:'business', lazy:'docs'},
-  {id:'quotepo', name:'Quotation / Bill / PO / Proforma', desc:'Quotation, Proforma, Tax Invoice, Cash Bill, Bill of Supply, Purchase Order or Delivery Challan — correct IGST or CGST+SGST, discount, advance, HSN summary, PDF / Excel / Word / WhatsApp', icon:'📃', color:'#1A5276', cat:'business', lazy:'docs'},
+  {id:'quotepo', name:'Quotation / Bill / PO / Proforma', desc:'GST Invoice / Tax Invoice, Quotation, Proforma, Cash Bill, Bill of Supply, Purchase Order or Delivery Challan — correct IGST or CGST+SGST, discount, advance, HSN summary, PDF / Excel / Word / WhatsApp', icon:'📃', color:'#1A5276', cat:'business', lazy:'docs'},
   {id:'receipts', name:'Receipts & Vouchers (all-in-one)', desc:'Rent receipt (up to 12 months at once), tuition fee receipt, money receipt and payment voucher — Tamil / English, amount in words, saved details', icon:'🧾', color:'#2E6F5E', cat:'business', lazy:'docs'},
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
-  {id:'paymentvoucher', name:'Payment Voucher', desc:'Formatted cash/bank payment voucher for accounts', icon:'🧮', color:'#8E5A2E', cat:'business',lazy:'docs'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
-  {id:'rentreceipt', name:'Rent Receipt Generator', desc:'Monthly rent receipt — HRA tax-exemption ready', icon:'🏠', color:'#2E6F5E', cat:'business',lazy:'docs'},
-  {id:'tuitionreceipt', name:'Tuition Fee Receipt', desc:'Fee receipt for tuition/coaching classes', icon:'📚', color:'#8E44AD', cat:'business',lazy:'docs'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Sick/Casual/Earned leave — proper formatted letter in seconds', icon:'📝', color:'#2E86AB', cat:'business'},
   {id:'businesscard', name:'Business Card Maker', desc:'Print-ready business card with UPI QR', icon:'💳', color:'#1A5276', cat:'business'},
@@ -1065,7 +1061,8 @@ function getRecentTools(){
 // by whichever tool reads it on mount, so it never lingers or gets
 // accidentally reused by a later, unrelated visit to that tool.
 let __pendingSmartUploadFile = null;
-function openTool(id){ stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
+const TOOL_MOVED = {gstinvoice:'quotepo', rentreceipt:'receipts', tuitionreceipt:'receipts', paymentvoucher:'receipts'}; // old ids (bookmarks, shared links, saved recents) land on the merged tools
+function openTool(id){ id = TOOL_MOVED[id] || id; stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
 // Social profiles — fill in the full https URLs and they appear in the footer automatically (empty = hidden).
 const SOCIAL_LINKS = { instagram:'', youtube:'', facebook:'' };
@@ -1403,17 +1400,13 @@ qrgen:['QR குறியீடு உருவாக்கு','இணைப�
 qrscan:['QR / Barcode ஸ்கேன்','கேமரா அல்லது படத்திலிருந்து படி'],
 readaloud:['உரக்கப் படி','எழுத்தைக் குரலில் கேள்'],
 obituary:['இரங்கல் அறிவிப்பு','இரங்கல் சுவரொட்டி தயாரி'],
-gstinvoice:['GST பில்','GST விலைப்பட்டியல் உருவாக்கு'],
 quotepo:['விலைப்புள்ளி / பில் / PO','Quotation, Bill, Purchase Order தயாரி'],
 salaryslip:['சம்பளச் சீட்டு','சம்பளச் சீட்டு உருவாக்கு'],
-paymentvoucher:['பணம் செலுத்தும் சீட்டு','Payment Voucher தயாரி'],
 receipts:['ரசீதுகள் & சீட்டுகள்','வாடகை, கல்விக் கட்டணம், பணம் பெற்ற ரசீது, Payment Voucher'],
 emicalc:['EMI / கடன் கணிப்பான்','மாதத் தவணை, வட்டி, அட்டவணை'],
 incometaxcalc:['வருமான வரி கணிப்பான்','பழைய / புதிய முறை ஒப்பீடு'],
 agecalc:['வயது கணிப்பான்','ஆண்டு, மாதம், நாளில் சரியான வயது'],
 percentcalc:['சதவீதக் கணிப்பான்','சதவீதம், கூடுதல், குறைவு கணக்கிடு'],
-rentreceipt:['வாடகை ரசீது','வாடகை ரசீது உருவாக்கு'],
-tuitionreceipt:['கல்விக் கட்டண ரசீது','கல்விக் கட்டண ரசீது தயாரி'],
 hrattendance:['வருகைப் பதிவேடு','ஊழியர் வருகைப் பதிவு'],
 leaveletter:['விடுப்புக் கடிதம்','விடுப்பு விண்ணப்பம் எழுது'],
 businesscard:['வணிக அட்டை','Business Card வடிவமை'],
@@ -1519,7 +1512,7 @@ numsys:['எண் முறை மாற்றி','தசம, இரும, �
 const TOOL_ALIAS = {
   merge:'join combine இணை சேர் ஒன்றாக்கு', split:'separate பிரி', compress:'reduce size smaller சுருக்கு kuraikka', pdf2word:'word doc convert',
   img2pdf:'jpg png photo to pdf', imgcompress:'reduce photo size jpg jpeg photo சுருக்கு', bgremove:'background remove பின்னணி cutout', videocompress:'video size reduce சுருக்கு',
-  gstinvoice:'bill invoice gst பில்', tamiltyping:'tamil type தமிழ் தட்டச்சு tanglish', tamilfont:'bamini tscii unicode converter', rupeewords:'amount in words cheque number to words ரூபாய்',
+  quotepo:'quotation bill invoice gst invoice tax invoice proforma purchase order challan பில் ஜிஎஸ்டி விலைப்பட்டியல்', receipts:'rent receipt tuition fee receipt payment voucher money receipt வாடகை ரசீது கல்விக் கட்டணம் பணம் செலுத்தும் சீட்டு', tamiltyping:'tamil type தமிழ் தட்டச்சு tanglish', tamilfont:'bamini tscii unicode converter', rupeewords:'amount in words cheque number to words ரூபாய்',
   emicalc:'loan emi bank கடன்', resumebuilder:'cv biodata resume', ocr:'text from image scan', camscan:'scanner camscanner scan', qrgen:'qr code', imgpassport:'passport photo id photo',
   examphoto:'exam photo signature neet tnpsc upsc ssc', sign:'signature sign', pdfprotect:'password lock', pdfunlock:'password remove unlock', agecalc:'age birthday வயது', interestcalc:'interest vatti meter vatti வட்டி',
   unitconv:'cent acre land sqft nilam நிலம்', percentcalc:'percentage percent', datecalc:'date days difference', kalvikalanjiyam:'kalvi kalanjiyam school class students கல்வி களஞ்சியம்', cgpacalc:'cgpa marks percentage mark',
@@ -1551,7 +1544,7 @@ const CAT_V2 = {
   ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', big:'🤖', ta:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)', en:'AI that reads, summarises and translates (needs credits)' },
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
 };
-const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','gstinvoice','tamiltyping','rupeewords','resumebuilder','emicalc'];
+const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','quotepo','tamiltyping','rupeewords','resumebuilder','emicalc'];
 const NEW_TOOL_IDS = ['invitation','starfinder','porutham','goldcalc','pfcalc','ebbill','tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
 function esc2(s){ return escapeHtml(String(s)); }
 
@@ -1939,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261013b`;
+    s.src = `category-${cat}.js?v=20261014a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3270,9 +3263,9 @@ const TOOL_LIBS = {
   biodata:['html2canvas','pdflib'], invitation:['html2canvas','pdflib'],
   aiexcelcompare:['xlsx'], img2excel:['tesseract','exceljs'], aireceipt:['xlsx'], businesscard:['pdflib'], camscan:['jszip','pdflib'],
   compress:['pdfjs','pdflib'], emicalc:['xlsx'], excel2pdf:['pdflib','xlsx'], excel2word:['docx','xlsx'],
-  expensetracker:['xlsx'], extractpages:['pdflib'], gstinvoice:['docx','pdflib','xlsx'], img2pdf:['pdflib'],
+  expensetracker:['xlsx'], extractpages:['pdflib'], img2pdf:['pdflib'],
   leaveletter:['pdflib'], merge:['pdflib'], ocr:['docx','html2canvas','pdfjs','tesseract'], pagenum:['pdflib'],
-  paymentvoucher:['pdflib'], pdf2excel:['pdfjs','xlsx'], pdf2img:['jszip','pdfjs'], pdf2png:['jszip','pdfjs'],
+  pdf2excel:['pdfjs','xlsx'], pdf2img:['jszip','pdfjs'], pdf2png:['jszip','pdfjs'],
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
@@ -3280,9 +3273,9 @@ const TOOL_LIBS = {
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
-  readaloud:['pdfjs'], rentreceipt:['pdflib'], receipts:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
+  readaloud:['pdfjs'], receipts:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
   remove:['pdfjs','pdflib'], organize:['pdfjs','pdflib'], rotate:['pdfjs','pdflib'],
-  split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], tuitionreceipt:['pdflib'], txt2pdf:['pdflib'],
+  split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], txt2pdf:['pdflib'],
   vidsplit:['jszip'], watermark:['pdflib'], word2pdf:['jszip','mammoth','pdflib'],
   // category-image.js
   imgcompress:['jszip'], wmremove:['pdflib'], imgenhance:['jszip'], heic2jpg:['jszip'],
@@ -15781,7 +15774,7 @@ render();
 (function(){
   try{
     const params = new URLSearchParams(window.location.search);
-    const deepLinkTool = params.get('tool');
+    const deepLinkTool = TOOL_MOVED[params.get('tool')] || params.get('tool');
     if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
       // /?tool=<id> is the same page as the static /tools/<slug> landing page — point Google at that one.
       try{ const c = document.querySelector('link[rel="canonical"]'); const tt = TOOLS.find(t=>t.id===deepLinkTool); if(c && tt) c.setAttribute('href', 'https://pdftoolsindia.com/tools/' + toolSlug(tt)); }catch(e){}
