@@ -488,6 +488,8 @@ async function matJathagam(env, req, user) {
     return json({ ok: true, fields, credits: cost });
   } catch (e) {
     if (cost > 0) await refundCredits(env, user.id, cost, 'matrimony_jathagam');
+    // Google says the key's project has the Gemini API switched off -> short, friendly message (credits already refunded)
+    if (/has not been used in project|SERVICE_DISABLED|is disabled|API key not valid|API_KEY_INVALID|PERMISSION_DENIED/i.test(e.message || '')) return err(503, 'AI சேவை தற்போது கிடைக்கவில்லை — நிர்வாகத்திடம் தெரிவிக்கப்பட்டுள்ளது. இப்போதைக்கு விவரங்களை நீங்களே நிரப்பலாம் (credits திரும்பக் கிடைத்தன).');
     return err(500, e.message);
   }
 }

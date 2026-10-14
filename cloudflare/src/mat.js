@@ -454,7 +454,11 @@ F.mat_admin_stats = async (db, uid) => {
       (select coalesce(sum(amount_paise), 0) from mat_unlocks) as revenue_paise,
       (select count(*) from mat_reports where status = 'open') as open_reports,
       (select count(*) from mat_submissions where status = 'new') as new_submissions,
-      (select count(*) from mat_contact_requests where status = 'new') as new_requests`).first();
+      (select count(*) from mat_contact_requests where status = 'new') as new_requests,
+      (select count(*) from mat_submissions) as submissions_total,
+      (select count(*) from mat_submissions where listed = 1) as listed,
+      (select count(*) from mat_contact_requests) as requests_total,
+      (select count(*) from mat_profiles) as members_total`).first();
   return { ok: true, ...r };
 };
 
@@ -533,6 +537,24 @@ F.mat_admin_submissions = async (db, uid, a) => {
   return { ok: true, items: rows.map((s) => { const data = safeParse(s.data, {}); return { ...s, data, photos: safeParse(s.photos, []), age: age(validDate(data.dob)) }; }) };
 };
 
+// every sign-up as flat rows (the admin page turns them into a CSV / Excel-openable download)
+F.mat_admin_export = async (db, uid) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const rows = (await db.prepare('select id, data, phone, email, status, listed, created_at from mat_submissions order by created_at desc limit 5000').all()).results;
+  return { ok: true, items: rows.map((s) => { const d = safeParse(s.data, {}); return { code: String(s.id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase(), name: d.name || '', gender: d.gender || '', age: age(validDate(d.dob)), phone: s.phone || '', email: s.email || '', community: d.community || '', kulam: d.kulam || '', star: d.star || '', raasi: d.raasi || '', education: d.education || '', occupation: d.occupation || '', city: d.city || '', state: d.state || '', status: s.status, listed: s.listed ? 'yes' : 'no', created_at: s.created_at }; }) };
+};
+
+// remove a sign-up for good (wrong / duplicate / asked to be removed); its photos are deleted too
+F.mat_admin_submission_delete = async (db, uid, a, env) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const s = await db.prepare('select photos, horoscope from mat_submissions where id = ?').bind(String(a.sid)).first();
+  if (!s) return { ok: false, code: 'not_found' };
+  await db.prepare('delete from mat_submissions where id = ?').bind(String(a.sid)).run();
+  const files = [...safeParse(s.photos, []), ...(s.horoscope ? [s.horoscope] : [])];
+  try { if (env && env.MAT_PHOTOS) for (const f of files) await env.MAT_PHOTOS.delete(f); } catch { /* best effort */ }
+  return { ok: true };
+};
+
 F.mat_admin_submission_set = async (db, uid, a) => {
   if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
   if (!['new', 'contacted', 'done', 'rejected'].includes(a.st)) return { ok: false, code: 'bad_status' };
@@ -542,16 +564,12 @@ F.mat_admin_submission_set = async (db, uid, a) => {
 
 // ---------------------------------------------------------------- public browsing (NO login needed)
 // Only these fields are ever shown to the public. Never: phone, e-mail, date of birth, income, parents' names,
-// native place, family notes, district, photos, horoscope. (Photos are added for logged-in viewers only.)
+// native place, family notes, district, horoscope. Photos of admin-listed profiles are visible to everyone (owner's decision).
 const PUBLIC_FIELDS = ['name', 'gender', 'height_cm', 'religion', 'community', 'community_other', 'kulam', 'gotra', 'mother_tongue', 'star', 'raasi', 'dosham', 'marital',
   'diet', 'education', 'education_detail', 'occupation', 'employer_type', 'city', 'state', 'father_occ', 'mother_occ', 'brothers', 'sisters', 'family_type', 'family_status', 'about'];
 
-// photos are shown only to approved members (and the admin) — never to anonymous visitors
-async function canSeePhotos(db, uid) {
-  if (!uid) return false;
-  if (await isAdmin(db, uid)) return true;
-  return !!(await db.prepare("select 1 from mat_profiles where user_id = ? and status = 'approved'").bind(uid).first());
-}
+// photos of admin-listed public sign-ups are visible to everyone (owner's decision); the admin approves the listing
+async function canSeePhotos() { return true; }
 
 function publicShape(id, d, created, photos, see) {
   const out = { id, code: String(id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase(), age: age(validDate(d.dob)), created_at: created };
@@ -645,7 +663,7 @@ export async function matRpc(env, uid, name, args) {
   if (!fn) return { ok: false, code: 'not_installed' };
   if (!uid && !PUBLIC.has(name) && name !== 'mat_my_profile' && name !== 'mat_counts') return { ok: false, code: 'not_logged_in' };
   try {
-    return await fn(env.DB, uid, args || {});
+    return await fn(env.DB, uid, args || {}, env);
   } catch (e) {
     if (e instanceof Code) return { ok: false, code: e.message };
     return { ok: false, code: 'error', message: e.message };
