@@ -3330,7 +3330,7 @@ const TOOL_LIBS = {
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
@@ -8291,6 +8291,48 @@ TOOL_IMPL.dscverify = {
       if(probs.some(p=>p.level==='warn')) return 'warn';
       return 'ok';
     }
+    // A separate one-page report with a real tick (drawn, not an emoji) — the signed PDF itself is never touched.
+    async function makeReport(rep, vs, worst){
+      const doc = await PDFDocument.create(); doc.setTitle('Signature verification report'); doc.setCreator('pdftoolsindia.com');
+      const font = await embedUnicodeFont(doc), W = 595.28, H = 841.89, MX = 44, CW = W - 2 * MX;
+      const INK = rgb(0.1, 0.1, 0.12), GR = rgb(0.4, 0.42, 0.48), LN = rgb(0.8, 0.82, 0.86);
+      const COL = { ok: rgb(0.12, 0.52, 0.25), warn: rgb(0.78, 0.5, 0.05), bad: rgb(0.75, 0.22, 0.17) };
+      let page = doc.addPage([W, H]), y = H - MX;
+      const wid = (t, sz) => font.widthOfTextAtSize(t, sz);
+      const wrap = (t, sz, w) => { const out = []; String(t == null ? '' : t).split(/\n/).forEach(par => { let line = ''; par.split(/(\s+)/).forEach(tok => { if(!tok) return; if(wid(line + tok, sz) <= w){ line += tok; return; } if(line.trim()) out.push(line.trim()); line = tok.trim(); while(wid(line, sz) > w && line.length > 1){ let k = line.length; while(k > 1 && wid(line.slice(0, k), sz) > w) k--; out.push(line.slice(0, k)); line = line.slice(k); } }); out.push(line.trim()); }); return out; };
+      const need = h => { if(y - h < 56){ page = doc.addPage([W, H]); y = H - MX; } };
+      const text = (t, sz, o) => { o = o || {}; wrap(t, sz, o.w || CW).forEach(l => { need(sz + 4); page.drawText(l, { x: o.x == null ? MX : o.x, y: y - sz, size: sz, font, color: o.c || INK }); if(o.b) page.drawText(l, { x: (o.x == null ? MX : o.x) + 0.35, y: y - sz, size: sz, font, color: o.c || INK }); y -= sz * 1.45; }); };
+      const row = (a, b) => { if(!String(b || '').trim()) return; const lines = wrap(b, 9.5, CW - 150); need(lines.length * 13 + 4); page.drawText(a, { x: MX, y: y - 9.5, size: 8.5, font, color: GR }); lines.forEach((l, i) => page.drawText(l, { x: MX + 150, y: y - 9.5 - i * 13, size: 9.5, font, color: INK })); y -= lines.length * 13 + 3; };
+      // header band with the verdict mark
+      const c = COL[worst], cx = MX + 28, cy = y - 34;
+      page.drawCircle({ x: cx, y: cy, size: 26, color: c });
+      if(worst === 'ok'){ page.drawLine({ start: { x: cx - 12, y: cy }, end: { x: cx - 3, y: cy - 10 }, thickness: 5, color: rgb(1, 1, 1) }); page.drawLine({ start: { x: cx - 3, y: cy - 10 }, end: { x: cx + 14, y: cy + 11 }, thickness: 5, color: rgb(1, 1, 1) }); }
+      else if(worst === 'bad'){ page.drawLine({ start: { x: cx - 10, y: cy - 10 }, end: { x: cx + 10, y: cy + 10 }, thickness: 5, color: rgb(1, 1, 1) }); page.drawLine({ start: { x: cx - 10, y: cy + 10 }, end: { x: cx + 10, y: cy - 10 }, thickness: 5, color: rgb(1, 1, 1) }); }
+      else { page.drawLine({ start: { x: cx, y: cy + 12 }, end: { x: cx, y: cy - 2 }, thickness: 5, color: rgb(1, 1, 1) }); page.drawCircle({ x: cx, y: cy - 11, size: 3, color: rgb(1, 1, 1) }); }
+      const T = { ok: ['கையொப்பம் கணித ரீதியாகச் சரி', 'Signature is intact and valid (checked by maths)'], warn: ['கையொப்பம் உள்ளது — கவனிக்க வேண்டியவை உள்ளன', 'Signature present — points to review'], bad: ['கையொப்பத்தில் பிரச்சினை', 'Signature problem found'] }[worst];
+      page.drawText(T[0], { x: MX + 70, y: y - 22, size: 16, font, color: c }); page.drawText(T[1], { x: MX + 70, y: y - 42, size: 10.5, font, color: GR });
+      y -= 78; page.drawLine({ start: { x: MX, y }, end: { x: W - MX, y }, thickness: 0.8, color: LN }); y -= 14;
+      text('கையொப்பச் சரிபார்ப்பு அறிக்கை · Signature verification report', 12, { b: true }); y -= 4;
+      const dig = await crypto.subtle.digest('SHA-256', file._buf), hex = Array.from(new Uint8Array(dig)).map(b => b.toString(16).padStart(2, '0')).join('');
+      row('கோப்பு · File', file.name); row('அளவு · Size', (file.size / 1024).toFixed(1) + ' KB'); row('SHA-256', hex.slice(0, 32) + '\n' + hex.slice(32));
+      row('சரிபார்த்த நேரம் · Checked', fd(new Date())); row('கையொப்பங்கள் · Signatures', String(rep.signatures.length));
+      rep.signatures.forEach((sig, i) => {
+        y -= 8; need(60); const v = vs[i]; page.drawRectangle({ x: MX, y: y - 18, width: CW, height: 20, color: rgb(0.94, 0.95, 0.97) });
+        page.drawText((v === 'ok' ? 'OK' : v === 'warn' ? 'CHECK' : 'PROBLEM') + ' · கையொப்பம் / Signature ' + sig.index + (sig.isDocTimeStamp ? ' (Time-stamp)' : ''), { x: MX + 8, y: y - 13, size: 10, font, color: COL[v] }); y -= 26;
+        const sg = sig.signer;
+        if(sg){ row('கையொப்பமிட்டவர் · Signer', sg.subjectCn); row('அமைப்பு · Organisation', sg.subjectMap.O || ''); row('நிலை · State', [sg.subjectMap.ST, sg.subjectMap.C].filter(Boolean).join(', ')); row('வழங்கியவர் · Issued by', sg.issuerCn); row('சான்றிதழ் செல்லுபடி · Valid', fdd(sg.notBefore) + '  to  ' + fdd(sg.notAfter)); row('Key', (sg.keyAlg || '') + ' ' + (sg.keyBits || '') + ' · ' + sig.hash); }
+        row('கையொப்ப நேரம் · Signed at', sig.timeUsed ? fd(sig.timeUsed) + ' (' + (sig.timeSource === 'signed' ? 'inside the signature' : sig.timeSource === 'timestamp' ? 'time-stamp authority' : 'claimed in the PDF') + ')' : '');
+        row('காரணம் · Reason', sig.reason); row('இடம் · Location', sig.location);
+        if(sig.chain.length) row('சங்கிலி · Chain', sig.chain.map(x => x.subjectCn).join('   >   ') + (sig.cca ? '   [CCA India]' : ''));
+        sig.problems.filter(p => !(p.code === 'APPENDED' && !sig.isLatest)).forEach(p => { const m = MSG[p.code] || ['warn', p.code, p.code]; row(m[0] === 'bad' ? 'பிரச்சினை · Problem' : 'கவனிக்க · Note', m[1] + '\n' + m[2]); });
+        if(!sig.problems.length || sig.problems.every(p => p.code === 'APPENDED' && !sig.isLatest)) row('முடிவு · Result', 'ஆவணம் கையொப்பத்துக்குப் பின் மாறவில்லை · The document has not changed since signing.');
+      });
+      y -= 10; page.drawLine({ start: { x: MX, y }, end: { x: W - MX, y }, thickness: 0.6, color: LN }); y -= 10;
+      text('சரிபார்த்தவை · What was checked: கையொப்பத்தின் கணிதம், ஆவணம் மாறவில்லை என்பது, கையொப்பமிட்ட நேரத்தில் சான்றிதழ் செல்லுபடி, சான்றிதழ் சங்கிலி இணைப்புகள். / The signature mathematics, that the document is unchanged, that the certificate was valid at signing time, and the links of the certificate chain.', 8.5, { c: GR });
+      text('சரிபார்க்கப்படாதவை · NOT checked: சான்றிதழ் ரத்து செய்யப்பட்டதா (OCSP / CRL), அதிகாரப்பூர்வ நம்பிக்கைப் பட்டியல். இது உலாவியில் உருவாக்கப்பட்ட சுருக்க அறிக்கை — CA அல்லது அரசு வழங்கியது அல்ல. / Revocation (OCSP / CRL) and an official trust list. This is a summary made in your browser — it is not issued by the CA or any government body.', 8.5, { c: GR });
+      text('Generated by pdftoolsindia.com · the original PDF was not modified.', 8, { c: GR });
+      const bytes = await doc.save(); downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'Signature-verification-report-' + (file.name.replace(/\.pdf$/i, '').replace(/[^A-Za-z0-9._-]+/g, '-').slice(0, 40) || 'file') + '.pdf');
+    }
     function paint(){
       body.innerHTML = '';
       body.appendChild(el(`<div class="note tamil">PDF-ல் உள்ள DSC / e-Sign / Adobe கையொப்பங்களைச் சரிபார்க்கிறது: யார் கையொப்பமிட்டார், கையொப்பத்துக்குப் பின் PDF மாறியதா, சான்றிதழ் செல்லுமா, இந்திய CA சங்கிலி உள்ளதா. கோப்பு உங்கள் கருவியை விட்டு வெளியே போகாது. · Checks signatures right in your browser; the file is never uploaded.</div>`));
@@ -8336,7 +8378,7 @@ TOOL_IMPL.dscverify = {
           h += row('அமைப்பு · Organisation', E(sg.subjectMap.O||''));
           h += row('நிலை · State', E([sg.subjectMap.ST,sg.subjectMap.C].filter(Boolean).join(', ')));
           h += row('வழங்கியவர் · Issued by', E(sg.issuerCn));
-          h += row('சான்றிதழ் செல்லுபடி · Valid', `${fdd(sg.notBefore)} → ${fdd(sg.notAfter)}${sig.certExpiredNow?' <b style="color:#C0392B">(இப்போது காலாவதி · expired now)</b>':''}`);
+          h += row('சான்றிதழ் செல்லுபடி · Valid', `${fdd(sg.notBefore)} → ${fdd(sg.notAfter)}${sig.certExpiredNow ? (sig.problems.some(p=>p.code==='EXPIRED_AT_SIGNING') ? ' <b style="color:#C0392B">(இப்போது காலாவதி · expired)</b>' : ((new Date(sg.notAfter) - new Date(sg.notBefore)) <= 2*86400000 ? ' <span style="color:#1565C0">(e-Sign சான்றிதழ் சில நிமிடங்களுக்கு மட்டுமே செல்லும் — இது வழக்கம். கையொப்பமிட்ட நேரத்தில் செல்லுபடியானதே முக்கியம் · short-lived e-Sign certificate: normal)</span>' : ' <span style="color:#B9770E">(இப்போது காலாவதி — ஆனால் கையொப்பமிட்ட நேரத்தில் செல்லுபடியானது · expired now, but valid when signed)</span>')) : ''}`);
           h += row('Key', E(`${sg.keyAlg||''} ${sg.keyBits||''}`.trim()) + ` · ${E(sig.hash)}`);
         }
         h += row('கையொப்ப நேரம் · Time', sig.timeUsed ? `${fd(sig.timeUsed)} <span style="color:var(--sub)">(${sig.timeSource==='signed'?'கையொப்பத்தில் உள்ளது · inside signature':'PDF-ல் குறிப்பிடப்பட்டது, நிரூபிக்கப்படவில்லை · claimed, not proven'})</span>` : '—');
@@ -8352,6 +8394,13 @@ TOOL_IMPL.dscverify = {
       });
       const lim = el(`<div class="note tamil" style="font-size:12.5px;line-height:1.6;"><b>இந்தச் சரிபார்ப்பு எதை உறுதி செய்கிறது / செய்யாது</b><br>✅ கையொப்பமிட்ட பகுதி மாறவில்லை, கையொப்பம் சான்றிதழுடன் கணித ரீதியாகப் பொருந்துகிறது, சான்றிதழ் காலம், சங்கிலி.<br>ℹ️ <b>சான்றிதழ் ரத்து (revocation – OCSP/CRL)</b> மற்றும் <b>அரசு root நம்பகப் பட்டியல்</b> ஆகியவற்றை இணையமின்றி உலாவியால் சரிபார்க்க முடியாது. அதிகாரப்பூர்வ முடிவுக்கு Adobe Acrobat Reader-ல் திறந்து Signature Panel-ஐயும் பாருங்கள்.<br><span style="color:var(--sub)">Not checked offline: revocation (OCSP/CRL) and whether the root is in an official trust store. For an official verdict also open the file in Adobe Acrobat Reader.</span></div>`);
       out.appendChild(lim);
+      if(worst !== 'bad'){
+        out.appendChild(el(`<div class="note tamil" style="font-size:12.5px;line-height:1.65;background:#EAF2F8;"><b>ℹ️ உங்கள் PDF viewer-ல் “Signature Not Verified” அல்லது மஞ்சள் “?” வருகிறதா?</b><br>
+          • அந்த “?” என்பது <b>“இந்த viewer-க்கு இந்தச் சான்றிதழ் வழங்கியவரை (CA) தெரியவில்லை”</b> என்பதே — <b>“கையொப்பம் தவறு” என்று அர்த்தமல்ல.</b> Google Drive, phone / browser viewers பெரும்பாலும் கையொப்பத்தைச் சரிபார்ப்பதே இல்லை, அல்லது இந்திய CCA root-ஐ நம்புவதில்லை; அதனால் “?” காட்டுகின்றன.<br>
+          • கணினியில் Adobe Acrobat / Reader (இணையத்துடன், புதிய பதிப்பு) பொதுவாக CCA India சங்கிலிக்குப் பச்சை ✔ காட்டும் — இது உங்கள் Adobe பதிப்பு / அமைப்பைப் பொறுத்தது.<br>
+          • PDF-க்குள் இருக்கும் அந்த “?” படத்தை ஆவணத்தை உருவாக்கியவரே சேர்த்தார். அதை மாற்றினால் கையொப்பம் உடையும் அல்லது போலிச் சரிபார்ப்பாகும் — அதனால் நாங்கள் PDF-ஐ மாற்றுவதில்லை. அதற்குப் பதிலாக கீழே உள்ள <b>“Verification report”</b> தனி PDF-ஐப் பயன்படுத்துங்கள்.<br>
+          <span style="color:#456;">In many viewers the yellow “?” only means “this viewer does not know the issuing CA” — it does not mean the signature is bad. We never edit your PDF (that would break the signature); use the separate verification report below instead.</span></div>`));
+      }
       const row = el(`<div class="btn-row"></div>`);
       const cp = el(`<button class="btn" style="background:#fff;color:var(--ink);border:1px solid var(--line);">📋 அறிக்கையை நகலெடு · Copy report</button>`);
       cp.onclick = async ()=>{
@@ -8360,6 +8409,9 @@ TOOL_IMPL.dscverify = {
         try{ await navigator.clipboard.writeText(L.join('\n')); cp.textContent='✅ நகலெடுக்கப்பட்டது'; }catch(e){ cp.textContent='⚠️ நகலெடுக்க முடியவில்லை'; }
       };
       row.appendChild(cp);
+      const rb = el(`<button class="btn" style="background:#1B5E20;color:#fff;">⬇️ சரிபார்ப்பு அறிக்கை · Verification report (PDF)</button>`);
+      rb.onclick = async ()=>{ rb.disabled = true; const old = rb.textContent; rb.textContent = '⏳…'; try{ await makeReport(rep, vs, worst); rb.textContent = '✅ பதிவிறக்கப்பட்டது · Downloaded'; }catch(e){ rb.textContent = '⚠️ ' + (e && e.message || 'Could not create the report'); } setTimeout(()=>{ rb.textContent = old; rb.disabled = false; }, 2600); };
+      row.appendChild(rb);
       const hb = el(`<button class="btn" style="background:#fff;color:#0B5345;border:1px solid #0B5345;">🔑 DSC உதவி · DSC problems?</button>`); hb.onclick = ()=>openTool('dscguide'); row.appendChild(hb);
       out.appendChild(row);
     }
