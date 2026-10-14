@@ -24,3 +24,6 @@ Only copy files that were actually changed. Never overwrite these with older cop
 `index.html`, `index.source.html`, `cf-auth.js`, `sw.js`, `matrimony/m-backend.js`, `matrimony/m-config.js`, `matrimony/m-core.js`,
 `matrimony/m-v-public.js`, `astrology-plus.html`, `Resume_build.html`, `health-check.html`, anything under `cloudflare/` or `.github/`.
 If an incoming copy of one of these contains `supabase.co`, `@supabase/supabase-js`, `run.app`, `signInWithPassword` or `resetPasswordForEmail`, it is an old version — merge only the real change by hand instead. (The names `window.supabase` / `SUPABASE_URL` still exist on purpose: `cf-auth.js` keeps that API name.)
+
+## Handoff / current state
+Start every new session by reading `HANDOFF.md` (architecture of the document tools in `category-docs.js`, build steps, tests, pitfalls, and what is still unverified). Document tools are lazy-loaded: after editing `category-docs.js`, bump the `?v=` string in `loadCategoryScript`, run `python3 remin.py`, bump `sw.js`, and run `node tests/billing-calc.test.mjs`.

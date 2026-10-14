@@ -1,0 +1,63 @@
+# HANDOFF — pdftoolsindia.com (read this first in a new session)
+
+Owner: Janarthanan (talks in Tamil / Tanglish; wants everything at ₹0 cost). Reply to the owner in Tamil/Tanglish, keep it plain.
+Repo: `janarmca/pdf-tools-backend`. Deploys: Cloudflare Pages auto-deploys `main`; one Cloudflare Worker (`cloudflare/`) is the whole backend.
+Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no passwords, edit BOTH `index.source.html` and `index.html`, bump `sw.js`).
+
+## Working rules for any change
+1. Edit `index.source.html` (readable). Then run `python3 remin.py` (~8 s) to rebuild the served `index.html`. **Run remin again after every edit to the source, including version-string edits.**
+2. Bump `CACHE_NAME` in `sw.js` (now `pdf-tools-shell-v54`).
+3. Lazy category scripts load with a version query: `category-${cat}.js?v=2026101xx` inside `loadCategoryScript` in `index.source.html`. Change that string whenever `category-docs.js` / `category-extra.js` changes, or browsers keep the old file.
+4. After catalog changes (`TOOLS` array) run `node generate-tool-pages.mjs` (rewrites `/tools/*.html`, hub pages, `sitemap.xml`) and `node generate-promo-catalog.mjs` (updates `cloudflare/src/promo-catalog.js`). Removing a tool = also delete its `/tools/<slug>.html` and add a 301 in `_redirects`.
+5. Push to **both** `main` and `claude/merge-pending-upload-files-k4v19o` (same commits). Never force-push. If rejected (the sitemap bot commits to main): `git fetch origin main && git merge --no-edit origin/main`, push again.
+6. Commit trailers: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` and `Claude-Session: <session url>`.
+7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
+
+## Where the tools live
+| File | Contents |
+|---|---|
+| `index.source.html` / `index.html` | app shell, `TOOLS` catalog, `TOOL_LIBS` (on-demand libs per tool id), most older tools |
+| `category-docs.js` (lazy `lazy:'docs'`) | **all document tools**: `quotepo` (Quotation / Proforma / Tax Invoice / Bill / Bill of Supply / PO / Challan, also covers GST invoice), `receipts` (rent, tuition, money receipt, payment voucher), `salaryslip`, `leaveletter`, `prescription`, `businesscard`, `hrattendance`, `expensetracker` |
+| `category-extra.js` (lazy `lazy:'extra'`) | TNEA cut-off, biodata, star finder, porutham, gold, PF, EB bill, invitation |
+| `category-education.js`, `category-image.js` | their categories |
+| `libs/` | self-hosted `fontkit`, `regenerator-runtime`, `qrcode-generator` (no CDN needed for Tamil PDFs or QR) |
+| `fonts/` | Noto Sans Tamil (TTF for PDFs, woff2 + `tamil.css` for pages) |
+| `pages-style.mjs`, `generate-tool-pages.mjs` | static SEO pages for every tool |
+| `_redirects` | 301s for removed tool pages |
+| `cloudflare/` | Worker (D1, KV, Workers AI, promo agent) — see `cloudflare/README.md` |
+
+Old tool ids still work: `TOOL_MOVED` in `index.source.html` maps `gstinvoice → quotepo`, `rentreceipt / tuitionreceipt / paymentvoucher → receipts` (used by `openTool` and `?tool=` deep links). `TOOL_ALIAS` is a different thing (search keywords) — do not reuse that name.
+
+## Key design points in `category-docs.js`
+- **Tamil in PDFs:** pdf-lib + fontkit + Noto Sans Tamil. `embedUnicodeFont` returns a font patched by `makeMixedScriptFont` (in `index.source.html`) so mixed Tamil/English strings are shaped per script run. Always draw through `page.drawText`; measure with `font.widthOfTextAtSize`.
+- **Document language** (English / தமிழ் / both) exists on every document tool:
+  - invoice family: `S.lang` (`en|ta|bi`), global `OL`, label dictionary `TA_LAB`, `LB()` translates fixed labels only (never user text), `lang3(en, ta)`; table headers stack two lines in `bi` mode.
+  - receipts / salary slip / prescription: `tl(lang, en, ta)` + `rcWords(lang, n)` (amount in words, uses `TamilCore.rupeesToWords` for Tamil).
+  - leave letter: `ta | en | bi` (bi = two letters, separate editable bodies); business card: two-sided (front/back in two languages, duplex-aligned sheet); HR + Expense: Excel/print language in the "Data" tab.
+- **Money:** invoice maths is integer paise (`calcDoc`); per-(HSN, rate) tax summary; IGST vs CGST+SGST from seller/buyer state (GSTIN first 2 digits); inclusive-price mode; round-off; advance/balance.
+- **Dates:** always local (`localISO`), never `toISOString()` (it gave yesterday between 00:00–05:30 IST).
+- **Storage (all device-local, nothing leaves the browser):** `pti-biz-*` (invoice drafts, seller, buyers, numbering), `pti-rcpt-*`, `pti-salary-*`, `pti-leave-*`, `pti-rx-*`, `pti-card-v1`, `pti-exp-v1`, `hrreg_employees / hrreg_attendance / hrreg_settings` (HR keys kept from the old page so existing data survived). HR and Expense re-read storage before every write and listen for `storage` events (two tabs cannot overwrite each other).
+- Helpers shared by tools: `root`, `B()` (UI text in the site language first), `esc`, `fld`-style inputs, `dx-*` CSS classes, `qrDataUrl` (self-hosted QR), `fileSafe`, `downloadBlob`.
+
+## Tests / how to verify
+- Pure maths: `node tests/billing-calc.test.mjs` (must print `ALL CALC TESTS PASS`).
+- Worker: `cd cloudflare && node --test --test-concurrency=1 test/*.test.mjs` (needs `wrangler dev`, see README).
+- Browser checks used so far (Playwright + Chromium, phone viewport 390×844, timezone Asia/Kolkata): open every tool via `openTool(id)` and look for JS errors / empty screens / horizontal overflow (157 tools passed); generate PDF/Excel/Word for each document tool and render PDFs with `pdftoppm` to look at them; recalculate Excel in LibreOffice (`soffice --headless --convert-to csv`) to confirm formulas = cached values.
+- Local preview: `python3 -m http.server 8104` then `http://127.0.0.1:8104/index.html?tool=<id>`. In the sandbox, public CDNs are blocked, so anything that still needs a CDN will not load there (that is why libs were self-hosted).
+
+## Pitfalls already hit (do not repeat)
+- A `</body>` string inside page JS: never `replace('</body>', …)` first occurrence; use the last one.
+- `const` name clash in the huge inline script (`TOOL_ALIAS`) breaks terser/minify — grep before adding a top-level name.
+- Using a `const` before its declaration in the same expression (TDZ) in tool code throws only at runtime — always run the tool once.
+- Tamil-only names make `fileSafe()` empty — it returns `''`; callers add a fallback.
+- Free Worker plan = 10 ms CPU per request: no hashing/heavy work in the Worker.
+
+## Not done / not verified (be honest about these)
+- Not tested on a real Android/iPhone (print dialog, WhatsApp share, file downloads). Word (.docx) outputs download but were not opened in Word. Quotation/Invoice Excel not opened in Excel (only the Expense Excel was recalculated in LibreOffice).
+- Image lazy-loading and performance measurements not done. No full visual redesign of the home page (earlier redesign already shipped; avoid breaking working parts).
+- Legal/tax values written from memory — owner should verify: PF 12% on ₹15,000 ceiling, ESI 0.75% when gross ≤ ₹21,000, rent > ₹1,00,000/yr needs landlord PAN, §269ST (₹2 lakh cash), §40A(3) (₹10,000 cash). They show only as warnings. Professional Tax is entered by hand (state slabs not hard-coded). Revenue-stamp rule is state-specific — only a warning + optional stamp box.
+- Old `hr-attendance-register.html` (React + Babel from CDN) is still in the repo but no longer linked.
+- Owner-side items still pending: Telegram bot admin rights + "post now" test; Facebook / Instagram / X / Pinterest / YouTube app keys (as GitHub secrets); footer phone-number decision; verify TNEB tariff, PF 8.25%, gold-loan 75% LTV, TNEA eligibility % (written from memory).
+
+## Ideas the owner may ask next
+Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words for paise edge cases; image lazy-loading + Lighthouse pass; remove the old HR page; e-invoice/QR (IRN) is out of scope (needs GST portal API).
