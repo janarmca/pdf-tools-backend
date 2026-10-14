@@ -347,6 +347,32 @@ test('matrimony: admin lists an approved member publicly (safe fields + photo), 
   assert.equal((await call('/mat/photo-url?path=' + encodeURIComponent(up.j.path), { method: 'GET' })).s, 401);
 });
 
+test('matrimony admin: edit a member profile and a sign-up (phone, photos, fields)', async () => {
+  const admin = await signup('admin6');
+  await sql([{ sql: 'insert into mat_admins (user_id) values (?)', params: [admin.user.id] }]);
+  const m = await signup('editme');
+  await rpc('mat_save_profile', { p: profile('Old Name', 'M', '1992-02-02', { occupation: 'Clerk' }), phone: '9000000001', email: 'old@x.in' }, m.access_token);
+  assert.equal((await rpc('mat_admin_get', { kind: 'm', id: m.user.id }, m.access_token)).ok, false);
+  const g = await rpc('mat_admin_get', { kind: 'm', id: m.user.id }, admin.access_token);
+  assert.equal(g.ok, true); assert.equal(g.p.name, 'Old Name'); assert.equal(g.phone, '9000000001');
+  assert.equal((await rpc('mat_admin_save', { kind: 'm', id: m.user.id, p: { ...g.p, name: 'New Name', occupation: 'Manager', photos: [m.user.id + '/x.jpg'] }, phone: '9000000002', email: 'new@x.in' }, m.access_token)).ok, false);
+  assert.equal((await rpc('mat_admin_save', { kind: 'm', id: m.user.id, p: { ...g.p, name: 'New Name', occupation: 'Manager', photos: ['evil/x.jpg'] }, phone: '9000000002' }, admin.access_token)).code, 'photos');
+  const sv = await rpc('mat_admin_save', { kind: 'm', id: m.user.id, p: { ...g.p, name: 'New Name', occupation: 'Manager', photos: [m.user.id + '/x.jpg'] }, phone: '9000000002', email: 'new@x.in' }, admin.access_token);
+  assert.equal(sv.ok, true, JSON.stringify(sv));
+  const g2 = await rpc('mat_admin_get', { kind: 'm', id: m.user.id }, admin.access_token);
+  assert.equal(g2.p.name, 'New Name'); assert.equal(g2.p.occupation, 'Manager'); assert.equal(g2.phone, '9000000002'); assert.equal(g2.email, 'new@x.in'); assert.deepEqual(g2.p.photos, [m.user.id + '/x.jpg']);
+  assert.equal(g2.status, g.status);                                              // editing as admin does not reset the approval state
+  // sign-up
+  const ph = '6' + String(Date.now()).slice(-9);
+  const sub = await rpc('mat_submit_public', { p: profile('Sub One', 'F', '1999-09-09'), phone: ph }, null);
+  const sg = await rpc('mat_admin_get', { kind: 's', id: sub.id }, admin.access_token);
+  assert.equal(sg.p.name, 'Sub One'); assert.equal(sg.phone, ph);
+  assert.equal((await rpc('mat_admin_save', { kind: 's', id: sub.id, p: { ...sg.p, name: 'Sub Two', city: 'Erode', photos: ['submissions/a.jpg'] }, phone: '6000000009', email: 's@x.in' }, admin.access_token)).ok, true);
+  const sg2 = await rpc('mat_admin_get', { kind: 's', id: sub.id }, admin.access_token);
+  assert.equal(sg2.p.name, 'Sub Two'); assert.equal(sg2.p.city, 'Erode'); assert.equal(sg2.phone, '6000000009'); assert.deepEqual(sg2.p.photos, ['submissions/a.jpg']);
+  assert.equal((await rpc('mat_admin_get', { kind: 's', id: 'nope' }, admin.access_token)).code, 'not_found');
+});
+
 test('CORS + unknown routes', async () => {
   const r = await fetch(API + '/auth/v1/user', { method: 'OPTIONS', headers: { Origin: 'https://pdftoolsindia.com' } });
   assert.equal(r.status, 204);
