@@ -1,0 +1,11 @@
+{
+  "note": "Official Income Tax Department pages the TDS tools were verified against (15 Oct 2026). A weekly workflow hashes them; when one changes it opens an issue so the tools can be re-verified.",
+  "sources": [
+    { "id": "transition-faq", "title": "FAQs on the transition to the Income-tax Act 2025", "url": "https://www.incometaxindia.gov.in/documents/81799/11848482/FAQs-on-Interplay-and-Transition.pdf" },
+    { "id": "form-138-faq", "title": "Form 138 FAQ (quarterly salary TDS statement, due dates)", "url": "https://www.incometaxindia.gov.in/documents/d/guest/form-138-faqs" },
+    { "id": "form-130-faq", "title": "Form 130 FAQ (salary TDS certificate, 15 June, TRACES)", "url": "https://www.incometaxindia.gov.in/documents/d/guest/form-130-faqs" },
+    { "id": "form-140-faq", "title": "Form 140 FAQ (non-salary TDS statement)", "url": "https://www.incometaxindia.gov.in/documents/d/guest/form-140-faqs" },
+    { "id": "forms-list", "title": "Forms as per Income-tax Rules 2026 (old to new form numbers)", "url": "https://www.incometaxindia.gov.in/w/faqs-on-forms-as-per-income-tax-rules-2026-1" },
+    { "id": "it-rules-2026", "title": "Notified Income-tax Rules 2026 (gazette PDF)", "url": "https://www.incometaxindia.gov.in/documents/d/guest/en-notified-it-rules-2026-20-03-2026-pdf" }
+  ]
+}

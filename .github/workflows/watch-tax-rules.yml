@@ -1,0 +1,50 @@
+name: Watch tax rule sources
+
+# Once a week: fetches the official Income Tax Department pages the TDS tools were verified against
+# (.github/tax-sources.json), compares them with .github/tax-sources.lock.json and, if one changed,
+# opens an issue (GitHub e-mails the owner). It never changes the tools by itself.
+# Free: no secrets, no AI. If a run cannot reach the pages it only logs it.
+on:
+  schedule:
+    - cron: '17 3 * * 1'   # Monday 08:47 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: watch-tax-rules
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check official pages
+        id: check
+        run: node .github/scripts/watch-tax-rules.mjs
+      - name: Save new baseline
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/tax-sources.lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: tax rule sources checked [skip ci]"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            git push || echo "push skipped"
+          fi
+      - name: Open an issue when a page changed
+        if: steps.check.outputs.changed == 'true' || steps.check.outputs.alert_down == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Tax rule pages changed — re-verify the TDS tools"
+          if [ "${{ steps.check.outputs.changed }}" != "true" ]; then TITLE="Tax rule watcher cannot reach the official pages"; fi
+          EXISTING=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" --body-file report.md; else gh issue create --title "$TITLE" --body-file report.md; fi

@@ -389,7 +389,13 @@ const TOOLS = [
   {id:'compress', name:'Compress PDF', desc:'Shrink file size', icon:'📦', color:'#8E5A2E', cat:'pdf'},
   {id:'pdfgray', name:'PDF → Grayscale', desc:'Convert to Grayscale / B&W', icon:'⚫', color:'#4A4A4A', cat:'pdf'},
   {id:'pdfcrop', name:'Crop PDF Margins', desc:'Trim white space from pages', icon:'📐', color:'#5B6B73', cat:'pdf'},
-  {id:'pdfmeta', name:'Edit PDF Info', desc:'Change Title / Author / Subject', icon:'🏷️', color:'#7D6608', cat:'pdf'},
+  {id:'pdfmeta', name:'Edit PDF Info', desc:'Change Title / Author / Subject / Keywords / Creator', icon:'🏷️', color:'#7D6608', cat:'pdf'},
+  {id:'dscverify', name:'DSC / e-Sign Verifier', desc:'Check digital signatures in a PDF — valid, edited after signing, expired, who signed', icon:'🔏', color:'#1B5E20', cat:'pdf'},
+  {id:'dscbulk', name:'Bulk Form 16 / 130 Signature Check', desc:'Check many signed PDFs or a TRACES ZIP at once — signed, broken or unsigned, with CSV', icon:'🗂️', color:'#1B5E20', cat:'business', lazy:'tds'},
+  {id:'pantan', name:'PAN / TAN Checker', desc:'Paste many PAN / TAN numbers — wrong format, holder type, duplicates — before filing a TDS return', icon:'🪪', color:'#6C3483', cat:'business', lazy:'tds'},
+  {id:'tdsdates', name:'TDS Due Date Calendar', desc:'TDS deposit and quarterly return dates for any financial year — new Income-tax Act 2025 and old forms', icon:'📅', color:'#1F618D', cat:'business', lazy:'tds'},
+  {id:'tdsinterest', name:'TDS Late Interest Calculator', desc:'Interest on late TDS deduction (1%) or late deposit (1.5%) per month — many challans, CSV', icon:'🧮', color:'#B9770E', cat:'business', lazy:'tds'},
+  {id:'dscguide', name:'DSC Token Help', desc:'Fix DSC USB token, emSigner, Java and “signature invalid” problems', icon:'🔑', color:'#0B5345', cat:'pdf'},
   {id:'img2pdf', name:'Image → PDF', desc:'Turn JPG/PNG into a PDF', icon:'🖼️', color:'#2E86C1', cat:'pdf'},
   {id:'word2pdf', name:'Word → PDF', desc:'Convert .docx to PDF (fonts preserved)', icon:'📄', color:'#2C5F8A', cat:'pdf'},
   {id:'excel2pdf', name:'Excel → PDF', desc:'Convert .xlsx to PDF', icon:'📊', color:'#1E7145', cat:'pdf'},
@@ -1375,6 +1381,12 @@ extractpages:['பக்கங்களைத் தனியே எடு','த
 pdfflatten:['PDF தட்டையாக்கு','படிவம், குறிப்புகளை மாற்ற முடியாதபடி இணை'],
 pdfrepair:['PDF பழுது நீக்கு','திறக்காத PDF-ஐ சரிசெய்ய முயற்சி'],
 pdfmetaremove:['PDF மறைதகவல் நீக்கு','ஆசிரியர், கருவி போன்ற மறைதகவலை அழி'],
+dscbulk:['பல Form 16/130 கையொப்பச் சரிபார்ப்பு','பல PDF அல்லது TRACES ZIP-ஐ ஒரே நேரத்தில் சரிபார்'],
+pantan:['PAN / TAN சரிபார்ப்பு','பல PAN, TAN எண்களின் வடிவத்தைச் சரிபார்'],
+tdsdates:['TDS தேதி நாட்காட்டி','TDS செலுத்தும், return தாக்கல் செய்யும் தேதிகள்'],
+tdsinterest:['TDS தாமத வட்டி கணிப்பான்','தாமதமாகப் பிடித்த/செலுத்திய TDS-க்கு வட்டி'],
+dscverify:['DSC / e-Sign சரிபார்ப்பு','PDF-ல் டிஜிட்டல் கையொப்பம் செல்லுமா, மாற்றப்பட்டதா, யார் கையொப்பம் என்று பார்'],
+dscguide:['DSC டோக்கன் உதவி','DSC USB, emSigner, Java, “signature invalid” சிக்கல்களுக்குத் தீர்வு'],
 pdfocrsearchable:['தேடக்கூடிய PDF (OCR)','ஸ்கேன் PDF-ஐ தேடக்கூடியதாக்கு'],
 pdf2ppt:['PDF → PowerPoint','PDF-ஐ ஸ்லைடுகளாக்கு'],
 ppt2pdf:['PowerPoint → PDF','ஸ்லைடுகளை PDF ஆக்கு'],
@@ -1932,7 +1944,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014l`;
+    s.src = `category-${cat}.js?v=20261015d`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -2103,8 +2115,51 @@ function mountUploader(container, opts){
     if(input.files && input.files.length) opts.onAdd(Array.from(input.files));
     input.value = '';
   });
+  // Signed-PDF safety net: every PDF tool that rewrites the file would silently destroy a
+  // DSC / e-Sign signature (TRACES, GST, e-filing portals then reject it). Warn right after upload.
+  if(/pdf/i.test(opts.accept||'') && !opts.noSignWarn){
+    const userAdd = opts.onAdd;
+    opts = Object.assign({}, opts, { onAdd: function(files){
+      const r = userAdd.apply(this, arguments);
+      try{ Promise.resolve(r).then(()=> signedPdfWarning(container, files)).catch(()=>{}); }catch(e){}
+      return r;
+    }});
+  }
   container.appendChild(box);
   return box;
+}
+const SIGN_BREAKING_TOOLS = new Set(['merge','split','compress','rotate','organize','remove','extractpages','watermark','pagenum','pdfmeta','pdfmetaremove','pdfstamp','pdfheaderfooter','pdfcrop','pdfeditor','pdfflatten','pdfform','pdfgray','pdfnup','pdfredact','pdfrepair','pdfsplitsize','sign','pdfbookmark','pdfhighlight','pdfimgwm','pdfqrstamp','pdfblankpage','protect','unlock','pdfunlock','pdfprotect','pdfocrsearchable','compresstarget']);
+// fast byte scan (no full-file string): counts real signature dictionaries (/ByteRange [0 a b c])
+function quickSignedCheck(u8){
+  const pat = [47,66,121,116,101,82,97,110,103,101]; // "/ByteRange"
+  let n = 0; const end = u8.length - pat.length;
+  for(let i=0;i<end;i++){
+    if(u8[i]!==47 || u8[i+1]!==66) continue;
+    let k=2; while(k<pat.length && u8[i+k]===pat[k]) k++;
+    if(k<pat.length) continue;
+    let t=''; for(let j=i+pat.length;j<Math.min(u8.length,i+pat.length+70);j++) t+=String.fromCharCode(u8[j]);
+    const m = /^\s*\[\s*0\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/.exec(t);
+    if(m && parseInt(m[1],10)>0 && parseInt(m[2],10)>parseInt(m[1],10)) n++;
+  }
+  return n;
+}
+async function signedPdfWarning(container, files){
+  if(!state || !SIGN_BREAKING_TOOLS.has(state.tool)) return;
+  let total = 0, names = [];
+  for(const f of (files||[]).slice(0,10)){
+    if(!(/\.pdf$/i.test(f.name) || f.type==='application/pdf') || f.size > 150*1024*1024) continue;
+    try{ const n = quickSignedCheck(new Uint8Array(await f.arrayBuffer())); if(n){ total += n; names.push(f.name); } }catch(e){}
+  }
+  if(!total || !container || !container.isConnected) return;
+  const old = container.querySelector(':scope > .sign-warn'); if(old) old.remove();
+  const w = el(`<div class="sign-warn tamil" style="background:#FFF8E1;border:1px solid #F5B041;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.55;">
+    <div style="font-weight:700;margin-bottom:4px;">⚠️ டிஜிட்டல் கையொப்பம் (DSC / e-Sign) உள்ள PDF · Digitally signed PDF</div>
+    <div>${escapeHtml(names.join(', '))} — இதில் ${total} கையொப்பம் உள்ளது. இந்தக் கருவி கோப்பை மாற்றியமைப்பதால் <b>கையொப்பம் செல்லாததாகிவிடும்</b>; TRACES, GST, e-filing போன்ற தளங்கள் அதை ஏற்காது.</div>
+    <div style="color:#6b5b00;margin-top:3px;">This tool rewrites the file, so the signature will be invalid. Use the original signed file for government uploads; if you must edit/compress, do it <b>before</b> signing.</div>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn sm" data-act="verify" style="padding:6px 12px;">🔏 கையொப்பத்தைச் சரிபார் · Verify</button><button class="btn sm" data-act="help" style="padding:6px 12px;background:#fff;color:#0B5345;border:1px solid #0B5345;">🔑 DSC உதவி · Help</button></div></div>`);
+  w.querySelector('[data-act=verify]').onclick = ()=>openTool('dscverify');
+  w.querySelector('[data-act=help]').onclick = ()=>openTool('dscguide');
+  container.insertBefore(w, container.firstChild);
 }
 
 // Like mountFileList, but for image-specific tools where actually SEEING
@@ -3243,8 +3298,14 @@ function ensurePptxGenJs(){
   return ensureLib('pptxgenjs', ()=>!!window.PptxGenJS,
     'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js', 'PowerPoint library');
 }
+function ensureTdsCore(){
+  return ensureLib('tdscore', ()=>!!window.TdsCore, '/tds-core.js?v=2', 'TDS helper');
+}
+function ensureDscVerify(){
+  return ensureLib('dscverify', ()=>!!window.DscVerify, '/dsc-verify.js?v=2', 'Signature checker');
+}
 const LIB_LOADERS = {
-  pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
+  tdscore: ensureTdsCore, dscverify: ensureDscVerify, pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
   xlsx: ensureXlsx, mammoth: ensureMammoth, html2canvas: ensureHtml2Canvas, docx: ensureDocxLib,
   pptxgenjs: ensurePptxGenJs, exceljs: ensureExcelJs
 };
@@ -3269,7 +3330,7 @@ const TOOL_LIBS = {
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
@@ -8007,8 +8068,8 @@ TOOL_IMPL.pdfmeta = {
       mountUploader(body, { accept:'application/pdf', label:'Drag & drop or tap to upload a PDF', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
-          const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
-          file._meta = { title: doc.getTitle()||'', author: doc.getAuthor()||'', subject: doc.getSubject()||'', keywords: (doc.getKeywords && doc.getKeywords())||'' };
+          const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true, updateMetadata:false});
+          file._meta = { title: doc.getTitle()||'', author: doc.getAuthor()||'', subject: doc.getSubject()||'', keywords: (doc.getKeywords && doc.getKeywords())||'', creator: (doc.getCreator && doc.getCreator())||'', producer: (doc.getProducer && doc.getProducer())||'' };
           paint();
         }});
       if(file){
@@ -8020,6 +8081,8 @@ TOOL_IMPL.pdfmeta = {
             <div class="field"><label>Author</label><input type="text" id="pmAuthor" autocomplete="off" value="${(m.author||'').replace(/"/g,'&quot;')}"></div>
             <div class="field"><label>Subject</label><input type="text" id="pmSubject" autocomplete="off" value="${(m.subject||'').replace(/"/g,'&quot;')}"></div>
             <div class="field" style="grid-column:1/-1;"><label>Keywords (separate with commas)</label><input type="text" id="pmKeywords" autocomplete="off" value="${(m.keywords||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field"><label>Creator (software / office)</label><input type="text" id="pmCreator" autocomplete="off" value="${(m.creator||'').replace(/"/g,'&quot;')}"></div>
+            <div class="field"><label>Producer</label><input type="text" id="pmProducer" autocomplete="off" value="${(m.producer||'').replace(/"/g,'&quot;')}"></div>
           </div>
         `);
         body.appendChild(opts);
@@ -8034,12 +8097,14 @@ TOOL_IMPL.pdfmeta = {
       const prog = mountProgress(body);
       try{
         prog.set(20,'Reading…');
-        const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
+        const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true, updateMetadata:false});
         doc.setTitle(body.querySelector('#pmTitle').value||'');
         doc.setAuthor(body.querySelector('#pmAuthor').value||'');
         doc.setSubject(body.querySelector('#pmSubject').value||'');
         const kw = (body.querySelector('#pmKeywords').value||'').split(',').map(s=>s.trim()).filter(Boolean);
         if(doc.setKeywords) doc.setKeywords(kw);
+        if(doc.setCreator) doc.setCreator(body.querySelector('#pmCreator').value||'');
+        if(doc.setProducer) doc.setProducer(body.querySelector('#pmProducer').value||'');
         prog.set(80,'Preparing…');
         const bytes = await doc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-meta.pdf');
@@ -8048,6 +8113,133 @@ TOOL_IMPL.pdfmeta = {
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
+  }
+};
+
+/* ===================== DSC / e-SIGN SIGNATURE VERIFIER ===================== */
+TOOL_IMPL.dscverify = {
+  mount(container){
+    let file = null;
+    const body = el(`<div></div>`); container.appendChild(body);
+    const IST = { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true };
+    const fd = d => d ? new Date(d).toLocaleString('en-IN', IST) + ' IST' : '—';
+    const fdd = d => d ? new Date(d).toLocaleDateString('en-IN', { timeZone:'Asia/Kolkata', day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const E = escapeHtml;
+    const MSG = {
+      DIGEST_MISMATCH:['bad','கையொப்பத்துக்குப் பிறகு ஆவணத்தின் உள்ளடக்கம் மாற்றப்பட்டுள்ளது (அல்லது கோப்பு சிதைந்துள்ளது). இந்த PDF-ஐ அரசு தளங்கள் ஏற்காது.','The document content changed after signing (or the file is damaged). Government portals will reject it.'],
+      SIG_INVALID:['bad','கையொப்பத்தின் கணிதச் சரிபார்ப்பு தோல்வி — இந்தச் சான்றிதழ் இந்தக் கையொப்பத்தை உருவாக்கவில்லை அல்லது கையொப்பம் சிதைந்துள்ளது.','Cryptographic check failed — the signature was not made by this certificate, or it is damaged.'],
+      CMS_PARSE:['bad','கையொப்பப் பகுதியைப் படிக்க முடியவில்லை.','The signature block could not be read.'],
+      NO_SIGNER:['bad','கையொப்பமிட்டவர் விவரம் இல்லை.','No signer information inside the signature.'],
+      NO_CERT:['bad','கையொப்பத்தில் சான்றிதழ் இணைக்கப்படவில்லை, அதனால் யார் கையொப்பமிட்டது எனக் காண முடியாது.','No certificate is embedded, so the signer cannot be identified.'],
+      HASH_UNSUPPORTED:['bad','இந்த hash வகை ஆதரிக்கப்படவில்லை.','Unsupported hash algorithm.'],
+      NOT_YET_VALID:['bad','கையொப்பமிடும் நேரத்தில் சான்றிதழ் இன்னும் செல்லுபடியாகத் தொடங்கியிருக்கவில்லை.','The certificate was not yet valid at the signing time.'],
+      EXPIRED_AT_SIGNING:['bad','கையொப்பமிடும் நேரத்தில் சான்றிதழ் காலாவதியாகியிருந்தது.','The certificate had already expired at the signing time.'],
+      CHAIN_BROKEN:['bad','சான்றிதழ் சங்கிலியில் ஒரு சான்றிதழ் அடுத்ததால் கையொப்பமிடப்படவில்லை — சங்கிலி உடைந்துள்ளது.','A certificate in the chain was not signed by the next one — the chain is broken.'],
+      APPENDED:['warn','கையொப்பத்துக்குப் பிறகு கோப்பில் கூடுதல் தரவு சேர்க்கப்பட்டுள்ளது (எ.கா. படிவம் நிரப்பல், கருத்துரை, இரண்டாவது கையொப்பம்). கையொப்பமிட்ட பகுதி மாறவில்லை, ஆனால் சில தளங்கள் இதை ஏற்காது.','Extra data was added after signing (form-fill, comment or another signature). The signed part is intact, but some portals reject this.'],
+      SHA1:['warn','பழைய SHA-1 hash பயன்படுத்தப்பட்டுள்ளது — பல புதிய தளங்கள் இதை ஏற்பதில்லை.','Old SHA-1 hash — many modern portals no longer accept it.'],
+      KEYUSAGE:['warn','சான்றிதழ் கையொப்பமிட (Digital Signature / Non-Repudiation) என அனுமதிக்கப்படவில்லை.','The certificate is not marked for signing.'],
+      CHAIN_INCOMPLETE:['warn','சான்றிதழ் சங்கிலி முழுமையாக இணைக்கப்படவில்லை (root இல்லை). Adobe போன்ற மென்பொருள் இணையம் வழியாகத் தேடிப் பார்க்கும்; நாம் இணையமின்றிச் சரிபார்க்கிறோம்.','The chain up to the root is not embedded. Readers like Adobe fetch it online; this tool checks offline.'],
+      SIG_UNCHECKED:['warn','இந்த வகை கையொப்பத்தை உலாவியால் சரிபார்க்க முடியவில்லை.','This signature type could not be checked in the browser.']
+    };
+    const OKTXT = { ok:'✅', warn:'⚠️', bad:'❌' };
+    function verdict(sig){
+      const probs = sig.problems.filter(p => !(p.code==='APPENDED' && !sig.isLatest));
+      if(probs.some(p=>p.level==='bad')) return 'bad';
+      if(probs.some(p=>p.level==='warn')) return 'warn';
+      return 'ok';
+    }
+    function paint(){
+      body.innerHTML = '';
+      body.appendChild(el(`<div class="note tamil">PDF-ல் உள்ள DSC / e-Sign / Adobe கையொப்பங்களைச் சரிபார்க்கிறது: யார் கையொப்பமிட்டார், கையொப்பத்துக்குப் பின் PDF மாறியதா, சான்றிதழ் செல்லுமா, இந்திய CA சங்கிலி உள்ளதா. கோப்பு உங்கள் கருவியை விட்டு வெளியே போகாது. · Checks signatures right in your browser; the file is never uploaded.</div>`));
+      mountUploader(body, { accept:'application/pdf', noSignWarn:true, label:'PDF-ஐ இங்கே இடுங்கள் / தொடுங்கள்', sublabel:'Form 16, TRACES, GST, e-Sign PDF…',
+        onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); run(); } });
+      if(file) mountFileList(body, [file], ()=>{ file=null; paint(); });
+    }
+    async function run(){
+      const out = el(`<div></div>`); body.appendChild(out);
+      const prog = mountProgress(out); prog.set(30,'Checking…');
+      let rep;
+      try{ rep = await window.DscVerify.analyze(file._buf); }
+      catch(err){ prog.remove(); out.appendChild(el(`<div class="note" style="background:#FDEDEC;">Error: ${E(err.message)}</div>`)); return; }
+      prog.remove();
+      if(!rep.isPdf){ out.appendChild(el(`<div class="note" style="background:#FDEDEC;">இது PDF கோப்பாகத் தெரியவில்லை. · This does not look like a PDF.</div>`)); return; }
+      if(!rep.signatures.length){
+        out.appendChild(el(`<div class="note tamil" style="background:#FFF8E1;"><b>கையொப்பம் எதுவும் இல்லை.</b> இந்த PDF-ல் டிஜிட்டல் கையொப்பம் கண்டறியப்படவில்லை.${rep.encrypted?' (கோப்பு கடவுச்சொல் பாதுகாப்புடன் இருக்கிறது.)':''}<br><span style="color:var(--sub)">No digital signature found. A picture of a signature or a stamp is not a digital signature.</span></div>`));
+        return;
+      }
+      const vs = rep.signatures.map(verdict);
+      const worst = vs.includes('bad') ? 'bad' : (vs.includes('warn') ? 'warn' : 'ok');
+      const head = {
+        ok:['#E8F8F0','#1E8449','✅ கையொப்பம் சரியாக உள்ளது','Signature is intact and valid (checked by maths)'],
+        warn:['#FFF8E1','#B9770E','⚠️ கையொப்பம் உள்ளது, ஆனால் கவனிக்க வேண்டியவை உள்ளன','Signature present, but there are points to check'],
+        bad:['#FDEDEC','#C0392B','❌ கையொப்பத்தில் பிரச்சினை','Signature problem found']
+      }[worst];
+      out.appendChild(el(`<div class="tamil" style="background:${head[0]};border:1px solid ${head[1]};border-radius:12px;padding:14px;margin:10px 0;"><div style="font-size:17px;font-weight:800;color:${head[1]};">${head[2]}</div><div style="color:var(--sub);font-size:12.5px;margin-top:2px;">${head[3]} · ${rep.signatures.length} signature(s)</div></div>`));
+      rep.signatures.forEach((sig,i)=>{
+        const v = vs[i]; const sg = sig.signer;
+        const card = el(`<div class="tamil" style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--card,#fff);"></div>`);
+        let h = `<div style="font-weight:700;font-size:15px;">${OKTXT[v]} கையொப்பம் ${sig.index}${sig.isDocTimeStamp?' (Time-stamp)':''}${sg?` — ${E(sg.subjectCn)}`:''}</div>`;
+        sig.problems.filter(p=>!(p.code==='APPENDED' && !sig.isLatest)).forEach(p=>{
+          const m = MSG[p.code] || ['warn',p.code,p.code];
+          h += `<div style="margin:6px 0;padding:8px 10px;border-radius:8px;background:${m[0]==='bad'?'#FDEDEC':'#FFF8E1'};font-size:13px;line-height:1.5;">${m[0]==='bad'?'❌':'⚠️'} ${E(m[1])}${p.code==='APPENDED'?` (${p.extra} bytes)`:''}<div style="color:var(--sub);font-size:12px;">${E(m[2])}</div></div>`;
+        });
+        if(sig.problems.every(p=>p.code==='APPENDED' && !sig.isLatest) || !sig.problems.length){
+          h += `<div style="margin:6px 0;font-size:13px;">✅ ஆவணம் கையொப்பத்துக்குப் பின் மாறவில்லை${sig.isLatest?' (முழு கோப்பையும் உள்ளடக்கியது)':' (இது முந்தைய கையொப்பம்; பின்னர் வந்த கையொப்பங்கள் இதை உடைக்காது)'} · ✅ கையொப்பம் கணித ரீதியாகச் சரி${sig.signatureValid ? '' : ' (சரிபார்க்க முடியவில்லை)'}</div>`;
+        }
+        const row = (a,b)=> b ? `<tr><td style="padding:3px 10px 3px 0;color:var(--sub);vertical-align:top;white-space:nowrap;">${a}</td><td style="padding:3px 0;word-break:break-word;">${b}</td></tr>` : '';
+        h += `<table style="font-size:13px;margin-top:6px;border-collapse:collapse;">`;
+        if(sg){
+          h += row('கையொப்பமிட்டவர் · Signer', E(sg.subjectCn));
+          h += row('அமைப்பு · Organisation', E(sg.subjectMap.O||''));
+          h += row('நிலை · State', E([sg.subjectMap.ST,sg.subjectMap.C].filter(Boolean).join(', ')));
+          h += row('வழங்கியவர் · Issued by', E(sg.issuerCn));
+          h += row('சான்றிதழ் செல்லுபடி · Valid', `${fdd(sg.notBefore)} → ${fdd(sg.notAfter)}${sig.certExpiredNow?' <b style="color:#C0392B">(இப்போது காலாவதி · expired now)</b>':''}`);
+          h += row('Key', E(`${sg.keyAlg||''} ${sg.keyBits||''}`.trim()) + ` · ${E(sig.hash)}`);
+        }
+        h += row('கையொப்ப நேரம் · Time', sig.timeUsed ? `${fd(sig.timeUsed)} <span style="color:var(--sub)">(${sig.timeSource==='signed'?'கையொப்பத்தில் உள்ளது · inside signature':'PDF-ல் குறிப்பிடப்பட்டது, நிரூபிக்கப்படவில்லை · claimed, not proven'})</span>` : '—');
+        h += row('காரணம் · Reason', E(sig.reason)); h += row('இடம் · Location', E(sig.location)); h += row('Field', E(sig.fieldName && sig.fieldName!==(sg&&sg.subjectCn) ? sig.fieldName : ''));
+        h += row('Time-stamp (TSA)', sig.hasTimestamp ? '✅ உள்ளது · present' : '');
+        h += `</table>`;
+        if(sig.chain.length){
+          h += `<div style="margin-top:8px;font-weight:600;font-size:13px;">சான்றிதழ் சங்கிலி · Certificate chain ${sig.chainComplete?'✅':'⚠️'}${sig.cca?' <span style="background:#E8F8F0;color:#1E8449;border-radius:8px;padding:1px 8px;font-weight:600;">CCA India</span>':(sig.indianCA?' <span style="background:#EAF2F8;color:#1B4F72;border-radius:8px;padding:1px 8px;font-weight:600;">இந்திய CA பெயர் · Indian CA name</span>':'')}</div><div style="font-size:12.5px;margin-top:4px;">`;
+          sig.chain.forEach((c,k)=>{ h += `<div style="padding-left:${k*14}px;">${k?'└ ':''}${c.role==='signer'?'👤':(c.role==='root'?'🏛️':'🏢')} ${E(c.subjectCn)} <span style="color:var(--sub)">(${fdd(c.notAfter)})</span>${c.signedByNext===false?' ❌':''}</div>`; });
+          h += `</div>`;
+        }
+        card.innerHTML = h; out.appendChild(card);
+      });
+      const lim = el(`<div class="note tamil" style="font-size:12.5px;line-height:1.6;"><b>இந்தச் சரிபார்ப்பு எதை உறுதி செய்கிறது / செய்யாது</b><br>✅ கையொப்பமிட்ட பகுதி மாறவில்லை, கையொப்பம் சான்றிதழுடன் கணித ரீதியாகப் பொருந்துகிறது, சான்றிதழ் காலம், சங்கிலி.<br>ℹ️ <b>சான்றிதழ் ரத்து (revocation – OCSP/CRL)</b> மற்றும் <b>அரசு root நம்பகப் பட்டியல்</b> ஆகியவற்றை இணையமின்றி உலாவியால் சரிபார்க்க முடியாது. அதிகாரப்பூர்வ முடிவுக்கு Adobe Acrobat Reader-ல் திறந்து Signature Panel-ஐயும் பாருங்கள்.<br><span style="color:var(--sub)">Not checked offline: revocation (OCSP/CRL) and whether the root is in an official trust store. For an official verdict also open the file in Adobe Acrobat Reader.</span></div>`);
+      out.appendChild(lim);
+      const row = el(`<div class="btn-row"></div>`);
+      const cp = el(`<button class="btn" style="background:#fff;color:var(--ink);border:1px solid var(--line);">📋 அறிக்கையை நகலெடு · Copy report</button>`);
+      cp.onclick = async ()=>{
+        const L = [`File: ${file.name}`, `Signatures: ${rep.signatures.length}`];
+        rep.signatures.forEach((s,i)=>{ L.push('', `#${s.index} ${vs[i].toUpperCase()}  signer: ${s.signer?s.signer.subject:'-'}`, `  issuer: ${s.signer?s.signer.issuer:'-'}`, `  valid: ${s.signer?fdd(s.signer.notBefore)+' to '+fdd(s.signer.notAfter):'-'}`, `  time: ${s.timeUsed?fd(s.timeUsed):'-'} (${s.timeSource})`, `  integrity: ${s.integrity}; signature: ${s.signatureValid}; whole-file: ${s.coversWholeFile}; hash: ${s.hash}`, `  chain: ${s.chain.map(c=>c.subjectCn).join(' <- ')}`, `  problems: ${s.problems.map(p=>p.code).join(', ')||'none'}`); });
+        try{ await navigator.clipboard.writeText(L.join('\n')); cp.textContent='✅ நகலெடுக்கப்பட்டது'; }catch(e){ cp.textContent='⚠️ நகலெடுக்க முடியவில்லை'; }
+      };
+      row.appendChild(cp);
+      const hb = el(`<button class="btn" style="background:#fff;color:#0B5345;border:1px solid #0B5345;">🔑 DSC உதவி · DSC problems?</button>`); hb.onclick = ()=>openTool('dscguide'); row.appendChild(hb);
+      out.appendChild(row);
+    }
+    paint();
+  }
+};
+
+/* ===================== DSC TOKEN HELP (guide) ===================== */
+TOOL_IMPL.dscguide = {
+  mount(container){
+    const body = el(`<div class="tamil"></div>`); container.appendChild(body);
+    const sec = (title, inner, open) => `<details ${open?'open':''} style="border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0;background:var(--card,#fff);"><summary style="font-weight:700;cursor:pointer;font-size:14.5px;">${title}</summary><div style="font-size:13.5px;line-height:1.7;margin-top:8px;">${inner}</div></details>`;
+    body.innerHTML =
+      `<div class="note"><b>முக்கியம்:</b> USB DSC token-ஆல் கையொப்பமிடுவது, உலாவியால் நேரடியாக முடியாது — token கணினியில் செருகப்பட்டு, அதன் driver மற்றும் CA தரும் சிறிய “signer” நிரல் (எ.கா. emSigner) ஓட வேண்டும். இந்தத் தளம் அந்த நிரலை மாற்ற முடியாது; ஆனால் பிரச்சினை எங்கே என்று கண்டுபிடிக்கவும், PDF-ஐப் பாதுகாக்கவும் உதவும்.<br><span style="color:var(--sub)">A browser cannot use a USB token by itself; it needs the token driver plus the signer utility from your CA. This page helps you find the problem and keep your PDF valid.</span></div>` +
+      `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;"><button class="btn" id="dgV">🔏 PDF கையொப்பத்தைச் சரிபார் · Verify a PDF</button></div>` +
+      sec('1️⃣ கையொப்பம் “Invalid / செல்லாது” என்று வருகிறது', `<ul style="padding-left:18px;margin:0;"><li><b>கையொப்பத்துக்குப் பிறகு PDF-ஐத் திறந்து “Save as”, Print-to-PDF, சுருக்குதல், பக்கம் சுழற்றல், இணைத்தல், படிவம் நிரப்புதல்</b> — எது செய்தாலும் கையொப்பம் உடையும். தீர்வு: முதலில் எல்லா மாற்றங்களையும் செய்து, <b>கடைசியாகவே</b> கையொப்பமிடுங்கள்.</li><li>அளவு அதிகம் என்றால்: கையொப்பமிடும் <b>முன்பே</b> சுருக்குங்கள் (<a href="#" data-go="compress">PDF Compress</a>).</li><li>மின்னஞ்சல்/WhatsApp வழியாக வந்த கோப்பு சில சமயம் மாறியிருக்கும்; அசல் கோப்பை மீண்டும் பதிவிறக்குங்கள்.</li><li>🔏 <a href="#" data-go="dscverify">DSC Verifier</a>-ல் இட்டால் “உள்ளடக்கம் மாறியதா” அல்லது “கையொப்பம் தவறா” என்று சரியாகத் தெரியும்.</li></ul>`, true) +
+      sec('2️⃣ Token கணினியில் தெரியவில்லை / PIN கேட்கவில்லை', `<ul style="padding-left:18px;margin:0;"><li>Token-ன் <b>driver</b> (ePass2003, WatchData, Proxkey, Hypersecu போன்றவை) உங்கள் CA-வின் இணையதளத்திலிருந்து நிறுவுங்கள்; நிறுவிய பிறகு கணினியை மறுதொடக்கம் செய்யுங்கள்.</li><li>வேறு USB port-ல் செருகிப் பாருங்கள்; USB hub தவிர்த்து நேரடியாக இணைக்கவும்.</li><li>Token Manager மென்பொருளில் சான்றிதழ் தெரிகிறதா என்று பாருங்கள். தெரியாவிட்டால் driver அல்லது token பிரச்சினை.</li><li>PIN-ஐ பல முறை தவறாக இட்டால் token <b>பூட்டிவிடும்</b>; திறக்க CA-யைத் தொடர்பு கொள்ளவும். அதிகமாக முயற்சிக்காதீர்கள்.</li><li>Windows தான் பெரும்பாலான token-களுக்கு நிலையான ஆதரவு தருகிறது; Mac/Linux-ல் CA-வின் ஆதரவு உள்ளதா எனப் பாருங்கள்.</li></ul>`) +
+      sec('3️⃣ emSigner / signer நிரல் இணைக்கவில்லை (Java பிரச்சினை)', `<ul style="padding-left:18px;margin:0;"><li>பழைய “Java applet” முறை இப்போது உலாவிகளில் இல்லை. அரசு தளங்கள் இப்போது கணினியில் ஓடும் சிறிய utility (எ.கா. emSigner) வழியாக token-ஐ அணுகுகின்றன. அந்தந்த தளம் (எ.கா. வருமான வரி e-filing) சொல்லும் <b>தற்போதைய</b> பதிப்பை அங்கிருந்தே பதிவிறக்குங்கள்.</li><li>Utility ஓடுகிறதா (system tray / Task Manager) என்று பார்க்கவும்; “Run as administrator” முயற்சிக்கவும்.</li><li>Antivirus / firewall அதன் localhost இணைப்பைத் தடுக்கலாம்; தற்காலிகமாக அனுமதி கொடுங்கள்.</li><li>உலாவியை Chrome / Edge புதிய பதிப்பில் பயன்படுத்துங்கள்; pop-up தடையை அனுமதியுங்கள்; பழைய tab-களை மூடி மீண்டும் தொடங்குங்கள்.</li><li>கணினியின் <b>தேதி-நேரம்</b> தவறாக இருந்தால் சான்றிதழ் “செல்லாது” எனத் தோன்றும்; தானியங்கி நேரத்தை இயக்குங்கள்.</li></ul>`) +
+      sec('4️⃣ சான்றிதழ் பிரச்சினைகள்', `<ul style="padding-left:18px;margin:0;"><li><b>காலாவதி:</b> DSC பொதுவாக 1–3 ஆண்டுகள் செல்லும்; காலாவதியானால் CA-யிடம் புதுப்பிக்க வேண்டும். காலாவதிக்கு முன் கையொப்பமிட்ட PDF பின்னாளிலும் செல்லும் (கையொப்ப நேரத்தில் சான்றிதழ் செல்லுபடியாக இருந்திருந்தால்).</li><li><b>ரத்து (revoked):</b> CA ரத்து செய்த சான்றிதழ் ஏற்கப்படாது; இதை இணையம் வழியாக CA/portal மட்டுமே காட்ட முடியும்.</li><li><b>Class 2 / Class 3:</b> எந்த வகை தேவை என்று அந்தந்த அரசு தளத்தின் வழிகாட்டியைப் பாருங்கள்.</li><li>பெயர்/PAN போன்றவை சான்றிதழில் உள்ளதுடன் தளத்தில் உள்ள பதிவு பொருந்த வேண்டும்.</li></ul>`) +
+      sec('5️⃣ Aadhaar e-Sign', `Aadhaar e-Sign, அரசு அங்கீகாரம் பெற்ற e-Sign சேவை வழங்குநர் (ESP) மூலம் OTP-ல் நடக்கும். அதை இந்தத் தளத்தால் வழங்க முடியாது (அதற்கு அதிகாரப்பூர்வ அங்கீகாரம் தேவை). ஆனால் ESP கையொப்பமிட்டு உங்களுக்குக் கிடைத்த PDF-ஐ <a href="#" data-go="dscverify">இங்கே சரிபார்க்கலாம்</a>, அதை மாற்றாமல் பயன்படுத்துங்கள்.<br><span style="color:var(--sub)">We cannot issue Aadhaar e-Sign (it needs an authorised ESP), but you can verify the resulting PDF here.</span>`) +
+      sec('6️⃣ TRACES / Form 16 / GST போன்ற தளங்களில் PDF நிராகரிப்பு', `<ul style="padding-left:18px;margin:0;"><li>அந்தத் தளத்திலிருந்து பதிவிறக்கிய PDF-ஐ <b>எதுவும் செய்யாமல்</b> அப்படியே பதிவேற்றுங்கள் / பகிருங்கள்.</li><li>மொபைலில் “Preview/Share” சில செயலிகள் கோப்பை மீண்டும் சேமித்து கையொப்பத்தை உடைக்கலாம்; File Manager-லிருந்து நேரடியாகப் பகிருங்கள்.</li><li>🔏 <a href="#" data-go="dscverify">DSC Verifier</a>-ல் “உள்ளடக்கம் மாறவில்லை” எனக் காட்டினால், கோப்பு சரியே; பிரச்சினை தளத்தின் விதிகளில் இருக்கலாம் (கோப்பு அளவு/பெயர்).</li></ul>`);
+    body.addEventListener('click', (e)=>{ const a = e.target.closest('[data-go]'); if(a){ e.preventDefault(); openTool(a.getAttribute('data-go')); } });
+    body.querySelector('#dgV').onclick = ()=>openTool('dscverify');
   }
 };
 

@@ -1,6 +1,54 @@
 // Hand-written search content for the tools people actually search for.
 // generate-tool-pages.mjs merges this into the generated /tools/<slug> pages.
 export const SEO_EXTRA = {
+  dscbulk: {
+    title: 'Bulk Form 16 / Form 130 Signature Check Free — Verify Many Signed PDFs or TRACES ZIP | PDF Tools India',
+    desc: 'Check the digital signature of many Form 16, Form 130 or other signed PDFs, or a whole TRACES ZIP, in your browser. See which are signed, valid or broken, and download a CSV. Files never leave your device.',
+    intro: 'Deductors and accountants often receive Form 16 / Form 130 certificates as a ZIP from TRACES. Drop the ZIP (or many PDFs) here and get a list showing which certificates carry a digital signature, which signatures are intact and which were broken by editing or re-saving. The check runs in your browser; nothing is uploaded.',
+    steps: ['Open Bulk Form 16 / 130 Signature Check.', 'Drop the PDFs or the TRACES ZIP.', 'Read the status list: valid, check, broken or unsigned.', 'Download the CSV for your records and re-download any broken certificate from TRACES.'],
+    uses: ['Checking a batch of Form 16 / Form 130 before sending to employees', 'Finding certificates broken by compression or re-saving', 'Auditing signed PDFs received from a client', 'Keeping a CSV record of signer and certificate validity'],
+    faqs: [['Is the ZIP uploaded?', 'No. It is opened inside your browser.'], ['Does an unsigned certificate mean it is invalid?', 'Not necessarily. The Income Tax Department says a TDS certificate downloaded from TRACES may be signed digitally or manually. An unsigned PDF is just listed as unsigned.'], ['Does a green tick prove the Income Tax Department accepts it?', 'It proves the signature is mathematically intact and the content unchanged. Revocation and official trust checks cannot be done offline.']]
+  },
+  pantan: {
+    title: 'PAN TAN Validator Free — Check PAN and TAN Format in Bulk Online | PDF Tools India',
+    desc: 'Paste many PAN or TAN numbers and see wrong formats, holder type and duplicates instantly. Free, runs in your browser, nothing uploaded. Catch mistakes before a TDS return.',
+    intro: 'A PAN has 5 letters, 4 digits and 1 letter; the fourth letter shows the holder type (P individual, C company, F firm, H HUF and so on). A TAN has 4 letters, 5 digits and 1 letter. Paste a list, even a column copied from Excel, and every number is checked and explained. Download the result as CSV.',
+    steps: ['Paste PAN / TAN numbers, one per line.', 'Read the result table: format OK, wrong, duplicate.', 'Fix the numbers marked wrong; letter O versus digit 0 mistakes are pointed out.', 'Download the CSV or copy the valid list.'],
+    uses: ['Cleaning a deductee list before a TDS return', 'Finding O/0 and I/1 typing mistakes', 'Spotting duplicate PANs in a vendor list', 'Telling a company PAN from an individual PAN'],
+    faqs: [['Does this confirm that a PAN exists?', 'No. It checks the format only. To confirm a PAN exists and belongs to a name, use Verify PAN on the Income Tax e-filing portal or TRACES.'], ['Is my list uploaded?', 'No. It is checked inside your browser.']]
+  },
+  tdsdates: {
+    title: 'TDS Due Date Calendar FY 2026-27 — TDS Deposit and Return Dates (Form 138, 140, 24Q, 26Q) | PDF Tools India',
+    desc: 'TDS payment dates and quarterly return due dates for any financial year, under the new Income-tax Act 2025 (Form 138, 140, 144, 130) and the old Act (24Q, 26Q, 27Q, 16). Free, from official FAQs.',
+    intro: 'Pick a financial year and see the TDS deposit date for every month (7th of the next month, 30 April for March), the four quarterly return due dates (31 July, 31 October, 31 January, 31 May) and the annual certificate date (15 June). The tool uses the new form numbers for periods from 1 April 2026 and the old ones before that.',
+    steps: ['Open TDS Due Date Calendar.', 'Choose the financial year.', 'Check the next dates card and the tables.', 'Confirm on TRACES if CBDT has extended a date.'],
+    uses: ['Planning monthly TDS deposits', 'Knowing which quarter return is next', 'Finding the Form 130 / Form 16 issue date', 'Checking which form number applies to which period'],
+    faqs: [['Which forms replace 24Q and 26Q?', 'Form 138 replaces 24Q (salary), Form 140 replaces 26Q (non-salary) and Form 144 replaces 27Q for payments from 1 April 2026.'], ['Are these dates ever extended?', 'CBDT sometimes extends dates. This tool shows the statutory dates; check TRACES or the e-filing portal for notices.']]
+  },
+  tdsinterest: {
+    title: 'TDS Late Payment Interest Calculator — 1% and 1.5% per Month (Section 398) | PDF Tools India',
+    desc: 'Calculate interest on TDS not deducted or deducted late (1% per month) and TDS deducted but deposited late (1.5% per month). Counts month or part of a month. Free, many challans, CSV.',
+    intro: 'Enter the TDS amount and the dates to get the interest for late deduction (1% per month or part of a month) or late deposit (1.5% per month or part of a month), as in section 398(3)(a) of the Income-tax Act 2025. Add many challans and download a CSV. The figure is an estimate; the TRACES Justification Report is final.',
+    steps: ['Choose the case: not deducted / late deducted, or deducted but deposited late.', 'Enter the TDS amount and the two dates.', 'Add more rows for more challans.', 'Compare the total with your TRACES Justification Report.'],
+    uses: ['Working out interest before paying a TDS challan', 'Estimating the cost of a late deposit', 'Explaining a TRACES default notice', 'Keeping a CSV of interest worked out'],
+    faqs: [['Is a part of a month counted as a full month?', 'Yes, the interest is for every month or part of a month.'], ['Does it include the late filing fee?', 'No. The late fee and penalty are not included.']]
+  },
+  dscverify: {
+    title: 'DSC Signature Verifier Free — Check Digital Signature in PDF Online (Form 16, TRACES, e-Sign) | PDF Tools India',
+    desc: 'Check the digital signature (DSC / Aadhaar e-Sign / Adobe) of any PDF free in your browser: who signed, whether the PDF was changed after signing, certificate validity and Indian CA chain. No upload, no signup.',
+    intro: 'Upload a signed PDF such as Form 16, a TRACES certificate, a GST or e-filing document, or an Aadhaar e-Sign PDF. The tool reads the signature inside the file and tells you in plain language whether the signature is intact, whether the content was changed after signing, who signed it, when the certificate is valid and which CA issued it. The file stays on your device.',
+    steps: ['Open DSC / e-Sign Verifier and drop the signed PDF.', 'Read the green, yellow or red result at the top.', 'Open each signature card for the signer, issuer, validity dates and certificate chain.', 'If it says the document changed after signing, download the original again from the source website and upload that without editing.'],
+    uses: ['Checking a Form 16 or TRACES PDF before filing', 'Finding out why a portal says signature invalid', 'Confirming an e-Signed agreement was not edited', 'Checking whether a DSC certificate had expired when the PDF was signed'],
+    faqs: [['Is my PDF uploaded?', 'No. The check runs inside your browser and the file never leaves your device.'], ['Does a green tick mean the government portal will accept it?', 'It means the signature is mathematically intact and the signed content is unchanged. Certificate revocation (OCSP/CRL) and the official trust list cannot be checked offline, so for an official verdict also open the file in Adobe Acrobat Reader.'], ['Can this tool sign a PDF with my USB DSC token?', 'No. A browser cannot access a USB token by itself; signing needs your token driver and your CA signer utility. See DSC Token Help for fixes.'], ['Why did my signature become invalid?', 'Any edit, compression, merge, rotate, print-to-PDF or re-save after signing breaks a digital signature. Make all changes first and sign last.']]
+  },
+  dscguide: {
+    title: 'DSC Token Not Working? Fix DSC USB Token, emSigner and Signature Invalid Problems | PDF Tools India',
+    desc: 'Step-by-step help for DSC USB token not detected, emSigner or Java not connecting, signature invalid after editing a PDF, expired certificate and Aadhaar e-Sign questions.',
+    intro: 'A short checklist for the most common DSC problems: token not detected, PIN locked, signer utility not connecting, certificate expired or signature invalid on TRACES, GST and e-filing uploads. It also explains what this site can and cannot do: it verifies signatures and warns you before you break one, but signing with a USB token needs your token driver and CA utility.',
+    steps: ['Check that the token driver from your CA is installed and the token shows in its manager.', 'Make sure the signer utility (for example emSigner) is running and not blocked by antivirus.', 'Keep the system date and time correct and use an up-to-date Chrome or Edge.', 'Never edit or compress a PDF after signing; verify it with the DSC Verifier.'],
+    uses: ['DSC token not detected in the browser', 'Signer utility not connecting', 'Signature invalid after compressing a PDF', 'Understanding Aadhaar e-Sign vs USB DSC'],
+    faqs: [['Do I still need Java for DSC?', 'Most government portals no longer use the old Java applet; they use a small utility on your computer. Follow the current instructions on the portal you are using.'], ['Can you remove the need for the signer utility?', 'No. A website cannot read a USB token without software on your computer; that is a browser security rule.'], ['Can I compress a signed PDF?', 'Compressing rewrites the file and breaks the signature. Compress before signing instead.']]
+  },
   img2excel: {
     title: 'Image to Excel Converter Free — Screenshot to .xlsx Online | PDF Tools India',
     desc: 'Convert a screenshot or photo of a table into an editable Excel (.xlsx) file free online. Fixes grid lines, dark mode and tilted photos, cleans numbers and dates. No signup, no AI, works in your browser.',

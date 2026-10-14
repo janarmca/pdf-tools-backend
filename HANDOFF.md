@@ -61,3 +61,24 @@ Old tool ids still work: `TOOL_MOVED` in `index.source.html` maps `gstinvoice �
 
 ## Ideas the owner may ask next
 Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words for paise edge cases; image lazy-loading + Lighthouse pass; remove the old HR page; e-invoice/QR (IRN) is out of scope (needs GST portal API).
+
+## DSC / e-Sign tools (added Oct 2026)
+- `dsc-verify.js` (self-contained, no libs, loaded on demand as lib key `dscverify` from `/dsc-verify.js?v=1`; bump the `?v=` in `ensureDscVerify` when it changes). `DscVerify.analyze(buf)` parses PDF `/ByteRange` + CMS/PKCS#7, checks digest, RSA/ECDSA signature, cert chain links, validity at signing time, appended data, SHA-1, Indian-CA names. Cannot check revocation (OCSP/CRL) or an official trust store offline — the UI says so.
+- Tools: `dscverify` (🔏 verifier), `dscguide` (🔑 help page). `mountUploader` shows a "signed PDF" warning for every tool in `SIGN_BREAKING_TOOLS` (`signedPdfWarning`, fast byte scan `quickSignedCheck`).
+- Browser cannot use a USB DSC token by itself, and Aadhaar e-Sign needs an authorised ESP — neither is built; the guide says so.
+- Tests: `node tests/dsc-verify.test.mjs` (needs openssl + python3 `cryptography`). Not yet tried on real TRACES / eMudhra / (n)Code PDFs.
+
+## TDS helper tools (added Oct 2026, lazy file `category-tds.js`, logic in `tds-core.js`)
+- Tools: `pantan` (PAN/TAN checker), `tdsdates` (due-date calendar), `tdsinterest` (s.398(3)(a) interest), `dscbulk` (bulk Form 16/130 signature check, PDFs or TRACES ZIP). `TOOL_LIBS` loads `tdscore` (+ `dscverify`, `jszip`). After editing `category-tds.js` bump `?v=` in `loadCategoryScript`; after editing `tds-core.js` bump `?v=` in `ensureTdsCore`.
+- Every rule was taken from Income Tax Dept pages (Transition FAQ Q2.13/Q6.8–Q6.10, Form 138/130 FAQs, Rules 2026): deposit 7th of next month (30 April for March), quarterly statements 31 Jul/31 Oct/31 Jan/31 May, Form 130 by 15 June, interest 1% / 1.5% per month or part. Form map: 16→130, 16A→131, 24Q→138, 26Q→140, 27Q→144, 27EQ→143, 15G/15H→121. Old Act applies to sums paid/credited up to 31 Mar 2026.
+- DELIBERATELY NOT BUILT (cannot be verified here): TDS rate table (section numbers changed, blogs disagree), s.427 late fee amount, TCS dates, Form 16A/131 date, Form 130/16 generator (Dept says only TRACES-generated certificates are valid), FVU/TDS return file preparation.
+- Month-counting convention in `monthsOrPart` (start and end day both counted) is an assumption; the UI tells users the TRACES Justification Report is final.
+- Tests: `node tests/tds-core.test.mjs`.
+
+
+## Tax-rule watcher (keeps the TDS tools current)
+- `.github/tax-sources.json` lists the official Income Tax Department pages the TDS tools were verified against. `.github/tax-sources.lock.json` holds their hashes.
+- `.github/workflows/watch-tax-rules.yml` runs every Monday (and on demand): `node .github/scripts/watch-tax-rules.mjs` fetches the pages (HTML is reduced to visible text so script/cache noise does not alarm), compares with the lock, commits the new lock, and opens/updates a GitHub issue "Tax rule pages changed — re-verify the TDS tools" when a page really changed. Unreachable pages are only logged; 4 weeks of ALL pages unreachable opens a separate issue (the site may block GitHub runners).
+- It never edits the tools. When the issue appears: ask Claude to re-read the changed official pages, fix `tds-core.js` / `category-tds.js` / tests, set `RULES.asOf` in `tds-core.js` (shown in the UI as "Rules last verified on"), bump `tds-core.js?v=` in `index.source.html`, `sw.js` CACHE_NAME, run `python3 remin.py`, and ship a changed-files zip.
+- First run after deploy only records a baseline (no alert). NOT verified from the build sandbox: the live run against incometaxindia.gov.in and the issue creation (needs the repo's Actions). Test: `node tests/watch-tax-rules.test.mjs` (local mock server).
+- Remember: `dsc-verify.js` now handles RSA-PSS and RFC 3161 time-stamps (`?v=2`), `tds-core.js?v=2`, category scripts `?v=20261015d`, sw cache `v57`.
