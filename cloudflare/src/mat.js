@@ -456,7 +456,7 @@ F.mat_admin_stats = async (db, uid) => {
       (select count(*) from mat_submissions where status = 'new') as new_submissions,
       (select count(*) from mat_contact_requests where status = 'new') as new_requests,
       (select count(*) from mat_submissions) as submissions_total,
-      (select count(*) from mat_submissions where listed = 1) as listed,
+      ((select count(*) from mat_submissions where listed = 1) + (select count(*) from mat_profiles where listed = 1 and status = 'approved')) as listed,
       (select count(*) from mat_contact_requests) as requests_total,
       (select count(*) from mat_profiles) as members_total`).first();
   return { ok: true, ...r };
@@ -541,7 +541,12 @@ F.mat_admin_submissions = async (db, uid, a) => {
 F.mat_admin_export = async (db, uid) => {
   if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
   const rows = (await db.prepare('select id, data, phone, email, status, listed, created_at from mat_submissions order by created_at desc limit 5000').all()).results;
-  return { ok: true, items: rows.map((s) => { const d = safeParse(s.data, {}); return { code: String(s.id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase(), name: d.name || '', gender: d.gender || '', age: age(validDate(d.dob)), phone: s.phone || '', email: s.email || '', community: d.community || '', kulam: d.kulam || '', star: d.star || '', raasi: d.raasi || '', education: d.education || '', occupation: d.occupation || '', city: d.city || '', state: d.state || '', status: s.status, listed: s.listed ? 'yes' : 'no', created_at: s.created_at }; }) };
+  const flat = (code, d, extra) => ({ code, name: d.name || '', gender: d.gender || '', age: age(validDate(d.dob)), phone: '', email: '', community: d.community || '', kulam: d.kulam || '', star: d.star || '', raasi: d.raasi || '', education: d.education || '', occupation: d.occupation || '', city: d.city || '', state: d.state || '', ...extra });
+  const code6 = (id) => String(id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase();
+  const items = rows.map((s) => flat(code6(s.id), safeParse(s.data, {}), { source: 'sign-up', phone: s.phone || '', email: s.email || '', status: s.status, listed: s.listed ? 'yes' : 'no', created_at: s.created_at }));
+  const mem = (await db.prepare('select p.*, v.phone as v_phone, v.email as v_email from mat_profiles p left join mat_private v on v.user_id = p.user_id order by p.created_at desc limit 5000').all()).results;
+  for (const m of mem) items.push(flat(code6(m.user_id), m, { source: 'member', phone: m.v_phone || '', email: m.v_email || '', status: m.status, listed: m.listed ? 'yes' : 'no', created_at: m.created_at }));
+  return { ok: true, items };
 };
 
 // remove a sign-up for good (wrong / duplicate / asked to be removed); its photos are deleted too
@@ -579,10 +584,13 @@ function publicShape(id, d, created, photos, see) {
   return out;
 }
 
-// Only public sign-ups that the admin has listed. (Member-account profiles agreed to be seen by approved members only, so they are NOT shown here.)
+// Only profiles the admin has listed: public sign-ups (mat_submissions.listed) and approved member accounts (mat_profiles.listed).
 async function publicRows(db, see) {
   const subs = await db.prepare("select id, data, photos, created_at from mat_submissions where listed = 1 and status <> 'rejected' order by created_at desc limit 500").all();
-  return subs.results.map((s) => publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see));
+  const mem = await db.prepare("select * from mat_profiles where listed = 1 and status = 'approved' order by created_at desc limit 500").all();
+  return [...subs.results.map((s) => publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see)),
+    ...mem.results.map((m) => publicShape(m.user_id, m, m.created_at, safeParse(m.photos, []), see))]
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
 }
 
 F.mat_public_list = async (db, uid, a) => {
@@ -601,7 +609,9 @@ F.mat_public_list = async (db, uid, a) => {
 
 async function findPublic(db, see, id) {
   const s = await db.prepare("select id, data, photos, created_at from mat_submissions where id = ? and listed = 1 and status <> 'rejected'").bind(String(id)).first();
-  return s ? publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see) : null;
+  if (s) return publicShape(s.id, safeParse(s.data, {}), s.created_at, safeParse(s.photos, []), see);
+  const m = await db.prepare("select * from mat_profiles where user_id = ? and listed = 1 and status = 'approved'").bind(String(id)).first();
+  return m ? publicShape(m.user_id, m, m.created_at, safeParse(m.photos, []), see) : null;
 }
 
 F.mat_public_profile = async (db, uid, a) => {
@@ -647,6 +657,13 @@ F.mat_admin_contact_request_set = async (db, uid, a) => {
   if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
   if (!['new', 'done'].includes(a.st)) return { ok: false, code: 'bad_status' };
   await db.prepare('update mat_contact_requests set status = ? where id = ?').bind(a.st, a.rid).run();
+  return { ok: true };
+};
+
+// list / unlist an approved member-account profile on the public page
+F.mat_admin_member_list = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  await db.prepare('update mat_profiles set listed = ? where user_id = ?').bind(a.on === false || a.on === 'false' ? 0 : 1, String(a.pid)).run();
   return { ok: true };
 };
 
