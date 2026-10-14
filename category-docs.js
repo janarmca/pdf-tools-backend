@@ -938,6 +938,191 @@
   TOOL_IMPL.receipts = { mount(container) { mountReceipts(container, 'receipts', null); } };
   TOOL_IMPL.receipts._f = { buildSlips, rcProblems, rcTotal, incNo, addMonthsISO, rcWords, blankRc };
 
+
+  /* =====================================================================
+     SALARY SLIP — LOP pro-rating, PF / ESI auto-calculation, custom rows,
+     saved employees, Tamil / English, PDF + print + WhatsApp
+     ===================================================================== */
+  const SS_EMP = 'pti-salary-emps-v1', SS_CO = 'pti-salary-company-v1';
+  const dimOf = (ym) => { const m = /^(\d{4})-(\d{2})$/.exec(ym || ''); return m ? new Date(+m[1], +m[2], 0).getDate() : 30; };
+  function blankSal() {
+    const co = lsGet(SS_CO, {}), ym = localISO().slice(0, 7);
+    return {
+      v: 1, lang: 'bi', month: ym, payDate: localISO(), mode: 'Bank Transfer',
+      co: Object.assign({ name: '', addr: '', pan: '' }, co),
+      emp: { name: '', id: '', desig: '', dept: '', doj: '', pan: '', uan: '', esino: '', bank: '' },
+      lop: '', prorate: true,
+      basic: '', hra: '', oth: [{ l: '', a: '' }], ot: '', bonus: '',
+      pf: { on: true, rate: 12, cap: true }, esi: { on: false, rate: 0.75 }, pt: '', tds: '', adv: '', dd: [{ l: '', a: '' }],
+    };
+  }
+  function salCalc(S) {
+    const days = dimOf(S.month), lop = Math.min(days, Math.max(0, num(S.lop))), payable = days - lop, f = S.prorate ? payable / days : 1;
+    const pr = (v) => Math.round(num(v) * f), flat = (v) => Math.round(num(v));
+    const basic = pr(S.basic), hra = pr(S.hra), oth = S.oth.filter((r) => num(r.a)).map((r) => ({ l: r.l.trim() || 'Allowance', a: pr(r.a) }));
+    const ot = flat(S.ot), bonus = flat(S.bonus);
+    const gross = basic + hra + oth.reduce((a, r) => a + r.a, 0) + ot + bonus;
+    const pfWage = S.pf.cap ? Math.min(basic, 15000) : basic;
+    const pf = S.pf.on ? Math.round(pfWage * num(S.pf.rate) / 100) : 0;
+    const esiEligible = gross <= 21000, esi = S.esi.on && esiEligible ? Math.ceil(gross * num(S.esi.rate) / 100) : 0;
+    const dd = S.dd.filter((r) => num(r.a)).map((r) => ({ l: r.l.trim() || 'Other deduction', a: flat(r.a) }));
+    const pt = flat(S.pt), tds = flat(S.tds), adv = flat(S.adv);
+    const ded = pf + esi + pt + tds + adv + dd.reduce((a, r) => a + r.a, 0);
+    return { days, lop, payable, f, basic, hra, oth, ot, bonus, gross, pf, esi, esiEligible, dd, pt, tds, adv, ded, net: gross - ded };
+  }
+  function salRows(S, c) {
+    const t = (en, ta) => tl(S.lang, en, ta);
+    const E = [[t('Basic pay', 'அடிப்படை ஊதியம்'), c.basic], [t('HRA', 'வீட்டு வாடகைப் படி'), c.hra]].concat(c.oth.map((r) => [r.l, r.a]), [[t('Overtime', 'கூடுதல் நேரம்'), c.ot], [t('Bonus / incentive', 'போனஸ் / ஊக்கத்தொகை'), c.bonus]]).filter((r) => r[1]);
+    const D = [[t('Provident Fund (PF)', 'வருங்கால வைப்பு நிதி (PF)'), c.pf], ['ESI', c.esi], [t('Professional tax', 'தொழில் வரி'), c.pt], [t('TDS (income tax)', 'TDS (வருமான வரி)'), c.tds], [t('Advance / loan', 'முன்பணம் / கடன்'), c.adv]].concat(c.dd.map((r) => [r.l, r.a])).filter((r) => r[1]);
+    return { E, D };
+  }
+  function salProblems(S, c) {
+    const errs = [], warns = [], p = PAN_RE;
+    if (!S.co.name.trim()) errs.push(B('நிறுவனப் பெயர் தேவை', 'Company name is required'));
+    if (!S.emp.name.trim()) errs.push(B('ஊழியர் பெயர் தேவை', 'Employee name is required'));
+    if (!/^\d{4}-\d{2}$/.test(S.month)) errs.push(B('மாதத்தைத் தேர்வு செய்யுங்கள்', 'Choose the month'));
+    if (!(c.gross > 0)) errs.push(B('சம்பளத் தொகையை உள்ளிடுங்கள்', 'Enter the salary amounts'));
+    if (num(S.lop) < 0 || num(S.lop) > c.days) errs.push(B('LOP நாட்கள் 0 முதல் ' + c.days + ' வரை', 'LOP days must be 0 to ' + c.days));
+    if (!validISO(S.payDate)) errs.push(B('சம்பளம் வழங்கிய தேதி தவறு', 'Pay date is not valid'));
+    if (S.emp.pan && !p.test(S.emp.pan.trim().toUpperCase())) errs.push(B('ஊழியர் PAN வடிவம் தவறு', 'Employee PAN format looks wrong'));
+    if (c.net < 0) errs.push(B('கழிவுகள் வருமானத்தை விட அதிகம் — சரிபார்க்கவும்', 'Deductions are more than earnings — please check'));
+    if (S.esi.on && !c.esiEligible) warns.push(B('மொத்த ஊதியம் ₹21,000-ஐ தாண்டியதால் ESI போடப்படவில்லை', 'ESI skipped: gross pay is above ₹21,000'));
+    if (S.pf.on && S.pf.cap) warns.push(B('PF ₹15,000 அடிப்படை வரம்பில் கணக்கிடப்பட்டது (தேவையெனில் "வரம்பு" தேர்வை நீக்கவும்)', 'PF is worked out on a ₹15,000 wage ceiling (untick "ceiling" to use full basic)'));
+    if (!num(S.pt) && c.gross > 21000) warns.push(B('தொழில் வரி (Professional Tax) உங்கள் மாநில slab-படி கைமுறையாக உள்ளிடவும்', 'Enter Professional Tax by hand as per your state slab'));
+    return { errs, warns };
+  }
+
+  function mountSalary(container) {
+    const host = root(container), DKEY = 'pti-salary-draft-v1';
+    let S = lsGet(DKEY, null);
+    if (!S || S.v !== 1 || !Array.isArray(S.oth) || !Array.isArray(S.dd)) S = blankSal();
+    const saveDraft = () => lsSet(DKEY, S);
+    const fld = (label, path, o) => { o = o || {}; return '<div class="dx-f"><label>' + label + '</label><input type="' + (o.type || 'text') + '" data-p="' + path + '" value="' + esc(getPath(S, path)) + '"' + (o.mode ? ' inputmode="' + o.mode + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.type === 'number' ? ' min="0" step="any"' : '') + ' autocomplete="off"></div>'; };
+    const num2 = (label, path) => fld(label, path, { type: 'number', mode: 'decimal' });
+    const rowsHtml = (arr, key, lab, ph) => arr.map((r, i) => '<div class="dx-grid"><div class="dx-f"><input type="text" data-p="' + key + '.' + i + '.l" value="' + esc(r.l) + '" placeholder="' + esc(ph) + '" aria-label="' + esc(lab) + '"></div><div class="dx-f"><input type="number" inputmode="decimal" min="0" step="any" data-p="' + key + '.' + i + '.a" value="' + esc(r.a) + '" placeholder="₹" aria-label="₹"></div></div>').join('') +
+      '<div class="dx-row"><button type="button" class="dx-btn sec" data-add="' + key + '">＋ ' + B('வரி சேர்', 'Add row') + '</button>' + (arr.length > 1 ? '<button type="button" class="dx-btn sec" data-rm="' + key + '">－ ' + B('கடைசி வரி நீக்கு', 'Remove last') + '</button>' : '') + '</div>';
+    const chk = (label, path) => '<label class="dx-chk"><input type="checkbox" data-p="' + path + '"' + (getPath(S, path) ? ' checked' : '') + '> ' + label + '</label>';
+
+    function paint() {
+      const emps = lsGet(SS_EMP, []);
+      host.innerHTML = '<div class="dx-note">💵 ' + B('LOP நாட்கள், PF, ESI தானாகக் கணக்கிடப்படும். விவரங்கள் இந்தச் சாதனத்திலேயே சேமிக்கப்படும்.', 'LOP days, PF and ESI are worked out for you. Details stay on this device.') + '</div>' +
+        '<div class="dx-grid"><div class="dx-f"><label>' + B('ஆவண மொழி', 'Document language') + '</label><select data-p="lang">' + [['bi', 'தமிழ் + EN'], ['ta', 'தமிழ்'], ['en', 'English']].map((o) => '<option value="' + o[0] + '"' + (S.lang === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
+        '<div class="dx-f"><label>' + B('மாதம்', 'Month') + '</label><input type="month" data-p="month" value="' + esc(S.month) + '"></div></div>' +
+        '<details open><summary>' + B('நிறுவனம்', 'Company') + (S.co.name ? ' — ' + esc(S.co.name) : '') + '</summary>' + fld(B('நிறுவனப் பெயர்', 'Company name'), 'co.name') + fld(B('முகவரி', 'Address'), 'co.addr') + fld('PAN / TAN ' + B('(விருப்பம்)', '(optional)'), 'co.pan') + '</details>' +
+        '<h3 class="dx-h">' + B('ஊழியர்', 'Employee') + '</h3>' +
+        (emps.length ? '<div class="dx-f"><label>' + B('சேமித்த ஊழியர்', 'Saved employees') + '</label><select data-load="1"><option value="">' + esc(B('— தேர்வு செய் —', '— choose —')) + '</option>' + emps.map((e, i) => '<option value="' + i + '">' + esc(e.emp.name + (e.emp.id ? ' (' + e.emp.id + ')' : '')) + '</option>').join('') + '</select></div>' : '') +
+        '<div class="dx-grid">' + fld(B('பெயர்', 'Name'), 'emp.name') + fld(B('ஊழியர் எண்', 'Employee ID'), 'emp.id') + '</div><div class="dx-grid">' + fld(B('பதவி', 'Designation'), 'emp.desig') + fld(B('துறை', 'Department'), 'emp.dept') + '</div>' +
+        '<details><summary>' + B('மேலும் விவரம் (DOJ, PAN, UAN, வங்கி)', 'More details (DOJ, PAN, UAN, bank)') + '</summary><div class="dx-grid">' + fld(B('சேர்ந்த தேதி', 'Date of joining'), 'emp.doj', { type: 'date' }) + fld('PAN', 'emp.pan') + '</div><div class="dx-grid">' + fld('UAN', 'emp.uan') + fld('ESI No.', 'emp.esino') + '</div>' + fld(B('வங்கி கணக்கு (கடைசி 4 இலக்கம்)', 'Bank a/c (last 4 digits)'), 'emp.bank') + '</details>' +
+        '<h3 class="dx-h">' + B('வருகை', 'Attendance') + '</h3><div class="dx-grid">' + fld(B('LOP நாட்கள் (சம்பளமில்லா விடுப்பு)', 'LOP days (unpaid leave)'), 'lop', { type: 'number', mode: 'decimal' }) + '<div class="dx-f"><label>' + B('மாதத்தின் நாட்கள்', 'Days in month') + '</label><input type="text" id="ssDays" readonly></div></div>' + chk(B('LOP நாட்களுக்கு ஏற்ப சம்பளத்தைக் குறை', 'Reduce earnings for LOP days'), 'prorate') +
+        '<h3 class="dx-h">' + B('வருமானம் (முழு மாதத்துக்கு)', 'Earnings (full month)') + '</h3><div class="dx-grid">' + num2(B('அடிப்படை ஊதியம் ₹', 'Basic pay ₹'), 'basic') + num2(B('HRA ₹', 'HRA ₹'), 'hra') + '</div>' + rowsHtml(S.oth, 'oth', B('படி', 'Allowance'), B('பிற படி (எ.கா. Conveyance)', 'Other allowance (e.g. Conveyance)')) +
+        '<div class="dx-grid">' + num2(B('கூடுதல் நேரம் ₹', 'Overtime ₹'), 'ot') + num2(B('போனஸ் ₹', 'Bonus ₹'), 'bonus') + '</div>' +
+        '<h3 class="dx-h">' + B('கழிவுகள்', 'Deductions') + '</h3>' + chk('PF ' + B('(ஊழியர் பங்கு)', '(employee share)'), 'pf.on') + '<div class="dx-grid">' + num2('PF %', 'pf.rate') + '<div class="dx-f">' + chk(B('₹15,000 வரம்பு', '₹15,000 ceiling'), 'pf.cap') + '</div></div>' +
+        chk('ESI ' + B('(மொத்தம் ≤ ₹21,000 எனில்)', '(if gross ≤ ₹21,000)'), 'esi.on') + '<div class="dx-grid">' + num2('ESI %', 'esi.rate') + '<div></div></div>' +
+        '<div class="dx-grid">' + num2(B('தொழில் வரி ₹', 'Professional tax ₹'), 'pt') + num2('TDS ₹', 'tds') + '</div>' + num2(B('முன்பணம் / கடன் ₹', 'Advance / loan ₹'), 'adv') + rowsHtml(S.dd, 'dd', B('கழிவு', 'Deduction'), B('பிற கழிவு', 'Other deduction')) +
+        '<h3 class="dx-h">' + B('வழங்கல்', 'Payment') + '</h3><div class="dx-grid">' + fld(B('வழங்கிய தேதி', 'Pay date'), 'payDate', { type: 'date' }) + '<div class="dx-f"><label>' + B('முறை', 'Mode') + '</label><select data-p="mode">' + MODES.concat(['Cheque']).filter((x, i, a) => a.indexOf(x) === i).map((o) => '<option' + (o === S.mode ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div></div>' +
+        '<div class="dx-sum" id="ssSum" aria-live="polite"></div><div id="ssWarn"></div><div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="pdf">📄 PDF</button><button type="button" class="dx-btn sec" data-out="print">🖨️ ' + B('திற / அச்சிடு', 'Open / Print') + '</button><button type="button" class="dx-btn sec" data-out="wa">💬 WhatsApp</button></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn sec" data-save="1">💾 ' + B('இந்த ஊழியரைச் சேமி', 'Save this employee') + '</button><button type="button" class="dx-btn sec" data-next="1">➡️ ' + B('அடுத்த ஊழியர் / மாதம்', 'Next employee / month') + '</button></div>';
+      refresh();
+    }
+    function refresh() {
+      const c = salCalc(S), sum = host.querySelector('#ssSum'); if (!sum) return;
+      host.querySelector('#ssDays').value = c.days + (c.lop ? ' · ' + B('வேலை நாட்கள்', 'paid') + ' ' + c.payable : '');
+      const w = rcWords(S.lang === 'en' ? 'en' : isEn() ? 'en' : 'ta', Math.max(0, c.net))[0];
+      sum.innerHTML = '<div class="tot">' + inr(c.net) + '</div><table><tr><td>' + B('மொத்த வருமானம்', 'Gross earnings') + '</td><td>' + inr(c.gross) + '</td></tr><tr><td>PF</td><td>' + inr(c.pf) + '</td></tr>' + (c.esi ? '<tr><td>ESI</td><td>' + inr(c.esi) + '</td></tr>' : '') + '<tr><td>' + B('மொத்தக் கழிவு', 'Total deductions') + '</td><td>' + inr(c.ded) + '</td></tr></table>' + (c.net > 0 ? '<div class="wd">' + esc(w) + '</div>' : '');
+      const pr = salProblems(S, c); host.querySelector('#ssWarn').innerHTML = pr.warns.length ? '<div class="dx-warn">⚠ ' + pr.warns.map(esc).join('<br>⚠ ') + '</div>' : '';
+    }
+    host.addEventListener('input', onIn); host.addEventListener('change', onIn);
+    function onIn(e) {
+      const t = e.target;
+      if (t.hasAttribute && t.hasAttribute('data-load')) { const e0 = lsGet(SS_EMP, [])[+t.value]; if (e0) { S = Object.assign(blankSal(), JSON.parse(JSON.stringify(e0)), { month: S.month, payDate: S.payDate, lang: S.lang, lop: '', ot: '', bonus: '', tds: '', adv: '' }); paint(); saveDraft(); } return; }
+      const p = t.getAttribute && t.getAttribute('data-p'); if (!p) return;
+      setPath(S, p, t.type === 'checkbox' ? t.checked : (/\.pan$/.test(p) ? String(t.value).toUpperCase() : t.value));
+      if (p === 'lang') paint(); else refresh();
+      saveDraft();
+    }
+    host.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-add')) { S[b.getAttribute('data-add')].push({ l: '', a: '' }); paint(); saveDraft(); }
+      else if (b.hasAttribute('data-rm')) { const a = S[b.getAttribute('data-rm')]; if (a.length > 1) a.pop(); paint(); saveDraft(); }
+      else if (b.hasAttribute('data-save')) saveEmp();
+      else if (b.hasAttribute('data-next')) { S.emp = { name: '', id: '', desig: '', dept: '', doj: '', pan: '', uan: '', esino: '', bank: '' }; S.lop = ''; S.ot = ''; S.bonus = ''; S.tds = ''; S.adv = ''; paint(); saveDraft(); }
+      else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
+    });
+    function saveEmp() {
+      const msg = host.querySelector('[data-k=msg]'); if (!S.emp.name.trim()) { msg.innerHTML = '<div class="dx-err" role="alert">' + B('முதலில் ஊழியர் பெயர் எழுதுங்கள்', 'Enter the employee name first') + '</div>'; return; }
+      const list = lsGet(SS_EMP, []).filter((x) => !(x.emp.name === S.emp.name && x.emp.id === S.emp.id));
+      const keep = JSON.parse(JSON.stringify(S)); keep.lop = ''; keep.ot = ''; keep.bonus = ''; keep.tds = ''; keep.adv = ''; list.unshift(keep); lsSet(SS_EMP, list.slice(0, 60)); lsSet(SS_CO, S.co);
+      msg.innerHTML = '<div class="dx-ok">✓ ' + B('சேமிக்கப்பட்டது', 'Saved') + ': ' + esc(S.emp.name) + '</div>'; paint();
+      host.querySelector('[data-k=msg]').innerHTML = '<div class="dx-ok">✓ ' + B('சேமிக்கப்பட்டது', 'Saved') + ': ' + esc(S.emp.name) + '</div>';
+    }
+    async function run(kind) {
+      const msg = host.querySelector('[data-k=msg]'), c = salCalc(S), pr = salProblems(S, c);
+      if (pr.errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + pr.errs.map(esc).join('<br>') + '</div>'; return; }
+      const btns = host.querySelectorAll('[data-out]'); btns.forEach((x) => (x.disabled = true)); msg.innerHTML = '<div class="dx-note">⏳ ' + B('தயாராகிறது…', 'Preparing…') + '</div>';
+      try {
+        const base = 'Payslip-' + (fileSafe(S.emp.name) || fileSafe(S.emp.id) || 'employee') + '-' + S.month;
+        if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(salWa(S, c)), '_blank');
+        else {
+          const blob = new Blob([await salPdf(S, c)], { type: 'application/pdf' });
+          if (kind === 'print') { const url = URL.createObjectURL(blob); if (!window.open(url, '_blank')) downloadBlob(blob, base + '.pdf'); setTimeout(() => URL.revokeObjectURL(url), 120000); } else downloadBlob(blob, base + '.pdf');
+        }
+        lsSet(SS_CO, S.co); saveDraft();
+        msg.innerHTML = '<div class="dx-ok">✓ ' + B('சம்பளச் சீட்டு தயார்', 'Payslip ready') + ' — ' + inr(c.net) + '</div>' + (pr.warns.length ? '<div class="dx-warn">⚠ ' + pr.warns.map(esc).join('<br>⚠ ') + '</div>' : '');
+      } catch (err) { msg.innerHTML = '<div class="dx-err" role="alert">' + B('உருவாக்க முடியவில்லை: ', 'Could not create it: ') + esc(err && err.message || err) + '</div>'; }
+      finally { btns.forEach((x) => (x.disabled = false)); }
+    }
+    paint();
+  }
+
+  function salWa(S, c) {
+    const r = salRows(S, c), L = ['*Payslip — ' + monthLabel('en', S.month + '-01', 0) + '*', S.co.name, 'Employee: ' + S.emp.name + (S.emp.id ? ' (' + S.emp.id + ')' : ''), c.lop ? 'Paid days: ' + c.payable + ' / ' + c.days : ''];
+    r.E.forEach((x) => L.push('+ ' + x[0] + ': ₹' + inrPlain(x[1]))); L.push('Gross: ₹' + inrPlain(c.gross));
+    r.D.forEach((x) => L.push('− ' + x[0] + ': ₹' + inrPlain(x[1]))); L.push('*Net pay: ₹' + inrPlain(c.net) + '*', rcWords('en', c.net)[0]);
+    return L.filter(Boolean).join('\n');
+  }
+
+  async function salPdf(S, c) {
+    const doc = await PDFDocument.create(); doc.setTitle('Payslip ' + S.emp.name + ' ' + S.month); doc.setCreator('pdftoolsindia.com');
+    const font = await embedUnicodeFont(doc), uni = !!font.__mixedShape, t = (en, ta) => tl(S.lang, en, ta);
+    const L = (s) => { s = String(s == null ? '' : s); return uni ? s : s.replace(/₹/g, 'Rs.').replace(/[^\x20-\x7E\xA0-\xFF]/g, '?'); };
+    const W = 595.28, H = 841.89, MX = 40, CW = W - 2 * MX, INK = rgb(0.1, 0.1, 0.12), GR = rgb(0.38, 0.4, 0.46), LN = rgb(0.8, 0.82, 0.86), BR = rgb(0.16, 0.25, 0.5), HD = rgb(0.92, 0.94, 0.99);
+    const page = doc.addPage([W, H]); let y = H - MX;
+    const txt = (s, x, yy, size, col) => page.drawText(L(s), { x, y: yy, size: size || 9.5, font, color: col || INK });
+    const bold = (s, x, yy, size, col) => { txt(s, x, yy, size, col); txt(s, x + 0.3, yy, size, col); };
+    const wid = (s, size) => font.widthOfTextAtSize(L(s), size), wrap = (s, size, w, m) => wrapLines(font, L(s), size, w, m);
+    const hline = (yy, x1, x2) => page.drawLine({ start: { x: x1, y: yy }, end: { x: x2, y: yy }, thickness: 0.6, color: LN });
+    const amt = (v, xr, yy, size, boldIt) => { const s = inrPlain(v); (boldIt ? bold : txt)(s, xr - wid(s, size || 9.5), yy, size || 9.5); };
+    wrap(S.co.name, 15, CW, 2).forEach((ln) => { bold(ln, MX, y - 14, 15, BR); y -= 18; }); y -= 2;
+    wrap(S.co.addr, 9, CW, 2).forEach((ln) => { txt(ln, MX, y - 10, 9, GR); y -= 12; }); if (S.co.pan) { txt('PAN/TAN: ' + S.co.pan, MX, y - 10, 9, GR); y -= 12; }
+    y -= 8; hline(y, MX, W - MX); y -= 22;
+    const ttl = t('PAYSLIP', 'சம்பளச் சீட்டு') + ' — ' + monthLabel(S.lang, S.month + '-01', 0); bold(ttl, MX, y, 12.5, BR); y -= 20;
+    const t1 = (en, ta) => (S.lang === 'ta' ? ta : en), pairs = [[t1('Employee', 'ஊழியர்'), S.emp.name], [t1('Employee ID', 'ஊழியர் எண்'), S.emp.id], [t1('Designation', 'பதவி'), S.emp.desig], [t1('Department', 'துறை'), S.emp.dept], [t1('Joined', 'சேர்ந்த தேதி'), S.emp.doj && fmtDMY(S.emp.doj)], ['PAN', S.emp.pan], ['UAN', S.emp.uan], ['ESI No.', S.emp.esino], [t1('Bank a/c', 'வங்கி கணக்கு'), S.emp.bank && 'XXXX' + S.emp.bank.replace(/\D/g, '').slice(-4)], [t1('Paid days', 'வேலை நாட்கள்'), c.payable + ' / ' + c.days + (c.lop ? '  (LOP ' + c.lop + ')' : '')]].filter((p) => String(p[1] || '').trim());
+    const half = Math.ceil(pairs.length / 2), colW = CW / 2; let yy = y;
+    pairs.forEach((p, i) => { const col = i < half ? 0 : 1, row = i < half ? i : i - half, x = MX + col * colW; wrap(p[0], 8, 108, 1).forEach((ln) => txt(ln, x, y - row * 17, 8, GR)); txt(wrap(p[1], 9.5, colW - 126, 1)[0], x + 116, y - row * 17, 9.5); yy = 0; });
+    y = y - (half - 1) * 17 - 16; hline(y + 6, MX, W - MX);
+    const R = salRows(S, c), n = Math.max(R.E.length, R.D.length, 1), mid = MX + colW + 6; y -= 8;
+    page.drawRectangle({ x: MX, y: y - 6, width: colW - 6, height: 19, color: HD }); page.drawRectangle({ x: mid, y: y - 6, width: colW - 6, height: 19, color: HD });
+    bold(t('EARNINGS', 'வருமானம்'), MX + 6, y, 9, BR); bold(t('DEDUCTIONS', 'கழிவுகள்'), mid + 6, y, 9, BR); y -= 22;
+    for (let i = 0; i < n; i++) {
+      const e = R.E[i], d = R.D[i];
+      const el = e ? wrap(e[0], 9, colW - 96, 2) : [], dl = d ? wrap(d[0], 9, colW - 96, 2) : [];
+      if (e) { el.forEach((ln, k) => txt(ln, MX + 6, y - k * 11, 9)); amt(e[1], MX + colW - 14, y); }
+      if (d) { dl.forEach((ln, k) => txt(ln, mid + 6, y - k * 11, 9)); amt(d[1], mid + colW - 14, y); }
+      y -= 13 * Math.max(el.length, dl.length, 1) + 4;
+    }
+    y -= 2; hline(y + 8, MX, W - MX); bold(t('Gross earnings', 'மொத்த வருமானம்'), MX + 6, y - 6, 10); amt(c.gross, MX + colW - 14, y - 6, 10, true); bold(t('Total deductions', 'மொத்தக் கழிவு'), mid + 6, y - 6, 10); amt(c.ded, mid + colW - 14, y - 6, 10, true); y -= 30;
+    const wl = rcWords(S.lang, c.net).flatMap((w) => wrap(w, 9, CW - 24, 2)), bh = 40 + wl.length * 12;
+    page.drawRectangle({ x: MX, y: y - bh + 14, width: CW, height: bh, color: HD });
+    bold(t('NET PAY', 'நிகரச் சம்பளம்'), MX + 12, y - 8, 11, BR); const ns = '₹ ' + inrPlain(c.net); bold(ns, W - MX - 12 - wid(ns, 17), y - 10, 17, BR); wl.forEach((w, i) => txt(w, MX + 12, y - 28 - i * 12, 9)); y -= bh + 6;
+    txt(t('Paid on', 'வழங்கிய தேதி') + ' ' + fmtDMY(S.payDate) + ' · ' + S.mode, MX, y - 6, 9, GR); y -= 60;
+    hline(y, MX, MX + 170); hline(y, W - MX - 170, W - MX); wrap(t('Employer signature', 'நிறுவன கையொப்பம்'), 8.5, 170, 2).forEach((ln, i) => txt(ln, MX, y - 12 - i * 10, 8.5, GR)); wrap(t('Employee signature', 'ஊழியர் கையொப்பம்'), 8.5, 170, 2).forEach((ln, i) => txt(ln, W - MX - 170, y - 12 - i * 10, 8.5, GR));
+    wrap(t('This is a computer-generated payslip.', 'இது கணினி மூலம் உருவாக்கப்பட்ட சம்பளச் சீட்டு.'), 8, CW, 2).forEach((ln, i) => txt(ln, MX, y - 40 - i * 10, 8, GR));
+    return doc.save();
+  }
+  TOOL_IMPL.salaryslip = { mount(container) { mountSalary(container); } };
+  TOOL_IMPL.salaryslip._f = { salCalc, salProblems, blankSal };
+
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
 

@@ -430,7 +430,7 @@ const TOOLS = [
   {id:'obituary', name:'Obituary / Death Announcement', desc:'Tamil & English — photo, dates, funeral details card', icon:'🕊️', color:'#5B6B73', cat:'pdf'},
   {id:'quotepo', name:'Quotation / Bill / PO / Proforma', desc:'GST Invoice / Tax Invoice, Quotation, Proforma, Cash Bill, Bill of Supply, Purchase Order or Delivery Challan — correct IGST or CGST+SGST, discount, advance, HSN summary, PDF / Excel / Word / WhatsApp', icon:'📃', color:'#1A5276', cat:'business', lazy:'docs'},
   {id:'receipts', name:'Receipts & Vouchers (all-in-one)', desc:'Rent receipt (up to 12 months at once), tuition fee receipt, money receipt and payment voucher — Tamil / English, amount in words, saved details', icon:'🧾', color:'#2E6F5E', cat:'business', lazy:'docs'},
-  {id:'salaryslip', name:'Salary Slip Generator', desc:'Basic pay, allowances, deductions, net pay — PDF payslip', icon:'💵', color:'#2E7D32', cat:'business'},
+  {id:'salaryslip', name:'Salary Slip Generator', desc:'Payslip with LOP days, PF / ESI auto-calculation, allowances, saved employees — Tamil / English PDF', icon:'💵', color:'#2E7D32', cat:'business',lazy:'docs'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014a`;
+    s.src = `category-${cat}.js?v=20261014b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -13604,112 +13604,7 @@ TOOL_IMPL.obituary = {
 };
 
 /* ===================== SALARY SLIP GENERATOR ===================== */
-TOOL_IMPL.salaryslip = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Basic pay + allowances − deductions = Net Pay, calculated automatically.</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field" style="grid-column:1/-1;"><label>Company Name</label><input type="text" id="ssCompany" autocomplete="off"></div>
-          <div class="field"><label>Employee Name</label><input type="text" id="ssName" autocomplete="off"></div>
-          <div class="field"><label>Employee ID</label><input type="text" id="ssEmpId" autocomplete="off"></div>
-          <div class="field"><label>Month</label><input type="month" id="ssMonth" value="${new Date().toISOString().slice(0,7)}"></div>
-          <div class="field"><label>Designation</label><input type="text" id="ssDesig" autocomplete="off"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Earnings</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field"><label>Basic Pay ₹</label><input type="number" id="ssBasic" value="0"></div>
-          <div class="field"><label>HRA ₹</label><input type="number" id="ssHra" value="0"></div>
-          <div class="field"><label>Other Allowances ₹</label><input type="number" id="ssAllow" value="0"></div>
-        </div>
-      `));
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Deductions</div>`));
-      body.appendChild(el(`
-        <div class="opts">
-          <div class="field"><label>PF ₹</label><input type="number" id="ssPf" value="0"></div>
-          <div class="field"><label>Professional Tax ₹</label><input type="number" id="ssPt" value="0"></div>
-          <div class="field"><label>TDS / Other ₹</label><input type="number" id="ssTds" value="0"></div>
-        </div>
-      `));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">💵 Generate Payslip</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const v = (id)=> Number(body.querySelector(id).value)||0;
-      const company = body.querySelector('#ssCompany').value||'';
-      const name = body.querySelector('#ssName').value||'';
-      const empId = body.querySelector('#ssEmpId').value||'';
-      const month = body.querySelector('#ssMonth').value||'';
-      const desig = body.querySelector('#ssDesig').value||'';
-      const basic=v('#ssBasic'), hra=v('#ssHra'), allow=v('#ssAllow');
-      const pf=v('#ssPf'), pt=v('#ssPt'), tds=v('#ssTds');
-      const grossEarnings = basic+hra+allow;
-      const totalDeductions = pf+pt+tds;
-      const netPay = grossEarnings-totalDeductions;
-      // Deductions exceeding earnings is usually a data-entry mistake — warn
-      // and require explicit confirmation instead of silently generating a
-      // real, downloadable payslip showing a negative salary. The calculation
-      // itself is unchanged; this only gates whether generation proceeds.
-      if(netPay < 0){
-        const existingWarn = body.querySelector('#ssNegWarn'); if(existingWarn) existingWarn.remove();
-        const warn = el(`
-          <div id="ssNegWarn" class="note" style="background:#FFF3E0; border-color:#FFD699; margin-top:12px;">
-            <b>⚠️ Warning:</b> Net Pay is negative (₹${netPay.toFixed(2)}). Please verify the earnings and deduction amounts before generating the salary slip.
-            <div class="btn-row" style="margin-top:10px;">
-              <button class="btn secondary" id="ssNegCancel" style="flex:1;">Cancel</button>
-              <button class="btn" id="ssNegContinue" style="flex:1;">Continue with negative Net Pay?</button>
-            </div>
-          </div>
-        `);
-        body.appendChild(warn);
-        warn.querySelector('#ssNegCancel').onclick = ()=> warn.remove();
-        warn.querySelector('#ssNegContinue').onclick = ()=>{ warn.remove(); generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay}); };
-        return;
-      }
-      generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay});
-    }
-    async function generatePayslip({company,name,empId,month,desig,basic,hra,allow,pf,pt,tds,grossEarnings,totalDeductions,netPay}){
-      const prog = mountProgress(body);
-      try{
-        prog.set(30,'Loading font…');
-        const doc = await PDFDocument.create();
-        const font = await embedUnicodeFont(doc);
-        const page = doc.addPage([595.28, 400]);
-        const {width} = page.getSize();
-        let y = 350;
-        const t = (txt,x,yy,size=11,color=rgb(0.1,0.1,0.1))=> page.drawText(String(txt),{x,y:yy,size,font,color});
-        t(company||'Company Name', 50, y, 16, rgb(0.13,0.29,0.62)); y-=20;
-        t('Payslip for '+(month||''), 50, y, 11, rgb(0.4,0.4,0.4)); y-=26;
-        t('Employee: '+name, 50, y, 11); t('ID: '+empId, 320, y, 11); y-=16;
-        t('Designation: '+desig, 50, y, 11); y-=24;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=20;
-        t('EARNINGS', 50, y, 11, rgb(0.13,0.29,0.62)); t('DEDUCTIONS', 320, y, 11, rgb(0.13,0.29,0.62)); y-=18;
-        t('Basic Pay', 50, y); t('₹'+basic.toFixed(2), 220, y); t('PF', 320, y); t('₹'+pf.toFixed(2), 490, y); y-=16;
-        t('HRA', 50, y); t('₹'+hra.toFixed(2), 220, y); t('Professional Tax', 320, y); t('₹'+pt.toFixed(2), 490, y); y-=16;
-        t('Other Allowances', 50, y); t('₹'+allow.toFixed(2), 220, y); t('TDS/Other', 320, y); t('₹'+tds.toFixed(2), 490, y); y-=24;
-        page.drawLine({start:{x:50,y},end:{x:width-50,y},thickness:1,color:rgb(0.8,0.8,0.8)}); y-=18;
-        t('Gross Earnings', 50, y, 11.5); t('₹'+grossEarnings.toFixed(2), 220, y, 11.5);
-        t('Total Deductions', 320, y, 11.5); t('₹'+totalDeductions.toFixed(2), 490, y, 11.5); y-=28;
-        t('NET PAY', 50, y, 14, rgb(0.1,0.45,0.2)); t('₹'+netPay.toFixed(2), 220, y, 14, rgb(0.1,0.45,0.2));
-        t('This is a computer-generated payslip.', 50, 30, 8, rgb(0.55,0.55,0.55));
-        prog.set(90,'Preparing…');
-        const bytes = await doc.save();
-        downloadBlob(new Blob([bytes],{type:'application/pdf'}), `payslip-${name||'employee'}-${month}.pdf`);
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, `Payslip generated — Net Pay ₹${netPay.toFixed(2)}.`);
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
-
+// salaryslip lives in category-docs.js
 /* ===================== PAYMENT VOUCHER ===================== */
 /* ===================== LEAVE APPLICATION LETTER ===================== */
 TOOL_IMPL.leaveletter = {
