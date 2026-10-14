@@ -435,7 +435,7 @@ const TOOLS = [
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
-  {id:'hrattendance', name:'HR Attendance Register', desc:'Employee attendance muster-roll + Excel report', icon:'📇', color:'#1F2A44', cat:'business'},
+  {id:'hrattendance', name:'HR Attendance Register', desc:'Daily attendance with weekly off / holiday, paid days and wages, month grid, Excel muster roll, print, backup — works offline', icon:'📇', color:'#1F2A44', cat:'business',lazy:'docs'},
   {id:'leaveletter', name:'Leave Application Letter', desc:'Leave letter for employees, students and parents — Tamil or English, auto-written, half-day, PDF', icon:'📝', color:'#2E86AB', cat:'business',lazy:'docs'},
   {id:'businesscard', name:'Business Card Maker', desc:'Business card with 4 layouts, Tamil name, QR (contact / UPI / website), 10-up A4 cut sheet, vCard', icon:'💳', color:'#1A5276', cat:'business',lazy:'docs'},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0,lazy:'docs'},
@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014g`;
+    s.src = `category-${cat}.js?v=20261014i`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3272,7 +3272,7 @@ const TOOL_LIBS = {
   pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
-  pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
+  hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
   readaloud:['pdfjs'], receipts:['pdflib'], salaryslip:['pdflib'], sign:['pdfjs','pdflib'],
   remove:['pdfjs','pdflib'], organize:['pdfjs','pdflib'], rotate:['pdfjs','pdflib'],
   split:['jszip','pdfjs','pdflib'], stmtcompare:['xlsx'], txt2pdf:['pdflib'],
@@ -15244,7 +15244,7 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
 }
 
 TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
-TOOL_IMPL.hrattendance = { mount(container){ mountEmbeddedTool(container, 'hr-attendance-register.html', 'HR Attendance Register'); } };
+// hrattendance lives in category-docs.js (native, no React/Babel)
 TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
 TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
 TOOL_IMPL.kalvikalanjiyam = { mount(container){ mountEmbeddedTool(container, 'learn/', 'Kalvi Kalanjiyam (கல்வி களஞ்சியம்)'); } };

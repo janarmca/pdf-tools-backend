@@ -1502,6 +1502,163 @@
   TOOL_IMPL.businesscard = { mount(container) { mountCard(container); } };
   TOOL_IMPL.businesscard._f = { bcVcard, bcQrText, blankCard };
 
+
+  /* =====================================================================
+     HR ATTENDANCE REGISTER — native (no React / Babel / CDN).
+     Same storage keys as the old page (hrreg_employees, hrreg_attendance) so
+     existing data carries over. Every write re-reads storage first, so two open
+     tabs can never overwrite each other.
+     ===================================================================== */
+  const HR_ST = {
+    P: { en: 'Present', ta: 'வந்தார்', col: '#2F6B46', bg: '#E3F1E8' }, A: { en: 'Absent', ta: 'வரவில்லை', col: '#B23A2E', bg: '#F9E4E0' },
+    H: { en: 'Half day', ta: 'அரை நாள்', col: '#9A6B00', bg: '#FBEFCB' }, L: { en: 'Paid leave', ta: 'விடுப்பு', col: '#2F5597', bg: '#E1E9F6' },
+    WO: { en: 'Weekly off', ta: 'வார விடுமுறை', col: '#5B5F6B', bg: '#ECEEF2' }, HO: { en: 'Holiday', ta: 'பண்டிகை விடுமுறை', col: '#7B3FA0', bg: '#EEE3F6' },
+  };
+  const HR_ORDER = ['P', 'A', 'H', 'L', 'WO', 'HO'], WD_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], WD_TA = ['ஞா', 'தி', 'செ', 'பு', 'வி', 'வெ', 'ச'];
+  const hrRd = (k, d) => { try { const v = localStorage.getItem('hrreg_' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+  const hrWr = (k, v) => { try { localStorage.setItem('hrreg_' + k, JSON.stringify(v)); return true; } catch (e) { return false; } };
+  const hrUid = () => Math.random().toString(36).slice(2, 10);
+  const firstChar = (n) => { n = String(n || '').trim(); if (!n) return '?'; try { if (window.Intl && Intl.Segmenter) return [...new Intl.Segmenter('ta', { granularity: 'grapheme' }).segment(n)][0].segment; } catch (e) { /* fall through */ } return Array.from(n)[0]; };
+  const ymOf = (y, m) => y + '-' + pad2(m + 1), isoOf = (y, m, d) => y + '-' + pad2(m + 1) + '-' + pad2(d);
+  const hrActive = (e, iso) => (!e.joinDate || e.joinDate <= iso) && (!e.leftDate || e.leftDate >= iso);
+  function hrStats(e, att, y, m, divisorMode) {
+    const n = new Date(y, m + 1, 0).getDate(), c = { P: 0, A: 0, H: 0, L: 0, WO: 0, HO: 0, un: 0, days: n };
+    for (let d = 1; d <= n; d++) { const iso = isoOf(y, m, d); if (!hrActive(e, iso)) continue; const s = att[e.id + '|' + iso]; if (s && c[s] != null) c[s]++; else c.un++; }
+    c.paid = c.P + c.H * 0.5 + c.L + c.WO + c.HO;
+    const sal = num(e.salary), div = divisorMode === '26' ? 26 : divisorMode === '30' ? 30 : n;
+    c.rate = !sal ? 0 : e.basis === 'day' ? sal : sal / div;
+    c.wage = !sal ? 0 : e.basis === 'day' ? Math.round(c.paid * sal) : Math.min(Math.round(c.paid * sal / div), Math.round(sal));
+    return c;
+  }
+
+  function mountHR(container) {
+    const host = root(container), today = localISO(); let tab = 'mark', date = today, vm = { y: +today.slice(0, 4), m: +today.slice(5, 7) - 1 }, edit = null, notice = '';
+    const settings = () => Object.assign({ company: '', divisor: 'month' }, hrRd('settings', {}));
+    const emps = () => (hrRd('employees', []) || []).filter((e) => e && e.id);
+    const att = () => hrRd('attendance', {}) || {};
+    const fail = () => { notice = '<div class="dx-err" role="alert">' + B('சேமிக்க முடியவில்லை — உலாவி நினைவகம் நிரம்பியிருக்கலாம். Backup எடுத்து பழைய தரவை நீக்கவும்.', 'Could not save — browser storage may be full. Take a backup and clear old data.') + '</div>'; };
+    const css = document.getElementById('hr-style') || (() => { const s = document.createElement('style'); s.id = 'hr-style'; s.textContent = '.hr-tabs{display:flex;gap:6px;margin:4px 0 10px}.hr-tabs button{flex:1;min-height:46px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font:800 12.5px inherit;font-family:inherit;cursor:pointer;color:var(--sub)}.hr-tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}.hr-emp{border:1.5px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin-top:8px}.hr-emp .nm{display:flex;align-items:center;gap:10px;font-weight:800}.hr-av{width:38px;height:38px;border-radius:50%;background:#E8EEFB;color:#28407F;display:flex;align-items:center;justify-content:center;font-weight:900;flex:0 0 38px}.hr-st{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hr-st button{flex:1 1 44px;min-width:44px;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:800 13px inherit;font-family:inherit;cursor:pointer}.hr-grid{border-collapse:collapse;font-size:12px;background:#fff}.hr-grid th,.hr-grid td{border:1px solid var(--line);text-align:center;padding:0}.hr-grid td.nm,.hr-grid th.nm{position:sticky;left:0;background:#fff;text-align:left;padding:6px 8px;min-width:110px;max-width:140px;z-index:1;font-weight:800}.hr-cell{min-width:34px;min-height:40px;width:34px;height:40px;border:none;background:transparent;font:800 11px inherit;font-family:inherit;cursor:pointer}.hr-sun{background:#F3F4F7}'; document.head.appendChild(s); return s; })(); void css;
+    const stBtn = (id, cur, extra) => { const s = HR_ST[id]; return '<button type="button" ' + extra + ' aria-pressed="' + (cur === id) + '" title="' + esc(isEn() ? s.en : s.ta) + '" style="' + (cur === id ? 'background:' + s.bg + ';border-color:' + s.col + ';color:' + s.col : '') + '">' + id + '</button>'; };
+    const legend = () => '<div class="dx-hint" style="line-height:1.7">' + HR_ORDER.map((k) => '<b>' + k + '</b> ' + esc(isEn() ? HR_ST[k].en : HR_ST[k].ta)).join(' · ') + '</div>';
+
+    function paint() {
+      const S = settings(), E = emps(), A = att(); let h = '';
+      h += '<div class="hr-tabs" role="tablist">' + [['mark', '✅', B('வருகை', 'Mark')], ['report', '📊', B('அறிக்கை', 'Report')], ['staff', '👥', B('பணியாளர்', 'Staff')], ['data', '⚙️', B('தரவு', 'Data')]].map((t) => '<button type="button" role="tab" data-tab="' + t[0] + '" class="' + (tab === t[0] ? 'on' : '') + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + ' ' + t[2] + '</button>').join('') + '</div>' + notice;
+      notice = '';
+      if (tab === 'mark') {
+        const dd = new Date(date + 'T00:00:00'), act = E.filter((e) => hrActive(e, date)), mk = act.filter((e) => A[e.id + '|' + date]).length;
+        h += '<div class="dx-row" style="margin-top:0"><button type="button" class="dx-btn sec" data-day="-1" aria-label="' + esc(B('முந்தைய நாள்', 'Previous day')) + '" style="flex:0 0 52px">‹</button><input type="date" data-date="1" value="' + date + '" style="flex:1 1 140px" aria-label="' + esc(B('தேதி', 'Date')) + '"><button type="button" class="dx-btn sec" data-day="1" aria-label="' + esc(B('அடுத்த நாள்', 'Next day')) + '" style="flex:0 0 52px">›</button></div>' +
+          '<div class="dx-hint">' + (isEn() ? WD_EN[dd.getDay()] : WD_TA[dd.getDay()]) + ' · ' + fmtDMY(date) + ' · ' + mk + '/' + act.length + ' ' + B('பதிவு', 'marked') + (dd.getDay() === 0 ? ' · ' + B('ஞாயிறு — வார விடுமுறை (WO) குறிக்கலாம்', 'Sunday — you can mark weekly off (WO)') : '') + '</div>';
+        if (!E.length) h += '<div class="dx-note">' + B('முதலில் "பணியாளர்" தாவலில் ஊழியர்களைச் சேர்க்கவும்.', 'First add your employees in the "Staff" tab.') + '</div>';
+        else {
+          h += '<div class="dx-row"><button type="button" class="dx-btn" data-all="P">✓ ' + B('மீதமுள்ள அனைவரும் வந்தார்', 'All unmarked present') + '</button><button type="button" class="dx-btn sec" data-all="WO">' + B('மீதமுள்ளவர்கள் WO', 'Unmarked → weekly off') + '</button><button type="button" class="dx-btn sec" data-all="HO">' + B('மீதமுள்ளவர்கள் HO', 'Unmarked → holiday') + '</button></div>';
+          h += act.map((e) => { const cur = A[e.id + '|' + date] || ''; return '<div class="hr-emp"><div class="nm"><span class="hr-av">' + esc(firstChar(e.name)) + '</span><span style="min-width:0">' + esc(e.name) + (e.role ? '<div class="dx-hint" style="margin:0">' + esc(e.role) + '</div>' : '') + '</span></div><div class="hr-st">' + HR_ORDER.map((k) => stBtn(k, cur, 'data-mark="' + e.id + '" data-s="' + k + '"')).join('') + '</div></div>'; }).join('') + legend();
+        }
+      } else if (tab === 'report') {
+        const n = new Date(vm.y, vm.m + 1, 0).getDate(), ms = vm.y + '-' + pad2(vm.m + 1), list = E.filter((e) => (!e.joinDate || e.joinDate <= isoOf(vm.y, vm.m, n)) && (!e.leftDate || e.leftDate >= isoOf(vm.y, vm.m, 1))), mname = (isEn() ? MON_EN : MON_TA)[vm.m] + ' ' + vm.y, wages = list.some((e) => num(e.salary));
+        h += '<div class="dx-row" style="margin-top:0"><button type="button" class="dx-btn sec" data-mon="-1" aria-label="' + esc(B('முந்தைய மாதம்', 'Previous month')) + '" style="flex:0 0 52px">‹</button><div style="flex:1;text-align:center;font-weight:900;align-self:center">' + esc(mname) + '</div><button type="button" class="dx-btn sec" data-mon="1" aria-label="' + esc(B('அடுத்த மாதம்', 'Next month')) + '" style="flex:0 0 52px">›</button></div>';
+        if (!list.length) h += '<div class="dx-note">' + B('இந்த மாதத்துக்குப் பணியாளர் இல்லை.', 'No employees for this month.') + '</div>';
+        else {
+          h += '<div class="dx-wrap"><table class="dx-tbl"><tr><th>' + B('பெயர்', 'Name') + '</th>' + HR_ORDER.map((k) => '<th>' + k + '</th>').join('') + '<th>' + B('பதிவில்லை', 'Unmarked') + '</th><th>' + B('சம்பள நாட்கள்', 'Paid days') + '</th>' + (wages ? '<th>' + B('சம்பளம் ₹', 'Wages ₹') + '</th>' : '') + '</tr>' +
+            list.map((e) => { const s = hrStats(e, A, vm.y, vm.m, S.divisor); return '<tr><td>' + esc(e.name) + (e.leftDate ? ' <small>(' + B('விலகினார்', 'left') + ')</small>' : '') + '</td>' + HR_ORDER.map((k) => '<td>' + s[k] + '</td>').join('') + '<td' + (s.un ? ' style="color:#B23A2E;font-weight:800"' : '') + '>' + s.un + '</td><td><b>' + +s.paid.toFixed(1) + '</b></td>' + (wages ? '<td>' + (num(e.salary) ? inrPlain(s.wage) : '—') + '</td>' : '') + '</tr>'; }).join('') + '</table></div>';
+          h += '<h3 class="dx-h">' + B('மாத அட்டவணை (கட்டத்தைத் தட்டினால் மாறும்)', 'Month grid (tap a cell to change)') + '</h3><div class="dx-wrap"><table class="hr-grid"><tr><th class="nm">' + B('பெயர்', 'Name') + '</th>' + Array.from({ length: n }, (_, i) => { const wd = new Date(vm.y, vm.m, i + 1).getDay(); return '<th class="' + (wd === 0 ? 'hr-sun' : '') + '">' + (i + 1) + '<div style="font-weight:600;font-size:10px">' + (isEn() ? WD_EN[wd][0] : WD_TA[wd]) + '</div></th>'; }).join('') + '</tr>' +
+            list.map((e) => '<tr><td class="nm">' + esc(e.name) + '</td>' + Array.from({ length: n }, (_, i) => { const iso = isoOf(vm.y, vm.m, i + 1), wd = new Date(vm.y, vm.m, i + 1).getDay(), s = A[e.id + '|' + iso] || ''; if (!hrActive(e, iso)) return '<td class="hr-sun" style="color:#B5B9C4">–</td>'; return '<td class="' + (wd === 0 && !s ? 'hr-sun' : '') + '"><button type="button" class="hr-cell" data-cell="' + e.id + '|' + iso + '" aria-label="' + esc(e.name + ' ' + (i + 1) + ': ' + (s || '—')) + '"' + (s ? ' style="background:' + HR_ST[s].bg + ';color:' + HR_ST[s].col + '"' : '') + '>' + (s || '·') + '</button></td>'; }).join('') + '</tr>').join('') + '</table></div>' + legend();
+          h += '<div class="dx-row"><button type="button" class="dx-btn" data-exp="xlsx">📊 Excel</button><button type="button" class="dx-btn sec" data-exp="print">🖨️ ' + B('அச்சிடு / PDF', 'Print / PDF') + '</button></div><div class="dx-hint">' + B('சம்பள நாட்கள் = வந்தார் + அரை நாள் × 0.5 + விடுப்பு + WO + HO.', 'Paid days = Present + Half × 0.5 + Leave + WO + HO.') + '</div>';
+        }
+      } else if (tab === 'staff') {
+        if (edit) {
+          const e = edit; h += '<div class="hr-emp"><b>' + (e.id ? B('பணியாளரைத் திருத்து', 'Edit employee') : B('புதிய பணியாளர்', 'New employee')) + '</b>' +
+            '<div class="dx-f"><label>' + B('பெயர்', 'Name') + '</label><input type="text" id="hrName" value="' + esc(e.name || '') + '" autocomplete="off"></div><div class="dx-grid"><div class="dx-f"><label>' + B('பணி', 'Role') + '</label><input type="text" id="hrRole" value="' + esc(e.role || '') + '" autocomplete="off"></div><div class="dx-f"><label>' + B('கைபேசி', 'Phone') + '</label><input type="tel" id="hrPhone" value="' + esc(e.phone || '') + '" autocomplete="off"></div></div>' +
+            '<div class="dx-grid"><div class="dx-f"><label>' + B('சேர்ந்த நாள்', 'Joined on') + '</label><input type="date" id="hrJoin" value="' + esc(e.joinDate || today) + '"></div><div class="dx-f"><label>' + B('விலகிய நாள் (விருப்பம்)', 'Left on (optional)') + '</label><input type="date" id="hrLeft" value="' + esc(e.leftDate || '') + '"></div></div>' +
+            '<div class="dx-grid"><div class="dx-f"><label>' + B('சம்பளம் ₹ (விருப்பம்)', 'Pay ₹ (optional)') + '</label><input type="number" id="hrSal" inputmode="decimal" min="0" step="any" value="' + esc(e.salary || '') + '"></div><div class="dx-f"><label>' + B('கணக்கு', 'Pay basis') + '</label><select id="hrBasis"><option value="month"' + (e.basis !== 'day' ? ' selected' : '') + '>' + B('மாதச் சம்பளம்', 'Monthly salary') + '</option><option value="day"' + (e.basis === 'day' ? ' selected' : '') + '>' + B('தினக்கூலி', 'Daily wage') + '</option></select></div></div>' +
+            '<div data-k="form"></div><div class="dx-row"><button type="button" class="dx-btn" data-save="1">💾 ' + B('சேமி', 'Save') + '</button><button type="button" class="dx-btn sec" data-cancel="1">' + B('ரத்து', 'Cancel') + '</button></div></div>';
+        } else {
+          h += '<div class="dx-row" style="margin-top:0"><button type="button" class="dx-btn" data-new="1">＋ ' + B('பணியாளரைச் சேர்', 'Add employee') + '</button></div>';
+          const cur = E.filter((e) => !e.leftDate || e.leftDate > today), gone = E.filter((e) => e.leftDate && e.leftDate <= today);
+          const card = (e, g) => '<div class="hr-emp"><div class="nm"><span class="hr-av">' + esc(firstChar(e.name)) + '</span><span style="min-width:0;flex:1">' + esc(e.name) + '<div class="dx-hint" style="margin:0">' + esc([e.role, e.phone, B('சேர்ந்தது', 'joined') + ' ' + fmtDMY(e.joinDate || ''), e.leftDate && B('விலகியது', 'left') + ' ' + fmtDMY(e.leftDate), num(e.salary) && '₹' + inrPlain(num(e.salary)) + (e.basis === 'day' ? '/' + B('நாள்', 'day') : '/' + B('மாதம்', 'month'))].filter(Boolean).join(' · ')) + '</div></span></div><div class="dx-row"><button type="button" class="dx-btn sec" data-edit="' + e.id + '">✏️ ' + B('திருத்து', 'Edit') + '</button>' + (g ? '<button type="button" class="dx-btn sec" data-rejoin="' + e.id + '">↩ ' + B('மீண்டும் சேர்', 'Rejoin') + '</button><button type="button" class="dx-del" style="flex:0 0 46px" data-purge="' + e.id + '" aria-label="' + esc(B('நிரந்தரமாக நீக்கு', 'Delete permanently')) + '">🗑</button>' : '<button type="button" class="dx-btn sec" data-left="' + e.id + '">🚪 ' + B('விலகினார்', 'Mark as left') + '</button>') + '</div></div>';
+          h += (cur.length ? cur.map((e) => card(e, false)).join('') : '<div class="dx-note" style="margin-top:10px">' + B('இன்னும் பணியாளர் இல்லை.', 'No employees yet.') + '</div>') + (gone.length ? '<h3 class="dx-h">' + B('விலகியவர்கள் (பழைய மாத அறிக்கையில் தொடர்ந்து தெரிவார்கள்)', 'Former staff (still shown in the months they worked)') + '</h3>' + gone.map((e) => card(e, true)).join('') : '');
+        }
+      } else {
+        h += '<div class="dx-f"><label>' + B('நிறுவனப் பெயர் (Excel / அச்சில் வரும்)', 'Company name (printed on Excel / print)') + '</label><input type="text" id="hrCo" value="' + esc(S.company) + '" autocomplete="off"></div><div class="dx-f"><label>' + B('சம்பளக் கணக்கு: ஒரு நாள் = மாதச் சம்பளம் ÷', 'Daily rate = monthly salary ÷') + '</label><select id="hrDiv">' + [['month', B('மாதத்தின் நாட்கள் (28–31)', 'Days in the month (28–31)')], ['26', '26'], ['30', '30']].map((o) => '<option value="' + o[0] + '"' + (S.divisor === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>' +
+          '<div class="dx-row"><button type="button" class="dx-btn" data-savesettings="1">💾 ' + B('சேமி', 'Save') + '</button></div><h3 class="dx-h">' + B('Backup / Restore', 'Backup / Restore') + '</h3><div class="dx-warn" style="margin-top:0">' + B('தரவு இந்த phone / browser-ல் மட்டுமே சேமிக்கப்படுகிறது — வேறு phone-ல் தெரியாது. "Clear browsing data" செய்தால் அழிந்துவிடும். மாதம் ஒருமுறை Backup எடுங்கள்.', 'Data is stored only on this phone / browser — other phones will not see it, and "Clear browsing data" erases it. Take a backup once a month.') + '</div>' +
+          '<div class="dx-row"><button type="button" class="dx-btn" data-backup="1">⬇️ Backup (.json)</button><button type="button" class="dx-btn sec" data-restore="1">⬆️ Restore</button></div><input type="file" id="hrFile" accept="application/json,.json" style="display:none"><div data-k="data"></div>';
+      }
+      host.innerHTML = h;
+    }
+    const msg = (sel, kind, t) => { const n = host.querySelector('[data-k=' + sel + ']'); if (n) n.innerHTML = '<div class="dx-' + kind + '" role="' + (kind === 'err' ? 'alert' : 'status') + '">' + t + '</div>'; };
+    host.addEventListener('click', (ev) => {
+      const b = ev.target.closest && ev.target.closest('button'); if (!b) return; const d = b.dataset;
+      if (d.tab) { tab = d.tab; edit = null; return paint(); }
+      if (d.day) { const dt = new Date(date + 'T00:00:00'); dt.setDate(dt.getDate() + +d.day); date = localISO(dt); return paint(); }
+      if (d.mon) { vm.m += +d.mon; if (vm.m < 0) { vm.m = 11; vm.y--; } if (vm.m > 11) { vm.m = 0; vm.y++; } return paint(); }
+      if (d.mark) { const a = att(), k = d.mark + '|' + date; if (!validISO(date)) return; if (a[k] === d.s) delete a[k]; else a[k] = d.s; if (!hrWr('attendance', a)) fail(); return paint(); }
+      if (d.all) { const a = att(); emps().filter((e) => hrActive(e, date)).forEach((e) => { const k = e.id + '|' + date; if (!a[k]) a[k] = d.all; }); if (!hrWr('attendance', a)) fail(); return paint(); }
+      if (d.cell) { const a = att(), cur = a[d.cell] || '', i = HR_ORDER.indexOf(cur), nx = i + 1 >= HR_ORDER.length ? '' : HR_ORDER[i + 1]; if (nx) a[d.cell] = nx; else delete a[d.cell]; if (!hrWr('attendance', a)) fail(); return paint(); }
+      if (d.new) { edit = { id: '', name: '' }; return paint(); }
+      if (d.edit) { edit = Object.assign({}, emps().find((e) => e.id === d.edit)); return paint(); }
+      if (d.cancel) { edit = null; return paint(); }
+      if (d.save) return saveEmp();
+      if (d.left) { const e = emps().find((x) => x.id === d.left); if (!e || !confirm(e.name + ' — ' + B('விலகினார் என்று குறிக்கவா? (பழைய மாத அறிக்கையில் தொடர்ந்து தெரிவார்)', 'Mark as left? (they stay in the months they worked)'))) return; const all = emps().map((x) => (x.id === e.id ? Object.assign({}, x, { leftDate: today }) : x)); if (!hrWr('employees', all)) fail(); return paint(); }
+      if (d.rejoin) { const all = emps().map((x) => { if (x.id !== d.rejoin) return x; const y = Object.assign({}, x); delete y.leftDate; return y; }); if (!hrWr('employees', all)) fail(); return paint(); }
+      if (d.purge) { const e = emps().find((x) => x.id === d.purge); if (!e || !confirm(e.name + ' — ' + B('நிரந்தரமாக நீக்கவா? இவரது எல்லா வருகைப் பதிவும் அழியும்; மீட்க முடியாது.', 'Delete permanently? All their attendance will be erased and cannot be recovered.'))) return; hrWr('employees', emps().filter((x) => x.id !== e.id)); const a = att(); Object.keys(a).forEach((k) => { if (k.startsWith(e.id + '|')) delete a[k]; }); hrWr('attendance', a); return paint(); }
+      if (d.savesettings) { const s = { company: host.querySelector('#hrCo').value.trim(), divisor: host.querySelector('#hrDiv').value }; if (hrWr('settings', s)) msg('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); else msg('data', 'err', B('சேமிக்க முடியவில்லை', 'Could not save')); return; }
+      if (d.backup) { const blob = new Blob([JSON.stringify({ app: 'pti-hr-register', v: 1, saved: new Date().toISOString(), employees: emps(), attendance: att(), settings: settings() }, null, 1)], { type: 'application/json' }); downloadBlob(blob, 'HR-register-backup-' + today + '.json'); return msg('data', 'ok', '✓ ' + B('Backup பதிவிறக்கப்பட்டது', 'Backup downloaded')); }
+      if (d.restore) return host.querySelector('#hrFile').click();
+      if (d.exp) return exportMonth(d.exp);
+    });
+    host.addEventListener('change', async (ev) => {
+      const t = ev.target;
+      if (t.hasAttribute && t.hasAttribute('data-date')) { if (validISO(t.value)) { date = t.value; paint(); } return; }
+      if (t.id === 'hrFile' && t.files[0]) {
+        try {
+          const j = JSON.parse(await t.files[0].text());
+          if (j.app !== 'pti-hr-register' || !Array.isArray(j.employees) || typeof j.attendance !== 'object') throw new Error('bad');
+          if (!confirm(B('இந்த Backup-ஐ restore செய்தால் தற்போதைய தரவு மாற்றப்படும் (' + j.employees.length + ' பணியாளர்). தொடரவா?', 'Restoring replaces the current data (' + j.employees.length + ' employees). Continue?'))) return;
+          hrWr('employees', j.employees); hrWr('attendance', j.attendance); if (j.settings) hrWr('settings', j.settings); paint(); msg('data', 'ok', '✓ ' + B('Restore முடிந்தது', 'Restored'));
+        } catch (e) { msg('data', 'err', B('இது சரியான Backup கோப்பு அல்ல', 'This is not a valid backup file')); }
+        t.value = '';
+      }
+    });
+    function saveEmp() {
+      const g = (id) => host.querySelector('#' + id).value.trim(), name = g('hrName'), join = g('hrJoin'), left = g('hrLeft'), sal = g('hrSal');
+      const errs = []; if (!name) errs.push(B('பெயர் தேவை', 'Name is required')); if (join && !validISO(join)) errs.push(B('சேர்ந்த நாள் தவறு', 'Join date is not valid')); if (left && !validISO(left)) errs.push(B('விலகிய நாள் தவறு', 'Left date is not valid')); if (join && left && left < join) errs.push(B('விலகிய நாள் சேர்ந்த நாளுக்கு முன் உள்ளது', 'Left date is before the join date')); if (sal && !(num(sal) >= 0)) errs.push(B('சம்பளம் தவறு', 'Pay is not valid'));
+      const all = emps(); if (!errs.length && all.some((e) => e.id !== edit.id && e.name.trim().toLowerCase() === name.toLowerCase()) && !confirm(name + ' — ' + B('இதே பெயரில் ஏற்கெனவே ஒருவர் உள்ளார். மீண்டும் சேர்க்கவா?', 'Someone with this name already exists. Add anyway?'))) return;
+      if (errs.length) return msg('form', 'err', errs.map(esc).join('<br>'));
+      const rec = Object.assign({}, edit, { name, role: g('hrRole'), phone: g('hrPhone'), joinDate: join || today, salary: sal, basis: host.querySelector('#hrBasis').value }); if (left) rec.leftDate = left; else delete rec.leftDate;
+      const next = edit.id ? all.map((e) => (e.id === edit.id ? rec : e)) : all.concat([Object.assign(rec, { id: hrUid() })]);
+      if (!hrWr('employees', next)) { fail(); } edit = null; paint();
+    }
+    async function exportMonth(kind) {
+      const S = settings(), E = emps(), A = att(), n = new Date(vm.y, vm.m + 1, 0).getDate(), list = E.filter((e) => (!e.joinDate || e.joinDate <= isoOf(vm.y, vm.m, n)) && (!e.leftDate || e.leftDate >= isoOf(vm.y, vm.m, 1)));
+      if (!list.length) return; const title = (S.company ? S.company + ' — ' : '') + 'வருகைப் பதிவேடு / Attendance Register — ' + MON_TA[vm.m] + ' / ' + MON_EN[vm.m] + ' ' + vm.y;
+      const rows = list.map((e, i) => { const s = hrStats(e, A, vm.y, vm.m, S.divisor); return { e, s, cells: Array.from({ length: n }, (_, d) => { const iso = isoOf(vm.y, vm.m, d + 1); return hrActive(e, iso) ? (A[e.id + '|' + iso] || '') : '–'; }), i }; });
+      const wages = list.some((e) => num(e.salary)), legend = HR_ORDER.map((k) => k + ' = ' + HR_ST[k].en + ' / ' + HR_ST[k].ta).join('    ');
+      try {
+        if (kind === 'xlsx') {
+          if (typeof XLSX === 'undefined') throw new Error('Excel library not loaded');
+          const head = ['#', 'பெயர் / Name', 'பணி / Role'].concat(Array.from({ length: n }, (_, d) => d + 1), HR_ORDER, ['Unmarked', 'Paid days'], wages ? ['Rate ₹/day', 'Wages ₹'] : []);
+          const wdRow = ['', '', ''].concat(Array.from({ length: n }, (_, d) => WD_EN[new Date(vm.y, vm.m, d + 1).getDay()]));
+          const aoa = [[title], wdRow, head].concat(rows.map((r) => [r.i + 1, r.e.name, r.e.role || ''].concat(r.cells, HR_ORDER.map((k) => r.s[k]), [r.s.un, +r.s.paid.toFixed(1)], wages ? [num(r.e.salary) ? +r.s.rate.toFixed(2) : '', num(r.e.salary) ? r.s.wage : ''] : [])), [[]], [[legend]], [[]], [['மேலாளர் கையொப்பம் / Manager signature: ____________________']]);
+          const ws = XLSX.utils.aoa_to_sheet(aoa.map((r) => (Array.isArray(r) ? r : [r]))), tot = head.length;
+          ws['!cols'] = [{ wch: 4 }, { wch: 22 }, { wch: 14 }].concat(Array(n).fill({ wch: 3.6 }), Array(6).fill({ wch: 4.5 }), [{ wch: 9 }, { wch: 9 }], wages ? [{ wch: 10 }, { wch: 11 }] : []);
+          ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: tot - 1 } }, { s: { r: aoa.length - 3, c: 0 }, e: { r: aoa.length - 3, c: tot - 1 } }, { s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 10 } }];
+          const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, ymOf(vm.y, vm.m)); const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          downloadBlob(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Attendance_' + ymOf(vm.y, vm.m) + '.xlsx');
+        } else {
+          const e = esc, thc = (h) => '<th>' + e(h) + '</th>', css = '@page{size:A4 landscape;margin:10mm}body{font-family:"Noto Sans Tamil",Arial,sans-serif;font-size:9px;color:#111}h1{font-size:14px;margin:0 0 6px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #888;padding:2px 3px;text-align:center}td.l{text-align:left;white-space:nowrap}.sun{background:#ddd}.g{margin-top:8px}';
+          const html = '<!doctype html><meta charset="utf-8"><title>Attendance ' + ymOf(vm.y, vm.m) + '</title><link rel="stylesheet" href="/fonts/tamil.css"><style>' + css + '</style><h1>' + e(title) + '</h1><table><tr><th>#</th><th>Name</th>' + Array.from({ length: n }, (_, d) => '<th class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + (d + 1) + '<br>' + WD_EN[new Date(vm.y, vm.m, d + 1).getDay()][0] + '</th>').join('') + HR_ORDER.map(thc).join('') + thc('Paid') + (wages ? thc('Wages ₹') : '') + '</tr>' +
+            rows.map((r) => '<tr><td>' + (r.i + 1) + '</td><td class="l">' + e(r.e.name) + '</td>' + r.cells.map((c, d) => '<td class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + e(c) + '</td>').join('') + HR_ORDER.map((k) => '<td>' + r.s[k] + '</td>').join('') + '<td><b>' + +r.s.paid.toFixed(1) + '</b></td>' + (wages ? '<td>' + (num(r.e.salary) ? inrPlain(r.s.wage) : '') + '</td>' : '') + '</tr>').join('') + '</table><p class="g">' + e(legend) + '</p><p style="margin-top:34px">மேலாளர் கையொப்பம் / Manager signature: ____________________</p>';
+          const fr = document.createElement('iframe'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr); const dd = fr.contentWindow.document; dd.open(); dd.write(html); dd.close();
+          setTimeout(() => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (x) { /* ignore */ } }, 700); setTimeout(() => fr.remove(), 90000);
+        }
+      } catch (err) { notice = '<div class="dx-err" role="alert">' + esc(err && err.message || err) + '</div>'; paint(); }
+    }
+    window.addEventListener('storage', (ev) => { if (!host.isConnected) return; if (ev.key && ev.key.indexOf('hrreg_') === 0 && !edit && (tab === 'mark' || tab === 'report' || tab === 'staff')) paint(); });
+    paint();
+  }
+  TOOL_IMPL.hrattendance = { mount(container) { mountHR(container); } };
+  TOOL_IMPL.hrattendance._f = { hrStats, hrActive };
+
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
 
