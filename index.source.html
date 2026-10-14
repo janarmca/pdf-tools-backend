@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014j`;
+    s.src = `category-${cat}.js?v=20261014l`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);

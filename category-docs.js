@@ -207,7 +207,7 @@
   function blankDoc(type) {
     const sp = sellerProfile(), T = DOC_TYPES[type], date = localISO();
     return {
-      type,
+      type, lang: 'en',
       from: Object.assign({ name: '', addr: '', gstin: '', pan: '', mobile: '', email: '', state: '' }, sp.from || {}),
       to: { name: '', addr: '', gstin: '', mobile: '', state: '' },
       meta: { no: nextNo(type, date), date, due: '', poRef: '', vehicle: '', taxMode: 'auto', inclusive: !!T.inclusive, roundOff: true, advance: '', notes: '' },
@@ -249,7 +249,7 @@
         (t.taxed ? '<div style="margin-top:8px"><label>GST %</label><select data-i="' + i + '" data-f="gst">' + GST_RATES.map((g) => '<option value="' + g + '"' + (num(it.gst) === g ? ' selected' : '') + '>' + g + '%' + ([12, 28].includes(g) ? ' (' + B('பழைய விகிதம்', 'old rate') + ')' : g === 40 ? ' (' + B('ஆடம்பரம்', 'luxury / sin') + ')' : g === 3 ? ' (' + B('தங்கம்', 'gold') + ')' : '') + '</option>').join('') + '</select></div>' : '') + '</div>').join('');
       host.innerHTML =
         '<div class="dx-note">' + esc(isEn() ? 'Fill it once — your business details, bank and terms are remembered on this phone. PDF, Excel, Word, print and WhatsApp share are all available.' : 'ஒருமுறை நிரப்புங்கள் — உங்கள் நிறுவன விவரம், வங்கி, நிபந்தனைகள் இந்த phone-லேயே நினைவில் இருக்கும். PDF, Excel, Word, அச்சு, WhatsApp எல்லாம் உண்டு.') + '</div>' +
-        typeSel +
+        typeSel + '<div class="dx-f"><label>' + B('ஆவண மொழி (அச்சு / PDF / Excel / Word)', 'Document language (print / PDF / Excel / Word)') + '</label><select data-p="lang">' + [['en', 'English'], ['ta', 'தமிழ்'], ['bi', 'தமிழ் + English']].map((o) => '<option value="' + o[0] + '"' + ((S.lang || 'en') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
         '<details' + (S.from.name ? '' : ' open') + '><summary>' + esc(t.from[isEn() ? 1 : 0]) + (S.from.name ? ' — ' + esc(S.from.name) : '') + '</summary>' +
         fld(B('நிறுவனப் பெயர்', 'Business name'), 'from.name') + fld(B('முகவரி', 'Address'), 'from.addr', { area: 2 }) +
         '<div class="dx-grid"><div>' + fld('GSTIN', 'from.gstin', { ph: '33AAAAA0000A1Z5', hint: 'hFromGstin' }) + '</div><div>' + fld('PAN', 'from.pan', { ph: 'AAAAA0000A', hint: 'hFromPan' }) + '</div></div>' +
@@ -344,8 +344,8 @@
 
     /* ---- validation + model ---- */
     function model() {
-      const t = T(), c = calc(), i = inter();
-      return { S: JSON.parse(JSON.stringify(S)), t, c, inter: i, taxed: t.taxed, amounts: t.amounts, title: t.en.toUpperCase() };
+      const t = T(), c = calc(), i = inter(); OL = S.lang === 'ta' || S.lang === 'bi' ? S.lang : 'en';
+      return { S: JSON.parse(JSON.stringify(S)), t, c, inter: i, taxed: t.taxed, amounts: t.amounts, title: OL === 'ta' ? t.ta : OL === 'bi' ? t.en.toUpperCase() + ' / ' + t.ta : t.en.toUpperCase() };
     }
     function problems() {
       const t = T(), errs = [], warns = [];
@@ -395,15 +395,25 @@
   }
 
   /* ---- shared pieces of the model for every output ---- */
+  /* ---- output language: English / Tamil / both. LB() translates a fixed label; user-typed text is never touched ---- */
+  let OL = 'en';
+  const TA_LAB = {"Description": "விவரம்", "Qty": "எண்", "Unit": "அலகு", "HSN/SAC": "HSN/SAC", "Rate": "விலை", "Rate (incl.)": "விலை (GST உட்பட)", "Disc%": "தள்ளுபடி %", "Taxable": "வரிக்குட்பட்டது", "GST%": "GST %", "Amount": "தொகை", "Date": "தேதி", "Customer PO": "வாடிக்கையாளர் PO", "Vehicle no.": "வாகன எண்", "Place of supply": "விநியோக இடம்", "Reverse charge": "தலைகீழ் வரி", "Taxable value": "வரிக்குட்பட்ட மதிப்பு", "Sub-total": "துணைக் கூட்டு", "Round off": "முழுமையாக்கல்", "GRAND TOTAL": "மொத்தத் தொகை", "Advance received": "பெற்ற முன்பணம்", "BALANCE DUE": "நிலுவைத் தொகை", "AMOUNT IN WORDS": "எழுத்தில் தொகை", "Amount in words": "எழுத்தில் தொகை", "Bank details": "வங்கி விவரம்", "Terms & conditions": "விதிமுறைகள்", "Notes": "குறிப்புகள்", "Authorised Signatory": "அங்கீகரிக்கப்பட்ட கையொப்பம்", "Receiver's signature & stamp": "பெறுநர் கையொப்பம் & முத்திரை", "Scan to pay (UPI)": "UPI-ல் செலுத்த ஸ்கேன் செய்க", "Total tax": "மொத்த வரி", "Tax summary": "வரி சுருக்கம்", "Tax summary (HSN / SAC and rate wise)": "வரி சுருக்கம் (HSN / SAC, விகிதவாரி)", "IGST %": "IGST %", "IGST amount": "IGST தொகை", "CGST %": "CGST %", "CGST amount": "CGST தொகை", "CGST amt": "CGST தொகை", "SGST %": "SGST %", "SGST amount": "SGST தொகை", "SGST amt": "SGST தொகை", "Name": "பெயர்", "Bank": "வங்கி", "A/c no.": "கணக்கு எண்", "State": "மாநிலம்", "Mob": "கைபேசி", "Rates entered include GST; the Taxable and Amount columns show the split.": "உள்ளிட்ட விலையில் GST சேர்ந்துள்ளது; வரிக்குட்பட்டது, தொகை பத்திகள் பிரிப்பைக் காட்டும்."};
+  const LB = (en) => { if (OL === 'en') return en; const t = TA_LAB[en]; if (!t || t === en) return en; return OL === 'ta' ? t : en + ' / ' + t; };
+  const lang3 = (en, ta) => (OL === 'en' ? en : OL === 'ta' ? ta : en + ' / ' + ta);
+  const forLbl = (n) => (OL === 'en' ? 'For ' + n : OL === 'ta' ? n + ' சார்பாக' : 'For ' + n + ' / சார்பாக');
+  const toLbl = (m, plain) => { const a = m.t.to[0], b = m.t.to[1]; const r = OL === 'ta' ? a : OL === 'bi' ? b + ' / ' + a : b; return plain ? r : r.toUpperCase(); };
+  const DEFAULT_TERMS_TA = 'விற்ற பொருட்கள் திரும்பப் பெறப்படவோ மாற்றப்படவோ மாட்டாது.\nஒப்புக்கொண்டபடி பணம் செலுத்த வேண்டும்; தாமதமானால் வட்டி விதிக்கப்படலாம்.\nஎல்லா தகராறுகளும் உள்ளூர் நீதிமன்ற அதிகார எல்லைக்கு உட்பட்டவை.';
+  const termsFor = (S) => { const t = String(S.terms || ''); if (OL !== 'en' && t.trim() === DEFAULT_TERMS.trim()) return OL === 'ta' ? DEFAULT_TERMS_TA : DEFAULT_TERMS + '\n' + DEFAULT_TERMS_TA; return t; };
+
   function bizCols(m) {
     const rows = m.c.rows, anyDisc = rows.some((r) => r.disc > 0);
-    if (!m.amounts) return [{ k: 'n', l: '#', w: 20, a: 'l' }, { k: 'desc', l: 'Description', w: 0, a: 'l' }, { k: 'hsn', l: 'HSN/SAC', w: 60, a: 'l' }, { k: 'qty', l: 'Qty', w: 50, a: 'r' }, { k: 'unit', l: 'Unit', w: 50, a: 'l' }];
-    const cols = [{ k: 'n', l: '#', w: 18, a: 'l' }, { k: 'desc', l: 'Description', w: 0, a: 'l' }];
+    if (!m.amounts) return [{ k: 'n', l: '#', w: 20, a: 'l' }, { k: 'desc', l: LB('Description'), w: 0, a: 'l' }, { k: 'hsn', l: 'HSN/SAC', w: 60, a: 'l' }, { k: 'qty', l: LB('Qty'), w: 50, a: 'r' }, { k: 'unit', l: LB('Unit'), w: 50, a: 'l' }];
+    const cols = [{ k: 'n', l: '#', w: 18, a: 'l' }, { k: 'desc', l: LB('Description'), w: 0, a: 'l' }];
     if (m.taxed) cols.push({ k: 'hsn', l: 'HSN/SAC', w: 46, a: 'l' });
-    cols.push({ k: 'qty', l: 'Qty', w: 32, a: 'r' }, { k: 'unit', l: 'Unit', w: 32, a: 'l' }, { k: 'rate', l: m.S.meta.inclusive && m.taxed ? 'Rate (incl.)' : 'Rate', w: 52, a: 'r' });
-    if (anyDisc) cols.push({ k: 'disc', l: 'Disc%', w: 30, a: 'r' });
-    if (m.taxed) cols.push({ k: 'taxable', l: 'Taxable', w: 58, a: 'r' }, { k: 'gst', l: 'GST%', w: 30, a: 'r' });
-    cols.push({ k: 'amount', l: 'Amount', w: 60, a: 'r' });
+    cols.push({ k: 'qty', l: LB('Qty'), w: 32, a: 'r' }, { k: 'unit', l: LB('Unit'), w: 32, a: 'l' }, { k: 'rate', l: m.S.meta.inclusive && m.taxed ? LB('Rate (incl.)') : LB('Rate'), w: 52, a: 'r' });
+    if (anyDisc) cols.push({ k: 'disc', l: LB('Disc%'), w: 30, a: 'r' });
+    if (m.taxed) cols.push({ k: 'taxable', l: LB('Taxable'), w: 58, a: 'r' }, { k: 'gst', l: LB('GST%'), w: 30, a: 'r' });
+    cols.push({ k: 'amount', l: LB('Amount'), w: 60, a: 'r' });
     return cols;
   }
   function bizCell(k, r, i) {
@@ -415,15 +425,15 @@
   }
   const showTaxSummary = (m) => m.taxed && m.c.summary.some((g) => g.gst > 0);
   function metaPairs(m) {
-    const S = m.S, p = [[m.t.en + ' No', S.meta.no], ['Date', fmtDMY(S.meta.date)]];
-    if (m.t.due[0] && S.meta.due) p.push([m.t.due[1], fmtDMY(S.meta.due)]);
-    if (S.meta.poRef) p.push(['Customer PO', S.meta.poRef]);
-    if (S.meta.vehicle) p.push(['Vehicle no.', S.meta.vehicle]);
-    if (m.taxed && S.to.state) p.push(['Place of supply', stateLabel(S.to.state)]);
-    if (S.type === 'tax') p.push(['Reverse charge', 'No']);
+    const S = m.S, p = [[lang3(m.t.en + ' No', m.t.ta + ' எண்'), S.meta.no], [LB('Date'), fmtDMY(S.meta.date)]];
+    if (m.t.due[0] && S.meta.due) p.push([lang3(m.t.due[1], m.t.due[0]), fmtDMY(S.meta.due)]);
+    if (S.meta.poRef) p.push([LB('Customer PO'), S.meta.poRef]);
+    if (S.meta.vehicle) p.push([LB('Vehicle no.'), S.meta.vehicle]);
+    if (m.taxed && S.to.state) p.push([LB('Place of supply'), stateLabel(S.to.state)]);
+    if (S.type === 'tax') p.push([LB('Reverse charge'), 'No']);
     return p.filter((x) => x[1]);
   }
-  const partyLines = (p, taxed) => [p.gstin ? 'GSTIN: ' + p.gstin : '', p.pan ? 'PAN: ' + p.pan : '', p.state && taxed ? 'State: ' + stateLabel(p.state) : '', [p.mobile ? 'Mob: ' + p.mobile : '', p.email ? p.email : ''].filter(Boolean).join('   ')].filter(Boolean);
+  const partyLines = (p, taxed) => [p.gstin ? 'GSTIN: ' + p.gstin : '', p.pan ? 'PAN: ' + p.pan : '', p.state && taxed ? LB('State') + ': ' + stateLabel(p.state) : '', [p.mobile ? LB('Mob') + ': ' + p.mobile : '', p.email ? p.email : ''].filter(Boolean).join('   ')].filter(Boolean);
 
   /* ---- PDF ---- */
   async function bizPdf(m) {
@@ -453,11 +463,11 @@
     partyLines(S.from, m.taxed).forEach((ln) => { txt(ln, MX, ly, 8.5); ly -= 11; });
     const RX = MX + 305, RW = W - MX - RX; let ry = topY + 6; const facts = metaPairs(m);
     page.drawRectangle({ x: RX - 6, y: ry - facts.length * 14 - 2, width: RW + 6, height: facts.length * 14 + 8, color: HD });
-    facts.forEach((f) => { txt(f[0], RX, ry - 8, 8.5, GR); const lines = wrap(f[1], 9, RW - 92, 1); txt(lines[0], RX + 92, ry - 8, 9); ry -= 14; });
+    const LC = OL === 'en' ? 92 : 122; facts.forEach((f) => { const ls = Math.min(8.5, 8.5 * (LC - 6) / Math.max(1, wid(f[0], 8.5))); txt(f[0], RX, ry - 8, ls, GR); const lines = wrap(f[1], 9, RW - LC, 1); txt(lines[0], RX + LC, ry - 8, 9); ry -= 14; });
     y = Math.min(ly, ry - 10) - 8; hline(y); y -= 16;
 
     // bill to
-    txt(m.t.to[1].toUpperCase(), MX, y, 8, GR); y -= 13;
+    txt(toLbl(m), MX, y, 8, GR); y -= 13;
     wrap(S.to.name || '—', 11, 330, 2).forEach((ln) => { bold(ln, MX, y, 11); y -= 14; });
     wrap(S.to.addr, 8.5, 330, 4).forEach((ln) => { txt(ln, MX, y, 8.5, GR); y -= 11; });
     partyLines(S.to, m.taxed).forEach((ln) => { txt(ln, MX, y, 8.5); y -= 11; });
@@ -466,7 +476,8 @@
     // items table
     const cols = bizCols(m), fixed = cols.reduce((a, k) => a + k.w, 0), dw = CW - fixed; cols.forEach((k) => { if (!k.w) k.w = dw; });
     let cx = MX; cols.forEach((k) => { k.x = cx; cx += k.w; });
-    const head = () => { page.drawRectangle({ x: MX, y: y - 15, width: CW, height: 17, color: HD }); cols.forEach((k) => { const l = k.l; if (k.a === 'r') rtxt(l, k.x + k.w - 3, y - 10, 8, BR); else txt(l, k.x + 3, y - 10, 8, BR); }); y -= 19; };
+    const hcell = (label, x, w, a, yy) => { const parts = OL === 'bi' ? String(label).split(' / ') : [label]; parts.forEach((pt, pi) => { const s0 = parts.length > 1 ? (pi ? 6.5 : 8) : 8, sz = Math.min(s0, s0 * (w - 6) / Math.max(1, wid(pt, s0))); if (a === 'r') rtxt(pt, x + w - 3, yy - pi * 9, sz, BR); else txt(pt, x + 3, yy - pi * 9, sz, BR); }); };
+    const head = () => { const hh = OL === 'bi' ? 26 : 17; page.drawRectangle({ x: MX, y: y - hh + 2, width: CW, height: hh, color: HD }); cols.forEach((k) => hcell(k.l, k.x, k.w, k.a, y - 10)); y -= hh + 2; };
     ensure(60); head();
     c.rows.forEach((r, i) => {
       const dcol = cols.find((k) => k.k === 'desc'), dl = wrap(r.desc, 8.5, dcol.w - 8, 5), rh = Math.max(dl.length * 10.5, 11) + 6;
@@ -477,15 +488,15 @@
       });
       y -= rh; hline(y + 2, MX, W - MX, 0.4);
     });
-    if (m.taxed && S.meta.inclusive) { y -= 11; txt('Rates entered include GST; the Taxable and Amount columns show the split.', MX, y, 7.5, GR); }
+    if (m.taxed && S.meta.inclusive) { y -= 11; txt(LB('Rates entered include GST; the Taxable and Amount columns show the split.'), MX, y, 7.5, GR); }
     y -= 14;
 
     // HSN / rate-wise tax summary
     if (showTaxSummary(m)) {
-      const head2 = m.inter ? [['HSN/SAC', 110, 'l'], ['Taxable value', 100, 'r'], ['IGST %', 70, 'r'], ['IGST amount', 110, 'r'], ['Total tax', 133, 'r']]
-        : [['HSN/SAC', 90, 'l'], ['Taxable value', 90, 'r'], ['CGST %', 52, 'r'], ['CGST amt', 72, 'r'], ['SGST %', 52, 'r'], ['SGST amt', 72, 'r'], ['Total tax', 95, 'r']];
-      const hs = () => { let x = MX; page.drawRectangle({ x: MX, y: y - 14, width: CW, height: 16, color: HD }); head2.forEach((h) => { if (h[2] === 'r') rtxt(h[0], x + h[1] - 3, y - 9, 8, BR); else txt(h[0], x + 3, y - 9, 8, BR); x += h[1]; }); y -= 18; };
-      ensure(70); bold('Tax summary (HSN / SAC and rate wise)', MX, y, 9, BR); y -= 14; hs();
+      const head2 = m.inter ? [['HSN/SAC', 110, 'l'], [LB('Taxable value'), 100, 'r'], ['IGST %', 70, 'r'], [LB('IGST amount'), 110, 'r'], [LB('Total tax'), 133, 'r']]
+        : [['HSN/SAC', 90, 'l'], [LB('Taxable value'), 90, 'r'], ['CGST %', 52, 'r'], [LB('CGST amt'), 72, 'r'], ['SGST %', 52, 'r'], [LB('SGST amt'), 72, 'r'], [LB('Total tax'), 95, 'r']];
+      const hs = () => { let x = MX; const hh = OL === 'bi' ? 25 : 16; page.drawRectangle({ x: MX, y: y - hh + 2, width: CW, height: hh, color: HD }); head2.forEach((h) => { hcell(h[0], x, h[1], h[2], y - 9); x += h[1]; }); y -= hh + 2; };
+      ensure(70); bold(LB('Tax summary (HSN / SAC and rate wise)'), MX, y, 9, BR); y -= 14; hs();
       c.summary.filter((g) => g.gst > 0 || c.summary.length === 1).forEach((g) => {
         ensure(16, hs);
         const vals = m.inter ? [g.hsn, inrPlain(P(g.taxable)), String(g.gst), inrPlain(P(g.igst)), inrPlain(P(g.tax))]
@@ -500,18 +511,18 @@
       // totals (right) beside words / bank / QR (left)
       ensure(130);
       const TX = MX + 300, TW = W - MX - TX; let ty = y;
-      const trow = (l, v, strong) => { if (strong) { page.drawRectangle({ x: TX - 4, y: ty - 18, width: TW + 4, height: 22, color: HD }); bold(l, TX, ty - 10, 10.5, BR); const vs = '₹' + inrPlain(v); const w = wid(vs, 11); bold(vs, W - MX - 3 - w, ty - 10, 11, BR); ty -= 24; } else { txt(l, TX, ty - 8, 9, GR); rtxt(inrPlain(v), W - MX - 3, ty - 8, 9); ty -= 15; } };
-      trow(m.taxed ? 'Taxable value' : 'Sub-total', P(c.taxable));
+      const trow = (l, v, strong) => { if (strong) { page.drawRectangle({ x: TX - 4, y: ty - 18, width: TW + 4, height: 22, color: HD }); const lsz = Math.min(10.5, 10.5 * (TW - 82) / Math.max(1, wid(l, 10.5))); bold(l, TX, ty - 10, lsz, BR); const vs = '₹' + inrPlain(v); const w = wid(vs, 11); bold(vs, W - MX - 3 - w, ty - 10, 11, BR); ty -= 24; } else { txt(l, TX, ty - 8, Math.min(9, 9 * (TW - 70) / Math.max(1, wid(l, 9))), GR); rtxt(inrPlain(v), W - MX - 3, ty - 8, 9); ty -= 15; } };
+      trow(m.taxed ? LB('Taxable value') : LB('Sub-total'), P(c.taxable));
       if (m.taxed && c.tax) { if (m.inter) trow('IGST', P(c.igst)); else { trow('CGST', P(c.cgst)); trow('SGST', P(c.sgst)); } }
-      if (c.roundOff) trow('Round off', P(c.roundOff));
-      trow('GRAND TOTAL', P(c.grand), true);
-      if (c.advance) { trow('Advance received', -P(c.advance)); trow('BALANCE DUE', P(c.balance), true); }
+      if (c.roundOff) trow(LB('Round off'), P(c.roundOff));
+      trow(LB('GRAND TOTAL'), P(c.grand), true);
+      if (c.advance) { trow(LB('Advance received'), -P(c.advance)); trow(LB('BALANCE DUE'), P(c.balance), true); }
       let ly2 = y;
-      txt('AMOUNT IN WORDS', MX, ly2 - 8, 8, GR); ly2 -= 20;
-      wrap('Rupees ' + words(P(c.grand)) + ' Only', 9.5, 270, 4).forEach((ln) => { bold(ln, MX, ly2, 9.5); ly2 -= 13; });
+      txt(LB('AMOUNT IN WORDS'), MX, ly2 - 8, 8, GR); ly2 -= 20;
+      rcWords(OL, P(c.grand)).flatMap((w) => wrap(w, 9.5, 270, 4)).forEach((ln) => { bold(ln, MX, ly2, 9.5); ly2 -= 13; });
       y = Math.min(ly2, ty) - 12;
       if (S.bank.acc || S.bank.name || S.bank.upi) {
-        const bl = [['Name', S.bank.name], ['Bank', S.bank.bank], ['A/c no.', S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).flatMap((p) => wrap(p[0] + ': ' + p[1], 8.5, 330, 2));
+        const bl = [[LB('Name'), S.bank.name], [LB('Bank'), S.bank.bank], [LB('A/c no.'), S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).flatMap((p) => wrap(p[0] + ': ' + p[1], 8.5, 330, 2));
         let qr = null;
         if (S.bank.upi && c.balance > 0) {
           const amt = P(c.advance ? c.balance : c.grand);
@@ -519,24 +530,24 @@
           if (url) qr = await doc.embedPng(dataUrlBytes(url));
         }
         const need = Math.max(30 + bl.length * 11, qr ? 90 : 0); ensure(need);
-        bold('Bank details', MX, y, 9, BR); let by = y - 13; bl.forEach((ln) => { txt(ln, MX, by, 8.5); by -= 11; });
-        if (qr) { page.drawImage(qr, { x: W - MX - 70, y: y - 70, width: 70, height: 70 }); const lw = wid('Scan to pay (UPI)', 7.5); txt('Scan to pay (UPI)', W - MX - 35 - lw / 2, y - 80, 7.5, GR); }
+        bold(LB('Bank details'), MX, y, 9, BR); let by = y - 13; bl.forEach((ln) => { txt(ln, MX, by, 8.5); by -= 11; });
+        if (qr) { page.drawImage(qr, { x: W - MX - 70, y: y - 70, width: 70, height: 70 }); const ssz = Math.min(7.5, 7.5 * 150 / Math.max(1, wid(LB('Scan to pay (UPI)'), 7.5))), lw = wid(LB('Scan to pay (UPI)'), ssz); txt(LB('Scan to pay (UPI)'), W - MX - lw, y - 80, ssz, GR); }
         y = Math.min(by, qr ? y - 86 : by) - 8;
       }
     }
 
-    const termLines = String(S.terms || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    if (termLines.length) { ensure(30 + termLines.length * 10); bold('Terms & conditions', MX, y, 9, BR); y -= 12; termLines.forEach((tl, i) => { wrap((i + 1) + '. ' + tl, 8, CW, 3).forEach((ln) => { ensure(11); txt(ln, MX, y, 8, GR); y -= 10.5; }); }); y -= 6; }
-    if (S.meta.notes && S.meta.notes.trim()) { ensure(30); bold('Notes', MX, y, 9, BR); y -= 12; wrap(S.meta.notes, 8.5, CW, 6).forEach((ln) => { ensure(11); txt(ln, MX, y, 8.5, GR); y -= 11; }); y -= 6; }
+    const termLines = termsFor(S).split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    if (termLines.length) { ensure(30 + termLines.length * 10); bold(LB('Terms & conditions'), MX, y, 9, BR); y -= 12; termLines.forEach((tl, i) => { wrap((i + 1) + '. ' + tl, 8, CW, 3).forEach((ln) => { ensure(11); txt(ln, MX, y, 8, GR); y -= 10.5; }); }); y -= 6; }
+    if (S.meta.notes && S.meta.notes.trim()) { ensure(30); bold(LB('Notes'), MX, y, 9, BR); y -= 12; wrap(S.meta.notes, 8.5, CW, 6).forEach((ln) => { ensure(11); txt(ln, MX, y, 8.5, GR); y -= 11; }); y -= 6; }
 
     ensure(80); y -= 8;
     const sx = W - MX - 190;
-    txt('For ' + (S.from.name || ''), sx, y, 8.5, GR); hline(y - 50, sx, W - MX, 0.6, GR);
-    txt('Authorised Signatory' + (S.signatory ? ' — ' + S.signatory : ''), sx, y - 61, 8.5, GR);
-    if (S.type === 'challan') { hline(y - 50, MX, MX + 190, 0.6, GR); txt("Receiver's signature & stamp", MX, y - 61, 8.5, GR); }
+    txt(forLbl(S.from.name || ''), sx, y, 8.5, GR); hline(y - 50, sx, W - MX, 0.6, GR);
+    { const sg = LB('Authorised Signatory') + (S.signatory ? ' — ' + S.signatory : ''); txt(sg, sx, y - 61, Math.min(8.5, 8.5 * 190 / Math.max(1, wid(sg, 8.5))), GR); }
+    if (S.type === 'challan') { hline(y - 50, MX, MX + 190, 0.6, GR); { const rs = LB("Receiver's signature & stamp"); txt(rs, MX, y - 61, Math.min(8.5, 8.5 * 190 / Math.max(1, wid(rs, 8.5))), GR); } }
 
     pages.forEach((pg, i) => {
-      const f = m.t.en + ' ' + (S.meta.no || '') + '   ·   Page ' + (i + 1) + ' of ' + pages.length, w = wid(f, 7.5);
+      const f = (OL === 'ta' ? m.t.ta : OL === 'bi' ? m.t.en + ' / ' + m.t.ta : m.t.en) + ' ' + (S.meta.no || '') + '   ·   ' + lang3('Page', 'பக்கம்') + ' ' + (i + 1) + ' / ' + pages.length, w = wid(f, 7.5);
       pg.drawText(L(f), { x: (W - w) / 2, y: 22, size: 7.5, font, color: GR });
       pg.drawText('pdftoolsindia.com', { x: W - MX - wid('pdftoolsindia.com', 7), y: 22, size: 7, font, color: rgb(0.6, 0.62, 0.68) });
     });
@@ -552,7 +563,7 @@
     partyLines(S.from, m.taxed).forEach((l) => add(l));
     add();
     metaPairs(m).forEach((p) => add(p[0], p[1]));
-    add(); add(m.t.to[1].toUpperCase()); add(S.to.name); if (S.to.addr) add(S.to.addr); partyLines(S.to, m.taxed).forEach((l) => add(l)); add();
+    add(); add(toLbl(m)); add(S.to.name); if (S.to.addr) add(S.to.addr); partyLines(S.to, m.taxed).forEach((l) => add(l)); add();
     const cols = bizCols(m); add(...cols.map((k) => k.l));
     c.rows.forEach((r, i) => {
       const rr = add(...cols.map((k) => (['qty', 'rate', 'disc', 'taxable', 'gst', 'amount'].includes(k.k) ? (k.k === 'taxable' || k.k === 'amount' ? P(r[k.k]) : k.k === 'rate' ? r.rate : k.k === 'qty' ? r.qty : k.k === 'disc' ? r.disc : r.gst) : bizCell(k.k, r, i))));
@@ -560,23 +571,23 @@
     });
     add();
     if (showTaxSummary(m)) {
-      add('Tax summary');
-      add(...(m.inter ? ['HSN/SAC', 'Taxable value', 'IGST %', 'IGST amount', 'Total tax'] : ['HSN/SAC', 'Taxable value', 'CGST %', 'CGST amount', 'SGST %', 'SGST amount', 'Total tax']));
+      add(LB('Tax summary'));
+      add(...(m.inter ? ['HSN/SAC', LB('Taxable value'), 'IGST %', LB('IGST amount'), LB('Total tax')] : ['HSN/SAC', LB('Taxable value'), 'CGST %', LB('CGST amount'), 'SGST %', LB('SGST amount'), LB('Total tax')]));
       c.summary.forEach((g) => { const rr = add(...(m.inter ? [g.hsn, P(g.taxable), g.gst, P(g.igst), P(g.tax)] : [g.hsn, P(g.taxable), g.gst / 2, P(g.cgst), g.gst / 2, P(g.sgst), P(g.tax)])); [1, 3, 5, 6].forEach((ci) => money(rr, ci)); });
       add();
     }
     if (m.amounts) {
       const tr = (l, v) => { const rr = add(l, P(v)); money(rr, 1); };
-      tr(m.taxed ? 'Taxable value' : 'Sub-total', c.taxable);
+      tr(m.taxed ? LB('Taxable value') : LB('Sub-total'), c.taxable);
       if (m.taxed && c.tax) { if (m.inter) tr('IGST', c.igst); else { tr('CGST', c.cgst); tr('SGST', c.sgst); } }
-      if (c.roundOff) tr('Round off', c.roundOff);
-      tr('GRAND TOTAL', c.grand);
-      if (c.advance) { tr('Advance received', -c.advance); tr('BALANCE DUE', c.balance); }
-      add('Amount in words', 'Rupees ' + words(P(c.grand)) + ' Only'); add();
+      if (c.roundOff) tr(LB('Round off'), c.roundOff);
+      tr(LB('GRAND TOTAL'), c.grand);
+      if (c.advance) { tr(LB('Advance received'), -c.advance); tr(LB('BALANCE DUE'), c.balance); }
+      add(LB('Amount in words'), rcWords(OL, P(c.grand)).join('  /  ')); add();
     }
-    if (S.bank.acc || S.bank.name || S.bank.upi) { add('Bank details'); [['Name', S.bank.name], ['Bank', S.bank.bank], ['A/c no.', S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).forEach((p) => add(p[0], p[1])); add(); }
-    const tl = String(S.terms || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    if (tl.length) { add('Terms & conditions'); tl.forEach((x, i) => add((i + 1) + '. ' + x)); }
+    if (S.bank.acc || S.bank.name || S.bank.upi) { add(LB('Bank details')); [[LB('Name'), S.bank.name], [LB('Bank'), S.bank.bank], [LB('A/c no.'), S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).forEach((p) => add(p[0], p[1])); add(); }
+    const tl = termsFor(S).split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    if (tl.length) { add(LB('Terms & conditions')); tl.forEach((x, i) => add((i + 1) + '. ' + x)); }
     const ws = XLSX.utils.aoa_to_sheet(rows);
     z.forEach(([r, col, f]) => { const a = XLSX.utils.encode_cell({ r, c: col }); if (ws[a] && ws[a].t === 'n') ws[a].z = f; });
     ws['!cols'] = [{ wch: 6 }, { wch: 40 }, { wch: 12 }, { wch: 10 }, { wch: 9 }, { wch: 13 }, { wch: 9 }, { wch: 14 }, { wch: 8 }, { wch: 14 }];
@@ -597,28 +608,28 @@
     if (S.from.addr) kids.push(Pg(S.from.addr)); partyLines(S.from, m.taxed).forEach((l) => kids.push(Pg(l)));
     kids.push(Pg(''));
     metaPairs(m).forEach((p) => kids.push(Pg(p[0] + ': ' + p[1])));
-    kids.push(Pg('')); kids.push(Pg(m.t.to[1].toUpperCase(), { run: { bold: true, size: 18 } })); kids.push(Pg(S.to.name, { run: { bold: true, size: 24 } }));
+    kids.push(Pg('')); kids.push(Pg(toLbl(m), { run: { bold: true, size: 18 } })); kids.push(Pg(S.to.name, { run: { bold: true, size: 24 } }));
     if (S.to.addr) kids.push(Pg(S.to.addr)); partyLines(S.to, m.taxed).forEach((l) => kids.push(Pg(l)));
     kids.push(Pg('')); kids.push(new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [head, ...body] })); kids.push(Pg(''));
     if (showTaxSummary(m)) {
-      const hd = m.inter ? ['HSN/SAC', 'Taxable value', 'IGST %', 'IGST amount', 'Total tax'] : ['HSN/SAC', 'Taxable value', 'CGST %', 'CGST amount', 'SGST %', 'SGST amount', 'Total tax'];
+      const hd = m.inter ? ['HSN/SAC', LB('Taxable value'), 'IGST %', LB('IGST amount'), LB('Total tax')] : ['HSN/SAC', LB('Taxable value'), 'CGST %', LB('CGST amount'), 'SGST %', LB('SGST amount'), LB('Total tax')];
       const rr = c.summary.map((g) => new D.TableRow({ children: (m.inter ? [g.hsn, inrPlain(P(g.taxable)), g.gst, inrPlain(P(g.igst)), inrPlain(P(g.tax))] : [g.hsn, inrPlain(P(g.taxable)), g.gst / 2, inrPlain(P(g.cgst)), g.gst / 2, inrPlain(P(g.sgst)), inrPlain(P(g.tax))]).map((v, i) => cell(v, { right: i > 0 })) }));
-      kids.push(Pg('Tax summary', { run: { bold: true } })); kids.push(new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [new D.TableRow({ children: hd.map((h, i) => cell(h, { bold: true, right: i > 0 })) }), ...rr] })); kids.push(Pg(''));
+      kids.push(Pg(LB('Tax summary'), { run: { bold: true } })); kids.push(new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [new D.TableRow({ children: hd.map((h, i) => cell(h, { bold: true, right: i > 0 })) }), ...rr] })); kids.push(Pg(''));
     }
     if (m.amounts) {
       const line = (l, v, b) => kids.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [R(l + ': ₹' + inrPlain(P(v)), { bold: !!b, size: b ? 24 : 20 })] }));
-      line(m.taxed ? 'Taxable value' : 'Sub-total', c.taxable);
+      line(m.taxed ? LB('Taxable value') : LB('Sub-total'), c.taxable);
       if (m.taxed && c.tax) { if (m.inter) line('IGST', c.igst); else { line('CGST', c.cgst); line('SGST', c.sgst); } }
-      if (c.roundOff) line('Round off', c.roundOff);
-      line('GRAND TOTAL', c.grand, true);
-      if (c.advance) { line('Advance received', -c.advance); line('BALANCE DUE', c.balance, true); }
-      kids.push(Pg('Amount in words: Rupees ' + words(P(c.grand)) + ' Only', { run: { bold: true } })); kids.push(Pg(''));
+      if (c.roundOff) line(LB('Round off'), c.roundOff);
+      line(LB('GRAND TOTAL'), c.grand, true);
+      if (c.advance) { line(LB('Advance received'), -c.advance); line(LB('BALANCE DUE'), c.balance, true); }
+      kids.push(Pg(LB('Amount in words') + ': ' + rcWords(OL, P(c.grand)).join('  /  '), { run: { bold: true } })); kids.push(Pg(''));
     }
-    if (S.bank.acc || S.bank.name || S.bank.upi) { kids.push(Pg('Bank details', { run: { bold: true } })); [['Name', S.bank.name], ['Bank', S.bank.bank], ['A/c no.', S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).forEach((p) => kids.push(Pg(p[0] + ': ' + p[1]))); kids.push(Pg('')); }
-    const tl = String(S.terms || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    if (tl.length) { kids.push(Pg('Terms & conditions', { run: { bold: true } })); tl.forEach((x, i) => kids.push(Pg((i + 1) + '. ' + x))); kids.push(Pg('')); }
-    kids.push(Pg('')); kids.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [R('For ' + (S.from.name || ''))] }));
-    kids.push(Pg('')); kids.push(Pg('')); kids.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [R('Authorised Signatory' + (S.signatory ? ' — ' + S.signatory : ''))] }));
+    if (S.bank.acc || S.bank.name || S.bank.upi) { kids.push(Pg(LB('Bank details'), { run: { bold: true } })); [[LB('Name'), S.bank.name], [LB('Bank'), S.bank.bank], [LB('A/c no.'), S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).forEach((p) => kids.push(Pg(p[0] + ': ' + p[1]))); kids.push(Pg('')); }
+    const tl = termsFor(S).split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    if (tl.length) { kids.push(Pg(LB('Terms & conditions'), { run: { bold: true } })); tl.forEach((x, i) => kids.push(Pg((i + 1) + '. ' + x))); kids.push(Pg('')); }
+    kids.push(Pg('')); kids.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [R(forLbl(S.from.name || ''))] }));
+    kids.push(Pg('')); kids.push(Pg('')); kids.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [R(LB('Authorised Signatory') + (S.signatory ? ' — ' + S.signatory : ''))] }));
     return await D.Packer.toBlob(new D.Document({ sections: [{ children: kids }] }));
   }
 
@@ -626,18 +637,18 @@
   function bizPrint(m) {
     const S = m.S, c = m.c, e = esc, cols = bizCols(m);
     const rowsHtml = c.rows.map((r, i) => '<tr>' + cols.map((k) => '<td style="text-align:' + (k.a === 'r' ? 'right' : 'left') + '">' + e(bizCell(k.k, r, i)) + '</td>').join('') + '</tr>').join('');
-    const sum = showTaxSummary(m) ? '<h3>Tax summary</h3><table><tr>' + (m.inter ? ['HSN/SAC', 'Taxable value', 'IGST %', 'IGST amount', 'Total tax'] : ['HSN/SAC', 'Taxable value', 'CGST %', 'CGST amount', 'SGST %', 'SGST amount', 'Total tax']).map((h) => '<th>' + h + '</th>').join('') + '</tr>' +
+    const sum = showTaxSummary(m) ? '<h3>' + e(LB('Tax summary')) + '</h3><table><tr>' + (m.inter ? ['HSN/SAC', LB('Taxable value'), 'IGST %', LB('IGST amount'), LB('Total tax')] : ['HSN/SAC', LB('Taxable value'), 'CGST %', LB('CGST amount'), 'SGST %', LB('SGST amount'), LB('Total tax')]).map((h) => '<th>' + h + '</th>').join('') + '</tr>' +
       c.summary.map((g) => '<tr>' + (m.inter ? [g.hsn, inrPlain(P(g.taxable)), g.gst, inrPlain(P(g.igst)), inrPlain(P(g.tax))] : [g.hsn, inrPlain(P(g.taxable)), g.gst / 2, inrPlain(P(g.cgst)), g.gst / 2, inrPlain(P(g.sgst)), inrPlain(P(g.tax))]).map((v, i) => '<td style="text-align:' + (i ? 'right' : 'left') + '">' + e(v) + '</td>').join('') + '</tr>').join('') + '</table>' : '';
-    const tot = m.amounts ? '<table class="tot">' + [[m.taxed ? 'Taxable value' : 'Sub-total', c.taxable]].concat(m.taxed && c.tax ? (m.inter ? [['IGST', c.igst]] : [['CGST', c.cgst], ['SGST', c.sgst]]) : [], c.roundOff ? [['Round off', c.roundOff]] : [], [['GRAND TOTAL', c.grand]], c.advance ? [['Advance received', -c.advance], ['BALANCE DUE', c.balance]] : [])
-      .map((r) => '<tr' + (/TOTAL|BALANCE/.test(r[0]) ? ' class="b"' : '') + '><td>' + r[0] + '</td><td style="text-align:right">₹' + inrPlain(P(r[1])) + '</td></tr>').join('') + '</table><p><b>Rupees ' + e(words(P(c.grand))) + ' Only</b></p>' : '';
+    const tot = m.amounts ? '<table class="tot">' + [[m.taxed ? LB('Taxable value') : LB('Sub-total'), c.taxable]].concat(m.taxed && c.tax ? (m.inter ? [['IGST', c.igst]] : [['CGST', c.cgst], ['SGST', c.sgst]]) : [], c.roundOff ? [[LB('Round off'), c.roundOff]] : [], [[LB('GRAND TOTAL'), c.grand]], c.advance ? [[LB('Advance received'), -c.advance], [LB('BALANCE DUE'), c.balance]] : [])
+      .map((r) => '<tr' + (/TOTAL|BALANCE|மொத்தத் தொகை|நிலுவை/.test(r[0]) ? ' class="b"' : '') + '><td>' + r[0] + '</td><td style="text-align:right">₹' + inrPlain(P(r[1])) + '</td></tr>').join('') + '</table><p><b>' + e(rcWords(OL, P(c.grand)).join(' / ')) + '</b></p>' : '';
     const party = (p) => '<b>' + e(p.name || '—') + '</b><br>' + e(p.addr || '').replace(/\n/g, '<br>') + (partyLines(p, m.taxed).length ? '<br>' + partyLines(p, m.taxed).map(e).join('<br>') : '');
-    const bank = (S.bank.acc || S.bank.name || S.bank.upi) ? '<p><b>Bank details</b><br>' + [['Name', S.bank.name], ['Bank', S.bank.bank], ['A/c no.', S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).map((p) => e(p[0] + ': ' + p[1])).join('<br>') + '</p>' : '';
-    const tl = String(S.terms || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    const bank = (S.bank.acc || S.bank.name || S.bank.upi) ? '<p><b>' + e(LB('Bank details')) + '</b><br>' + [[LB('Name'), S.bank.name], [LB('Bank'), S.bank.bank], [LB('A/c no.'), S.bank.acc], ['IFSC', S.bank.ifsc], ['UPI', S.bank.upi]].filter((p) => p[1]).map((p) => e(p[0] + ': ' + p[1])).join('<br>') + '</p>' : '';
+    const tl = termsFor(S).split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
     const html = '<!doctype html><meta charset="utf-8"><title>' + e(m.t.en + ' ' + S.meta.no) + '</title><link rel="stylesheet" href="/fonts/tamil.css"><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans Tamil",Arial,sans-serif;color:#222;font-size:12px}h1{margin:0 0 6px;color:#28407F;font-size:22px}h3{margin:14px 0 4px;font-size:13px;color:#28407F}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{border:1px solid #bbb;padding:4px 6px;font-size:11.5px;vertical-align:top}th{background:#eaf0ff;text-align:left}.two{display:flex;gap:20px}.two>div{flex:1}table.tot{width:50%;margin-left:auto}table.tot td{border:none;border-bottom:1px solid #ddd}tr.b td{font-weight:800;background:#eaf0ff}</style>' +
-      '<h1>' + e(m.title) + '</h1><div class="two"><div>' + party(S.from) + '</div><div>' + metaPairs(m).map((p) => '<b>' + e(p[0]) + ':</b> ' + e(p[1])).join('<br>') + '</div></div><h3>' + e(m.t.to[1]) + '</h3>' + party(S.to) +
+      '<h1>' + e(m.title) + '</h1><div class="two"><div>' + party(S.from) + '</div><div>' + metaPairs(m).map((p) => '<b>' + e(p[0]) + ':</b> ' + e(p[1])).join('<br>') + '</div></div><h3>' + e(toLbl(m, true)) + '</h3>' + party(S.to) +
       '<table><tr>' + cols.map((k) => '<th style="text-align:' + (k.a === 'r' ? 'right' : 'left') + '">' + e(k.l) + '</th>').join('') + '</tr>' + rowsHtml + '</table>' + sum + tot + bank +
-      (tl.length ? '<p><b>Terms &amp; conditions</b><br>' + tl.map((x, i) => e((i + 1) + '. ' + x)).join('<br>') + '</p>' : '') + (S.meta.notes ? '<p>' + e(S.meta.notes).replace(/\n/g, '<br>') + '</p>' : '') +
-      '<p style="margin-top:50px;text-align:right">For ' + e(S.from.name || '') + '<br><br><br>_______________________<br>Authorised Signatory' + (S.signatory ? ' — ' + e(S.signatory) : '') + '</p>';
+      (tl.length ? '<p><b>' + e(LB('Terms & conditions')) + '</b><br>' + tl.map((x, i) => e((i + 1) + '. ' + x)).join('<br>') + '</p>' : '') + (S.meta.notes ? '<p>' + e(S.meta.notes).replace(/\n/g, '<br>') + '</p>' : '') +
+      '<p style="margin-top:50px;text-align:right">' + e(forLbl(S.from.name || '')) + '<br><br><br>_______________________<br>' + e(LB('Authorised Signatory')) + (S.signatory ? ' — ' + e(S.signatory) : '') + '</p>';
     const fr = document.createElement('iframe'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr);
     const d = fr.contentWindow.document; d.open(); d.write(html); d.close();
     setTimeout(() => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (x) { /* ignore */ } }, 600);
@@ -1162,7 +1173,7 @@
   }
   function blankLv() {
     const me = lsGet(LV_ME, {});
-    return { v: 1, role: 'employee', lang: 'ta', place: me.place || '', date: localISO(), toName: '', org: me.org || '', type: 'Casual Leave', from: localISO(), to: localISO(), half: false, session: 'am', skipSun: false, reason: '', contact: me.contact || '', handover: '', me: Object.assign({ name: '', desig: '', id: '', cls: '', roll: '', parent: '' }, me.me || {}), body: '', edited: false };
+    return { v: 1, role: 'employee', lang: 'ta', place: me.place || '', date: localISO(), toName: '', org: me.org || '', type: 'Casual Leave', from: localISO(), to: localISO(), half: false, session: 'am', skipSun: false, reason: '', contact: me.contact || '', handover: '', me: Object.assign({ name: '', desig: '', id: '', cls: '', roll: '', parent: '' }, me.me || {}), body: '', edited: false, body2: '', edited2: false };
   }
   function mountLeave(container) {
     const host = root(container); let S = lsGet(LV_KEY, null);
@@ -1170,12 +1181,12 @@
     const save = () => lsSet(LV_KEY, S);
     const fld = (label, path, o) => { o = o || {}; return '<div class="dx-f"><label>' + label + '</label>' + (o.area ? '<textarea data-p="' + path + '" rows="' + o.area + '">' + esc(getPath(S, path)) + '</textarea>' : '<input type="' + (o.type || 'text') + '" data-p="' + path + '" value="' + esc(getPath(S, path)) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' autocomplete="off">') + '</div>'; };
     const sel = (label, path, list) => '<div class="dx-f"><label>' + label + '</label><select data-p="' + path + '">' + list.map((o) => '<option value="' + o[0] + '"' + (getPath(S, path) === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>';
-    const regen = () => { if (!S.edited) S.body = leaveBody(S); const b = host.querySelector('[data-p=body]'); if (b && b !== document.activeElement) b.value = S.body; };
+    const regen = () => { const l1 = S.lang === 'en' ? 'en' : 'ta'; if (!S.edited) S.body = leaveBody(Object.assign({}, S, { lang: l1 })); if (S.lang === 'bi' && !S.edited2) S.body2 = leaveBody(Object.assign({}, S, { lang: 'en' })); [['body', S.body], ['body2', S.body2]].forEach((x) => { const b = host.querySelector('[data-p=' + x[0] + ']'); if (b && b !== document.activeElement) b.value = x[1]; }); };
     function paint() {
       regen();
       const emp = S.role === 'employee', stu = S.role === 'student', par = S.role === 'parent';
       host.innerHTML = '<div class="dx-note">📝 ' + B('விவரங்களை நிரப்பினால் கடிதம் தானாக உருவாகும் — நீங்கள் திருத்தலாம்.', 'Fill the details and the letter writes itself — you can edit it.') + '</div>' +
-        '<div class="dx-grid">' + sel(B('நான்', 'I am a'), 'role', [['employee', B('ஊழியர்', 'Employee')], ['student', B('மாணவர்', 'Student')], ['parent', B('பெற்றோர் (பிள்ளைக்காக)', 'Parent (for my child)')]]) + sel(B('கடிதம் மொழி', 'Letter language'), 'lang', [['ta', 'தமிழ்'], ['en', 'English']]) + '</div>' +
+        '<div class="dx-grid">' + sel(B('நான்', 'I am a'), 'role', [['employee', B('ஊழியர்', 'Employee')], ['student', B('மாணவர்', 'Student')], ['parent', B('பெற்றோர் (பிள்ளைக்காக)', 'Parent (for my child)')]]) + sel(B('கடிதம் மொழி', 'Letter language'), 'lang', [['ta', 'தமிழ்'], ['en', 'English'], ['bi', 'தமிழ் + English']]) + '</div>' +
         '<h3 class="dx-h">' + B('யாருக்கு', 'To whom') + '</h3>' + fld(B('பெயர் / பதவி', 'Name / designation'), 'toName', { ph: B('எ.கா. தலைமையாசிரியர்', 'e.g. The Principal') }) + fld(B('நிறுவனம் / பள்ளி', 'Organisation / school'), 'org') + '<div class="dx-grid">' + fld(B('இடம்', 'Place'), 'place') + fld(B('நாள்', 'Date'), 'date', { type: 'date' }) + '</div>' +
         '<h3 class="dx-h">' + B('உங்கள் விவரம்', 'Your details') + '</h3>' + fld(par ? B('பிள்ளையின் பெயர்', "Child's name") : B('பெயர்', 'Name'), 'me.name') + (par ? fld(B('பெற்றோர் பெயர்', "Parent's name"), 'me.parent') : '') +
         (emp ? '<div class="dx-grid">' + fld(B('பதவி', 'Designation'), 'me.desig') + fld(B('ஊழியர் எண்', 'Employee ID'), 'me.id') + '</div>' : '<div class="dx-grid">' + fld(B('வகுப்பு / பிரிவு', 'Class / section'), 'me.cls') + (stu ? fld(B('பதிவு எண்', 'Roll no.'), 'me.roll') : '<div></div>') + '</div>') +
@@ -1183,37 +1194,37 @@
         '<label class="dx-chk"><input type="checkbox" data-p="half"' + (S.half ? ' checked' : '') + '> ' + B('அரை நாள் மட்டும்', 'Half day only') + '</label>' + (S.half ? sel(B('நேரம்', 'Session'), 'session', [['am', B('காலை', 'Forenoon')], ['pm', B('பிற்பகல்', 'Afternoon')]]) : '') +
         '<label class="dx-chk"><input type="checkbox" data-p="skipSun"' + (S.skipSun ? ' checked' : '') + '> ' + B('ஞாயிற்றுக்கிழமைகளை எண்ணாதே', 'Do not count Sundays') + '</label><div class="dx-hint" id="lvDays"></div>' +
         fld(B('காரணம்', 'Reason'), 'reason', { area: 2, ph: B('எ.கா. காய்ச்சல் / குடும்ப நிகழ்ச்சி', 'e.g. fever / family function') }) + (emp ? fld(B('என் பணியைக் கவனிப்பவர் (விருப்பம்)', 'Who will cover my work (optional)'), 'handover') : '') + fld(B('விடுப்பில் தொடர்பு எண் (விருப்பம்)', 'Contact number during leave (optional)'), 'contact', { type: 'tel' }) +
-        '<h3 class="dx-h">' + B('கடிதம் (திருத்தலாம்)', 'Letter text (editable)') + '</h3><div class="dx-f"><textarea data-p="body" rows="9"></textarea></div>' +
+        '<h3 class="dx-h">' + B('கடிதம் (திருத்தலாம்)', 'Letter text (editable)') + (S.lang === 'bi' ? ' — தமிழ்' : '') + '</h3><div class="dx-f"><textarea data-p="body" rows="9"></textarea></div>' + (S.lang === 'bi' ? '<h3 class="dx-h">' + B('கடிதம்', 'Letter text') + ' — English</h3><div class="dx-f"><textarea data-p="body2" rows="9"></textarea></div>' : '') +
         '<div class="dx-row"><button type="button" class="dx-btn sec" data-regen="1">↻ ' + B('தானாக மீண்டும் எழுது', 'Rewrite automatically') + '</button></div><div data-k="msg" aria-live="polite"></div>' +
         '<div class="dx-row"><button type="button" class="dx-btn" data-out="pdf">📄 PDF</button><button type="button" class="dx-btn sec" data-out="print">🖨️ ' + B('திற / அச்சிடு', 'Open / Print') + '</button><button type="button" class="dx-btn sec" data-out="copy">📋 ' + B('நகலெடு', 'Copy text') + '</button><button type="button" class="dx-btn sec" data-out="wa">💬 WhatsApp</button></div>';
-      host.querySelector('[data-p=body]').value = S.body; hint();
+      host.querySelector('[data-p=body]').value = S.body; const b2 = host.querySelector('[data-p=body2]'); if (b2) b2.value = S.body2; hint();
     }
     function hint() { const n = leaveDays(S), h = host.querySelector('#lvDays'); if (!h) return; const bad = validISO(S.from) && validISO(S.to) && S.to < S.from; h.className = 'dx-hint ' + (bad ? 'bad' : 'ok'); h.textContent = bad ? B('கடைசி நாள் முதல் நாளுக்கு முன் இருக்கக் கூடாது', 'The last day cannot be before the first day') : '✓ ' + lvDays(n, isEn() ? 'en' : 'ta'); }
     host.addEventListener('input', onIn); host.addEventListener('change', onIn);
     function onIn(e) {
       const t = e.target, p = t.getAttribute && t.getAttribute('data-p'); if (!p) return;
       setPath(S, p, t.type === 'checkbox' ? t.checked : t.value);
-      if (p === 'body') { S.edited = true; save(); return; }
+      if (p === 'body') { S.edited = true; save(); return; } if (p === 'body2') { S.edited2 = true; save(); return; }
       if (p === 'from' && validISO(t.value) && (!validISO(S.to) || S.to < t.value)) S.to = t.value;
-      if (['role', 'lang', 'half', 'from', 'to', 'type'].includes(p)) { if (p === 'role' || p === 'lang') S.edited = false; paint(); } else { regen(); hint(); }
+      if (['role', 'lang', 'half', 'from', 'to', 'type'].includes(p)) { if (p === 'role' || p === 'lang') { S.edited = false; S.edited2 = false; } paint(); } else { regen(); hint(); }
       save();
     }
     host.addEventListener('click', (e) => {
       const b = e.target.closest && e.target.closest('button'); if (!b) return;
-      if (b.hasAttribute('data-regen')) { S.edited = false; paint(); save(); } else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
+      if (b.hasAttribute('data-regen')) { S.edited = false; S.edited2 = false; paint(); save(); } else if (b.hasAttribute('data-out')) run(b.getAttribute('data-out'));
     });
     async function run(kind) {
       const msg = host.querySelector('[data-k=msg]'), errs = [];
       if (!S.me.name.trim()) errs.push(B('பெயர் தேவை', 'Name is required'));
       if (!validISO(S.from) || !validISO(S.to)) errs.push(B('தேதிகளைத் தேர்வு செய்யுங்கள்', 'Choose the dates')); else if (S.to < S.from) errs.push(B('கடைசி நாள் முதல் நாளுக்கு முன் உள்ளது', 'The last day is before the first day'));
-      if (!S.body.trim()) errs.push(B('கடிதம் காலியாக உள்ளது', 'The letter is empty'));
+      if (!S.body.trim() || (S.lang === 'bi' && !S.body2.trim())) errs.push(B('கடிதம் காலியாக உள்ளது', 'The letter is empty'));
       if (errs.length) { msg.innerHTML = '<div class="dx-err" role="alert">' + errs.map(esc).join('<br>') + '</div>'; return; }
-      const L = leaveFull(S), plain = [L.date, '', L.to, '', L.subj, '', L.sal, '', L.body, '', L.close, ''].concat(L.sender).join('\n');
+      const letters = S.lang === 'bi' ? [leaveFull(Object.assign({}, S, { lang: 'ta' })), leaveFull(Object.assign({}, S, { lang: 'en', body: S.body2 }))] : [leaveFull(S)], plain = letters.map((L) => [L.date, '', L.to, '', L.subj, '', L.sal, '', L.body, '', L.close, ''].concat(L.sender).join('\n')).join('\n\n--------------------\n\n');
       try {
         if (kind === 'copy') { if (navigator.clipboard) await navigator.clipboard.writeText(plain); else { const ta = document.createElement('textarea'); ta.value = plain; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } msg.innerHTML = '<div class="dx-ok">✓ ' + B('நகலெடுக்கப்பட்டது', 'Copied') + '</div>'; }
         else if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(plain), '_blank');
         else {
-          const blob = new Blob([await leavePdf(S, L)], { type: 'application/pdf' }), name = 'Leave-letter-' + (fileSafe(S.me.name) || 'letter') + '-' + S.from + '.pdf';
+          const blob = new Blob([await leavePdf(S, letters)], { type: 'application/pdf' }), name = 'Leave-letter-' + (fileSafe(S.me.name) || 'letter') + '-' + S.from + '.pdf';
           if (kind === 'print') { const url = URL.createObjectURL(blob); if (!window.open(url, '_blank')) downloadBlob(blob, name); setTimeout(() => URL.revokeObjectURL(url), 120000); } else downloadBlob(blob, name);
           msg.innerHTML = '<div class="dx-ok">✓ ' + B('கடிதம் தயார்', 'Letter ready') + ' — ' + lvDays(leaveDays(S), isEn() ? 'en' : 'ta') + '</div>';
         }
@@ -1222,15 +1233,15 @@
     }
     paint();
   }
-  async function leavePdf(S, L) {
+  async function leavePdf(S, Ls) {
     const doc = await PDFDocument.create(); doc.setTitle('Leave letter'); doc.setCreator('pdftoolsindia.com');
     const font = await embedUnicodeFont(doc), uni = !!font.__mixedShape, Lx = (s) => { s = String(s == null ? '' : s); return uni ? s : s.replace(/[^\x20-\x7E\xA0-\xFF]/g, '?'); };
     const W = 595.28, H = 841.89, MX = 64, CW = W - 2 * MX; let page, y;
     const np = () => { page = doc.addPage([W, H]); y = H - 70; }; np();
     const draw = (s, x, size, bold) => { if (y < 80) np(); page.drawText(Lx(s), { x, y, size, font, color: rgb(0.08, 0.08, 0.1) }); if (bold) page.drawText(Lx(s), { x: x + 0.3, y, size, font, color: rgb(0.08, 0.08, 0.1) }); };
     const block = (txt, size, gap, bold, rightX) => { txt.split('\n').forEach((para) => { wrapLines(font, Lx(para), size, CW, 40).forEach((ln) => { const x = rightX ? W - MX - font.widthOfTextAtSize(Lx(ln), size) : MX; draw(ln, x, size, bold); y -= size * 1.6; }); }); y -= gap; };
-    block(L.date, 10.5, 12, false, true); block(L.to, 11, 10); block(L.subj, 11.5, 10, true); block(L.sal, 11, 6); block(L.body, 11, 14); block(L.close, 11, 40);
-    L.sender.forEach((ln, i) => { draw(ln, MX, i ? 10.5 : 11.5, i === 0); y -= 15; });
+    Ls.forEach((L, li) => { if (li) np(); block(L.date, 10.5, 12, false, true); block(L.to, 11, 10); block(L.subj, 11.5, 10, true); block(L.sal, 11, 6); block(L.body, 11, 14); block(L.close, 11, 40);
+    L.sender.forEach((ln, i) => { draw(ln, MX, i ? 10.5 : 11.5, i === 0); y -= 15; }); });
     return doc.save();
   }
   TOOL_IMPL.leaveletter = { mount(container) { mountLeave(container); } };
@@ -1379,7 +1390,7 @@
   const hexOk = (s) => /^#[0-9a-fA-F]{6}$/.test(s || '');
   function blankCard() {
     const d = lsGet(BC_KEY, {});
-    return Object.assign({ v: 1, layout: 'bar', theme: 'navy', cust: ['#1A3C6E', '#FFFFFF', '#F4C430'], name: '', name2: '', desig: '', company: '', tag: '', phone: '', phone2: '', email: '', web: '', addr: '', gstin: '', upi: '', qr: 'none' }, d);
+    return Object.assign({ v: 1, layout: 'bar', theme: 'navy', cust: ['#1A3C6E', '#FFFFFF', '#F4C430'], name: '', name2: '', desig: '', company: '', tag: '', phone: '', phone2: '', email: '', web: '', addr: '', gstin: '', upi: '', qr: 'none', sides: '1', desig2: '', company2: '', tag2: '', addr2: '' }, d);
   }
   const bcColors = (S) => { const t = S.theme === 'custom' ? S.cust : BC_THEMES[S.theme] || BC_THEMES.navy; return { bg: hexOk(t[0]) ? t[0] : '#1A3C6E', tx: hexOk(t[1]) ? t[1] : '#FFFFFF', ac: hexOk(t[2]) ? t[2] : '#F4C430' }; };
   const bcWeb = (w) => { w = String(w || '').trim(); return w && !/^https?:\/\//i.test(w) ? 'https://' + w : w; };
@@ -1394,6 +1405,7 @@
     if (S.qr === 'vcard' && S.name.trim()) return bcVcard(S, true); // compact: fewer fields = a sparser, easier-to-scan code
     return '';
   }
+  const bcBack = (S) => Object.assign({}, S, { name: S.name2 || S.name, name2: '', desig: S.desig2 || S.desig, company: S.company2 || S.company, tag: S.tag2 || S.tag, addr: S.addr2 || S.addr });
   async function drawCard(S, W, H) {
     const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'), k = W / 1050, col = bcColors(S);
     try { await Promise.all([document.fonts.load('700 40px "Noto Sans Tamil"'), document.fonts.load('400 24px "Noto Sans Tamil"')]); } catch (e) { /* fall back to system fonts */ }
@@ -1451,20 +1463,21 @@
       host.innerHTML = '<div class="dx-note">💳 ' + B('விவரம் நிரப்பினால் அட்டை உடனே தெரியும். PNG (300 dpi), A4-இல் 10 அட்டைகள் (வெட்டுக் குறிகளுடன்), தனி அட்டை PDF, தொடர்பு கோப்பு (vCard) பதிவிறக்கலாம்.', 'Fill in the details and the card updates live. Download PNG (300 dpi), a 10-up A4 cut sheet with crop marks, a single-card PDF, or a contact file (vCard).') + '</div>' +
         '<div class="dx-grid">' + fld(B('பெயர்', 'Name'), 'name') + fld(B('தமிழ் / 2வது மொழிப் பெயர் (விருப்பம்)', 'Name in 2nd language (optional)'), 'name2') + '</div><div class="dx-grid">' + fld(B('பதவி', 'Designation'), 'desig') + fld(B('நிறுவனம்', 'Company'), 'company') + '</div>' + fld(B('வாசகம் (விருப்பம்)', 'Tagline (optional)'), 'tag') +
         '<div class="dx-grid">' + fld(B('கைபேசி', 'Phone'), 'phone', { type: 'tel' }) + fld(B('2வது எண் (விருப்பம்)', '2nd number (optional)'), 'phone2', { type: 'tel' }) + '</div><div class="dx-grid">' + fld('Email', 'email', { type: 'email' }) + fld(B('இணையதளம்', 'Website'), 'web', { ph: 'www.example.com' }) + '</div>' + fld(B('முகவரி', 'Address'), 'addr', { area: 1 }) + fld('GSTIN ' + B('(விருப்பம்)', '(optional)'), 'gstin') +
+        '<h3 class="dx-h">' + B('அட்டை பக்கங்கள்', 'Card sides') + '</h3><div class="dx-f"><select data-p="sides" aria-label="' + esc(B('பக்கங்கள்', 'Sides')) + '">' + [['1', B('ஒரு பக்கம் (நீங்கள் எழுதியபடி)', 'One side (as typed)')], ['2', B('இரு பக்கம் — முன் ஆங்கிலம் / பின் தமிழ் (அல்லது எந்த இரு மொழி)', 'Two sides — front English / back Tamil (or any two languages)')]].map((o) => '<option value="' + o[0] + '"' + (S.sides === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>' + (S.sides === '2' ? '<div class="dx-note">' + B('பின் பக்கத்துக்கு: மேலே உள்ள "2வது மொழிப் பெயர்" பெயராக வரும். கீழே மற்றவற்றை நிரப்புங்கள் (காலியாக விட்டால் முன் பக்கத்தில் உள்ளதே வரும்).', 'For the back: the "Name in 2nd language" above becomes the name. Fill the rest below (blank = same as the front).') + '</div><div class="dx-grid">' + fld(B('பதவி (பின்)', 'Designation (back)'), 'desig2') + fld(B('நிறுவனம் (பின்)', 'Company (back)'), 'company2') + '</div>' + fld(B('வாசகம் (பின்)', 'Tagline (back)'), 'tag2') + fld(B('முகவரி (பின்)', 'Address (back)'), 'addr2', { area: 1 }) : '') +
         '<h3 class="dx-h">QR</h3><div class="dx-grid"><div class="dx-f"><label>' + B('QR வகை', 'QR type') + '</label><select data-p="qr">' + [['none', B('இல்லை', 'None')], ['vcard', B('தொடர்பு (vCard) — ஸ்கேன் செய்தால் சேமிக்கலாம்', 'Contact (vCard) — scan to save')], ['web', B('இணையதளம்', 'Website')], ['upi', 'UPI ' + B('கட்டணம்', 'payment')]].map((o) => '<option value="' + o[0] + '"' + (S.qr === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>' + (S.qr === 'upi' ? fld('UPI ID', 'upi', { ph: 'name@bank' }) : '<div></div>') + '</div>' +
         '<h3 class="dx-h">' + B('வடிவமைப்பு', 'Design') + '</h3><div class="dx-grid"><div class="dx-f"><label>' + B('அமைப்பு', 'Layout') + '</label><select data-p="layout">' + [['bar', B('பக்கக் கோடு', 'Side bar')], ['band', B('மேல் பட்டை', 'Top band')], ['center', B('மையம்', 'Centered')], ['split', B('இரு பாதி', 'Split panel')]].map((o) => '<option value="' + o[0] + '"' + (S.layout === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div><div class="dx-f"><label>' + B('வண்ணம்', 'Colours') + '</label><select data-p="theme">' + Object.keys(BC_THEMES).map((k) => '<option value="' + k + '"' + (S.theme === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div></div>' +
         (S.theme === 'custom' ? '<div class="dx-grid three">' + ['bg', 'text', 'accent'].map((n, i) => '<div class="dx-f"><label>' + n + '</label><input type="color" data-c="' + i + '" value="' + esc(S.cust[i]) + '" style="width:100%;height:44px;border:1.5px solid var(--line);border-radius:10px;padding:2px"></div>').join('') + '</div>' : '') +
-        '<div style="margin-top:14px"><canvas id="bcPrev" width="700" height="400" style="width:100%;max-width:520px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.18);display:block;margin:0 auto" role="img" aria-label="' + esc(B('அட்டை முன்னோட்டம்', 'Card preview')) + '"></canvas></div><div data-k="msg" aria-live="polite"></div>' +
-        '<div class="dx-row"><button type="button" class="dx-btn" data-out="sheet">📄 ' + B('A4 தாள் (10 அட்டை)', 'A4 sheet (10 cards)') + '</button><button type="button" class="dx-btn sec" data-out="single">💳 ' + B('தனி அட்டை PDF', 'Single card PDF') + '</button></div><div class="dx-row"><button type="button" class="dx-btn sec" data-out="png">🖼️ PNG</button><button type="button" class="dx-btn sec" data-out="vcf">👤 vCard (.vcf)</button></div>';
+        '<div style="margin-top:14px"><canvas id="bcPrev" width="700" height="400" style="width:100%;max-width:520px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.18);display:block;margin:0 auto" role="img" aria-label="' + esc(B('அட்டை முன்னோட்டம்', 'Card preview')) + '"></canvas>' + (S.sides === '2' ? '<canvas id="bcPrev2" width="700" height="400" style="width:100%;max-width:520px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.18);display:block;margin:12px auto 0" role="img" aria-label="' + esc(B('பின் பக்கம்', 'Back side')) + '"></canvas>' : '') + '</div><div data-k="msg" aria-live="polite"></div>' +
+        '<div class="dx-row"><button type="button" class="dx-btn" data-out="sheet">📄 ' + B('A4 தாள் (10 அட்டை)', 'A4 sheet (10 cards)') + '</button><button type="button" class="dx-btn sec" data-out="single">💳 ' + B('தனி அட்டை PDF', 'Single card PDF') + '</button></div><div class="dx-row"><button type="button" class="dx-btn sec" data-out="png">🖼️ PNG' + (S.sides === '2' ? ' ' + B('(முன்)', '(front)') : '') + '</button>' + (S.sides === '2' ? '<button type="button" class="dx-btn sec" data-out="pngback">🖼️ PNG ' + B('(பின்)', '(back)') + '</button>' : '') + '<button type="button" class="dx-btn sec" data-out="vcf">👤 vCard (.vcf)</button></div>';
       preview();
     }
-    async function preview() { const my = ++seq, cv = host.querySelector('#bcPrev'); if (!cv) return; const c = await drawCard(S, 700, 400); if (my !== seq) return; const g = cv.getContext('2d'); g.clearRect(0, 0, 700, 400); g.drawImage(c, 0, 0); }
+    async function preview() { const my = ++seq, cv = host.querySelector('#bcPrev'); if (!cv) return; const c = await drawCard(S, 700, 400); if (my !== seq) return; const g = cv.getContext('2d'); g.clearRect(0, 0, 700, 400); g.drawImage(c, 0, 0); const cv2 = host.querySelector('#bcPrev2'); if (cv2) { const c2 = await drawCard(bcBack(S), 700, 400); if (my !== seq) return; const g2 = cv2.getContext('2d'); g2.clearRect(0, 0, 700, 400); g2.drawImage(c2, 0, 0); } }
     let tmr; host.addEventListener('input', onIn); host.addEventListener('change', onIn);
     function onIn(e) {
       const t = e.target, p = t.getAttribute && t.getAttribute('data-p'), ci = t.getAttribute && t.getAttribute('data-c');
       if (ci != null) { S.cust[+ci] = t.value; save(); clearTimeout(tmr); tmr = setTimeout(preview, 120); return; }
       if (!p) return; S[p] = t.value; save();
-      if (p === 'theme' || p === 'qr') { paint(); return; } clearTimeout(tmr); tmr = setTimeout(preview, 150);
+      if (p === 'theme' || p === 'qr' || p === 'sides') { paint(); return; } clearTimeout(tmr); tmr = setTimeout(preview, 150);
     }
     host.addEventListener('click', async (e) => {
       const b = e.target.closest && e.target.closest('button[data-out]'); if (!b) return;
@@ -1479,15 +1492,17 @@
         const base = 'Business-card-' + (fileSafe(S.name) || fileSafe(S.company) || 'card');
         if (kind === 'vcf') downloadBlob(new Blob([bcVcard(S)], { type: 'text/vcard' }), base + '.vcf');
         else {
-          const c = await drawCard(S, 1050, 600), blob = await new Promise((r) => c.toBlob(r, 'image/png'));
-          if (kind === 'png') downloadBlob(blob, base + '.png');
+          const c = await drawCard(S, 1050, 600), blob = await new Promise((r) => c.toBlob(r, 'image/png')), two = S.sides === '2', cb = two ? await drawCard(bcBack(S), 1050, 600) : null, blobB = two ? await new Promise((r) => cb.toBlob(r, 'image/png')) : null;
+          if (kind === 'png') downloadBlob(blob, base + (two ? '-front' : '') + '.png');
+          else if (kind === 'pngback') downloadBlob(blobB, base + '-back.png');
           else {
-            const doc = await PDFDocument.create(), img = await doc.embedPng(new Uint8Array(await blob.arrayBuffer())), CW = 252, CH = 144;
-            if (kind === 'single') { const pg = doc.addPage([CW, CH]); pg.drawImage(img, { x: 0, y: 0, width: CW, height: CH }); }
+            const doc = await PDFDocument.create(), img = await doc.embedPng(new Uint8Array(await blob.arrayBuffer())), imgB = two ? await doc.embedPng(new Uint8Array(await blobB.arrayBuffer())) : null, CW = 252, CH = 144;
+            if (kind === 'single') { const pg = doc.addPage([CW, CH]); pg.drawImage(img, { x: 0, y: 0, width: CW, height: CH }); if (two) { const pb = doc.addPage([CW, CH]); pb.drawImage(imgB, { x: 0, y: 0, width: CW, height: CH }); } }
             else {
               const pg = doc.addPage([595.28, 841.89]), gx = 14, gy = 14, tw = 2 * CW + gx, th = 5 * CH + 4 * gy, sx = (595.28 - tw) / 2, sy = (841.89 + th) / 2 - CH, mk = rgb(0.45, 0.45, 0.5);
+              const pgB = two ? doc.addPage([595.28, 841.89]) : null; // back page: columns mirrored so a long-edge duplex print lines up with the front
               for (let r = 0; r < 5; r++) for (let q = 0; q < 2; q++) {
-                const cx = sx + q * (CW + gx), cy = sy - r * (CH + gy); pg.drawImage(img, { x: cx, y: cy, width: CW, height: CH });
+                const cx = sx + q * (CW + gx), cy = sy - r * (CH + gy); pg.drawImage(img, { x: cx, y: cy, width: CW, height: CH }); if (pgB) pgB.drawImage(imgB, { x: sx + (1 - q) * (CW + gx), y: cy, width: CW, height: CH });
                 [[cx, cy], [cx + CW, cy], [cx, cy + CH], [cx + CW, cy + CH]].forEach((p, i) => { const dx = i % 2 ? 1 : -1, dy = i < 2 ? -1 : 1; pg.drawLine({ start: { x: p[0] + dx * 2, y: p[1] }, end: { x: p[0] + dx * 8, y: p[1] }, thickness: 0.4, color: mk }); pg.drawLine({ start: { x: p[0], y: p[1] + dy * 2 }, end: { x: p[0], y: p[1] + dy * 8 }, thickness: 0.4, color: mk }); });
               }
             }
@@ -1533,7 +1548,7 @@
 
   function mountHR(container) {
     const host = root(container), today = localISO(); let tab = 'mark', date = today, vm = { y: +today.slice(0, 4), m: +today.slice(5, 7) - 1 }, edit = null, notice = '';
-    const settings = () => Object.assign({ company: '', divisor: 'month' }, hrRd('settings', {}));
+    const settings = () => Object.assign({ company: '', divisor: 'month', lang: 'bi' }, hrRd('settings', {}));
     const emps = () => (hrRd('employees', []) || []).filter((e) => e && e.id);
     const att = () => hrRd('attendance', {}) || {};
     const fail = () => { notice = '<div class="dx-err" role="alert">' + B('சேமிக்க முடியவில்லை — உலாவி நினைவகம் நிரம்பியிருக்கலாம். Backup எடுத்து பழைய தரவை நீக்கவும்.', 'Could not save — browser storage may be full. Take a backup and clear old data.') + '</div>'; };
@@ -1580,7 +1595,7 @@
         }
       } else {
         h += '<div class="dx-f"><label>' + B('நிறுவனப் பெயர் (Excel / அச்சில் வரும்)', 'Company name (printed on Excel / print)') + '</label><input type="text" id="hrCo" value="' + esc(S.company) + '" autocomplete="off"></div><div class="dx-f"><label>' + B('சம்பளக் கணக்கு: ஒரு நாள் = மாதச் சம்பளம் ÷', 'Daily rate = monthly salary ÷') + '</label><select id="hrDiv">' + [['month', B('மாதத்தின் நாட்கள் (28–31)', 'Days in the month (28–31)')], ['26', '26'], ['30', '30']].map((o) => '<option value="' + o[0] + '"' + (S.divisor === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></div>' +
-          '<div class="dx-row"><button type="button" class="dx-btn" data-savesettings="1">💾 ' + B('சேமி', 'Save') + '</button></div><h3 class="dx-h">' + B('Backup / Restore', 'Backup / Restore') + '</h3><div class="dx-warn" style="margin-top:0">' + B('தரவு இந்த phone / browser-ல் மட்டுமே சேமிக்கப்படுகிறது — வேறு phone-ல் தெரியாது. "Clear browsing data" செய்தால் அழிந்துவிடும். மாதம் ஒருமுறை Backup எடுங்கள்.', 'Data is stored only on this phone / browser — other phones will not see it, and "Clear browsing data" erases it. Take a backup once a month.') + '</div>' +
+          '<div class="dx-f"><label>' + B('Excel / அச்சு மொழி', 'Excel / print language') + '</label><select id="hrLang">' + [['bi', 'தமிழ் + English'], ['ta', 'தமிழ்'], ['en', 'English']].map((o) => '<option value="' + o[0] + '"' + (S.lang === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div><div class="dx-row"><button type="button" class="dx-btn" data-savesettings="1">💾 ' + B('சேமி', 'Save') + '</button></div><h3 class="dx-h">' + B('Backup / Restore', 'Backup / Restore') + '</h3><div class="dx-warn" style="margin-top:0">' + B('தரவு இந்த phone / browser-ல் மட்டுமே சேமிக்கப்படுகிறது — வேறு phone-ல் தெரியாது. "Clear browsing data" செய்தால் அழிந்துவிடும். மாதம் ஒருமுறை Backup எடுங்கள்.', 'Data is stored only on this phone / browser — other phones will not see it, and "Clear browsing data" erases it. Take a backup once a month.') + '</div>' +
           '<div class="dx-row"><button type="button" class="dx-btn" data-backup="1">⬇️ Backup (.json)</button><button type="button" class="dx-btn sec" data-restore="1">⬆️ Restore</button></div><input type="file" id="hrFile" accept="application/json,.json" style="display:none"><div data-k="data"></div>';
       }
       host.innerHTML = h;
@@ -1601,7 +1616,7 @@
       if (d.left) { const e = emps().find((x) => x.id === d.left); if (!e || !confirm(e.name + ' — ' + B('விலகினார் என்று குறிக்கவா? (பழைய மாத அறிக்கையில் தொடர்ந்து தெரிவார்)', 'Mark as left? (they stay in the months they worked)'))) return; const all = emps().map((x) => (x.id === e.id ? Object.assign({}, x, { leftDate: today }) : x)); if (!hrWr('employees', all)) fail(); return paint(); }
       if (d.rejoin) { const all = emps().map((x) => { if (x.id !== d.rejoin) return x; const y = Object.assign({}, x); delete y.leftDate; return y; }); if (!hrWr('employees', all)) fail(); return paint(); }
       if (d.purge) { const e = emps().find((x) => x.id === d.purge); if (!e || !confirm(e.name + ' — ' + B('நிரந்தரமாக நீக்கவா? இவரது எல்லா வருகைப் பதிவும் அழியும்; மீட்க முடியாது.', 'Delete permanently? All their attendance will be erased and cannot be recovered.'))) return; hrWr('employees', emps().filter((x) => x.id !== e.id)); const a = att(); Object.keys(a).forEach((k) => { if (k.startsWith(e.id + '|')) delete a[k]; }); hrWr('attendance', a); return paint(); }
-      if (d.savesettings) { const s = { company: host.querySelector('#hrCo').value.trim(), divisor: host.querySelector('#hrDiv').value }; if (hrWr('settings', s)) msg('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); else msg('data', 'err', B('சேமிக்க முடியவில்லை', 'Could not save')); return; }
+      if (d.savesettings) { const s = { company: host.querySelector('#hrCo').value.trim(), divisor: host.querySelector('#hrDiv').value, lang: host.querySelector('#hrLang').value }; if (hrWr('settings', s)) msg('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); else msg('data', 'err', B('சேமிக்க முடியவில்லை', 'Could not save')); return; }
       if (d.backup) { const blob = new Blob([JSON.stringify({ app: 'pti-hr-register', v: 1, saved: new Date().toISOString(), employees: emps(), attendance: att(), settings: settings() }, null, 1)], { type: 'application/json' }); downloadBlob(blob, 'HR-register-backup-' + today + '.json'); return msg('data', 'ok', '✓ ' + B('Backup பதிவிறக்கப்பட்டது', 'Backup downloaded')); }
       if (d.restore) return host.querySelector('#hrFile').click();
       if (d.exp) return exportMonth(d.exp);
@@ -1630,15 +1645,15 @@
     }
     async function exportMonth(kind) {
       const S = settings(), E = emps(), A = att(), n = new Date(vm.y, vm.m + 1, 0).getDate(), list = E.filter((e) => (!e.joinDate || e.joinDate <= isoOf(vm.y, vm.m, n)) && (!e.leftDate || e.leftDate >= isoOf(vm.y, vm.m, 1)));
-      if (!list.length) return; const title = (S.company ? S.company + ' — ' : '') + 'வருகைப் பதிவேடு / Attendance Register — ' + MON_TA[vm.m] + ' / ' + MON_EN[vm.m] + ' ' + vm.y;
+      if (!list.length) return; const hl = (en, ta) => tl(S.lang, en, ta), mnm = S.lang === 'en' ? MON_EN[vm.m] : S.lang === 'ta' ? MON_TA[vm.m] : MON_TA[vm.m] + ' / ' + MON_EN[vm.m], wdN = (i) => (S.lang === 'ta' ? WD_TA[i] : WD_EN[i]); const title = (S.company ? S.company + ' — ' : '') + hl('Attendance Register', 'வருகைப் பதிவேடு') + ' — ' + mnm + ' ' + vm.y;
       const rows = list.map((e, i) => { const s = hrStats(e, A, vm.y, vm.m, S.divisor); return { e, s, cells: Array.from({ length: n }, (_, d) => { const iso = isoOf(vm.y, vm.m, d + 1); return hrActive(e, iso) ? (A[e.id + '|' + iso] || '') : '–'; }), i }; });
-      const wages = list.some((e) => num(e.salary)), legend = HR_ORDER.map((k) => k + ' = ' + HR_ST[k].en + ' / ' + HR_ST[k].ta).join('    ');
+      const wages = list.some((e) => num(e.salary)), legend = HR_ORDER.map((k) => k + ' = ' + hl(HR_ST[k].en, HR_ST[k].ta)).join('    ');
       try {
         if (kind === 'xlsx') {
           if (typeof XLSX === 'undefined') throw new Error('Excel library not loaded');
-          const head = ['#', 'பெயர் / Name', 'பணி / Role'].concat(Array.from({ length: n }, (_, d) => d + 1), HR_ORDER, ['Unmarked', 'Paid days'], wages ? ['Rate ₹/day', 'Wages ₹'] : []);
-          const wdRow = ['', '', ''].concat(Array.from({ length: n }, (_, d) => WD_EN[new Date(vm.y, vm.m, d + 1).getDay()]));
-          const aoa = [[title], wdRow, head].concat(rows.map((r) => [r.i + 1, r.e.name, r.e.role || ''].concat(r.cells, HR_ORDER.map((k) => r.s[k]), [r.s.un, +r.s.paid.toFixed(1)], wages ? [num(r.e.salary) ? +r.s.rate.toFixed(2) : '', num(r.e.salary) ? r.s.wage : ''] : [])), [[]], [[legend]], [[]], [['மேலாளர் கையொப்பம் / Manager signature: ____________________']]);
+          const head = ['#', hl('Name', 'பெயர்'), hl('Role', 'பணி')].concat(Array.from({ length: n }, (_, d) => d + 1), HR_ORDER, [hl('Unmarked', 'பதிவில்லை'), hl('Paid days', 'சம்பள நாட்கள்')], wages ? [hl('Rate ₹/day', 'ஒரு நாள் ₹'), hl('Wages ₹', 'சம்பளம் ₹')] : []);
+          const wdRow = ['', '', ''].concat(Array.from({ length: n }, (_, d) => wdN(new Date(vm.y, vm.m, d + 1).getDay())));
+          const aoa = [[title], wdRow, head].concat(rows.map((r) => [r.i + 1, r.e.name, r.e.role || ''].concat(r.cells, HR_ORDER.map((k) => r.s[k]), [r.s.un, +r.s.paid.toFixed(1)], wages ? [num(r.e.salary) ? +r.s.rate.toFixed(2) : '', num(r.e.salary) ? r.s.wage : ''] : [])), [[]], [[legend]], [[]], [[hl('Manager signature', 'மேலாளர் கையொப்பம்') + ': ____________________']]);
           const ws = XLSX.utils.aoa_to_sheet(aoa.map((r) => (Array.isArray(r) ? r : [r]))), tot = head.length;
           ws['!cols'] = [{ wch: 4 }, { wch: 22 }, { wch: 14 }].concat(Array(n).fill({ wch: 3.6 }), Array(6).fill({ wch: 4.5 }), [{ wch: 9 }, { wch: 9 }], wages ? [{ wch: 10 }, { wch: 11 }] : []);
           ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: tot - 1 } }, { s: { r: aoa.length - 3, c: 0 }, e: { r: aoa.length - 3, c: tot - 1 } }, { s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 10 } }];
@@ -1646,8 +1661,8 @@
           downloadBlob(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Attendance_' + ymOf(vm.y, vm.m) + '.xlsx');
         } else {
           const e = esc, thc = (h) => '<th>' + e(h) + '</th>', css = '@page{size:A4 landscape;margin:10mm}body{font-family:"Noto Sans Tamil",Arial,sans-serif;font-size:9px;color:#111}h1{font-size:14px;margin:0 0 6px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #888;padding:2px 3px;text-align:center}td.l{text-align:left;white-space:nowrap}.sun{background:#ddd}.g{margin-top:8px}';
-          const html = '<!doctype html><meta charset="utf-8"><title>Attendance ' + ymOf(vm.y, vm.m) + '</title><link rel="stylesheet" href="/fonts/tamil.css"><style>' + css + '</style><h1>' + e(title) + '</h1><table><tr><th>#</th><th>Name</th>' + Array.from({ length: n }, (_, d) => '<th class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + (d + 1) + '<br>' + WD_EN[new Date(vm.y, vm.m, d + 1).getDay()][0] + '</th>').join('') + HR_ORDER.map(thc).join('') + thc('Paid') + (wages ? thc('Wages ₹') : '') + '</tr>' +
-            rows.map((r) => '<tr><td>' + (r.i + 1) + '</td><td class="l">' + e(r.e.name) + '</td>' + r.cells.map((c, d) => '<td class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + e(c) + '</td>').join('') + HR_ORDER.map((k) => '<td>' + r.s[k] + '</td>').join('') + '<td><b>' + +r.s.paid.toFixed(1) + '</b></td>' + (wages ? '<td>' + (num(r.e.salary) ? inrPlain(r.s.wage) : '') + '</td>' : '') + '</tr>').join('') + '</table><p class="g">' + e(legend) + '</p><p style="margin-top:34px">மேலாளர் கையொப்பம் / Manager signature: ____________________</p>';
+          const html = '<!doctype html><meta charset="utf-8"><title>Attendance ' + ymOf(vm.y, vm.m) + '</title><link rel="stylesheet" href="/fonts/tamil.css"><style>' + css + '</style><h1>' + e(title) + '</h1><table><tr><th>#</th><th>' + e(hl('Name', 'பெயர்')) + '</th>' + Array.from({ length: n }, (_, d) => '<th class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + (d + 1) + '<br>' + (S.lang === 'ta' ? WD_TA[new Date(vm.y, vm.m, d + 1).getDay()] : WD_EN[new Date(vm.y, vm.m, d + 1).getDay()][0]) + '</th>').join('') + HR_ORDER.map(thc).join('') + thc(hl('Paid', 'சம்பள நாட்கள்')) + (wages ? thc(hl('Wages ₹', 'சம்பளம் ₹')) : '') + '</tr>' +
+            rows.map((r) => '<tr><td>' + (r.i + 1) + '</td><td class="l">' + e(r.e.name) + '</td>' + r.cells.map((c, d) => '<td class="' + (new Date(vm.y, vm.m, d + 1).getDay() === 0 ? 'sun' : '') + '">' + e(c) + '</td>').join('') + HR_ORDER.map((k) => '<td>' + r.s[k] + '</td>').join('') + '<td><b>' + +r.s.paid.toFixed(1) + '</b></td>' + (wages ? '<td>' + (num(r.e.salary) ? inrPlain(r.s.wage) : '') + '</td>' : '') + '</tr>').join('') + '</table><p class="g">' + e(legend) + '</p><p style="margin-top:34px">' + e(hl('Manager signature', 'மேலாளர் கையொப்பம்')) + ': ____________________</p>';
           const fr = document.createElement('iframe'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(fr); const dd = fr.contentWindow.document; dd.open(); dd.write(html); dd.close();
           setTimeout(() => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (x) { /* ignore */ } }, 700); setTimeout(() => fr.remove(), 90000);
         }
@@ -1675,7 +1690,7 @@
   function exLoad() {
     const d = lsGet(EX_KEY, null);
     if (d && d.v === 1 && Array.isArray(d.entries) && Array.isArray(d.cats)) return d;
-    return { v: 1, cats: EX_CATS.slice(), entries: [], biz: '' };
+    return { v: 1, cats: EX_CATS.slice(), entries: [], biz: '', lang: 'bi' };
   }
   function exSummary(D, fy) {
     const ms = fyMonths(fy), keys = ms.map((m) => m.key), cats = D.cats.slice(), extra = {};
@@ -1713,7 +1728,7 @@
           '<h3 class="dx-h">' + B('வகை வாரியாக செலவு', 'Expense by category') + '</h3><div class="dx-wrap"><table class="dx-tbl"><tr><th>' + B('வகை', 'Category') + '</th>' + X.ms.map((m) => '<th>' + mname(m) + '</th>').join('') + '<th>' + B('மொத்தம்', 'Total') + '</th></tr>' + X.cats.filter((c) => X.mat[c].some(Boolean)).map((c) => '<tr><td>' + esc(c) + '</td>' + X.mat[c].map((v) => '<td>' + (v ? inrPlain(v / 100) : '') + '</td>').join('') + '<td><b>' + inrPlain(X.mat[c].reduce((a, b) => a + b, 0) / 100) + '</b></td></tr>').join('') + '<tr><th>' + B('மொத்தம்', 'Total') + '</th>' + X.expM.map((v) => '<th>' + (v ? inrPlain(v / 100) : '') + '</th>').join('') + '<th>' + inrPlain(X.totExp / 100) + '</th></tr></table></div>';
         if (!D.entries.length) h += '<div class="dx-note" style="margin-top:10px">' + B('"பதி" தாவலில் முதல் பதிவைச் சேர்க்கவும்.', 'Add your first entry in the "Add" tab.') + '</div>';
       } else {
-        h += '<div class="dx-f"><label>' + B('வணிகப் பெயர் (Excel தலைப்பில்)', 'Business name (on the Excel title)') + '</label><input type="text" id="exBiz" value="' + esc(D.biz) + '" autocomplete="off"></div><div class="dx-f"><label>' + B('வகைகள் (ஒரு வரிக்கு ஒன்று)', 'Categories (one per line)') + '</label><textarea id="exCats" rows="8">' + esc(D.cats.join('\n')) + '</textarea></div><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-savecfg="1">💾 ' + B('சேமி', 'Save') + '</button></div>' +
+        h += '<div class="dx-f"><label>' + B('வணிகப் பெயர் (Excel தலைப்பில்)', 'Business name (on the Excel title)') + '</label><input type="text" id="exBiz" value="' + esc(D.biz) + '" autocomplete="off"></div><div class="dx-f"><label>' + B('Excel / CSV மொழி', 'Excel / CSV language') + '</label><select id="exLang">' + [['bi', 'தமிழ் + English'], ['ta', 'தமிழ்'], ['en', 'English']].map((o) => '<option value="' + o[0] + '"' + ((D.lang || 'bi') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div><div class="dx-f"><label>' + B('வகைகள் (ஒரு வரிக்கு ஒன்று)', 'Categories (one per line)') + '</label><textarea id="exCats" rows="8">' + esc(D.cats.join('\n')) + '</textarea></div><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-savecfg="1">💾 ' + B('சேமி', 'Save') + '</button></div>' +
           '<h3 class="dx-h">' + B('ஏற்றுமதி', 'Export') + ' — ' + B('நிதியாண்டு', 'FY') + ' ' + fyLabel(fy) + '</h3><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-exp="xlsx">📊 Excel</button><button type="button" class="dx-btn sec" data-exp="csv">CSV</button></div>' +
           '<h3 class="dx-h">Backup / Restore</h3><div class="dx-warn" style="margin-top:0">' + B('தரவு இந்த phone / browser-ல் மட்டுமே இருக்கும். "Clear browsing data" செய்தால் அழியும் — மாதம் ஒருமுறை Backup எடுங்கள்.', 'Data lives only on this phone / browser and is erased by "Clear browsing data" — take a backup every month.') + '</div><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-backup="1">⬇️ Backup</button><button type="button" class="dx-btn sec" data-restore="1">⬆️ Restore</button></div><input type="file" id="exFile" accept="application/json,.json" style="display:none"><div data-k="data"></div>';
       }
@@ -1739,7 +1754,7 @@
       if (d.edit) { editId = d.edit; tab = 'add'; return paint(); }
       if (d.del) { const D = exLoad(), e = D.entries.find((x) => x.id === d.del); if (!e || !confirm((e.desc || e.cat) + ' ₹' + inrPlain(num(e.amt)) + ' — ' + B('நீக்கவா?', 'Delete?'))) return; D.entries = D.entries.filter((x) => x.id !== d.del); save(D); return paint(); }
       if (d.fy) { fy += +d.fy; flt.m = 'all'; return paint(); }
-      if (d.savecfg) { const D = exLoad(), cats = host.querySelector('#exCats').value.split('\n').map((s) => s.trim()).filter((s, i, a) => s && a.indexOf(s) === i); if (!cats.length) return note('data', 'err', B('குறைந்தது ஒரு வகை வேண்டும்', 'Keep at least one category')); D.cats = cats; D.biz = host.querySelector('#exBiz').value.trim(); if (save(D)) note('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); return; }
+      if (d.savecfg) { const D = exLoad(), cats = host.querySelector('#exCats').value.split('\n').map((s) => s.trim()).filter((s, i, a) => s && a.indexOf(s) === i); if (!cats.length) return note('data', 'err', B('குறைந்தது ஒரு வகை வேண்டும்', 'Keep at least one category')); D.cats = cats; D.biz = host.querySelector('#exBiz').value.trim(); D.lang = host.querySelector('#exLang').value; if (save(D)) note('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); return; }
       if (d.backup) { downloadBlob(new Blob([JSON.stringify(Object.assign({ app: 'pti-expense' }, exLoad()), null, 1)], { type: 'application/json' }), 'Expense-backup-' + today + '.json'); return note('data', 'ok', '✓ ' + B('Backup பதிவிறக்கப்பட்டது', 'Backup downloaded')); }
       if (d.restore) return host.querySelector('#exFile').click();
       if (d.exp) return exportFY(d.exp);
@@ -1753,24 +1768,24 @@
       }
     });
     function exportFY(kind) {
-      const D = exLoad(), X = exSummary(D, fy), keys = X.ms.map((m) => m.key), rows = D.entries.filter((e) => keys.includes(e.d.slice(0, 7))).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : a.t - b.t));
+      const D = exLoad(), xl = (en, ta) => tl(D.lang || 'bi', en, ta), X = exSummary(D, fy), keys = X.ms.map((m) => m.key), rows = D.entries.filter((e) => keys.includes(e.d.slice(0, 7))).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : a.t - b.t));
       if (!rows.length) return note('data', 'err', B('இந்த நிதியாண்டில் பதிவுகள் இல்லை', 'No entries in this financial year'));
       if (kind === 'csv') {
-        const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"', csv = '﻿' + ['Date,Type,Description,Category,Amount,Mode'].concat(rows.map((e) => [e.d, e.type === 'inc' ? 'Income' : 'Expense', q(e.desc), q(e.cat), num(e.amt), q(e.mode)].join(','))).join('\r\n');
+        const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"', csv = '\ufeff' + [[xl('Date', 'தேதி'), xl('Type', 'வகை'), xl('Description', 'விளக்கம்'), xl('Category', 'பிரிவு'), xl('Amount', 'தொகை'), xl('Mode', 'முறை')].map((x) => '"' + x + '"').join(',')].concat(rows.map((e) => [e.d, e.type === 'inc' ? xl('Income', 'வரவு') : xl('Expense', 'செலவு'), q(e.desc), q(e.cat), num(e.amt), q(e.mode)].join(','))).join('\r\n');
         return downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'Expenses_FY' + fyLabel(fy) + '.csv');
       }
       try {
         if (typeof XLSX === 'undefined') throw new Error('Excel library not loaded');
         const wb = XLSX.utils.book_new(), z = '"₹"#,##0.00', N = rows.length + 1;
-        const logHead = ['Date', 'Type', 'Description', 'Category', 'Amount', 'Mode'], log = [logHead].concat(rows.map((e) => [{ t: 'n', v: xlSerial(e.d), z: 'dd-mm-yyyy' }, e.type === 'inc' ? 'Income' : 'Expense', e.desc, e.cat, { t: 'n', v: num(e.amt), z }, e.mode]));
+        const logHead = [xl('Date', 'தேதி'), xl('Type', 'வகை'), xl('Description', 'விளக்கம்'), xl('Category', 'பிரிவு'), xl('Amount', 'தொகை'), xl('Mode', 'முறை')], log = [logHead].concat(rows.map((e) => [{ t: 'n', v: xlSerial(e.d), z: 'dd-mm-yyyy' }, e.type === 'inc' ? 'Income' : 'Expense', e.desc, e.cat, { t: 'n', v: num(e.amt), z }, e.mode]));
         const wl = XLSX.utils.aoa_to_sheet(log); wl['!cols'] = [{ wch: 12 }, { wch: 9 }, { wch: 30 }, { wch: 28 }, { wch: 14 }, { wch: 13 }]; wl['!autofilter'] = { ref: 'A1:F' + N };
-        const cols = 'BCDEFGHIJKLM'.split(''), sum = [[(D.biz ? D.biz + ' — ' : '') + 'செலவுக் கணக்கு / Expense Tracker — FY ' + fyLabel(fy)], ['வகை / Category'].concat(X.ms.map((m) => ({ t: 'n', v: xlSerial(m.key + '-01'), z: 'mmm-yy' })), ['Total'])];
+        const cols = 'BCDEFGHIJKLM'.split(''), sum = [[(D.biz ? D.biz + ' — ' : '') + xl('Expense Tracker', 'செலவுக் கணக்கு') + ' — FY ' + fyLabel(fy)], [xl('Category', 'பிரிவு')].concat(X.ms.map((m) => ({ t: 'n', v: xlSerial(m.key + '-01'), z: 'mmm-yy' })), [xl('Total', 'மொத்தம்')])];
         const sf = (c, i, cat) => 'SUMIFS(Log!$E$2:$E$' + N + ',Log!$B$2:$B$' + N + ',"' + (cat ? 'Expense' : 'Income') + '"' + (cat ? ',Log!$D$2:$D$' + N + ',$A' + c : '') + ',Log!$A$2:$A$' + N + ',">="&' + cols[i] + '$2,Log!$A$2:$A$' + N + ',"<"&EDATE(' + cols[i] + '$2,1))';
         X.cats.forEach((c, r) => { const rn = r + 3; sum.push([c].concat(X.mat[c].map((v, i) => ({ t: 'n', f: sf(rn, i, true), v: v / 100, z })), [{ t: 'n', f: 'SUM(B' + rn + ':M' + rn + ')', v: X.mat[c].reduce((a, b) => a + b, 0) / 100, z }])); });
         const f0 = 3, f1 = X.cats.length + 2, tr = f1 + 1;
-        sum.push(['மொத்த செலவு / Total expense'].concat(X.expM.map((v, i) => ({ t: 'n', f: 'SUM(' + cols[i] + f0 + ':' + cols[i] + f1 + ')', v: v / 100, z })), [{ t: 'n', f: 'SUM(N' + f0 + ':N' + f1 + ')', v: X.totExp / 100, z }]));
-        sum.push(['வரவு / Income'].concat(X.inc.map((v, i) => ({ t: 'n', f: sf(tr + 1, i, false), v: v / 100, z })), [{ t: 'n', f: 'SUM(B' + (tr + 1) + ':M' + (tr + 1) + ')', v: X.totInc / 100, z }]));
-        sum.push(['மீதம் / Net'].concat(X.inc.map((v, i) => ({ t: 'n', f: cols[i] + (tr + 1) + '-' + cols[i] + tr, v: (v - X.expM[i]) / 100, z })), [{ t: 'n', f: 'N' + (tr + 1) + '-N' + tr, v: (X.totInc - X.totExp) / 100, z }]));
+        sum.push([xl('Total expense', 'மொத்த செலவு')].concat(X.expM.map((v, i) => ({ t: 'n', f: 'SUM(' + cols[i] + f0 + ':' + cols[i] + f1 + ')', v: v / 100, z })), [{ t: 'n', f: 'SUM(N' + f0 + ':N' + f1 + ')', v: X.totExp / 100, z }]));
+        sum.push([xl('Income', 'வரவு')].concat(X.inc.map((v, i) => ({ t: 'n', f: sf(tr + 1, i, false), v: v / 100, z })), [{ t: 'n', f: 'SUM(B' + (tr + 1) + ':M' + (tr + 1) + ')', v: X.totInc / 100, z }]));
+        sum.push([xl('Net', 'மீதம்')].concat(X.inc.map((v, i) => ({ t: 'n', f: cols[i] + (tr + 1) + '-' + cols[i] + tr, v: (v - X.expM[i]) / 100, z })), [{ t: 'n', f: 'N' + (tr + 1) + '-N' + tr, v: (X.totInc - X.totExp) / 100, z }]));
         const ws = XLSX.utils.aoa_to_sheet(sum); ws['!cols'] = [{ wch: 34 }].concat(Array(12).fill({ wch: 11 }), [{ wch: 14 }]); ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }];
         XLSX.utils.book_append_sheet(wb, ws, 'Summary'); XLSX.utils.book_append_sheet(wb, wl, 'Log'); wb.Workbook = { CalcPr: { fullCalcOnLoad: true } };
         downloadBlob(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Expenses_FY' + fyLabel(fy) + '.xlsx');
