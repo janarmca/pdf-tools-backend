@@ -1659,6 +1659,130 @@
   TOOL_IMPL.hrattendance = { mount(container) { mountHR(container); } };
   TOOL_IMPL.hrattendance._f = { hrStats, hrActive };
 
+
+  /* =====================================================================
+     EXPENSE TRACKER — in-browser income / expense log, financial year (Apr–Mar),
+     editable bilingual categories, monthly + category totals, backup,
+     Excel (Log + Summary with live SUMIFS formulas and cached values) and CSV
+     ===================================================================== */
+  const EX_KEY = 'pti-exp-v1';
+  const EX_CATS = ['வாடகை / Rent', 'சம்பளம் / Salaries', 'மின் கட்டணம் / EB bill', 'சரக்கு கொள்முதல் / Purchases', 'போக்குவரத்து / Transport', 'தொலைபேசி & இணையம் / Phone & internet', 'பழுது / Repairs', 'வரி & கட்டணம் / Tax & fees', 'கடன் தவணை / Loan EMI', 'விளம்பரம் / Marketing', 'பிற / Other'];
+  const EX_MODES = ['Cash', 'UPI', 'Bank Transfer', 'Card', 'Cheque'];
+  const fyStartOf = (iso) => { const y = +iso.slice(0, 4), m = +iso.slice(5, 7); return m >= 4 ? y : y - 1; };
+  const fyLabel = (y) => y + '-' + String((y + 1) % 100).padStart(2, '0');
+  const fyMonths = (y) => Array.from({ length: 12 }, (_, i) => { const m = (3 + i) % 12, yy = m >= 3 ? y : y + 1; return { y: yy, m, key: yy + '-' + pad2(m + 1) }; });
+  const xlSerial = (iso) => { const p = iso.split('-').map(Number); return Math.round((Date.UTC(p[0], p[1] - 1, p[2]) - Date.UTC(1899, 11, 30)) / 86400000); };
+  function exLoad() {
+    const d = lsGet(EX_KEY, null);
+    if (d && d.v === 1 && Array.isArray(d.entries) && Array.isArray(d.cats)) return d;
+    return { v: 1, cats: EX_CATS.slice(), entries: [], biz: '' };
+  }
+  function exSummary(D, fy) {
+    const ms = fyMonths(fy), keys = ms.map((m) => m.key), cats = D.cats.slice(), extra = {};
+    D.entries.forEach((e) => { if (e.type === 'exp' && !cats.includes(e.cat)) extra[e.cat] = 1; }); Object.keys(extra).forEach((c) => cats.push(c));
+    const mat = {}, inc = Array(12).fill(0), expM = Array(12).fill(0);
+    cats.forEach((c) => (mat[c] = Array(12).fill(0)));
+    D.entries.forEach((e) => { const i = keys.indexOf(e.d.slice(0, 7)); if (i < 0) return; const paise = Math.round(num(e.amt) * 100); if (e.type === 'inc') inc[i] += paise; else { mat[e.cat] = mat[e.cat] || Array(12).fill(0); mat[e.cat][i] += paise; expM[i] += paise; } });
+    return { ms, cats, mat, inc, expM, totExp: expM.reduce((a, b) => a + b, 0), totInc: inc.reduce((a, b) => a + b, 0) };
+  }
+  function mountExpense(container) {
+    const host = root(container), today = localISO(); let tab = 'add', fy = fyStartOf(today), editId = null, last = null, notice = '', f = { type: 'exp', date: today, cat: '', mode: 'UPI' }, flt = { m: 'all', c: 'all', q: '' };
+    const save = (D) => { if (!lsSet(EX_KEY, D)) { notice = '<div class="dx-err" role="alert">' + B('சேமிக்க முடியவில்லை — நினைவகம் நிரம்பியிருக்கலாம்', 'Could not save — storage may be full') + '</div>'; return false; } return true; };
+    const sg = document.getElementById('ex-style') || (() => { const s = document.createElement('style'); s.id = 'ex-style'; s.textContent = '.hr-tabs{display:flex;gap:6px;margin:4px 0 10px}.hr-tabs button{flex:1;min-height:46px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font:800 12.5px inherit;font-family:inherit;cursor:pointer;color:var(--sub)}.hr-tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}.ex-seg{display:flex;gap:6px}.ex-seg button{flex:1;min-height:46px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:800 13px inherit;font-family:inherit;cursor:pointer}.ex-seg button.on.exp{background:#FDECEA;border-color:#C0392B;color:#C0392B}.ex-seg button.on.inc{background:#E6F6EC;border-color:#1E8449;color:#1E8449}.ex-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:8px}.ex-row .d{min-width:0;flex:1}.ex-row .a{font-weight:900;white-space:nowrap}.ex-bar{display:flex;align-items:flex-end;gap:4px;height:120px;margin-top:10px}.ex-bar>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;height:100%}.ex-bar i{display:block;width:100%;border-radius:4px 4px 0 0;min-height:1px}.ex-bar small{font-size:9.5px;color:var(--sub)}'; document.head.appendChild(s); return s; })(); void sg;
+    const catName = (c) => c;
+    function paint() {
+      const D = exLoad(); if (!f.cat || !D.cats.includes(f.cat)) f.cat = D.cats[0] || ''; let h = '';
+      h += '<div class="hr-tabs" role="tablist">' + [['add', '➕', B('பதி', 'Add')], ['list', '📋', B('பதிவுகள்', 'Entries')], ['sum', '📊', B('சுருக்கம்', 'Summary')], ['data', '⚙️', B('தரவு', 'Data')]].map((t) => '<button type="button" role="tab" data-tab="' + t[0] + '" class="' + (tab === t[0] ? 'on' : '') + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + ' ' + t[2] + '</button>').join('') + '</div>' + notice; notice = '';
+      if (tab === 'add') {
+        const ed = editId && D.entries.find((e) => e.id === editId); if (ed) f = { type: ed.type, date: ed.d, cat: ed.cat, mode: ed.mode, amt: ed.amt, desc: ed.desc };
+        h += (ed ? '<div class="dx-warn" style="margin-top:0">✏️ ' + B('பதிவைத் திருத்துகிறீர்கள்', 'Editing an entry') + '</div>' : '') + '<div class="ex-seg"><button type="button" data-type="exp" class="exp ' + (f.type === 'exp' ? 'on' : '') + '">− ' + B('செலவு', 'Expense') + '</button><button type="button" data-type="inc" class="inc ' + (f.type === 'inc' ? 'on' : '') + '">+ ' + B('வரவு', 'Income') + '</button></div>' +
+          '<div class="dx-grid" style="margin-top:10px"><div class="dx-f"><label>' + B('தொகை ₹', 'Amount ₹') + '</label><input type="number" inputmode="decimal" min="0" step="any" id="exAmt" value="' + esc(f.amt || '') + '" autofocus></div><div class="dx-f"><label>' + B('தேதி', 'Date') + '</label><input type="date" id="exDate" value="' + esc(f.date) + '"></div></div>' +
+          '<div class="dx-f"><label>' + B('வகை', 'Category') + '</label><select id="exCat">' + D.cats.map((c) => '<option' + (c === f.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div><div class="dx-grid"><div class="dx-f"><label>' + B('விளக்கம்', 'Description') + '</label><input type="text" id="exDesc" value="' + esc(f.desc || '') + '" autocomplete="off"></div><div class="dx-f"><label>' + B('முறை', 'Mode') + '</label><select id="exMode">' + EX_MODES.map((m) => '<option' + (m === f.mode ? ' selected' : '') + '>' + m + '</option>').join('') + '</select></div></div><div data-k="msg" aria-live="polite"></div>' +
+          '<div class="dx-row"><button type="button" class="dx-btn" data-add="1">💾 ' + (ed ? B('புதுப்பி', 'Update') : B('சேமி', 'Save')) + '</button>' + (ed ? '<button type="button" class="dx-btn sec" data-canceledit="1">' + B('ரத்து', 'Cancel') + '</button>' : '') + '</div>' + (last && !ed ? '<div class="dx-ok" style="display:flex;align-items:center;gap:8px;justify-content:space-between">✓ ' + esc(last.desc || last.cat) + ' · ₹' + inrPlain(num(last.amt)) + '<button type="button" class="dx-btn sec" data-undo="1" style="flex:0 0 auto;min-height:38px">↩ ' + B('நீக்கு', 'Undo') + '</button></div>' : '');
+      } else if (tab === 'list') {
+        const ms = fyMonths(fy), rows = D.entries.filter((e) => (flt.m === 'all' ? ms.some((m) => m.key === e.d.slice(0, 7)) : e.d.slice(0, 7) === flt.m) && (flt.c === 'all' || e.cat === flt.c) && (!flt.q || (e.desc + ' ' + e.cat).toLowerCase().includes(flt.q.toLowerCase()))).sort((a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : b.t - a.t));
+        const inc = rows.filter((e) => e.type === 'inc').reduce((a, e) => a + num(e.amt), 0), exp = rows.filter((e) => e.type === 'exp').reduce((a, e) => a + num(e.amt), 0);
+        h += '<div class="dx-grid"><div class="dx-f"><label>' + B('மாதம்', 'Month') + '</label><select data-flt="m"><option value="all">' + B('நிதியாண்டு ', 'FY ') + fyLabel(fy) + '</option>' + ms.map((m) => '<option value="' + m.key + '"' + (flt.m === m.key ? ' selected' : '') + '>' + (isEn() ? MON_EN : MON_TA)[m.m] + ' ' + m.y + '</option>').join('') + '</select></div><div class="dx-f"><label>' + B('வகை', 'Category') + '</label><select data-flt="c"><option value="all">' + B('அனைத்தும்', 'All') + '</option>' + D.cats.map((c) => '<option' + (flt.c === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div></div><div class="dx-f"><input type="search" data-flt="q" value="' + esc(flt.q) + '" placeholder="' + esc(B('தேடு…', 'Search…')) + '" aria-label="' + esc(B('தேடு', 'Search')) + '" style="width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit"></div>' +
+          '<div class="dx-sum" style="margin-top:10px"><table><tr><td>' + B('வரவு', 'Income') + '</td><td>' + inr(inc) + '</td></tr><tr><td>' + B('செலவு', 'Expense') + '</td><td>' + inr(exp) + '</td></tr><tr><td><b>' + B('மீதம்', 'Net') + '</b></td><td>' + inr(inc - exp) + '</td></tr></table></div>' +
+          (rows.length ? rows.slice(0, 300).map((e) => '<div class="ex-row"><div class="d"><b>' + esc(e.desc || e.cat) + '</b><div class="dx-hint" style="margin:0">' + fmtDMY(e.d) + ' · ' + esc(e.cat) + ' · ' + esc(e.mode) + '</div></div><div class="a" style="color:' + (e.type === 'inc' ? '#1E8449' : '#C0392B') + '">' + (e.type === 'inc' ? '+' : '−') + inrPlain(num(e.amt)) + '</div><button type="button" class="dx-btn sec" data-edit="' + e.id + '" aria-label="' + esc(B('திருத்து', 'Edit')) + '" style="flex:0 0 44px;padding:0">✏️</button><button type="button" class="dx-del" data-del="' + e.id + '" aria-label="' + esc(B('நீக்கு', 'Delete')) + '">✕</button></div>').join('') + (rows.length > 300 ? '<div class="dx-hint">' + B('முதல் 300 மட்டும் — வடிகட்டவும்', 'Showing the first 300 — use the filters') + '</div>' : '') : '<div class="dx-note" style="margin-top:10px">' + B('பதிவுகள் இல்லை', 'No entries') + '</div>');
+      } else if (tab === 'sum') {
+        const X = exSummary(D, fy), mx = Math.max(1, ...X.inc, ...X.expM), mname = (m) => (isEn() ? MON_EN : MON_TA)[m.m].slice(0, isEn() ? 3 : 4);
+        h += '<div class="dx-row" style="margin-top:0;display:flex"><button type="button" class="dx-btn sec" data-fy="-1" aria-label="' + esc(B('முந்தைய ஆண்டு', 'Previous year')) + '" style="flex:0 0 52px">‹</button><div style="flex:1;text-align:center;font-weight:900;align-self:center">' + B('நிதியாண்டு', 'FY') + ' ' + fyLabel(fy) + '</div><button type="button" class="dx-btn sec" data-fy="1" aria-label="' + esc(B('அடுத்த ஆண்டு', 'Next year')) + '" style="flex:0 0 52px">›</button></div>' +
+          '<div class="dx-sum"><div class="tot">' + inr((X.totInc - X.totExp) / 100) + '</div><table><tr><td>' + B('மொத்த வரவு', 'Total income') + '</td><td>' + inr(X.totInc / 100) + '</td></tr><tr><td>' + B('மொத்த செலவு', 'Total expense') + '</td><td>' + inr(X.totExp / 100) + '</td></tr></table></div>' +
+          '<div class="ex-bar" role="img" aria-label="' + esc(B('மாதவாரி வரவு செலவு', 'Monthly income and expense')) + '">' + X.ms.map((m, i) => '<div><div style="display:flex;align-items:flex-end;gap:2px;height:100%;width:100%"><i style="background:#2E9E5B;height:' + Math.round(X.inc[i] / mx * 100) + '%"></i><i style="background:#E0594B;height:' + Math.round(X.expM[i] / mx * 100) + '%"></i></div><small>' + mname(m) + '</small></div>').join('') + '</div><div class="dx-hint"><span style="color:#2E9E5B">■</span> ' + B('வரவு', 'Income') + ' &nbsp; <span style="color:#E0594B">■</span> ' + B('செலவு', 'Expense') + '</div>' +
+          '<h3 class="dx-h">' + B('வகை வாரியாக செலவு', 'Expense by category') + '</h3><div class="dx-wrap"><table class="dx-tbl"><tr><th>' + B('வகை', 'Category') + '</th>' + X.ms.map((m) => '<th>' + mname(m) + '</th>').join('') + '<th>' + B('மொத்தம்', 'Total') + '</th></tr>' + X.cats.filter((c) => X.mat[c].some(Boolean)).map((c) => '<tr><td>' + esc(c) + '</td>' + X.mat[c].map((v) => '<td>' + (v ? inrPlain(v / 100) : '') + '</td>').join('') + '<td><b>' + inrPlain(X.mat[c].reduce((a, b) => a + b, 0) / 100) + '</b></td></tr>').join('') + '<tr><th>' + B('மொத்தம்', 'Total') + '</th>' + X.expM.map((v) => '<th>' + (v ? inrPlain(v / 100) : '') + '</th>').join('') + '<th>' + inrPlain(X.totExp / 100) + '</th></tr></table></div>';
+        if (!D.entries.length) h += '<div class="dx-note" style="margin-top:10px">' + B('"பதி" தாவலில் முதல் பதிவைச் சேர்க்கவும்.', 'Add your first entry in the "Add" tab.') + '</div>';
+      } else {
+        h += '<div class="dx-f"><label>' + B('வணிகப் பெயர் (Excel தலைப்பில்)', 'Business name (on the Excel title)') + '</label><input type="text" id="exBiz" value="' + esc(D.biz) + '" autocomplete="off"></div><div class="dx-f"><label>' + B('வகைகள் (ஒரு வரிக்கு ஒன்று)', 'Categories (one per line)') + '</label><textarea id="exCats" rows="8">' + esc(D.cats.join('\n')) + '</textarea></div><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-savecfg="1">💾 ' + B('சேமி', 'Save') + '</button></div>' +
+          '<h3 class="dx-h">' + B('ஏற்றுமதி', 'Export') + ' — ' + B('நிதியாண்டு', 'FY') + ' ' + fyLabel(fy) + '</h3><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-exp="xlsx">📊 Excel</button><button type="button" class="dx-btn sec" data-exp="csv">CSV</button></div>' +
+          '<h3 class="dx-h">Backup / Restore</h3><div class="dx-warn" style="margin-top:0">' + B('தரவு இந்த phone / browser-ல் மட்டுமே இருக்கும். "Clear browsing data" செய்தால் அழியும் — மாதம் ஒருமுறை Backup எடுங்கள்.', 'Data lives only on this phone / browser and is erased by "Clear browsing data" — take a backup every month.') + '</div><div class="dx-row" style="border:none;padding:0"><button type="button" class="dx-btn" data-backup="1">⬇️ Backup</button><button type="button" class="dx-btn sec" data-restore="1">⬆️ Restore</button></div><input type="file" id="exFile" accept="application/json,.json" style="display:none"><div data-k="data"></div>';
+      }
+      host.innerHTML = h;
+    }
+    const note = (k, kind, t) => { const n = host.querySelector('[data-k=' + k + ']'); if (n) n.innerHTML = '<div class="dx-' + kind + '" role="' + (kind === 'err' ? 'alert' : 'status') + '">' + t + '</div>'; };
+    const grab = () => { const g = (id) => { const e = host.querySelector('#' + id); return e ? e.value : ''; }; f = Object.assign(f, { amt: g('exAmt'), date: g('exDate'), cat: g('exCat'), desc: g('exDesc'), mode: g('exMode') }); };
+    host.addEventListener('click', async (ev) => {
+      const b = ev.target.closest && ev.target.closest('button'); if (!b) return; const d = b.dataset;
+      if (d.tab) { if (tab === 'add') grab(); tab = d.tab; if (tab !== 'add') editId = null; return paint(); }
+      if (d.type) { grab(); f.type = d.type; return paint(); }
+      if (d.add) {
+        grab(); const amt = num(f.amt), errs = [];
+        if (!(amt > 0)) errs.push(B('தொகை 0-ஐ விட அதிகமாக இருக்க வேண்டும்', 'Amount must be more than 0')); if (!validISO(f.date)) errs.push(B('சரியான தேதி தேர்வு செய்யுங்கள்', 'Choose a valid date')); if (!f.cat) errs.push(B('வகையைத் தேர்வு செய்யுங்கள்', 'Choose a category'));
+        if (errs.length) return note('msg', 'err', errs.map(esc).join('<br>'));
+        const D = exLoad(); // fresh read: never overwrite another tab's entries
+        if (editId) { const i = D.entries.findIndex((e) => e.id === editId); if (i >= 0) D.entries[i] = Object.assign(D.entries[i], { type: f.type, d: f.date, cat: f.cat, mode: f.mode, amt: String(amt), desc: f.desc.trim() }); editId = null; last = null; }
+        else { last = { id: hrUid(), t: Date.now(), type: f.type, d: f.date, cat: f.cat, mode: f.mode, amt: String(amt), desc: f.desc.trim() }; D.entries.push(last); }
+        if (save(D)) { f.amt = ''; f.desc = ''; if (fyStartOf(f.date) !== fy) fy = fyStartOf(f.date); } return paint();
+      }
+      if (d.undo && last) { const D = exLoad(); D.entries = D.entries.filter((e) => e.id !== last.id); save(D); last = null; return paint(); }
+      if (d.canceledit) { editId = null; f.amt = ''; f.desc = ''; return paint(); }
+      if (d.edit) { editId = d.edit; tab = 'add'; return paint(); }
+      if (d.del) { const D = exLoad(), e = D.entries.find((x) => x.id === d.del); if (!e || !confirm((e.desc || e.cat) + ' ₹' + inrPlain(num(e.amt)) + ' — ' + B('நீக்கவா?', 'Delete?'))) return; D.entries = D.entries.filter((x) => x.id !== d.del); save(D); return paint(); }
+      if (d.fy) { fy += +d.fy; flt.m = 'all'; return paint(); }
+      if (d.savecfg) { const D = exLoad(), cats = host.querySelector('#exCats').value.split('\n').map((s) => s.trim()).filter((s, i, a) => s && a.indexOf(s) === i); if (!cats.length) return note('data', 'err', B('குறைந்தது ஒரு வகை வேண்டும்', 'Keep at least one category')); D.cats = cats; D.biz = host.querySelector('#exBiz').value.trim(); if (save(D)) note('data', 'ok', '✓ ' + B('சேமிக்கப்பட்டது', 'Saved')); return; }
+      if (d.backup) { downloadBlob(new Blob([JSON.stringify(Object.assign({ app: 'pti-expense' }, exLoad()), null, 1)], { type: 'application/json' }), 'Expense-backup-' + today + '.json'); return note('data', 'ok', '✓ ' + B('Backup பதிவிறக்கப்பட்டது', 'Backup downloaded')); }
+      if (d.restore) return host.querySelector('#exFile').click();
+      if (d.exp) return exportFY(d.exp);
+    });
+    host.addEventListener('input', (ev) => { const t = ev.target; if (t.dataset && t.dataset.flt === 'q') { flt.q = t.value; const pos = t.selectionStart; paint(); const n = host.querySelector('[data-flt=q]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } } });
+    host.addEventListener('change', async (ev) => {
+      const t = ev.target;
+      if (t.dataset && t.dataset.flt && t.dataset.flt !== 'q') { flt[t.dataset.flt] = t.value; return paint(); }
+      if (t.id === 'exFile' && t.files[0]) {
+        try { const j = JSON.parse(await t.files[0].text()); if (j.app !== 'pti-expense' || !Array.isArray(j.entries) || !Array.isArray(j.cats)) throw new Error('bad'); if (!confirm(B('Restore செய்தால் தற்போதைய தரவு மாற்றப்படும் (' + j.entries.length + ' பதிவு). தொடரவா?', 'Restoring replaces current data (' + j.entries.length + ' entries). Continue?'))) return; delete j.app; save(Object.assign({ v: 1, biz: '' }, j)); paint(); note('data', 'ok', '✓ ' + B('Restore முடிந்தது', 'Restored')); } catch (e) { note('data', 'err', B('இது சரியான Backup கோப்பு அல்ல', 'This is not a valid backup file')); } t.value = '';
+      }
+    });
+    function exportFY(kind) {
+      const D = exLoad(), X = exSummary(D, fy), keys = X.ms.map((m) => m.key), rows = D.entries.filter((e) => keys.includes(e.d.slice(0, 7))).sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : a.t - b.t));
+      if (!rows.length) return note('data', 'err', B('இந்த நிதியாண்டில் பதிவுகள் இல்லை', 'No entries in this financial year'));
+      if (kind === 'csv') {
+        const q = (s) => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"', csv = '﻿' + ['Date,Type,Description,Category,Amount,Mode'].concat(rows.map((e) => [e.d, e.type === 'inc' ? 'Income' : 'Expense', q(e.desc), q(e.cat), num(e.amt), q(e.mode)].join(','))).join('\r\n');
+        return downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'Expenses_FY' + fyLabel(fy) + '.csv');
+      }
+      try {
+        if (typeof XLSX === 'undefined') throw new Error('Excel library not loaded');
+        const wb = XLSX.utils.book_new(), z = '"₹"#,##0.00', N = rows.length + 1;
+        const logHead = ['Date', 'Type', 'Description', 'Category', 'Amount', 'Mode'], log = [logHead].concat(rows.map((e) => [{ t: 'n', v: xlSerial(e.d), z: 'dd-mm-yyyy' }, e.type === 'inc' ? 'Income' : 'Expense', e.desc, e.cat, { t: 'n', v: num(e.amt), z }, e.mode]));
+        const wl = XLSX.utils.aoa_to_sheet(log); wl['!cols'] = [{ wch: 12 }, { wch: 9 }, { wch: 30 }, { wch: 28 }, { wch: 14 }, { wch: 13 }]; wl['!autofilter'] = { ref: 'A1:F' + N };
+        const cols = 'BCDEFGHIJKLM'.split(''), sum = [[(D.biz ? D.biz + ' — ' : '') + 'செலவுக் கணக்கு / Expense Tracker — FY ' + fyLabel(fy)], ['வகை / Category'].concat(X.ms.map((m) => ({ t: 'n', v: xlSerial(m.key + '-01'), z: 'mmm-yy' })), ['Total'])];
+        const sf = (c, i, cat) => 'SUMIFS(Log!$E$2:$E$' + N + ',Log!$B$2:$B$' + N + ',"' + (cat ? 'Expense' : 'Income') + '"' + (cat ? ',Log!$D$2:$D$' + N + ',$A' + c : '') + ',Log!$A$2:$A$' + N + ',">="&' + cols[i] + '$2,Log!$A$2:$A$' + N + ',"<"&EDATE(' + cols[i] + '$2,1))';
+        X.cats.forEach((c, r) => { const rn = r + 3; sum.push([c].concat(X.mat[c].map((v, i) => ({ t: 'n', f: sf(rn, i, true), v: v / 100, z })), [{ t: 'n', f: 'SUM(B' + rn + ':M' + rn + ')', v: X.mat[c].reduce((a, b) => a + b, 0) / 100, z }])); });
+        const f0 = 3, f1 = X.cats.length + 2, tr = f1 + 1;
+        sum.push(['மொத்த செலவு / Total expense'].concat(X.expM.map((v, i) => ({ t: 'n', f: 'SUM(' + cols[i] + f0 + ':' + cols[i] + f1 + ')', v: v / 100, z })), [{ t: 'n', f: 'SUM(N' + f0 + ':N' + f1 + ')', v: X.totExp / 100, z }]));
+        sum.push(['வரவு / Income'].concat(X.inc.map((v, i) => ({ t: 'n', f: sf(tr + 1, i, false), v: v / 100, z })), [{ t: 'n', f: 'SUM(B' + (tr + 1) + ':M' + (tr + 1) + ')', v: X.totInc / 100, z }]));
+        sum.push(['மீதம் / Net'].concat(X.inc.map((v, i) => ({ t: 'n', f: cols[i] + (tr + 1) + '-' + cols[i] + tr, v: (v - X.expM[i]) / 100, z })), [{ t: 'n', f: 'N' + (tr + 1) + '-N' + tr, v: (X.totInc - X.totExp) / 100, z }]));
+        const ws = XLSX.utils.aoa_to_sheet(sum); ws['!cols'] = [{ wch: 34 }].concat(Array(12).fill({ wch: 11 }), [{ wch: 14 }]); ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Summary'); XLSX.utils.book_append_sheet(wb, wl, 'Log'); wb.Workbook = { CalcPr: { fullCalcOnLoad: true } };
+        downloadBlob(new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Expenses_FY' + fyLabel(fy) + '.xlsx');
+        note('data', 'ok', '✓ ' + B('Excel தயார் — Log தாளில் சேர்த்தால் Summary தானாகக் கூடும்', 'Excel ready — add rows to the Log sheet and the Summary updates itself'));
+      } catch (err) { note('data', 'err', esc(err && err.message || err)); }
+    }
+    window.addEventListener('storage', (ev) => { if (host.isConnected && ev.key === EX_KEY && tab !== 'add') paint(); });
+    void catName; paint();
+  }
+  TOOL_IMPL.expensetracker = { mount(container) { mountExpense(container); } };
+  TOOL_IMPL.expensetracker._f = { exSummary, fyMonths, fyStartOf };
+
   TOOL_IMPL.quotepo = { mount(container) { mountBizDoc(container, 'quotepo', null); } };
   TOOL_IMPL.quotepo._f = { calcDoc, gstinCheck, fyOf, wrapLines, bizCols, STATES, numWords: words };
 

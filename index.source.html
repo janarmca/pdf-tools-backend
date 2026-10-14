@@ -440,7 +440,7 @@ const TOOLS = [
   {id:'businesscard', name:'Business Card Maker', desc:'Business card with 4 layouts, Tamil name, QR (contact / UPI / website), 10-up A4 cut sheet, vCard', icon:'💳', color:'#1A5276', cat:'business',lazy:'docs'},
   {id:'prescription', name:'Prescription Pad Generator', desc:'Doctor Rx pad — patient details, medicines (dosage/frequency), advice, signature', icon:'⚕️', color:'#00897B', cat:'business', cost:0,lazy:'docs'},
   {id:'resumebuilder', name:'Resume Builder', desc:'Build a resume from scratch — 4 templates, auto-saves your info, ATS-friendly', icon:'📋', color:'#1565C0', cat:'business', cost:0},
-  {id:'expensetracker', name:'Expense Tracker Template', desc:'Downloadable Excel with categories & auto-totals', icon:'📊', color:'#B7950B', cat:'business'},
+  {id:'expensetracker', name:'Expense Tracker', desc:'Income & expense log for the financial year — categories, monthly totals, charts, backup, Excel with live formulas', icon:'📊', color:'#B7950B', cat:'business',lazy:'docs'},
   {id:'gstchecking', name:'GST Checking (Books vs GSTR-2B)', desc:'Reconcile your books against GSTR-2B', icon:'📗', color:'#1F6B45', cat:'business'},
   {id:'stmtcompare', name:'Statement Reconciliation', desc:'Compare Buyer vs Supplier statements (PDF/Excel/Text) — find mismatches automatically', icon:'🔍', color:'#B7410E', cat:'business'},
   {id:'astrologyplus', name:'Astrology+ (Vedic Birth Chart)', desc:'Birth chart, Dasha, match-making — accuracy-first, no fabricated data', icon:'🪐', color:'#17345F', cat:'business', cost:2},
@@ -1932,7 +1932,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261014i`;
+    s.src = `category-${cat}.js?v=20261014j`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -14846,54 +14846,7 @@ TOOL_IMPL.tamiltext = {
 /* tamiltracing — moved to category-education.js (lazy-loaded) */
 // paymentvoucher lives in category-docs.js (shared receipts engine)
 /* ===================== EXPENSE TRACKER TEMPLATE (Excel) ===================== */
-TOOL_IMPL.expensetracker = {
-  mount(container){
-    const body = el(`<div></div>`); container.appendChild(body);
-    function paint(){
-      body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Downloads a ready-to-use Excel — categories, monthly columns, and totals already set up with formulas.</div>`));
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">📊 Download Expense Tracker</button>`);
-      btn.onclick = doGenerate;
-      row.appendChild(btn);
-      body.appendChild(row);
-    }
-    async function doGenerate(){
-      const prog = mountProgress(body);
-      try{
-        prog.set(40,'Building template…');
-        const categories = ['Rent','Salaries','Utilities','Supplies','Travel','Marketing','Maintenance','Miscellaneous'];
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const header = ['Category', ...months, 'Total'];
-        const aoa = [header];
-        categories.forEach((cat, r)=>{
-          const row = [cat, ...months.map(()=>0)];
-          const rowNum = r+2; // account for header row
-          const firstCol = 'B', lastCol = 'M';
-          row.push({ f: `SUM(${firstCol}${rowNum}:${lastCol}${rowNum})` });
-          aoa.push(row);
-        });
-        const totalRow = ['TOTAL'];
-        for(let c=0;c<12;c++){
-          const colLetter = String.fromCharCode(66+c); // B..M
-          totalRow.push({ f: `SUM(${colLetter}2:${colLetter}${categories.length+1})` });
-        }
-        totalRow.push({ f: `SUM(N2:N${categories.length+1})` });
-        aoa.push(totalRow);
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws['!cols'] = [{wch:16}, ...Array(12).fill({wch:9}), {wch:12}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Expense Tracker');
-        prog.set(90,'Preparing…');
-        const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        downloadBlob(new Blob([out],{type:'application/octet-stream'}), 'expense-tracker.xlsx');
-        prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Expense Tracker (.xlsx) downloaded — fill in your numbers, totals calculate automatically.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
-    }
-    paint();
-  }
-};
+// expensetracker lives in category-docs.js
 
 /* ===================== EMI / LOAN CALCULATOR ===================== */
 TOOL_IMPL.emicalc = {
