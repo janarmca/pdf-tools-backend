@@ -51,7 +51,8 @@
       var sq = await M.api('mat_admin_submissions', { st: sst });
       if (!v.isConnected) return;
       var sub = '<div class="tabsx">' + [['subs', t('புதியவை', 'New')], ['subs-contacted', t('தொடர்பு கொண்டவை', 'Contacted')], ['subs-done', t('முடிந்தவை', 'Done')]].map(function (x) { return '<a class="' + (tab === x[0] ? 'on' : '') + '" href="#/admin/' + x[0] + '">' + esc(x[1]) + '</a>'; }).join('') + '</div>';
-      v.innerHTML = head + sub + ((sq.items || []).length ? sq.items.map(function (r) {
+      var bar = '<div class="rowb"><input id="asq" type="search" placeholder="' + esc(t('பெயர் / எண் / ஊர் தேடு…', 'Search name / phone / city…')) + '" style="flex:1;min-width:160px"><button class="btn sm" data-act="aExport">⬇ ' + t('Excel/CSV பதிவிறக்கம்', 'Download CSV') + '</button></div>';
+      v.innerHTML = head + sub + bar + ((sq.items || []).length ? sq.items.map(function (r) {
         var d = r.data || {}, ph = (r.photos || []).map(function (x) { return '<img alt="" data-ph="' + esc(x) + '">'; }).join('');
         var rows = [['கல்வி', M.label('education', d.education)], [t('கல்வி விவரம்', 'Course'), d.education_detail], [t('தொழில்', 'Occupation'), d.occupation], [t('வருமானம்', 'Income'), M.label('income_band', d.income_band)], [t('உயரம்', 'Height'), d.height_cm ? d.height_cm + ' cm' : ''],
           [t('குலம்', 'Kulam'), d.kulam], [t('கோத்திரம்', 'Gotra'), d.gotra], [t('நட்சத்திரம்', 'Star'), M.label('star', d.star)], [t('ராசி', 'Raasi'), M.label('raasi', d.raasi)], [t('தோஷம்', 'Dosham'), M.label('dosham', d.dosham)],
@@ -59,21 +60,23 @@
           [t('சகோதரர்/சகோதரி', 'Siblings'), (d.brothers != null ? d.brothers + ' B' + (d.brothers_married != null ? ' (' + d.brothers_married + ' married)' : '') : '') + ' ' + (d.sisters != null ? d.sisters + ' S' + (d.sisters_married != null ? ' (' + d.sisters_married + ' married)' : '') : '')],
           [t('சொந்த ஊர்', 'Native'), d.native_place], [t('ஊர்', 'City'), [d.city, d.district, M.label('state', d.state), d.country].filter(Boolean).join(', ')], [t('குடும்பம்', 'Family'), [M.label('family_type', d.family_type), M.label('family_status', d.family_status)].filter(Boolean).join(' · ')],
           [t('குடும்பம் பற்றி', 'About family'), d.family_about], [t('பற்றி', 'About'), d.about], [t('பதிவு செய்தவர்', 'By'), M.label('created_for', d.created_for)]].filter(function (x) { return x[1] && String(x[1]).trim(); });
-        return '<div class="arow big"><div class="ahd"><b>' + esc(d.name || '?') + '</b> · ' + (d.gender === 'M' ? t('ஆண்', 'M') : t('பெண்', 'F')) + ' · ' + (r.age != null ? r.age : '') + ' · ' + esc(M.commLabel(d)) + ' <span class="mut sm">' + M.ago(r.created_at) + '</span>' + (r.listed ? ' <span class="tg">🌐 ' + t('பட்டியலில் உள்ளது', 'Public') + '</span>' : '') + '</div>' +
+        return '<div class="arow big asub" data-q="' + esc([d.name, r.phone, r.email, d.city, d.district].join(' ').toLowerCase()) + '"><div class="ahd"><b>' + esc(d.name || '?') + '</b> · ' + (d.gender === 'M' ? t('ஆண்', 'M') : t('பெண்', 'F')) + ' · ' + (r.age != null ? r.age : '') + ' · ' + esc(M.commLabel(d)) + ' <span class="mut sm">' + M.ago(r.created_at) + '</span>' + (r.listed ? ' <span class="tg">🌐 ' + t('பட்டியலில் உள்ளது', 'Public') + '</span>' : '') + '</div>' +
           '<div class="aph">' + (ph || '<span class="mut">' + t('படம் இல்லை', 'No photo') + '</span>') + '</div>' +
           (r.horoscope ? '<div class="horo"><a href="#" data-act="aHoro" data-p="' + esc(r.horoscope) + '"><img alt="" data-ph="' + esc(r.horoscope) + '"><span>📄 ' + t('ஜாதகத்தைப் பெரிதாகப் பார்க்க / பதிவிறக்க', 'Open / download horoscope') + '</span></a></div>' : '<p class="mut sm">📄 ' + t('ஜாதகம் பதிவேற்றப்படவில்லை', 'No horoscope uploaded') + '</p>') +
           '<div class="pvt2">📞 <a href="tel:' + esc(r.phone) + '"><b>' + esc(r.phone) + '</b></a> &nbsp; ✉ <b>' + esc(r.email || '—') + '</b></div>' +
           '<dl class="sdl">' + rows.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>' +
           (r.note ? '<p class="mut sm">' + t('குறிப்பு: ', 'Note: ') + esc(r.note) + '</p>' : '') +
-          '<div class="rowb">' + (r.status !== 'contacted' ? '<button class="btn sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="contacted">📞 ' + t('தொடர்பு கொண்டேன்', 'Contacted') + '</button>' : '') + (r.status !== 'done' ? '<button class="btn pri sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="done">✓ ' + t('முடிந்தது', 'Done') + '</button>' : '') + (r.status !== 'new' ? '<button class="btn ghost sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="new">↺ ' + t('புதியது', 'New') + '</button>' : '') + '<button class="btn sm ' + (r.listed ? 'ghost' : 'pri') + '" data-act="aList" data-id="' + esc(r.id) + '" data-on="' + (r.listed ? '0' : '1') + '">' + (r.listed ? '🚫 ' + t('பட்டியலிலிருந்து நீக்கு', 'Remove from public list') : '🌐 ' + t('பொதுப் பட்டியலில் சேர்', 'Publish to public list')) + '</button>' + '</div></div>';
+          '<div class="rowb">' + (r.status !== 'contacted' ? '<button class="btn sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="contacted">📞 ' + t('தொடர்பு கொண்டேன்', 'Contacted') + '</button>' : '') + (r.status !== 'done' ? '<button class="btn pri sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="done">✓ ' + t('முடிந்தது', 'Done') + '</button>' : '') + (r.status !== 'new' ? '<button class="btn ghost sm" data-act="aSub" data-id="' + esc(r.id) + '" data-s="new">↺ ' + t('புதியது', 'New') + '</button>' : '') + '<button class="btn sm ' + (r.listed ? 'ghost' : 'pri') + '" data-act="aList" data-id="' + esc(r.id) + '" data-on="' + (r.listed ? '0' : '1') + '">' + (r.listed ? '🚫 ' + t('பட்டியலிலிருந்து நீக்கு', 'Remove from public list') : '🌐 ' + t('பொதுப் பட்டியலில் சேர்', 'Publish to public list')) + '</button>' + '<button class="btn ghost sm" data-act="aSubDel" data-id="' + esc(r.id) + '">🗑 ' + t('நீக்கு', 'Delete') + '</button></div></div>';
       }).join('') : '<p class="mut">' + t('இங்கு எதுவும் இல்லை.', 'Nothing here.') + '</p>') + '</div>';
       M.hydrate(v);
+      var sbx = M.$('#asq', v); if (sbx) sbx.addEventListener('input', function () { var q = sbx.value.trim().toLowerCase(); M.$$('.asub', v).forEach(function (el) { el.style.display = !q || el.getAttribute('data-q').indexOf(q) >= 0 ? '' : 'none'; }); });
+      
       return;
     }
     if (tab === 'stats') {
       var s = await M.api('mat_admin_stats');
       if (!v.isConnected) return;
-      v.innerHTML = head + '<div class="stats">' + [['new_submissions', t('புதிய பதிவுகள்', 'New sign-ups')], ['pending', t('காத்திருப்பு', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['men', t('ஆண்கள்', 'Men')], ['women', t('பெண்கள்', 'Women')], ['unlocks', t('Chat திறப்புகள்', 'Chat unlocks')], ['open_reports', t('திறந்த புகார்கள்', 'Open reports')]].map(function (k) { return '<div><b>' + (s[k[0]] || 0) + '</b><span>' + esc(k[1]) + '</span></div>'; }).join('') + '<div><b>₹' + ((s.revenue_paise || 0) / 100) + '</b><span>' + t('வருவாய்', 'Revenue') + '</span></div></div></div>';
+      v.innerHTML = head + '<div class="stats">' + [['new_submissions', t('புதிய பதிவுகள்', 'New sign-ups')], ['pending', t('காத்திருப்பு', 'Pending')], ['approved', t('அங்கீகரிக்கப்பட்டவை', 'Approved')], ['men', t('ஆண்கள்', 'Men')], ['women', t('பெண்கள்', 'Women')], ['submissions_total', t('மொத்த பதிவுகள் (login இன்றி)', 'Total sign-ups')], ['listed', t('பொதுப் பட்டியலில்', 'Publicly listed')], ['requests_total', t('தொடர்பு கோரிக்கைகள்', 'Contact requests')], ['new_requests', t('புதிய கோரிக்கைகள்', 'New requests')], ['members_total', t('உறுப்பினர் கணக்குகள்', 'Member accounts')], ['unlocks', t('Chat திறப்புகள்', 'Chat unlocks')], ['open_reports', t('திறந்த புகார்கள்', 'Open reports')]].map(function (k) { return '<div><b>' + (s[k[0]] || 0) + '</b><span>' + esc(k[1]) + '</span></div>'; }).join('') + '<div><b>₹' + ((s.revenue_paise || 0) / 100) + '</b><span>' + t('வருவாய்', 'Revenue') + '</span></div></div></div>';
       return;
     }
     if (tab === 'reports') {
@@ -130,6 +133,20 @@
   M.acts.pOn = async function (a) {
     var r = await M.B.promo('enabled', { on: a.getAttribute('data-on') === '1' });
     if (r.ok === false) return M.toast(r.message, 'bad'); M.route();
+  };
+  M.acts.aSubDel = async function (a) {
+    if (!confirm(t('இந்தப் பதிவை (படங்களுடன்) நிரந்தரமாக நீக்கவா?', 'Delete this sign-up and its photos permanently?'))) return;
+    var r = await M.api('mat_admin_submission_delete', { sid: a.getAttribute('data-id') });
+    if (!r.ok) return M.toast(M.err(r), 'bad'); M.toast('✓', 'ok'); M.route();
+  };
+  M.acts.aExport = async function (a) {
+    a.disabled = true; var r = await M.api('mat_admin_export'); a.disabled = false;
+    if (!r.ok) return M.toast(M.err(r), 'bad');
+    var cols = ['code', 'name', 'gender', 'age', 'phone', 'email', 'community', 'kulam', 'star', 'raasi', 'education', 'occupation', 'city', 'state', 'status', 'listed', 'created_at'];
+    var q = function (x) { x = x == null ? '' : String(x); return /[",\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+    var csv = '\ufeff' + cols.join(',') + '\n' + (r.items || []).map(function (it) { return cols.map(function (c) { return q(it[c]); }).join(','); }).join('\n');
+    var l = document.createElement('a'); l.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); l.download = 'sign-ups-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(l); l.click(); l.remove();
   };
   M.acts.aReq = async function (a) {
     var r = await M.api('mat_admin_contact_request_set', { rid: a.getAttribute('data-id'), st: 'done' });
