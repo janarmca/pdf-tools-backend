@@ -140,6 +140,22 @@ function checkConstraints(r) {
 // ---------------------------------------------------------------- functions (same names as before)
 const F = {};
 
+function memberRow(p, g, d, ph) {
+  return {
+    created_for: nz(p.created_for) || 'self', name: String(p.name ?? '').trim(), gender: g, dob: d,
+    religion: nz(p.religion) || 'hindu', community: nz(p.community) || 'other',
+    community_other: trimOrNull(p.community_other), kulam: trimOrNull(p.kulam), gotra: trimOrNull(p.gotra), mother_tongue: nz(p.mother_tongue),
+    star: nz(p.star), raasi: nz(p.raasi), dosham: nz(p.dosham) || 'no', marital: nz(p.marital) || 'never',
+    height_cm: toInt(p.height_cm), diet: nz(p.diet), education: nz(p.education), education_detail: trimOrNull(p.education_detail), occupation: trimOrNull(p.occupation),
+    employer_type: nz(p.employer_type), income_band: nz(p.income_band), city: trimOrNull(p.city), district: trimOrNull(p.district), state: nz(p.state),
+    country: nz(p.country) || 'India', father_occ: trimOrNull(p.father_occ), mother_occ: trimOrNull(p.mother_occ),
+    brothers: toInt(p.brothers), sisters: toInt(p.sisters), family_type: nz(p.family_type), family_status: nz(p.family_status),
+    father_name: trimOrNull(p.father_name), mother_name: trimOrNull(p.mother_name), native_place: trimOrNull(p.native_place),
+    brothers_married: toInt(p.brothers_married), sisters_married: toInt(p.sisters_married), family_about: trimOrNull(p.family_about),
+    about: trimOrNull(p.about), pref: JSON.stringify(p.pref && typeof p.pref === 'object' ? p.pref : {}), photos: JSON.stringify(ph),
+  };
+}
+
 F.mat_save_profile = async (db, uid, a) => {
   const p = a.p || {};
   if (!uid) return { ok: false, code: 'not_logged_in' };
@@ -160,19 +176,7 @@ F.mat_save_profile = async (db, uid, a) => {
   if (ph.length > 6) return { ok: false, code: 'photos' };
   if (ph.some((k) => k.slice(0, 37) !== uid + '/' || k.includes('..'))) return { ok: false, code: 'photos' };
 
-  const r = {
-    created_for: nz(p.created_for) || 'self', name: String(p.name ?? '').trim(), gender: g, dob: d,
-    religion: nz(p.religion) || 'hindu', community: nz(p.community) || 'other',
-    community_other: trimOrNull(p.community_other), kulam: trimOrNull(p.kulam), gotra: trimOrNull(p.gotra), mother_tongue: nz(p.mother_tongue),
-    star: nz(p.star), raasi: nz(p.raasi), dosham: nz(p.dosham) || 'no', marital: nz(p.marital) || 'never',
-    height_cm: toInt(p.height_cm), diet: nz(p.diet), education: nz(p.education), education_detail: trimOrNull(p.education_detail), occupation: trimOrNull(p.occupation),
-    employer_type: nz(p.employer_type), income_band: nz(p.income_band), city: trimOrNull(p.city), district: trimOrNull(p.district), state: nz(p.state),
-    country: nz(p.country) || 'India', father_occ: trimOrNull(p.father_occ), mother_occ: trimOrNull(p.mother_occ),
-    brothers: toInt(p.brothers), sisters: toInt(p.sisters), family_type: nz(p.family_type), family_status: nz(p.family_status),
-    father_name: trimOrNull(p.father_name), mother_name: trimOrNull(p.mother_name), native_place: trimOrNull(p.native_place),
-    brothers_married: toInt(p.brothers_married), sisters_married: toInt(p.sisters_married), family_about: trimOrNull(p.family_about),
-    about: trimOrNull(p.about), pref: JSON.stringify(p.pref && typeof p.pref === 'object' ? p.pref : {}), photos: JSON.stringify(ph),
-  };
+  const r = memberRow(p, g, d, ph);
   checkConstraints(r);
   const cols = Object.keys(r);
   let status = existing ? existing.status : 'pending';
@@ -536,6 +540,55 @@ F.mat_admin_submissions = async (db, uid, a) => {
   const rows = (await db.prepare('select * from mat_submissions where status = ? order by created_at desc').bind(a.st || 'new').all()).results;
   return { ok: true, items: rows.map((s) => { const data = safeParse(s.data, {}); return { ...s, data, photos: safeParse(s.photos, []), age: age(validDate(data.dob)) }; }) };
 };
+
+// ---------------------------------------------------------------- admin: read & edit any profile / sign-up
+F.mat_admin_get = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  if (a.kind === 's') {
+    const s = await db.prepare('select * from mat_submissions where id = ?').bind(String(a.id)).first();
+    if (!s) return { ok: false, code: 'not_found' };
+    return { ok: true, kind: 's', id: s.id, p: { ...safeParse(s.data, {}), photos: safeParse(s.photos, []), horoscope: s.horoscope || null }, phone: s.phone || '', email: s.email || '', status: s.status, listed: !!s.listed };
+  }
+  const r = await db.prepare('select p.*, v.phone as v_phone, v.email as v_email from mat_profiles p left join mat_private v on v.user_id = p.user_id where p.user_id = ?').bind(String(a.id)).first();
+  if (!r) return { ok: false, code: 'not_found' };
+  const o = profileOut(omit(r, ['v_phone', 'v_email']));
+  return { ok: true, kind: 'm', id: r.user_id, p: o, phone: r.v_phone || '', email: r.v_email || '', status: r.status, listed: !!r.listed };
+};
+
+F.mat_admin_save = async (db, uid, a) => {
+  if (!(await adminOnly(db, uid))) return { ok: false, code: 'forbidden' };
+  const p = a.p || {}, id = String(a.id || '');
+  const nm = String(p.name ?? '').trim();
+  if ([...nm].length < 2 || [...nm].length > 60) return { ok: false, code: 'name' };
+  const g = p.gender;
+  if (g !== 'M' && g !== 'F') return { ok: false, code: 'gender' };
+  const d = validDate(p.dob);
+  if (!d) return { ok: false, code: 'dob' };
+  const ph = arr(p, 'photos');
+  if (ph.length > 6) return { ok: false, code: 'photos' };
+  const okPath = (k) => !k.includes('..') && (k.slice(0, 12) === 'submissions/' || (a.kind !== 's' && k.slice(0, id.length + 1) === id + '/'));
+  if (ph.some((k) => !okPath(k))) return { ok: false, code: 'photos' };
+  const phone = trimOrNull(a.phone), email = trimOrNull(a.email);
+  if (a.kind === 's') {
+    const horo = trimOrNull(p.horoscope);
+    if (horo && !okPath(horo)) return { ok: false, code: 'photos' };
+    const clean = {};
+    for (const k of SUBMIT_FIELDS) { const v = trimOrNull(p[k] == null ? null : String(p[k])); if (v != null) clean[k] = [...v].slice(0, 600).join(''); }
+    if (p.pref && typeof p.pref === 'object' && !Array.isArray(p.pref)) clean.pref = p.pref;
+    const res = await db.prepare('update mat_submissions set data = ?, photos = ?, horoscope = ?, phone = ?, email = ? where id = ?')
+      .bind(JSON.stringify(clean), JSON.stringify(ph), horo, phone ? phone.slice(0, 20) : '', email ? email.slice(0, 120) : null, id).run();
+    return res.meta.changes ? { ok: true } : { ok: false, code: 'not_found' };
+  }
+  const r = memberRow(p, g, d, ph);
+  r.name = nm;
+  checkConstraints(r);
+  const cols = Object.keys(r);
+  const res = await db.prepare(`update mat_profiles set ${cols.map((c) => c + ' = ?').join(', ')}, updated_at = ? where user_id = ?`).bind(...cols.map((c) => r[c]), now(), id).run();
+  if (!res.meta.changes) return { ok: false, code: 'not_found' };
+  await db.prepare('insert into mat_private (user_id, phone, email) values (?1, ?2, ?3) on conflict (user_id) do update set phone = coalesce(?2, mat_private.phone), email = coalesce(?3, mat_private.email)').bind(id, phone, email).run();
+  return { ok: true };
+};
+
 
 // every sign-up as flat rows (the admin page turns them into a CSV / Excel-openable download)
 F.mat_admin_export = async (db, uid) => {
