@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
+import { buildPlan, makeAnimVideo } from './promo-anim.mjs';
 
 // Fonts come from npm (@fontsource, installed by the workflow) and are loaded from disk, so a slow or blocked
 // Google Fonts request can no longer make the Tamil text fall back to an ugly font.
@@ -64,8 +65,10 @@ p{font-size:40px;font-weight:500;line-height:1.5;margin:46px 0 0;opacity:.95;max
 // English abbreviations spelt out in Tamil letters so the Tamil voice reads them as people say them
 const SAY = { PDF: 'பி டி எஃப்', GST: 'ஜி எஸ் டி', TDS: 'டி டி எஸ்', PAN: 'பான்', TAN: 'டான்', DSC: 'டி எஸ் சி', OCR: 'ஓ சி ஆர்', QR: 'கியூ ஆர்', AI: 'ஏ ஐ', JPG: 'ஜே பி ஜி', PNG: 'பி என் ஜி', ZIP: 'ஜிப்', EMI: 'இ எம் ஐ', HRA: 'எச் ஆர் ஏ', PF: 'பி எஃப்', ESI: 'இ எஸ் ஐ', CSV: 'சி எஸ் வி', PPT: 'பி பி டி', MP3: 'எம் பி த்ரீ', MP4: 'எம் பி போர்', Excel: 'எக்செல்', Word: 'வேர்டு', Tamil: 'தமிழ்', Aadhaar: 'ஆதார்' };
 const say = (x) => x.replace(/₹\s*([\d,]+)/g, '$1 ரூபாய்').replace(/e-?sign/gi, 'இ சைன்').replace(/[A-Za-z0-9]+/g, (w) => SAY[w] || SAY[w.toUpperCase()] || w);
+const clean = (x) => String(x || '').replace(/[\p{Extended_Pictographic}‍️]/gu, ' ').replace(/https?:\/\/\S+/g, ' ').replace(/[#*_|/]+/g, ' ').replace(/\s+/g, ' ').trim();
+// Spoken text of the animated story (its sentences come from promo-anim.mjs).
+export const animSpeech = (lines) => lines.map((x) => say(clean(x))).filter(Boolean).map((x) => (/[.!?]$/.test(x) ? x : x + '.')).join(' ');
 export function speechText(t) {
-  const clean = (x) => String(x || '').replace(/[\p{Extended_Pictographic}‍️]/gu, ' ').replace(/https?:\/\/\S+/g, ' ').replace(/[#*_|/]+/g, ' ').replace(/\s+/g, ' ').trim();
   const parts = [say(clean(t.ta || t.name)), say(clean(t.taDesc || t.desc)), 'இலவசம். லாகின் தேவையில்லை.', 'பி டி எஃப் டூல்ஸ் இந்தியா டாட் காம் தளத்தில் பயன்படுத்துங்கள்.'];
   return parts.filter(Boolean).map((x) => (/[.!?]$/.test(x) ? x : x + '.')).join(' ');
 }
@@ -153,12 +156,21 @@ const main = async () => {
   const post = process.env.TOOL ? null : (await sql("select tool_id, text from promo_posts where platform = 'telegram' and status = 'sent' order by id desc limit 1"))[0];
   const t = CATALOG.find((x) => x.id === (process.env.TOOL || post?.tool_id)) || CATALOG.find((x) => !x.paid);
   console.log('Tool:', t.id);
-  fs.writeFileSync('slide.html', slideHtml(t, post?.text));
-  const chrome = process.env.CHROME || 'google-chrome';
-  execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
-  const voice = await makeVoice(speechText(t));
-  const secs = makeVideo(voice);
-  console.log('Video', secs + 's', voice ? 'with Tamil voice' : 'silent');
+  // Animated funny story (a different one each day, made by code only). If anything in it fails the old still slide is used, so a Short is always made.
+  let plan = process.env.ANIM === '0' ? null : buildPlan(t, undefined, { story: process.env.STORY });
+  let voice = await makeVoice(plan ? animSpeech(plan.lines) : speechText(t));
+  let secs, kind = 'still slide';
+  if (plan) {
+    try { secs = await makeAnimVideo(plan, voice, FONT_FACE); kind = 'animated story "' + plan.cfg.story + '"'; }
+    catch (e) { console.log('Animation failed, using the still slide instead:', String(e.message).slice(0, 300)); plan = null; voice = await makeVoice(speechText(t)); }
+  }
+  if (!plan) {
+    fs.writeFileSync('slide.html', slideHtml(t, post?.text));
+    const chrome = process.env.CHROME || 'google-chrome';
+    execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
+    secs = makeVideo(voice);
+  }
+  console.log('Video', secs + 's', kind, voice ? 'with Tamil voice' : 'silent');
   if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
   try {
     const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);

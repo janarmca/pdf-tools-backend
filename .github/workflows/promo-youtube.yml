@@ -1,7 +1,7 @@
 name: Promotion — YouTube Short
 
-# Every day after the 09:05 IST promotion post: turns that tool into a 10-second Tamil + English
-# YouTube Short and uploads it (.github/scripts/promo-youtube.mjs). Does nothing until YouTube is
+# Every day after the 09:05 IST promotion post: turns that tool into a funny animated Tamil
+# YouTube Short (story/colours/character rotate daily; made by code, no AI cost) and uploads it (.github/scripts/promo-youtube.mjs). Does nothing until YouTube is
 # connected on the admin page (matrimony → Admin → Promotion → Connect YouTube) or promotion is off.
 # Uses the existing secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
 # Optional secret GEMINI_API_KEY = natural Tamil voice (Gemini TTS, free tier); without it the voice falls back to edge-tts / gTTS.
@@ -21,6 +21,11 @@ on:
         type: choice
         options: [public, private]
         default: public
+      story:
+        description: 'Story template (auto = a different one each day by date)'
+        type: choice
+        options: [auto, reject, queue, beard]
+        default: auto
       gemini_voice:
         description: 'Gemini voice name (Kore, Aoede, Leda, Zephyr = female; Charon, Puck, Orus, Fenrir = male)'
         type: string
@@ -47,7 +52,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji
-          npm i --no-save --no-package-lock @fontsource/inter@5
+          npm i --no-save --no-package-lock @fontsource/inter@5 playwright-core@1
           python3 -m pip install --user --break-system-packages --quiet edge-tts gTTS
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
@@ -61,6 +66,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_VOICE: ${{ inputs.gemini_voice }}
           PRIVACY: ${{ inputs.privacy }}
+          STORY: ${{ inputs.story }}
         run: node .github/scripts/promo-youtube.mjs
 
       - name: Keep the video
