@@ -536,10 +536,12 @@ const TOOLS = [
   {id:'namepicker', name:'Name Picker & Groups — பெயர் சீட்டு', desc:'Pick a student at random or make fair groups — for teachers', icon:'🎲', color:'#D6336C', cat:'education', cost:0, lazy:'extra'},
   {id:'numsys', name:'Number Systems — எண் முறை மாற்றி', desc:'Decimal, binary, octal and hex with step-by-step working', icon:'🧮', color:'#1971C2', cat:'education', cost:0, lazy:'extra'},
   {id:'tneacutoff', name:'TNEA Cut-off Calculator — பொறியியல் கட்-ஆஃப்', desc:'Engineering cut-off out of 200 from 12th Maths, Physics, Chemistry, plus the Maths mark you need for a target', icon:'🎯', color:'#0B7285', cat:'education', cost:0, lazy:'extra'},
+  {id:'attendcalc', name:'Attendance Calculator — வருகைப் பதிவு கணிப்பான்', desc:'Attendance % and how many classes to attend or can miss to reach 75% (or your own target)', icon:'📅', color:'#0B7285', cat:'education', cost:0, lazy:'extra'},
   {id:'starfinder', name:'Birth Star Finder — நட்சத்திரம் கண்டுபிடி', desc:'Find your star (natchathiram) with padam, raasi, lagnam, thithi and dasa balance from birth date, time and place', icon:'🔭', color:'#5B2C83', cat:'business', cost:0, lazy:'extra'},
   {id:'porutham', name:'Marriage Porutham — திருமணப் பொருத்தம்', desc:'All 10 poruthams from the bride\'s and groom\'s stars — dina, gana, rajju, vedhai and more, with reasons', icon:'💑', color:'#B03A64', cat:'business', cost:0, lazy:'extra'},
   {id:'goldcalc', name:'Gold Price & Gold Loan — தங்க நகை கணிப்பான்', desc:'Jewellery price with wastage, making charge and GST; old gold exchange value; gold-loan amount and interest', icon:'🪙', color:'#B8860B', cat:'business', cost:0, lazy:'extra'},
   {id:'pfcalc', name:'PF & Gratuity Calculator — வருங்கால வைப்பு நிதி / கிராஜுவிட்டி', desc:'EPF balance at retirement, year by year, and the gratuity you get when you leave a job', icon:'🏦', color:'#1F6F8B', cat:'business', cost:0, lazy:'extra'},
+  {id:'daarrears', name:'DA / DR Arrears Calculator — அகவிலைப்படி நிலுவை', desc:'Month-by-month DA / DR arrears for government employees and pensioners when the rate goes up', icon:'🧾', color:'#7D3C98', cat:'business', cost:0, lazy:'extra'},
   {id:'ebbill', name:'TNEB Bill Calculator — மின் கட்டணம்', desc:'Tamil Nadu electricity bill for two months, slab by slab, plus an appliance-wise usage estimate', icon:'💡', color:'#E67E22', cat:'business', cost:0, lazy:'extra'},
   {id:'invitation', name:'Wedding Invitation Maker — திருமண அழைப்பிதழ்', desc:'Beautiful Tamil or English wedding invitation in minutes — image for WhatsApp or PDF to print, four designs', icon:'💌', color:'#7A1020', cat:'business', cost:0, lazy:'extra'},
 
@@ -1103,6 +1105,8 @@ function render(){
       <a href="/video-tools" style="color:var(--sub);">Video Tools</a>
       <a href="/ai-tools" style="color:var(--sub);">AI Tools</a>
       <a href="/education-tools" style="color:var(--sub);">Education Tools</a>
+      <a href="/for-government-employees" style="color:var(--sub);">அரசு ஊழியர்</a>
+      <a href="/for-students" style="color:var(--sub);">மாணவர்</a>
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
@@ -1513,6 +1517,8 @@ starfinder:['நட்சத்திரம் கண்டுபிடி','ப
 porutham:['திருமணப் பொருத்தம்','10 பொருத்தம் — நட்சத்திரப்படி விளக்கத்துடன்'],
 goldcalc:['தங்க நகை கணிப்பான்','நகை விலை, பழைய நகை மாற்று, நகைக் கடன்'],
 pfcalc:['PF / கிராஜுவிட்டி','ஓய்வின்போது PF இருப்பு, கிராஜுவிட்டி தொகை'],
+daarrears:['DA / DR நிலுவை கணிப்பான்','அகவிலைப்படி உயர்வின் நிலுவைத் தொகை, மாதவாரியாக'],
+attendcalc:['வருகைப் பதிவு கணிப்பான்','75% எட்ட இன்னும் எத்தனை வகுப்பு; எத்தனை விடலாம்'],
 ebbill:['மின் கட்டணம் (TNEB)','2 மாத யூனிட்டுக்கு கட்டணம், மின்சாதனக் கணக்கு'],
 invitation:['திருமண அழைப்பிதழ்','WhatsApp-க்குப் படமாக / அச்சுக்கு PDF — 4 வடிவமைப்புகள்'],
 jsonfmt:['JSON சரிபார்ப்பு','JSON-ஐ அழகாக்கு, சரிபார்'],
@@ -1530,7 +1536,7 @@ const TOOL_ALIAS = {
   emicalc:'loan emi bank கடன்', resumebuilder:'cv biodata resume', ocr:'text from image scan', camscan:'scanner camscanner scan', qrgen:'qr code', imgpassport:'passport photo id photo',
   examphoto:'exam photo signature neet tnpsc upsc ssc', sign:'signature sign', pdfprotect:'password lock', pdfunlock:'password remove unlock', agecalc:'age birthday வயது', interestcalc:'interest vatti meter vatti வட்டி',
   unitconv:'cent acre land sqft nilam நிலம்', percentcalc:'percentage percent', datecalc:'date days difference', kalvikalanjiyam:'kalvi kalanjiyam school class students கல்வி களஞ்சியம்', cgpacalc:'cgpa marks percentage mark',
-  invitation:'wedding invitation card kalyana pathirikai marriage invite அழைப்பிதழ் பத்திரிகை', starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
+  daarrears:'da arrears dearness allowance dr relief pension government employee agavilaipadi nilavai அகவிலைப்படி நிலுவை அரசு ஊழியர்', attendcalc:'attendance percentage 75 percent classes miss bunk hajar வருகை', invitation:'wedding invitation card kalyana pathirikai marriage invite அழைப்பிதழ் பத்திரிகை', starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
   namepicker:'random name group lucky draw', jsonfmt:'json format', b64:'base64 encode decode', videotogif:'gif', heic2jpg:'iphone heic', pdf2img:'pdf to jpg', pdf2excel:'pdf table excel', excel2pdf:'xls xlsx pdf',
 };
 function taOn(){ return __appLang === 'ta'; }
@@ -1559,7 +1565,7 @@ const CAT_V2 = {
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
 };
 const QUICK_TASK_IDS = ['merge','compress','pdf2word','img2pdf','imgcompress','bgremove','videocompress','quotepo','tamiltyping','rupeewords','resumebuilder','emicalc'];
-const NEW_TOOL_IDS = ['invitation','starfinder','porutham','goldcalc','pfcalc','ebbill','tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
+const NEW_TOOL_IDS = ['daarrears','attendcalc','invitation','starfinder','porutham','goldcalc','pfcalc','ebbill','tneacutoff','biodata','rupeewords','interestcalc','casecvt','jsonfmt','b64','textdiff','bmicalc','namepicker','numsys'];
 function esc2(s){ return escapeHtml(String(s)); }
 
 function renderHero(){
@@ -1946,7 +1952,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261015e`;
+    s.src = `category-${cat}.js?v=20261016a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3303,6 +3309,9 @@ function ensurePptxGenJs(){
 function ensureTdsCore(){
   return ensureLib('tdscore', ()=>!!window.TdsCore, '/tds-core.js?v=3', 'TDS helper');
 }
+function ensureHubCore(){
+  return ensureLib('hubcore', ()=>!!window.HubCore, '/hub-core.js?v=1', 'Calculator helper');
+}
 function ensureDscVerify(){
   return ensureLib('dscverify', ()=>!!window.DscVerify, '/dsc-verify.js?v=3', 'Signature checker');
 }
@@ -3310,7 +3319,7 @@ function ensureDscStamp(){
   return ensureLib('dscstamp', ()=>!!window.DscStamp, '/dsc-stamp.js?v=1', 'Tick stamp');
 }
 const LIB_LOADERS = {
-  tdscore: ensureTdsCore, dscverify: ensureDscVerify, dscstamp: ensureDscStamp, pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
+  hubcore: ensureHubCore, tdscore: ensureTdsCore, dscverify: ensureDscVerify, dscstamp: ensureDscStamp, pdflib: ensurePdfLib, pdfjs: ensurePdfJs, jszip: ensureJsZip, tesseract: ensureTesseractLib,
   xlsx: ensureXlsx, mammoth: ensureMammoth, html2canvas: ensureHtml2Canvas, docx: ensureDocxLib,
   pptxgenjs: ensurePptxGenJs, exceljs: ensureExcelJs
 };
@@ -3335,7 +3344,7 @@ const TOOL_LIBS = {
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'], tdslatefee:['tdscore'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], daarrears:['hubcore'], attendcalc:['hubcore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'], tdslatefee:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],

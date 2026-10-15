@@ -25,6 +25,7 @@ import path from 'path';
 import { SEO_EXTRA } from './seo-content.mjs';
 import { TA_TOOL } from './ta-names.mjs';
 import { CAT_THEME, BASE_CSS, HEADER, FOOTER } from './pages-style.mjs';
+import { AUDIENCE_HUBS, audienceHtml } from './audience-hubs.mjs';
 
 const SITE = 'https://pdftoolsindia.com';
 const OUT_DIR = './tools';
@@ -269,6 +270,8 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/video-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/ai-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/for-government-employees`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/for-students`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/matrimony/en/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
@@ -337,10 +340,17 @@ function main() {
     fs.writeFileSync(HUB_META[cat].file, hubHtml(cat, items));
   }
   console.log(`Wrote ${Object.keys(HUB_META).length} hub pages`);
+  for (const h of Object.values(AUDIENCE_HUBS)) {
+    const ids = [...h.quick, ...h.sections.flatMap(x => x.tools.map(y => y[0]))];
+    const missing = ids.filter(id => !allTools.some(t => t.id === id));
+    if (missing.length) { console.error('ABORTING — audience hub lists unknown tools: ' + missing.join(', ')); process.exit(1); }
+    fs.writeFileSync(h.file, audienceHtml(h, allTools, TA_TOOL, SITE, slugify));
+  }
+  console.log('Wrote 2 audience hub pages');
 
   const sitemap = buildSitemap(slugs);
   fs.writeFileSync('sitemap.xml', sitemap);
-  console.log(`Rewrote sitemap.xml — ${slugs.length + 16} URLs total.`);
+  console.log(`Rewrote sitemap.xml — ${slugs.length + 18} URLs total.`);
 }
 
 main();

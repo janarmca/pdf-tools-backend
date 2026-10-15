@@ -5,6 +5,7 @@
  *   sipcalc, gstcalc, discountcalc, datecalc, passgen
  *   + rupeewords, interestcalc, landconv, bmicalc, numsys, casecvt, jsonfmt, b64, textdiff, markscalc, namepicker
  *   + tneacutoff, biodata, starfinder, porutham, goldcalc, pfcalc, ebbill, invitation
+ *   + daarrears, attendcalc (logic in hub-core.js)
  *
  * Plain browser JS (no modules / build step / network). Each tool registers
  * TOOL_IMPL.<id> = { mount(body){...} }. Globals used from the host page:
@@ -4009,5 +4010,118 @@
     }
   };
   TOOL_IMPL.invitation._f = { page: IV_pageHtml, dateText: IV_dateText };
+
+
+  /* =====================================================================
+   * daarrears — DA / DR arrears calculator (government employees and pensioners)
+   * attendcalc — attendance % calculator (how many classes to attend / can miss)
+   * Logic is in hub-core.js (window.HubCore, tested in tests/hub-core.test.mjs).
+   * ===================================================================== */
+  const hub = () => window.HubCore;
+  function nowYM() { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1); }
+  function csvDownload(rows, name) {
+    const q = v => { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    downloadBlob(new Blob(['﻿' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), name);
+  }
+  function monthField(label, key, value) {
+    return '<div class="cx-f"><label>' + label + '</label><input type="month" data-k="' + key + '" value="' + esc(value) + '"></div>';
+  }
+  TOOL_IMPL.daarrears = {
+    mount(body) {
+      AS_injectStyle(); TN_injectStyle();
+      const root = makeRoot(body), H = hub();
+      const S = Object.assign({ basic: '', oldDa: '', newDa: '', from: '', to: nowYM(), round: 'nearest', inc: '0', incM: '', basic2: '' }, lsGet('daarrears', {}));
+      if (!/^\d{4}-\d{2}$/.test(S.to)) S.to = nowYM();
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? அகவிலைப்படி (DA) அல்லது அகவிலை நிவாரணம் (DR) உயர்ந்தபோது, நிலுவைத் தொகை (arrears) மாதம் மாதமாக எவ்வளவு என்று கணக்கிட. அரசு ஊழியர்கள், ஓய்வூதியர்கள் இருவருக்கும்.',
+          'Work out DA / DR arrears month by month when the rate goes up — for serving employees and pensioners.') +
+          '<div class="cx-info" style="margin-top:0">' + T('உங்கள் ஊதியம் / ஓய்வூதியத்தில் ஏற்கனவே பெறும் DA %, புதிய DA % ஆகியவற்றை உங்கள் அலுவலக உத்தரவிலிருந்து எழுதுங்கள். கீழே உள்ள பொத்தான் ஒரு உதாரணம் மட்டுமே.', 'Enter the DA % you were paid and the new DA % from your office order. The button below is only a starting example.') + '</div>' +
+          '<div class="cx-actions" style="margin-top:10px">' + H.DA_PRESETS.map(p => '<button type="button" class="cx-btn sec" data-preset="' + p.id + '">' + esc(p.label) + '</button>').join('') + '</div>' +
+          '<div class="cx-grid one">' + field(T('அடிப்படை ஊதியம் / ஓய்வூதியம் (₹, மாதம்)', 'Basic pay / basic pension (₹ a month)'), 'basic', S.basic, { ph: '37700' }) + '</div>' +
+          '<div class="cx-grid">' + field(T('பழைய DA %', 'Old DA %'), 'oldDa', S.oldDa, { ph: '58' }) + field(T('புதிய DA %', 'New DA %'), 'newDa', S.newDa, { ph: '60' }) + '</div>' +
+          '<div class="cx-grid">' + monthField(T('எந்த மாதம் முதல்', 'From month'), 'from', S.from) + monthField(T('எந்த மாதம் வரை', 'To month'), 'to', S.to) + '</div>' +
+          '<div class="cx-grid">' + selectField(T('தொகையை முழு ரூபாயாக்கும் முறை', 'Rounding'), 'round', [['nearest', T('அருகிலுள்ள ரூபாய் (50 பைசா+ மேலே)', 'Nearest rupee (50 paise up)')], ['up', T('மேல்நோக்கி', 'Round up')], ['none', T('பைசாவுடன்', 'Keep paise')]], S.round) +
+          selectField(T('இடையில் ஊதிய உயர்வு (increment) உண்டா?', 'Increment during the period?'), 'inc', [['0', T('இல்லை', 'No')], ['1', T('உண்டு', 'Yes')]], S.inc) + '</div>' +
+          (S.inc === '1' ? '<div class="cx-grid">' + monthField(T('புதிய ஊதியம் தொடங்கும் மாதம்', 'New basic from month'), 'incM', S.incM) + field(T('புதிய அடிப்படை ஊதியம் (₹)', 'New basic (₹)'), 'basic2', S.basic2) + '</div>' : '') +
+          '<div data-k="out"></div>';
+        $$(root, '[data-preset]').forEach(b => b.onclick = () => { const p = H.DA_PRESETS.find(x => x.id === b.getAttribute('data-preset')); S.oldDa = String(p.old); S.newDa = String(p.now); S.from = p.from; draw(); const o = $(root, '[data-k=out]'); if (o) o.insertAdjacentHTML('afterbegin', '<div class="cx-info" data-note="1">' + esc(p.note) + '</div>'); });
+        $$(root, 'input[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        $$(root, 'select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; if (i.getAttribute('data-k') === 'inc') draw(); else calc(); }));
+        calc();
+      }
+      let txt = '', last = null;
+      function calc() {
+        lsSet('daarrears', S);
+        const out = $(root, '[data-k=out]'), pre = out.querySelector('[data-note]'), keep = pre ? pre.outerHTML : '';
+        if (S.basic === '' || S.oldDa === '' || S.newDa === '' || !S.from) { out.innerHTML = keep; return; }
+        const r = H.daArrears({ basic: parseNum(S.basic), oldDa: parseNum(S.oldDa), newDa: parseNum(S.newDa), from: S.from, to: S.to, round: S.round, incMonth: S.inc === '1' ? S.incM : '', basic2: parseNum(S.basic2) });
+        if (!r.ok) {
+          const m = { basic: T('அடிப்படை ஊதியத்தை எழுதுங்கள்.', 'Enter the basic pay.'), rate: T('DA %-ஐ 0 முதல் 500-க்குள் எழுதுங்கள்.', 'Enter DA % between 0 and 500.'), period: T('தொடக்க மாதம், முடிவு மாதத்துக்கு முன் இருக்க வேண்டும்.', 'The start month must not be after the end month.'), long: T('10 ஆண்டுக்கு மேல் கணக்கிட முடியாது.', 'Maximum 10 years.'), increment: T('ஊதிய உயர்வு மாதமும் புதிய ஊதியமும் எழுதுங்கள்.', 'Enter the increment month and new basic.') }[r.error];
+          out.innerHTML = keep + msgHtml(m); return;
+        }
+        last = r;
+        txt = T('DA நிலுவை', 'DA arrears') + ': ' + inr0(r.total) + ' (' + r.rows[0].month + ' – ' + r.rows[r.rows.length - 1].month + ', ' + r.months + ' ' + T('மாதம்', 'months') + ', ' + S.oldDa + '% → ' + S.newDa + '%)';
+        out.innerHTML = keep + resCard(r.total < 0 ? T('திரும்பப் பிடிக்க வேண்டிய தொகை', 'Amount to recover') : T('மொத்த நிலுவைத் தொகை', 'Total arrears'), inr0(Math.abs(r.total)), r.rows[0].month + ' – ' + r.rows[r.rows.length - 1].month + ' · ' + r.months + T(' மாதம்', ' months') + ' · ' + fmt(parseNum(S.oldDa), 2) + '% → ' + fmt(parseNum(S.newDa), 2) + '%') +
+          '<details class="cx-det"><summary>' + T('மாதவாரி அட்டவணை', 'Month-by-month table') + '</summary><div class="cx-tn-wrap"><table class="cx-tn-tbl"><thead><tr><th>' + T('மாதம்', 'Month') + '</th><th>' + T('அடிப்படை', 'Basic') + '</th><th>' + T('பழைய DA', 'Old DA') + '</th><th>' + T('புதிய DA', 'New DA') + '</th><th>' + T('வேறுபாடு', 'Difference') + '</th></tr></thead><tbody>' +
+          r.rows.map(x => '<tr><td>' + x.month + '</td><td>' + inr0(x.basic) + '</td><td>' + inr0(x.daOld) + '</td><td>' + inr0(x.daNew) + '</td><td><b>' + inr0(x.diff) + '</b></td></tr>').join('') + '</tbody></table></div></details>' +
+          '<div class="cx-info">' + T('DA = அடிப்படை ஊதியம் × DA %. நிலுவை = (புதிய DA − பழைய DA) ஒவ்வொரு மாதமும். இது மதிப்பீடு; உண்மையான தொகை உங்கள் சம்பளப் பட்டியல் / கருவூலக் கணக்கைப் பொறுத்தது (முழு ரூபாய் முறை, பிடித்தங்கள்). வருமான வரி நிவாரணம் (arrears relief) இதில் கணக்கிடப்படவில்லை.', 'DA = basic × DA %. Arrears = (new DA − old DA) for each month. This is an estimate: your pay bill / treasury may round or deduct differently. Income-tax relief on arrears is not calculated here.') + '</div>';
+        const act = actionsEl(() => txt);
+        const csv = document.createElement('button'); csv.type = 'button'; csv.className = 'cx-btn sec'; csv.textContent = '⬇ ' + T('Excel (CSV)', 'Excel (CSV)');
+        csv.onclick = () => csvDownload([['Month', 'Basic', 'Old DA %', 'New DA %', 'Old DA', 'New DA', 'Difference']].concat(last.rows.map(x => [x.month, x.basic, S.oldDa, S.newDa, x.daOld, x.daNew, x.diff])).concat([['Total', '', '', '', '', '', last.total]]), 'da-arrears.csv');
+        act.appendChild(csv); out.appendChild(act);
+      }
+      draw();
+    }
+  };
+  TOOL_IMPL.daarrears._f = { calc: o => hub().daArrears(o) };
+
+  TOOL_IMPL.attendcalc = {
+    mount(body) {
+      AS_injectStyle(); TN_injectStyle();
+      const root = makeRoot(body), H = hub();
+      const S = Object.assign({ tab: 'one', att: '', tot: '', target: '75', list: '' }, lsGet('attendcalc', {}));
+      function draw() {
+        root.innerHTML = purpose('இது எதற்கு? வருகைப் பதிவு (attendance) எத்தனை சதவீதம் என்றும், இலக்கை (எ.கா. 75%) அடைய இன்னும் எத்தனை வகுப்புகளுக்குத் தொடர்ந்து செல்ல வேண்டும், அல்லது எத்தனை வகுப்புகள் விடலாம் என்றும் கணக்கிட.',
+          'See your attendance %, how many classes in a row you must attend to reach the target, or how many you can still miss.') +
+          tabsHtml([['one', T('ஒரே பாடம்', 'One total')], ['list', T('பல பாடங்கள்', 'Many subjects')]], S.tab) +
+          '<div class="cx-grid one">' + field(T('இலக்கு வருகை % (உங்கள் கல்லூரி / பள்ளி விதிப்படி)', 'Target attendance % (as per your college / school rule)'), 'target', S.target) + '</div><div data-k="pane"></div><div data-k="out"></div>';
+        bindTabs(root, t => { S.tab = t; draw(); });
+        const pane = $(root, '[data-k=pane]');
+        if (S.tab === 'one') pane.innerHTML = '<div class="cx-grid">' + field(T('வந்த வகுப்புகள்', 'Classes attended'), 'att', S.att, { mode: 'numeric' }) + field(T('நடந்த மொத்த வகுப்புகள்', 'Total classes held'), 'tot', S.tot, { mode: 'numeric' }) + '</div>';
+        else pane.innerHTML = '<div class="cx-f"><label>' + T('ஒவ்வொரு வரியிலும்: பாடம், வந்தவை, மொத்தம்', 'One line each: subject, attended, total') + '</label><textarea class="cx-ta" data-k="list" spellcheck="false" placeholder="Maths, 40, 52&#10;Physics, 38, 50&#10;Tamil, 30, 36">' + esc(S.list) + '</textarea></div>';
+        $$(root, 'input[data-k],textarea[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        calc();
+      }
+      const line = (r, tg) => r.status === 'ok'
+        ? T('இலக்கை எட்டிவிட்டீர்கள் ✓ — இனி ' + r.canMiss + ' வகுப்பு வரை விடலாம் (மற்றவற்றுக்கு வந்தால்).', 'Target met ✓ — you can still miss up to ' + r.canMiss + ' class(es).')
+        : T(tg + '%-ஐ எட்ட, இனி வரும் ' + r.need + ' வகுப்புகளுக்கும் தொடர்ந்து செல்ல வேண்டும் (ஒன்றும் விடாமல்).', 'To reach ' + tg + '%, attend the next ' + r.need + ' classes without missing any.');
+      let txt = '';
+      function calc() {
+        lsSet('attendcalc', S);
+        const out = $(root, '[data-k=out]'), tg = parseNum(S.target);
+        if (!(tg > 0 && tg < 100)) { out.innerHTML = msgHtml(T('இலக்கு % 1 முதல் 99-க்குள் இருக்க வேண்டும்.', 'Target must be between 1 and 99.')); return; }
+        if (S.tab === 'one') {
+          if (S.att === '' || S.tot === '') { out.innerHTML = ''; return; }
+          const r = H.attendance(parseNum(S.att), parseNum(S.tot), tg);
+          if (!r.ok) { out.innerHTML = msgHtml(T('வந்த வகுப்புகள் ≤ மொத்த வகுப்புகள் என்று முழு எண்களை எழுதுங்கள்.', 'Enter whole numbers; attended cannot be more than total.')); return; }
+          txt = T('வருகை', 'Attendance') + ': ' + fmt(r.pct, 2) + '% — ' + line(r, tg);
+          out.innerHTML = resCard(T('உங்கள் வருகை', 'Your attendance'), fmt(r.pct, 2) + '%', S.att + ' / ' + S.tot, null, r.status === 'ok' ? 'ok' : 'bad') + '<div class="cx-meter"><i style="width:' + Math.min(100, r.pct) + '%;background:var(--brand)"></i></div>' + (r.status === 'ok' ? '<div class="cx-ok">' : '<div class="cx-info">') + line(r, tg) + '</div>' +
+            '<div class="cx-info">' + T('75% என்பது பொதுவான இலக்கு மட்டுமே; உங்கள் கல்வி நிறுவனத்தின் விதி வேறாக இருக்கலாம் (மருத்துவ விடுப்பு சலுகை உட்பட).', '75% is only a common target; your institution may differ (medical leave condonation etc.).') + '</div>';
+          out.appendChild(actionsEl(() => txt));
+        } else {
+          const rows = []; const bad = [];
+          String(S.list).split(/\r?\n/).forEach((ln, i) => { if (!ln.trim()) return; const c = ln.split(/\t|,|;/).map(x => x.trim()); const r = H.attendance(parseNum(c[1]), parseNum(c[2]), tg); if (!c[0] || !r.ok) bad.push(i + 1); else rows.push({ n: c[0], a: parseNum(c[1]), t: parseNum(c[2]), r: r }); });
+          if (!rows.length) { out.innerHTML = bad.length ? msgHtml(T('வரிகளைப் படிக்க முடியவில்லை: ', 'Could not read lines: ') + bad.join(', ')) : ''; return; }
+          const A = rows.reduce((s, x) => s + x.a, 0), Tt = rows.reduce((s, x) => s + x.t, 0), all = H.attendance(A, Tt, tg);
+          txt = rows.map(x => x.n + ': ' + fmt(x.r.pct, 1) + '%').join(', ') + ' | ' + T('மொத்தம்', 'Overall') + ' ' + fmt(all.pct, 1) + '%';
+          out.innerHTML = (bad.length ? msgHtml(T('விடப்பட்ட வரிகள்: ', 'Skipped lines: ') + bad.join(', ')) : '') + resCard(T('மொத்த வருகை', 'Overall attendance'), fmt(all.pct, 2) + '%', A + ' / ' + Tt, null, all.status === 'ok' ? 'ok' : 'bad') +
+            '<div class="cx-tn-wrap"><table class="cx-tn-tbl"><thead><tr><th>' + T('பாடம்', 'Subject') + '</th><th>%</th><th>' + T('நிலை', 'Status') + '</th></tr></thead><tbody>' + rows.map(x => '<tr><td>' + esc(x.n) + '</td><td>' + fmt(x.r.pct, 1) + '</td><td style="text-align:left">' + (x.r.status === 'ok' ? '✓ ' + T('விடலாம் ', 'can miss ') + x.r.canMiss : '⚠ ' + T('தொடர்ந்து வர ', 'attend ') + x.r.need) + '</td></tr>').join('') + '</tbody></table></div>';
+          out.appendChild(actionsEl(() => txt));
+        }
+      }
+      draw();
+    }
+  };
+  TOOL_IMPL.attendcalc._f = { calc: (a, t, g) => hub().attendance(a, t, g) };
 
 })();
