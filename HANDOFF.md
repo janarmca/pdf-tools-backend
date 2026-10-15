@@ -108,3 +108,8 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - What Adobe does that we cannot: online revocation (OCSP/CRL), Adobe/OS trust lists (AATL/EUTL, Indian CCA roots), and certifying that later changes are allowed.
 - Pitfall: new object numbers must start at the original trailer `/Size` (xref-stream files otherwise collide).
 - Tests: `PDFLIB=<path to pdf-lib> node tests/dsc-stamp.test.mjs` (skips without pdf-lib); `tests/dsc/validate-stamped.py <stamped.pdf>` (pyHanko + pypdf + poppler; needs `root.pem` in cwd). Tested only with generated e-Sign-like PDFs, not a real government file.
+
+### Late filing fee tool (`tdslatefee`)
+- Official: Income-tax Act 2025 s.427(1),(2) (https://www.incometaxindia.gov.in/w/section-427-6) — Rs 200 per day, not more than the tax deductible, to be paid before the statement is delivered; old Act s.234E same. Days = filing date - due date. The s.271H penalty (Rs 10,000-1,00,000) is mentioned, not calculated.
+- A TDS rate table is deliberately NOT built: s.393 has ~50 rows with notes/exceptions and "prevailing rates"; a lossy transcription would give wrong rates. The TDS dates page links the official s.393 and TDS Rates pages instead. To add one later, transcribe from the official PDF of the Act and test every row.
+- Versions: tds-core.js?v=3, category scripts ?v=20261015e, sw cache v64. s427 + late-fee page added to .github/tax-sources.json.

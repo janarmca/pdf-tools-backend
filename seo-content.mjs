@@ -25,6 +25,14 @@ export const SEO_EXTRA = {
     uses: ['Planning monthly TDS deposits', 'Knowing which quarter return is next', 'Finding the Form 130 / Form 16 issue date', 'Checking which form number applies to which period'],
     faqs: [['Which forms replace 24Q and 26Q?', 'Form 138 replaces 24Q (salary), Form 140 replaces 26Q (non-salary) and Form 144 replaces 27Q for payments from 1 April 2026.'], ['Are these dates ever extended?', 'CBDT sometimes extends dates. This tool shows the statutory dates; check TRACES or the e-filing portal for notices.']]
   },
+  tdslatefee: {
+    title: 'TDS Late Filing Fee Calculator — ₹200 per Day (Section 427 / 234E) | PDF Tools India',
+    desc: 'Work out the late fee for a delayed quarterly TDS statement: ₹200 for every day, limited to the TDS amount, under section 427 of the Income-tax Act 2025 (earlier 234E). Free.',
+    intro: 'Pick the financial year and quarter, enter the total TDS for that quarter and the date the statement is (or will be) filed. The tool counts the days after the due date, multiplies by ₹200 and limits the fee to the TDS amount, as in section 427 of the Income-tax Act 2025 (section 234E before 2026-27). The fee must be paid before the statement is filed. Interest and the section 271H penalty are not included.',
+    steps: ['Choose the financial year and the quarter.', 'Enter the total TDS for the quarter.', 'Enter the filing date.', 'Compare the result with the amount shown on TRACES.'],
+    uses: ['Knowing the fee before filing a late TDS statement', 'Checking a TRACES default notice', 'Planning cash for a late filing'],
+    faqs: [['What is the late fee per day?', '₹200 for every day the failure continues, never more than the tax deductible.'], ['Is the penalty included?', 'No. A section 271H penalty of ₹10,000 to ₹1,00,000 may be levied separately; it is not calculated here.']]
+  },
   tdsinterest: {
     title: 'TDS Late Payment Interest Calculator — 1% and 1.5% per Month (Section 398) | PDF Tools India',
     desc: 'Calculate interest on TDS not deducted or deducted late (1% per month) and TDS deducted but deposited late (1.5% per month). Counts month or part of a month. Free, many challans, CSV.',

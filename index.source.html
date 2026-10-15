@@ -394,6 +394,7 @@ const TOOLS = [
   {id:'dscbulk', name:'Bulk Form 16 / 130 Signature Check', desc:'Check many signed PDFs or a TRACES ZIP at once — signed, broken or unsigned, with CSV', icon:'🗂️', color:'#1B5E20', cat:'business', lazy:'tds'},
   {id:'pantan', name:'PAN / TAN Checker', desc:'Paste many PAN / TAN numbers — wrong format, holder type, duplicates — before filing a TDS return', icon:'🪪', color:'#6C3483', cat:'business', lazy:'tds'},
   {id:'tdsdates', name:'TDS Due Date Calendar', desc:'TDS deposit and quarterly return dates for any financial year — new Income-tax Act 2025 and old forms', icon:'📅', color:'#1F618D', cat:'business', lazy:'tds'},
+  {id:'tdslatefee', name:'TDS Late Filing Fee Calculator', desc:'₹200 a day fee for a late TDS statement, capped at the TDS amount (section 427 / 234E)', icon:'⏱️', color:'#A04000', cat:'business', lazy:'tds'},
   {id:'tdsinterest', name:'TDS Late Interest Calculator', desc:'Interest on late TDS deduction (1%) or late deposit (1.5%) per month — many challans, CSV', icon:'🧮', color:'#B9770E', cat:'business', lazy:'tds'},
   {id:'dscguide', name:'DSC Token Help', desc:'Fix DSC USB token, emSigner, Java and “signature invalid” problems', icon:'🔑', color:'#0B5345', cat:'pdf'},
   {id:'img2pdf', name:'Image → PDF', desc:'Turn JPG/PNG into a PDF', icon:'🖼️', color:'#2E86C1', cat:'pdf'},
@@ -1385,6 +1386,7 @@ dscbulk:['பல Form 16/130 கையொப்பச் சரிபார்�
 pantan:['PAN / TAN சரிபார்ப்பு','பல PAN, TAN எண்களின் வடிவத்தைச் சரிபார்'],
 tdsdates:['TDS தேதி நாட்காட்டி','TDS செலுத்தும், return தாக்கல் செய்யும் தேதிகள்'],
 tdsinterest:['TDS தாமத வட்டி கணிப்பான்','தாமதமாகப் பிடித்த/செலுத்திய TDS-க்கு வட்டி'],
+tdslatefee:['TDS தாமத தாக்கல் கட்டணம்','TDS அறிக்கை தாமதத்துக்கு நாளுக்கு ₹200 கட்டணம்'],
 dscverify:['DSC / e-Sign சரிபார்ப்பு','PDF-ல் டிஜிட்டல் கையொப்பம் செல்லுமா, மாற்றப்பட்டதா, யார் கையொப்பம் என்று பார்'],
 dscguide:['DSC டோக்கன் உதவி','DSC USB, emSigner, Java, “signature invalid” சிக்கல்களுக்குத் தீர்வு'],
 pdfocrsearchable:['தேடக்கூடிய PDF (OCR)','ஸ்கேன் PDF-ஐ தேடக்கூடியதாக்கு'],
@@ -1944,7 +1946,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261015d`;
+    s.src = `category-${cat}.js?v=20261015e`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3299,7 +3301,7 @@ function ensurePptxGenJs(){
     'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js', 'PowerPoint library');
 }
 function ensureTdsCore(){
-  return ensureLib('tdscore', ()=>!!window.TdsCore, '/tds-core.js?v=2', 'TDS helper');
+  return ensureLib('tdscore', ()=>!!window.TdsCore, '/tds-core.js?v=3', 'TDS helper');
 }
 function ensureDscVerify(){
   return ensureLib('dscverify', ()=>!!window.DscVerify, '/dsc-verify.js?v=3', 'Signature checker');
@@ -3333,7 +3335,7 @@ const TOOL_LIBS = {
   pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'], tdslatefee:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],

@@ -3,6 +3,7 @@
  *   pantan      PAN / TAN checker (bulk)
  *   tdsdates    TDS due-date calendar (FY / Tax Year)
  *   tdsinterest TDS late-interest calculator (s.398(3)(a))
+ *   tdslatefee TDS late filing fee (s.427 / old s.234E)
  *   dscbulk     Bulk signature check for Form 16 / Form 130 PDFs or a TRACES ZIP
  *
  * Free, browser-only, no AI. Logic lives in tds-core.js (window.TdsCore) and dsc-verify.js (window.DscVerify);
@@ -28,7 +29,12 @@
     faq: 'https://www.incometaxindia.gov.in/documents/81799/11848482/FAQs-on-Interplay-and-Transition.pdf',
     f138: 'https://www.incometaxindia.gov.in/documents/d/guest/form-138-faqs',
     f130: 'https://www.incometaxindia.gov.in/documents/d/guest/form-130-faqs',
-    forms: 'https://www.incometaxindia.gov.in/w/faqs-on-forms-as-per-income-tax-rules-2026-1'
+    forms: 'https://www.incometaxindia.gov.in/w/faqs-on-forms-as-per-income-tax-rules-2026-1',
+    s427: 'https://www.incometaxindia.gov.in/w/section-427-6',
+    s234e: 'https://www.incometaxindia.gov.in/w/section-234e-13',
+    feePage: 'https://www.incometaxindia.gov.in/w/late-filing-fees-and-penalty-for-failure-to-furnish/delay-in-furnishing-the-tds/tcs-statements%E2%80%8B',
+    s393: 'https://www.incometaxindia.gov.in/w/section-393-5',
+    rates: 'https://www.incometaxindia.gov.in/w/tds-rates-1'
   };
   const srcLink = (u, t) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`;
 
@@ -101,7 +107,7 @@
         c.returns.forEach(r => { h += `<tr style="${r.due < now ? 'opacity:.6;' : ''}"><td style="${td}">${esc(r.q)}</td><td style="${td}"><b>${fmtDate(r.due)}</b><div style="font-size:11.5px;color:var(--sub);">${wday(r.due)}</div></td></tr>`; });
         h += `</table></div></div>`;
         h += `<div style="${card}"><b>🧾 ${T('வருடாந்திர சான்றிதழ்', 'Annual certificate')}</b><div style="font-size:13.5px;margin-top:6px;line-height:1.7;">${esc(c.certs[0].name)}: <b>${fmtDate(c.certs[0].due)}</b> (${wday(c.certs[0].due)})<br><span style="color:var(--sub);font-size:12.5px;">${c.newAct ? T('Form 130-ஐ TRACES-ல் இருந்தே பதிவிறக்க வேண்டும்; வேறு வழியில் தயாரித்தது செல்லுபடியாகாது (வருமான வரித் துறை FAQ).', 'Form 130 must be downloaded from TRACES; one prepared any other way is not a valid certificate (Income Tax Dept FAQ).') : T('Form 16-ஐ TRACES-ல் இருந்து பதிவிறக்கி, டிஜிட்டல் அல்லது கையால் கையொப்பமிடலாம்.', 'Form 16 is downloaded from TRACES and may be signed digitally or manually.')}<br>${T('Form 16A / 131-க்கான தேதியை இந்தக் கருவி காட்டாது: அதிகாரப்பூர்வ பக்கத்தில் உறுதி செய்யுங்கள்.', 'The date for Form 16A / 131 is not shown here — confirm it on the official page.')}</span></div></div>`;
-        h += `<div class="note" style="font-size:12.5px;line-height:1.65;"><b>${T('கவனிக்க', 'Please note')}</b><br>• ${T('இவை சட்டப்படியான தேதிகள். CBDT சில சமயம் நீட்டிக்கலாம்; TRACES / e-filing அறிவிப்புகளையும் பாருங்கள்.', 'These are the statutory dates. CBDT may extend them — also check TRACES / e-filing notices.')}<br>• ${T('31 மார்ச் 2026 வரையிலான காலத்துக்குப் பழைய சட்டமும் பழைய படிவங்களும் (24Q/26Q/27Q/16); 1 ஏப்ரல் 2026 முதல் புதிய சட்டம்.', 'Periods up to 31 March 2026 stay under the old Act and old forms (24Q/26Q/27Q/16); from 1 April 2026 the new Act applies.')}<br>• ${T('TCS தேதிகள் இங்கு சேர்க்கப்படவில்லை.', 'TCS dates are not included.')}<br>• ${T('ஆதாரம்', 'Sources')}: ${srcLink(SRC.faq, 'Transition FAQs')} · ${srcLink(SRC.f138, 'Form 138 FAQ')} · ${srcLink(SRC.f130, 'Form 130 FAQ')}<br>• ${T('இந்த விதிகள் கடைசியாகச் சரிபார்க்கப்பட்ட தேதி', 'Rules last verified on')}: <b>${esc(core().RULES.asOf)}</b> (${T('அதிகாரப்பூர்வ பக்கங்களில் மாற்றம் வந்தால் இந்தத் தளம் புதுப்பிக்கப்படும்; முக்கியமான தாக்கல்களுக்கு முன் அதிகாரப்பூர்வ பக்கத்தையும் பாருங்கள்', 'the site is updated when the official pages change; for an important filing also check the official page')})</div>`;
+        h += `<div class="note" style="font-size:12.5px;line-height:1.65;"><b>${T('கவனிக்க', 'Please note')}</b><br>• ${T('இவை சட்டப்படியான தேதிகள். CBDT சில சமயம் நீட்டிக்கலாம்; TRACES / e-filing அறிவிப்புகளையும் பாருங்கள்.', 'These are the statutory dates. CBDT may extend them — also check TRACES / e-filing notices.')}<br>• ${T('31 மார்ச் 2026 வரையிலான காலத்துக்குப் பழைய சட்டமும் பழைய படிவங்களும் (24Q/26Q/27Q/16); 1 ஏப்ரல் 2026 முதல் புதிய சட்டம்.', 'Periods up to 31 March 2026 stay under the old Act and old forms (24Q/26Q/27Q/16); from 1 April 2026 the new Act applies.')}<br>• ${T('TCS தேதிகள் இங்கு சேர்க்கப்படவில்லை.', 'TCS dates are not included.')}<br>• ${T('ஆதாரம்', 'Sources')}: ${srcLink(SRC.faq, 'Transition FAQs')} · ${srcLink(SRC.f138, 'Form 138 FAQ')} · ${srcLink(SRC.f130, 'Form 130 FAQ')}<br>• ${T('TDS விகிதங்கள் / வரம்புகளுக்கு (எந்தப் பிரிவில் எவ்வளவு %) அதிகாரப்பூர்வ பக்கங்களைப் பாருங்கள்; இங்கு விகித அட்டவணை தரப்படவில்லை, ஏனெனில் ஒவ்வொரு வரிசைக்கும் விதிவிலக்குகள் உள்ளன', 'For TDS rates and thresholds see the official pages; no rate table is reproduced here because each row has exceptions')}: ${srcLink(SRC.s393, 'Section 393')} · ${srcLink(SRC.rates, 'TDS Rates')}<br>• ${T('இந்த விதிகள் கடைசியாகச் சரிபார்க்கப்பட்ட தேதி', 'Rules last verified on')}: <b>${esc(core().RULES.asOf)}</b> (${T('அதிகாரப்பூர்வ பக்கங்களில் மாற்றம் வந்தால் இந்தத் தளம் புதுப்பிக்கப்படும்; முக்கியமான தாக்கல்களுக்கு முன் அதிகாரப்பூர்வ பக்கத்தையும் பாருங்கள்', 'the site is updated when the official pages change; for an important filing also check the official page')})</div>`;
         body.innerHTML = h;
         body.querySelector('#tdY').onchange = (e) => { year = +e.target.value; paint(); };
       }
@@ -144,6 +150,42 @@
         body.querySelector('#tiAdd').onclick = () => { rows.push({ kind: rows[rows.length - 1].kind, amount: '', from: '', to: '' }); paint(); };
         body.querySelector('#tiCsv').onclick = () => downloadBlob(csvBlob([['Case', 'TDS amount', 'From', 'To', 'Months', 'Rate %', 'Interest', 'Note']].concat(rows.map(r => { const x = calc(r); return [r.kind === 'deposit' ? 'Deducted, deposited late' : 'Not deducted / deducted late', r.amount, r.from, r.to, x.months, x.rate, x.interest, x.note]; }).concat([['Total', '', '', '', '', '', tot.toFixed(2), '']]))), 'tds-interest.csv');
       }
+      paint();
+    }
+  };
+
+  /* ====================================================================
+   * TDS late filing fee (s.427 / old s.234E)
+   * ==================================================================== */
+  TOOL_IMPL.tdslatefee = {
+    mount(container) {
+      const body = el(`<div class="tamil"></div>`); container.appendChild(body);
+      const now = todayLocal(); const curStart = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+      const st = { year: curStart, q: 0, amount: '', filed: core().iso(now) };
+      function paint() {
+        const c = core().calendar(st.year); const due = c.returns[st.q].due;
+        const res = core().lateFee(due, core().parseISO(st.filed), parseFloat(st.amount));
+        let yo = ''; for (let y = curStart - 2; y <= curStart + 1; y++) yo += `<option value="${y}" ${y === st.year ? 'selected' : ''}>FY ${y}-${String((y + 1) % 100).padStart(2, '0')}</option>`;
+        let qo = ''; c.returns.forEach((r, i) => { qo += `<option value="${i}" ${i === st.q ? 'selected' : ''}>${esc(r.q)}</option>`; });
+        let h = `<div class="note">${T('TDS காலாண்டு அறிக்கையைத் தாமதமாகத் தாக்கல் செய்தால் நாளொன்றுக்கு ₹200 கட்டணம்; அது அந்தக் காலாண்டில் பிடிக்க வேண்டிய வரித் தொகையை மிகாது. இந்தக் கட்டணத்தை அறிக்கை தாக்கல் செய்வதற்கு முன் செலுத்த வேண்டும்.', 'Late filing of a quarterly TDS statement attracts ₹200 for every day, never more than the tax deductible. The fee must be paid before the statement is filed.')}</div>
+          <div class="opts">
+            <div class="field"><label>${T('நிதியாண்டு', 'Financial year')}</label><select id="lfY">${yo}</select></div>
+            <div class="field"><label>${T('காலாண்டு', 'Quarter')}</label><select id="lfQ">${qo}</select></div>
+            <div class="field"><label>${T('அந்தக் காலாண்டில் மொத்த TDS ₹', 'Total TDS for the quarter ₹')}</label><input type="number" inputmode="decimal" min="0" step="0.01" id="lfA" value="${esc(st.amount)}" style="width:100%;"></div>
+            <div class="field"><label>${T('தாக்கல் செய்த / செய்யப்போகும் தேதி', 'Date filed / to be filed')}</label><input type="date" id="lfD" value="${esc(st.filed)}" style="width:100%;"></div>
+          </div>
+          <div style="${card}"><div style="font-size:13px;">${T('கடைசி தேதி', 'Due date')}: <b>${fmtDate(due)}</b> (${wday(due)})</div>`;
+        if (res.late) {
+          h += `<div style="margin-top:8px;font-size:14px;"><b>${T('தாமதக் கட்டணம்', 'Late fee')}: ${inr(res.fee)}</b><div style="font-size:12.5px;color:var(--sub);">${res.days} ${T('நாட்கள்', 'days')} × ₹200 = ${inr(res.uncapped)}${res.capped ? ' → ' + T('TDS தொகையை மிகாது என்பதால் வரம்பு', 'limited to the TDS amount') + ' ' + inr(res.fee) : ''}</div></div>`;
+        } else h += `<div style="margin-top:8px;color:var(--sub);">${esc(res.note || '—')}</div>`;
+        h += `</div><div class="note" style="font-size:12.5px;line-height:1.65;"><b>${T('கவனிக்க', 'Please note')}</b><br>• ${T('நாட்கள் = தாக்கல் தேதி − கடைசி தேதி (கடைசி தேதியிலேயே தாக்கல் செய்தால் 0). TRACES காட்டும் தொகையே இறுதி.', 'Days = filing date − due date (filing on the due date = 0). The amount shown by TRACES is final.')}<br>• ${T('இது கட்டணம் மட்டும். வட்டி தனி (வட்டிக் கருவியைப் பாருங்கள்); தாமதத்துக்கு அபராதமும் விதிக்கப்படலாம் (பிரிவு 271H: ₹10,000 – ₹1,00,000 வரை) — அது இங்கு கணக்கிடப்படவில்லை.', 'This is the fee only. Interest is separate (see the interest tool). A penalty of ₹10,000 to ₹1,00,000 under section 271H may also apply — not calculated here.')}<br>• ${T('2026-27 முதல் புதிய சட்டம் பிரிவு 427; அதற்கு முன் பிரிவு 234E. இரண்டிலும் நாளொன்றுக்கு ₹200.', 'From 2026-27 the new Act section 427 applies; before that section 234E. Both are ₹200 a day.')}<br>• ${T('ஆதாரம்', 'Sources')}: ${srcLink(SRC.s427, 'Section 427')} · ${srcLink(SRC.s234e, 'Section 234E')} · ${srcLink(SRC.feePage, 'Late fee page')}<br>• ${T('இந்த விதிகள் கடைசியாகச் சரிபார்க்கப்பட்ட தேதி', 'Rules last verified on')}: <b>${esc(core().RULES.asOf)}</b></div>`;
+        body.innerHTML = h;
+        body.querySelector('#lfY').onchange = e => { st.year = +e.target.value; paint(); };
+        body.querySelector('#lfQ').onchange = e => { st.q = +e.target.value; paint(); };
+        body.querySelector('#lfA').oninput = e => { st.amount = e.target.value; update(); };
+        body.querySelector('#lfD').onchange = e => { st.filed = e.target.value; paint(); };
+      }
+      function update() { const a = document.activeElement; const pos = a && a.selectionStart; paint(); const n = body.querySelector('#lfA'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
       paint();
     }
   };

@@ -142,5 +142,18 @@
     return res;
   }
 
-  return { RULES, checkId, PAN_TYPES, parseISO, iso, depositDue, challanCumStatementDue, calendar, monthsOrPart, interest, MON, MON_TA, DAY, DAY_TA, pad };
+  /* ---------------- late filing fee (Income-tax Act 2025 s.427(1),(2); old Act s.234E) ---------------- */
+  // Rs 200 for every day the failure continues, never more than the tax deductible; must be paid before the statement is delivered.
+  // Days = filing date minus due date (filing on the due date = 0 days).
+  function lateFee(due, filed, tdsAmount) {
+    const res = { days: 0, perDay: 200, uncapped: 0, fee: 0, capped: false, late: false, note: '' };
+    if (!due || !filed) { res.note = 'Enter the filing date'; return res; }
+    if (!(tdsAmount >= 0)) { res.note = 'Enter the TDS amount'; return res; }
+    const days = Math.round((Date.UTC(filed.getFullYear(), filed.getMonth(), filed.getDate()) - Date.UTC(due.getFullYear(), due.getMonth(), due.getDate())) / 864e5);
+    if (days <= 0) { res.note = 'Filed on or before the due date — no late fee'; return res; }
+    res.late = true; res.days = days; res.uncapped = 200 * days; res.fee = Math.min(res.uncapped, tdsAmount); res.capped = res.uncapped > tdsAmount;
+    return res;
+  }
+
+  return { RULES, lateFee, checkId, PAN_TYPES, parseISO, iso, depositDue, challanCumStatementDue, calendar, monthsOrPart, interest, MON, MON_TA, DAY, DAY_TA, pad };
 }));

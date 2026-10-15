@@ -60,4 +60,13 @@ r = T.interest('deduct', 100, d(2026, 4, 5), d(2026, 4, 4));
 ok(r.interest === 0 && /before/.test(r.note), 'reversed dates rejected');
 r = T.interest('deposit', 12345.67, d(2026, 6, 1), d(2026, 9, 9));
 ok(r.interest === Math.round(12345.67 * 0.015 * r.months * 100) / 100 && r.months === 4, 'paise rounding 1 Jun -> 9 Sep = 4 months');
+// ---- late filing fee (s.427 / 234E): Rs 200 a day, capped at the TDS amount
+r = T.lateFee(d(2026, 6, 30), d(2026, 6, 30), 10000); ok(!r.late && r.fee === 0, 'late fee: filed on due date -> 0');
+r = T.lateFee(d(2026, 6, 30), d(2026, 7, 1), 10000); ok(r.days === 1 && r.fee === 200, 'late fee: 1 day -> 200');
+r = T.lateFee(d(2026, 6, 30), d(2026, 7, 10), 10000); ok(r.days === 10 && r.fee === 2000, 'late fee: 10 days -> 2000');
+r = T.lateFee(d(2026, 6, 30), d(2026, 9, 1), 5000); ok(r.capped && r.fee === 5000 && r.uncapped === 12600, 'late fee capped at TDS amount (63 days x 200 = 12,600 -> 5,000)');
+r = T.lateFee(d(2026, 6, 30), d(2026, 7, 5), 0); ok(r.fee === 0 && r.late, 'late fee: zero TDS -> zero fee');
+r = T.lateFee(d(2027, 4, 1), d(2027, 5, 1), 1e6); ok(r.days === 30, 'late fee: day count across DST-free dates exact');
+r = T.lateFee(d(2026, 6, 30), d(2026, 7, 5), NaN); ok(r.fee === 0 && /TDS amount/.test(r.note), 'late fee: missing amount handled');
+ok(T.RULES && /^\d{4}-\d{2}-\d{2}$/.test(T.RULES.asOf), 'RULES.asOf present');
 console.log(fail ? 'FAILED ' + fail : 'ALL TDS-CORE TESTS PASS'); process.exit(fail ? 1 : 0);
