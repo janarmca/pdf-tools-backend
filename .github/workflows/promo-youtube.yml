@@ -4,6 +4,7 @@ name: Promotion — YouTube Short
 # YouTube Short and uploads it (.github/scripts/promo-youtube.mjs). Does nothing until YouTube is
 # connected on the admin page (matrimony → Admin → Promotion → Connect YouTube) or promotion is off.
 # Uses the existing secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
+# Optional secret GEMINI_API_KEY = natural Tamil voice (Gemini TTS, free tier); without it the voice falls back to edge-tts / gTTS.
 on:
   # The daily schedule is switched OFF (YouTube is not connected, so every run only burned CI minutes).
   # To turn it back on after "Connect YouTube": remove the leading '#' of the two lines below.
@@ -15,6 +16,15 @@ on:
         description: 'Tool id (empty = today''s promotion post)'
         type: string
         default: ''
+      privacy:
+        description: 'public (normal) or private (to test the voice without showing the video to everyone)'
+        type: choice
+        options: [public, private]
+        default: public
+      gemini_voice:
+        description: 'Gemini voice name (Kore, Aoede, Leda, Zephyr = female; Charon, Puck, Orus, Fenrir = male)'
+        type: string
+        default: 'Kore'
 
 concurrency:
   group: promo-youtube
@@ -48,6 +58,9 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           TOOL: ${{ inputs.tool }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_VOICE: ${{ inputs.gemini_voice }}
+          PRIVACY: ${{ inputs.privacy }}
         run: node .github/scripts/promo-youtube.mjs
 
       - name: Keep the video

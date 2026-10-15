@@ -69,17 +69,44 @@ export function speechText(t) {
   const parts = [say(clean(t.ta || t.name)), say(clean(t.taDesc || t.desc)), 'இலவசம். லாகின் தேவையில்லை.', 'பி டி எஃப் டூல்ஸ் இந்தியா டாட் காம் தளத்தில் பயன்படுத்துங்கள்.'];
   return parts.filter(Boolean).map((x) => (/[.!?]$/.test(x) ? x : x + '.')).join(' ');
 }
-export function makeVoice(text, out = 'voice.mp3') {
+// Gemini TTS (free tier "Free of charge" on the Gemini API pricing page; Tamil ta-IN is supported): by far the most natural voice.
+// Needs the GitHub secret GEMINI_API_KEY. Returns raw 16-bit PCM which ffmpeg turns into mp3.
+async function geminiVoice(text, out) {
+  const key = process.env.GEMINI_API_KEY; if (!key) throw new Error('GEMINI_API_KEY not set');
+  const base = (process.env.GEMINI_API_BASE || 'https://generativelanguage.googleapis.com').replace(/\/$/, '');
+  const models = (process.env.GEMINI_TTS_MODEL || 'gemini-3.1-flash-tts-preview,gemini-2.5-flash-preview-tts').split(',');
+  const voiceName = process.env.GEMINI_VOICE || 'Kore';
+  const prompt = `Say this in natural, warm, friendly spoken Tamil, at a relaxed conversational pace, like a helpful teacher on a short video:\n\n${text}`;
+  let lastErr;
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const r = await fetch(`${base}/v1beta/models/${model}:generateContent`, { method: 'POST', headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(90000),
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } } } }) });
+        if (!r.ok) { lastErr = new Error(`${model}: HTTP ${r.status} ${(await r.text()).slice(0, 160)}`); if (r.status === 429 || r.status >= 500) { await new Promise((z) => setTimeout(z, 5000)); continue; } break; }
+        const j = await r.json(); const part = j.candidates?.[0]?.content?.parts?.find((x) => x.inlineData?.data);
+        if (!part) { lastErr = new Error(`${model}: no audio in the answer`); break; }
+        const rate = /rate=(\d+)/.exec(part.inlineData.mimeType || '')?.[1] || '24000';
+        fs.writeFileSync('voice.pcm', Buffer.from(part.inlineData.data, 'base64'));
+        execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 's16le', '-ar', rate, '-ac', '1', '-i', 'voice.pcm', '-ar', '44100', '-ac', '1', out]);
+        console.log('Gemini model', model, 'voice', voiceName); return;
+      } catch (e) { lastErr = e; }
+    }
+  }
+  throw lastErr || new Error('Gemini TTS failed');
+}
+// Order: Gemini TTS (natural) -> edge-tts (Microsoft neural, no key) -> gTTS. Override with TTS_ENGINES=gemini,edge,gtts.
+// If nothing works the Short is still made, silent, and the log says why.
+export async function makeVoice(text, out = 'voice.mp3') {
   fs.rmSync(out, { force: true });
-  const tries = [
-    ['edge-tts', ['--voice', process.env.TTS_VOICE || 'ta-IN-PallaviNeural', '--text', text, '--write-media', out]],
-    ['gtts-cli', [text, '-l', 'ta', '-o', out]],
-  ];
-  for (const [cmd, args] of tries) {
-    try {
-      execFileSync(cmd, args, { stdio: 'inherit', timeout: 90000 });
-      if (fs.existsSync(out) && fs.statSync(out).size > 2000) { console.log('Voice made with', cmd); return out; }
-    } catch (e) { console.log(cmd, 'failed:', String(e.message).slice(0, 160)); }
+  const engines = (process.env.TTS_ENGINES || 'gemini,edge,gtts').split(',').map((x) => x.trim());
+  const run = { gemini: () => geminiVoice(text, out),
+    edge: () => execFileSync('edge-tts', ['--voice', process.env.TTS_VOICE || 'ta-IN-PallaviNeural', '--rate=-5%', '--text', text, '--write-media', out], { stdio: 'inherit', timeout: 90000 }),
+    gtts: () => execFileSync('gtts-cli', [text, '-l', 'ta', '-o', out], { stdio: 'inherit', timeout: 90000 }) };
+  for (const e of engines) {
+    if (!run[e] || (e === 'gemini' && !process.env.GEMINI_API_KEY)) continue;
+    try { await run[e](); if (fs.existsSync(out) && fs.statSync(out).size > 2000) { console.log('Voice made with', e); return out; } }
+    catch (err) { console.log(e, 'failed:', String(err.message).slice(0, 200)); }
   }
   console.log('No voice could be made — the Short will be silent.');
   return null;
@@ -106,7 +133,7 @@ async function upload(token, file, t, text) {
   const meta = {
     snippet: { title: `${t.ta ? t.ta + ' | ' : ''}${t.name} — Free Online Tool #Shorts`.slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
       description: `${ta || t.taDesc}\n${en || t.desc}\n\n👉 ${t.url}\n\nஇலவசம் · login தேவையில்லை · Free, no sign-up\n#Shorts #PDFToolsIndia #Tamil`, tags: ['pdftoolsindia', 'free tools', 'tamil', t.name, t.ta].filter(Boolean) },
-    status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+    status: { privacyStatus: process.env.PRIVACY === 'private' ? 'private' : 'public', selfDeclaredMadeForKids: false },
   };
   const size = fs.statSync(file).size;
   const start = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
@@ -129,7 +156,7 @@ const main = async () => {
   fs.writeFileSync('slide.html', slideHtml(t, post?.text));
   const chrome = process.env.CHROME || 'google-chrome';
   execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
-  const voice = makeVoice(speechText(t));
+  const voice = await makeVoice(speechText(t));
   const secs = makeVideo(voice);
   console.log('Video', secs + 's', voice ? 'with Tamil voice' : 'silent');
   if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
