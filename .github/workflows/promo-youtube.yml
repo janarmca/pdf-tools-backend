@@ -74,6 +74,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: short
-          path: short.mp4
+          path: |
+            short.mp4
+            social-captions.txt
           if-no-files-found: ignore
           retention-days: 7

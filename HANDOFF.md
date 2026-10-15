@@ -131,3 +131,9 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - The video length follows the voice (`stretch`: 0.85x–1.78x of the 16.8 s beats, max 30 s). If the animation fails for any reason, `promo-youtube.mjs` falls back to the old still-slide Short, so a Short is always made. `ANIM=0` forces the still slide.
 - Daily schedule (09:20 IST) is now ON in `promo-youtube.yml`. YouTube consent screen "Testing" mode makes the refresh token expire about every 7 days → publish the Google app to "In production" (or press Connect YouTube weekly).
 - Tests: `PLAYWRIGHT_PATH=<playwright> CHROME=<chrome> node tests/promo-anim.test.mjs` (render tests are skipped when playwright/Chrome/ffmpeg are missing).
+
+## Captions + hashtags for social reach (UPDATE_21)
+- `.github/scripts/promo-tags.mjs`: code-only captions/hashtags per platform. Instagram ≤5 hashtags (Instagram's own cap since Dec 2025), Facebook ≤3 and no link, YouTube ≤3 + #Shorts. Keyword-first Tamil/English captions, every caption asks to Save + Send/Share (sends = strongest Reels signal), audience alternates office/college daily, hashtag set rotates, dated hooks (TDS due dates, Deepavali 8 Nov 2026, exam season).
+- `promo-youtube.mjs` uses it for the YouTube description/tags and writes `social-captions.txt` (Instagram + Facebook captions) into the workflow artifact "short", next to `short.mp4`.
+- NOT built: automatic posting to Instagram/Facebook (needs a Meta app + Page token; plan and unverified points are in the research report `Instagram Facebook reach tactics.md`). Tag performance for Tamil is unproven — review Insights after 3 weeks and edit `CAT_TAGS`/`TOOL_TAGS`/`COMMUNITY`.
+- Test: `node tests/promo-tags.test.mjs`.

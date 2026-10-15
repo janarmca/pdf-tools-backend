@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
 import { buildPlan, makeAnimVideo } from './promo-anim.mjs';
+import { buildCaptions } from './promo-tags.mjs';
 
 // Fonts come from npm (@fontsource, installed by the workflow) and are loaded from disk, so a slow or blocked
 // Google Fonts request can no longer make the Tamil text fall back to an ugly font.
@@ -132,10 +133,10 @@ async function accessToken(refresh) {
 }
 
 async function upload(token, file, t, text) {
-  const [ta, en] = String(text || '').split('\n');
+  const cap = buildCaptions(t);
   const meta = {
-    snippet: { title: `${t.ta ? t.ta + ' | ' : ''}${t.name} — Free Online Tool #Shorts`.slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
-      description: `${ta || t.taDesc}\n${en || t.desc}\n\n👉 ${t.url}\n\nஇலவசம் · login தேவையில்லை · Free, no sign-up\n#Shorts #PDFToolsIndia #Tamil`, tags: ['pdftoolsindia', 'free tools', 'tamil', t.name, t.ta].filter(Boolean) },
+    snippet: { title: `${t.ta ? t.ta + ' | ' : ''}${t.name} — ${t.paid ? 'Online Tool' : 'Free Online Tool'} #Shorts`.slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
+      description: cap.youtube, tags: cap.youtubeTags },
     status: { privacyStatus: process.env.PRIVACY === 'private' ? 'private' : 'public', selfDeclaredMadeForKids: false },
   };
   const size = fs.statSync(file).size;
@@ -170,6 +171,7 @@ const main = async () => {
     execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
     secs = makeVideo(voice);
   }
+  const cap = buildCaptions(t); fs.writeFileSync('social-captions.txt', `=== INSTAGRAM (Reel caption) ===\n${cap.instagram}\n\n=== FACEBOOK (Reel/post caption) ===\n${cap.facebook}\n\n=== YOUTUBE (description) ===\n${cap.youtube}\n`);
   console.log('Video', secs + 's', kind, voice ? 'with Tamil voice' : 'silent');
   if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
   try {
