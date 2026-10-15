@@ -6,10 +6,10 @@ name: Promotion — YouTube Short
 # Uses the existing secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
 # Optional secret GEMINI_API_KEY = natural Tamil voice (Gemini TTS, free tier); without it the voice falls back to edge-tts / gTTS.
 on:
-  # The daily schedule is switched OFF (YouTube is not connected, so every run only burned CI minutes).
-  # To turn it back on after "Connect YouTube": remove the leading '#' of the two lines below.
-  # schedule:
-  #   - cron: '50 3 * * *'   # 09:20 IST
+  # Daily at 09:20 IST (after the 09:05 promotion post). YouTube is connected. If promotion is switched off the run just exits.
+  # To stop the daily Short: put '#' in front of the two lines below (or switch promotion off on the admin page).
+  schedule:
+    - cron: '50 3 * * *'   # 09:20 IST
   workflow_dispatch:
     inputs:
       tool:
