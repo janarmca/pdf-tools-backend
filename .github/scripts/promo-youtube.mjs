@@ -5,7 +5,16 @@
 // Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET; optional TOOL (force a tool id), DRY_RUN=1.
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
+
+// Fonts come from npm (@fontsource, installed by the workflow) and are loaded from disk, so a slow or blocked
+// Google Fonts request can no longer make the Tamil text fall back to an ugly font.
+const ff = (fam, file, w, extra = '') => `@font-face{font-family:'${fam}';font-weight:${w};font-style:normal;src:url('${file}') format('woff2');${extra}}`;
+const FONT_FACE = [
+  ff('Noto Sans Tamil', 'fonts/noto-sans-tamil-500.woff2', 500), ff('Noto Sans Tamil', 'fonts/noto-sans-tamil-800.woff2', 800), // shipped in the repo (fonts/), no network needed
+  ff('Inter', 'node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2', 600), ff('Inter', 'node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2', 900), // npm, installed by the workflow
+].join('\n');
 
 const { CLOUDFLARE_API_TOKEN: CF_TOKEN, CLOUDFLARE_ACCOUNT_ID: ACC, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 const CF = `https://api.cloudflare.com/client/v4/accounts/${ACC}/d1/database`;
@@ -26,11 +35,11 @@ async function sql(q, params = []) {
 const setting = async (k) => (await sql('select value from promo_settings where key = ?', [k]))[0]?.value || null;
 const log = (toolId, status, id, error) => sql('insert into promo_posts (tool_id, platform, status, message_id, error) values (?, ?, ?, ?, ?)', [toolId, 'youtube', status, id, error]);
 
-function slideHtml(t, text) {
+export function slideHtml(t, text) {
   const [ta, en] = String(text || '').split('\n');
-  return `<!doctype html><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@500;800&family=Inter:wght@600;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet"><link href="https://pdftoolsindia.com/fonts/tamil.css" rel="stylesheet">
+  return `<!doctype html><meta charset="utf-8"><style>${FONT_FACE}</style>
 <style>*{box-sizing:border-box}html,body{margin:0;width:1080px;height:1920px;overflow:hidden}
-body{font-family:'Noto Sans Tamil','Inter',sans-serif;color:#fff;background:linear-gradient(160deg,${t.color} 0%,#14182b 100%);display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:110px 80px 120px}
+body{font-family:'Noto Sans Tamil','Inter','Noto Color Emoji',sans-serif;color:#fff;background:linear-gradient(160deg,${t.color} 0%,#14182b 100%);display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:110px 80px 120px}
 .mid{display:flex;flex-direction:column;align-items:center}
 .icon{font:300px/1 'Noto Color Emoji',sans-serif;margin-top:10px}
 .pts{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:40px}.pts span{background:rgba(255,255,255,.16);border-radius:999px;padding:14px 28px;font-size:36px;font-weight:800}
@@ -39,7 +48,7 @@ body{font-family:'Noto Sans Tamil','Inter',sans-serif;color:#fff;background:line
 h1{font-size:${(t.ta || '').length > 18 ? 68 : 84}px;font-weight:800;margin:60px 0 6px;line-height:1.25}
 h2{font:900 52px Inter,sans-serif;margin:0;opacity:.92}
 p{font-size:40px;font-weight:500;line-height:1.5;margin:46px 0 0;opacity:.95;max-height:420px;overflow:hidden}
-.foot{background:#FFD54A;color:#14182b;font:900 46px Inter,sans-serif;padding:26px 46px;border-radius:999px}
+.foot{background:#FFD54A;color:#14182b;font:900 40px Inter,sans-serif;padding:26px 36px;border-radius:999px;white-space:nowrap}
 .foot span{font-family:'Noto Sans Tamil';font-weight:800}</style>
 <div class="brand">PDF Tools <b>India</b></div>
 <div class="mid">${t.img ? `<div class="img" style="background-image:url('${esc(t.img)}')"></div>` : `<div class="icon">${esc(t.icon || '🛠')}</div>`}
@@ -47,6 +56,43 @@ p{font-size:40px;font-weight:500;line-height:1.5;margin:46px 0 0;opacity:.95;max
 <p>${esc(ta || t.taDesc || t.desc)}</p>
 <div class="pts"><span>✓ இலவசம்</span><span>✓ Login இல்லை</span><span>✓ Phone-லேயே</span></div></div>
 <div class="foot"><span>இலவசம்</span> · FREE · pdftoolsindia.com</div>`;
+}
+
+// ---- free Tamil voice (no API key, no cost) ----
+// 1st choice: edge-tts (Microsoft neural Tamil voices), 2nd: gTTS (Google Translate voice). Both are installed by the workflow with pip.
+// If neither works (blocked / rate limited) the Short is still made, silent, and the log says why.
+// English abbreviations spelt out in Tamil letters so the Tamil voice reads them as people say them
+const SAY = { PDF: 'பி டி எஃப்', GST: 'ஜி எஸ் டி', TDS: 'டி டி எஸ்', PAN: 'பான்', TAN: 'டான்', DSC: 'டி எஸ் சி', OCR: 'ஓ சி ஆர்', QR: 'கியூ ஆர்', AI: 'ஏ ஐ', JPG: 'ஜே பி ஜி', PNG: 'பி என் ஜி', ZIP: 'ஜிப்', EMI: 'இ எம் ஐ', HRA: 'எச் ஆர் ஏ', PF: 'பி எஃப்', ESI: 'இ எஸ் ஐ', CSV: 'சி எஸ் வி', PPT: 'பி பி டி', MP3: 'எம் பி த்ரீ', MP4: 'எம் பி போர்', Excel: 'எக்செல்', Word: 'வேர்டு', Tamil: 'தமிழ்', Aadhaar: 'ஆதார்' };
+const say = (x) => x.replace(/₹\s*([\d,]+)/g, '$1 ரூபாய்').replace(/e-?sign/gi, 'இ சைன்').replace(/[A-Za-z0-9]+/g, (w) => SAY[w] || SAY[w.toUpperCase()] || w);
+export function speechText(t) {
+  const clean = (x) => String(x || '').replace(/[\p{Extended_Pictographic}‍️]/gu, ' ').replace(/https?:\/\/\S+/g, ' ').replace(/[#*_|/]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const parts = [say(clean(t.ta || t.name)), say(clean(t.taDesc || t.desc)), 'இலவசம். லாகின் தேவையில்லை.', 'பி டி எஃப் டூல்ஸ் இந்தியா டாட் காம் தளத்தில் பயன்படுத்துங்கள்.'];
+  return parts.filter(Boolean).map((x) => (/[.!?]$/.test(x) ? x : x + '.')).join(' ');
+}
+export function makeVoice(text, out = 'voice.mp3') {
+  fs.rmSync(out, { force: true });
+  const tries = [
+    ['edge-tts', ['--voice', process.env.TTS_VOICE || 'ta-IN-PallaviNeural', '--text', text, '--write-media', out]],
+    ['gtts-cli', [text, '-l', 'ta', '-o', out]],
+  ];
+  for (const [cmd, args] of tries) {
+    try {
+      execFileSync(cmd, args, { stdio: 'inherit', timeout: 90000 });
+      if (fs.existsSync(out) && fs.statSync(out).size > 2000) { console.log('Voice made with', cmd); return out; }
+    } catch (e) { console.log(cmd, 'failed:', String(e.message).slice(0, 160)); }
+  }
+  console.log('No voice could be made — the Short will be silent.');
+  return null;
+}
+const audioSeconds = (f) => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim()) || 0;
+export function makeVideo(voice, out = 'short.mp4') {
+  const dur = voice ? Math.min(30, Math.max(10, Math.ceil((audioSeconds(voice) + 1.5) * 10) / 10)) : 10;
+  const frames = Math.round(dur * 30);
+  const audioIn = voice ? ['-i', voice] : ['-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo'];
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-loop', '1', '-framerate', '30', '-i', 'slide.png', ...audioIn, '-t', String(dur),
+    '-vf', `crop=1080:1920:0:0,scale=1188:2112,zoompan=z='min(zoom+${(0.08 / frames).toFixed(6)},1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${frames}:s=1080x1920:fps=30`,
+    '-af', 'apad', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-ar', '44100', '-ac', '2', out], { stdio: 'inherit' });
+  return dur;
 }
 
 async function accessToken(refresh) {
@@ -83,16 +129,17 @@ const main = async () => {
   fs.writeFileSync('slide.html', slideHtml(t, post?.text));
   const chrome = process.env.CHROME || 'google-chrome';
   execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-loop', '1', '-i', 'slide.png', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-t', '10',
-    '-vf', "crop=1080:1920:0:0,scale=1188:2112,zoompan=z='min(zoom+0.0005,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=300:s=1080x1920:fps=30", '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-shortest', 'short.mp4'], { stdio: 'inherit' });
+  const voice = makeVoice(speechText(t));
+  const secs = makeVideo(voice);
+  console.log('Video', secs + 's', voice ? 'with Tamil voice' : 'silent');
   if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
   try {
     const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);
-    await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : null);
+    await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : (voice ? null : 'uploaded WITHOUT voice (Tamil voice service unreachable)'));
     console.log('Uploaded https://youtube.com/shorts/' + v.id, v.status?.privacyStatus);
   } catch (e) {
     await log(t.id, 'failed', null, String(e.message).slice(0, 300));
     throw e;
   }
 };
-main().catch((e) => { console.error(e.message || e); process.exit(1); });
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error(e.message || e); process.exit(1); });
