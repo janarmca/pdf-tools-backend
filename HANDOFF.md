@@ -176,3 +176,12 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 
 ## UPDATE_33 — Facebook/Instagram creds from the admin page (no GitHub secrets needed)
 `promo-youtube.mjs` now reads `fb_page_token`, `fb_page_id`, `ig_user_id` from D1 `promo_settings` (saved by **Connect Facebook** on the admin page, `cloudflare/src/social.js`) when the META_* secrets are not set. Needs Worker secrets FB_APP_ID + FB_APP_SECRET and, in the Meta app, the valid OAuth redirect URI `https://pdftoolsindia.com/cfapi/promo/oauth/facebook`.
+
+## "What's new" Shorts + names on every platform (Oct 2026)
+- Why: owner wants every new discovery/feature announced to the public — logo first, then the news, then our info — all free.
+- Data: `.github/promo-news.json` (one entry per feature; validated by `validateNews`). Logic: `.github/scripts/promo-news.mjs` (`pendingNews`: oldest due & unposted entry; posted once as tool_id `news:<id>`; at most one per 24 h; otherwise the normal tool-of-the-day). Scene: `.github/scripts/anim/news.js` (logo card, NEW badge, title, 3 steps, info card with site, support e-mail, YouTube / Instagram / Facebook names). Workflow input `news` forces an id. CLAUDE.md carries the standing rule to add an entry with each new feature.
+- Captions: every Instagram / Facebook / YouTube caption (tool-of-the-day and news) now ends with the follow list (`FOLLOW` in promo-tags.mjs). Facebook captions still have no external link.
+- Verified end to end with a mocked database: `DRY_RUN` run made a 16.8 s h264+aac `short.mp4` for `dsc-tick`. Real Gemini voice and the three uploads are only provable from the live Actions log.
+- NOT built yet (waiting for the owner's photo): "owner explains the new update" talking video. Zero-cost options are limited — a still photo with a moving mouth needs a lip-sync model (heavy on free CI); the safe plan is the photo in a framed circle with a subtle speaking pulse + the Gemini voice, or the owner records the voice/screen himself and the pipeline adds logo + info card.
+- Live log check (Oct 2026, D1 `promo_posts`): YouTube, Facebook, Instagram all `sent` on 16 Oct; one Instagram `Application request limit reached` after many manual test runs (the daily single post is far below the limit); "uploaded as private" rows came from privacy=private test runs. Scheduled runs are delayed by GitHub (03:50 UTC cron started 08:31 UTC on 16 Oct) — normal.
+

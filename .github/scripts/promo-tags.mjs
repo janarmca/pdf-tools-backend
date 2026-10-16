@@ -47,6 +47,9 @@ export function hashtags(t, day, platform = 'instagram') {
   return ordered.slice(0, MAX[platform]);
 }
 
+// Our names on every platform — shown in every caption so people can follow us wherever they watch.
+export const FOLLOW = '▶️ YouTube: @pdftoolsindia\n📸 Instagram: @pdftoolsindia\n👍 Facebook: Pdf Tools India';
+
 export function buildCaptions(t, day = Math.floor(Date.now() / 86400000), date = new Date()) {
   const aud = AUDIENCE[day % AUDIENCE.length], paid = !!t.paid;
   const ta = t.ta || t.name, desc = String(t.taDesc || t.desc || '').replace(/[.!]+$/, '');
@@ -54,9 +57,9 @@ export function buildCaptions(t, day = Math.floor(Date.now() / 86400000), date =
   const price = paid ? 'AI tool ✨ — தேவையான இடத்தில் மட்டும் சிறு கட்டணம்' : 'இலவசம் ✅ · Login வேண்டாம் ✅ · Phone-லேயே ✅';
   const hook = `${aud.ta}: ${ta} — ${desc}!`;
   const lines = (...x) => x.filter(Boolean).join('\n\n');
-  const ig = lines(hook, season.join('\n'), price, `🔎 ${t.name} · ${kw}`, '📌 Save பண்ணுங்க · 📲 இது தேவைப்படும் friend-க்கு Send பண்ணுங்க', '👉 Link in bio — pdftoolsindia.com', hashtags(t, day, 'instagram').join(' '));
-  const fb = lines(`${aud.ta} 👇\n${ta} — ${desc}`, season.join('\n'), price, '🔁 Share பண்ணுங்க — உங்க நண்பர்களுக்கு உதவும்! (pdftoolsindia.com)', hashtags(t, day, 'facebook').join(' '));
+  const ig = lines(hook, season.join('\n'), price, `🔎 ${t.name} · ${kw}`, '📌 Save பண்ணுங்க · 📲 இது தேவைப்படும் friend-க்கு Send பண்ணுங்க', '👉 Link in bio — pdftoolsindia.com', FOLLOW, hashtags(t, day, 'instagram').join(' '));
+  const fb = lines(`${aud.ta} 👇\n${ta} — ${desc}`, season.join('\n'), price, '🔁 Share பண்ணுங்க — உங்க நண்பர்களுக்கு உதவும்! (pdftoolsindia.com)', FOLLOW, hashtags(t, day, 'facebook').join(' '));
   const ytTags = hashtags(t, day, 'youtube');
-  const yt = lines(`${t.name} — ${ta}\n${desc}`, season.join('\n'), `🔎 ${kw}`, `👉 ${t.url}`, price, [...ytTags, '#Shorts'].join(' '));
+  const yt = lines(`${t.name} — ${ta}\n${desc}`, season.join('\n'), `🔎 ${kw}`, `👉 ${t.url}`, price, FOLLOW, [...ytTags, '#Shorts'].join(' '));
   return { audience: aud.key, instagram: ig, facebook: fb, youtube: yt, youtubeTags: uniq(['pdftoolsindia', 'free tools', 'tamil', 'tanglish', t.name, t.ta, ...kw.split(' · ')]).slice(0, 15) };
 }

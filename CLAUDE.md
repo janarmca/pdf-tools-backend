@@ -27,3 +27,7 @@ If an incoming copy of one of these contains `supabase.co`, `@supabase/supabase-
 
 ## Handoff / current state
 Start every new session by reading `HANDOFF.md` (architecture of the document tools in `category-docs.js`, build steps, tests, pitfalls, and what is still unverified). Document tools are lazy-loaded: after editing `category-docs.js`, bump the `?v=` string in `loadCategoryScript`, run `python3 remin.py`, bump `sw.js`, and run `node tests/billing-calc.test.mjs`.
+
+## Tell the public about every new feature (standing owner request)
+Whenever you ship something NEW that visitors can use (a tool, a page, a new capability), add one entry to `.github/promo-news.json` in the same commit (id, first date, icon, short Tamil title/line, exactly 3 steps, url — rules at the top of that file; `node tests/promo-news.test.mjs` validates it). The daily Short job then posts it once as a "what's new" Short (our logo, the news, 3 steps, then site + support@pdftoolsindia.com + YouTube / Instagram / Facebook names) on YouTube, Facebook and Instagram, at most one news Short per 24 h. Keep it true and short; never announce something unverified or unfinished. Everything must stay at zero cost.
+

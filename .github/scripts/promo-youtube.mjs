@@ -10,6 +10,7 @@ import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
 import { buildPlan, makeAnimVideo } from './promo-anim.mjs';
 import { buildCaptions } from './promo-tags.mjs';
 import { fetchTrends, chooseTool } from './promo-brain.mjs';
+import { loadNews, validateNews, pendingNews, newsTool, buildNewsPlan, buildNewsCaptions } from './promo-news.mjs';
 import { metaConfigured, postFacebookReel, postInstagramReel } from './promo-meta.mjs';
 
 // Fonts come from npm (@fontsource, installed by the workflow) and are loaded from disk, so a slow or blocked
@@ -134,10 +135,10 @@ async function accessToken(refresh) {
   return r.access_token;
 }
 
-async function upload(token, file, t, text) {
-  const cap = buildCaptions(t);
+async function upload(token, file, t, text, capOverride) {
+  const cap = capOverride || buildCaptions(t);
   const meta = {
-    snippet: { title: `${t.ta ? t.ta + ' | ' : ''}${t.name} — ${t.paid ? 'Online Tool' : 'Free Online Tool'} #Shorts`.slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
+    snippet: { title: (capOverride ? `🆕 ${t.name} — PDF Tools India #Shorts` : `${t.ta ? t.ta + ' | ' : ''}${t.name} — ${t.paid ? 'Online Tool' : 'Free Online Tool'} #Shorts`).slice(0, 100), categoryId: '27', defaultLanguage: 'ta',
       description: cap.youtube, tags: cap.youtubeTags },
     status: { privacyStatus: process.env.PRIVACY === 'private' ? 'private' : 'public', selfDeclaredMadeForKids: false },
   };
@@ -160,8 +161,17 @@ const main = async () => {
   if (!refresh && !meta.facebook && !meta.instagram && !process.env.DRY_RUN) return console.log('Nothing is connected yet (YouTube on the admin page; Facebook/Instagram via the META_* secrets).');
   if (!process.env.TOOL && (await sql("select 1 from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' and created_at >= date('now')")).length) return console.log('Already posted today.');
   // The brain picks today's tool from Google Trends (India) + the Indian calendar + evergreen demand, avoiding tools posted recently.
-  let t, why = null;
-  if (process.env.TOOL) t = CATALOG.find((x) => x.id === process.env.TOOL);
+  let t, why = null, news = null;
+  // A pending "what's new" announcement goes first (logo + news + 3 steps + our info); otherwise the tool-of-the-day brain chooses.
+  if (!process.env.TOOL) {
+    const items = loadNews(); const bad = validateNews(items); if (bad.length) throw new Error('promo-news.json: ' + bad.join('; '));
+    const sentIds = (await sql("select distinct tool_id from promo_posts where tool_id like 'news:%' and status = 'sent'").catch(() => [])).map((r) => r.tool_id);
+    const recent = (await sql("select 1 from promo_posts where tool_id like 'news:%' and status = 'sent' and created_at >= datetime('now', '-1 day')").catch(() => [])).length > 0;
+    news = pendingNews(items, { sentIds, newsSentLast24h: recent, force: process.env.NEWS || '' });
+    if (process.env.NEWS && !news) throw new Error('No news entry with id ' + process.env.NEWS);
+  }
+  if (news) { t = newsTool(news); console.log('News Short:', news.id); }
+  else if (process.env.TOOL) t = CATALOG.find((x) => x.id === process.env.TOOL);
   else {
     const history = await sql("select tool_id, created_at from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' order by id desc limit 60").catch(() => []);
     const trends = await fetchTrends();
@@ -171,13 +181,14 @@ const main = async () => {
   }
   t = t || CATALOG.find((x) => !x.paid);
   const post = null;
+  const newsCap = news ? buildNewsCaptions(news) : null;
   console.log('Tool:', t.id);
   // Animated funny story (a different one each day, made by code only). If anything in it fails the old still slide is used, so a Short is always made.
-  let plan = process.env.ANIM === '0' ? null : buildPlan(t, undefined, { story: process.env.STORY });
+  let plan = news ? buildNewsPlan(news) : process.env.ANIM === '0' ? null : buildPlan(t, undefined, { story: process.env.STORY });
   let voice = await makeVoice(plan ? animSpeech(plan.lines) : speechText(t));
   let secs, kind = 'still slide';
   if (plan) {
-    try { secs = await makeAnimVideo(plan, voice, FONT_FACE); kind = 'animated story "' + plan.cfg.story + '"'; }
+    try { secs = await makeAnimVideo(plan, voice, FONT_FACE); kind = 'animated ' + (news ? 'news Short' : 'story "' + plan.cfg.story + '"'); }
     catch (e) { console.log('Animation failed, using the still slide instead:', String(e.message).slice(0, 300)); plan = null; voice = await makeVoice(speechText(t)); }
   }
   if (!plan) {
@@ -186,7 +197,7 @@ const main = async () => {
     execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
     secs = makeVideo(voice);
   }
-  const cap = buildCaptions(t);
+  const cap = newsCap || buildCaptions(t);
   const hot = why?.trend ? `🔥 இப்போ trending: ${why.trend}\n\n` : '';
   fs.writeFileSync('social-captions.txt', `=== INSTAGRAM (Reel caption) ===\n${hot}${cap.instagram}\n\n=== FACEBOOK (Reel/post caption) ===\n${hot}${cap.facebook}\n\n=== YOUTUBE (description) ===\n${cap.youtube}\n\nBrain: ${why ? why.reason : 'forced tool'}\n`);
   console.log('Video', secs + 's', kind, voice ? 'with Tamil voice' : 'silent');
@@ -194,7 +205,7 @@ const main = async () => {
   let failed = null;
   if (refresh) {
     try {
-      const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);
+      const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text, newsCap);
       await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : (voice ? null : 'uploaded WITHOUT voice (Tamil voice service unreachable)'));
       console.log('Uploaded https://youtube.com/shorts/' + v.id, v.status?.privacyStatus);
     } catch (e) { await log(t.id, 'failed', null, String(e.message).slice(0, 300)).catch(() => {}); failed = e; console.log('YouTube failed:', e.message); }

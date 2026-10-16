@@ -1,0 +1,24 @@
+[
+  {
+    "_note": "Add one entry for every NEW user-visible feature. The daily run posts it as a 'new update' Short (logo, what is new, 3 steps, then our contact + social names) on the first free day, then never again. id must be unique; date = first day it may be posted (YYYY-MM-DD, IST). Keep text short, true and in Tamil; steps = exactly 3.",
+    "id": "_template", "date": "2999-01-01", "icon": "🆕", "title": "தலைப்பு", "line": "ஒரு வரி விளக்கம்", "steps": ["படி 1", "படி 2", "படி 3"], "url": "pdftoolsindia.com"
+  },
+  {
+    "id": "dsc-tick", "date": "2026-10-17", "icon": "✅", "title": "கையொப்பம் சரியா? Tick உடன் புதிய PDF!",
+    "line": "DSC / e-Sign சரிபார்ப்பில் எல்லா கையொப்பமும் சரி என்றால், tick குறியுடன் புதிய PDF கிடைக்கும் — அசல் கோப்பு மாறாது.",
+    "steps": ["கையொப்பமிட்ட PDF-ஐப் போடுங்கள்", "எல்லாம் சரி என்றால் Tick பட்டனைத் தட்டுங்கள்", "Tick உடன் புதிய PDF பதிவிறக்கம்"],
+    "url": "pdftoolsindia.com/?tool=dscverify"
+  },
+  {
+    "id": "gov-hub", "date": "2026-10-19", "icon": "🏛️", "title": "அரசு ஊழியர்களுக்கு தனிப் பக்கம்!",
+    "line": "DA நிலுவை, வருமான வரி, கடிதங்கள் — அரசு ஊழியர் கருவிகள் எல்லாம் ஒரே பக்கத்தில்.",
+    "steps": ["pdftoolsindia.com திறங்கள்", "'அரசு ஊழியர்' அட்டையைத் தட்டுங்கள்", "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"],
+    "url": "pdftoolsindia.com/for-government-employees"
+  },
+  {
+    "id": "student-hub", "date": "2026-10-21", "icon": "🎓", "title": "மாணவர்களுக்கு தனிப் பக்கம்!",
+    "line": "Cut-off, மதிப்பெண், படிவங்கள், Resume — மாணவர் கருவிகள் எல்லாம் ஒரே பக்கத்தில். எந்தத் தகவலும் சேகரிக்கப்படாது.",
+    "steps": ["pdftoolsindia.com திறங்கள்", "'மாணவர்கள்' அட்டையைத் தட்டுங்கள்", "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"],
+    "url": "pdftoolsindia.com/for-students"
+  }
+]

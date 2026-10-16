@@ -21,6 +21,10 @@ on:
         type: choice
         options: [public, private]
         default: public
+      news:
+        description: 'News id from .github/promo-news.json to post now as a "what''s new" Short (empty = automatic)'
+        type: string
+        default: ''
       story:
         description: 'Story template (auto = a different one each day by date)'
         type: choice
@@ -63,6 +67,7 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           TOOL: ${{ inputs.tool }}
+          NEWS: ${{ inputs.news }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           META_TOKEN: ${{ secrets.META_TOKEN }}      # optional: Facebook Page + Instagram Reels (see HANDOFF → Meta setup)
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
