@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../cloudflare/src/promo-catalog.js';
 import { buildPlan, makeAnimVideo } from './promo-anim.mjs';
 import { buildCaptions } from './promo-tags.mjs';
+import { fetchTrends, chooseTool } from './promo-brain.mjs';
+import { metaConfigured, postFacebookReel, postInstagramReel } from './promo-meta.mjs';
 
 // Fonts come from npm (@fontsource, installed by the workflow) and are loaded from disk, so a slow or blocked
 // Google Fonts request can no longer make the Tamil text fall back to an ugly font.
@@ -35,7 +37,7 @@ async function sql(q, params = []) {
   return r.result[0].results;
 }
 const setting = async (k) => (await sql('select value from promo_settings where key = ?', [k]))[0]?.value || null;
-const log = (toolId, status, id, error) => sql('insert into promo_posts (tool_id, platform, status, message_id, error) values (?, ?, ?, ?, ?)', [toolId, 'youtube', status, id, error]);
+const log = (toolId, status, id, error, platform = 'youtube') => sql('insert into promo_posts (tool_id, platform, status, message_id, error) values (?, ?, ?, ?, ?)', [toolId, platform, status, id, error]);
 
 export function slideHtml(t, text) {
   const [ta, en] = String(text || '').split('\n');
@@ -152,10 +154,23 @@ async function upload(token, file, t, text) {
 const main = async () => {
   if ((await setting('enabled')) === 'off') return console.log('Promotion is switched off on the admin page.');
   const refresh = await setting('yt_refresh');
-  if (!refresh && !process.env.DRY_RUN) return console.log('YouTube is not connected yet (admin page → Promotion → Connect YouTube).');
-  if (!process.env.TOOL && (await sql("select 1 from promo_posts where platform = 'youtube' and status = 'sent' and created_at >= date('now')")).length) return console.log('Already uploaded today.');
-  const post = process.env.TOOL ? null : (await sql("select tool_id, text from promo_posts where platform = 'telegram' and status = 'sent' order by id desc limit 1"))[0];
-  const t = CATALOG.find((x) => x.id === (process.env.TOOL || post?.tool_id)) || CATALOG.find((x) => !x.paid);
+  // Facebook/Instagram credentials: GitHub secrets if set, otherwise the ones saved by "Connect Facebook" on the admin page (D1) — so no manual token work is needed.
+  const metaEnv = { META_TOKEN: process.env.META_TOKEN || await setting('fb_page_token'), FB_PAGE_ID: process.env.FB_PAGE_ID || await setting('fb_page_id'), IG_USER_ID: process.env.IG_USER_ID || await setting('ig_user_id') };
+  const meta = metaConfigured(metaEnv);
+  if (!refresh && !meta.facebook && !meta.instagram && !process.env.DRY_RUN) return console.log('Nothing is connected yet (YouTube on the admin page; Facebook/Instagram via the META_* secrets).');
+  if (!process.env.TOOL && (await sql("select 1 from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' and created_at >= date('now')")).length) return console.log('Already posted today.');
+  // The brain picks today's tool from Google Trends (India) + the Indian calendar + evergreen demand, avoiding tools posted recently.
+  let t, why = null;
+  if (process.env.TOOL) t = CATALOG.find((x) => x.id === process.env.TOOL);
+  else {
+    const history = await sql("select tool_id, created_at from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' order by id desc limit 60").catch(() => []);
+    const trends = await fetchTrends();
+    why = chooseTool({ catalog: CATALOG, trends, history });
+    console.log(`Trends fetched: ${trends.length}. Brain chose ${why.id} (${why.reason}). Top 5:`, why.top.map((x) => `${x.id}=${x.score.toFixed(2)}`).join(' '));
+    t = CATALOG.find((x) => x.id === why.id);
+  }
+  t = t || CATALOG.find((x) => !x.paid);
+  const post = null;
   console.log('Tool:', t.id);
   // Animated funny story (a different one each day, made by code only). If anything in it fails the old still slide is used, so a Short is always made.
   let plan = process.env.ANIM === '0' ? null : buildPlan(t, undefined, { story: process.env.STORY });
@@ -171,16 +186,27 @@ const main = async () => {
     execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1080,2100', '--virtual-time-budget=8000', `--screenshot=${process.cwd()}/slide.png`, `file://${process.cwd()}/slide.html`], { stdio: 'inherit' });
     secs = makeVideo(voice);
   }
-  const cap = buildCaptions(t); fs.writeFileSync('social-captions.txt', `=== INSTAGRAM (Reel caption) ===\n${cap.instagram}\n\n=== FACEBOOK (Reel/post caption) ===\n${cap.facebook}\n\n=== YOUTUBE (description) ===\n${cap.youtube}\n`);
+  const cap = buildCaptions(t);
+  const hot = why?.trend ? `🔥 இப்போ trending: ${why.trend}\n\n` : '';
+  fs.writeFileSync('social-captions.txt', `=== INSTAGRAM (Reel caption) ===\n${hot}${cap.instagram}\n\n=== FACEBOOK (Reel/post caption) ===\n${hot}${cap.facebook}\n\n=== YOUTUBE (description) ===\n${cap.youtube}\n\nBrain: ${why ? why.reason : 'forced tool'}\n`);
   console.log('Video', secs + 's', kind, voice ? 'with Tamil voice' : 'silent');
   if (process.env.DRY_RUN) return console.log('DRY_RUN: made short.mp4, not uploaded');
-  try {
-    const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);
-    await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : (voice ? null : 'uploaded WITHOUT voice (Tamil voice service unreachable)'));
-    console.log('Uploaded https://youtube.com/shorts/' + v.id, v.status?.privacyStatus);
-  } catch (e) {
-    await log(t.id, 'failed', null, String(e.message).slice(0, 300));
-    throw e;
+  let failed = null;
+  if (refresh) {
+    try {
+      const v = await upload(await accessToken(refresh), 'short.mp4', t, post?.text);
+      await log(t.id, 'sent', v.id, v.status?.privacyStatus === 'private' ? 'uploaded as private (YouTube API audit needed for public)' : (voice ? null : 'uploaded WITHOUT voice (Tamil voice service unreachable)'));
+      console.log('Uploaded https://youtube.com/shorts/' + v.id, v.status?.privacyStatus);
+    } catch (e) { await log(t.id, 'failed', null, String(e.message).slice(0, 300)).catch(() => {}); failed = e; console.log('YouTube failed:', e.message); }
   }
+  // Facebook Page Reel + Instagram Reel (independent of each other and of YouTube; each is skipped until its secrets exist).
+  for (const [platform, fn, text] of [['facebook', postFacebookReel, hot + cap.facebook], ['instagram', postInstagramReel, hot + cap.instagram]]) {
+    try {
+      const r = await fn('short.mp4', text, metaEnv);
+      if (r.skipped) { console.log(platform, 'not set up yet — skipped'); continue; }
+      await log(t.id, 'sent', r.id, null, platform); console.log(platform, 'posted', r.id);
+    } catch (e) { await log(t.id, 'failed', null, String(e.message).slice(0, 300), platform).catch(() => {}); failed = failed || e; console.log(platform, 'failed:', e.message); }
+  }
+  if (failed) throw failed;
 };
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error(e.message || e); process.exit(1); });

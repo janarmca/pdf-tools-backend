@@ -1,4 +1,4 @@
-name: Promotion — YouTube Short
+name: Promotion — daily Short (YouTube + Facebook + Instagram)
 
 # Every day after the 09:05 IST promotion post: turns that tool into a funny animated Tamil
 # YouTube Short (story/colours/character rotate daily; made by code, no AI cost) and uploads it (.github/scripts/promo-youtube.mjs). Does nothing until YouTube is
@@ -64,6 +64,9 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           TOOL: ${{ inputs.tool }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          META_TOKEN: ${{ secrets.META_TOKEN }}      # optional: Facebook Page + Instagram Reels (see HANDOFF → Meta setup)
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
           GEMINI_VOICE: ${{ inputs.gemini_voice }}
           PRIVACY: ${{ inputs.privacy }}
           STORY: ${{ inputs.story }}

@@ -150,6 +150,6 @@ export async function makeAnimVideo(plan, voice, fontFace, out = 'short.mp4') {
   const args = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', 'anim-frames/f%04d.jpg', '-i', 'sfx.wav'];
   let filter = '[1:a]volume=0.55[a]';
   if (voice) { args.push('-i', voice); filter = '[1:a]volume=0.45[s];[2:a]adelay=300|300,aresample=44100,volume=1.2[v];[s][v]amix=inputs=2:normalize=0,alimiter=limit=0.95[a]'; }
-  execFileSync('ffmpeg', [...args, '-filter_complex', filter, '-map', '0:v', '-map', '[a]', '-t', String(dur), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '21', '-c:a', 'aac', '-ar', '44100', '-ac', '2', '-movflags', '+faststart', out], { stdio: 'inherit' });
+  execFileSync('ffmpeg', [...args, '-filter_complex', filter, '-map', '0:v', '-map', '[a]', '-t', String(dur), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '21', '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-ac', '2', '-r', '30', '-g', '60', '-movflags', '+faststart', out], { stdio: 'inherit' });
   return dur;
 }
