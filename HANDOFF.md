@@ -159,3 +159,8 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 
 ## UPDATE_25 — hubs: one page, tools shown directly (2026-10-16)
 - Owner found page-by-page navigation confusing: `/for-government-employees` and `/for-students` now show ALL their tools on one page, grouped, with a sticky chip bar (அனைத்தும் + one chip per topic) that filters client-side; `#topic` hash deep-links. Sub-pages remain generated for SEO but are no longer linked from the landing. sw.js v68.
+
+## UPDATE_26 — Search Console "Page with redirect" fix (2026-10-16)
+- Cause: sitemap listed `/x.html` URLs, but Cloudflare Pages 308-redirects `.html` → `/x` and canonicals are clean. Sitemap now lists clean URLs only; hub canonical/og:url clean; clean canonicals added to hand-written pages (contact, privacy, refund, terms, tn-*, health-check, games). New `404.html` (noindex) so junk URLs like /api/*.html and /tools/terms.html return a real 404 instead of the SPA shell ("Alternate page with proper canonical"). `/?tool=<id>` deep links canonicalise to `/` by design.
+- After deploy: Search Console → Sitemaps → resubmit; Pages → "Validate fix" on both reports.
+- Search Console triage (16 Oct): "Blocked by robots.txt" for /api/ai/text and /api/pricing is intentional (legacy API paths, Disallow: /api/). `/tools/little-star-education-arcade` (old tool, no page) now 301 → /education-tools. "Crawled/Discovered – currently not indexed" (146/135) is Google's quality/crawl-budget queue for a new domain, not a code error; fixed by clean sitemap + time + richer tool-page text.

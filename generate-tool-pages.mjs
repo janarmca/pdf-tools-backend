@@ -224,11 +224,11 @@ function hubHtml(cat, items) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(m.title)}</title>
 <meta name="description" content="${escapeHtml(m.desc)}">
-<link rel="canonical" href="${SITE}/${m.file}">
+<link rel="canonical" href="${SITE}/${m.file.replace('.html','')}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${escapeHtml(m.title)}">
 <meta property="og:description" content="${escapeHtml(m.desc)}">
-<meta property="og:url" content="${SITE}/${m.file}">
+<meta property="og:url" content="${SITE}/${m.file.replace('.html','')}">
 <meta property="og:site_name" content="PDF Tools India">
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">${ld}</script>
@@ -297,10 +297,9 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/blog/free-kalvi-kalanjiyam-learn-class-1-to-10`, freq: 'monthly', pri: '0.7' },
   ];
   const toolUrls = toolEntries.map(slug => ({ loc: `${SITE}/tools/${slug}`, freq: 'monthly', pri: '0.6' }));
-  // The live sitemap lists real file URLs (with .html) — keep that form so nothing already indexed drops out.
-  const withHtml = u => (/\/$/.test(u.loc) || /\.html$/.test(u.loc)) ? u : { ...u, loc: u.loc + '.html' };
+  // Cloudflare Pages 308-redirects /x.html to /x, and every page's canonical is the clean /x — so the sitemap must list the clean URL (a .html URL here shows up in Search Console as "Page with redirect").
   staticUrls.push({ loc: `${SITE}/health-check`, freq: 'monthly', pri: '0.6' });
-  const all = [...staticUrls, ...toolUrls].map(withHtml);
+  const all = [...staticUrls, ...toolUrls].map(u => ({ ...u, loc: u.loc.replace(/\.html$/, '') }));
   const body = all.map(u =>
     `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${new Date().toISOString().slice(0,10)}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>${(u.alts || []).map(([l, h]) => `\n    <xhtml:link rel="alternate" hreflang="${l}" href="${h}"/>`).join('')}\n  </url>`
   ).join('\n');
