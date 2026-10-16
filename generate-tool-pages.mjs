@@ -212,7 +212,7 @@ function hubHtml(cat, items) {
   const m = HUB_META[cat], th = CAT_THEME[cat];
   const cards = items.map(t => {
     const tm = TA_TOOL[t.id] || [];
-    const href = STANDALONE_HREF[t.id] || `/tools/${slugify(t.name)}`;
+    const href = STANDALONE_HREF[t.id] || `/?tool=${encodeURIComponent(t.id)}`; // straight into the tool — the explanation page stays reachable from search / sitemap
     const badge = t.cost > 0 ? `<span class="bd ai">⚡ ${t.cost}</span>` : '<span class="bd">இலவசம்</span>';
     return `<a class="tc" href="${href}"><span class="ic" style="background:${t.color}">${t.icon}</span><span class="tx"><div class="nm">${escapeHtml(tm[0] || t.name)}${tm[0] ? `<small>${escapeHtml(t.name.split(' — ')[0])}</small>` : ''}</div><div class="ds">${escapeHtml(tm[1] || t.desc)}</div></span>${badge}</a>`;
   }).join('\n        ');
@@ -240,8 +240,6 @@ function hubHtml(cat, items) {
     <div class="crumb"><a href="/?home=1">PDF Tools India</a> › ${escapeHtml(th.ta)}</div>
     <div class="hero" style="background:${th.g};">
       <div class="row"><div class="big">${th.icon}</div><div><h1>${escapeHtml(th.ta)}</h1><div class="en">${items.length} free tools · ${escapeHtml(th.en)}</div></div></div>
-      <p>${escapeHtml(m.ta)}</p>
-      <p style="margin-top:6px;opacity:.85;font-size:13.5px;">${escapeHtml(m.en)}</p>
       <div class="pills"><span class="pill">🧰 ${items.length} கருவிகள்</span><span class="pill">${cat === 'ai' ? '⚡ credit தேவை' : '✓ இலவசம்'}</span><span class="pill">🔒 கோப்பு உங்கள் சாதனத்திலேயே</span></div>
     </div>
     <div class="section">
@@ -249,6 +247,11 @@ function hubHtml(cat, items) {
       <div class="grid">
         ${cards}
       </div>
+    </div>
+    <div class="section">
+      <h2>இந்தப் பகுதி பற்றி <small>About</small></h2>
+      <p>${escapeHtml(m.ta)}</p>
+      <p style="margin-top:8px;">${escapeHtml(m.en)}</p>
     </div>
     ${FOOTER}
   </div>

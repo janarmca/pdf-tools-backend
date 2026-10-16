@@ -1069,12 +1069,12 @@ function render(){
   const foot = el(`<footer>
     <div>Your files never leave your device — everything runs in your browser.</div>
     <div style="margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
-      <a href="/pdf-tools" style="color:var(--sub);">PDF Tools</a>
-      <a href="/image-tools" style="color:var(--sub);">Image Tools</a>
-      <a href="/business-tools" style="color:var(--sub);">Business Tools</a>
-      <a href="/video-tools" style="color:var(--sub);">Video Tools</a>
-      <a href="/ai-tools" style="color:var(--sub);">AI Tools</a>
-      <a href="/education-tools" style="color:var(--sub);">Education Tools</a>
+      <a href="/?cat=pdf" style="color:var(--sub);">PDF Tools</a>
+      <a href="/?cat=image" style="color:var(--sub);">Image Tools</a>
+      <a href="/?cat=business" style="color:var(--sub);">Business Tools</a>
+      <a href="/?cat=video" style="color:var(--sub);">Video Tools</a>
+      <a href="/?cat=ai" style="color:var(--sub);">AI Tools</a>
+      <a href="/?cat=education" style="color:var(--sub);">Education Tools</a>
       <a href="/for-government-employees" style="color:var(--sub);">அரசு ஊழியர்</a>
       <a href="/for-students" style="color:var(--sub);">மாணவர்</a>
     </div>
@@ -15604,6 +15604,7 @@ render();
   try{
     const params = new URLSearchParams(window.location.search);
     const deepLinkTool = TOOL_MOVED[params.get('tool')] || params.get('tool');
+    const deepCat = params.get('cat'); if(deepCat && CATEGORY_META[deepCat]) { __activeCategory = deepCat; try{ sessionStorage.removeItem(LAST_TOOL_KEY); }catch(e){} return; } // /?cat=pdf → that category's tool list directly
     if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
       // /?tool=<id> is the same page as the static /tools/<slug> landing page — point Google at that one.
       try{ const c = document.querySelector('link[rel="canonical"]'); const tt = TOOLS.find(t=>t.id===deepLinkTool); if(c && tt) c.setAttribute('href', 'https://pdftoolsindia.com/tools/' + toolSlug(tt)); }catch(e){}
