@@ -209,6 +209,286 @@ export const SEO_EXTRA = {
     uses: ['Rental and employment agreements', 'School and bank forms'],
     faqs: [['Is this a legally certified e-signature?', 'It places an image of your signature. For documents needing a certified digital signature, use a licensed provider.']]
   },
+  remove: {
+    title: 'Delete Pages from PDF Free — Remove Unwanted PDF Pages Online | PDF Tools India',
+    desc: 'Remove blank, wrong or confidential pages from a PDF free online. Pick the pages, download the cleaned file. No signup, runs in your browser.',
+    intro: 'Take pages out of a PDF without re-creating the whole document. Choose the pages you do not want, and the rest stay in their original order. (தேவையற்ற பக்கங்களை PDF-லிருந்து நீக்கலாம்.)',
+    steps: ['Open Delete Pages and choose your PDF.', 'Select the pages to remove.', 'Click delete and download the new PDF.', 'Open it once to confirm the right pages are gone.'],
+    uses: ['Removing a blank last page from a scan', 'Dropping a cover page or advertisement before sending a file', 'Taking out pages that contain private details', 'Trimming a long document to the pages an office asked for'],
+    faqs: [['Does it change the original file?', 'No. Your original PDF is untouched; you download a new file.'], ['Can I undo a delete?', 'Download is a new file, so just run the tool again on your original PDF.']]
+  },
+  organize: {
+    title: 'Reorder PDF Pages Free — Rearrange PDF Pages Online | PDF Tools India',
+    desc: 'Drag PDF pages into a new order and download the rearranged file. Free, no signup, files stay in your browser.',
+    intro: 'Fix a scan that came out in the wrong order, or move a page to the front. Drag the page thumbnails into the sequence you want and save a new PDF.',
+    steps: ['Open Reorder Pages and choose your PDF.', 'Drag pages into the order you want.', 'Save and download the rearranged PDF.'],
+    uses: ['Correcting pages scanned in the wrong order', 'Moving a signed page to the end', 'Putting certificates in the order an application asks for', 'Rearranging a presentation exported as PDF'],
+    faqs: [['Will page quality change?', 'No. Pages are only moved, not recompressed.'], ['Can I also delete or rotate pages?', 'Yes — PDF Tools India has separate Delete Pages and Rotate Pages tools you can use before or after.']]
+  },
+  extractpages: {
+    title: 'Extract Pages from PDF Free — Save Selected Pages as a New PDF | PDF Tools India',
+    desc: 'Pick specific pages from a PDF and save them as one new PDF. Free, no signup, nothing is uploaded.',
+    intro: 'When you only need a few pages of a large PDF, extract them into a new, smaller file instead of sending the whole document.',
+    steps: ['Open Extract Pages and choose your PDF.', 'Select the pages you want to keep.', 'Download the new PDF that contains only those pages.'],
+    uses: ['Sending only the relevant pages of a long contract', 'Saving one certificate out of a combined scan', 'Making a small PDF to fit an upload limit', 'Sharing a single chapter of a book PDF you own'],
+    faqs: [['How is this different from Split PDF?', 'Extract Pages gathers chosen pages into one new PDF. Split PDF is for cutting a document into separate parts.'], ['Is my file uploaded?', 'No, the work happens in your browser.']]
+  },
+  rotate: {
+    title: 'Rotate PDF Pages Free — Turn PDF 90, 180 or 270 Degrees | PDF Tools India',
+    desc: 'Rotate PDF pages by 90, 180 or 270 degrees and save the fixed file. Free, no signup, runs in your browser.',
+    intro: 'Sideways or upside-down scans are common when a phone camera or scanner app is used. Rotate the pages and save a PDF that opens the right way up.',
+    steps: ['Open Rotate Pages and choose your PDF.', 'Pick 90, 180 or 270 degrees.', 'Download the corrected PDF.'],
+    uses: ['Fixing a scan that opens sideways', 'Turning landscape pages to portrait for printing', 'Correcting a document photographed upside down'],
+    faqs: [['Does rotating reduce quality?', 'No. Only the page orientation changes.'], ['Does it work on a signed PDF?', 'Rotating rewrites the file, which can invalidate a digital signature. Use the original signed file when a signature must stay valid.']]
+  },
+  watermark: {
+    title: 'Add Watermark to PDF Free — Text Watermark on Every Page | PDF Tools India',
+    desc: 'Stamp text such as CONFIDENTIAL or DRAFT across every page of a PDF. Free, no signup, runs in your browser.',
+    intro: 'Mark a document so everyone knows its status before you share it. Type the text and it is stamped across every page.',
+    steps: ['Open Add Watermark and choose your PDF.', 'Type the watermark text.', 'Apply it and download the marked PDF.'],
+    uses: ['Marking a file DRAFT or COPY', 'Adding the recipient name to a confidential document', 'Showing "For application only" on a shared ID copy', 'Branding a document with your business name'],
+    faqs: [['Can the watermark be removed later?', 'A watermark added with this tool becomes part of the page. Keep your original file if you may need a clean copy.'], ['Can I use an image logo?', 'Yes, PDF Tools India also has a separate Logo Watermark on PDF tool.']]
+  },
+  pagenum: {
+    title: 'Add Page Numbers to PDF Free — Number PDF Pages Online | PDF Tools India',
+    desc: 'Automatically number every page of a PDF and download the result. Free, no signup, runs in your browser.',
+    intro: 'Add page numbers to assignments, reports or legal bundles that have none, so readers and offices can refer to a page exactly.',
+    steps: ['Open Add Page Numbers and choose your PDF.', 'Choose how the numbers should appear.', 'Download the numbered PDF.'],
+    uses: ['Numbering a project report or thesis', 'Preparing a bundle of documents for a court or office', 'Numbering merged certificates for an application'],
+    faqs: [['Can I start numbering from a later page?', 'Use the options shown in the tool before you apply the numbers.'], ['Is my file uploaded?', 'No, it is processed in your browser.']]
+  },
+  pdfprotect: {
+    title: 'Protect PDF with Password Free — Lock a PDF Online | PDF Tools India',
+    desc: 'Add a password to a PDF so only people who know it can open the file. Free, no signup, done in your browser.',
+    intro: 'Lock a PDF before you send it by email or WhatsApp. Choose a password, share it separately, and only the right person can open the document.',
+    steps: ['Open Protect PDF and choose your file.', 'Type a password you will remember.', 'Download the locked PDF and test opening it.'],
+    uses: ['Sending salary slips, bank statements or ID copies', 'Sharing medical or legal papers', 'Protecting a resume or business proposal'],
+    faqs: [['What if I forget the password?', 'Keep it safe. A forgotten password cannot be recovered by this tool, so keep your original unlocked file.'], ['Is the PDF sent to a server?', 'No. The password is added inside your browser.']]
+  },
+  pdfunlock: {
+    title: 'Unlock PDF — Remove PDF Password Free When You Know It | PDF Tools India',
+    desc: 'Remove password protection from your own PDF when you know the current password. Free, no signup, runs in your browser.',
+    intro: 'If you are tired of typing the same password every time you open a PDF you own, enter it once and save an unlocked copy.',
+    steps: ['Open Unlock PDF and choose the locked file.', 'Enter the current password.', 'Download the unlocked PDF.'],
+    uses: ['Saving a bank or salary statement without a password for your own records', 'Preparing a PDF to merge or edit', 'Removing a password you set yourself and no longer need'],
+    faqs: [['Can it unlock a PDF without the password?', 'This tool needs the current password. Use it only on files you own or are allowed to open.'], ['Is the password stored?', 'No. It is used inside your browser and not sent anywhere.']]
+  },
+  pdfeditor: {
+    title: 'Free PDF Editor Online — Add Text, Images, Shapes and Signature | PDF Tools India',
+    desc: 'Edit a PDF online: add text, images, signatures and shapes. Core editing is free, no signup, runs in your browser.',
+    intro: 'Fill in a form, add a line of text, place a signature or draw a shape on a PDF without installing software.',
+    steps: ['Open PDF Editor and choose your PDF.', 'Pick text, image, signature or shape and place it on the page.', 'Download the edited PDF.'],
+    uses: ['Filling a printed-style form on a phone', 'Adding a signature or stamp image', 'Writing a note on a document before returning it', 'Covering a small area with a shape'],
+    faqs: [['Can I change the existing text of a scanned PDF?', 'This editor adds new text, images and shapes on top of pages. Scanned pages are pictures, so their original text is not editable.'], ['Is the editing free?', 'Core editing is free.']]
+  },
+  pdfocrsearchable: {
+    title: 'OCR PDF to Searchable PDF Free — Make Scans Searchable | PDF Tools India',
+    desc: 'Add an invisible text layer to a scanned PDF so you can search and copy its text. Free, runs in your browser.',
+    intro: 'A scanned PDF is just pictures. This tool reads the text in those pictures and adds it as an invisible layer, so the file looks the same but can be searched and copied.',
+    steps: ['Open OCR PDF and choose your scanned PDF.', 'Start the text recognition and wait for it to finish.', 'Download the searchable PDF and try searching a word.'],
+    uses: ['Searching a long scanned document', 'Copying text out of a scanned certificate or letter', 'Making old records easier to find on your computer'],
+    faqs: [['How accurate is it?', 'Accuracy depends on how clear and straight the scan is. Always check important numbers and names.'], ['Is the scan uploaded?', 'No. Recognition happens in your browser, so large scans can take time on a phone.']]
+  },
+  pdf2img: {
+    title: 'PDF to JPG Free — Convert Every PDF Page to Image | PDF Tools India',
+    desc: 'Turn each page of a PDF into a JPG image. Free, no signup, runs in your browser.',
+    intro: 'Convert PDF pages into pictures you can share on WhatsApp, insert into a presentation or upload where only images are accepted.',
+    steps: ['Open PDF to Image and choose your PDF.', 'Convert the pages.', 'Download the images.'],
+    uses: ['Sharing one page as a picture on WhatsApp', 'Putting a PDF page into a slide or document', 'Uploading a page to a form that accepts only JPG'],
+    faqs: [['Do I get one image per page?', 'Yes, every page becomes a separate image.'], ['Is the PDF uploaded?', 'No, conversion happens on your device.']]
+  },
+  pdfgray: {
+    title: 'PDF to Grayscale Free — Convert PDF to Black and White | PDF Tools India',
+    desc: 'Convert a colour PDF to grayscale or black and white to save ink and reduce size. Free, runs in your browser.',
+    intro: 'Printing a colour PDF in black and white wastes ink on colours you will not see. Convert it first and print a cleaner copy.',
+    steps: ['Open PDF to Grayscale and choose your file.', 'Convert to grayscale.', 'Download and check the result before printing.'],
+    uses: ['Printing documents cheaply', 'Making scanned pages look more uniform', 'Preparing a form for photocopying'],
+    faqs: [['Will the text stay readable?', 'Usually yes, but light coloured text can become faint. Preview before printing.'], ['Does it make the file smaller?', 'It can, but it is not a compression tool. Use Compress PDF for size limits.']]
+  },
+  pdfredact: {
+    title: 'Redact PDF Free — Permanently Black Out and Remove Text | PDF Tools India',
+    desc: 'Black out sensitive text in a PDF and remove it from the file, not just cover it. Free, runs in your browser.',
+    intro: 'Hiding text with a black box is not enough if the text is still in the file underneath. Redaction blacks out the area and removes the text so it cannot be copied back out.',
+    steps: ['Open Redact PDF and choose your file.', 'Mark the text or areas to hide.', 'Apply the redaction and download the new PDF.', 'Try selecting the hidden area to confirm nothing can be copied.'],
+    uses: ['Hiding Aadhaar, PAN or account numbers before sharing a document', 'Removing names from a document for a case study', 'Protecting private details on a statement'],
+    faqs: [['Is redaction reversible?', 'The redacted copy is permanent, so keep your original file separately.'], ['Does it work on scanned pages?', 'Scanned pages are pictures; check the result carefully and keep the original safe.']]
+  },
+  txt2pdf: {
+    title: 'Text to PDF Free — Convert TXT or Typed Text to PDF | PDF Tools India',
+    desc: 'Turn a .txt file or text you type into a PDF. Free, no signup, runs in your browser.',
+    intro: 'Make a clean PDF from plain text such as notes, a letter draft or log output, ready to print or share.',
+    steps: ['Open Text to PDF.', 'Type or paste text, or choose a .txt file.', 'Download the PDF.'],
+    uses: ['Turning notes into a shareable file', 'Saving a copied message as a document', 'Preparing text for printing'],
+    faqs: [['Does it support Tamil text?', 'Tamil text typed in Unicode can be added; check the preview before downloading.'], ['Is my text stored?', 'No, it stays on your device.']]
+  },
+  excel2pdf: {
+    title: 'Excel to PDF Free — Convert XLSX to PDF Online | PDF Tools India',
+    desc: 'Convert an .xlsx spreadsheet to a PDF you can print or share. Free, no signup, runs in your browser.',
+    intro: 'Share a spreadsheet as a fixed-layout PDF so the recipient cannot accidentally change the numbers.',
+    steps: ['Open Excel to PDF and choose your .xlsx file.', 'Convert the sheet.', 'Download the PDF and check page breaks.'],
+    uses: ['Sending a price list or marks sheet', 'Printing a report from Excel without Excel installed', 'Sharing a statement that should not be edited'],
+    faqs: [['Are formulas kept?', 'The PDF shows the values, not the formulas.'], ['Will wide sheets fit one page?', 'Very wide sheets may split across pages; check the preview.']]
+  },
+  imgpassport: {
+    title: 'Passport Size Photo Maker Free — Photo, Background and 4-up Print Sheet | PDF Tools India',
+    desc: 'Make a standard-size passport or ID photo with a plain background and a print sheet with four copies. Free, runs in your browser.',
+    intro: 'Create passport or ID photos at home. Choose the size, set a plain background and get a sheet with four photos you can print on one page. (பாஸ்போர்ட் அளவு புகைப்படம்.)',
+    steps: ['Open Passport / ID Photo and choose a clear front-facing photo.', 'Pick the size and background colour.', 'Download the single photo or the 4-up print sheet.'],
+    uses: ['Photos for ID cards, school and college forms', 'Preparing a print sheet to take to a shop', 'Fixing a photo with a messy background'],
+    faqs: [['Which size should I choose?', 'Use the exact size written in your form or application; sizes differ between offices.'], ['Is my photo uploaded?', 'No, the photo is processed on your device.']]
+  },
+  examphoto: {
+    title: 'Exam Photo and Signature Resizer — Resize to Exact KB and cm | PDF Tools India',
+    desc: 'Resize your photo and signature to the exact file size in KB and dimensions in cm that an exam or job form asks for. Free, runs in your browser.',
+    intro: 'Application portals reject photos that are even slightly too large. Enter the size limit from your notification and get a file that fits. (தேர்வு விண்ணப்பத்துக்கான புகைப்படம் / கையெழுத்து அளவு.)',
+    steps: ['Read the photo and signature rules in your exam notification.', 'Open the resizer and choose your photo or signature.', 'Enter the required KB and size.', 'Download and upload the result on the portal.'],
+    uses: ['Government exam and recruitment forms', 'College admission and scholarship portals', 'Passport-style uploads with a KB limit'],
+    faqs: [['Does the tool know each exam\'s rules?', 'No. You enter the numbers from the official notification, so the result matches the current rule.'], ['Is my photo uploaded?', 'No, it is processed in your browser.']]
+  },
+  imgcompresskb: {
+    title: 'Compress Image to Target KB Free — Reduce Photo to 20KB, 50KB, 100KB | PDF Tools India',
+    desc: 'Shrink a JPG or PNG to the file size in KB that a form requires. Free, automatic quality search, runs in your browser.',
+    intro: 'Forms often say "photo must be under 50 KB". Enter the number and the tool tries qualities automatically to get as close as possible without going over.',
+    steps: ['Open Compress to Target KB and choose your image.', 'Enter the maximum size in KB.', 'Download the compressed image and check it still looks clear.'],
+    uses: ['Job, exam and scholarship portals', 'Uploading photos to bank or insurance forms', 'Sending images on slow mobile data'],
+    faqs: [['Can every image reach a very small size?', 'Very large photos squeezed to a tiny size will look blurry. Crop first if the result is poor.'], ['Is my image uploaded?', 'No, it is compressed in your browser.']]
+  },
+  imgconvert: {
+    title: 'Convert Image Format Free — JPG, PNG and WEBP Converter | PDF Tools India',
+    desc: 'Convert pictures between JPG, PNG and WEBP. Free, no signup, runs in your browser.',
+    intro: 'Some websites accept only JPG, others only PNG. Convert in one step without any software.',
+    steps: ['Open Convert Image Format and choose your image.', 'Select the format you need.', 'Download the converted image.'],
+    uses: ['Uploading to a portal that accepts only JPG', 'Converting WEBP downloads to something your editor opens', 'Keeping transparency by choosing PNG'],
+    faqs: [['Does JPG support transparency?', 'No. PNG and WEBP keep transparent areas; JPG fills them with a solid colour.'], ['Does the picture lose quality?', 'Converting to JPG is lossy; keep your original.']]
+  },
+  imgcrop: {
+    title: 'Crop and Resize Image Free — Crop Photos Online | PDF Tools India',
+    desc: 'Crop a region of a photo or change its size. Free, no signup, runs in your browser.',
+    intro: 'Cut away what you do not need or set an exact size for a profile picture, form or document.',
+    steps: ['Open Crop / Resize Image and choose your photo.', 'Drag to select the area, or enter a new size.', 'Download the result.'],
+    uses: ['Profile pictures', 'Cropping a certificate or ID from a larger photo', 'Resizing for an upload form'],
+    faqs: [['Will resizing change quality?', 'Making an image larger cannot add detail; making it smaller is safe.'], ['Is the photo uploaded?', 'No.']]
+  },
+  colorpicker: {
+    title: 'Image Color Picker Free — Get Colour Codes from a Photo | PDF Tools India',
+    desc: 'Pick any colour from an image and get its code, then build a palette. Free, runs in your browser.',
+    intro: 'Click on any point of a picture to read its colour code. Useful for matching a brand colour, a website or a design.',
+    steps: ['Open Color Picker and choose an image.', 'Click the colour you want.', 'Copy the colour code or build a palette.'],
+    uses: ['Matching a logo colour on a website', 'Choosing colours for a poster', 'Finding the exact shade in a photo'],
+    faqs: [['What format is the colour code?', 'The tool shows the colour so you can copy it in common web formats.'], ['Is my image uploaded?', 'No.']]
+  },
+  receipts: {
+    title: 'Rent Receipt Generator for HRA — Free Rent, Fee and Money Receipts | PDF Tools India',
+    desc: 'Make rent receipts (up to 12 months at once), tuition fee receipts, money receipts and payment vouchers in Tamil or English. Free PDF.',
+    intro: 'Employees need rent receipts to claim HRA, schools and tuition centres need fee receipts, and shops need money receipts. Fill the details once and generate the PDF, with the amount written in words. (வாடகை ரசீது, கட்டண ரசீது.)',
+    steps: ['Open Receipts & Vouchers and choose the type.', 'Enter names, amount and dates; for rent, pick the months.', 'Preview and download the PDF.', 'Sign and keep the printout; your details can be saved for next time.'],
+    uses: ['Claiming HRA from an employer', 'Fee receipts for tuition or classes', 'Receipt for cash received', 'Payment voucher for small expenses'],
+    faqs: [['Is a rent receipt enough for HRA?', 'Employers set their own proof rules; high rent usually also needs the landlord PAN. Check with your employer.'], ['Are my details stored online?', 'Saved details stay on your device.']]
+  },
+  quotepo: {
+    title: 'GST Invoice, Quotation, Bill and Purchase Order Maker Free | PDF Tools India',
+    desc: 'Create a GST tax invoice, quotation, proforma, cash bill, bill of supply, purchase order or delivery challan with correct IGST or CGST+SGST. Free PDF, Excel and Word.',
+    intro: 'One tool for the business documents small shops and freelancers write every day. Enter the customer and items; the tool works out CGST+SGST or IGST, discounts and totals. (GST பில், மேற்கோள் படிவம்.)',
+    steps: ['Open the tool and choose the document type.', 'Enter seller, customer and items with HSN and GST rate.', 'Check the totals, then download as PDF, Excel or Word, or share on WhatsApp.'],
+    uses: ['Billing customers with GST', 'Sending a quotation before an order', 'Raising a purchase order to a supplier', 'Delivery challan for goods in transit'],
+    faqs: [['Does it choose IGST or CGST+SGST automatically?', 'It uses the states you enter to apply the correct tax split.'], ['Is it a replacement for accounting software?', 'It creates documents; keep your accounts and GST returns in your accounting system.']]
+  },
+  resumebuilder: {
+    title: 'Free Resume Builder — ATS-Friendly Resume in 4 Templates | PDF Tools India',
+    desc: 'Build a resume with four templates, auto-saved details and an ATS-friendly layout. Free, no signup, runs in your browser.',
+    intro: 'Fill your details once and see the resume update as you type. Your information is saved in your browser so you can come back and edit later. (ரெஸ்யூம் உருவாக்கி.)',
+    steps: ['Open Resume Builder and choose a template.', 'Fill personal details, education, experience and skills.', 'Preview and download the PDF.'],
+    uses: ['First job or campus placements', 'Government and private job applications', 'Updating an old resume quickly'],
+    faqs: [['What does ATS-friendly mean?', 'A simple layout that recruiting software can read reliably — avoid heavy graphics.'], ['Is my information uploaded?', 'Your details are saved on your device.']]
+  },
+  salaryslip: {
+    title: 'Salary Slip Generator Free — Payslip with PF, ESI and LOP | PDF Tools India',
+    desc: 'Create a salary slip with LOP days, PF and ESI calculation, allowances and saved employees in Tamil or English. Free PDF.',
+    intro: 'Small businesses can produce a clear payslip in minutes. Enter earnings and deductions; PF and ESI can be calculated, and loss-of-pay days are accounted for. (சம்பளச் சீட்டு.)',
+    steps: ['Open Salary Slip Generator.', 'Enter employee, month, earnings and deductions.', 'Check PF / ESI and LOP amounts.', 'Download the PDF.'],
+    uses: ['Monthly payslips for staff', 'Salary proof for loan or visa applications', 'Keeping employee records'],
+    faqs: [['Are PF and ESI rates fixed?', 'Rates and wage limits change; verify them against current rules before issuing.'], ['Are employee details stored online?', 'Saved employees stay on your device.']]
+  },
+  leaveletter: {
+    title: 'Leave Application Letter Generator — Tamil and English | PDF Tools India',
+    desc: 'Write a leave letter for office, school or college in Tamil or English, including half-day leave. Free PDF.',
+    intro: 'Choose who is writing (employee, student or parent), the reason and the dates, and the letter is written for you. (விடுப்புக் கடிதம்.)',
+    steps: ['Open Leave Application Letter.', 'Choose the writer type, language and dates.', 'Edit the text if you wish and download the PDF.'],
+    uses: ['Casual or sick leave at work', 'Student leave letters to a class teacher', 'Parent letters to a school', 'Half-day leave requests'],
+    faqs: [['Can I change the wording?', 'Yes, edit the text before downloading.'], ['Is my letter stored?', 'No.']]
+  },
+  percentcalc: {
+    title: 'Percentage Calculator — X% of Y, % Change and Increase/Decrease | PDF Tools India',
+    desc: 'Find X percent of a number, what percent one number is of another, and percentage increase or decrease. Free.',
+    intro: 'Quick percentages for marks, discounts, price changes and interest without opening a spreadsheet.',
+    steps: ['Open Percentage Calculator.', 'Choose the type of question.', 'Enter the numbers and read the answer.'],
+    uses: ['Marks and results', 'Discount and sale price checks', 'Salary or price hike percentage'],
+    faqs: [['How is percentage change calculated?', '(new − old) ÷ old × 100.'], ['Is there a limit?', 'No.']]
+  },
+  rupeewords: {
+    title: 'Amount in Words — Write Rupees in Tamil and English for Cheques and Invoices | PDF Tools India',
+    desc: 'Convert any rupee amount into words in Tamil and English for cheques, invoices and receipts. Free.',
+    intro: 'Cheques and receipts require the amount in words, and a mistake can cause rejection. Type the figure and copy the words. (ரூபாய் எழுத்தில்.)',
+    steps: ['Open Amount in Words.', 'Type the amount in numbers.', 'Copy the Tamil or English words.'],
+    uses: ['Writing cheques', 'Invoices and receipts', 'Legal papers'],
+    faqs: [['Does it handle lakhs and crores?', 'Yes, using the Indian numbering system.'], ['Does it work offline?', 'It runs in your browser.']]
+  },
+  gstcalc: {
+    title: 'GST Calculator — Add or Remove GST, CGST SGST Split | PDF Tools India',
+    desc: 'Add GST to a price or remove it from a GST-inclusive price, at any rate you enter, with the CGST / SGST split. Free.',
+    intro: 'Find the pre-tax price or the final price quickly. Enter the amount and the GST rate; you also see the CGST and SGST split. (ஜிஎஸ்டி கணிப்பான்.)',
+    steps: ['Open GST Calculator.', 'Choose add or remove GST.', 'Enter the amount and rate.'],
+    uses: ['Billing with GST', 'Checking a supplier invoice', 'Finding the base price from an inclusive price'],
+    faqs: [['Which rate should I use?', 'Use the rate that applies to your goods or service under the current GST notification.'], ['Does it handle IGST?', 'IGST equals the total GST rate.']]
+  },
+  tamiltyping: {
+    title: 'Tamil Typing Online — Type Tamil with English Letters | PDF Tools India',
+    desc: 'Type Tamil by typing English letters (unakkaga → உனக்காக), with word suggestions, voice typing and Word/print export. Free.',
+    intro: 'No Tamil keyboard needed. Type in English letters and the tool converts to Tamil as you go. Files are auto-saved on your device. (தமிழ் தட்டச்சு.)',
+    steps: ['Open Tamil Typing.', 'Type words in English letters.', 'Pick suggestions or use voice typing.', 'Export to Word or print.'],
+    uses: ['Letters and applications in Tamil', 'Student assignments', 'Social media posts'],
+    faqs: [['Is it free?', 'Yes, no signup and no AI.'], ['Where are my files saved?', 'On your own device.']]
+  },
+  tamilfont: {
+    title: 'Tamil Font Converter — Bamini to Unicode, TSCII, TAB and More | PDF Tools India',
+    desc: 'Convert Bamini, TSCII, TAB, Anjal, Dinakaran and about 20 older Tamil fonts to Unicode and back. Free, runs in your browser.',
+    intro: 'Old Tamil documents typed in legacy fonts show strange English letters elsewhere. Paste the text and convert it to Unicode so it displays everywhere. (பாமினி → யூனிகோட்.)',
+    steps: ['Open Tamil Font Converter.', 'Choose the source font.', 'Paste your text and copy the converted result.'],
+    uses: ['Converting old Word files', 'Using Tamil text on websites and WhatsApp', 'Searching old Tamil documents'],
+    faqs: [['Can I convert back to Bamini?', 'Yes, conversion works in both directions.'], ['Is my text uploaded?', 'No.']]
+  },
+  readaloud: {
+    title: 'Read Aloud — Listen to PDF or Text with Text-to-Speech | PDF Tools India',
+    desc: 'Listen to a PDF or text read aloud using your device voice. Free, runs in your browser.',
+    intro: 'Rest your eyes or revise while walking: the tool reads your document out loud using your device speech voice.',
+    steps: ['Open Read Aloud.', 'Choose a PDF or paste text.', 'Press play and choose the voice.'],
+    uses: ['Listening to notes before an exam', 'Proof-listening to your own writing', 'Reading support'],
+    faqs: [['Is a Tamil voice available?', 'Voices come from your device, so availability depends on your phone or computer.'], ['Is my file uploaded?', 'No.']]
+  },
+  qrscan: {
+    title: 'Scan QR Code from Image Free — Read QR Codes Online | PDF Tools India',
+    desc: 'Read the QR code in a picture or screenshot and see the link or text it holds. Free, runs in your browser.',
+    intro: 'Got a QR code as an image instead of seeing it on a poster? Upload the picture and read what it contains.',
+    steps: ['Open Scan QR / Barcode.', 'Choose an image with a QR code.', 'Read the result.'],
+    uses: ['Reading a QR from a screenshot', 'Checking a link before you open it', 'Recovering a Wi-Fi code'],
+    faqs: [['Is it safe to open the link?', 'Check the web address first; do not open links you do not trust.'], ['Is my image uploaded?', 'No.']]
+  },
+  studytimer: {
+    title: 'Study Timer — 25-Minute Pomodoro with Study Log | PDF Tools India',
+    desc: 'Focus for 25 minutes, rest for 5, and keep a log of your study. Free Pomodoro timer.',
+    intro: 'The Pomodoro method breaks study into short focused sessions with breaks. Start the timer and the tool keeps a study log. (படிப்பு நேரம்.)',
+    steps: ['Open Study Timer.', 'Start a 25-minute focus session.', 'Rest for 5 minutes when it ends.'],
+    uses: ['Exam preparation', 'Homework time', 'Office focus sessions'],
+    faqs: [['Can I change the times?', 'Use the options shown in the tool.'], ['Is my log uploaded?', 'No, it stays on your device.']]
+  },
+  sipcalc: {
+    title: 'SIP, FD and RD Calculator — Savings Growth Calculator | PDF Tools India',
+    desc: 'See how monthly savings or a deposit can grow at a rate you enter, with an honest note on returns. Free.',
+    intro: 'Enter the monthly amount or deposit, the years and an assumed rate to see the future value. Returns on investments are not guaranteed. (சேமிப்புக் கணிப்பான்.)',
+    steps: ['Open SIP / FD / RD Calculator.', 'Choose SIP, FD or RD.', 'Enter amount, years and rate.'],
+    uses: ['Planning savings goals', 'Comparing FD and RD', 'Understanding compounding'],
+    faqs: [['Are returns guaranteed?', 'No. Market returns vary; use the rate only as an assumption.'], ['Is this financial advice?', 'No. Check with a qualified adviser before investing.']]
+  }
 };
 export const PAGE_TITLES = {
   'tn-rent-agreement': ['Rent Agreement Format in Tamil (வாடகை ஒப்பந்தம்) — Free Tamil Nadu Draft', 'Free Tamil Nadu rent agreement format in Tamil or English (வீட்டு வாடகை ஒப்பந்தம்) following the TN Regulation of Rights and Responsibilities of Landlords and Tenants Act, 2017. Print-ready, no signup.'],
