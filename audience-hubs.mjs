@@ -98,17 +98,27 @@ const HUB_CSS = `
   .hb-btn{min-height:48px;margin-top:12px;padding:10px 20px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:800 15px inherit;font-family:inherit;cursor:pointer}
   .hb-priv{background:#F0FAF4;border:1px solid #CDEBDA;color:#175C3B;border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:600;margin-top:18px;line-height:1.6}
   #favs[hidden]{display:none}
+  .hb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:10px}
+  .hb-tile{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:16px;text-decoration:none;color:inherit;min-height:84px;transition:transform .12s,box-shadow .12s,border-color .12s}
+  .hb-tile:hover{border-color:var(--brand);box-shadow:0 6px 18px rgba(55,82,166,.14);transform:translateY(-1px)}
+  .hb-ti{width:52px;height:52px;border-radius:15px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:27px;flex-shrink:0}
+  .hb-tt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0} .hb-tt b{font-size:16px;font-weight:900;line-height:1.3} .hb-tt small{font-size:12px;color:var(--sub);font-weight:600}
+  .hb-tt em{font-style:normal;font-size:12px;color:#566070;line-height:1.4;margin-top:3px}
+  .hb-go{font-size:26px;color:var(--brand);font-weight:300}
+  .hb-back{display:inline-flex;align-items:center;min-height:44px;font-weight:800;font-size:14px;color:var(--brand);text-decoration:none;margin:2px 0 6px}
+  .hb-shead{display:flex;align-items:center;gap:14px;border-radius:18px;padding:18px;color:#fff} .hb-shead .hb-ti{background:rgba(255,255,255,.18)} .hb-shead h1{font-size:22px;margin:0;font-weight:900} .hb-shead .en{opacity:.85;font-size:13px}
+  .hb-h1{font-size:20px;font-weight:900;margin:0 0 6px} .hb-h1 small{display:block;font-size:12px;color:var(--sub);font-weight:600;margin-top:2px}
   @media (max-width:600px){.hb-q{grid-template-columns:1fr 1fr}}`;
 
 const PAGE_JS = `
 (function(){
-  var KEY='hubfav', cards=[].slice.call(document.querySelectorAll('.tcw'));
+  var KEY='hubfav', cards=[].slice.call(document.querySelectorAll('.tcw:not(#allc .tcw)')), store=document.getElementById('allc');
   function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
   function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
   function paint(){
     var f=load(), box=document.getElementById('favs'), grid=document.getElementById('favgrid'); grid.innerHTML='';
-    cards.forEach(function(c){var id=c.getAttribute('data-id'),on=f.indexOf(id)>-1,b=c.querySelector('.fav');b.setAttribute('aria-pressed',on?'true':'false');b.title=on?'நீக்கு':'பிடித்தவற்றில் சேர்';
-      if(on&&!grid.querySelector('[data-id="'+id+'"]')){var k=c.cloneNode(true);k.querySelector('.fav').remove();grid.appendChild(k);}});
+    cards.forEach(function(c){var id=c.getAttribute('data-id'),on=f.indexOf(id)>-1,b=c.querySelector('.fav');b.setAttribute('aria-pressed',on?'true':'false');b.title=on?'நீக்கு':'பிடித்தவற்றில் சேர்';});
+    f.forEach(function(id){var c=store&&store.querySelector('[data-id="'+id+'"]');if(c&&!grid.querySelector('[data-id="'+id+'"]')){var k=c.cloneNode(true);k.querySelector('.fav').remove();grid.appendChild(k);}});
     box.hidden=!grid.children.length;
   }
   cards.forEach(function(c){c.querySelector('.fav').addEventListener('click',function(){var id=c.getAttribute('data-id'),f=load(),i=f.indexOf(id);if(i>-1)f.splice(i,1);else f.push(id);save(f);paint();});});
@@ -129,7 +139,7 @@ const PAGE_JS = `
   });
 })();`;
 
-export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify) {
+export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
   const byId = Object.fromEntries(tools.map(t => [t.id, t]));
   const href = (id) => ({ tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' }[id] || `/tools/${slugify(byId[id].name)}`);
   const card = (id, why) => {
@@ -138,27 +148,67 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify) {
     return `<div class="tcw" data-id="${id}"><a class="tc" href="${href(id)}"><span class="ic" style="background:${t.color}">${t.icon}</span><span class="tx"><div class="nm">${esc(tm[0] || t.name)}<small>${esc(t.name.split(' — ')[0])}</small></div><div class="ds">${esc(why || tm[1] || t.desc)}</div></span>${badge}</a><button class="fav" type="button" aria-pressed="false" aria-label="பிடித்தவற்றில் சேர் — ${esc(tm[0] || t.name)}">★</button></div>`;
   };
   const quick = hub.quick.map(id => { const t = byId[id], tm = TA_TOOL[id] || []; return `<a href="${href(id)}"><b>${t.icon}</b>${esc(tm[0] || t.name)}<small>${esc(t.name.split(' — ')[0])}</small></a>`; }).join('');
-  const sections = hub.sections.map(s => `<div class="section hb-sec"><h2>${esc(s.ta)} <small>${esc(s.en)}</small></h2><div class="grid" style="margin-top:10px">${s.tools.map(([id, why]) => card(id, why)).join('')}</div></div>`).join('\n    ');
   const rem = hub.remind.events === 'tds'
     ? `<p class="hb-note">${esc(hub.remind.note)}</p><button class="hb-btn" id="remTds" type="button">📅 ${esc(hub.remind.label)} (.ics)</button><p class="hb-note" style="margin-top:8px">Google Calendar, Apple Calendar, Outlook — எதிலும் திறக்கும். நினைவூட்டல் 3 நாள் முன்பு. எதுவும் இணையத்தில் அனுப்பப்படாது.</p>`
     : `<form id="remForm" class="hb-rem"><label for="rt">என்ன நினைவூட்ட வேண்டும்?</label><input id="rt" name="title" maxlength="80" placeholder="எ.கா. TNPSC விண்ணப்பக் கடைசி நாள்"><label for="rd">தேதி</label><input id="rd" name="date" type="date"><label for="ra">எத்தனை நாள் முன்பு நினைவூட்ட?</label><select id="ra" name="alarm"><option value="0">அதே நாள்</option><option value="1" selected>1 நாள் முன்பு</option><option value="3">3 நாள் முன்பு</option><option value="7">7 நாள் முன்பு</option></select><button class="hb-btn" type="submit">📅 Calendar கோப்பு (.ics) பதிவிறக்கு</button></form><p class="hb-note" style="margin-top:8px">தேதியை அதிகாரப்பூர்வ அறிவிப்பிலிருந்து எழுதுங்கள். எதுவும் இணையத்தில் அனுப்பப்படாது.</p>`;
+  const secs = hubSections(hub);
+  const cur = page == null ? null : (page === 'about' ? { about: true } : secs[page]);
+  const url = cur ? `${SITE}/${hub.slug}/${cur.about ? 'about' : cur.key}` : `${SITE}/${hub.slug}`;
+  const title = cur ? (cur.about ? `விதிகள் & இன்னும் சேர்க்காதவை — ${hub.h1} | PDF Tools India` : `${cur.ta} — ${hub.h1} | PDF Tools India`) : hub.title;
+  const desc = cur ? (cur.about ? `${hub.h1}: கணக்குகள் எப்படிச் சரிபார்க்கப்பட்டன, எவை இன்னும் சேர்க்கப்படவில்லை.` : `${cur.ta} (${cur.en}) — ${cur.tools.length} இலவசக் கருவிகள். பதிவு தேவையில்லை, மொபைலில் வேலை செய்யும்.`) : hub.desc;
+  const crumbs = [{ name: 'PDF Tools India', item: `${SITE}/` }, { name: hub.h1, item: `${SITE}/${hub.slug}` }].concat(cur ? [{ name: cur.about ? 'விதிகள்' : cur.ta, item: url }] : []);
   const ld = JSON.stringify([
-    { '@context': 'https://schema.org', '@type': 'CollectionPage', name: hub.title, description: hub.desc, url: `${SITE}/${hub.slug}`, inLanguage: ['ta', 'en'] },
-    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: hub.faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
-    { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'PDF Tools India', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: hub.h1, item: `${SITE}/${hub.slug}` }] },
+    { '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, description: desc, url, inLanguage: ['ta', 'en'] },
+    ...(cur ? [] : [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: hub.faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }]),
+    { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.item })) },
   ]).replace(/</g, '\\u003c');
+  const crumbHtml = ['<a href="/?home=1">PDF Tools India</a>'].concat(cur ? [`<a href="/${hub.slug}">${esc(hub.h1)}</a>`, esc(cur.about ? 'விதிகள்' : cur.ta)] : [esc(hub.h1)]).join(' › ');
+  const tile = (x, i) => `<a class="hb-tile" href="/${hub.slug}/${x.key}"><span class="hb-ti">${x.icon}</span><span class="hb-tt"><b>${esc(x.ta)}</b><small>${esc(x.en)}</small><em>${x.tools.slice(0, 3).map(([id]) => esc((TA_TOOL[id] || [byId[id].name])[0])).join(' · ')}</em></span><span class="hb-go" aria-hidden="true">›</span></a>`;
+  const others = (skip) => `<div class="section hb-sec"><h2>மற்ற தலைப்புகள் <small>Other topics</small></h2><div class="hb-tiles">${secs.map((x, i) => i === skip ? '' : tile(x, i)).join('')}</div></div>`;
+  const allCards = `<div id="allc" hidden>${secs.flatMap(x => x.tools.map(([id, why]) => card(id, why))).join('')}</div>`;
+  const favBox = `<div class="section hb-sec" id="favs" hidden><h2>⭐ என் பிடித்தவை <small>My favourites — this device only</small></h2><div class="grid" id="favgrid" style="margin-top:10px"></div></div>`;
+  const pills = `<div class="pills"><span class="pill">✓ இலவசம்</span><span class="pill">🔒 கோப்பு உங்கள் சாதனத்திலேயே</span><span class="pill">🚫 பதிவு தேவையில்லை</span></div>`;
+  let body;
+  if (!cur) {
+    body = `
+    <div class="hero" style="background:${hub.grad};">
+      <div class="row"><div class="big">${hub.icon}</div><div><h1>${esc(hub.h1)}</h1><div class="en">${esc(hub.en)}</div></div></div>
+      <p>${esc(hub.intro)}</p>
+      <p style="margin-top:6px;opacity:.85;font-size:13.5px;">${esc(hub.introEn)}</p>
+      ${pills}
+    </div>
+    <div class="section hb-sec"><h2>அதிகம் பயன்படுபவை <small>Most used</small></h2><div class="hb-q">${quick}</div></div>
+    ${favBox}
+    <div class="section hb-sec"><h2>உங்களுக்கு என்ன வேண்டும்? <small>Pick a topic</small></h2><div class="hb-tiles">${secs.map(tile).join('')}</div></div>
+    ${hub.privacy ? `<div class="hb-priv">🛡️ ${esc(hub.privacy)}</div>` : ''}
+    <div class="section hb-sec"><h2>நினைவூட்டல் <small>Calendar reminder</small></h2>${rem}</div>
+    <div class="section faq hb-sec"><h2>அடிக்கடி கேட்கப்படும் கேள்விகள் <small>FAQ</small></h2>${hub.faqs.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join('\n      ')}</div>
+    <p class="hb-note" style="margin-top:16px"><a href="/${hub.slug}/about">விதிகள் எப்படிச் சரிபார்க்கப்பட்டன, எவை இன்னும் சேர்க்கப்படவில்லை →</a></p>`;
+  } else if (cur.about) {
+    body = `
+    <a class="hb-back" href="/${hub.slug}">‹ ${esc(hub.h1)}</a>
+    <div class="section hb-sec"><h1 class="hb-h1">விதிகள் எப்படிச் சரிபார்க்கப்பட்டன <small>Rules checked on ${HUBS_VERIFIED_ON}</small></h1><dl class="hb-note">${hub.verified.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
+    <div class="section hb-sec"><h2>இன்னும் சேர்க்காதவை — ஏன்? <small>Not built yet, on purpose</small></h2><p class="hb-note">உறுதிப்படுத்தாத எண்களைக் காட்டி உங்களைத் தவறாக வழிநடத்த மாட்டோம். அதிகாரப்பூர்வ ஆதாரம் கிடைத்ததும் சேர்ப்போம்:</p><ul class="hb-no">${hub.notYet.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  } else {
+    body = `
+    <a class="hb-back" href="/${hub.slug}">‹ ${esc(hub.h1)}</a>
+    <div class="hb-shead" style="background:${hub.grad}"><span class="hb-ti">${cur.icon}</span><div><h1>${esc(cur.ta)}</h1><div class="en">${esc(cur.en)}</div></div></div>
+    <div class="grid" style="margin-top:14px">${cur.tools.map(([id, why]) => card(id, why)).join('')}</div>
+    ${favBox}
+    ${others(page)}`;
+  }
   return `<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(hub.title)}</title>
-<meta name="description" content="${esc(hub.desc)}">
-<link rel="canonical" href="${SITE}/${hub.slug}">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${url}">
 <meta property="og:type" content="website">
-<meta property="og:title" content="${esc(hub.title)}">
-<meta property="og:description" content="${esc(hub.desc)}">
-<meta property="og:url" content="${SITE}/${hub.slug}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${url}">
 <meta property="og:site_name" content="PDF Tools India">
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">${ld}</script>
@@ -167,21 +217,9 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify) {
 <body>
   ${HEADER}
   <div class="wrap">
-    <div class="crumb"><a href="/?home=1">PDF Tools India</a> › ${esc(hub.h1)}</div>
-    <div class="hero" style="background:${hub.grad};">
-      <div class="row"><div class="big">${hub.icon}</div><div><h1>${esc(hub.h1)}</h1><div class="en">${esc(hub.en)}</div></div></div>
-      <p>${esc(hub.intro)}</p>
-      <p style="margin-top:6px;opacity:.85;font-size:13.5px;">${esc(hub.introEn)}</p>
-      <div class="hb-q">${quick}</div>
-      <div class="pills"><span class="pill">✓ இலவசம்</span><span class="pill">🔒 கோப்பு உங்கள் சாதனத்திலேயே</span><span class="pill">🚫 பதிவு தேவையில்லை</span></div>
-    </div>
-    <div class="section hb-sec" id="favs" hidden><h2>⭐ என் பிடித்தவை <small>My favourites — this device only</small></h2><div class="grid" id="favgrid" style="margin-top:10px"></div></div>
-    ${sections}
-    ${hub.privacy ? `<div class="hb-priv">🛡️ ${esc(hub.privacy)}</div>` : ''}
-    <div class="section hb-sec"><h2>நினைவூட்டல் <small>Calendar reminder</small></h2>${rem}</div>
-    <div class="section hb-sec"><h2>விதிகள் எப்படிச் சரிபார்க்கப்பட்டன <small>Rules checked on ${HUBS_VERIFIED_ON}</small></h2><dl class="hb-note">${hub.verified.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
-    <div class="section hb-sec"><h2>இன்னும் சேர்க்காதவை — ஏன்? <small>Not built yet, on purpose</small></h2><p class="hb-note">உறுதிப்படுத்தாத எண்களைக் காட்டி உங்களைத் தவறாக வழிநடத்த மாட்டோம். அதிகாரப்பூர்வ ஆதாரம் கிடைத்ததும் சேர்ப்போம்:</p><ul class="hb-no">${hub.notYet.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-    <div class="section faq hb-sec"><h2>அடிக்கடி கேட்கப்படும் கேள்விகள் <small>FAQ</small></h2>${hub.faqs.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join('\n      ')}</div>
+    <div class="crumb">${crumbHtml}</div>
+    ${body}
+    ${allCards}
     ${FOOTER}
   </div>
 <script src="/hub-core.js?v=1"></script>
@@ -189,4 +227,11 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify) {
 </body>
 </html>
 `;
+}
+
+const SEC_ICONS = ['💰', '🧾', '🏢', '✉️', '📄', '🏠'];
+const STU_ICONS = ['🎯', '📝', '📚', '⏱️', '💼', '🧒'];
+export function hubSections(hub) {
+  const icons = hub.slug === 'for-students' ? STU_ICONS : SEC_ICONS;
+  return hub.sections.map((x, i) => ({ ...x, icon: icons[i] || '📌', key: x.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }));
 }

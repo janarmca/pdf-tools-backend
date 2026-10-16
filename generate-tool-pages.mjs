@@ -25,7 +25,7 @@ import path from 'path';
 import { SEO_EXTRA } from './seo-content.mjs';
 import { TA_TOOL } from './ta-names.mjs';
 import { CAT_THEME, BASE_CSS, HEADER, FOOTER } from './pages-style.mjs';
-import { AUDIENCE_HUBS, audienceHtml } from './audience-hubs.mjs';
+import { AUDIENCE_HUBS, audienceHtml, hubSections } from './audience-hubs.mjs';
 
 const SITE = 'https://pdftoolsindia.com';
 const OUT_DIR = './tools';
@@ -272,6 +272,7 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/for-government-employees`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/for-students`, freq: 'weekly', pri: '0.8' },
+    ...Object.values(AUDIENCE_HUBS).flatMap(h => hubSections(h).map(x => ({ loc: `${SITE}/${h.slug}/${x.key}`, freq: 'weekly', pri: '0.7' }))),
     { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/matrimony/en/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
@@ -345,12 +346,15 @@ function main() {
     const missing = ids.filter(id => !allTools.some(t => t.id === id));
     if (missing.length) { console.error('ABORTING — audience hub lists unknown tools: ' + missing.join(', ')); process.exit(1); }
     fs.writeFileSync(h.file, audienceHtml(h, allTools, TA_TOOL, SITE, slugify));
+    fs.mkdirSync(h.slug, { recursive: true });
+    hubSections(h).forEach((x, i) => fs.writeFileSync(`${h.slug}/${x.key}.html`, audienceHtml(h, allTools, TA_TOOL, SITE, slugify, i)));
+    fs.writeFileSync(`${h.slug}/about.html`, audienceHtml(h, allTools, TA_TOOL, SITE, slugify, 'about'));
   }
-  console.log('Wrote 2 audience hub pages');
+  console.log('Wrote audience hubs + sub-pages');
 
   const sitemap = buildSitemap(slugs);
   fs.writeFileSync('sitemap.xml', sitemap);
-  console.log(`Rewrote sitemap.xml — ${slugs.length + 18} URLs total.`);
+  console.log(`Rewrote sitemap.xml — ${slugs.length + 18 + 12} URLs total.`);
 }
 
 main();
