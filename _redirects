@@ -1,7 +1,13 @@
 # Old tool pages merged into newer tools — keep inbound links and search rankings
 /tools/gst-invoice-generator /tools/quotation-bill-po-proforma 301
+/tools/gst-invoice-generator.html /tools/quotation-bill-po-proforma 301
 /tools/quotation-bill-po-performa /tools/quotation-bill-po-proforma 301
+/tools/quotation-bill-po-performa.html /tools/quotation-bill-po-proforma 301
 /tools/rent-receipt-generator /tools/receipts-vouchers-all-in-one 301
+/tools/rent-receipt-generator.html /tools/receipts-vouchers-all-in-one 301
 /tools/tuition-fee-receipt /tools/receipts-vouchers-all-in-one 301
+/tools/tuition-fee-receipt.html /tools/receipts-vouchers-all-in-one 301
 /tools/payment-voucher /tools/receipts-vouchers-all-in-one 301
+/tools/payment-voucher.html /tools/receipts-vouchers-all-in-one 301
 /tools/little-star-education-arcade /education-tools 301
+/tools/little-star-education-arcade.html /education-tools 301
