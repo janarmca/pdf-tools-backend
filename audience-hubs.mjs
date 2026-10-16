@@ -105,6 +105,11 @@ const HUB_CSS = `
   .hb-tt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0} .hb-tt b{font-size:16px;font-weight:900;line-height:1.3} .hb-tt small{font-size:12px;color:var(--sub);font-weight:600}
   .hb-tt em{font-style:normal;font-size:12px;color:#566070;line-height:1.4;margin-top:3px}
   .hb-go{font-size:26px;color:var(--brand);font-weight:300}
+  .hb-chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;margin-top:6px;position:sticky;top:0;z-index:5;background:var(--bg,#F6F7FB);scrollbar-width:none}
+  .hb-chips::-webkit-scrollbar{display:none}
+  .hb-chips button{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;color:#20242B;border-radius:999px;padding:9px 15px;font:800 13.5px inherit;font-family:inherit;cursor:pointer;min-height:42px;white-space:nowrap}
+  .hb-chips button.on{background:var(--brand);border-color:var(--brand);color:#fff} .hb-chips small{font-weight:600;opacity:.8}
+  .hb-blk[hidden]{display:none}
   .hb-back{display:inline-flex;align-items:center;min-height:44px;font-weight:800;font-size:14px;color:var(--brand);text-decoration:none;margin:2px 0 6px}
   .hb-shead{display:flex;align-items:center;gap:14px;border-radius:18px;padding:18px;color:#fff} .hb-shead .hb-ti{background:rgba(255,255,255,.18)} .hb-shead h1{font-size:22px;margin:0;font-weight:900} .hb-shead .en{opacity:.85;font-size:13px}
   .hb-h1{font-size:20px;font-weight:900;margin:0 0 6px} .hb-h1 small{display:block;font-size:12px;color:var(--sub);font-weight:600;margin-top:2px}
@@ -123,6 +128,11 @@ const PAGE_JS = `
   }
   cards.forEach(function(c){c.querySelector('.fav').addEventListener('click',function(){var id=c.getAttribute('data-id'),f=load(),i=f.indexOf(id);if(i>-1)f.splice(i,1);else f.push(id);save(f);paint();});});
   paint();
+  var chips=document.getElementById('chips');
+  if(chips){var bt=[].slice.call(chips.querySelectorAll('button')),blks=[].slice.call(document.querySelectorAll('.hb-blk'));
+    function show(k){bt.forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===k)});blks.forEach(function(x){x.hidden=!(k==='all'||x.getAttribute('data-sec')===k)});}
+    bt.forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-k');show(k);try{history.replaceState(null,'',k==='all'?location.pathname:'#'+k)}catch(e){}chips.scrollIntoView({block:'nearest'});});});
+    var h=(location.hash||'').slice(1);if(h&&blks.some(function(x){return x.id===h}))show(h);}
   function dl(events,name){
     if(!window.HubCore){alert('ஏற்ற முடியவில்லை — பக்கத்தைப் புதுப்பிக்கவும்');return;}
     var blob=new Blob([HubCore.makeIcs(events)],{type:'text/calendar;charset=utf-8'}),a=document.createElement('a');
@@ -177,9 +187,9 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
       <p style="margin-top:6px;opacity:.85;font-size:13.5px;">${esc(hub.introEn)}</p>
       ${pills}
     </div>
-    <div class="section hb-sec"><h2>அதிகம் பயன்படுபவை <small>Most used</small></h2><div class="hb-q">${quick}</div></div>
     ${favBox}
-    <div class="section hb-sec"><h2>உங்களுக்கு என்ன வேண்டும்? <small>Pick a topic</small></h2><div class="hb-tiles">${secs.map(tile).join('')}</div></div>
+    <div class="hb-chips" id="chips" role="tablist"><button type="button" class="on" data-k="all">அனைத்தும் <small>All</small></button>${secs.map(x => `<button type="button" data-k="${x.key}">${x.icon} ${esc(x.ta)}</button>`).join('')}</div>
+    ${secs.map(x => `<div class="section hb-sec hb-blk" data-sec="${x.key}" id="${x.key}"><h2>${x.icon} ${esc(x.ta)} <small>${esc(x.en)}</small></h2><div class="grid" style="margin-top:10px">${x.tools.map(([id, why]) => card(id, why)).join('')}</div></div>`).join('\n    ')}
     ${hub.privacy ? `<div class="hb-priv">🛡️ ${esc(hub.privacy)}</div>` : ''}
     <div class="section hb-sec"><h2>நினைவூட்டல் <small>Calendar reminder</small></h2>${rem}</div>
     <div class="section faq hb-sec"><h2>அடிக்கடி கேட்கப்படும் கேள்விகள் <small>FAQ</small></h2>${hub.faqs.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join('\n      ')}</div>

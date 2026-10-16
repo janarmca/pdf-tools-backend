@@ -156,3 +156,6 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - Home ("all" view): categories first → three audience cards (government employees, students, Kalvi Kalanjiyam) → 6 quick tasks → file picker → recent. "New tools" strip removed.
 - ONE small Matrimony link row sits under the audience cards on home (owner asked for a single link); no card in tools lists; `/matrimony/` keeps its own shell/branding (hash-routed app). Sitemap entries for it kept. Subdomain move still pending (owner will decide).
 - sw.js CACHE_NAME v67.
+
+## UPDATE_25 — hubs: one page, tools shown directly (2026-10-16)
+- Owner found page-by-page navigation confusing: `/for-government-employees` and `/for-students` now show ALL their tools on one page, grouped, with a sticky chip bar (அனைத்தும் + one chip per topic) that filters client-side; `#topic` hash deep-links. Sub-pages remain generated for SEO but are no longer linked from the landing. sw.js v68.
