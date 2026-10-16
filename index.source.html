@@ -1044,7 +1044,7 @@ const TOOL_MOVED = {gstinvoice:'quotepo', rentreceipt:'receipts', tuitionreceipt
 function openTool(id){ id = TOOL_MOVED[id] || id; stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
 // Social profiles — fill in the full https URLs and they appear in the footer automatically (empty = hidden).
-const SOCIAL_LINKS = { instagram:'', youtube:'', facebook:'' };
+const SOCIAL_LINKS = { instagram:'https://www.instagram.com/pdftoolsindia/', youtube:'https://www.youtube.com/@pdftoolsindia', facebook:'' }; // Facebook page URL: add here (and in pages-style.mjs SOCIAL) once known
 function socialLinksHtml(){
   const defs = [['instagram','📸 Instagram','#C13584'],['youtube','▶️ YouTube','#C4302B'],['facebook','👍 Facebook','#1877F2']];
   const items = defs.filter(d=>/^https:\/\//.test(SOCIAL_LINKS[d[0]]||'')).map(d=>`<a href="${SOCIAL_LINKS[d[0]]}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:${d[2]};color:#fff;font-weight:800;font-size:12.5px;text-decoration:none;">${d[1]}</a>`);
@@ -1086,6 +1086,7 @@ function render(){
       <a href="/contact" style="color:var(--sub);">Contact</a>
     </div>
     <div style="margin-top:10px; font-weight:800; color:var(--ink); font-size:12.5px;">Developed by Janarthanan Thiyagarajan  &nbsp;·&nbsp; 📞 +91&nbsp;76676&nbsp;63922</div>
+    <div style="margin-top:6px; font-size:12.5px;">✉️ <a href="mailto:support@pdftoolsindia.com" style="color:var(--ink); font-weight:800;">support@pdftoolsindia.com</a></div>
     ${socialLinksHtml()}
     <div style="margin-top:12px;"><a href="https://sellwithboost.com" target="_blank" rel="noopener"><img src="https://sellwithboost.com/badge/pdf-tools-india.svg" alt="Listed on SellWithBoost" width="160" height="40"></a></div>
   </footer>`);
