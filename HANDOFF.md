@@ -151,3 +151,8 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - `downloadBlob` is a single direct anchor download (no Save-As picker, no share sheet) + toast.
 - Drop box (`.drop`) and login modal (`.am-*` classes) redesigned; Tamil-first labels; same logic/IDs.
 - sw.js CACHE_NAME v66; category `?v=20261016b`.
+
+## UPDATE_24 — simpler home, matrimony separated (2026-10-16)
+- Home ("all" view): categories first → three audience cards (government employees, students, Kalvi Kalanjiyam) → 6 quick tasks → file picker → recent. "New tools" strip removed.
+- ONE small Matrimony link row sits under the audience cards on home (owner asked for a single link); no card in tools lists; `/matrimony/` keeps its own shell/branding (hash-routed app). Sitemap entries for it kept. Subdomain move still pending (owner will decide).
+- sw.js CACHE_NAME v67.

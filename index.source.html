@@ -97,6 +97,14 @@
   .tool-name{font-weight:800; font-size:15.5px; line-height:1.3;}
   .tool-desc{font-size:12.5px; color:var(--sub); line-height:1.4;}
 
+
+  .aud-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:10px;}
+  .aud{display:flex; align-items:center; gap:12px; color:#fff; text-decoration:none; border-radius:18px; padding:16px; min-height:84px; box-shadow:0 4px 14px rgba(0,0,0,.12); transition:transform .12s;}
+  .aud:hover{transform:translateY(-2px);}
+  .aud .ai{font-size:32px; line-height:1;} .aud .at{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;} .aud .at b{font-size:16px; font-weight:900;} .aud .at small{font-size:12px; opacity:.9; line-height:1.4;} .aud .ag{font-size:22px; font-weight:900;}
+  .aud-m{display:flex; align-items:center; gap:10px; margin-top:12px; padding:12px 16px; border-radius:14px; background:#FFF1F4; border:1.5px solid #F2C6D0; color:#7A1233; text-decoration:none; font-size:14px; flex-wrap:wrap;}
+  .aud-m span{font-size:22px;} .aud-m b{font-weight:900;} .aud-m small{color:#9A5A6B; font-size:12px; flex:1;} .aud-m i{font-style:normal; font-weight:900; font-size:18px; margin-left:auto;}
+  @media (max-width:760px){ .aud-grid{grid-template-columns:1fr;} }
   .panel{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:24px; margin-top:10px;}
   .panel-head{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
   .back-btn{background:var(--chip); border:none; width:36px; height:36px; border-radius:10px; font-size:16px; cursor:pointer; color:var(--brand); flex-shrink:0;}
@@ -1072,7 +1080,6 @@ function render(){
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
-      <a href="/matrimony/" style="color:var(--sub);">திருமண அமைப்பகம்</a>
       <a href="/terms" style="color:var(--sub);">Terms</a>
       <a href="/privacy" style="color:var(--sub);">Privacy</a>
       <a href="/refund" style="color:var(--sub);">Refund Policy</a>
@@ -1793,34 +1800,29 @@ function renderHomeBody(){
   }
 
   if(__activeCategory==='all'){
-    // 1. What do you want to do? (the 12 most common jobs)
+    // 1. Categories (first — the main way to find a tool)
+    const sec5 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'வகைகள்':'Browse by category'}</b><span>${ta?'தேவையான வகையைத் தேர்ந்தெடு':'Pick what you need'}</span></div></div>`);
+    sec5.appendChild(renderCategoryCards()); holder.appendChild(sec5);
+
+    // 2. Who are you? — separate pages for each audience (no long mixed lists)
+    holder.appendChild(el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'உங்களுக்கான பக்கங்கள்':'Pages made for you'}</b><span>${ta?'ஒரு தட்டில் உங்கள் வேலைகள்':'Everything you need, in one place'}</span></div>
+      <div class="aud-grid tamil">
+        <a class="aud" href="/for-government-employees" style="background:linear-gradient(135deg,#1F4E79,#14304D)"><span class="ai">🏛️</span><span class="at"><b>அரசு ஊழியர்கள்</b><small>DA நிலுவை · வரி · கடிதங்கள்</small></span><span class="ag">→</span></a>
+        <a class="aud" href="/for-students" style="background:linear-gradient(135deg,#2E7D5B,#1B4D37)"><span class="ai">🎓</span><span class="at"><b>மாணவர்கள்</b><small>கட்-ஆஃப் · வருகை · Resume</small></span><span class="ag">→</span></a>
+        <a class="aud" href="/learn/" style="background:linear-gradient(135deg,#E8894A,#C96A2C)"><span class="ai">📚</span><span class="at"><b>கல்வி களஞ்சியம்</b><small>1–10 வகுப்பு · விளையாடிக் கற்றல்</small></span><span class="ag">→</span></a>
+      </div>
+      <a class="aud-m tamil" href="/matrimony/"><span>💍</span><b>ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்</b><small>திருமணத் தகவல் மையம்</small><i>→</i></a></div>`));
+
+    // 3. Quick start (the 12 most common jobs)
     const sec1 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'என்ன செய்ய வேண்டும்?':'Quick start'}</b><span>${ta?'ஒரே தட்டில் தொடங்கு':'One tap to begin'}</span></div></div>`);
     const g1 = el(`<div class="qt-grid"></div>`);
-    QUICK_TASK_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> g1.appendChild(renderToolCardCompact(t)));
+    QUICK_TASK_IDS.slice(0,6).map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> g1.appendChild(renderToolCardCompact(t)));
     sec1.appendChild(g1); holder.appendChild(sec1);
 
-    // 2. File first — drop a file, we suggest the tool
+    // 4. File first — drop a file, we suggest the tool
     holder.appendChild(el(`<div class="sec2"></div>`)); holder.lastChild.appendChild(renderSmartUploadZone());
 
-    // 3. Kalvi Kalanjiyam
-    holder.appendChild(el(`<div class="sec2"><a class="kv tamil" href="/learn/">
-      <div style="font-size:38px; line-height:1;">📚</div>
-      <div style="flex:1; min-width:0;">
-        <div style="font-weight:900; font-size:17px;">கல்வி களஞ்சியம்</div>
-        <div style="font-size:12.5px; opacity:.95; margin-top:2px; line-height:1.5;">1–10 வகுப்பு · தினசரி சவால் · விளையாடிக் கற்றல் · நாளைய உலகம் — தமிழில், இலவசம்</div>
-      </div>
-      <div style="font-weight:900; font-size:22px;">→</div></a></div>`));
-
-    // 3b. Matrimony (separate site section: /matrimony/)
-    holder.appendChild(el(`<div class="sec2"><a class="kv mtb tamil" href="/matrimony/">
-      <div style="font-size:38px; line-height:1;">💍</div>
-      <div style="flex:1; min-width:0;">
-        <div style="font-weight:900; font-size:17px;">ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்</div>
-        <div style="font-size:12.5px; opacity:.95; margin-top:2px; line-height:1.5;">கன்னட தேவாங்கர் சமூகத்திற்காக · அனைத்து சமூகத்தினரும் வரவேற்கப்படுகிறார்கள் · Interest இலவசம்</div>
-      </div>
-      <div style="font-weight:900; font-size:22px;">→</div></a></div>`));
-
-    // 4. Recently used
+    // 5. Recently used
     const recentTools = getRecentTools().map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
     if(recentTools.length){
       const sec = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'சமீபத்தில் பயன்படுத்தியவை':'Recently used'}</b></div></div>`);
@@ -1834,18 +1836,6 @@ function renderHomeBody(){
       sec.appendChild(row); holder.appendChild(sec);
     }
 
-    // 5. Categories
-    const sec5 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'வகைகள்':'Browse by category'}</b><span>${ta?'தேவையான வகையைத் தேர்ந்தெடு':'Pick what you need'}</span></div></div>`);
-    sec5.appendChild(renderCategoryCards()); holder.appendChild(sec5);
-
-    // 6. New tools
-    const fresh = NEW_TOOL_IDS.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
-    if(fresh.length){
-      const sec6 = el(`<div class="sec2"><div class="sec2-h tamil"><b>🆕 ${ta?'புதிய கருவிகள்':'New tools'}</b><span>${ta?'எல்லாம் இலவசம்':'All free'}</span></div></div>`);
-      const g6 = el(`<div class="grid2"></div>`);
-      fresh.forEach(t=> g6.appendChild(renderToolCard(t)));
-      sec6.appendChild(g6); holder.appendChild(sec6);
-    }
     return;
   }
 
