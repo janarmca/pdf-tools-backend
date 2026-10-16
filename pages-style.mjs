@@ -52,7 +52,7 @@ export const BASE_CSS = `@import url('/fonts/tamil.css');
   @media (max-width:600px){.hero h1{font-size:21px}.hero{padding:20px 16px;border-radius:20px}.hero .big{width:56px;height:56px;font-size:28px}.grid{grid-template-columns:1fr}}
 `;
 export const HEADER = `<div class="top"><a href="/?home=1"><img src="/lockup.svg" alt="PDF Tools India" height="40"></a><a class="home" href="/?home=1">← முதன்மைப் பக்கம்</a></div>`;
-const SOCIAL = { instagram: 'https://www.instagram.com/pdftoolsindia/', youtube: 'https://www.youtube.com/@pdftoolsindia', facebook: '' }; // Facebook: add the page URL here once known (empty = hidden)
+const SOCIAL = { instagram: 'https://www.instagram.com/pdftoolsindia/', youtube: 'https://www.youtube.com/@pdftoolsindia', facebook: 'https://www.facebook.com/profile.php?id=61595156705561' }; // keep in sync with SOCIAL_LINKS in index.source.html (empty = hidden)
 export const SOCIAL_HTML = (() => {
   const defs = [['instagram', '📸 Instagram', '#C13584'], ['youtube', '▶️ YouTube', '#C4302B'], ['facebook', '👍 Facebook', '#1877F2']];
   const items = defs.filter(d => /^https:\/\//.test(SOCIAL[d[0]])).map(d => `<a href="${SOCIAL[d[0]]}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:40px;padding:8px 14px;border-radius:999px;background:${d[2]};color:#fff;font-weight:800;font-size:12.5px;text-decoration:none;">${d[1]}</a>`);
