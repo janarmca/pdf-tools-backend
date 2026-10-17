@@ -98,7 +98,7 @@
   .tool-desc{font-size:12.5px; color:var(--sub); line-height:1.4;}
 
 
-  .aud-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:10px;}
+  .aud-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(235px,1fr)); gap:12px; margin-top:10px;}
   .aud{display:flex; align-items:center; gap:12px; color:#fff; text-decoration:none; border-radius:18px; padding:16px; min-height:84px; box-shadow:0 4px 14px rgba(0,0,0,.12); transition:transform .12s;}
   .aud:hover{transform:translateY(-2px);}
   .aud .ai{font-size:32px; line-height:1;} .aud .at{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;} .aud .at b{font-size:16px; font-weight:900;} .aud .at small{font-size:12px; opacity:.9; line-height:1.4;} .aud .ag{font-size:22px; font-weight:900;}
@@ -1094,6 +1094,7 @@ function render(){
       <a href="/?cat=education" style="color:var(--sub);">Education Tools</a>
       <a href="/for-government-employees" style="color:var(--sub);">அரசு ஊழியர்</a>
       <a href="/for-students" style="color:var(--sub);">மாணவர்</a>
+      <a href="/uzhavar-tools" style="color:var(--sub);">உழவர்</a>
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
@@ -1717,6 +1718,14 @@ const CATEGORY_GRADIENTS = {
 // against the full 114-tool TOOLS list to produce zero collisions before
 // this was wired in; re-check with that script's own dry-run if tools are
 // ever renamed.
+// "Pages made for you" cards on the home page. To add a new audience/section later (Siddha medicine, meditation,
+// psychology, everyday-life problems, home tasks…) add ONE entry here — the grid lays itself out.
+const AUDIENCE_CARDS = [
+  {href:'/for-government-employees', icon:'🏛️', c1:'#1F4E79', c2:'#14304D', ta:'அரசு ஊழியர்கள்', en:'Government employees', sta:'DA நிலுவை · வரி · கடிதங்கள்', sen:'DA arrears · tax · letters'},
+  {href:'/for-students', icon:'🎓', c1:'#2E7D5B', c2:'#1B4D37', ta:'மாணவர்கள்', en:'Students', sta:'கட்-ஆஃப் · வருகை · Resume', sen:'Cut-off · attendance · Resume'},
+  {href:'/uzhavar-tools', icon:'🌾', c1:'#6B8E23', c2:'#3F5A12', ta:'உழவர்கள்', en:'Farmers', sta:'நில அளவு · உரம் · செலவு · சோதனை நிலம்', sen:'Land · fertiliser · cost · trial plot'},
+  {href:'/learn/', icon:'📚', c1:'#E8894A', c2:'#C96A2C', ta:'கல்வி களஞ்சியம்', en:'Learning hub', sta:'1–10 வகுப்பு · விளையாடிக் கற்றல்', sen:'Classes 1–10 · learn by playing'},
+];
 const TOOL_STANDALONE_PAGES = { uzhavartools: '/uzhavar-tools', photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' }; // real standalone pages, no /tools/ landing page
 function toolHref(t){ return TOOL_STANDALONE_PAGES[t.id] || '/tools/' + toolSlug(t); }
 function toolSlug(t){
@@ -1828,10 +1837,7 @@ function renderHomeBody(){
 
     // 2. Who are you? — separate pages for each audience (no long mixed lists)
     holder.appendChild(el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'உங்களுக்கான பக்கங்கள்':'Pages made for you'}</b><span>${ta?'ஒரு தட்டில் உங்கள் வேலைகள்':'Everything you need, in one place'}</span></div>
-      <div class="aud-grid tamil">
-        <a class="aud" href="/for-government-employees" style="background:linear-gradient(135deg,#1F4E79,#14304D)"><span class="ai">🏛️</span><span class="at"><b>அரசு ஊழியர்கள்</b><small>DA நிலுவை · வரி · கடிதங்கள்</small></span><span class="ag">→</span></a>
-        <a class="aud" href="/for-students" style="background:linear-gradient(135deg,#2E7D5B,#1B4D37)"><span class="ai">🎓</span><span class="at"><b>மாணவர்கள்</b><small>கட்-ஆஃப் · வருகை · Resume</small></span><span class="ag">→</span></a>
-        <a class="aud" href="/learn/" style="background:linear-gradient(135deg,#E8894A,#C96A2C)"><span class="ai">📚</span><span class="at"><b>கல்வி களஞ்சியம்</b><small>1–10 வகுப்பு · விளையாடிக் கற்றல்</small></span><span class="ag">→</span></a>
+      <div class="aud-grid tamil">${AUDIENCE_CARDS.map(c=>`<a class="aud" href="${c.href}" style="background:linear-gradient(135deg,${c.c1},${c.c2})"><span class="ai">${c.icon}</span><span class="at"><b>${ta?c.ta:c.en}</b><small>${ta?c.sta:c.sen}</small></span><span class="ag">→</span></a>`).join('')}
       </div>
       <a class="aud-m tamil" href="/matrimony/"><span>💍</span><b>ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்</b><small>திருமணத் தகவல் மையம்</small><i>→</i></a></div>`));
 
