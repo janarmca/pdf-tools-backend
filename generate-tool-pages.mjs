@@ -54,7 +54,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
-const STANDALONE_IDS = new Set(['photoresize', 'postermaker', 'tnrentagreement', 'tnsaledeed', 'kalvikalanjiyam']); // real root pages — no generated /tools/ duplicate
+const STANDALONE_IDS = new Set(['uzhavartools', 'photoresize', 'postermaker', 'tnrentagreement', 'tnsaledeed', 'kalvikalanjiyam']); // real root pages — no generated /tools/ duplicate
 function readTools(all = false) {
   const src = fs.readFileSync('index.source.html', 'utf8');
   const m = src.match(/const TOOLS = \[([\s\S]*?)\n\];/);
@@ -188,7 +188,7 @@ ${SEO_TA[t.id] ? `    <div class="section">
 `;
 }
 
-const STANDALONE_HREF = { photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' };
+const STANDALONE_HREF = { uzhavartools: '/uzhavar-tools', photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' };
 const HUB_META = {
   pdf:       { file: 'pdf-tools.html',       title: 'PDF Tools Online Free | PDF Tools India',
     desc: 'Free PDF tools online — merge, split, compress, convert PDF to Word/Excel/Image, sign and more. No signup, works on mobile & desktop. தமிழிலும் கிடைக்கும்.',
@@ -288,6 +288,7 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/matrimony/en/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/poster-maker`, freq: 'monthly', pri: '0.7' },
     ...['photo-resizer', 'photo-20kb', 'photo-50kb', 'photo-100kb', 'photo-200kb', 'signature-resize', 'tnpsc-photo-signature'].map((s) => ({ loc: `${SITE}/${s}`, freq: 'monthly', pri: '0.8' })),
+    { loc: `${SITE}/uzhavar-tools`, freq: 'monthly', pri: '0.8' },
     { loc: `${SITE}/tn-rent-agreement`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/tn-sale-deed`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/blog/how-to-merge-pdf-files-free`, freq: 'monthly', pri: '0.7' },

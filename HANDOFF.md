@@ -219,3 +219,9 @@ Owner's worry: students will use AI for everything and forget where computing/AI
 - Lessons are `learn/lessons/*.json`, registered in `learn/catalog.json` (`futureGroups` + `future`); validate with `node learn/tests/lessons.test.cjs` (widget names must be added to its `WIDGETS` set).
 - History facts used are well-documented milestones only; Pingala/zero are hedged (dating disputed). Do not add dates you cannot source.
 - Honest gaps: Tamil wording was written by the AI session, not proof-read by a Tamil teacher — owner (a teacher) should read the five lessons once and fix phrasing.
+
+## UPDATE_42 — Farmer Toolbox (`/uzhavar-tools`)
+- `farm-core.js` (pure maths, `globalThis.KALVI_FARM`) + `tests/farm-core.test.cjs` (142 checks) + `uzhavar-tools.html` (Tamil/English UI, tabs: land, planting, rice fertiliser bags, spray mix, cost/break-even, test-vs-comparison plot book, rice seasons, official links, evidence).
+- Registered like photoresize: TOOLS `uzhavartools` (cat business), TOOL_STANDALONE_PAGES, TOOL_IMPL, ta-names (index.source.html + ta-names.mjs), generate-tool-pages.mjs, audience-hubs.mjs, promo catalog regenerated, promo-news `uzhavar-tools`, sw.js v80.
+- Content policy: only verified facts. Unverified (NOT published): pesticide ban lists, IARC classes, PM-KISAN/PMFBY amounts, jeevamrutha quantities, non-rice doses, folk/lunar timing, rainfall normals. Evidence tab labels each item established / association / unproven.
+- Owner to-do: have a Tamil teacher proofread; verify recipes with TNAU/KVK; confirm KCC number 1800-180-1551 and source originals for evidence-tab figures.

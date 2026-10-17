@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>உழவர் கருவிப்பெட்டி — Farmer Tools (Land, Fertiliser, Cost) | PDF Tools India</title>
+<meta name="description" content="Free Tamil farmer tools: cent/acre/kuzhi/veli land converter, rice fertiliser bag calculator, spray dilution, cost and break-even price, trial-plot record book. No login, works offline.">
+<link rel="canonical" href="https://pdftoolsindia.com/uzhavar-tools">
+<meta property="og:title" content="உழவர் கருவிப்பெட்டி — free farmer tools in Tamil">
+<meta property="og:description" content="Land converter, fertiliser bags, spray mix, cost and break-even price, test-plot record book — free, no login.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pdftoolsindia.com/uzhavar-tools">
+<meta property="og:image" content="https://pdftoolsindia.com/og-image.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/fonts/tamil.css">
+<style>
+*{box-sizing:border-box}
+:root{--ink:#16301f;--sub:#4f6657;--line:#d8e6da;--bg:#f3f8f3;--card:#fff;--brand:#2f7d32;--brand2:#e8f5e9;--warn:#fff7e3;--bad:#b42318;--ok:#127a3e}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.65;-webkit-tap-highlight-color:transparent}
+.top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.top a{color:var(--ink);text-decoration:none;font-weight:800;font-size:.9rem}
+.sp{flex:1}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.lang button{border:0;background:#fff;padding:8px 12px;font:inherit;font-size:.85rem;cursor:pointer;min-height:40px}
+.lang button.on{background:var(--brand);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:14px}
+h1{font-size:1.35rem;margin:4px 0 4px}
+.sub{color:var(--sub);font-size:.88rem;margin:0 0 10px}
+.note{background:var(--warn);border-radius:12px;padding:10px 12px;font-size:.84rem;margin:10px 0}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
+.tabs button{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 12px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;white-space:nowrap;min-height:42px}
+.tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 4px 16px #0b3b1a0a}
+.card h2{font-size:1rem;margin:0 0 8px}
+label{display:block;font-size:.84rem;font-weight:700;margin:10px 0 3px}
+input,select,textarea{width:100%;font:inherit;font-size:1rem;padding:10px;border:1px solid #bfd3c2;border-radius:10px;background:#fff;min-height:44px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:420px){.row3{grid-template-columns:1fr 1fr}}
+.btn{border:0;background:var(--brand);color:#fff;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer;min-height:44px}
+.btn.alt{background:var(--brand2);color:var(--brand);border:1px solid #b7d9ba}
+.res{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+td,th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+td.n{text-align:right;font-weight:800;white-space:nowrap}
+.big{font-size:1.3rem;font-weight:800;color:var(--ok)}
+.src{font-size:.76rem;color:var(--sub);margin-top:8px}
+.tag{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:99px;background:#e6f0ff;color:#1d4ed8}
+.tag.est{background:#e8f8ee;color:#127a3e}.tag.unp{background:#fdecea;color:#b42318}.tag.ass{background:#fff1d6;color:#8a5a00}
+a{color:var(--brand)}
+ul.links{padding-left:18px;margin:6px 0}
+.foot{font-size:.76rem;color:var(--sub);text-align:center;margin:18px 0}
+</style>
+</head>
+<body>
+<div class="top"><a href="/">← PDF Tools India</a><span class="sp"></span><div class="lang"><button id="lta" class="on">தமிழ்</button><button id="len">EN</button></div></div>
+<div class="wrap">
+  <h1 id="ttl"></h1>
+  <p class="sub" id="sub"></p>
+  <div class="note" id="disc"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="panel"></div>
+  <p class="foot" id="foot"></p>
+</div>
+<script src="/farm-core.js?v=1"></script>
+<script>
+(function(){
+'use strict';
+const F = window.KALVI_FARM;
+let LANG = 'ta'; try{ LANG = localStorage.getItem('pti-farm-lang') || 'ta'; }catch(e){}
+const T = (ta, en) => LANG === 'ta' ? ta : en;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num = (v, d) => { const x = parseFloat(v); return isFinite(x) ? x : (d || 0); };
+const fmt = (x, d) => (x == null || !isFinite(x)) ? '—' : Number(x).toLocaleString('en-IN', {maximumFractionDigits: d == null ? 2 : d});
+const store = {
+  get(k, dflt){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : dflt; }catch(e){ return dflt; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+const TABS = [
+  ['land', '📐', 'நிலம்', 'Land'], ['plant', '🌱', 'நடவு', 'Planting'], ['fert', '🧂', 'உரம்', 'Fertiliser'], ['mix', '🧪', 'கரைசல்', 'Spray mix'],
+  ['cost', '💰', 'செலவு', 'Cost'], ['trial', '📒', 'சோதனை நிலம்', 'Trial plot'], ['season', '🗓️', 'பருவம்', 'Season'], ['help', '☎️', 'உதவி', 'Help'], ['proof', '🔬', 'சான்று', 'Evidence']
+];
+let tab = 'land';
+const SRC = (ta, en) => `<div class="src">${T(ta, en)}</div>`;
+const CHECK = () => SRC('இது கணிதக் கருவி; உங்கள் மண், பயிர், பகுதிக்கு ஏற்ப அருகிலுள்ள வேளாண் அலுவலர் / KVK-ஐ உறுதிசெய்யுங்கள்.', 'This is a calculator; confirm with your local agriculture officer / KVK for your soil, crop and area.');
+
+/* ---------- panels ---------- */
+function panelLand(){
+  const st = store.get('pti-farm-land', {v: 1, from: 'acre', kuzhi: 144});
+  const el = $('#panel');
+  const opts = k => Object.keys(F.AREA).map(u => `<option value="${u}" ${u === k ? 'selected' : ''}>${F.AREA[u][LANG === 'ta' ? 'ta' : 'en']}</option>`).join('');
+  el.innerHTML = `<div class="card"><h2>${T('நிலஅளவை மாற்றி', 'Land area converter')}</h2>
+    <div class="row2"><div><label>${T('அளவு', 'Value')}</label><input id="v" type="number" inputmode="decimal" min="0" step="any" value="${st.v}"></div>
+    <div><label>${T('அலகு', 'Unit')}</label><select id="f">${opts(st.from)}</select></div></div>
+    <label>${T('உங்கள் ஊரில் 1 குழி = எத்தனை சதுர அடி? (பொதுவாக 144)', 'In your area, 1 kuzhi = how many sq ft? (commonly 144)')}</label><input id="k" type="number" inputmode="decimal" min="1" step="any" value="${st.kuzhi}">
+    <div class="res" id="r"></div>
+    ${SRC('1 சென்ட் = 435.6 ச.அடி; 1 ஏக்கர் = 100 சென்ட் = 43,560 ச.அடி; 1 ஹெக்டேர் ≈ 2.471 ஏக்கர். குழி, மா (=100 குழி), காணி (=4 மா), வேலி (=20 மா) ஊருக்கு ஊர் மாறலாம் — பட்டாவில் உள்ள சதுர மீட்டர்/ஹெக்டேர் அளவே அதிகாரப்பூர்வம்.', '1 cent = 435.6 sq ft; 1 acre = 100 cent = 43,560 sq ft; 1 hectare ≈ 2.471 acre. Kuzhi, ma (=100 kuzhi), kani (=4 ma) and veli (=20 ma) vary by place — the sq m / hectare figure in your patta is the official one.')}</div>`;
+  const run = () => {
+    const v = num($('#v').value), f = $('#f').value, k = num($('#k').value, 144) || 144;
+    store.set('pti-farm-land', {v, from: f, kuzhi: k});
+    $('#r').innerHTML = '<table>' + Object.keys(F.AREA).filter(u => u !== f).map(u => `<tr><td>${F.AREA[u][LANG === 'ta' ? 'ta' : 'en']}</td><td class="n">${fmt(F.convertArea(v, f, u, k), 4)}</td></tr>`).join('') + '</table>';
+  };
+  ['#v', '#f', '#k'].forEach(s => $(s).oninput = run); run();
+}
+
+function panelPlant(){
+  $('#panel').innerHTML = `<div class="card"><h2>${T('ஏக்கருக்கு எத்தனை செடி / நாற்று?', 'How many plants per acre?')}</h2>
+    <div class="row3"><div><label>${T('வரிசை இடைவெளி', 'Row spacing')}</label><input id="a" type="number" inputmode="decimal" min="0" step="any" value="9"></div>
+    <div><label>${T('செடி இடைவெளி', 'Plant spacing')}</label><input id="b" type="number" inputmode="decimal" min="0" step="any" value="9"></div>
+    <div><label>${T('அலகு', 'Unit')}</label><select id="u"><option value="in">${T('அங்குலம்', 'inch')}</option><option value="cm">cm</option><option value="ft">${T('அடி', 'feet')}</option></select></div></div>
+    <div class="res" id="r"></div>
+    ${SRC('கணிதம்: 43,560 ச.அடி ÷ (வரிசை இடைவெளி × செடி இடைவெளி, அடியில்). பயிருக்கு ஏற்ற இடைவெளியை உங்கள் வேளாண் அலுவலரிடம் / TNAU பயிர் வழிகாட்டியில் பாருங்கள்; இங்கே பரிந்துரை இல்லை.', 'Maths: 43,560 sq ft ÷ (row spacing × plant spacing in feet). Take the right spacing for your crop from your agriculture officer / TNAU crop guide; no recommendation is given here.')}</div>`;
+  const run = () => {
+    const u = $('#u').value, c = u === 'in' ? 1 / 12 : u === 'cm' ? 1 / 30.48 : 1;
+    const a = num($('#a').value) * c, b = num($('#b').value) * c, n = F.plantsPerAcre(a, b);
+    $('#r').innerHTML = n ? `<div class="big">${fmt(n, 0)}</div><div>${T('செடிகள் / ஏக்கர்', 'plants / acre')} &nbsp;·&nbsp; ${fmt(F.plantsPerCent(a, b), 0)} ${T('செடிகள் / சென்ட்', 'plants / cent')}</div>` : T('இடைவெளியை உள்ளிடுங்கள்', 'Enter the spacing');
+  };
+  ['#a', '#b', '#u'].forEach(s => $(s).oninput = run); run();
+}
+
+function panelFert(){
+  const st = store.get('pti-farm-fert', {area: 1, unit: 'acre', N: 125, P: 50, K: 50, psrc: 'dap', bu: 45, bo: 50});
+  $('#panel').innerHTML = `<div class="card"><h2>${T('உர மூட்டைக் கணக்கு', 'Fertiliser bag calculator')}</h2>
+    <div class="note">${T('கீழே உள்ள அளவுகள் TNAU நெல் பரிந்துரை (கிலோ சத்து / ஹெக்டேர்: N 125, P₂O₅ 50, K₂O 50). உங்கள் <b>மண் பரிசோதனை (Soil Health Card)</b> முடிவே முதன்மை — அதன்படி மாற்றலாம்.', 'The defaults are the TNAU rice recommendation (kg nutrient / hectare: N 125, P₂O₅ 50, K₂O 50). Your <b>soil test (Soil Health Card)</b> comes first — change the numbers to match it.')}</div>
+    <div class="row2"><div><label>${T('நிலப் பரப்பு', 'Land area')}</label><input id="area" type="number" inputmode="decimal" min="0" step="any" value="${st.area}"></div>
+    <div><label>${T('அலகு', 'Unit')}</label><select id="unit"><option value="acre" ${st.unit === 'acre' ? 'selected' : ''}>${T('ஏக்கர்', 'acre')}</option><option value="cent" ${st.unit === 'cent' ? 'selected' : ''}>${T('சென்ட்', 'cent')}</option><option value="hectare" ${st.unit === 'hectare' ? 'selected' : ''}>${T('ஹெக்டேர்', 'hectare')}</option></select></div></div>
+    <div class="row3"><div><label>N (kg/ha)</label><input id="N" type="number" inputmode="decimal" min="0" step="any" value="${st.N}"></div><div><label>P₂O₅ (kg/ha)</label><input id="P" type="number" inputmode="decimal" min="0" step="any" value="${st.P}"></div><div><label>K₂O (kg/ha)</label><input id="K" type="number" inputmode="decimal" min="0" step="any" value="${st.K}"></div></div>
+    <label>${T('மணிச்சத்து (P) எதிலிருந்து?', 'Phosphorus (P) from?')}</label><select id="psrc"><option value="dap" ${st.psrc === 'dap' ? 'selected' : ''}>DAP (18-46-0)</option><option value="ssp" ${st.psrc === 'ssp' ? 'selected' : ''}>SSP (16% P₂O₅)</option></select>
+    <div class="row2"><div><label>${T('யூரியா பை எடை (கிலோ)', 'Urea bag weight (kg)')}</label><input id="bu" type="number" inputmode="decimal" min="1" step="any" value="${st.bu}"></div><div><label>${T('மற்ற பை எடை (கிலோ)', 'Other bag weight (kg)')}</label><input id="bo" type="number" inputmode="decimal" min="1" step="any" value="${st.bo}"></div></div>
+    <div class="src">${T('பையின் மேல் அச்சிட்ட எடையைப் பாருங்கள்.', 'Check the weight printed on your bag.')}</div>
+    <div class="res" id="r"></div>
+    ${SRC('மூலம்: TNAU Agritech — நெல் உரப் பரிந்துரை (agritech.tnau.ac.in). சத்து விகிதங்கள்: யூரியா 46% N; DAP 18% N + 46% P₂O₅; SSP 16% P₂O₅; MOP 60% K₂O — பை லேபிளில் உறுதிசெய்யுங்கள். DAP-இல் உள்ள N கழிக்கப்பட்டுள்ளது.', 'Source: TNAU Agritech — rice fertiliser recommendation (agritech.tnau.ac.in). Grades: urea 46% N; DAP 18% N + 46% P₂O₅; SSP 16% P₂O₅; MOP 60% K₂O — confirm on your bag label. The N supplied by DAP has been deducted.')}</div>`;
+  const run = () => {
+    const unit = $('#unit').value, a = num($('#area').value);
+    const acres = unit === 'acre' ? a : unit === 'cent' ? a / 100 : a * 2.4710538147;
+    const dose = {N: num($('#N').value), P2O5: num($('#P').value), K2O: num($('#K').value)}, psrc = $('#psrc').value, bu = num($('#bu').value, 45) || 45, bo = num($('#bo').value, 50) || 50;
+    store.set('pti-farm-fert', {area: a, unit, N: dose.N, P: dose.P2O5, K: dose.K2O, psrc, bu, bo});
+    const p = F.fertPlan(dose, acres, psrc), rows = [];
+    const row = (name, kg, bag) => rows.push(`<tr><td>${name}</td><td class="n">${fmt(kg, 1)} kg</td><td class="n">${fmt(kg / bag, 2)} ${T('பை', 'bags')}</td></tr>`);
+    row(T('யூரியா', 'Urea'), p.products.urea, bu);
+    if(p.products.dap != null) row('DAP', p.products.dap, bo);
+    if(p.products.ssp != null) row('SSP', p.products.ssp, bo);
+    row('MOP', p.products.mop, bo);
+    $('#r').innerHTML = `<table>${rows.join('')}</table><div class="src">${T('DAP-இலிருந்து கிடைக்கும் N: ', 'N supplied by DAP: ')}${fmt(p.nCredit, 1)} kg · ${T('மொத்த N தேவை: ', 'Total N needed: ')}${fmt(p.nutrient.N, 1)} kg</div>
+      <div class="src">${T('TNAU அட்டவணைப்படி N மற்றும் K நான்கு சம பாகங்களாக இடப்படுகின்றன (நடவு 21 நாள், கிளைப்பு, பூங்கதிர் தோற்றம், பூப்பு). ஒரு பாகம்: யூரியா ', 'TNAU splits N and K in four equal parts (21 days after planting, tillering, panicle initiation, flowering). One part: urea ')}${fmt(p.products.urea / 4, 1)} kg, MOP ${fmt(p.products.mop / 4, 1)} kg.</div>`;
+  };
+  ['#area', '#unit', '#N', '#P', '#K', '#psrc', '#bu', '#bo'].forEach(s => $(s).oninput = run); run();
+}
+
+function panelMix(){
+  $('#panel').innerHTML = `<div class="card"><h2>${T('தெளிப்புக் கரைசல் அளவு', 'Spray mix quantity')}</h2>
+    <div class="row2"><div><label>${T('கரைசல் % (எ.கா. பஞ்சகவ்யம் 3%)', 'Solution % (e.g. panchagavya 3%)')}</label><input id="pct" type="number" inputmode="decimal" min="0" step="any" value="3"></div>
+    <div><label>${T('தெளிப்பான் அளவு (லிட்டர்)', 'Sprayer tank (litres)')}</label><select id="tank"><option>10</option><option>15</option><option selected>16</option><option>20</option></select></div></div>
+    <div class="row2"><div><label>${T('நிலம் (ஏக்கர்)', 'Land (acre)')}</label><input id="ac" type="number" inputmode="decimal" min="0" step="any" value="1"></div>
+    <div><label>${T('ஏக்கருக்குத் தெளிக்கும் தண்ணீர் (லிட்டர்)', 'Spray volume per acre (litres)')}</label><input id="vol" type="number" inputmode="decimal" min="0" step="any" placeholder="${T('உங்கள் அனுபவம் / அலுவலர் சொன்னது', 'your practice / officer’s advice')}"></div></div>
+    <div class="res" id="r"></div>
+    ${SRC('கணிதம்: 3% = 100 மி.லி. நீருக்கு 3 மி.லி. = 1 லிட்டருக்கு 30 மி.லி. TNAU பஞ்சகவ்யம்: 3% இலைவழித் தெளிப்பு (agritech.tnau.ac.in/org_farm/orgfarm_panchakavya.html). TNAU-வின் வேறொரு பக்கம் வேறு செய்முறை தருகிறது — இரண்டையும் ஒப்பிட்டு உங்கள் KVK-இடம் கேளுங்கள். இந்தக் கருவி வேதிப் பூச்சிக்கொல்லிகளுக்கு அல்ல: அவற்றின் அளவை எப்போதும் பாட்டில் லேபிளில் உள்ளபடி மட்டுமே பயன்படுத்துங்கள்.', 'Maths: 3% = 30 ml per litre. TNAU panchagavya: 3% foliar spray (agritech.tnau.ac.in/org_farm/orgfarm_panchakavya.html). Another TNAU page gives a different recipe — compare both and ask your KVK. This tool is not for chemical pesticides: always follow the bottle label for those.')}</div>`;
+  const run = () => {
+    const pct = num($('#pct').value), tank = num($('#tank').value), ac = num($('#ac').value), vol = num($('#vol').value);
+    let h = `<table><tr><td>${T('1 லிட்டர் நீருக்கு', 'Per litre of water')}</td><td class="n">${fmt(F.mlPerLitre(pct), 1)} ml</td></tr><tr><td>${T('ஒரு தெளிப்பான் (' + tank + ' L)', 'One tank (' + tank + ' L)')}</td><td class="n">${fmt(F.mlPerTank(pct, tank), 1)} ml</td></tr>`;
+    if(vol > 0 && ac > 0){ const tanks = F.tanksNeeded(ac, vol, tank); h += `<tr><td>${T('தேவையான தெளிப்பான் எண்ணிக்கை', 'Tanks needed')}</td><td class="n">${fmt(tanks, 1)}</td></tr><tr><td>${T('மொத்தக் கரைசல் (லிட்டர்)', 'Total concentrate (litres)')}</td><td class="n">${fmt(F.mlPerLitre(pct) * ac * vol / 1000, 2)} L</td></tr>`; }
+    $('#r').innerHTML = h + '</table>';
+  };
+  ['#pct', '#tank', '#ac', '#vol'].forEach(s => $(s).oninput = run); run();
+}
+
+function panelCost(){
+  const st = store.get('pti-farm-cost', {a: '', b: '', c: '', d: '', y: '', p: ''});
+  const f = (id, ta, en) => `<div><label>${T(ta, en)}</label><input id="${id}" type="number" inputmode="decimal" min="0" step="any" value="${st[id]}"></div>`;
+  $('#panel').innerHTML = `<div class="card"><h2>${T('செலவு & சமநிலை விலை (ஒரு பருவம், ஒரு பயிர்)', 'Cost & break-even price (one crop, one season)')}</h2>
+    <div class="row2">${f('a', 'கையிலிருந்து செலவு (விதை, உரம், கூலி, நீர்…) ₹', 'Cash costs (seed, inputs, hired labour…) ₹')}${f('b', 'குடும்ப உழைப்பின் மதிப்பு ₹', 'Value of family labour ₹')}</div>
+    <div class="row2">${f('c', 'சொந்த நிலத்தின் வாடகை மதிப்பு ₹', 'Rental value of own land ₹')}${f('d', 'சொந்த மூலதனத்தின் வட்டி ₹', 'Interest on own capital ₹')}</div>
+    <div class="row2">${f('y', 'மொத்த விளைச்சல் (கிலோ / மூட்டை)', 'Total yield (kg / bags)')}${f('p', 'ஓர் அலகுக்கு விலை ₹', 'Price per unit ₹')}</div>
+    <div class="res" id="r"></div>
+    ${SRC('வரையறை (CACP): A2+FL = கையிலிருந்து செலவு + குடும்ப உழைப்பு; C2 = A2+FL + சொந்த நில வாடகை + சொந்த மூலதன வட்டி. சமநிலை விலை = மொத்தச் செலவு ÷ விளைச்சல். உங்கள் எண்களை நீங்களே உள்ளிடுகிறீர்கள்; எதுவும் சேவையகத்துக்குப் போகாது.', 'Definitions (CACP): A2+FL = paid-out costs + family labour; C2 = A2+FL + rental value of own land + interest on own capital. Break-even price = total cost ÷ yield. You enter your own numbers; nothing leaves your phone.')}</div>`;
+  const run = () => {
+    const v = id => num($('#' + id).value); store.set('pti-farm-cost', {a: $('#a').value, b: $('#b').value, c: $('#c').value, d: $('#d').value, y: $('#y').value, p: $('#p').value});
+    const e = F.economics({paidOut: v('a'), familyLabour: v('b'), ownedLandRent: v('c'), ownedCapitalInterest: v('d'), yield: v('y'), price: v('p')});
+    $('#r').innerHTML = `<table><tr><td>A2+FL ${T('செலவு', 'cost')}</td><td class="n">₹ ${fmt(e.a2fl, 0)}</td></tr><tr><td>C2 ${T('மொத்தச் செலவு', 'total cost')}</td><td class="n">₹ ${fmt(e.c2, 0)}</td></tr><tr><td>${T('வருமானம்', 'Revenue')}</td><td class="n">₹ ${fmt(e.revenue, 0)}</td></tr>
+      <tr><td>${T('நிகர லாபம் (A2+FL-க்கு மேல்)', 'Net over A2+FL')}</td><td class="n">₹ ${fmt(e.netOverA2FL, 0)}</td></tr><tr><td>${T('நிகர லாபம் (C2-க்கு மேல்)', 'Net over C2')}</td><td class="n">₹ ${fmt(e.netOverC2, 0)}</td></tr>
+      <tr><td>${T('சமநிலை விலை (C2) / அலகு', 'Break-even price (C2) / unit')}</td><td class="n">₹ ${fmt(e.breakEvenPriceC2, 2)}</td></tr><tr><td>${T('சமநிலை விளைச்சல் (இந்த விலையில்)', 'Break-even yield (at this price)')}</td><td class="n">${fmt(e.breakEvenYieldC2, 1)}</td></tr></table>`;
+  };
+  ['a', 'b', 'c', 'd', 'y', 'p'].forEach(id => $('#' + id).oninput = run); run();
+}
+
+function panelTrial(){
+  const blank = {name: '', areaCent: '', yield: '', price: '', cost: '', labourHours: '', note: ''};
+  const st = store.get('pti-farm-trial', {test: Object.assign({}, blank, {name: T('சோதனை நிலம்', 'Test plot')}), ctrl: Object.assign({}, blank, {name: T('ஒப்பீட்டு நிலம் (உங்கள் வழக்கமான முறை)', 'Comparison plot (your usual way)')})});
+  const col = (k, title) => `<div class="card"><h2>${title}</h2>
+    <label>${T('பெயர் / முறை', 'Name / method')}</label><input data-k="${k}" data-f="name" value="${esc(st[k].name)}">
+    <div class="row2"><div><label>${T('பரப்பு (சென்ட்)', 'Area (cent)')}</label><input data-k="${k}" data-f="areaCent" type="number" inputmode="decimal" min="0" step="any" value="${st[k].areaCent}"></div><div><label>${T('விளைச்சல் (கிலோ)', 'Yield (kg)')}</label><input data-k="${k}" data-f="yield" type="number" inputmode="decimal" min="0" step="any" value="${st[k].yield}"></div></div>
+    <div class="row3"><div><label>${T('விலை ₹/கிலோ', 'Price ₹/kg')}</label><input data-k="${k}" data-f="price" type="number" inputmode="decimal" min="0" step="any" value="${st[k].price}"></div><div><label>${T('செலவு ₹', 'Cost ₹')}</label><input data-k="${k}" data-f="cost" type="number" inputmode="decimal" min="0" step="any" value="${st[k].cost}"></div><div><label>${T('உழைப்பு மணி', 'Labour hours')}</label><input data-k="${k}" data-f="labourHours" type="number" inputmode="decimal" min="0" step="any" value="${st[k].labourHours}"></div></div>
+    <label>${T('குறிப்பு (என்ன செய்தீர்கள், மழை, நோய்…)', 'Notes (what you did, rain, disease…)')}</label><textarea data-k="${k}" data-f="note" rows="2">${esc(st[k].note)}</textarea></div>`;
+  $('#panel').innerHTML = `<div class="note">${T('<b>சிறு சோதனை, பெரிய பாதுகாப்பு:</b> புதிய முறையை முழு நிலத்தில் ஒரே முறை மாற்றாமல், 10–25 சென்ட்டில் முயன்று, அதே பயிர், அதே பருவம், அருகருகே உள்ள நிலத்துடன் ஒப்பிடுங்கள். விளைச்சல், செலவு, உழைப்பு மூன்றையும் பதியுங்கள்.', '<b>A small trial is the safe way:</b> do not switch the whole farm at once. Try the new method on 10–25 cent and compare with a neighbouring plot of the same crop and season. Record yield, cost and labour.')}</div>
+    ${col('test', T('சோதனை நிலம்', 'Test plot'))}${col('ctrl', T('ஒப்பீட்டு நிலம்', 'Comparison plot'))}
+    <div class="card"><h2>${T('ஒப்பீடு (ஏக்கருக்கு)', 'Comparison (per acre)')}</h2><div id="r"></div>
+    <div class="row2" style="margin-top:10px"><button class="btn alt" id="csv">⬇ CSV</button><button class="btn alt" id="clr">${T('அழி', 'Clear')}</button></div>${SRC('தரவு உங்கள் போனிலேயே சேமிக்கப்படும் (localStorage). உலாவித் தரவை அழித்தால் போய்விடும் — CSV-ஐ ஒரு முறை பதிவிறக்கி வைத்துக்கொள்ளுங்கள். ஒரே ஒரு பருவ முடிவு உறுதியான முடிவு அல்ல; பல பருவம் ஒப்பிடுங்கள்.', 'Data is saved on your phone only (localStorage). It disappears if you clear browser data — download the CSV once. One season is not proof; compare over several seasons.')}</div>`;
+  const read = () => { document.querySelectorAll('[data-k]').forEach(i => { st[i.dataset.k][i.dataset.f] = i.value; }); store.set('pti-farm-trial', st); };
+  const show = () => {
+    const c = F.comparePlots(...['test', 'ctrl'].map(k => ({areaCent: num(st[k].areaCent), yield: num(st[k].yield), price: num(st[k].price), cost: num(st[k].cost), labourHours: num(st[k].labourHours)})));
+    const sign = x => (x > 0 ? '+' : '') + fmt(x, 1);
+    $('#r').innerHTML = c ? `<table><tr><th></th><th class="n">${esc(st.test.name)}</th><th class="n">${esc(st.ctrl.name)}</th></tr>
+      <tr><td>${T('விளைச்சல் கிலோ/ஏக்கர்', 'Yield kg/acre')}</td><td class="n">${fmt(c.test.yield, 0)}</td><td class="n">${fmt(c.ctrl.yield, 0)}</td></tr>
+      <tr><td>${T('செலவு ₹/ஏக்கர்', 'Cost ₹/acre')}</td><td class="n">${fmt(c.test.cost, 0)}</td><td class="n">${fmt(c.ctrl.cost, 0)}</td></tr>
+      <tr><td>${T('நிகரம் ₹/ஏக்கர்', 'Net ₹/acre')}</td><td class="n">${fmt(c.test.net, 0)}</td><td class="n">${fmt(c.ctrl.net, 0)}</td></tr>
+      <tr><td>${T('உழைப்பு மணி/ஏக்கர்', 'Labour hrs/acre')}</td><td class="n">${fmt(c.test.labourHours, 0)}</td><td class="n">${fmt(c.ctrl.labourHours, 0)}</td></tr></table>
+      <div style="margin-top:8px">${T('விளைச்சல் வேறுபாடு', 'Yield difference')}: <b>${c.yieldDiffPct == null ? '—' : sign(c.yieldDiffPct) + '%'}</b> · ${T('செலவு வேறுபாடு', 'Cost difference')}: <b>${c.costDiffPct == null ? '—' : sign(c.costDiffPct) + '%'}</b> · ${T('நிகர வேறுபாடு', 'Net difference')}: <b>₹ ${sign(c.netDiff)}</b>/${T('ஏக்கர்', 'acre')}</div>` : `<div class="src">${T('இரு நிலங்களிலும் பரப்பை (சென்ட்) உள்ளிடுங்கள்.', 'Enter the area (cent) for both plots.')}</div>`;
+  };
+  document.querySelectorAll('[data-k]').forEach(i => i.oninput = () => { read(); show(); });
+  $('#clr').onclick = () => { if(confirm(T('எல்லாப் பதிவையும் அழிக்கவா?', 'Clear all records?'))){ store.set('pti-farm-trial', null); try{ localStorage.removeItem('pti-farm-trial'); }catch(e){} panelTrial(); } };
+  $('#csv').onclick = () => {
+    const keys = ['name', 'areaCent', 'yield', 'price', 'cost', 'labourHours', 'note'];
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv = '﻿plot,' + keys.join(',') + '\n' + ['test', 'ctrl'].map(k => k + ',' + keys.map(f => q(st[k][f])).join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'})); a.download = 'farm-trial.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
+  show();
+}
+
+function panelSeason(){
+  $('#panel').innerHTML = `<div class="card"><h2>${T('நெல் பருவங்கள் (காவிரி டெல்டா)', 'Rice seasons (Cauvery delta)')}</h2>
+    <table>${F.SEASONS.map(s => `<tr><td><b>${s[LANG === 'ta' ? 'ta' : 'en']}</b></td><td class="n">${s.months[LANG === 'ta' ? 'ta' : 'en']}</td></tr>`).join('')}</table>
+    ${SRC('மூலம்: TNAU Agritech — நெல் பருவங்கள் (agritech.tnau.ac.in/expert_system/paddy/season.html). இவை நடவு/விதைப்பு மாதங்களின் தோராய வரம்பு; ரகம், மாவட்டம், நீர் வரத்துக்கு ஏற்ப மாறும். வானாவாரிப் பட்டங்கள் (ஆடிப்பட்டம் போன்றவை) பற்றிய அதிகாரப்பூர்வ மூலம் இன்னும் சரிபார்க்கப்படவில்லை, அதனால் சேர்க்கவில்லை.', 'Source: TNAU Agritech — paddy seasons (agritech.tnau.ac.in/expert_system/paddy/season.html). These are approximate sowing/planting months; they vary with variety, district and water. Rain-fed pattam names (like Aadi pattam) have no verified official source yet, so they are not included.')}</div>`;
+}
+
+function panelHelp(){
+  const L = [['Kisan Call Centre', 'mkisan.gov.in/Home/AboutKCC', T('இலவச உதவி எண்: <b>1800-180-1551</b>', 'Free helpline: <b>1800-180-1551</b>')],
+    ['TNAU Agritech', 'agritech.tnau.ac.in', T('பயிர் வழிகாட்டிகள், இயற்கை வேளாண் செய்முறைகள்', 'Crop guides and organic-farming recipes')],
+    ['Soil Health Card', 'soilhealth.dac.gov.in', T('மண் பரிசோதனை அட்டை', 'Soil test card')],
+    ['IMD Agromet', 'agromet.imd.gov.in', T('வேளாண் வானிலை ஆலோசனை', 'Agro-meteorological advisories')],
+    ['Agmarknet', 'agmarknet.gov.in', T('சந்தை விலை', 'Market prices')],
+    ['e-NAM', 'enam.gov.in', T('இணைய வேளாண் சந்தை', 'Online agri market')],
+    ['PM-KISAN', 'pmkisan.gov.in', T('நேரடி உதவித்தொகை (eKYC கட்டாயம்)', 'Income support (eKYC is mandatory)')],
+    ['PMFBY', 'pmfby.gov.in', T('பயிர்க் காப்பீடு — நடப்பு ஆண்டு விகிதம், கடைசி தேதியை இங்கே பாருங்கள்', 'Crop insurance — check the current rates and last dates here')]];
+  $('#panel').innerHTML = `<div class="card"><h2>${T('அரசு உதவி & தகவல் இணைப்புகள்', 'Official help and information links')}</h2><ul class="links">${L.map(x => `<li><b>${x[0]}</b> — <a href="https://${x[1]}" target="_blank" rel="noopener">${x[1]}</a><br><span class="src">${x[2]}</span></li>`).join('')}</ul>
+    ${SRC('இணைப்புகளை அவ்வப்போது அரசு தளங்கள் மாற்றலாம். திறக்கவில்லை என்றால் மேலே உள்ள இலவச எண்ணை அழையுங்கள். இந்தத் தளம் அரசு அமைப்பு அல்ல.', 'Government sites may change their addresses. If a link does not open, call the free number above. This website is not a government body.')}</div>`;
+}
+
+function panelProof(){
+  const S = [
+    ['est', 'நிறுவப்பட்டது', 'Established', 'அரசின் மண் சுகாதார அட்டைத் தரவு (2023-25) படி சோதித்த இந்திய மண் மாதிரிகளில் ஏறத்தாழ பாதி கரிமக்கரி குறைவு; மூன்றில் இரண்டு பங்கு தழைச்சத்து குறைவு. (CSE பகுப்பாய்வு. இதற்குக் காரணம் செயற்கை உரம் என்பது நிரூபிக்கப்படவில்லை.)', 'In the government Soil Health Card data (2023-25), about half of tested Indian soil samples were low in organic carbon and about two-thirds low in nitrogen (CSE analysis). That fertiliser is the cause has not been shown.'],
+    ['ass', 'ஒரு ஆய்வு', 'One study', 'பெங்களூரு ஆறு ஆண்டு ICAR-தொடர்பு சோதனையில், மண் பரிசோதனை அடிப்படையிலான சமநிலை உரத்துடன் தொழுவுரமும் சேர்த்தபோது விளைச்சலும் மண் கரிமமும் கூடின. ஒரே இடம்; தமிழ்நாட்டில் இன்னும் சோதனைகள் தேவை.', 'In a six-year ICAR-linked trial at Bengaluru, soil-test-based balanced fertiliser plus farmyard manure raised yield and soil carbon. One site; Tamil Nadu needs its own trials.'],
+    ['est', 'நிறுவப்பட்டது', 'Established', 'தேசிய நிலத்தடி நீர் ஆய்வில் தமிழ்நாட்டில் 40%-க்கு மேற்பட்ட மாதிரிகளில் நைட்ரேட் குடிநீர் வரம்பைத் தாண்டியது. உங்கள் ஆழ்துளைக் கிணற்று நீரைப் பரிசோதியுங்கள். உரம் பல சாத்தியமான மூலங்களில் ஒன்று (கழிவுநீர், கால்நடையும் உண்டு).', 'In the national groundwater survey, nitrate exceeded the drinking-water limit in over 40% of Tamil Nadu samples. Test your own borewell water. Fertiliser is one possible source among several (sewage and livestock too).'],
+    ['est', 'நிறுவப்பட்டது', 'Established', '2022-25-இல் சோதித்த 86,401 உணவு மாதிரிகளில் 2.8%-இல் பூச்சிமருந்து எச்சம் சட்ட வரம்பைத் தாண்டியது; பெரும்பாலானவை வரம்புக்குள் இருந்தன. இது தேசிய எண்; வரம்பைத் தாண்டுவது "நஞ்சு" என்று பொருள் அல்ல.', 'Of 86,401 food samples tested in 2022-25, 2.8% had pesticide residue above the legal limit; most were within it. This is a national figure; exceeding a limit does not by itself mean "poison".'],
+    ['unp', 'நிரூபிக்கப்படவில்லை', 'Not proven', 'பஞ்சாபில் புற்றுநோய்க்குப் பூச்சிமருந்துதான் காரணம் என்று நிரூபிக்கப்படவில்லை; பல காரணிகள் ஆராயப்படுகின்றன. "செயற்கை உரம் பல நவீன நோய்களுக்குக் காரணம்" என்பதற்கும் நாங்கள் படித்த நம்பகமான மூலங்களில் சான்று இல்லை.', 'It has not been proven that pesticides caused the cancer cases in Punjab; many factors are being studied. Neither did the reliable sources we read show that "chemical fertiliser causes many modern diseases".'],
+    ['ass', 'தொடர்பு மட்டும்', 'Association only', 'பிரான்ஸ் பெரிய ஆய்வில் ஆர்கானிக் உணவை அதிகம் உண்டவர்களுக்குப் புற்றுநோய் குறைவாக இருந்தது; ஆனால் வருமானம், கல்வி, வாழ்க்கைமுறை வேறுபட்டதால் ஆர்கானிக் உணவுதான் காரணம் என்று சொல்ல முடியாது.', 'In a large French study, people who ate more organic food had less cancer, but income, education and lifestyle also differed, so organic food itself cannot be named as the cause.'],
+    ['est', 'தொடர்பு', 'Association', 'இந்தியாவில் refined அரிசி, கோதுமை, சர்க்கரை அதிகமுள்ள உணவு நீரிழிவு ஆபத்துடன் தொடர்புடையது (ICMR-INDIAB, 1.2 லட்சம் பேர்); பயறு, காய்கறி, தாவர/பால் புரதம் அதிகரிப்பது குறைந்த ஆபத்துடன் தொடர்புடையது. அதே ஆய்வில் refined தானியத்தை மில்லட்டாக மாற்றுவது மட்டும் நன்மை தருவதாகக் காணப்படவில்லை.', 'In India, diets heavy in refined rice, wheat and sugar are linked to higher diabetes risk (ICMR-INDIAB, 1.2 lakh people); more pulses, vegetables and plant/dairy protein were linked to lower risk. The same study did not find that swapping refined grain for millet alone helped.'],
+    ['ass', 'சுயாதீன மதிப்பீடுகள்', 'Independent evaluations', 'இயற்கை வேளாண்மை வெளியிடு செலவைக் குறைத்தது; விளைச்சல் உயர்வு நம்பகமாகக் காணப்படவில்லை, சில ஆய்வுகளில் குறைந்தது (எ.கா. ஆந்திராவில் 3-ஆம் ஆண்டில் 6–20% குறைவு), சில கட்டுப்படுத்தப்பட்ட சோதனைகளில் நன்மையும் காணப்பட்டது. தமிழ்நாட்டுக்கான தரவு கிடைக்கவில்லை. முதலில் சிறிய நிலத்தில் சோதியுங்கள்.', 'Natural farming reduced purchased-input cost; a reliable yield gain was not found and some studies showed lower yield (for example 6–20% lower in year 3 in Andhra Pradesh), while some controlled trials showed benefits. No Tamil Nadu data was found. Test on a small plot first.']
+  ];
+  const TAGS = {est: 'est', ass: 'ass', unp: 'unp'};
+  $('#panel').innerHTML = `<div class="card"><h2>${T('எது நிரூபிக்கப்பட்டது? எது இல்லை?', 'What is proven and what is not?')}</h2>
+    <p class="src" style="margin-top:0">${T('இந்தப் பக்கம் நம்பகமான ஆய்வுகளில் உண்மையாகக் கண்டறியப்பட்டதை மட்டும் சொல்கிறது. "எனக்குத் தெரிந்த ஊரில் இப்படி நடந்தது" போன்ற அனுபவங்கள் மதிப்புமிக்கவை — ஆனால் அவை ஆய்வு முடிவுகள் அல்ல.', 'This page states only what reliable studies found. Experience such as "this happened in my village" is valuable — but it is not a study result.')}</p>
+    ${S.map(x => `<div style="margin:10px 0"><span class="tag ${TAGS[x[0]]}">${T(x[1], x[2])}</span><div>${T(x[3], x[4])}</div></div>`).join('')}
+    <div class="note">${T('பாரம்பரிய முறைகளின் செய்முறைகளில் (பஞ்சகவ்யம், ஜீவாமிர்தம், அஸ்திரங்கள்) மூலங்களுக்கிடையே அளவு வேறுபாடுகள் உள்ளன; கட்டுப்படுத்தப்பட்ட விளைச்சல் சோதனைகள் நாங்கள் படித்த மூலங்களில் இல்லை. அதனால் இங்கே எந்த "அற்புத" நன்மையும் கூறப்படவில்லை — உங்கள் நிலத்தில் சிறு சோதனை செய்து நீங்களே அறிந்துகொள்ளுங்கள்.', 'The recipes of traditional preparations (panchagavya, jeevamrutha, astras) differ between sources, and the sources we read had no controlled yield trials. So no "miracle" benefit is claimed here — run a small trial on your own land and find out.')}</div>
+    ${SRC('மூலங்கள்: CSE (Soil Health Card பகுப்பாய்வு), Frontiers in Plant Science 2024 (பெங்களூரு சோதனை), CGWB நிலத்தடி நீர் ஆய்வு (PTI செய்தி வழி), FSSAI (மக்களவை/மாநிலங்களவைப் பதில் வழி), JAMA Internal Medicine 2018 (NutriNet-Santé), ICMR-INDIAB (Nature Medicine 2025; Down To Earth வழி), NITI Aayog / ICAR-NAARM இயற்கை வேளாண்மை ஆய்வு. சில எண்கள் இரண்டாம்நிலை மூலம் வழி வந்தவை; அசல் மூலங்களை உறுதிசெய்யும் பணி நடந்து வருகிறது.', 'Sources: CSE (Soil Health Card analysis), Frontiers in Plant Science 2024 (Bengaluru trial), CGWB groundwater survey (via PTI report), FSSAI (via parliamentary reply), JAMA Internal Medicine 2018 (NutriNet-Santé), ICMR-INDIAB (Nature Medicine 2025; via Down To Earth), NITI Aayog / ICAR-NAARM natural-farming study. Some figures came via secondary reports; checking the originals is ongoing.')}</div>`;
+}
+
+const PANELS = {land: panelLand, plant: panelPlant, fert: panelFert, mix: panelMix, cost: panelCost, trial: panelTrial, season: panelSeason, help: panelHelp, proof: panelProof};
+function render(){
+  document.documentElement.lang = LANG === 'ta' ? 'ta' : 'en';
+  $('#ttl').textContent = T('🌾 உழவர் கருவிப்பெட்டி', '🌾 Farmer Toolbox');
+  $('#sub').textContent = T('உங்கள் பாரம்பரிய முறையை மாற்றாமல், கணக்கையும் தகவலையும் எளிதாக்கும் இலவசக் கருவிகள். உள்நுழைவு இல்லை; விளம்பரம் இல்லை; தரவு உங்கள் போனிலேயே இருக்கும்.', 'Free tools that make the maths and information easier without changing your traditional way of farming. No login, no ads, your data stays on your phone.');
+  $('#disc').innerHTML = T('<b>கவனம்:</b> இங்குள்ளவை கணிதக் கருவிகளும் ஆய்வுகளின் சுருக்கமும். இது வேளாண் அலுவலரின் அல்லது KVK-இன் ஆலோசனைக்கு மாற்று அல்ல; உங்கள் மண், பயிர், பகுதிக்கு ஏற்ப அவர்களிடம் உறுதிசெய்யுங்கள்.', '<b>Note:</b> These are calculators and summaries of studies. They are not a substitute for the advice of your agriculture officer or KVK; confirm with them for your soil, crop and area.');
+  $('#foot').textContent = T('PDF Tools India · எப்போதும் இலவசம் · எந்தத் தரவும் சேவையகத்துக்குப் போவதில்லை', 'PDF Tools India · always free · no data is sent to any server');
+  $('#lta').className = LANG === 'ta' ? 'on' : ''; $('#len').className = LANG === 'en' ? 'on' : '';
+  $('#tabs').innerHTML = TABS.map(t => `<button data-t="${t[0]}" class="${t[0] === tab ? 'on' : ''}">${t[1]} ${T(t[2], t[3])}</button>`).join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.t; try{ history.replaceState(null, '', '#' + tab); }catch(e){} render(); });
+  PANELS[tab]();
+}
+$('#lta').onclick = () => { LANG = 'ta'; try{ localStorage.setItem('pti-farm-lang', 'ta'); }catch(e){} render(); };
+$('#len').onclick = () => { LANG = 'en'; try{ localStorage.setItem('pti-farm-lang', 'en'); }catch(e){} render(); };
+const h = (location.hash || '').slice(1); if(PANELS[h]) tab = h;
+render();
+})();
+</script>
+</body>
+</html>

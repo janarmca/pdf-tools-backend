@@ -151,7 +151,7 @@ const PAGE_JS = `
 
 export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
   const byId = Object.fromEntries(tools.map(t => [t.id, t]));
-  const href = (id) => ({ photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' }[id] || `/tools/${slugify(byId[id].name)}`);
+  const href = (id) => ({ uzhavartools: '/uzhavar-tools', photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' }[id] || `/tools/${slugify(byId[id].name)}`);
   const card = (id, why) => {
     const t = byId[id]; const tm = TA_TOOL[id] || [];
     const badge = t.cost > 0 ? `<span class="bd ai">⚡ AI</span>` : ''; // everything else on these hubs is free (said once in the hero)

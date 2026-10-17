@@ -98,7 +98,7 @@ on:
           - 'aibgreplace — பின்னணி மாற்று (AI) / AI Background Replace'
           - 'examphoto — தேர்வுப் புகைப்படம் / Exam Photo & Signature Resizer'
       tool_business:
-        description: 'Business tools (43) — pick one, or leave (none)'
+        description: 'Business tools (44) — pick one, or leave (none)'
         type: choice
         default: '(none)'
         options:
@@ -125,6 +125,7 @@ on:
           - 'stmtcompare — கணக்குப் பட்டியல் ஒப்பீடு / Statement Reconciliation'
           - 'astrologyplus — ஜாதகம் / பொருத்தம் / Astrology+ (Vedic Birth Chart) (AI, paid)'
           - 'tnpropertycalc — பத்திரப் பதிவுக் கட்டணம் / TN Property Registration Calculator'
+          - 'uzhavartools — உழவர் கருவிப்பெட்டி / Farmer Toolbox'
           - 'tnrentagreement — வாடகை ஒப்பந்தம் / TN Rent Agreement Maker'
           - 'tnsaledeed — கிரைய சாசனம் / TN Sale Deed Draft'
           - 'sipcalc — சேமிப்புக் கணிப்பான் / SIP / FD / RD Calculator'
