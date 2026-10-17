@@ -8,7 +8,8 @@ const cat = JSON.parse(fs.readFileSync(path.join(root, 'catalog.json'), 'utf8'))
 const LEGACY = new Set(['ai-learns', 'inventor-toolkit', 'tech-side-effects']); // written before this contract; checked only when named explicitly
 const ids = process.argv.slice(2).length ? process.argv.slice(2) : (cat.future || []).map(f => f.id).filter(i => !LEGACY.has(i));
 const WIDGETS = new Set(['eratosthenes', 'robotProgram', 'pythagoras', 'doubling', 'birthday', 'classVote', 'aiTrainer', 'ideaSpinner', 'trigTriangle', 'shadow', 'special', 'unitCircle', 'heightDistance', 'motion', 'mole', 'reflex',
-  'forgetting', 'solarHome', 'packets', 'bits', 'growth', 'costKm', 'footprint', 'planetWeight', 'dna', 'thermostat']);
+  'forgetting', 'solarHome', 'packets', 'bits', 'growth', 'costKm', 'footprint', 'planetWeight', 'dna', 'thermostat',
+  'logicGates', 'compilerPipeline', 'gradientDescent', 'nextWord', 'timeline']);
 const TYPES = new Set(['hook', 'predict', 'discover', 'widget', 'text', 'key', 'example', 'try', 'world', 'future', 'activity', 'invent', 'explain', 'summary', 'table']);
 const TAMIL = /[஀-௿]/;
 let fails = 0;

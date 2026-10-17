@@ -211,3 +211,11 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - IndexNow: `.github/workflows/indexnow.yml` + `.github/scripts/indexnow.mjs`; key file `<32 hex>.txt` in repo root must stay. Only Bing/Yandex/Naver/Seznam — Google is not part of IndexNow.
 - `/tnpsc-photo-signature` (generate-photo-pages.mjs): TNPSC photo 20-50 KB, signature 10-20 KB (200 dpi) from Prepp (3rd party, Feb 2026) — px derived from cm; page tells users to confirm on tnpsc.gov.in. Re-verify when TNPSC publishes new instructions.
 - Existing Worker already supports Telegram channel posting (TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL secrets) — owner only has to create the bot/channel and add the two secrets.
+
+## UPDATE_41 — "அடித்தளம்" (foundations) lessons in Kalvi Kalanjiyam (owner request 17 Oct 2026 night)
+Owner's worry: students will use AI for everything and forget where computing/AI came from and how it works. So the "நாளைய உலகம்" part of `/learn/` got a new group `foundation` ("அடித்தளம் — இது எப்படி உருவானது?", 5 lessons, Tamil+English, no AI, all client-side):
+`how-it-began` (timeline: al-Khwarizmi → Leibniz → Lovelace → Boole → Turing → transistor → Hopper's compiler → perceptron → backprop → AlexNet → Transformer), `logic-gates`, `idea-to-result` (mini compiler: source → tokens → tree → stack instructions → run → result), `ai-math` (gradient descent on one weight), `ai-language` (next-word probabilities from counts; hallucination; verify).
+- New widgets: `learn/foundation-widgets.js` (`logicGates, compilerPipeline, gradientDescent, nextWord, timeline`), merged into `WIDGETS` in `learn/index.html` (script tag + `KALVI_WIDGETS_F`). Pure logic is exported as `KALVI_WF_PURE` and tested by `node learn/tests/foundation.test.cjs` (122 checks incl. gates-only addition 0..7, compiler vs JS arithmetic, gradient descent convergence/divergence).
+- Lessons are `learn/lessons/*.json`, registered in `learn/catalog.json` (`futureGroups` + `future`); validate with `node learn/tests/lessons.test.cjs` (widget names must be added to its `WIDGETS` set).
+- History facts used are well-documented milestones only; Pingala/zero are hedged (dating disputed). Do not add dates you cannot source.
+- Honest gaps: Tamil wording was written by the AI session, not proof-read by a Tamil teacher — owner (a teacher) should read the five lessons once and fix phrasing.

@@ -1,0 +1,526 @@
+{
+ "id": "ai-math",
+ "minutes": 30,
+ "title": {
+  "ta": "AI-யின் கணக்கு: தவறைக் குறைத்துக் கற்றல்",
+  "en": "The maths of AI: learning by shrinking the error"
+ },
+ "curriculum": [
+  {
+   "b": "Beyond syllabus",
+   "w": {
+    "ta": "பாடத்திட்டத்துக்கு அப்பால்: கணினி அறிவியலின் அடித்தளம் (CBSE / Samacheer கணினி அறிவியல் பாடங்களுக்குத் துணை)",
+    "en": "Beyond the syllabus: foundations of computer science (supports CBSE / Samacheer computer-science topics)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "AI \"கற்றல்\" என்பது என்ன என்று எளிய கணக்காகச் சொல்ல",
+   "en": "Describe AI \"learning\" as simple arithmetic"
+  },
+  {
+   "ta": "எடை (weight), தவறு (loss), சரிவு (gradient), கற்கும் வேகம் என்ற சொற்களை விளக்க",
+   "en": "Explain weight, loss, gradient and learning rate"
+  },
+  {
+   "ta": "ஒரு எடைத் திருத்தத்தைக் கையால் கணக்கிட",
+   "en": "Work out one weight update by hand"
+  },
+  {
+   "ta": "AI ஏன் தவறு செய்யலாம் என்பதற்கான காரணத்தைச் சொல்ல",
+   "en": "Say why an AI can be wrong"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "கிரிக்கெட்டில் பந்து வீசும் பயிற்சி: முதல் பந்து வெகு தூரம் போய்விடுகிறது. \"கொஞ்சம் குறை!\" என்று பயிற்சியாளர் சொல்கிறார். அடுத்த பந்து சற்று நெருங்குகிறது. மீண்டும் சிறிய திருத்தம்… சில பந்துகளில் சரியான இடத்தில் விழுகிறது.\n\nஇதுதான் AI கற்கும் விதம்: **ஊகி → எவ்வளவு தவறு என்று அளவிடு → சிறிது திருத்து → மீண்டும் செய்.** யாரும் AI-க்கு \"விதிகளை\" எழுதிக் கொடுக்கவில்லை; எடுத்துக்காட்டுகளைப் பார்த்துப் பார்த்து, தன் உள்ளே உள்ள எண்களைத் திருத்திக்கொள்கிறது.\n\n**இது ஏன் உனக்குத் தேவை?** AI-யின் \"அறிவு\" என்பது எண்கள்தான். எண்கள் தவறான தரவிலிருந்து திருத்தப்பட்டிருந்தால் AI தவறு சொல்லும். இதை அறிந்தவரே AI-யின் பதிலை அறிவுடன் நம்பவோ சந்தேகிக்கவோ முடியும்.",
+    "en": "Practising bowling in cricket: the first ball goes far too long. \"A little shorter!\" says the coach. The next ball lands closer. Another small correction… after a few balls it lands on the spot.\n\nThis is how AI learns: **guess → measure how wrong → correct a little → repeat.** Nobody writes \"rules\" for the AI; it looks at example after example and adjusts the numbers inside itself.\n\n**Why do you need this?** The \"knowledge\" of an AI is only numbers. If those numbers were adjusted from wrong data, the AI will say wrong things. Only someone who knows this can trust or doubt an AI’s answer wisely."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "AI \"கற்கிறது\" என்றால் உள்ளே என்ன நடக்கிறது?",
+    "en": "When an AI \"learns\", what happens inside?"
+   },
+   "options": [
+    {
+     "ta": "ஆசிரியர் போலப் பாடங்களைப் புரிந்துகொள்கிறது",
+     "en": "It understands lessons like a teacher"
+    },
+    {
+     "ta": "தன் எண்களை (எடைகளை) சிறிது சிறிதாக மாற்றித் தவறைக் குறைக்கிறது",
+     "en": "It changes its numbers (weights) bit by bit to reduce the error"
+    },
+    {
+     "ta": "எல்லா பதில்களையும் மனப்பாடம் செய்து வைக்கிறது",
+     "en": "It memorises all the answers"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "பெரும்பாலும் இரண்டாவதுதான். AI-க்குள் பல கோடி \"எடை\" எண்கள் உள்ளன. கற்றல் என்பது அவற்றை, தவறு குறையும் திசையில் சிறிது சிறிதாக மாற்றுவது. இப்போது அதை நீயே ஒரே ஒரு எடையுடன் செய்து பார்.",
+    "en": "Mostly the second. Inside an AI are many crores of \"weight\" numbers. Learning means changing them bit by bit in the direction that reduces the error. Now you will do it yourself with just one weight."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "gradientDescent",
+   "title": {
+    "ta": "ஒரே ஒரு எடையுடன் ஒரு AI",
+    "en": "An AI with a single weight"
+   },
+   "text": {
+    "ta": "ஆரஞ்சுப் புள்ளிகள் உண்மைத் தரவு (எ.கா. x = படித்த மணி, y = மதிப்பெண்ணின் ஒரு மாதிரி). நீலக் கோடு AI-யின் ஊகம்: y = w·x. தொடக்கத்தில் w = 0, அதனால் கோடு தட்டையாக இருக்கிறது. 👣 அழுத்தி ஒவ்வொரு அடியிலும் கோடு எப்படிப் புள்ளிகளை நோக்கிச் சாய்கிறது, கீழே உள்ள பள்ளத்தில் புள்ளி எப்படி இறங்குகிறது என்று பார். பிறகு கற்கும் வேகத்தை (learning rate) மாற்றி முயற்சி செய்.",
+    "en": "Orange dots are real data (say x = hours studied, y = a sample score). The blue line is the AI’s guess: y = w·x. At first w = 0 so the line is flat. Press 👣 and watch the line tilt toward the dots, and the dot roll down the valley below. Then change the learning rate and try again."
+   },
+   "q": {
+    "ta": "கற்கும் வேகத்தை **0.17** ஆக வைத்து 👣 அழுத்தினால் என்ன நடக்கும்?",
+    "en": "What happens if you set the learning rate to **0.17** and press 👣?"
+   },
+   "options": [
+    {
+     "ta": "வேகமாகவும் சரியாகவும் கற்கும்",
+     "en": "It learns faster and correctly"
+    },
+    {
+     "ta": "தவறு குறையாமல் பெருகி, எடை வெடிக்கும்",
+     "en": "The error grows instead of shrinking and the weight blows up"
+    },
+    {
+     "ta": "எதுவும் மாறாது",
+     "en": "Nothing changes"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "அடி மிகப் பெரிதாக இருந்தால் பள்ளத்தைத் தாண்டி மறுபக்கம் இன்னும் உயரத்தில் குதித்துவிடுகிறது; ஒவ்வொரு அடியிலும் தவறு அதிகரிக்கிறது. இந்தத் தரவுக்கு வேகம் சுமார் 0.13-க்குள் இருந்தால்தான் நிலையாகக் கற்கும். அதனால் \"வேகமாகக் கற்பிக்கலாம்\" என்பது எப்போதும் நல்லதல்ல — அளவு முக்கியம்.",
+    "en": "If the step is too big you jump over the valley and land even higher on the other side; the error grows at every step. For this data the rate must stay below about 0.13 for stable learning. So \"teaching faster\" is not always better — size matters."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "இந்தக் கணக்கு எப்படி வேலை செய்கிறது?",
+    "en": "How does the arithmetic work?"
+   },
+   "text": {
+    "ta": "**ஊகம் (prediction):** y = w · x. உதாரணம்: w = 2, x = 3 என்றால் ஊகம் 6.\n\n**தவறு (loss):** ஒவ்வொரு புள்ளிக்கும் (ஊகம் − உண்மை)-ஐ வர்க்கமாக்கி, எல்லாவற்றின் சராசரி எடுக்கிறோம். வர்க்கமாக்குவதால் எதிர்மறை எண் வராது, பெரிய தவறு அதிகமாகத் தண்டிக்கப்படும்.\n\n**சரிவு (gradient):** w-ஐ சிறிது அதிகரித்தால் தவறு கூடுமா குறையுமா என்று சொல்லும் எண். சரிவு நேர்மறை என்றால் w-ஐக் குறை; எதிர்மறை என்றால் கூட்டு.\n\n**ஒரு அடி:**\n\n[[ புதிய w = பழைய w − (கற்கும் வேகம் × சரிவு) ]]\n\nஇதை மீண்டும் மீண்டும் செய்தால் தவறு குறைந்துகொண்டே போய், பள்ளத்தின் அடியில் நிற்கும். இந்த முறையின் பெயர் **gradient descent (சரிவு இறக்கம்)**.",
+    "en": "**Prediction:** y = w · x. Example: w = 2, x = 3 gives 6.\n\n**Error (loss):** for each point take (prediction − truth), square it, and average them all. Squaring removes negatives and punishes big mistakes more.\n\n**Slope (gradient):** a number that says whether the error grows or shrinks if you raise w a little. If the slope is positive, lower w; if negative, raise it.\n\n**One step:**\n\n[[ new w = old w − (learning rate × slope) ]]\n\nRepeat it and the error keeps falling until you rest at the bottom of the valley. This method is called **gradient descent**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பல கோடி எடைகள் — அதே விதி",
+    "en": "Billions of weights — the same rule"
+   },
+   "text": {
+    "ta": "நீ பார்த்தது ஒரே ஒரு எடை. பெரிய AI-யில் பல கோடி எடைகள் உள்ளன; ஒவ்வொன்றுக்கும் இதே கணக்கு (backpropagation என்ற முறையால் திறமையாக) நடக்கிறது. 1958-இல் ரோசன்ப்ளாட்டின் perceptron, 1986-இல் பிரபலமான backpropagation, 2012-இல் AlexNet என்று வளர்ந்து, இன்று பெரிய மொழி மாதிரிகள் வரை வந்திருப்பது இந்த ஒரே யோசனையின் விரிவாக்கம்.\n\n**தரவு முக்கியம்.** AI தான் பார்த்த எடுத்துக்காட்டுகளிலிருந்தே கற்கிறது. தரவு குறைவாகவோ ஒருபக்கச் சார்பாகவோ இருந்தால் (எ.கா. சில மக்களின் குரல்களே இல்லாத தரவு) AI அவர்களுக்குத் தவறாகவே வேலை செய்யும். இது AI-யின் குறை அல்ல; அதைப் பயிற்றுவித்த தரவின் குறை.",
+    "en": "What you saw was one weight. A large AI has many crores; the same arithmetic runs for each (efficiently, using a method called backpropagation). From Rosenblatt’s perceptron of 1958, through the popular backpropagation of 1986 and AlexNet in 2012, to today’s large language models — it is the growth of this one idea.\n\n**Data matters.** An AI learns only from the examples it saw. If the data is small or one-sided (say, no voices from certain people), the AI will work badly for them. That is not a fault of the AI itself, but of the data that trained it."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "AI-யின் \"அறிவு\" = தவறைக் குறைக்கும்படி திருத்தப்பட்ட எண்கள். அது நிச்சயம் உண்மை என்று பொருள் அல்ல; தான் பார்த்த தரவில் நன்றாகப் பொருந்தும் எண்கள் என்று மட்டுமே பொருள்.",
+    "en": "An AI’s \"knowledge\" = numbers adjusted to shrink the error. It does not mean certain truth; only numbers that fit the data it has seen."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "x = 2 என்ற புள்ளிக்கு உண்மை y = 6. AI-யின் w = 2 என்றால், ஊகம் என்ன? தவறின் வர்க்கம் (ஊகம் − உண்மை)² எவ்வளவு?",
+    "en": "For the point x = 2 the true y is 6. If the AI has w = 2, what is the prediction, and what is the squared error (prediction − truth)²?"
+   },
+   "answer": 4,
+   "tol": 0,
+   "unit": {
+    "ta": "(வர்க்கத் தவறு)",
+    "en": "(squared error)"
+   },
+   "hint": {
+    "ta": "ஊகம் = w × x = 2 × 2.",
+    "en": "Prediction = w × x = 2 × 2."
+   },
+   "solution": {
+    "ta": "ஊகம் = 4; உண்மை 6; வேறுபாடு −2; வர்க்கம் = (−2)² = **4**.",
+    "en": "Prediction = 4; truth 6; difference −2; square = (−2)² = **4**."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "ஒரு AI-யின் w = 1, சரிவு = −4, கற்கும் வேகம் = 0.1. ஒரு அடிக்குப் பிறகு புதிய w எவ்வளவு?",
+    "en": "An AI has w = 1, slope = −4 and learning rate = 0.1. What is the new w after one step?"
+   },
+   "answer": 1.4,
+   "tol": 0.01,
+   "hint": {
+    "ta": "புதிய w = 1 − (0.1 × (−4)).",
+    "en": "New w = 1 − (0.1 × (−4))."
+   },
+   "solution": {
+    "ta": "0.1 × (−4) = −0.4; 1 − (−0.4) = **1.4**. சரிவு எதிர்மறை என்பதால் w அதிகரித்தது.",
+    "en": "0.1 × (−4) = −0.4; 1 − (−0.4) = **1.4**. The slope was negative so w went up."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "w = 3 இன் தவறைக் கணக்கிடு",
+    "en": "Work out the error for w = 3"
+   },
+   "q": {
+    "ta": "widget-இன் தரவு: (x, y) = (1, 2.8), (2, 6.3), (3, 8.9), (4, 12.2). w = 3 என்றால் தவறு (loss) எவ்வளவு?",
+    "en": "The widget’s data: (x, y) = (1, 2.8), (2, 6.3), (3, 8.9), (4, 12.2). What is the loss for w = 3?"
+   },
+   "steps": [
+    {
+     "ta": "ஊகங்கள்: 3, 6, 9, 12.",
+     "en": "Predictions: 3, 6, 9, 12."
+    },
+    {
+     "ta": "வேறுபாடுகள்: +0.2, −0.3, +0.1, −0.2.",
+     "en": "Differences: +0.2, −0.3, +0.1, −0.2."
+    },
+    {
+     "ta": "வர்க்கங்கள்: 0.04, 0.09, 0.01, 0.04; கூட்டுத்தொகை 0.18.",
+     "en": "Squares: 0.04, 0.09, 0.01, 0.04; sum 0.18."
+    },
+    {
+     "ta": "சராசரி = 0.18 ÷ 4 = **0.045**. (சிறந்த w ≈ 3.03 இல் இது 0.038-ஆகக் குறையும்; widget-இல் சரிபார்.)",
+     "en": "Average = 0.18 ÷ 4 = **0.045**. (At the best w ≈ 3.03 it falls to 0.038; check in the widget.)"
+    }
+   ]
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📷",
+     "title": {
+      "ta": "போன் கேமரா முகம் கண்டறிதல்",
+      "en": "Face detection in phone cameras"
+     },
+     "text": {
+      "ta": "பல கோடி படங்களில் எடைகள் திருத்தப்பட்டு, \"இது முகம்\" என்று ஊகிக்கும் எண்களாக மாறியுள்ளன.",
+      "en": "Weights were adjusted over many crores of pictures until they became numbers that guess \"this is a face\"."
+     }
+    },
+    {
+     "icon": "🎙️",
+     "title": {
+      "ta": "குரல் தட்டச்சு",
+      "en": "Voice typing"
+     },
+     "text": {
+      "ta": "குரல் அலைகளையும் எழுத்துகளையும் இணைக்கும் எடைகள்; தமிழ்த் தரவு குறைவாக இருந்தால் தமிழில் பிழைகள் அதிகம் வரலாம்.",
+      "en": "Weights that link sound waves to letters; if there is less Tamil data, more mistakes can appear in Tamil."
+     }
+    },
+    {
+     "icon": "🛍️",
+     "title": {
+      "ta": "பரிந்துரைகள்",
+      "en": "Recommendations"
+     },
+     "text": {
+      "ta": "நீ பார்த்தவற்றிலிருந்து \"அடுத்து எது பிடிக்கும்\" என்று ஊகிக்கும் எண்கள்; அது உன் ஆர்வத்தையும் ஒரு குறுகிய வட்டத்துக்குள் அடைக்கலாம்.",
+      "en": "Numbers that guess \"what you will like next\" from what you watched; they can also keep your interests inside a narrow circle."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "\"அதிகம் / குறைவு\" விளையாட்டு",
+    "en": "The \"higher / lower\" game"
+   },
+   "text": {
+    "ta": "ஒரு நண்பன் 1 முதல் 100-க்குள் ஒரு எண்ணை நினைக்கட்டும். நீ ஊகி; அவன் \"அதிகம்\" அல்லது \"குறைவு\" என்று மட்டும் சொல்லட்டும். ஒவ்வொரு முறையும் சிறிது சரி செய். இது gradient descent-ன் மனித வடிவம்: **திசை சொல்லும் தவறு**.\n\n**கேள்வி:** அவன் \"அதிகம்/குறைவு\" என்பதற்குப் பதிலாக \"தவறு எவ்வளவு\" என்று எண்ணாகச் சொன்னால் உன் ஊகம் விரைவாகுமா?",
+    "en": "Let a friend think of a number from 1 to 100. You guess; the friend says only \"higher\" or \"lower\". Correct yourself a little each time. This is the human form of gradient descent: **an error that tells the direction**.\n\n**Question:** if the friend gave the error as a number instead of \"higher/lower\", would you get there faster?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "AI \"கற்பது\" எப்படி என்பதைத் தவறு, எடை என்ற சொற்களுடன் விளக்கு.",
+    "en": "Explain how an AI \"learns\" using the words error and weight."
+   },
+   "keywords": [
+    {
+     "ta": "எடை",
+     "en": "weight",
+     "alt": [
+      "எடைகள்",
+      "weights"
+     ]
+    },
+    {
+     "ta": "தவறு",
+     "en": "error",
+     "alt": [
+      "loss",
+      "பிழை"
+     ]
+    },
+    {
+     "ta": "திருத்த",
+     "en": "adjust",
+     "alt": [
+      "correct",
+      "change",
+      "மாற்ற"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "AI தன் உள்ளே உள்ள எடை எண்களால் ஒரு ஊகம் செய்கிறது. அந்த ஊகம் உண்மையிலிருந்து எவ்வளவு தவறு என்று கணக்கிடுகிறது. பிறகு தவறு குறையும் திசையில் எடைகளைச் சிறிது திருத்துகிறது. இதை எடுத்துக்காட்டுகளில் மீண்டும் மீண்டும் செய்வதால் தவறு குறைந்து ஊகங்கள் மேம்படுகின்றன.",
+    "en": "The AI makes a guess with the weight numbers inside it. It calculates how wrong the guess is compared to the truth. Then it adjusts the weights a little in the direction that reduces the error. By repeating this over many examples the error falls and the guesses improve."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "எதிர்காலத்தில் AI மருத்துவம், கல்வி, நீதி போன்ற இடங்களிலும் பயன்படும். அங்கே \"தரவில் யார் இருந்தார், யார் இல்லை\" என்பது முடிவுகளைப் பாதிக்கும்.",
+    "en": "In future AI will be used in medicine, education and justice too. There, \"who was in the data and who was not\" will affect the decisions."
+   },
+   "risk": {
+    "ta": "ஒருபக்கச் சார்பான தரவால் பயிற்சி பெற்ற AI சிலருக்குத் தவறான முடிவுகளைத் தரலாம்; பொதுவாக அது தன் தவறைத் தானே உணராது.",
+    "en": "An AI trained on one-sided data may give wrong results for some people, and it usually will not notice its own mistake."
+   },
+   "fix": {
+    "ta": "பல்வேறு மக்களின் தரவு, தனி மனிதர் சோதனை, முக்கிய முடிவுகளில் மனிதரின் இறுதிச் சரிபார்ப்பு தேவை.",
+    "en": "Data from many kinds of people, independent testing, and a final human check on important decisions are needed."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் தரவு, உன் AI",
+    "en": "Your data, your AI"
+   },
+   "text": {
+    "ta": "\"நாளை மழை வருமா\" என்று ஊகிக்கும் ஒரு சிறிய AI-க்கு நீ என்ன தரவைச் சேகரிப்பாய்? (எ.கா. வானம் மேகமூட்டம், காற்றின் ஈரப்பதம்…). எந்த மாதிரியான தரவை விட்டுவிட்டால் அது தவறாக ஊகிக்கும்?",
+    "en": "What data would you collect for a small AI that guesses \"will it rain tomorrow\"? (For example cloud cover, humidity…). What kind of data, if left out, would make it guess wrongly?"
+   },
+   "prompts": [
+    {
+     "ta": "எத்தனை நாட்களின் தரவு வேண்டும்?",
+     "en": "How many days of data do you need?"
+    },
+    {
+     "ta": "எல்லாப் பருவங்களின் தரவும் ஏன் வேண்டும்?",
+     "en": "Why is data from every season needed?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "AI கற்றல்: ஊகி → தவறை அளவிடு → எடைகளைச் சிறிது திருத்து → மீண்டும் செய்.",
+     "en": "AI learning: guess → measure the error → adjust the weights a little → repeat."
+    },
+    {
+     "ta": "புதிய w = பழைய w − (கற்கும் வேகம் × சரிவு).",
+     "en": "new w = old w − (learning rate × slope)."
+    },
+    {
+     "ta": "கற்கும் வேகம் மிகப் பெரிதானால் தவறு குறையாமல் பெருகும்.",
+     "en": "If the learning rate is too big the error grows instead of shrinking."
+    },
+    {
+     "ta": "பல கோடி எடைகள் இருந்தாலும் விதி இதுவே; தரவின் தரம் முடிவின் தரத்தைத் தீர்மானிக்கும்.",
+     "en": "Even with crores of weights the rule is the same; the quality of the data decides the quality of the result."
+    },
+    {
+     "ta": "AI-யின் பதில் \"நிச்சய உண்மை\" அல்ல; தரவுக்குப் பொருந்தும் ஊகம். முக்கியமானதை எப்போதும் சரிபார்.",
+     "en": "An AI’s answer is not \"certain truth\"; it is a guess that fits its data. Always verify what matters."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "\"புதிய w = பழைய w − (கற்கும் வேகம் × சரிவு)\" என்பதில் சரிவு நேர்மறை என்றால் w எப்படி மாறும்?",
+    "en": "In \"new w = old w − (rate × slope)\", if the slope is positive, how does w change?"
+   },
+   "options": [
+    {
+     "ta": "அதிகரிக்கும்",
+     "en": "It increases"
+    },
+    {
+     "ta": "மாறாது",
+     "en": "It stays the same"
+    },
+    {
+     "ta": "குறையும்",
+     "en": "It decreases"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "நேர்மறைச் சரிவை (கற்கும் வேகத்தால் பெருக்கி) கழிப்பதால் w குறையும்.",
+    "en": "A positive slope (times the rate) is subtracted, so w decreases."
+   }
+  },
+  {
+   "q": {
+    "ta": "AI-யில் \"எடை\" (weight) என்பது?",
+    "en": "In AI, what is a \"weight\"?"
+   },
+   "options": [
+    {
+     "ta": "சிப்பின் கனம்",
+     "en": "The heaviness of a chip"
+    },
+    {
+     "ta": "படிப்படியாகத் திருத்தப்படும் ஒரு எண்",
+     "en": "A number that is adjusted step by step"
+    },
+    {
+     "ta": "ஒரு படத்தின் அளவு",
+     "en": "The size of a picture"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "எடைகள் என்பவை AI-யின் உள்ளே உள்ள எண்கள்.",
+    "en": "Weights are the numbers inside an AI."
+   }
+  },
+  {
+   "q": {
+    "ta": "தவறைக் கணக்கிடும்போது வேறுபாட்டை ஏன் வர்க்கமாக்குகிறோம்?",
+    "en": "Why do we square the difference when calculating the error?"
+   },
+   "options": [
+    {
+     "ta": "எதிர்மறை இல்லாமல் இருக்கவும் பெரிய தவறை அதிகம் கணக்கிடவும்",
+     "en": "So it is never negative and big mistakes count more"
+    },
+    {
+     "ta": "எண்கள் அழகாக இருக்க",
+     "en": "So the numbers look nice"
+    },
+    {
+     "ta": "கணினி வேகமாக ஓட",
+     "en": "So the computer runs faster"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "வர்க்கம் எதிர்மறையாகாது; பெரிய தவறை அதிகம் தண்டிக்கும்.",
+    "en": "A square is never negative and punishes big mistakes more."
+   }
+  },
+  {
+   "q": {
+    "ta": "கற்கும் வேகம் மிக அதிகமாக இருந்தால்?",
+    "en": "If the learning rate is far too high?"
+   },
+   "options": [
+    {
+     "ta": "தவறு பெருகிக்கொண்டே போகலாம்",
+     "en": "The error can keep growing"
+    },
+    {
+     "ta": "எப்போதும் வேகமாகச் சரியாகும்",
+     "en": "It always gets right faster"
+    },
+    {
+     "ta": "AI தன்னை நிறுத்திக்கொள்ளும்",
+     "en": "The AI stops itself"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அடி மிகப் பெரிதானால் பள்ளத்தைத் தாண்டிக் குதித்துவிடும்.",
+    "en": "A step that is too big jumps over the valley."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஒருபக்கச் சார்பான தரவில் பயிற்சி பெற்ற AI?",
+    "en": "An AI trained on one-sided data?"
+   },
+   "options": [
+    {
+     "ta": "எல்லோருக்கும் சமமாக வேலை செய்யும்",
+     "en": "Will work equally for everyone"
+    },
+    {
+     "ta": "தானாகவே தவறைத் திருத்தும்",
+     "en": "Corrects itself automatically"
+    },
+    {
+     "ta": "சில குழுக்களுக்குத் தவறான முடிவுகளைத் தரலாம்",
+     "en": "May give wrong results for some groups"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "AI தான் பார்த்த தரவையே பிரதிபலிக்கிறது.",
+    "en": "An AI reflects the data it has seen."
+   }
+  },
+  {
+   "q": {
+    "ta": "w = 1, சரிவு = −2, வேகம் = 0.5 என்றால் புதிய w?",
+    "en": "If w = 1, slope = −2, rate = 0.5, the new w is?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "2",
+     "en": "2"
+    },
+    {
+     "ta": "1.5",
+     "en": "1.5"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1 − (0.5 × −2) = 1 + 1 = 2; சரிவு எதிர்மறை என்பதால் w கூடுகிறது.",
+    "en": "1 − (0.5 × −2) = 1 + 1 = 2."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"AI-யின் அறிவு\" என்பது?",
+    "en": "\"An AI’s knowledge\" is?"
+   },
+   "options": [
+    {
+     "ta": "திருத்தப்பட்ட எண்கள்; தரவுக்குப் பொருந்தும் ஊகம்",
+     "en": "Adjusted numbers; a guess that fits the data"
+    },
+    {
+     "ta": "எப்போதும் உண்மையான தகவல்",
+     "en": "Always true facts"
+    },
+    {
+     "ta": "மனித மூளையின் நகல்",
+     "en": "A copy of a human brain"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அது தரவிலிருந்து திருத்தப்பட்ட எண்களின் தொகுப்பு.",
+    "en": "It is a set of numbers adjusted from data."
+   }
+  }
+ ]
+}

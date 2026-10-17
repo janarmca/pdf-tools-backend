@@ -189,6 +189,7 @@ textarea.journal{width:100%;min-height:90px;border:1px solid #cfd4e2;border-radi
 <script src="play.js?v=6"></script>
 <script src="arena.js?v=1"></script>
 <script src="future-widgets.js?v=1"></script>
+<script src="foundation-widgets.js?v=1"></script>
 <script src="lab.js?v=4"></script>
 <script src="lab2.js?v=1"></script>
 <script>
@@ -1097,6 +1098,7 @@ function renderReport(pid){
 function paintLang(){ document.querySelectorAll('.lang button').forEach(b=> b.classList.toggle('on', b.dataset.l===LANG)); document.documentElement.lang = LANG; }
 document.querySelectorAll('.lang button').forEach(b=> b.onclick = ()=>{ LANG = b.dataset.l; try{ localStorage.setItem('kalviLang', LANG); }catch(e){} paintLang(); route(); });
 if(window.KALVI_WIDGETS_X) Object.assign(WIDGETS, KALVI_WIDGETS_X({svg, readout, slider, T, esc}));
+if(window.KALVI_WIDGETS_F) Object.assign(WIDGETS, KALVI_WIDGETS_F({svg, readout, slider, T, esc}));
 $('#home').onclick = ()=> go('#/');
 if(window.KALVI_ARENA) KALVI_ARENA.init({C:()=>CATALOG, L, esc, go, lang:()=>LANG, getProg});
 if(window.KALVI_PLAY) KALVI_PLAY.init({lang:()=>LANG, esc, go, getProg, setProg, award:(window.KALVI_ARENA?KALVI_ARENA.award:null)});

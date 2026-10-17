@@ -1,0 +1,569 @@
+{
+ "id": "how-it-began",
+ "minutes": 25,
+ "title": {
+  "ta": "இது எங்கிருந்து தொடங்கியது? கணினியும் AI-யும் வந்த பாதை",
+  "en": "Where did it all begin? The path to computers and AI"
+ },
+ "curriculum": [
+  {
+   "b": "Beyond syllabus",
+   "w": {
+    "ta": "பாடத்திட்டத்துக்கு அப்பால்: கணினி அறிவியலின் அடித்தளம் (CBSE / Samacheer கணினி அறிவியல் பாடங்களுக்குத் துணை)",
+    "en": "Beyond the syllabus: foundations of computer science (supports CBSE / Samacheer computer-science topics)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "கணினி மற்றும் AI-யின் 10 முக்கிய மைல்கற்களை வரிசையாகச் சொல்ல",
+   "en": "Name 10 key milestones of computing and AI in order"
+  },
+  {
+   "ta": "ஒவ்வொரு கண்டுபிடிப்பும் முந்தையதன் மேல் எப்படி நிற்கிறது என்று விளக்க",
+   "en": "Explain how each invention stands on the one before"
+  },
+  {
+   "ta": "அடிப்படை அறிவு ஏன் இன்றும் தேவை என்று சொல்ல",
+   "en": "Say why basic knowledge is still needed today"
+  },
+  {
+   "ta": "இந்த அடித்தளப் பாடங்களை ஒன்றோடொன்று இணைக்க",
+   "en": "Link these foundation lessons together"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "இன்று ஒரு கேள்வி கேட்டால் AI உடனே பதில் தருகிறது; ஒரு program கேட்டால் எழுதித் தருகிறது. இதையெல்லாம் பார்க்கும்போது \"இனி நாம் எதற்குப் படிக்க வேண்டும்?\" என்று தோன்றலாம்.\n\nஆனால் ஒரு நூற்றாண்டுக்கு முன்பு யாரோ ஒருவர் **\"சரி\" என்பதை 1 என்றும் \"தவறு\" என்பதை 0 என்றும்** எழுதினார். இன்னொருவர் **படிகளை** எழுதினார். இன்னொருவர் **இயந்திரத்தின் எல்லையைக்** கணக்கிட்டார். இன்னொருவர் **சுவிட்சை** உருவாக்கினார். இவற்றின் மேல் அடுக்கடுக்காகக் கட்டப்பட்டதுதான் இன்றைய AI.\n\n**இது ஏன் உனக்குத் தேவை?** அடிப்படை மறந்துவிட்டால் AI தவறு செய்யும்போது யாராலும் கண்டுபிடிக்க முடியாது; புதிதாக ஒன்றை உருவாக்கவும் முடியாது. இந்தப் பாதையை மறக்காமல் இருப்பதற்காகவே இந்தப் பாடம்.",
+    "en": "Today you ask AI a question and it answers at once; ask for a program and it writes one. Seeing all this you may think \"why should we study any more?\"\n\nBut not even a century ago someone wrote **\"true\" as 1 and \"false\" as 0**. Someone else wrote down **steps**. Someone else worked out **the limits of a machine**. Someone else built **the switch**. Today’s AI is built layer upon layer on these.\n\n**Why do you need this?** If the basics are forgotten, nobody can find the mistakes when an AI errs, and nobody can build the next thing. This lesson exists so that this path is not forgotten."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "\"Algorithm\" என்ற சொல் யாருடைய பெயரிலிருந்து வந்தது?",
+    "en": "The word \"algorithm\" comes from whose name?"
+   },
+   "options": [
+    {
+     "ta": "அல்-குவாரிஸ்மி (9ஆம் நூற்றாண்டு)",
+     "en": "Al-Khwarizmi (9th century)"
+    },
+    {
+     "ta": "ஆலன் டூரிங் (1936)",
+     "en": "Alan Turing (1936)"
+    },
+    {
+     "ta": "ஐசக் நியூட்டன்",
+     "en": "Isaac Newton"
+    }
+   ],
+   "answer": 0,
+   "reveal": {
+    "ta": "அல்-குவாரிஸ்மி என்ற கணிதவியலாளரின் பெயரின் இலத்தீன் வடிவம் \"Algoritmi\". கணினிகள் வருவதற்கு ஆயிரம் ஆண்டுகளுக்கு முன்பே படிப்படியாகக் கணக்குத் தீர்க்கும் முறைகள் இருந்தன. இப்போது முழுப் பாதையையும் தொட்டுப் பார்.",
+    "en": "The Latin form of the mathematician al-Khwarizmi’s name is \"Algoritmi\". Step-by-step methods for solving sums existed a thousand years before computers. Now walk the whole path."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "timeline",
+   "title": {
+    "ta": "காலப் பாதை",
+    "en": "The timeline"
+   },
+   "text": {
+    "ta": "மேலே உள்ள படங்களில் ஒவ்வொன்றாகத் தொடு, அல்லது → அழுத்தி முன்னே செல். ஒவ்வொரு மைல்கல்லிலும் \"இன்று இது ஏன் முக்கியம்?\" என்ற பெட்டியைப் படி.",
+    "en": "Tap the pictures above one by one, or press → to move forward. In each milestone read the box \"why it matters today\"."
+   },
+   "q": {
+    "ta": "இவற்றில் காலவரிசை எது சரி?",
+    "en": "Which is the correct chronological order?"
+   },
+   "options": [
+    {
+     "ta": "பூல் (1854) → டூரிங் (1936) → டிரான்சிஸ்டர் (1947)",
+     "en": "Boole (1854) → Turing (1936) → transistor (1947)"
+    },
+    {
+     "ta": "டூரிங் (1936) → பூல் (1854) → டிரான்சிஸ்டர் (1947)",
+     "en": "Turing (1936) → Boole (1854) → transistor (1947)"
+    },
+    {
+     "ta": "டிரான்சிஸ்டர் (1947) → பூல் (1854) → டூரிங் (1936)",
+     "en": "Transistor (1947) → Boole (1854) → Turing (1936)"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "சிந்தனையின் கணக்கு (1854) → இயந்திரத்தின் கணித வரையறை (1936) → அதை உண்மையாக்கும் சுவிட்ச் (1947). **கோட்பாடு முதலில்; வன்பொருள் பிறகு** என்பது இங்கே தெளிவாகத் தெரிகிறது. அதனால்தான் அடிப்படைக் கணிதம் படிப்பது எதிர்காலத்தில் பயன்படுகிறது.",
+    "en": "The mathematics of reasoning (1854) → the mathematical definition of a machine (1936) → the switch that made it real (1947). **Theory first, hardware later** is clearly visible. That is why studying basic mathematics pays off in the future."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "ஒரு சங்கிலி",
+    "en": "A chain"
+   },
+   "text": {
+    "ta": "இந்தப் பாதையை ஒரு சங்கிலியாகப் பார்:\n\n**படிகள்** (9ஆம் நூற்றாண்டு) → **இரும எண்** (1703) → **முதல் நிரல் யோசனை** (1843) → **logic gates-க்கான கணிதம்** (1854) → **இயந்திரத்தின் எல்லை** (1936) → **டிரான்சிஸ்டர்** (1947) → **compiler** (1952) → **கற்கும் இயந்திரம்** (1958, 1986, 2012) → **Transformer** (2017).\n\nஒவ்வொரு படியும் முந்தையதன் மேல் நிற்கிறது. எதையாவது நீக்கினால் அடுத்தது நிற்காது. இந்தத் தொடரின் பாடங்களும் அதே வரிசையில் உன் அறிவைக் கட்டுகின்றன: **கணினிக்கு எல்லாமே 0 மற்றும் 1 → logic gates → யோசனை, program, compiler, முடிவு → AI-யின் கணக்கு → AI எப்படிப் பேசுகிறது.**",
+    "en": "See this path as a chain:\n\n**steps** (9th century) → **binary numbers** (1703) → **the idea of a program** (1843) → **mathematics for logic gates** (1854) → **limits of a machine** (1936) → **transistor** (1947) → **compiler** (1952) → **machines that learn** (1958, 1986, 2012) → **Transformer** (2017).\n\nEach step stands on the one before. Remove one and the next cannot stand. The lessons of this series build your knowledge in the same order: **To a computer everything is 0 and 1 → logic gates → idea, program, compiler, result → the maths of AI → how AI talks.**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "நம் மண்ணின் பங்களிப்பு",
+    "en": "Contributions from our own land"
+   },
+   "text": {
+    "ta": "இந்தப் பாதையின் அடித்தளத்தில் இந்தியாவின் பங்கும் உண்டு. **பூஜ்யத்துடன் கூடிய இட மதிப்பு எண் முறை** இந்தியாவில் வளர்ந்து உலகெங்கும் பரவியது; அது இல்லாமல் இன்றைய கணக்குகளும் இரும எண்களும் சாத்தியமில்லை (\"பூஜ்யமும் இட மதிப்பும்\" பாடத்தில் விரிவாகப் பார்க்கலாம்). மேலும் சந்தச் சூத்திரம் எழுதிய பிங்கலர், குறில் / நெடில் என்ற இரண்டு வகை எழுத்துகளின் சேர்க்கைகளை எண்ணும் முறையை எழுதினார்; இது இரும எண்களை ஒத்த எண்ணமாகப் பல அறிஞர்களால் கருதப்படுகிறது (அவர் காலம் பற்றி அறிஞர்களிடையே கருத்து வேறுபாடு உண்டு).\n\nகற்றுக்கொள்ள வேண்டியது: புதிய யோசனைகள் வெவ்வேறு இடங்களிலிருந்தும் காலங்களிலிருந்தும் வந்து சேர்கின்றன. நீயும் அந்தச் சங்கிலியில் ஒரு கண்ணி ஆகலாம்.",
+    "en": "India also has a share in the foundation of this path. The **place-value number system with zero** grew in India and spread across the world; without it today’s arithmetic and binary numbers would not be possible (see the lesson on zero and place value). Also Pingala, who wrote on metre, described a way of counting combinations of two kinds of syllables (short / long); many scholars regard this as an idea similar to binary numbers (scholars disagree about his date).\n\nThe lesson: new ideas arrive from different places and times. You too can become a link in that chain."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "AI திடீரென்று வரவில்லை. ஒரு படியிலிருந்து அடுத்த படிக்குப் பல தலைமுறை மனிதர்கள் உழைத்தார்கள். அடிப்படை தெரிந்தவர்தான் அடுத்த படியை எடுத்து வைக்கவும், இருக்கும் படியில் தவறைக் கண்டுபிடிக்கவும் முடியும்.",
+    "en": "AI did not appear suddenly. Many generations worked from one step to the next. Only someone who knows the basics can take the next step, or find a mistake in the step we stand on."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "டூரிங்கின் ஆய்வுக்கட்டுரை (1936) முதல் Transformer (2017) வரை எத்தனை ஆண்டுகள்?",
+    "en": "How many years from Turing’s paper (1936) to the Transformer (2017)?"
+   },
+   "answer": 81,
+   "tol": 0,
+   "unit": {
+    "ta": "ஆண்டுகள்",
+    "en": "years"
+   },
+   "hint": {
+    "ta": "2017 − 1936.",
+    "en": "2017 − 1936."
+   },
+   "solution": {
+    "ta": "2017 − 1936 = **81** ஆண்டுகள்.",
+    "en": "2017 − 1936 = **81** years."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "பூலின் நூல் (1854) வெளிவந்து எத்தனை ஆண்டுகளுக்குப் பிறகு டிரான்சிஸ்டர் (1947) கண்டுபிடிக்கப்பட்டது?",
+    "en": "How many years after Boole’s book (1854) was the transistor invented (1947)?"
+   },
+   "options": [
+    {
+     "ta": "73",
+     "en": "73"
+    },
+    {
+     "ta": "93",
+     "en": "93"
+    },
+    {
+     "ta": "103",
+     "en": "103"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "1947 − 1854.",
+    "en": "1947 − 1854."
+   },
+   "solution": {
+    "ta": "1947 − 1854 = **93** ஆண்டுகள் — கணிதம் இயந்திரமாவதற்குக் கிட்டத்தட்ட ஒரு நூற்றாண்டு ஆனது.",
+    "en": "1947 − 1854 = **93** years — it took almost a century for the mathematics to become a machine."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "AlexNet-ஐ எவ்வளவு முன்பிருந்து பார்க்கலாம்?",
+    "en": "How far back can we trace AlexNet?"
+   },
+   "q": {
+    "ta": "2012-ஆம் ஆண்டின் AlexNet எந்தெந்த அடித்தளங்களைப் பயன்படுத்தியது?",
+    "en": "Which foundations did AlexNet of 2012 use?"
+   },
+   "steps": [
+    {
+     "ta": "சுவிட்சுகள்: டிரான்சிஸ்டர் (1947) → பல கோடி சுவிட்சுகள் கொண்ட GPU சிப்.",
+     "en": "Switches: the transistor (1947) → a GPU chip with billions of switches."
+    },
+    {
+     "ta": "நிரல்: compiler (1952) முதல் மனிதர் படிக்கும் மொழியில் எழுதிய program.",
+     "en": "Programs: written in human-readable languages, from the compiler (1952) onward."
+    },
+    {
+     "ta": "கற்றல்: perceptron (1958) → backpropagation (1986) → தவறைக் குறைக்கும் gradient விதி.",
+     "en": "Learning: perceptron (1958) → backpropagation (1986) → the error-shrinking gradient rule."
+    },
+    {
+     "ta": "தரவு: இணையத்தின் பல கோடிப் படங்கள். விளைவு: பல தலைமுறைகளின் பணிகள் 2012-இல் ஒன்று சேர்ந்தன (பூலிலிருந்து 158 ஆண்டுகள்).",
+     "en": "Data: crores of pictures from the internet. Result: the work of many generations came together in 2012 (158 years after Boole)."
+    }
+   ]
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "உன் போன்",
+      "en": "Your phone"
+     },
+     "text": {
+      "ta": "அதில் டிரான்சிஸ்டர்கள் (1947), 0/1 எண்கள் (1703), compiler-கள் (1952), நியூரல் நெட்வொர்க்குகள் (1958 → 2012) எல்லாம் ஒன்றாக வேலை செய்கின்றன.",
+      "en": "Transistors (1947), 0/1 numbers (1703), compilers (1952) and neural networks (1958 → 2012) all work together in it."
+     }
+    },
+    {
+     "icon": "🧾",
+     "title": {
+      "ta": "UPI பணப் பரிமாற்றம்",
+      "en": "UPI payments"
+     },
+     "text": {
+      "ta": "கணக்கீடு, குறியாக்கம் (encryption), இணையம், தரவுத்தளம் — எல்லாமே இந்தச் சங்கிலியின் மேல் கட்டப்பட்டவை.",
+      "en": "Calculation, encryption, the internet and databases — all built on this chain."
+     }
+    },
+    {
+     "icon": "🏫",
+     "title": {
+      "ta": "உன் வகுப்பறை",
+      "en": "Your classroom"
+     },
+     "text": {
+      "ta": "நீ கற்கும் எண், தர்க்கம், படிமுறை ஆகியவை இதே சங்கிலியின் முதல் கண்ணிகள்.",
+      "en": "The numbers, logic and step-by-step thinking you learn are the first links of the same chain."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "உன் சாதனத்தின் வேர்கள்",
+    "en": "The roots of your gadget"
+   },
+   "text": {
+    "ta": "வீட்டில் உள்ள ஒரு சாதனத்தைத் தேர்ந்தெடு (போன், ஏடிஎம், பேருந்து டிக்கெட் இயந்திரம்). காலப் பாதையிலிருந்து குறைந்தது **4 கண்டுபிடிப்புகளை** அதனுடன் இணைத்து, \"இது இல்லையென்றால் இந்தச் சாதனம் இயங்காது\" என்று ஒரு வாக்கியம் எழுது.\n\n**சவால்:** அந்தச் சங்கிலியில் இன்னும் எந்தக் கண்டுபிடிப்புகள் தேவை என்று உன் குடும்பத்தில் ஒருவரிடம் கேட்டு, பட்டியலில் சேர்.",
+    "en": "Choose a device at home (a phone, an ATM, a bus-ticket machine). Link at least **4 inventions** from the timeline to it and write one sentence: \"without this, the device would not work\".\n\n**Challenge:** ask someone in your family what other inventions the chain needs, and add them to your list."
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "AI வந்துவிட்டதால் அடிப்படைகளைப் படிக்கத் தேவையில்லை என்று ஒருவர் சொன்னால், நீ என்ன பதில் சொல்வாய்?",
+    "en": "If someone says \"AI has arrived so the basics need not be studied\", how would you reply?"
+   },
+   "keywords": [
+    {
+     "ta": "அடிப்படை",
+     "en": "basics",
+     "alt": [
+      "foundation",
+      "அடித்தளம்"
+     ]
+    },
+    {
+     "ta": "சரிபார்",
+     "en": "check",
+     "alt": [
+      "verify",
+      "தவறு",
+      "mistake"
+     ]
+    },
+    {
+     "ta": "சங்கிலி",
+     "en": "chain",
+     "alt": [
+      "மேல்",
+      "build",
+      "stands"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "இன்றைய AI பல தலைமுறைகளின் அடிப்படைக் கண்டுபிடிப்புகளின் மேல் கட்டப்பட்டுள்ளது. அடிப்படை தெரியாவிட்டால் AI தவறு செய்யும்போது அதைக் கண்டுபிடித்துச் சரிபார்க்கவும், அடுத்த படியை உருவாக்கவும் முடியாது. அதனால் அடிப்படை இன்றும் தேவை.",
+    "en": "Today’s AI stands on the basic inventions of many generations. Without the basics nobody can find and check an AI’s mistakes, or build the next step. So the basics are still needed."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "எதிர்காலத்தில் இந்தச் சங்கிலியில் புதிய கண்ணிகள் சேரும். அவற்றில் சில இப்போதே மறைந்துகொண்டிருக்கும் எளிய அடிப்படைகளின் மேல் நிற்கும்.",
+    "en": "New links will join this chain in future. Some of them will stand on simple basics that are quietly fading from memory today."
+   },
+   "risk": {
+    "ta": "அடிப்படை அறிவு குறைந்து, எல்லாவற்றையும் AI-யிடம் மட்டும் ஒப்படைத்தால் பிழைகளையும் சார்புகளையும் யாரும் கண்டுபிடிக்க முடியாத நிலை வரலாம்.",
+    "en": "If basic knowledge shrinks and everything is handed to AI alone, a time may come when nobody can find errors and biases."
+   },
+   "fix": {
+    "ta": "பள்ளியில் எண், தர்க்கம், படிமுறை ஆகியவற்றை உறுதியாகக் கற்பதும், AI-யின் முடிவைச் சரிபார்க்கும் பழக்கமும் தேவை.",
+    "en": "Learning numbers, logic and algorithms firmly at school, and the habit of verifying AI’s output, are needed."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "அடுத்த மைல்கல்",
+    "en": "The next milestone"
+   },
+   "text": {
+    "ta": "காலப் பாதையில் உன் பெயர் சேர்க்கப்படுமானால் அது எந்தத் தலைப்பில் இருக்கும்? தமிழ் மொழிக்கான தரவு, விவசாயம், மருத்துவம், பள்ளிக்கல்வி — எதில் ஒரு அடி எடுத்து வைப்பாய்? அந்த அடிக்கு எந்த அடிப்படை (எண், தர்க்கம், program, கற்றல்) தேவை?",
+    "en": "If your name were added to the timeline, under what heading would it be? Tamil-language data, farming, medicine, school education — where would you take a step? Which basics (numbers, logic, programs, learning) would that step need?"
+   },
+   "prompts": [
+    {
+     "ta": "உன் ஊரில் தீர்க்க வேண்டிய ஒரு பிரச்சனை என்ன?",
+     "en": "What is one problem in your town to solve?"
+    },
+    {
+     "ta": "அதற்கு எந்தத் தரவு தேவை?",
+     "en": "What data would it need?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "அல்-குவாரிஸ்மி → லைப்னிட்ஸ் (1703) → லவ்லேஸ் (1843) → பூல் (1854) → டூரிங் (1936) → டிரான்சிஸ்டர் (1947) → ஹாப்பர் (1952).",
+     "en": "Al-Khwarizmi → Leibniz (1703) → Lovelace (1843) → Boole (1854) → Turing (1936) → transistor (1947) → Hopper (1952)."
+    },
+    {
+     "ta": "கற்கும் AI: perceptron (1958) → backpropagation (1986) → AlexNet (2012) → Transformer (2017).",
+     "en": "Learning AI: perceptron (1958) → backpropagation (1986) → AlexNet (2012) → Transformer (2017)."
+    },
+    {
+     "ta": "கோட்பாடு முதலில், வன்பொருள் பிறகு — கணிதம் ஒரு நூற்றாண்டு கழித்து இயந்திரமானது.",
+     "en": "Theory came first, hardware later — mathematics became a machine a century afterwards."
+    },
+    {
+     "ta": "ஒவ்வொரு கண்டுபிடிப்பும் முந்தையதன் மேல் நிற்கிறது; அடிப்படை தெரிந்தவரே சரிபார்க்கவும் உருவாக்கவும் முடியும்.",
+     "en": "Each invention stands on the one before; only those who know the basics can verify and create."
+    },
+    {
+     "ta": "இந்தத் தொடரின் பாடங்கள் இதே சங்கிலியின் வழியே உன் அறிவைக் கட்டுகின்றன.",
+     "en": "The lessons in this series build your knowledge along the same chain."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "\"Algorithm\" என்ற சொல்லின் வேர் யாருடைய பெயர்?",
+    "en": "The word \"algorithm\" is rooted in whose name?"
+   },
+   "options": [
+    {
+     "ta": "அல்-குவாரிஸ்மி",
+     "en": "Al-Khwarizmi"
+    },
+    {
+     "ta": "பூல்",
+     "en": "Boole"
+    },
+    {
+     "ta": "டூரிங்",
+     "en": "Turing"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அவரது பெயரின் இலத்தீன் வடிவம் Algoritmi.",
+    "en": "The Latin form of his name is Algoritmi."
+   }
+  },
+  {
+   "q": {
+    "ta": "0 மற்றும் 1 மட்டுமே கொண்ட இரும எண் முறையை 1703-இல் விளக்கியவர்?",
+    "en": "Who explained the binary system of only 0 and 1 in 1703?"
+   },
+   "options": [
+    {
+     "ta": "லைப்னிட்ஸ்",
+     "en": "Leibniz"
+    },
+    {
+     "ta": "ரோசன்ப்ளாட்",
+     "en": "Rosenblatt"
+    },
+    {
+     "ta": "ஹாப்பர்",
+     "en": "Hopper"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "கோட்ஃபிரீட் லைப்னிட்ஸ்.",
+    "en": "Gottfried Leibniz."
+   }
+  },
+  {
+   "q": {
+    "ta": "முதல் நிரல்களில் ஒன்றாகக் கருதப்படும் படிமுறையைப் பகுப்பாய்வு இயந்திரத்துக்காக எழுதியவர்?",
+    "en": "Who wrote an algorithm for the Analytical Engine that is regarded as one of the first programs?"
+   },
+   "options": [
+    {
+     "ta": "அடா லவ்லேஸ்",
+     "en": "Ada Lovelace"
+    },
+    {
+     "ta": "ஆலன் டூரிங்",
+     "en": "Alan Turing"
+    },
+    {
+     "ta": "ஜார்ஜ் பூல்",
+     "en": "George Boole"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "1843-இல் அடா லவ்லேஸ்.",
+    "en": "Ada Lovelace, in 1843."
+   }
+  },
+  {
+   "q": {
+    "ta": "டிரான்சிஸ்டர் கண்டுபிடிக்கப்பட்ட ஆண்டு?",
+    "en": "In which year was the transistor invented?"
+   },
+   "options": [
+    {
+     "ta": "1854",
+     "en": "1854"
+    },
+    {
+     "ta": "1936",
+     "en": "1936"
+    },
+    {
+     "ta": "1947",
+     "en": "1947"
+    },
+    {
+     "ta": "1958",
+     "en": "1958"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "1947, பெல் ஆய்வகத்தில்.",
+    "en": "1947, at Bell Labs."
+   }
+  },
+  {
+   "q": {
+    "ta": "எடுத்துக்காட்டுகளிலிருந்து தன் எடைகளைத் தானே மாற்றிக்கொள்ளும் perceptron எப்போது?",
+    "en": "When was the perceptron, which adjusts its own weights from examples?"
+   },
+   "options": [
+    {
+     "ta": "1703",
+     "en": "1703"
+    },
+    {
+     "ta": "1958",
+     "en": "1958"
+    },
+    {
+     "ta": "2017",
+     "en": "2017"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1958-இல் பிராங்க் ரோசன்ப்ளாட்.",
+    "en": "Frank Rosenblatt, 1958."
+   }
+  },
+  {
+   "q": {
+    "ta": "Transformer அமைப்பு எந்த ஆண்டு அறிமுகம் ஆனது?",
+    "en": "In which year was the Transformer design introduced?"
+   },
+   "options": [
+    {
+     "ta": "2012",
+     "en": "2012"
+    },
+    {
+     "ta": "2017",
+     "en": "2017"
+    },
+    {
+     "ta": "1986",
+     "en": "1986"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "\"Attention Is All You Need\" ஆய்வுக்கட்டுரை, 2017.",
+    "en": "\"Attention Is All You Need\", 2017."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"கோட்பாடு முதலில், வன்பொருள் பிறகு\" என்பதற்கு எடுத்துக்காட்டு?",
+    "en": "Which is an example of \"theory first, hardware later\"?"
+   },
+   "options": [
+    {
+     "ta": "போன் கேமரா",
+     "en": "Phone cameras"
+    },
+    {
+     "ta": "பூலின் கணிதம் (1854) → டிரான்சிஸ்டர் gates (1947)",
+     "en": "Boole’s mathematics (1854) → transistor gates (1947)"
+    },
+    {
+     "ta": "புதிய செயலிகள்",
+     "en": "New apps"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "93 ஆண்டுகளுக்குப் பிறகு கணிதம் சுவிட்சுகளாக மாறியது.",
+    "en": "After 93 years the mathematics became switches."
+   }
+  },
+  {
+   "q": {
+    "ta": "அடிப்படைகளை ஏன் இன்றும் கற்க வேண்டும்?",
+    "en": "Why should the basics still be learned today?"
+   },
+   "options": [
+    {
+     "ta": "AI தவறுகளைக் கண்டுபிடிக்கவும் அடுத்த படியை உருவாக்கவும்",
+     "en": "To find AI’s mistakes and build the next step"
+    },
+    {
+     "ta": "ஏனெனில் AI இல்லாமல் எதுவும் முடியாது",
+     "en": "Because nothing works without AI"
+    },
+    {
+     "ta": "தேர்வில் மதிப்பெண் பெற மட்டும்",
+     "en": "Only to score marks in exams"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அடிப்படை தெரிந்தவரே சரிபார்க்கவும் உருவாக்கவும் முடியும்.",
+    "en": "Only those who know the basics can verify and create."
+   }
+  }
+ ]
+}

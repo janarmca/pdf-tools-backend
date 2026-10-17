@@ -1,0 +1,520 @@
+{
+ "id": "ai-language",
+ "minutes": 25,
+ "title": {
+  "ta": "AI எப்படிப் \"பேசுகிறது\"? அடுத்த சொல்லை ஊகித்தல்",
+  "en": "How does AI \"talk\"? Guessing the next word"
+ },
+ "curriculum": [
+  {
+   "b": "Beyond syllabus",
+   "w": {
+    "ta": "பாடத்திட்டத்துக்கு அப்பால்: கணினி அறிவியலின் அடித்தளம் (CBSE / Samacheer கணினி அறிவியல் பாடங்களுக்குத் துணை)",
+    "en": "Beyond the syllabus: foundations of computer science (supports CBSE / Samacheer computer-science topics)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "மொழி மாதிரி (language model) அடுத்த சொல்லை எப்படி ஊகிக்கிறது என்று விளக்க",
+   "en": "Explain how a language model guesses the next word"
+  },
+  {
+   "ta": "எண்ணிக்கையிலிருந்து நிகழ்தகவைக் கணக்கிட",
+   "en": "Work out a probability from counts"
+  },
+  {
+   "ta": "AI நம்பிக்கையுடன் தவறு சொல்வது ஏன் என்று புரிந்துகொள்ள",
+   "en": "Understand why an AI can be confidently wrong"
+  },
+  {
+   "ta": "AI-யின் பதிலை எப்படிச் சரிபார்ப்பது என்று சொல்ல",
+   "en": "Say how to verify an AI’s answer"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் போன் விசைப்பலகையில் \"நான் தினமும்\" என்று எழுதினால் மேலே \"படிக்கிறேன்\", \"செல்கிறேன்\" என்று சொற்கள் வரும். போனுக்குத் தமிழ் புரிகிறதா?\n\nஇல்லை. அது **முன்பு எழுதப்பட்ட பல வாக்கியங்களில், இந்தச் சொல்லுக்குப் பிறகு எது அடிக்கடி வந்தது** என்று எண்ணிவைத்திருக்கிறது. இன்றைய chat AI-களின் அடிப்படையும் இதே கேள்விதான்: **\"இதுவரை வந்ததைப் பார்த்தால், அடுத்து எது வர வாய்ப்பு அதிகம்?\"**\n\n**இது ஏன் உனக்குத் தேவை?** AI சரளமாகப் பேசுவதால் அது உண்மை சொல்கிறது என்று நினைக்கத் தோன்றும். அது ஏன் தவறு என்று இந்தப் பாடம் காட்டும்.",
+    "en": "When you type \"நான் தினமும்\" on your phone keyboard, suggestions like \"படிக்கிறேன்\" and \"செல்கிறேன்\" appear. Does the phone understand Tamil?\n\nNo. It has **counted, in many sentences written before, which word most often came after this word.** The basis of today’s chat AIs is the same question: **\"Given everything so far, what is most likely to come next?\"**\n\n**Why do you need this?** Because an AI speaks fluently, it is tempting to think it speaks the truth. This lesson shows why that is wrong."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "ஒரு AI \"தமிழ்நாட்டின் தலைநகரம் ___\" என்ற வாக்கியத்தை முடிக்கும்போது \"சென்னை\" என்று சொல்வது ஏன்?",
+    "en": "Why does an AI finish \"The capital of Tamil Nadu is ___\" with \"Chennai\"?"
+   },
+   "options": [
+    {
+     "ta": "அது சென்னைக்குப் போயிருக்கிறது",
+     "en": "It has been to Chennai"
+    },
+    {
+     "ta": "தான் பார்த்த எழுத்துகளில் அந்த இடத்தில் \"சென்னை\" என்பது மிக அதிகமாக வந்தது",
+     "en": "In the text it has seen, \"Chennai\" came there far more often than anything else"
+    },
+    {
+     "ta": "அதற்குள் ஒரு வரைபடம் இருக்கிறது",
+     "en": "It has a map inside"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "அடிப்படையில் இரண்டாவதுதான்: எழுத்துகளில் காணப்பட்ட வடிவங்கள். அதனால் சரியான பதில்கள் பொதுவாகக் கிடைக்கின்றன. ஆனால் அதே முறையில் தவறான பதிலும் வரலாம். இப்போது ஒரு சிறிய மாதிரியை நீயே பயிற்றுவித்துப் பார்.",
+    "en": "At heart it is the second: patterns found in text. That is why right answers usually come. But by the same method wrong answers can come too. Now train a small model yourself."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "nextWord",
+   "title": {
+    "ta": "ஒரு சிறிய மொழி மாதிரி",
+    "en": "A small language model"
+   },
+   "text": {
+    "ta": "மேலே உள்ள 8 எளிய வாக்கியங்கள்தான் இந்த மாதிரியின் பயிற்சித் தரவு. சொற்களைத் தொட்டு, அதற்குப் பிறகு எந்தச் சொல் எத்தனை முறை வந்தது என்று பார். \"<தொடக்கம்>\" என்பது வாக்கியத்தின் தொடக்கம். பிறகு 🎲 அழுத்தி வாக்கியங்களை உருவாக்கு. கடைசியாக தரவில் உன் சொந்த வாக்கியங்களைச் சேர்த்து / மாற்றி என்ன நடக்கிறது என்று பார்.",
+    "en": "The 8 simple sentences above are this model’s training data. Tap words to see which word came after it, and how many times. \"<தொடக்கம்>\" means the start of a sentence. Then press 🎲 to generate sentences. Finally add or change sentences in the data and see what happens."
+   },
+   "q": {
+    "ta": "பயிற்சித் தரவில் \"நான்\" என்ற சொல்லுக்குப் பிறகு எந்தச் சொல் அதிகமாக வருகிறது?",
+    "en": "In the training data, which word comes most often after \"நான்\"?"
+   },
+   "options": [
+    {
+     "ta": "தினமும் (5 இல் 2 முறை, 40%)",
+     "en": "தினமும் (2 of 5 times, 40%)"
+    },
+    {
+     "ta": "பள்ளிக்குச் (5 இல் 3 முறை)",
+     "en": "பள்ளிக்குச் (3 of 5 times)"
+    },
+    {
+     "ta": "படிக்கிறேன் (5 இல் 4 முறை)",
+     "en": "படிக்கிறேன் (4 of 5 times)"
+    }
+   ],
+   "correct": 0,
+   "insight": {
+    "ta": "\"நான்\"-இல் தொடங்கும் 5 வாக்கியங்களில் 2-இல் \"தினமும்\" வருகிறது (40%); தமிழ், பள்ளிக்குச், புத்தகம் ஒவ்வொன்றும் 1 முறை (20%). மாதிரி உன் தரவை மட்டுமே பின்பற்றுகிறது. தரவை மாற்றினால் அதன் \"எண்ணம்\" உடனே மாறும்!",
+    "en": "Of the 5 sentences starting with \"நான்\", 2 have \"தினமும்\" next (40%); தமிழ், பள்ளிக்குச் and புத்தகம் have 1 each (20%). The model simply follows your data. Change the data and its \"thinking\" changes at once!"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "எண்ணிக்கையிலிருந்து நிகழ்தகவு",
+    "en": "From counts to probability"
+   },
+   "text": {
+    "ta": "\"நான்\"-க்குப் பிறகு: தினமும் 2, தமிழ் 1, பள்ளிக்குச் 1, புத்தகம் 1 → மொத்தம் 5.\n\n[[ நிகழ்தகவு = அந்தச் சொல் வந்த முறை ÷ மொத்த முறை ]]\n\nஎனவே \"தினமும்\" = 2 ÷ 5 = 0.4 = **40%**. எல்லா நிகழ்தகவுகளின் கூட்டுத்தொகை எப்போதும் 100%.\n\n🎲 அழுத்தும்போது மாதிரி இந்த நிகழ்தகவுகளின்படி **சீட்டுக் குலுக்கல்** போலத் தேர்ந்தெடுக்கிறது. அதனால் ஒவ்வொரு முறையும் வேறு வாக்கியம் வரலாம்; தரவில் இல்லாத ஒரு சேர்க்கை (எ.கா. \"அவன் தினமும்…\") வராது.",
+    "en": "After \"நான்\": தினமும் 2, தமிழ் 1, பள்ளிக்குச் 1, புத்தகம் 1 → total 5.\n\n[[ probability = times that word came ÷ total times ]]\n\nSo \"தினமும்\" = 2 ÷ 5 = 0.4 = **40%**. All probabilities always add up to 100%.\n\nWhen you press 🎲 the model picks according to these probabilities, like a **draw of lots**. So a different sentence can come each time; a combination that never appears in the data (say \"அவன் தினமும்…\") will not come."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சிறிய மாதிரியிலிருந்து பெரிய AI வரை",
+    "en": "From a small model to a large AI"
+   },
+   "text": {
+    "ta": "இந்த மாதிரி முந்தைய **ஒரே ஒரு** சொல்லை மட்டுமே பார்க்கிறது. பெரிய மொழி மாதிரிகள் முந்தைய நூற்றுக்கணக்கான (இப்போது ஆயிரக்கணக்கான) சொற்களைப் பார்க்கின்றன; எந்தச் சொல் எதனோடு தொடர்புடையது என்று கவனிக்கும் **attention** என்ற முறையை 2017-இல் வந்த **Transformer** அமைப்பு பயன்படுத்துகிறது.\n\nஅவை எண்ணிக்கை அட்டவணை வைத்திருப்பதில்லை; முந்தைய பாடத்தில் நீ செய்த அதே **தவறைக் குறைக்கும் கற்றல்** மூலம் பல கோடி எடைகளைத் திருத்தி, \"அடுத்த சொல்லின் நிகழ்தகவு\"களை ஊகிக்கப் பழகுகின்றன. ஆனால் வெளியீட்டு யோசனை அதேதான்: **நிகழ்தகவுகள் → ஒன்றைத் தேர்ந்தெடு → அடுத்த சொல்.**",
+    "en": "This model looks at only **one** previous word. Large language models look at hundreds (now thousands) of previous words; the **Transformer** design of 2017 uses a method called **attention** to notice which word relates to which.\n\nThey do not keep a count table; through the same **error-shrinking learning** you did in the last lesson they adjust many crores of weights to learn to guess \"the probabilities of the next word\". But the output idea is the same: **probabilities → pick one → the next word.**"
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சரளமாகப் பேசும், ஆனால் தவறாகவும் இருக்கலாம்",
+    "en": "Fluent — and possibly wrong"
+   },
+   "text": {
+    "ta": "AI தேர்ந்தெடுப்பது **அதிக வாய்ப்புள்ள** சொல்லை; **உண்மையான** சொல்லை அல்ல. எழுத்துகளில் ஒரு தவறு அடிக்கடி வந்திருந்தால், அது தவறாக இருந்தாலும் அதுவே வாய்ப்பு அதிகமாகலாம். தரவில் இல்லாத ஒன்றைக் கேட்டால், அது \"தெரியாது\" என்று சொல்வதற்குப் பதிலாக நம்பகமாகத் தோன்றும் ஆனால் கற்பனையான பதிலைச் சொல்லிவிடலாம். இதை AI **hallucination** (இல்லாததைப் பேசுதல்) என்கிறார்கள்.\n\n**சரிபார்க்கும் வழிகள்:** (1) அரசு / பாடநூல் / நம்பகமான இணையதளம் போன்ற இரண்டு தனிச் சான்றுகளில் ஒப்பிடு. (2) எண், ஆண்டு, பெயர், மேற்கோள் இருந்தால் குறிப்பாகச் சரிபார். (3) முக்கிய முடிவுகளுக்கு (மருந்து, சட்டம், பணம்) AI-யை மட்டும் நம்பாதே. (4) \"இதற்குச் சான்று என்ன?\" என்று கேள்.",
+    "en": "The AI picks the **most likely** word, not the **true** word. If a mistake appears often in the text, it can be the most likely choice even though it is wrong. Asked about something not in its data, instead of saying \"I don’t know\" it may give a believable but invented answer. This is called AI **hallucination**.\n\n**Ways to verify:** (1) Compare with two independent sources such as government sites, textbooks and trusted websites. (2) Check numbers, years, names and quotations especially. (3) Do not rely on AI alone for important decisions (medicine, law, money). (4) Ask \"what is the evidence for this?\"."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "மொழி மாதிரி = அடுத்த சொல்லின் நிகழ்தகவுகளைக் கணிக்கும் அமைப்பு. அது சரளமாகப் பேசினாலும் \"புரிந்து\" சொல்கிறது என்றோ \"உண்மை\" சொல்கிறது என்றோ உறுதி இல்லை.",
+    "en": "A language model = a system that estimates the probabilities of the next word. Even though it speaks fluently, there is no guarantee that it \"understands\" or that it says the \"truth\"."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "பயிற்சித் தரவில் 8 வாக்கியங்கள்; அவற்றில் 2 \"அவன்\" என்று தொடங்குகின்றன. வாக்கிய ஆரம்பத்தில் \"அவன்\" வரும் நிகழ்தகவு எத்தனை சதவீதம்?",
+    "en": "The data has 8 sentences and 2 begin with \"அவன்\". What percent is the probability that a sentence starts with \"அவன்\"?"
+   },
+   "answer": 25,
+   "tol": 0,
+   "unit": {
+    "ta": "%",
+    "en": "%"
+   },
+   "hint": {
+    "ta": "2 ÷ 8 × 100.",
+    "en": "2 ÷ 8 × 100."
+   },
+   "solution": {
+    "ta": "2 ÷ 8 = 0.25 = **25%**.",
+    "en": "2 ÷ 8 = 0.25 = **25%**."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "தரவில் \"புத்தகம்\" என்ற சொல்லுக்குப் பிறகு \"படிக்கிறேன்\" 2 முறையும் \"படிக்கிறான்\" 1 முறையும் வருகின்றன. \"படிக்கிறான்\" வரும் வாய்ப்பு?",
+    "en": "In the data, after \"புத்தகம்\" the word \"படிக்கிறேன்\" came 2 times and \"படிக்கிறான்\" came 1 time. What is the chance of \"படிக்கிறான்\"?"
+   },
+   "options": [
+    {
+     "ta": "50%",
+     "en": "50%"
+    },
+    {
+     "ta": "சுமார் 33%",
+     "en": "About 33%"
+    },
+    {
+     "ta": "25%",
+     "en": "25%"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "1 ÷ (2 + 1).",
+    "en": "1 ÷ (2 + 1)."
+   },
+   "solution": {
+    "ta": "1 ÷ 3 ≈ 0.33 → சுமார் **33%**.",
+    "en": "1 ÷ 3 ≈ 0.33 → about **33%**."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "தரவு ஒரே மாதிரி இருந்தால்?",
+    "en": "What if the data is all the same?"
+   },
+   "q": {
+    "ta": "தரவில் \"நான் படிக்கிறேன்\" என்ற வாக்கியம் மட்டும் 10 முறை இருந்தால், \"நான்\"-க்குப் பிறகு என்ன வரும்?",
+    "en": "If the data has only the sentence \"நான் படிக்கிறேன்\" 10 times, what comes after \"நான்\"?"
+   },
+   "steps": [
+    {
+     "ta": "\"நான்\"-க்குப் பிறகு எப்போதும் \"படிக்கிறேன்\" (10 இல் 10).",
+     "en": "After \"நான்\" it is always \"படிக்கிறேன்\" (10 of 10)."
+    },
+    {
+     "ta": "நிகழ்தகவு = 10 ÷ 10 = 100%.",
+     "en": "Probability = 10 ÷ 10 = 100%."
+    },
+    {
+     "ta": "வேறு எந்தச் சொல்லும் ஒருபோதும் வராது — தரவு குறுகினால் மாதிரியின் \"உலகமும்\" குறுகும்.",
+     "en": "No other word will ever come — when the data is narrow the model’s \"world\" is narrow too."
+    }
+   ]
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "⌨️",
+     "title": {
+      "ta": "விசைப்பலகைப் பரிந்துரை",
+      "en": "Keyboard suggestions"
+     },
+     "text": {
+      "ta": "நீ தட்டச்சு செய்யும்போது தோன்றும் அடுத்த சொற்கள் இதே முறையின் சிறிய வடிவம்.",
+      "en": "The next-word suggestions while you type are a small form of this method."
+     }
+    },
+    {
+     "icon": "🔎",
+     "title": {
+      "ta": "தேடல் தானியங்கு நிறைவு",
+      "en": "Search autocomplete"
+     },
+     "text": {
+      "ta": "பலர் அடிக்கடி தேடியவற்றை வைத்து உன் தேடல் வரியை முடிக்க முயல்கிறது; அது \"சரியானது\" என்று அல்ல, \"பிரபலமானது\" என்று பொருள்.",
+      "en": "It tries to finish your query from what many people often searched; that means \"popular\", not \"correct\"."
+     }
+    },
+    {
+     "icon": "🤖",
+     "title": {
+      "ta": "Chat AI",
+      "en": "Chat AIs"
+     },
+     "text": {
+      "ta": "பெரிய அளவில் அதே யோசனை: சொற்களின் நிகழ்தகவுகளிலிருந்து அடுத்த சொல்லைத் தேர்ந்தெடுத்தல்.",
+      "en": "The same idea at a very large scale: choosing the next word from probabilities of words."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "சொல் சங்கிலி",
+    "en": "Word chain"
+   },
+   "text": {
+    "ta": "நண்பர்களுடன் வட்டமாக அமர். ஒருவர் ஒரு சொல்லைச் சொல்லட்டும். அடுத்தவர் \"அதற்குப் பிறகு மிகவும் இயல்பாக வரும் சொல்\" எதுவோ அதைச் சொல்லட்டும். 10 சொற்கள் வரை தொடர். வாக்கியம் அர்த்தமுள்ளதாக இருக்கிறதா? இப்போது ஒவ்வொருவரும் \"இயல்பாக வராத ஆனால் உண்மையான\" சொல்லைச் சொல்லிப் பாருங்கள்.\n\n**கேள்வி:** \"இயல்பாக வரும் சொல்\" என்பதும் \"உண்மையான சொல்\" என்பதும் எப்போதும் ஒன்றா?",
+    "en": "Sit in a circle with friends. One says a word. The next says the word that most naturally comes after it. Continue up to 10 words. Is the sentence meaningful? Now each of you try saying a word that is \"not natural but true\".\n\n**Question:** are \"the natural next word\" and \"the true word\" always the same?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "AI சரளமாகப் பேசினாலும் அதன் பதிலை ஏன் சரிபார்க்க வேண்டும்?",
+    "en": "Why should you verify an AI’s answer even if it speaks fluently?"
+   },
+   "keywords": [
+    {
+     "ta": "நிகழ்தகவு",
+     "en": "probability",
+     "alt": [
+      "வாய்ப்பு",
+      "likely"
+     ]
+    },
+    {
+     "ta": "உண்மை",
+     "en": "true",
+     "alt": [
+      "truth",
+      "சரி"
+     ]
+    },
+    {
+     "ta": "சரிபார்",
+     "en": "verify",
+     "alt": [
+      "check",
+      "சான்று"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "AI அடுத்த சொல்லின் நிகழ்தகவைக் கணக்கிட்டு, அதிக வாய்ப்புள்ள சொல்லைத் தேர்ந்தெடுக்கிறது; அது உண்மையா என்று சோதிப்பதில்லை. அதனால் சரளமாகத் தோன்றும் தவறான பதிலும் வரலாம். எனவே எண், பெயர், முக்கிய முடிவுகளை நம்பகமான இரண்டு சான்றுகளில் சரிபார்க்க வேண்டும்.",
+    "en": "An AI works out the probability of the next word and picks the most likely one; it does not check whether it is true. So a fluent but wrong answer can come. Therefore numbers, names and important decisions must be verified against two reliable sources."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "எதிர்காலத்தில் AI எழுதிய உரை, குரல், படம், காணொளி இணையத்தில் மிக அதிகமாகும். எது மனிதன் செய்தது, எது AI செய்தது, எது உண்மை என்று பிரித்தறிவது ஒரு முக்கியத் திறமையாக மாறும்.",
+    "en": "In future, AI-made text, voices, pictures and videos will be very common online. Telling what a person made, what an AI made, and what is true will become an important skill."
+   },
+   "risk": {
+    "ta": "போலிச் செய்திகள், போலிக் குரல் அழைப்புகள் ஏமாற்று வேலைகளுக்குப் பயன்படலாம்.",
+    "en": "Fake news and fake voice calls may be used for cheating."
+   },
+   "fix": {
+    "ta": "மூலத்தைத் தேடு, இரு சான்றுகளில் சரிபார், பணம் / OTP கேட்கும் அழைப்பை நம்பாதே; குடும்பத்தில் ஒரு ரகசியச் சொல் வைத்துக்கொள்.",
+    "en": "Look for the source, verify in two places, never trust calls asking for money or OTP; keep a family secret word."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் தரவு, உன் பாணி",
+    "en": "Your data, your style"
+   },
+   "text": {
+    "ta": "widget-இல் தரவை அழித்து, உன் நண்பர்கள் அல்லது குடும்பம் பேசும் 8 வாக்கியங்களை எழுது. மாதிரி உருவாக்கும் வாக்கியங்கள் உங்கள் பாணியில் இருக்கின்றனவா? எந்த வாக்கியங்களைச் சேர்த்தால் அது இன்னும் உன் பாணிக்கு நெருங்கும்?",
+    "en": "Clear the data in the widget and write 8 sentences your friends or family say. Do the generated sentences sound like your style? Which sentences would you add to bring it closer?"
+   },
+   "prompts": [
+    {
+     "ta": "தரவு 100 வாக்கியங்களானால் என்ன மாறும்?",
+     "en": "What would change with 100 sentences?"
+    },
+    {
+     "ta": "தவறான வாக்கியத்தைச் சேர்த்தால் என்ன ஆகும்?",
+     "en": "What happens if you add a wrong sentence?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "மொழி மாதிரி = \"இதுவரை வந்ததைப் பார்த்தால் அடுத்து எது வர வாய்ப்பு அதிகம்?\" என்ற கேள்விக்கான நிகழ்தகவுகள்.",
+     "en": "A language model = probabilities answering \"given what came before, what is most likely next?\""
+    },
+    {
+     "ta": "நிகழ்தகவு = அந்தச் சொல் வந்த முறை ÷ மொத்த முறை; கூட்டுத்தொகை 100%.",
+     "en": "probability = times that word came ÷ total times; they add up to 100%."
+    },
+    {
+     "ta": "தரவை மாற்றினால் மாதிரியின் பதிலும் மாறும்; தரவில் இல்லாததை அது அறியாது.",
+     "en": "Change the data and the model’s answer changes; it does not know what is not in the data."
+    },
+    {
+     "ta": "அதிக வாய்ப்பு ≠ உண்மை. AI சரளமாகத் தவறு சொல்லலாம் (hallucination).",
+     "en": "Most likely ≠ true. An AI can be fluent and wrong (hallucination)."
+    },
+    {
+     "ta": "எண், பெயர், முக்கிய முடிவுகளை இரண்டு நம்பகமான சான்றுகளில் சரிபார்.",
+     "en": "Verify numbers, names and important decisions in two reliable sources."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "மொழி மாதிரி அடுத்த சொல்லை எப்படித் தேர்ந்தெடுக்கிறது?",
+    "en": "How does a language model pick the next word?"
+   },
+   "options": [
+    {
+     "ta": "நிகழ்தகவுகளின் அடிப்படையில்",
+     "en": "Based on probabilities"
+    },
+    {
+     "ta": "இணையத்தில் தேடி",
+     "en": "By searching the internet"
+    },
+    {
+     "ta": "மனிதரிடம் கேட்டு",
+     "en": "By asking a human"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அடுத்த சொல்லின் நிகழ்தகவுகளிலிருந்து தேர்ந்தெடுக்கிறது.",
+    "en": "It picks from the probabilities of the next word."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"நான்\"-க்குப் பிறகு ஒரு சொல் 5 இல் 1 முறை வந்தால் அதன் நிகழ்தகவு?",
+    "en": "If a word came 1 time out of 5 after \"நான்\", its probability is?"
+   },
+   "options": [
+    {
+     "ta": "50%",
+     "en": "50%"
+    },
+    {
+     "ta": "5%",
+     "en": "5%"
+    },
+    {
+     "ta": "20%",
+     "en": "20%"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "1 ÷ 5 = 0.2, அதாவது 20%.",
+    "en": "1 ÷ 5 = 0.2 = 20%."
+   }
+  },
+  {
+   "q": {
+    "ta": "Hallucination என்றால்?",
+    "en": "What is hallucination?"
+   },
+   "options": [
+    {
+     "ta": "AI நம்பகமாகத் தோன்றும் ஆனால் தவறான / கற்பனைப் பதிலைச் சொல்வது",
+     "en": "An AI giving a believable but wrong or invented answer"
+    },
+    {
+     "ta": "AI தானாக அணைந்துபோவது",
+     "en": "An AI switching itself off"
+    },
+    {
+     "ta": "AI-யின் வேகம்",
+     "en": "The speed of an AI"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "அதிக வாய்ப்புள்ள சொற்கள் உண்மையாக இருக்க வேண்டும் என்பதில்லை.",
+    "en": "The most likely words need not be true."
+   }
+  },
+  {
+   "q": {
+    "ta": "Transformer (2017) என்ன புதிய யோசனையைப் பயன்படுத்தியது?",
+    "en": "What new idea did the Transformer (2017) use?"
+   },
+   "options": [
+    {
+     "ta": "attention — எந்தச் சொல் எதனோடு தொடர்புடையது என்று கவனித்தல்",
+     "en": "attention — noticing which word relates to which"
+    },
+    {
+     "ta": "பேட்டரி சேமிப்பு",
+     "en": "battery saving"
+    },
+    {
+     "ta": "இரும எண்கள்",
+     "en": "binary numbers"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "\"Attention Is All You Need\" ஆய்வுக்கட்டுரை.",
+    "en": "The paper \"Attention Is All You Need\"."
+   }
+  },
+  {
+   "q": {
+    "ta": "AI-யின் முக்கியமான பதிலைச் சரிபார்க்கச் சிறந்த வழி?",
+    "en": "What is the best way to verify an important AI answer?"
+   },
+   "options": [
+    {
+     "ta": "அதே AI-யிடம் மீண்டும் கேட்பது",
+     "en": "Ask the same AI again"
+    },
+    {
+     "ta": "இரண்டு நம்பகமான தனிச் சான்றுகளில் ஒப்பிடுவது",
+     "en": "Compare with two reliable independent sources"
+    },
+    {
+     "ta": "பதில் நீளமாக இருந்தால் நம்புவது",
+     "en": "Trust it if the answer is long"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "ஒரே மூலத்தை நம்புவதைவிடப் பல சான்றுகள் பாதுகாப்பானவை.",
+    "en": "Several sources are safer than trusting a single one."
+   }
+  },
+  {
+   "q": {
+    "ta": "தரவில் \"நான் படிக்கிறேன்\" மட்டுமே இருந்தால் \"நான்\"-க்குப் பிறகு எந்தச் சொல் வரும்?",
+    "en": "If the data holds only \"நான் படிக்கிறேன்\", which word follows \"நான்\"?"
+   },
+   "options": [
+    {
+     "ta": "வேறு எந்தச் சொல்லும் வரலாம்",
+     "en": "Any other word may come"
+    },
+    {
+     "ta": "எப்போதும் படிக்கிறேன்",
+     "en": "Always படிக்கிறேன்"
+    },
+    {
+     "ta": "எதுவும் வராது",
+     "en": "Nothing comes"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "தரவு குறுகினால் மாதிரியின் உலகமும் குறுகும்.",
+    "en": "When the data is narrow the model’s world is narrow."
+   }
+  }
+ ]
+}

@@ -1,0 +1,534 @@
+{
+ "id": "idea-to-result",
+ "minutes": 30,
+ "title": {
+  "ta": "யோசனை → program → compiler → முடிவு",
+  "en": "Idea → program → compiler → result"
+ },
+ "curriculum": [
+  {
+   "b": "Beyond syllabus",
+   "w": {
+    "ta": "பாடத்திட்டத்துக்கு அப்பால்: கணினி அறிவியலின் அடித்தளம் (CBSE / Samacheer கணினி அறிவியல் பாடங்களுக்குத் துணை)",
+    "en": "Beyond the syllabus: foundations of computer science (supports CBSE / Samacheer computer-science topics)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "ஒரு program எழுத்திலிருந்து முடிவு வரை எந்த நிலைகளைக் கடக்கிறது என்று சொல்ல",
+   "en": "Say the stages a program passes from text to result"
+  },
+  {
+   "ta": "tokens, tree, instructions என்ற சொற்களை விளக்க",
+   "en": "Explain tokens, tree and instructions"
+  },
+  {
+   "ta": "2 + 3 × 4 = 14 என்று கணினி எப்படி அறிகிறது என்று விளக்க",
+   "en": "Explain how a computer knows 2 + 3 × 4 = 14"
+  },
+  {
+   "ta": "compiler பிழைச் செய்தி ஏன் வருகிறது என்று புரிந்துகொள்ள",
+   "en": "Understand why a compiler shows an error message"
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "உன் கால்குலேட்டரில் 2 + 3 × 4 என்று தட்டினால் 14 வரும், 20 அல்ல. கணினி எப்படித் தெரிந்துகொண்டது, \"முதலில் பெருக்கு\" என்று?\n\nஇன்னொரு புதிர்: நாம் எழுதுவது ஆங்கிலம் போன்ற சொற்கள் (print, if, for). ஆனால் சிப்புக்கு 0 மற்றும் 1 மட்டுமே புரியும். இடையில் மொழிபெயர்ப்பவர் யார்?\n\nஅவர்தான் **compiler** (அல்லது interpreter). **இது ஏன் உனக்குத் தேவை?** இன்று AI நீ கேட்டால் program எழுதிக் கொடுக்கிறது. ஆனால் அந்த program எப்படி இயங்குகிறது என்று தெரிந்தவர் மட்டுமே அது சரியா என்று சோதிக்க முடியும்.",
+    "en": "Type 2 + 3 × 4 into your calculator and you get 14, not 20. How did it know to multiply first?\n\nAnother puzzle: we write English-like words (print, if, for). But a chip understands only 0 and 1. Who translates in between?\n\nThat is the **compiler** (or interpreter). **Why do you need this?** Today AI writes programs when you ask. But only someone who knows how a program runs can check whether it is right."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "2 + 3 * 4 என்பதன் விடை என்ன? (* = பெருக்கல்)",
+    "en": "What is 2 + 3 * 4? (* means multiply)"
+   },
+   "options": [
+    {
+     "ta": "20",
+     "en": "20"
+    },
+    {
+     "ta": "14",
+     "en": "14"
+    },
+    {
+     "ta": "24",
+     "en": "24"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "பெருக்கலுக்கு முன்னுரிமை உண்டு: 3 × 4 = 12, பிறகு 2 + 12 = **14**. இந்த முன்னுரிமையை compiler எப்படிப் புரிந்துகொள்கிறது என்பதை இப்போது கண்ணால் பார்க்கப் போகிறாய்.",
+    "en": "Multiplication has priority: 3 × 4 = 12, then 2 + 12 = **14**. Now you will see with your own eyes how the compiler understands this priority."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "compilerPipeline",
+   "title": {
+    "ta": "ஒரு மினி compiler",
+    "en": "A mini compiler"
+   },
+   "text": {
+    "ta": "கீழே ஒரு கணக்கை எழுதி ⚙️ அழுத்து. 5 நிலைகளையும் மேலிருந்து கீழாகப் படி: மூலம் → tokens → மரம் → machine கட்டளைகள் → ஓட்டம் → முடிவு. பிறகு (2 + 3) * 4 ஐ முயற்சி செய்; மரம் எப்படி மாறுகிறது என்று பார். கடைசியாக தவறான வாக்கியங்களை (2 + * 3, 10 / (5 - 5)) முயன்று பிழைச் செய்திகளைப் பார்.",
+    "en": "Type a calculation below and press ⚙️. Read the five stages from top to bottom: source → tokens → tree → machine instructions → run → result. Then try (2 + 3) * 4 and see how the tree changes. Finally try the wrong ones (2 + * 3, 10 / (5 - 5)) and read the error messages."
+   },
+   "q": {
+    "ta": "(2 + 3) * 4 இன் மரத்தில் **மேலே** (வேர்) உள்ள குறியீடு எது?",
+    "en": "In the tree of (2 + 3) * 4, which symbol is at the **top** (the root)?"
+   },
+   "options": [
+    {
+     "ta": "+",
+     "en": "+"
+    },
+    {
+     "ta": "*",
+     "en": "*"
+    },
+    {
+     "ta": "4",
+     "en": "4"
+    }
+   ],
+   "correct": 1,
+   "insight": {
+    "ta": "மரத்தின் மேலே இருப்பது **கடைசியாகச் செய்யப்படும்** செயல். அடைப்புக்குள் உள்ள 2 + 3 முதலில் கணக்கிடப்பட்டு 5 ஆகிறது; கடைசியாக 5 × 4 = 20. அடைப்பு இல்லாத 2 + 3 * 4-இல் மேலே + இருக்கும்; ஆழத்தில் உள்ள 3 * 4 முதலில் நடக்கும். அதனால்தான் முடிவு 14.",
+    "en": "The symbol at the top is the operation done **last**. The 2 + 3 in brackets is worked out first and becomes 5; at the end 5 × 4 = 20. In 2 + 3 * 4 without brackets, + is at the top and the deeper 3 * 4 happens first — that is why the result is 14."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "5 நிலைகள் — ஒவ்வொன்றும் ஏன்?",
+    "en": "Five stages — and why each"
+   },
+   "text": {
+    "ta": "**1. மூலம் (source):** மனிதன் எழுதிய எழுத்துக்கள் — \"2 + 3 * 4\".\n\n**2. Tokens:** எழுத்துக்களைச் சொற்களாகத் துண்டாக்குதல் — 2, +, 3, *, 4. இங்கேயே $ போன்ற புரியாத குறியீடு இருந்தால் பிழை.\n\n**3. மரம் (tree / syntax tree):** எந்தச் செயல் எதன் உள்ளே உள்ளது, எதை முதலில் செய்ய வேண்டும் என்ற அமைப்பு. இங்கேதான் × முன்னுரிமை தீர்மானமாகிறது. \"2 + * 3\" போன்ற இலக்கணப் பிழை இங்கே பிடிபடும்; program ஓடவே தொடங்காது.\n\n**4. Machine கட்டளைகள்:** மரத்தை எளிய கட்டளைகளாக மாற்றுதல்: PUSH 2, PUSH 3, PUSH 4, MUL, ADD. (இது ஒரு stack machine; உண்மையான சிப் கட்டளைகள் வேறு, ஆனால் யோசனை இதுவே.)\n\n**5. ஓட்டம் (run):** கட்டளைகளை ஒவ்வொன்றாகச் செய்தல் — stack-இல் எண்களை வைத்து எடுத்து. 10 / 0 போன்ற பிழை இங்கே தெரியவரும் (runtime error).",
+    "en": "**1. Source:** the characters a person wrote — \"2 + 3 * 4\".\n\n**2. Tokens:** splitting characters into words — 2, +, 3, *, 4. A strange symbol like $ is caught here.\n\n**3. Tree (syntax tree):** the structure of which operation sits inside which, and what must be done first. This is where the priority of × is decided. A grammar mistake like \"2 + * 3\" is caught here; the program never starts running.\n\n**4. Machine instructions:** turning the tree into simple instructions: PUSH 2, PUSH 3, PUSH 4, MUL, ADD. (This is a stack machine; real chips have different instructions, but the idea is the same.)\n\n**5. Run:** doing the instructions one by one — putting numbers on a stack and taking them off. A mistake like 10 / 0 shows up here (a runtime error)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "படிக்கட்டு: யோசனையிலிருந்து சிப் வரை",
+    "en": "The ladder: from idea down to the chip"
+   },
+   "text": {
+    "ta": "**யோசனை** (\"வகுப்பின் சராசரி மதிப்பெண் வேண்டும்\") → **algorithm** (படிகள்) → **program** (Python, Java போன்ற மொழியில் எழுதியது) → **compiler / interpreter** (மொழிபெயர்ப்பு) → **machine code** (0/1 கட்டளைகள்) → **logic gates** (முந்தைய பாடம்) → **முடிவு**.\n\n1952 வாக்கில் கிரேஸ் ஹாப்பர் (Grace Hopper) மனிதர் படிக்கக்கூடிய வடிவை இயந்திரக் கட்டளையாக மாற்றும் ஆரம்ப compiler நிரல்களில் ஒன்றை உருவாக்கினார். அதற்கு முன் எல்லாரும் 0/1-இல் நேரடியாக எழுத வேண்டியிருந்தது!\n\n**Compiler** முழு program-ஐயும் முதலிலேயே மொழிபெயர்த்துவிடும்; **interpreter** ஒவ்வொரு வரியாக மொழிபெயர்த்து ஓட்டும். இரண்டும் மேலே உள்ள நிலைகளையே பயன்படுத்துகின்றன.",
+    "en": "**Idea** (\"I want the class average\") → **algorithm** (steps) → **program** (written in a language like Python or Java) → **compiler / interpreter** (translation) → **machine code** (0/1 instructions) → **logic gates** (the previous lesson) → **result**.\n\nAround 1952 Grace Hopper built one of the first compiler programs that turned human-readable text into machine instructions. Before that everyone had to write directly in 0s and 1s!\n\nA **compiler** translates the whole program first; an **interpreter** translates and runs line by line. Both use the stages above."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "\"Compile ஆகிவிட்டது\" என்றால் இலக்கணம் சரி என்றுதான் பொருள் — நீ நினைத்தது சரியாக நடக்கும் என்று பொருள் அல்ல. கணினி நீ சொன்னதையே செய்யும்; நினைத்ததை அல்ல.",
+    "en": "\"It compiled\" only means the grammar is right — not that it will do what you meant. A computer does what you said, not what you thought."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "(7 - 2) * (3 + 1) இன் விடை?",
+    "en": "What is (7 - 2) * (3 + 1)?"
+   },
+   "answer": 20,
+   "tol": 0,
+   "hint": {
+    "ta": "அடைப்புகளை முதலில்: 5 மற்றும் 4.",
+    "en": "Brackets first: 5 and 4."
+   },
+   "solution": {
+    "ta": "7 − 2 = 5; 3 + 1 = 4; 5 × 4 = 20. (widget-இல் தட்டிச் சரிபார்.)",
+    "en": "7 − 2 = 5; 3 + 1 = 4; 5 × 4 = 20. (Check by typing it into the widget.)"
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "2 + 3 * 4 க்கு உருவாகும் PUSH கட்டளைகள் எத்தனை?",
+    "en": "How many PUSH instructions are made for 2 + 3 * 4?"
+   },
+   "options": [
+    {
+     "ta": "2",
+     "en": "2"
+    },
+    {
+     "ta": "3",
+     "en": "3"
+    },
+    {
+     "ta": "5",
+     "en": "5"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "ஒவ்வொரு எண்ணுக்கும் ஒரு PUSH.",
+    "en": "One PUSH for every number."
+   },
+   "solution": {
+    "ta": "2, 3, 4 என மூன்று எண்கள் → 3 PUSH; அதன் பின் MUL, ADD.",
+    "en": "Three numbers 2, 3, 4 → 3 PUSH; then MUL and ADD."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "5 - 2 * 3 ஐக் கையால் compile செய்",
+    "en": "Compile 5 - 2 * 3 by hand"
+   },
+   "q": {
+    "ta": "மரம், கட்டளைகள், முடிவு என மூன்றையும் எழுது.",
+    "en": "Write the tree, the instructions and the result."
+   },
+   "steps": [
+    {
+     "ta": "மரம்: மேலே −; இடதில் 5; வலதில் (2 × 3). ஏனெனில் × முன்னுரிமை.",
+     "en": "Tree: − at the top; 5 on the left; (2 × 3) on the right, because × has priority."
+    },
+    {
+     "ta": "கட்டளைகள்: PUSH 5, PUSH 2, PUSH 3, MUL, SUB.",
+     "en": "Instructions: PUSH 5, PUSH 2, PUSH 3, MUL, SUB."
+    },
+    {
+     "ta": "ஓட்டம்: [5] → [5,2] → [5,2,3] → MUL: [5,6] → SUB: [−1].",
+     "en": "Run: [5] → [5,2] → [5,2,3] → MUL: [5,6] → SUB: [−1]."
+    },
+    {
+     "ta": "முடிவு: **−1**. widget-இல் தட்டிப் பார்!",
+     "en": "Result: **−1**. Type it into the widget to check!"
+    }
+   ]
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "📊",
+     "title": {
+      "ta": "Excel சூத்திரம்",
+      "en": "Excel formulas"
+     },
+     "text": {
+      "ta": "=A1+B1*2 என்று எழுதும்போது Excel-உம் அதே முன்னுரிமை விதிகளுடன் tokens → tree → கணக்கீடு செய்கிறது.",
+      "en": "When you write =A1+B1*2, Excel also goes through tokens → tree → calculation with the same priority rules."
+     }
+    },
+    {
+     "icon": "🌐",
+     "title": {
+      "ta": "இணையப் பக்கம்",
+      "en": "A web page"
+     },
+     "text": {
+      "ta": "உலாவி (browser) JavaScript என்ற மொழியை நீ பக்கத்தைத் திறக்கும்போதே படித்து மொழிபெயர்த்து ஓட்டுகிறது.",
+      "en": "Your browser reads, translates and runs JavaScript right when you open the page."
+     }
+    },
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "ஆப் (App)",
+      "en": "An app"
+     },
+     "text": {
+      "ta": "நீ பதிவிறக்கும் ஆப் ஏற்கெனவே compile செய்யப்பட்ட கட்டளைகள்; அதனால் போன் அதை உடனே ஓட்டுகிறது.",
+      "en": "The app you download is already compiled instructions, which is why the phone can run it at once."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "காகிதத்தில் ஒரு stack machine",
+    "en": "A stack machine on paper"
+   },
+   "text": {
+    "ta": "ஒரு கோப்பையில் (அல்லது ஒரு தாள் அடுக்கில்) எண் தாள்களை அடுக்கி வை. \"(8 − 2) / 3\" க்கு இந்தக் கட்டளைகளை எழுது: PUSH 8, PUSH 2, SUB, PUSH 3, DIV. ஒவ்வொரு கட்டளைக்கும் மேலிருந்து தாள்களை எடுத்துச் செய்து, விடையைத் தாளில் எழுதி மீண்டும் மேலே வை. விடை 2 வருகிறதா?\n\n**சவால்:** \"2 + 3 * 4\" க்கும் செய்து பார். எங்கே ஒழுங்கு மாறினால் 20 வரும்?",
+    "en": "Stack paper slips with numbers in a cup (or a pile). For \"(8 − 2) / 3\" write these instructions: PUSH 8, PUSH 2, SUB, PUSH 3, DIV. For each instruction, take slips from the top, do the operation, write the answer on a slip and put it back. Do you get 2?\n\n**Challenge:** do the same for \"2 + 3 * 4\". Where would a change of order give 20?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "\"2 + 3 * 4\" எப்படி 14 ஆகிறது என்று compiler நிலைகளுடன் விளக்கு.",
+    "en": "Explain with the compiler stages how \"2 + 3 * 4\" becomes 14."
+   },
+   "keywords": [
+    {
+     "ta": "tokens",
+     "en": "tokens",
+     "alt": [
+      "துண்டு",
+      "சொற்கள்",
+      "words"
+     ]
+    },
+    {
+     "ta": "மரம்",
+     "en": "tree",
+     "alt": [
+      "syntax"
+     ]
+    },
+    {
+     "ta": "முன்னுரிமை",
+     "en": "priority",
+     "alt": [
+      "precedence",
+      "முதலில்"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "compiler முதலில் எழுத்துக்களை tokens ஆகப் பிரிக்கிறது (2, +, 3, *, 4). பிறகு மரத்தை உருவாக்கும்போது × க்கு முன்னுரிமை இருப்பதால் 3 * 4 ஆழத்தில் வைக்கப்படுகிறது. கட்டளைகள் PUSH 2, PUSH 3, PUSH 4, MUL, ADD ஆக மாறி ஓடும்போது முதலில் 12 கிடைத்து, பிறகு 2 + 12 = 14 ஆகிறது.",
+    "en": "The compiler first splits the characters into tokens (2, +, 3, *, 4). While building the tree it places 3 * 4 deeper because × has priority. The instructions become PUSH 2, PUSH 3, PUSH 4, MUL, ADD; when run, 12 is produced first and then 2 + 12 = 14."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று AI program எழுதித் தருகிறது. அது compile ஆகலாம்; ஆனால் அது உன் தேவையைச் சரியாகத் தீர்க்கிறதா என்பதை compiler சொல்லாது. பொருளின் சரியை மனிதன்தான் சோதிக்க வேண்டும்.",
+    "en": "Today AI writes programs for you. It may compile, but the compiler will not tell you whether it solves your real need. Humans must check the meaning."
+   },
+   "risk": {
+    "ta": "சரியாக ஓடுவது போலத் தோன்றும் ஆனால் சில சூழ்நிலைகளில் தவறான விடை தரும் program-கள் ஆபத்தானவை (எ.கா. கட்டணக் கணக்கு, மருந்து அளவு).",
+    "en": "Programs that seem to run fine but give wrong answers in some situations are dangerous (for example billing, or medicine doses)."
+   },
+   "fix": {
+    "ta": "சோதனை எடுத்துக்காட்டுகள் (test cases) எழுதிக் கையால் கணக்கிட்ட விடையுடன் ஒப்பிடு; அடிப்படை தெரிந்தவரே அதைச் செய்ய முடியும்.",
+    "en": "Write test cases and compare with answers you worked out by hand; only someone who knows the basics can do that."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் மொழியின் விதி",
+    "en": "A rule for your own language"
+   },
+   "text": {
+    "ta": "நீ ஒரு புதிய கால்குலேட்டர் மொழி செய்கிறாய் என்று வைத்துக்கொள். \"^\" என்பது அடுக்கு (2 ^ 3 = 8) என்றால் அதற்கு + மற்றும் × ஐ விடப் பெரிய முன்னுரிமை கொடுப்பாயா? ஏன்? மரம் எப்படி மாறும்?",
+    "en": "Imagine you are making a new calculator language. If \"^\" means power (2 ^ 3 = 8), would you give it higher priority than + and ×? Why? How would the tree change?"
+   },
+   "prompts": [
+    {
+     "ta": "2 + 3 ^ 2 இன் விடை எவ்வளவாக இருக்க வேண்டும்?",
+     "en": "What should 2 + 3 ^ 2 give?"
+    },
+    {
+     "ta": "எந்த operation மரத்தில் ஆழத்தில் இருக்கும்?",
+     "en": "Which operation sits deepest in the tree?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "Program நிலைகள்: மூலம் → tokens → மரம் → machine கட்டளைகள் → ஓட்டம் → முடிவு.",
+     "en": "Program stages: source → tokens → tree → machine instructions → run → result."
+    },
+    {
+     "ta": "மரத்தில் ஆழத்தில் உள்ளது முதலில் நடக்கும்; இதுவே × முன்னுரிமையை உருவாக்குகிறது.",
+     "en": "What is deeper in the tree happens first; this creates the priority of ×."
+    },
+    {
+     "ta": "இலக்கணப் பிழை மரம் கட்டும்போது பிடிபடும்; 0-ஆல் வகுப்பது ஓடும்போது தெரியும்.",
+     "en": "A grammar error is caught while building the tree; dividing by 0 shows up at run time."
+    },
+    {
+     "ta": "Compile ஆவது = இலக்கணம் சரி. நினைத்தது நடக்கிறதா என்று சோதிப்பது உன் வேலை.",
+     "en": "Compiling = grammar is right. Checking that it does what you meant is your job."
+    },
+    {
+     "ta": "1952-இல் கிரேஸ் ஹாப்பரின் compiler, மனிதர் படிக்கும் மொழியில் எழுத வழிவகுத்தது.",
+     "en": "Grace Hopper’s compiler of 1952 opened the way to writing in human-readable languages."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "Tokens என்றால்?",
+    "en": "What are tokens?"
+   },
+   "options": [
+    {
+     "ta": "program-ன் இறுதி விடை",
+     "en": "The final answer of a program"
+    },
+    {
+     "ta": "எழுத்துக்களைத் துண்டாக்கிய சொற்கள் / குறியீடுகள்",
+     "en": "The words/symbols the text is split into"
+    },
+    {
+     "ta": "ஒரு வகை சிப்",
+     "en": "A kind of chip"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "மூலத்தை முதல் நிலையில் tokens ஆகத் துண்டாக்குவார்கள்.",
+    "en": "The source is first split into tokens."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"2 + * 3\" எந்த நிலையில் பிடிபடும்?",
+    "en": "At which stage is \"2 + * 3\" caught?"
+   },
+   "options": [
+    {
+     "ta": "மரம் கட்டும் நிலையில் (இலக்கணப் பிழை)",
+     "en": "While building the tree (a syntax error)"
+    },
+    {
+     "ta": "முடிவு அச்சிடும்போது",
+     "en": "While printing the result"
+    },
+    {
+     "ta": "பிடிபடாது",
+     "en": "It is never caught"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "+ க்குப் பிறகு ஒரு எண் வர வேண்டும்; அது வராததால் மரம் கட்ட முடியாது.",
+    "en": "A number must follow +; it does not, so the tree cannot be built."
+   }
+  },
+  {
+   "q": {
+    "ta": "10 / (5 - 5) எந்தப் பிழையைத் தரும்?",
+    "en": "What error does 10 / (5 - 5) give?"
+   },
+   "options": [
+    {
+     "ta": "இலக்கணப் பிழை",
+     "en": "A syntax error"
+    },
+    {
+     "ta": "பூஜ்யத்தால் வகுத்தல் (ஓடும்போது)",
+     "en": "Division by zero (at run time)"
+    },
+    {
+     "ta": "எந்தப் பிழையும் இல்லை",
+     "en": "No error"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "இலக்கணம் சரி; ஆனால் ஓடும்போது 10 / 0 ஆகிறது.",
+    "en": "The grammar is fine, but at run time it becomes 10 / 0."
+   }
+  },
+  {
+   "q": {
+    "ta": "2 + 3 * 4 இல் எது முதலில் கணக்கிடப்படும்?",
+    "en": "In 2 + 3 * 4, which is calculated first?"
+   },
+   "options": [
+    {
+     "ta": "2 + 3",
+     "en": "2 + 3"
+    },
+    {
+     "ta": "3 * 4",
+     "en": "3 * 4"
+    },
+    {
+     "ta": "இடமிருந்து வலம் எல்லாம் ஒன்றாக",
+     "en": "Everything at once, left to right"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "× க்கு + ஐ விட முன்னுரிமை.",
+    "en": "× has priority over +."
+   }
+  },
+  {
+   "q": {
+    "ta": "கணக்கிடு: (2 + 3) * 4 = ?",
+    "en": "(2 + 3) * 4 = ?"
+   },
+   "options": [
+    {
+     "ta": "14",
+     "en": "14"
+    },
+    {
+     "ta": "24",
+     "en": "24"
+    },
+    {
+     "ta": "20",
+     "en": "20"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "அடைப்பு முதலில்: 5 × 4 = 20.",
+    "en": "Brackets first: 5 × 4 = 20."
+   }
+  },
+  {
+   "q": {
+    "ta": "ஆரம்ப compiler ஒன்றை 1952 வாக்கில் உருவாக்கியவர்?",
+    "en": "Who built one of the first compilers around 1952?"
+   },
+   "options": [
+    {
+     "ta": "கிரேஸ் ஹாப்பர்",
+     "en": "Grace Hopper"
+    },
+    {
+     "ta": "ஜார்ஜ் பூல்",
+     "en": "George Boole"
+    },
+    {
+     "ta": "லைப்னிட்ஸ்",
+     "en": "Leibniz"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "கிரேஸ் ஹாப்பர்.",
+    "en": "Grace Hopper."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"Compile ஆகிவிட்டது\" என்றால்?",
+    "en": "What does \"it compiled\" mean?"
+   },
+   "options": [
+    {
+     "ta": "program எப்போதும் சரியான விடை தரும்",
+     "en": "The program always gives the right answer"
+    },
+    {
+     "ta": "இலக்கணம் சரி; நோக்கம் சரியா என்பது தனியாகச் சோதிக்க வேண்டும்",
+     "en": "The grammar is right; whether it does what you meant must be tested separately"
+    },
+    {
+     "ta": "program ஓடவே ஓடாது",
+     "en": "The program will never run"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "compiler இலக்கணத்தைத்தான் சோதிக்கிறது.",
+    "en": "A compiler only checks grammar."
+   }
+  }
+ ]
+}

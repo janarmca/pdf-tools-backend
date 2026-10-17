@@ -1,0 +1,573 @@
+{
+ "id": "logic-gates",
+ "minutes": 25,
+ "title": {
+  "ta": "சரி / தவறு-லிருந்து சிப் வரை: logic gates",
+  "en": "From true/false to the chip: logic gates"
+ },
+ "curriculum": [
+  {
+   "b": "Beyond syllabus",
+   "w": {
+    "ta": "பாடத்திட்டத்துக்கு அப்பால்: கணினி அறிவியலின் அடித்தளம் (CBSE / Samacheer கணினி அறிவியல் பாடங்களுக்குத் துணை)",
+    "en": "Beyond the syllabus: foundations of computer science (supports CBSE / Samacheer computer-science topics)"
+   }
+  }
+ ],
+ "goals": [
+  {
+   "ta": "AND, OR, NOT, XOR gates என்ன செய்கின்றன என்று சொல்ல",
+   "en": "Say what the AND, OR, NOT and XOR gates do"
+  },
+  {
+   "ta": "truth table எழுதிப் படிக்க",
+   "en": "Write and read a truth table"
+  },
+  {
+   "ta": "கணினி கூட்டலை gates மூலம் எப்படிச் செய்கிறது என்பதை விளக்க",
+   "en": "Explain how a computer adds numbers using gates"
+  },
+  {
+   "ta": "\"கணினி யோசிக்கிறது\" என்பதன் அடிப்படை என்ன என்று புரிந்துகொள்ள",
+   "en": "Understand what is underneath \"the computer thinks\""
+  }
+ ],
+ "blocks": [
+  {
+   "type": "hook",
+   "text": {
+    "ta": "அம்மா சொல்கிறார்: \"மழை பெய்கிறது **மற்றும்** உன்னிடம் குடை இல்லை என்றால் நனைவாய்.\" இதில் இரண்டு நிபந்தனைகள், ஒரே ஒரு முடிவு. நீ தினமும் இப்படி எத்தனை முறை \"இது **மற்றும்** அது\", \"இது **அல்லது** அது\" என்று யோசிக்கிறாய்!\n\nஇதே யோசனையை 1854-இல் ஒரு கணிதவியலாளர் கணக்காக எழுதினார். அந்தக் கணக்குதான் இன்று உன் போனில் உள்ள ஒவ்வொரு சிப்பின் உள்ளேயும் இருக்கிறது.\n\n**இது ஏன் உனக்குத் தேவை?** இன்று AI எல்லா வேலையையும் செய்கிறது. ஆனால் அது எதன் மேல் நிற்கிறது என்று தெரிந்தவர்தான் அது தவறு செய்யும்போது கண்டுபிடிக்க முடியும், நாளை புதிதாக ஒன்றை உருவாக்கவும் முடியும். இங்கே தொடங்குவோம்.",
+    "en": "Mother says: \"If it is raining **and** you have no umbrella, you will get wet.\" Two conditions, one result. Every day you think \"this **and** that\", \"this **or** that\" many times!\n\nIn 1854 a mathematician wrote exactly this kind of thinking as mathematics. That mathematics sits today inside every chip in your phone.\n\n**Why do you need this?** Today AI does a lot of the work. But only someone who knows what it stands on can find its mistakes — and build something new tomorrow. Let us begin here."
+   }
+  },
+  {
+   "type": "predict",
+   "q": {
+    "ta": "இரும எண்ணில் 1 + 1 = ?",
+    "en": "In binary, 1 + 1 = ?"
+   },
+   "options": [
+    {
+     "ta": "2",
+     "en": "2"
+    },
+    {
+     "ta": "10",
+     "en": "10"
+    },
+    {
+     "ta": "11",
+     "en": "11"
+    }
+   ],
+   "answer": 1,
+   "reveal": {
+    "ta": "இரும எண்ணில் 2 என்ற இலக்கமே இல்லை (0, 1 மட்டுமே). எனவே 1 + 1 = **10** (ஒரு \"இரண்டு\", சைபர் \"ஒன்று\"). நாம் 9 + 1 = 10 என்று எழுதுவது போலத்தான். கணினி இதை எப்படிச் செய்கிறது என்று இன்று gates மூலம் பார்ப்போம்.",
+    "en": "In binary there is no digit 2 (only 0 and 1). So 1 + 1 = **10** (one \"two\", zero \"ones\") — just like 9 + 1 = 10 for us. Today you will see how a computer does it with gates."
+   }
+  },
+  {
+   "type": "discover",
+   "widget": "logicGates",
+   "title": {
+    "ta": "Gates-ஐத் தொட்டுப் பார்",
+    "en": "Play with the gates"
+   },
+   "text": {
+    "ta": "மேலே AND, OR, NOT, XOR, NAND எனத் தேர்ந்தெடு. A, B சுவிட்சுகளைத் தொட்டு விடை மாறுவதைப் பார். கீழே உள்ள அட்டவணை (truth table) எல்லா சாத்தியங்களையும் காட்டும். பிறகு கீழே இரண்டு எண்களைத் தேர்ந்தெடுத்து, gates மட்டுமே வைத்துக் கூட்டுவதைப் பார்.",
+    "en": "Choose AND, OR, NOT, XOR or NAND. Tap the A and B switches and watch the answer change. The table (truth table) lists every possibility. Then pick two numbers at the bottom and watch them being added by gates alone."
+   },
+   "q": {
+    "ta": "எந்த gate, இரண்டு உள்ளீடுகளும் **வேறுவேறாக** இருந்தால் மட்டுமே 1 தரும்?",
+    "en": "Which gate gives 1 only when the two inputs are **different**?"
+   },
+   "options": [
+    {
+     "ta": "AND",
+     "en": "AND"
+    },
+    {
+     "ta": "OR",
+     "en": "OR"
+    },
+    {
+     "ta": "XOR",
+     "en": "XOR"
+    }
+   ],
+   "correct": 2,
+   "insight": {
+    "ta": "XOR (exclusive OR). 0,1 → 1 மற்றும் 1,0 → 1; ஆனால் 1,1 → 0 மற்றும் 0,0 → 0. OR-இல் 1,1 → 1 என்பதுதான் வேறுபாடு. இந்த XOR-தான் கூட்டலின் \"இலக்கத்தை\" தருகிறது (அடுத்து பார்ப்போம்).",
+    "en": "XOR (exclusive OR). 0,1 → 1 and 1,0 → 1; but 1,1 → 0 and 0,0 → 0. The difference from OR is that OR gives 1 for 1,1. This XOR produces the \"digit\" of addition (we will see next)."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "பூலின் யோசனை (1854)",
+    "en": "Boole’s idea (1854)"
+   },
+   "text": {
+    "ta": "ஜார்ஜ் பூல் (George Boole) என்ற கணிதவியலாளர் \"The Laws of Thought\" என்ற நூலில் ஒரு யோசனையை எழுதினார்: **\"சரி\" என்பதை 1 என்றும் \"தவறு\" என்பதை 0 என்றும் எடுத்துக்கொண்டால், சிந்தனையின் விதிகளையும் இயற்கணிதம் போலக் கணக்கிடலாம்.**\n\nமூன்று அடிப்படைச் செயல்கள்:\n\n**AND** — இரண்டும் 1 என்றால் மட்டும் 1 (\"மழை AND குடை இல்லை\").\n**OR** — ஏதாவது ஒன்று 1 என்றால் 1 (\"அம்மா OR அப்பா அழைத்தால்\").\n**NOT** — தலைகீழ் (\"மழை இல்லை\" என்பதன் எதிர்).\n\nஅப்போது இது வெறும் கணிதக் கருத்தாகத்தான் இருந்தது; இதைச் செய்யும் இயந்திரம் இன்னும் இல்லை.",
+    "en": "George Boole wrote in \"The Laws of Thought\": **if \"true\" is taken as 1 and \"false\" as 0, the rules of reasoning can be calculated like algebra.**\n\nThree basic operations:\n\n**AND** — 1 only if both are 1 (\"rain AND no umbrella\").\n**OR** — 1 if any one is 1 (\"if mother OR father calls\").\n**NOT** — the opposite (the opposite of \"it is raining\").\n\nAt that time it was only a mathematical idea; the machine to carry it out did not exist yet."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "சுவிட்சிலிருந்து gate வரை",
+    "en": "From switch to gate"
+   },
+   "text": {
+    "ta": "1947-இல் **டிரான்சிஸ்டர்** (transistor) கண்டுபிடிக்கப்பட்டது — மின்சாரத்தால் இயக்கப்படும் ஒரு ON/OFF சுவிட்ச். இரண்டு சுவிட்சுகளைத் தொடராக (ஒன்றன் பின் ஒன்று) இணைத்தால், இரண்டும் ON ஆனால் மட்டுமே மின்சாரம் பாயும் — அது **AND**. இணையாக (அடுத்தடுத்து) இணைத்தால், ஏதாவது ஒன்று ON ஆனால் போதும் — அது **OR**.\n\nஅதாவது பூலின் கணக்கு, டிரான்சிஸ்டரின் மூலம் உண்மையான மின்சார அமைப்பாக மாறியது. இந்த அமைப்புகளுக்குப் பெயர் **logic gates**.",
+    "en": "In 1947 the **transistor** was invented — an electrically controlled ON/OFF switch. Connect two switches one after the other (in series) and current flows only if both are ON — that is **AND**. Connect them side by side (in parallel) and one ON is enough — that is **OR**.\n\nSo Boole’s mathematics became real electrical circuits through the transistor. Such circuits are called **logic gates**."
+   }
+  },
+  {
+   "type": "text",
+   "title": {
+    "ta": "கூட்டலும் gates-தான்",
+    "en": "Addition is also just gates"
+   },
+   "text": {
+    "ta": "இரண்டு bits கூட்டுவதைப் பார்:\n\n**0 + 0 = 00**, **0 + 1 = 01**, **1 + 0 = 01**, **1 + 1 = 10**.\n\nவலப்பக்க இலக்கம் (sum) இரண்டும் **வேறுவேறாக** இருக்கும்போது மட்டும் 1 — அது **XOR**. இடப்பக்க இலக்கம் (carry — கைமாற்று) இரண்டும் 1 ஆக இருக்கும்போது மட்டும் 1 — அது **AND**. இந்த இரண்டு gates சேர்ந்த அமைப்புக்குப் பெயர் **half adder**.\n\nஇரண்டு half adder + ஒரு OR சேர்த்தால் முந்தைய carry-யையும் சேர்க்கும் **full adder** கிடைக்கும். அதை வரிசையாக இணைத்தால் எவ்வளவு பெரிய எண்களையும் கூட்டலாம். கணினிக்குக் \"கூட்டல் தெரியாது\" — அது சுவிட்சுகளின் ஒரு அமைப்பு மட்டுமே; அந்த அமைப்பு கூட்டலாக வேலை செய்கிறது.",
+    "en": "Look at adding two bits:\n\n**0 + 0 = 00**, **0 + 1 = 01**, **1 + 0 = 01**, **1 + 1 = 10**.\n\nThe right-hand digit (sum) is 1 only when the two bits **differ** — that is **XOR**. The left-hand digit (carry) is 1 only when both are 1 — that is **AND**. These two gates together are a **half adder**.\n\nTwo half adders plus one OR make a **full adder** that also takes in the previous carry. Chain them and you can add numbers of any size. A computer does not \"know\" addition — it is an arrangement of switches that behaves as addition."
+   }
+  },
+  {
+   "type": "key",
+   "text": {
+    "ta": "எல்லாக் கணக்கும் gates-ன் சேர்க்கைதான். NAND என்ற ஒரே ஒரு gate-ஐ வைத்து மற்ற எல்லா gates-ஐயும் உருவாக்க முடியும் — இதை மேலே உள்ள widget-இல் NAND-ஐத் தேர்ந்தெடுத்துச் சிந்தித்துப் பார்.",
+    "en": "All arithmetic is a combination of gates. With the single gate NAND you can build every other gate — think about this while you try NAND in the widget above."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "3 உள்ளீடுகள் (A, B, C) கொண்ட ஒரு truth table-இல் மொத்தம் எத்தனை வரிசைகள் இருக்கும்?",
+    "en": "How many rows does a truth table with 3 inputs (A, B, C) have?"
+   },
+   "answer": 8,
+   "tol": 0,
+   "hint": {
+    "ta": "ஒவ்வொரு உள்ளீட்டுக்கும் 2 தேர்வுகள் (0 அல்லது 1).",
+    "en": "Each input has 2 choices (0 or 1)."
+   },
+   "solution": {
+    "ta": "2 × 2 × 2 = 8 வரிசைகள்.",
+    "en": "2 × 2 × 2 = 8 rows."
+   }
+  },
+  {
+   "type": "try",
+   "q": {
+    "ta": "OR( NOT(1), AND(1, 1) ) இன் விடை என்ன?",
+    "en": "What is OR( NOT(1), AND(1, 1) )?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "கணக்கிட முடியாது",
+     "en": "Cannot be worked out"
+    }
+   ],
+   "correct": 1,
+   "hint": {
+    "ta": "உள்ளிருந்து வெளியே: முதலில் NOT(1), AND(1,1); பிறகு OR.",
+    "en": "Inside out: first NOT(1) and AND(1,1); then OR."
+   },
+   "solution": {
+    "ta": "NOT(1) = 0; AND(1,1) = 1; OR(0,1) = 1.",
+    "en": "NOT(1) = 0; AND(1,1) = 1; OR(0,1) = 1."
+   }
+  },
+  {
+   "type": "example",
+   "title": {
+    "ta": "3 + 2 எப்படிக் கூட்டப்படுகிறது?",
+    "en": "How is 3 + 2 added?"
+   },
+   "q": {
+    "ta": "3 = 011, 2 = 010 (இரும எண்கள்). இவற்றை வலமிருந்து இடமாக, bit bit-ஆகக் கூட்டுவோம்.",
+    "en": "3 = 011 and 2 = 010 (binary). Add them bit by bit from right to left."
+   },
+   "steps": [
+    {
+     "ta": "வலமுதல் bit: 1 + 0 → sum = XOR(1,0) = 1; carry = AND(1,0) = 0.",
+     "en": "Right-most bit: 1 + 0 → sum = XOR(1,0) = 1; carry = AND(1,0) = 0."
+    },
+    {
+     "ta": "நடு bit: 1 + 1 + carry 0 → sum = 0; carry = 1.",
+     "en": "Middle bit: 1 + 1 + carry 0 → sum = 0; carry = 1."
+    },
+    {
+     "ta": "இடது bit: 0 + 0 + carry 1 → sum = 1; carry = 0.",
+     "en": "Left bit: 0 + 0 + carry 1 → sum = 1; carry = 0."
+    },
+    {
+     "ta": "விடை: 101 = 4 + 0 + 1 = **5**. சரிதான்! (widget-இல் 3, 2 தேர்ந்தெடுத்துச் சரிபார்.)",
+     "en": "Answer: 101 = 4 + 0 + 1 = **5**. Correct! (Check in the widget with 3 and 2.)"
+    }
+   ]
+  },
+  {
+   "type": "world",
+   "items": [
+    {
+     "icon": "🚨",
+     "title": {
+      "ta": "பாதுகாப்பு alarm",
+      "en": "Security alarm"
+     },
+     "text": {
+      "ta": "\"கதவு திறந்தது AND இரவு நேரம்\" என்றால் மட்டும் மணி அடிக்கும் — இது ஒரு AND gate.",
+      "en": "\"Door opened AND it is night\" rings the alarm — an AND gate."
+     }
+    },
+    {
+     "icon": "📱",
+     "title": {
+      "ta": "போன் திறப்பு",
+      "en": "Unlocking a phone"
+     },
+     "text": {
+      "ta": "\"கைரேகை சரி OR PIN சரி\" என்றால் திறக்கும் — OR gate.",
+      "en": "\"Fingerprint matches OR PIN is right\" unlocks it — an OR gate."
+     }
+    },
+    {
+     "icon": "🚰",
+     "title": {
+      "ta": "தண்ணீர்த் தொட்டி மோட்டார்",
+      "en": "Water-tank motor"
+     },
+     "text": {
+      "ta": "\"தொட்டி காலி AND மின்சாரம் உண்டு\" என்றால் மோட்டார் ON; தொட்டி நிறைந்தவுடன் NOT(நிறைந்தது) பொய்யாகி நின்றுவிடும்.",
+      "en": "\"Tank empty AND power available\" turns the motor ON; once full, NOT(full) becomes false and it stops."
+     }
+    }
+   ]
+  },
+  {
+   "type": "activity",
+   "title": {
+    "ta": "மனித gate விளையாட்டு",
+    "en": "Human gates game"
+   },
+   "text": {
+    "ta": "மூன்று நண்பர்கள் வேண்டும். இருவர் \"உள்ளீடு\" (கை உயர்த்தினால் 1, கீழே இருந்தால் 0). மூன்றாமவர் \"gate\": அவர் AND ஆக இருந்தால் இரண்டு பேரும் கை உயர்த்தினால் மட்டுமே கை உயர்த்துவார். பிறகு அவரை OR, XOR ஆக மாற்றி விளையாடு.\n\n**சவால்:** நான்காவது நண்பரை NOT gate ஆக்கி, மூன்றாமவர் விடைக்குப் பிறகு நிறுத்து. இப்போது NAND உருவாகிவிட்டதா?",
+    "en": "You need three friends. Two are \"inputs\" (hand up = 1, down = 0). The third is the \"gate\": as AND, they raise a hand only if both inputs do. Then change them to OR and XOR.\n\n**Challenge:** make a fourth friend a NOT gate placed after the third friend. Have you built a NAND?"
+   }
+  },
+  {
+   "type": "explain",
+   "q": {
+    "ta": "கணினிக்குக் கூட்டலே தெரியாது என்று சொல்கிறார்களே — அப்படியானால் அது எப்படிக் கூட்டுகிறது?",
+    "en": "They say a computer does not \"know\" addition — then how does it add?"
+   },
+   "keywords": [
+    {
+     "ta": "gate",
+     "en": "gate",
+     "alt": [
+      "சுவிட்ச்",
+      "switch",
+      "கேட்"
+     ]
+    },
+    {
+     "ta": "XOR",
+     "en": "XOR",
+     "alt": [
+      "xor"
+     ]
+    },
+    {
+     "ta": "carry",
+     "en": "carry",
+     "alt": [
+      "கைமாற்று"
+     ]
+    }
+   ],
+   "model": {
+    "ta": "கணினியில் டிரான்சிஸ்டர்களால் செய்யப்பட்ட logic gates உள்ளன. இரண்டு bits-ஐ XOR gate-க்குக் கொடுத்தால் கூட்டலின் இலக்கம் (sum) கிடைக்கும்; AND gate-க்குக் கொடுத்தால் carry கிடைக்கும். இவற்றை வரிசையாக இணைத்து எந்த எண்ணையும் கூட்டுகிறது — புரிதல் இல்லை, ஒரு அமைப்பு மட்டுமே.",
+    "en": "A computer has logic gates made of transistors. Feeding two bits to an XOR gate gives the digit (sum) of the addition; an AND gate gives the carry. Chaining them adds any number — it is not understanding, only an arrangement."
+   }
+  },
+  {
+   "type": "future",
+   "text": {
+    "ta": "இன்று AI கருவிகள் சிப் வடிவமைப்பிலும் உதவலாம். ஆனால் அந்த வடிவமைப்பு சரியா, ஒரு gate தவறாக இருந்தால் என்ன ஆகும் என்று சோதிப்பது இன்னும் மனிதர்களின் வேலை.",
+    "en": "Today AI tools can also help in chip design. But checking whether the design is right, and what happens if one gate is wrong, is still the job of people."
+   },
+   "risk": {
+    "ta": "ஒரு சிறிய logic தவறு கோடிக்கணக்கான சாதனங்களைப் பாதிக்கலாம் (இதற்கு முன்பும் சிப் பிழைகளால் நிறுவனங்கள் சாதனங்களைத் திரும்பப் பெற்றதுண்டு).",
+    "en": "One small logic error can affect crores of devices (companies have recalled devices because of chip flaws before)."
+   },
+   "fix": {
+    "ta": "அடிப்படை தெரிந்தவர்கள் truth table மூலம் சோதிப்பதும், பல முறை சோதனை செய்வதும் தேவை.",
+    "en": "People who know the basics must verify with truth tables and repeated testing."
+   }
+  },
+  {
+   "type": "invent",
+   "title": {
+    "ta": "உன் வகுப்பறை விதி",
+    "en": "A rule for your classroom"
+   },
+   "text": {
+    "ta": "\"மாணவன் வெளியே போகலாம்\" என்ற விதியை gates வைத்து எழுது: எ.கா. (ஆசிரியர் அனுமதி AND மணி அடித்திருக்கவில்லை) OR (அவசரம்). எத்தனை உள்ளீடுகள்? truth table-இல் எத்தனை வரிசைகள்?",
+    "en": "Write the rule \"a student may go out\" with gates. For example (teacher’s permission AND bell has not rung) OR (emergency). How many inputs? How many rows in the truth table?"
+   },
+   "prompts": [
+    {
+     "ta": "எந்த நிலையில் விடை 1?",
+     "en": "In which situations is the answer 1?"
+    },
+    {
+     "ta": "ஒரு விதியை NOT gate-ஆல் எப்படித் தலைகீழாக்கலாம்?",
+     "en": "How can a NOT gate flip a rule?"
+    }
+   ]
+  },
+  {
+   "type": "summary",
+   "points": [
+    {
+     "ta": "Gate = ஒன்று அல்லது இரண்டு bits-ஐ எடுத்து ஒரு bit தரும் சுவிட்ச் அமைப்பு (AND, OR, NOT, XOR, NAND).",
+     "en": "A gate takes one or two bits and gives one bit (AND, OR, NOT, XOR, NAND)."
+    },
+    {
+     "ta": "1854-இல் பூல் சிந்தனையைக் கணக்காக எழுதினார்; 1947-இல் டிரான்சிஸ்டர் அதை இயந்திரமாக்கியது.",
+     "en": "Boole wrote reasoning as mathematics in 1854; the transistor of 1947 made it a machine."
+    },
+    {
+     "ta": "கூட்டல்: sum = XOR, carry = AND. இவற்றை இணைத்து எந்த எண்ணையும் கூட்டலாம்.",
+     "en": "Addition: sum = XOR, carry = AND. Chain them to add any number."
+    },
+    {
+     "ta": "n உள்ளீடுகள் இருந்தால் truth table-இல் 2ⁿ வரிசைகள்.",
+     "en": "With n inputs the truth table has 2ⁿ rows."
+    },
+    {
+     "ta": "கணினி \"புரிந்து\" செய்வதில்லை; சுவிட்சுகளின் அமைப்பு செய்கிறது — அதை அறிந்தவரே சோதிக்க முடியும்.",
+     "en": "A computer does not \"understand\"; an arrangement of switches does it — and only those who know it can check it."
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "q": {
+    "ta": "AND gate எப்போது 1 தரும்?",
+    "en": "When does an AND gate give 1?"
+   },
+   "options": [
+    {
+     "ta": "இரண்டு உள்ளீடுகளும் 1 ஆக இருக்கும்போது",
+     "en": "When both inputs are 1"
+    },
+    {
+     "ta": "ஏதாவது ஒன்று 1 ஆக இருக்கும்போது",
+     "en": "When either input is 1"
+    },
+    {
+     "ta": "இரண்டும் 0 ஆக இருக்கும்போது",
+     "en": "When both are 0"
+    }
+   ],
+   "correct": 0,
+   "explain": {
+    "ta": "AND = இரண்டும் 1 என்றால் மட்டும் 1.",
+    "en": "AND = 1 only if both are 1."
+   }
+  },
+  {
+   "q": {
+    "ta": "NOT(0) = ?",
+    "en": "NOT(0) = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "இரண்டும் இல்லை",
+     "en": "Neither"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "NOT தலைகீழாக்கும்: 0 → 1.",
+    "en": "NOT flips: 0 → 1."
+   }
+  },
+  {
+   "q": {
+    "ta": "1 + 1 இன் இரும விடையில் carry (இடப்பக்க இலக்கம்) எந்த gate-ஆல் வருகிறது?",
+    "en": "In the binary answer of 1 + 1, which gate produces the carry (left digit)?"
+   },
+   "options": [
+    {
+     "ta": "XOR",
+     "en": "XOR"
+    },
+    {
+     "ta": "AND",
+     "en": "AND"
+    },
+    {
+     "ta": "NOT",
+     "en": "NOT"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "carry = AND(1,1) = 1; sum = XOR(1,1) = 0 → 10; எனவே carry AND-ஆல் வருகிறது.",
+    "en": "carry = AND(1,1) = 1; sum = XOR(1,1) = 0 → 10."
+   }
+  },
+  {
+   "q": {
+    "ta": "4 உள்ளீடுகள் கொண்ட truth table-இல் எத்தனை வரிசைகள்?",
+    "en": "How many rows does a 4-input truth table have?"
+   },
+   "options": [
+    {
+     "ta": "8",
+     "en": "8"
+    },
+    {
+     "ta": "16",
+     "en": "16"
+    },
+    {
+     "ta": "4",
+     "en": "4"
+    },
+    {
+     "ta": "12",
+     "en": "12"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "2⁴ = 16.",
+    "en": "2⁴ = 16."
+   }
+  },
+  {
+   "q": {
+    "ta": "\"The Laws of Thought\" நூலை எழுதியவர்?",
+    "en": "Who wrote \"The Laws of Thought\"?"
+   },
+   "options": [
+    {
+     "ta": "ஆலன் டூரிங்",
+     "en": "Alan Turing"
+    },
+    {
+     "ta": "ஜார்ஜ் பூல்",
+     "en": "George Boole"
+    },
+    {
+     "ta": "கிரேஸ் ஹாப்பர்",
+     "en": "Grace Hopper"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "1854-இல் ஜார்ஜ் பூல்.",
+    "en": "George Boole, in 1854."
+   }
+  },
+  {
+   "q": {
+    "ta": "இரண்டு சுவிட்சுகளை **தொடராக** இணைத்தால் எந்த gate போல வேலை செய்யும்?",
+    "en": "Two switches connected **in series** behave like which gate?"
+   },
+   "options": [
+    {
+     "ta": "OR",
+     "en": "OR"
+    },
+    {
+     "ta": "NOT",
+     "en": "NOT"
+    },
+    {
+     "ta": "AND",
+     "en": "AND"
+    }
+   ],
+   "correct": 2,
+   "explain": {
+    "ta": "இரண்டும் ON ஆனால்தான் மின்சாரம் பாயும் → AND.",
+    "en": "Current flows only if both are ON → AND."
+   }
+  },
+  {
+   "q": {
+    "ta": "XOR(1, 0) = ?",
+    "en": "XOR(1, 0) = ?"
+   },
+   "options": [
+    {
+     "ta": "0",
+     "en": "0"
+    },
+    {
+     "ta": "1",
+     "en": "1"
+    },
+    {
+     "ta": "2",
+     "en": "2"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "உள்ளீடுகள் வேறுவேறு → 1.",
+    "en": "The inputs differ → 1."
+   }
+  },
+  {
+   "q": {
+    "ta": "கணினி கூட்டலை எப்படிச் செய்கிறது?",
+    "en": "How does a computer do addition?"
+   },
+   "options": [
+    {
+     "ta": "கணிதம் படித்ததால்",
+     "en": "Because it studied maths"
+    },
+    {
+     "ta": "gates-ன் அமைப்பால்",
+     "en": "With an arrangement of gates"
+    },
+    {
+     "ta": "இணையத்திலிருந்து தேடி",
+     "en": "By searching the internet"
+    }
+   ],
+   "correct": 1,
+   "explain": {
+    "ta": "XOR மற்றும் AND gates சேர்ந்த adder அமைப்பால்.",
+    "en": "With adder circuits made of XOR and AND gates."
+   }
+  }
+ ]
+}
