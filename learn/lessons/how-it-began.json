@@ -36,8 +36,8 @@
   {
    "type": "hook",
    "text": {
-    "ta": "இன்று ஒரு கேள்வி கேட்டால் AI உடனே பதில் தருகிறது; ஒரு program கேட்டால் எழுதித் தருகிறது. இதையெல்லாம் பார்க்கும்போது \"இனி நாம் எதற்குப் படிக்க வேண்டும்?\" என்று தோன்றலாம்.\n\nஆனால் ஒரு நூற்றாண்டுக்கு முன்பு யாரோ ஒருவர் **\"சரி\" என்பதை 1 என்றும் \"தவறு\" என்பதை 0 என்றும்** எழுதினார். இன்னொருவர் **படிகளை** எழுதினார். இன்னொருவர் **இயந்திரத்தின் எல்லையைக்** கணக்கிட்டார். இன்னொருவர் **சுவிட்சை** உருவாக்கினார். இவற்றின் மேல் அடுக்கடுக்காகக் கட்டப்பட்டதுதான் இன்றைய AI.\n\n**இது ஏன் உனக்குத் தேவை?** அடிப்படை மறந்துவிட்டால் AI தவறு செய்யும்போது யாராலும் கண்டுபிடிக்க முடியாது; புதிதாக ஒன்றை உருவாக்கவும் முடியாது. இந்தப் பாதையை மறக்காமல் இருப்பதற்காகவே இந்தப் பாடம்.",
-    "en": "Today you ask AI a question and it answers at once; ask for a program and it writes one. Seeing all this you may think \"why should we study any more?\"\n\nBut not even a century ago someone wrote **\"true\" as 1 and \"false\" as 0**. Someone else wrote down **steps**. Someone else worked out **the limits of a machine**. Someone else built **the switch**. Today’s AI is built layer upon layer on these.\n\n**Why do you need this?** If the basics are forgotten, nobody can find the mistakes when an AI errs, and nobody can build the next thing. This lesson exists so that this path is not forgotten."
+    "ta": "இன்று ஒரு கேள்வி கேட்டால் AI உடனே பதில் தருகிறது; ஒரு program கேட்டால் எழுதித் தருகிறது. இதையெல்லாம் பார்க்கும்போது \"இனி நாம் எதற்குப் படிக்க வேண்டும்?\" என்று தோன்றலாம்.\n\nஆனால் சுமார் 170 ஆண்டுகளுக்கு முன்பு (1854) ஒருவர் **சிந்தனையை 1, 0 கொண்ட கணக்காக** எழுதினார். இன்னொருவர் **படிகளை** எழுதினார். இன்னொருவர் **இயந்திரத்தின் எல்லையைக்** கணக்கிட்டார். இன்னொருவர் **சுவிட்சை** உருவாக்கினார். இவற்றின் மேல் அடுக்கடுக்காகக் கட்டப்பட்டதுதான் இன்றைய AI.\n\n**இது ஏன் உனக்குத் தேவை?** அடிப்படை மறந்துவிட்டால் AI தவறு செய்யும்போது யாராலும் கண்டுபிடிக்க முடியாது; புதிதாக ஒன்றை உருவாக்கவும் முடியாது. இந்தப் பாதையை மறக்காமல் இருப்பதற்காகவே இந்தப் பாடம்.",
+    "en": "Today you ask AI a question and it answers at once; ask for a program and it writes one. Seeing all this you may think \"why should we study any more?\"\n\nBut about 170 years ago (1854) someone wrote **reasoning as algebra with 1 and 0**. Someone else wrote down **steps**. Someone else worked out **the limits of a machine**. Someone else built **the switch**. Today’s AI is built layer upon layer on these.\n\n**Why do you need this?** If the basics are forgotten, nobody can find the mistakes when an AI errs, and nobody can build the next thing. This lesson exists so that this path is not forgotten."
    }
   },
   {
@@ -177,8 +177,8 @@
     "en": "1947 − 1854."
    },
    "solution": {
-    "ta": "1947 − 1854 = **93** ஆண்டுகள் — கணிதம் இயந்திரமாவதற்குக் கிட்டத்தட்ட ஒரு நூற்றாண்டு ஆனது.",
-    "en": "1947 − 1854 = **93** years — it took almost a century for the mathematics to become a machine."
+    "ta": "1947 − 1854 = **93** ஆண்டுகள். (இடையில் 1937-இல் ஷானன் இதை மின் சுவிட்ச் சுற்றுகளுக்குப் பயன்படுத்தினார்; டிரான்சிஸ்டர் அதைச் சிறியதாகவும் வேகமாகவும் ஆக்கியது.)",
+    "en": "1947 − 1854 = **93** years. (In between, in 1937, Shannon applied it to electric switch circuits; the transistor made it tiny and fast.)"
    }
   },
   {
@@ -338,16 +338,16 @@
    "type": "summary",
    "points": [
     {
-     "ta": "அல்-குவாரிஸ்மி → லைப்னிட்ஸ் (1703) → லவ்லேஸ் (1843) → பூல் (1854) → டூரிங் (1936) → டிரான்சிஸ்டர் (1947) → ஹாப்பர் (1952).",
-     "en": "Al-Khwarizmi → Leibniz (1703) → Lovelace (1843) → Boole (1854) → Turing (1936) → transistor (1947) → Hopper (1952)."
+     "ta": "அல்-குவாரிஸ்மி → லைப்னிட்ஸ் (1703) → லவ்லேஸ் (1843) → பூல் (1854) → டூரிங் (1936) → ஷானன் (1937) → டிரான்சிஸ்டர் (1947) → ஹாப்பர் (1952).",
+     "en": "Al-Khwarizmi → Leibniz (1703) → Lovelace (1843) → Boole (1854) → Turing (1936) → Shannon (1937) → transistor (1947) → Hopper (1952)."
     },
     {
      "ta": "கற்கும் AI: perceptron (1958) → backpropagation (1986) → AlexNet (2012) → Transformer (2017).",
      "en": "Learning AI: perceptron (1958) → backpropagation (1986) → AlexNet (2012) → Transformer (2017)."
     },
     {
-     "ta": "கோட்பாடு முதலில், வன்பொருள் பிறகு — கணிதம் ஒரு நூற்றாண்டு கழித்து இயந்திரமானது.",
-     "en": "Theory came first, hardware later — mathematics became a machine a century afterwards."
+     "ta": "கோட்பாடு முதலில், வன்பொருள் பிறகு — 1854 கணிதம் 1937-இல் சுவிட்ச் சுற்றாகவும், 1947-க்குப் பின் சிறு சிப்பாகவும் ஆனது.",
+     "en": "Theory came first, hardware later — the 1854 mathematics became switch circuits in 1937 and tiny chips after 1947."
     },
     {
      "ta": "ஒவ்வொரு கண்டுபிடிப்பும் முந்தையதன் மேல் நிற்கிறது; அடிப்படை தெரிந்தவரே சரிபார்க்கவும் உருவாக்கவும் முடியும்.",

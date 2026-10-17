@@ -71,7 +71,7 @@ function comparePlots(test, ctrl){
 const SEASONS = [
   {id: 'kuruvai', ta: 'குறுவை', en: 'Kuruvai', months: {ta: 'ஜூன் – ஜூலை', en: 'Jun – Jul'}},
   {id: 'samba', ta: 'சம்பா', en: 'Samba', months: {ta: 'ஆகஸ்ட்', en: 'Aug'}},
-  {id: 'thaladi', ta: 'தாளடி', en: 'Thaladi', months: {ta: 'செப்டம்பர் – அக்டோபர்', en: 'Sep – Oct'}},
+  {id: 'thaladi', ta: 'பின் சம்பா / தாளடி', en: 'Late Samba / Thaladi', months: {ta: 'செப்டம்பர் – அக்டோபர்', en: 'Sep – Oct'}},
   {id: 'navarai', ta: 'நவரை', en: 'Navarai', months: {ta: 'டிசம்பர் – ஜனவரி', en: 'Dec – Jan'}}
 ];
 const SOURCES = {

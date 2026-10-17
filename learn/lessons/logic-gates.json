@@ -119,7 +119,7 @@
     "en": "From switch to gate"
    },
    "text": {
-    "ta": "1947-இல் **டிரான்சிஸ்டர்** (transistor) கண்டுபிடிக்கப்பட்டது — மின்சாரத்தால் இயக்கப்படும் ஒரு ON/OFF சுவிட்ச். இரண்டு சுவிட்சுகளைத் தொடராக (ஒன்றன் பின் ஒன்று) இணைத்தால், இரண்டும் ON ஆனால் மட்டுமே மின்சாரம் பாயும் — அது **AND**. இணையாக (அடுத்தடுத்து) இணைத்தால், ஏதாவது ஒன்று ON ஆனால் போதும் — அது **OR**.\n\nஅதாவது பூலின் கணக்கு, டிரான்சிஸ்டரின் மூலம் உண்மையான மின்சார அமைப்பாக மாறியது. இந்த அமைப்புகளுக்குப் பெயர் **logic gates**.",
+    "ta": "1947-இல் **டிரான்சிஸ்டர்** (transistor) கண்டுபிடிக்கப்பட்டது — மின்சாரத்தால் இயக்கப்படும் ஒரு ON/OFF சுவிட்ச். இரண்டு சுவிட்சுகளைத் தொடராக (ஒன்றன் பின் ஒன்று) இணைத்தால், இரண்டும் ON ஆனால் மட்டுமே மின்சாரம் பாயும் — அது **AND**. இணையாக (பக்கம் பக்கமாக) இணைத்தால், ஏதாவது ஒன்று ON ஆனால் போதும் — அது **OR**.\n\nஇப்படிச் சுவிட்சுகளால் பூலின் கணக்கைச் செய்யலாம் என்று 1937-இல் கிளாட் ஷானன் (Claude Shannon) காட்டினார் (அப்போது relay சுவிட்சுகள்). டிரான்சிஸ்டர் அதை மிகச் சிறியதாகவும் வேகமாகவும் ஆக்கியது. இந்த அமைப்புகளுக்குப் பெயர் **logic gates**.",
     "en": "In 1947 the **transistor** was invented — an electrically controlled ON/OFF switch. Connect two switches one after the other (in series) and current flows only if both are ON — that is **AND**. Connect them side by side (in parallel) and one ON is enough — that is **OR**.\n\nSo Boole’s mathematics became real electrical circuits through the transistor. Such circuits are called **logic gates**."
    }
   },
@@ -249,8 +249,8 @@
       "en": "Water-tank motor"
      },
      "text": {
-      "ta": "\"தொட்டி காலி AND மின்சாரம் உண்டு\" என்றால் மோட்டார் ON; தொட்டி நிறைந்தவுடன் NOT(நிறைந்தது) பொய்யாகி நின்றுவிடும்.",
-      "en": "\"Tank empty AND power available\" turns the motor ON; once full, NOT(full) becomes false and it stops."
+      "ta": "\"NOT(தொட்டி நிறைந்தது) AND மின்சாரம் உண்டு\" என்றால் மோட்டார் ON; தொட்டி நிறைந்தவுடன் NOT(நிறைந்தது) பொய்யாகி மோட்டார் நின்றுவிடும்.",
+      "en": "\"NOT(tank full) AND power available\" turns the motor ON; once full, NOT(full) becomes false and the motor stops."
      }
     }
    ]
@@ -347,7 +347,7 @@
     },
     {
      "ta": "1854-இல் பூல் சிந்தனையைக் கணக்காக எழுதினார்; 1947-இல் டிரான்சிஸ்டர் அதை இயந்திரமாக்கியது.",
-     "en": "Boole wrote reasoning as mathematics in 1854; the transistor of 1947 made it a machine."
+     "en": "Boole wrote reasoning as mathematics in 1854; Shannon (1937) showed switches can do it; the 1947 transistor made it tiny and fast."
     },
     {
      "ta": "கூட்டல்: sum = XOR, carry = AND. இவற்றை இணைத்து எந்த எண்ணையும் கூட்டலாம்.",

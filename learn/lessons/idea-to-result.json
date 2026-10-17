@@ -36,8 +36,8 @@
   {
    "type": "hook",
    "text": {
-    "ta": "உன் கால்குலேட்டரில் 2 + 3 × 4 என்று தட்டினால் 14 வரும், 20 அல்ல. கணினி எப்படித் தெரிந்துகொண்டது, \"முதலில் பெருக்கு\" என்று?\n\nஇன்னொரு புதிர்: நாம் எழுதுவது ஆங்கிலம் போன்ற சொற்கள் (print, if, for). ஆனால் சிப்புக்கு 0 மற்றும் 1 மட்டுமே புரியும். இடையில் மொழிபெயர்ப்பவர் யார்?\n\nஅவர்தான் **compiler** (அல்லது interpreter). **இது ஏன் உனக்குத் தேவை?** இன்று AI நீ கேட்டால் program எழுதிக் கொடுக்கிறது. ஆனால் அந்த program எப்படி இயங்குகிறது என்று தெரிந்தவர் மட்டுமே அது சரியா என்று சோதிக்க முடியும்.",
-    "en": "Type 2 + 3 × 4 into your calculator and you get 14, not 20. How did it know to multiply first?\n\nAnother puzzle: we write English-like words (print, if, for). But a chip understands only 0 and 1. Who translates in between?\n\nThat is the **compiler** (or interpreter). **Why do you need this?** Today AI writes programs when you ask. But only someone who knows how a program runs can check whether it is right."
+    "ta": "உன் போன் கால்குலேட்டரில் (அல்லது scientific calculator) 2 + 3 × 4 என்று தட்டினால் 14 வரும், 20 அல்ல. (சாதாரணக் கடைக் கால்குலேட்டர் இடமிருந்து வலமாகக் கணக்கிட்டு 20 தரும் — அதற்கு இந்த விதி தெரியாது!) கணினி எப்படித் தெரிந்துகொண்டது, \"முதலில் பெருக்கு\" என்று?\n\nஇன்னொரு புதிர்: நாம் எழுதுவது ஆங்கிலம் போன்ற சொற்கள் (print, if, for). ஆனால் சிப்புக்கு 0 மற்றும் 1 மட்டுமே புரியும். இடையில் மொழிபெயர்ப்பவர் யார்?\n\nஅவர்தான் **compiler** (அல்லது interpreter). **இது ஏன் உனக்குத் தேவை?** இன்று AI நீ கேட்டால் program எழுதிக் கொடுக்கிறது. ஆனால் அந்த program எப்படி இயங்குகிறது என்று தெரிந்தவர் மட்டுமே அது சரியா என்று சோதிக்க முடியும்.",
+    "en": "Type 2 + 3 × 4 into your phone (or scientific) calculator and you get 14, not 20. (A basic shop calculator works left to right and shows 20 — it does not know this rule!) How did it know to multiply first?\n\nAnother puzzle: we write English-like words (print, if, for). But a chip understands only 0 and 1. Who translates in between?\n\nThat is the **compiler** (or interpreter). **Why do you need this?** Today AI writes programs when you ask. But only someone who knows how a program runs can check whether it is right."
    }
   },
   {
@@ -119,15 +119,15 @@
     "en": "The ladder: from idea down to the chip"
    },
    "text": {
-    "ta": "**யோசனை** (\"வகுப்பின் சராசரி மதிப்பெண் வேண்டும்\") → **algorithm** (படிகள்) → **program** (Python, Java போன்ற மொழியில் எழுதியது) → **compiler / interpreter** (மொழிபெயர்ப்பு) → **machine code** (0/1 கட்டளைகள்) → **logic gates** (முந்தைய பாடம்) → **முடிவு**.\n\n1952 வாக்கில் கிரேஸ் ஹாப்பர் (Grace Hopper) மனிதர் படிக்கக்கூடிய வடிவை இயந்திரக் கட்டளையாக மாற்றும் ஆரம்ப compiler நிரல்களில் ஒன்றை உருவாக்கினார். அதற்கு முன் எல்லாரும் 0/1-இல் நேரடியாக எழுத வேண்டியிருந்தது!\n\n**Compiler** முழு program-ஐயும் முதலிலேயே மொழிபெயர்த்துவிடும்; **interpreter** ஒவ்வொரு வரியாக மொழிபெயர்த்து ஓட்டும். இரண்டும் மேலே உள்ள நிலைகளையே பயன்படுத்துகின்றன.",
-    "en": "**Idea** (\"I want the class average\") → **algorithm** (steps) → **program** (written in a language like Python or Java) → **compiler / interpreter** (translation) → **machine code** (0/1 instructions) → **logic gates** (the previous lesson) → **result**.\n\nAround 1952 Grace Hopper built one of the first compiler programs that turned human-readable text into machine instructions. Before that everyone had to write directly in 0s and 1s!\n\nA **compiler** translates the whole program first; an **interpreter** translates and runs line by line. Both use the stages above."
+    "ta": "**யோசனை** (\"வகுப்பின் சராசரி மதிப்பெண் வேண்டும்\") → **algorithm** (படிகள்) → **program** (Python, Java போன்ற மொழியில் எழுதியது) → **compiler / interpreter** (மொழிபெயர்ப்பு) → **machine code** (0/1 கட்டளைகள்) → **logic gates** (முந்தைய பாடம்) → **முடிவு**.\n\n1952 வாக்கில் கிரேஸ் ஹாப்பர் (Grace Hopper) மனிதர் படிக்கக்கூடிய வடிவை இயந்திரக் கட்டளையாக மாற்றும் ஆரம்ப compiler நிரல்களில் ஒன்றை உருவாக்கினார். அதற்கு முன் நிரலாளர்கள் இயந்திரக் கட்டளைகளை எண்களாகவோ சிறு எழுத்துக் குறியீடுகளாகவோ (assembly) கையால் எழுத வேண்டியிருந்தது!\n\n**Compiler** முழு program-ஐயும் முதலிலேயே மொழிபெயர்த்துவிடும்; **interpreter** ஒவ்வொரு வரியாக மொழிபெயர்த்து ஓட்டும். இரண்டும் மேலே உள்ள நிலைகளையே பயன்படுத்துகின்றன.",
+    "en": "**Idea** (\"I want the class average\") → **algorithm** (steps) → **program** (written in a language like Python or Java) → **compiler / interpreter** (translation) → **machine code** (0/1 instructions) → **logic gates** (the previous lesson) → **result**.\n\nAround 1952 Grace Hopper built one of the first compiler programs that turned human-readable text into machine instructions. Before that, programmers had to write machine instructions by hand as numbers or short letter codes (assembly)!\n\nA **compiler** translates the whole program first; an **interpreter** translates and runs line by line. Both use the stages above."
    }
   },
   {
    "type": "key",
    "text": {
-    "ta": "\"Compile ஆகிவிட்டது\" என்றால் இலக்கணம் சரி என்றுதான் பொருள் — நீ நினைத்தது சரியாக நடக்கும் என்று பொருள் அல்ல. கணினி நீ சொன்னதையே செய்யும்; நினைத்ததை அல்ல.",
-    "en": "\"It compiled\" only means the grammar is right — not that it will do what you meant. A computer does what you said, not what you thought."
+    "ta": "\"Compile ஆகிவிட்டது\" என்றால் இலக்கணமும் (சில மொழிகளில் வகை, பெயர்களும்) சரி என்றுதான் பொருள் — நீ நினைத்தது சரியாக நடக்கும் என்று பொருள் அல்ல. கணினி நீ சொன்னதையே செய்யும்; நினைத்ததை அல்ல.",
+    "en": "\"It compiled\" only means the grammar (and, in some languages, types and names) is right — not that it will do what you meant. A computer does what you said, not what you thought."
    }
   },
   {
@@ -526,8 +526,8 @@
    ],
    "correct": 1,
    "explain": {
-    "ta": "compiler இலக்கணத்தைத்தான் சோதிக்கிறது.",
-    "en": "A compiler only checks grammar."
+    "ta": "compiler இலக்கணத்தை (சில மொழிகளில் வகை, பெயர்களையும்) சோதிக்கிறது; நீ நினைத்ததை அல்ல.",
+    "en": "A compiler checks grammar (and in some languages types and names) — not what you meant."
    }
   }
  ]

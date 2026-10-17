@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Resize Signature to 140x60 px, 20KB Online Free</title>
-<meta name="description" content="Resize a scanned signature to 140x60 pixels and under 20KB for exam forms. Free, in your browser, nothing uploaded. Edit size if your form differs.">
+<meta name="description" content="Resize a scanned signature to 140x60 pixels and under 20KB (IBPS bank exam size). Free, in your browser, nothing uploaded. Edit size if your form differs.">
 <link rel="canonical" href="https://pdftoolsindia.com/signature-resize">
 <meta property="og:title" content="Resize Signature to 140x60 px, 20KB Online Free">
-<meta property="og:description" content="Resize a scanned signature to 140x60 pixels and under 20KB for exam forms. Free, in your browser, nothing uploaded. Edit size if your form differs.">
+<meta property="og:description" content="Resize a scanned signature to 140x60 pixels and under 20KB (IBPS bank exam size). Free, in your browser, nothing uploaded. Edit size if your form differs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdftoolsindia.com/signature-resize">
 <meta property="og:image" content="https://pdftoolsindia.com/og-image.png">
@@ -48,7 +48,7 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
 <div class="top"><a href="/?home=1">← முதன்மைப் பக்கம்</a><span class="sp"></span><a href="/?cat=image">மற்ற படக் கருவிகள்</a></div>
 <div class="wrap">
   <h1>கையொப்பப் படத்தை அளவு மாற்று — Signature Resize</h1>
-  <p class="sub">கையொப்பப் படத்தை படிவம் கேட்கும் px, KB அளவுக்கு மாற்றுங்கள். இங்கே 140×60 px, 20 KB முன்னிருப்பு; உங்கள் படிவத்தின் அளவுக்கு மாற்றிக்கொள்ளுங்கள்.</p>
+  <p class="sub">கையொப்பப் படத்தை படிவம் கேட்கும் px, KB அளவுக்கு மாற்றுங்கள். இங்கே 140×60 px, 20 KB (IBPS வங்கித் தேர்வு அளவு) முன்னிருப்பு; உங்கள் படிவத்தின் அளவுக்கு மாற்றிக்கொள்ளுங்கள்.</p>
 
   <div class="card">
     <div class="drop" id="drop"><b>📷 படத்தைத் தேர்ந்தெடுங்கள்</b><span>JPG, PNG, WEBP · உங்கள் போனிலேயே செயல்படும், எங்கும் அனுப்பப்படாது</span></div>
@@ -100,7 +100,7 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
 var $=function(i){return document.getElementById(i)};
 var imgEl=null, srcName='photo', outUrl=null;
 var EXTRA=[];
-var KBS=[20,50,100,200,500], PXS=[['Signature 140×60',140,60],['3.5×4.5 cm (413×531)',413,531],['200×230',200,230],['Passport 600×600',600,600]];
+var KBS=[20,50,100,200,500], PXS=[['IBPS கையொப்பம் 140×60',140,60],['3.5×4.5 cm @300dpi (413×531)',413,531],['IBPS புகைப்படம் 200×230',200,230],['600×600',600,600]];
 function chips(id,list,fn){var b=$(id);list.forEach(function(x){var c=document.createElement('button');c.type='button';c.className='chip';c.textContent=x[0];c.onclick=function(){fn(x)};b.appendChild(c)})}
 chips('kbChips',KBS.map(function(k){return[k+' KB',k]}),function(x){$('kb').value=x[1]});
 chips('pxChips',EXTRA.map(function(x){return[x[0],x]}),function(x){var q=x[1];$('kb').value=q[1];$('minkb').value=q[2]||'';$('w').value=q[3]||'';$('h').value=q[4]||''});

@@ -62,7 +62,7 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
     </div>
     <div class="chips" id="pxChips"></div>
     <div class="row"><div><label>குறைந்தபட்ச அளவு KB (விருப்பம்)</label><input type="number" id="minkb" min="0" max="5000" placeholder="எ.கா. 10" value="20" inputmode="numeric"></div></div>
-    <div class="note" style="background:#fff8e6;border-radius:10px;padding:10px"><b>TNPSC அளவுகள்:</b> புகைப்படம் 20–50 KB; கையொப்பம் 10–20 KB (200 dpi, JPG). px அளவுகள் செ.மீ.-ஐ 200 dpi-ல் மாற்றிக் கணக்கிட்டவை (புகைப்படம் 3.5×4.5 செ.மீ. ≈ 276×354 px; கையொப்பம் 6×2 செ.மீ. ≈ 472×157 px). இந்தத் தகவல் மூன்றாம் தரப்பு தளத்தில் (Prepp, பிப்ரவரி 2026) உள்ளது, அதிகாரப்பூர்வ அறிவிப்பு அல்ல — விண்ணப்பிக்கும் முன் <b>tnpsc.gov.in</b>-ல் சரிபார்க்கவும்.</div>
+    <div class="note" style="background:#fff8e6;border-radius:10px;padding:10px"><b>TNPSC அளவுகள்:</b> புகைப்படம் 20–50 KB; கையொப்பம் 10–20 KB (200 dpi, JPG). px அளவுகள் செ.மீ.-ஐ 200 dpi-ல் மாற்றிக் கணக்கிட்டவை (புகைப்படம் 3.5×4.5 செ.மீ. ≈ 276×354 px; கையொப்பம் 6×2 செ.மீ. ≈ 472×157 px). அதே மூலத்தின்படி புகைப்படத்தின் கீழே 1.5 செ.மீ. பட்டையில் உங்கள் பெயரும் படம் எடுத்த தேதியும் இருக்க வேண்டும் — இந்தக் கருவி அதைச் சேர்க்காது; ஸ்டுடியோவில் எடுத்த படத்தையே பயன்படுத்துங்கள். வேறு சில தளங்கள் வேறு px அளவுகளைச் சொல்கின்றன. இந்தத் தகவல் மூன்றாம் தரப்பு தளத்தில் (Prepp, பிப்ரவரி 2026) உள்ளது, அதிகாரப்பூர்வ அறிவிப்பு அல்ல — விண்ணப்பிக்கும் முன் <b>tnpsc.gov.in</b>-ல் சரிபார்க்கவும்.</div>
     <div class="note">உங்கள் படிவம் கேட்கும் அளவுகளை அதன் வழிமுறையில் பார்த்து உள்ளிடுங்கள் — தேர்வு வாரியங்கள் அளவுகளை மாற்றலாம். இரண்டு அளவுகளையும் கொடுத்தால் படம் நடுவில் வெட்டப்பட்டு அதே அளவாகும்; ஒன்றை மட்டும் கொடுத்தால் விகிதம் மாறாது.</div>
     <div style="margin-top:12px"><button class="btn" id="go" disabled>அளவு மாற்று</button></div>
   </div>
@@ -100,7 +100,7 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
 var $=function(i){return document.getElementById(i)};
 var imgEl=null, srcName='photo', outUrl=null;
 var EXTRA=[["TNPSC புகைப்படம்",50,20,276,354],["TNPSC கையொப்பம்",20,10,472,157]];
-var KBS=[20,50,100,200,500], PXS=[['Signature 140×60',140,60],['3.5×4.5 cm (413×531)',413,531],['200×230',200,230],['Passport 600×600',600,600]];
+var KBS=[20,50,100,200,500], PXS=[['IBPS கையொப்பம் 140×60',140,60],['3.5×4.5 cm @300dpi (413×531)',413,531],['IBPS புகைப்படம் 200×230',200,230],['600×600',600,600]];
 function chips(id,list,fn){var b=$(id);list.forEach(function(x){var c=document.createElement('button');c.type='button';c.className='chip';c.textContent=x[0];c.onclick=function(){fn(x)};b.appendChild(c)})}
 chips('kbChips',KBS.map(function(k){return[k+' KB',k]}),function(x){$('kb').value=x[1]});
 chips('pxChips',EXTRA.map(function(x){return[x[0],x]}),function(x){var q=x[1];$('kb').value=q[1];$('minkb').value=q[2]||'';$('w').value=q[3]||'';$('h').value=q[4]||''});

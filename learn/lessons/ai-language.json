@@ -119,8 +119,8 @@
     "en": "From a small model to a large AI"
    },
    "text": {
-    "ta": "இந்த மாதிரி முந்தைய **ஒரே ஒரு** சொல்லை மட்டுமே பார்க்கிறது. பெரிய மொழி மாதிரிகள் முந்தைய நூற்றுக்கணக்கான (இப்போது ஆயிரக்கணக்கான) சொற்களைப் பார்க்கின்றன; எந்தச் சொல் எதனோடு தொடர்புடையது என்று கவனிக்கும் **attention** என்ற முறையை 2017-இல் வந்த **Transformer** அமைப்பு பயன்படுத்துகிறது.\n\nஅவை எண்ணிக்கை அட்டவணை வைத்திருப்பதில்லை; முந்தைய பாடத்தில் நீ செய்த அதே **தவறைக் குறைக்கும் கற்றல்** மூலம் பல கோடி எடைகளைத் திருத்தி, \"அடுத்த சொல்லின் நிகழ்தகவு\"களை ஊகிக்கப் பழகுகின்றன. ஆனால் வெளியீட்டு யோசனை அதேதான்: **நிகழ்தகவுகள் → ஒன்றைத் தேர்ந்தெடு → அடுத்த சொல்.**",
-    "en": "This model looks at only **one** previous word. Large language models look at hundreds (now thousands) of previous words; the **Transformer** design of 2017 uses a method called **attention** to notice which word relates to which.\n\nThey do not keep a count table; through the same **error-shrinking learning** you did in the last lesson they adjust many crores of weights to learn to guess \"the probabilities of the next word\". But the output idea is the same: **probabilities → pick one → the next word.**"
+    "ta": "இந்த மாதிரி முந்தைய **ஒரே ஒரு** சொல்லை மட்டுமே பார்க்கிறது. பெரிய மொழி மாதிரிகள் முந்தைய ஆயிரக்கணக்கான — இன்று ஒரு லட்சத்துக்கும் மேற்பட்ட — சொல் துண்டுகளை (tokens) பார்க்கின்றன; எந்தச் சொல் எதனோடு தொடர்புடையது என்று கவனிக்கும் **attention** என்ற முறையை 2017-இல் வந்த **Transformer** அமைப்பு பயன்படுத்துகிறது.\n\nஅவை எண்ணிக்கை அட்டவணை வைத்திருப்பதில்லை; முந்தைய பாடத்தில் நீ செய்த அதே **தவறைக் குறைக்கும் கற்றல்** மூலம் பல கோடி எடைகளைத் திருத்தி, \"அடுத்த சொல்லின் நிகழ்தகவு\"களை ஊகிக்கப் பழகுகின்றன. ஆனால் வெளியீட்டு யோசனை அதேதான்: **நிகழ்தகவுகள் → ஒன்றைத் தேர்ந்தெடு → அடுத்த சொல்.**",
+    "en": "This model looks at only **one** previous word. Large language models look at thousands — today often more than 100,000 — previous tokens (word pieces); the **Transformer** design of 2017 uses a method called **attention** to notice which word relates to which.\n\nThey do not keep a count table; through the same **error-shrinking learning** you did in the last lesson they adjust many crores of weights to learn to guess \"the probabilities of the next word\". But the output idea is the same: **probabilities → pick one → the next word.**"
    }
   },
   {
@@ -130,8 +130,8 @@
     "en": "Fluent — and possibly wrong"
    },
    "text": {
-    "ta": "AI தேர்ந்தெடுப்பது **அதிக வாய்ப்புள்ள** சொல்லை; **உண்மையான** சொல்லை அல்ல. எழுத்துகளில் ஒரு தவறு அடிக்கடி வந்திருந்தால், அது தவறாக இருந்தாலும் அதுவே வாய்ப்பு அதிகமாகலாம். தரவில் இல்லாத ஒன்றைக் கேட்டால், அது \"தெரியாது\" என்று சொல்வதற்குப் பதிலாக நம்பகமாகத் தோன்றும் ஆனால் கற்பனையான பதிலைச் சொல்லிவிடலாம். இதை AI **hallucination** (இல்லாததைப் பேசுதல்) என்கிறார்கள்.\n\n**சரிபார்க்கும் வழிகள்:** (1) அரசு / பாடநூல் / நம்பகமான இணையதளம் போன்ற இரண்டு தனிச் சான்றுகளில் ஒப்பிடு. (2) எண், ஆண்டு, பெயர், மேற்கோள் இருந்தால் குறிப்பாகச் சரிபார். (3) முக்கிய முடிவுகளுக்கு (மருந்து, சட்டம், பணம்) AI-யை மட்டும் நம்பாதே. (4) \"இதற்குச் சான்று என்ன?\" என்று கேள்.",
-    "en": "The AI picks the **most likely** word, not the **true** word. If a mistake appears often in the text, it can be the most likely choice even though it is wrong. Asked about something not in its data, instead of saying \"I don’t know\" it may give a believable but invented answer. This is called AI **hallucination**.\n\n**Ways to verify:** (1) Compare with two independent sources such as government sites, textbooks and trusted websites. (2) Check numbers, years, names and quotations especially. (3) Do not rely on AI alone for important decisions (medicine, law, money). (4) Ask \"what is the evidence for this?\"."
+    "ta": "AI தேர்ந்தெடுப்பது **அதிக வாய்ப்புள்ள** சொற்களில் ஒன்றை; **உண்மையான** சொல்லை அல்ல. எழுத்துகளில் ஒரு தவறு அடிக்கடி வந்திருந்தால், அது தவறாக இருந்தாலும் அதுவே வாய்ப்பு அதிகமாகலாம். தரவில் இல்லாத ஒன்றைக் கேட்டால், அது \"தெரியாது\" என்று சொல்வதற்குப் பதிலாக நம்பகமாகத் தோன்றும் ஆனால் கற்பனையான பதிலைச் சொல்லிவிடலாம். இதை AI **hallucination** (இல்லாததைப் பேசுதல்) என்கிறார்கள்.\n\n**சரிபார்க்கும் வழிகள்:** (1) அரசு / பாடநூல் / நம்பகமான இணையதளம் போன்ற இரண்டு தனிச் சான்றுகளில் ஒப்பிடு. (2) எண், ஆண்டு, பெயர், மேற்கோள் இருந்தால் குறிப்பாகச் சரிபார். (3) முக்கிய முடிவுகளுக்கு (மருந்து, சட்டம், பணம்) AI-யை மட்டும் நம்பாதே. (4) \"இதற்குச் சான்று என்ன?\" என்று கேள்.",
+    "en": "The AI picks from the **most likely** words, not the **true** word. If a mistake appears often in the text, it can be the most likely choice even though it is wrong. Asked about something not in its data, instead of saying \"I don’t know\" it may give a believable but invented answer. This is called AI **hallucination**.\n\n**Ways to verify:** (1) Compare with two independent sources such as government sites, textbooks and trusted websites. (2) Check numbers, years, names and quotations especially. (3) Do not rely on AI alone for important decisions (medicine, law, money). (4) Ask \"what is the evidence for this?\"."
    }
   },
   {
@@ -299,8 +299,8 @@
     }
    ],
    "model": {
-    "ta": "AI அடுத்த சொல்லின் நிகழ்தகவைக் கணக்கிட்டு, அதிக வாய்ப்புள்ள சொல்லைத் தேர்ந்தெடுக்கிறது; அது உண்மையா என்று சோதிப்பதில்லை. அதனால் சரளமாகத் தோன்றும் தவறான பதிலும் வரலாம். எனவே எண், பெயர், முக்கிய முடிவுகளை நம்பகமான இரண்டு சான்றுகளில் சரிபார்க்க வேண்டும்.",
-    "en": "An AI works out the probability of the next word and picks the most likely one; it does not check whether it is true. So a fluent but wrong answer can come. Therefore numbers, names and important decisions must be verified against two reliable sources."
+    "ta": "AI அடுத்த சொல்லின் நிகழ்தகவைக் கணக்கிட்டு, அதிக வாய்ப்புள்ள சொற்களில் ஒன்றைத் தேர்ந்தெடுக்கிறது; அது உண்மையா என்று சோதிப்பதில்லை. அதனால் சரளமாகத் தோன்றும் தவறான பதிலும் வரலாம். எனவே எண், பெயர், முக்கிய முடிவுகளை நம்பகமான இரண்டு சான்றுகளில் சரிபார்க்க வேண்டும்.",
+    "en": "An AI works out the probability of the next word and picks from the most likely ones; it does not check whether it is true. So a fluent but wrong answer can come. Therefore numbers, names and important decisions must be verified against two reliable sources."
    }
   },
   {
