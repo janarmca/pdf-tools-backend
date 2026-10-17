@@ -107,6 +107,10 @@ export async function handlePromo(req, env, path, url) {
     const social = await loadSocial(env);
     return json({ enabled: await promoEnabled(env), platforms: PLATFORMS.map((p) => ({ name: p.name, ready: p.ready(env, social) })), social: socialStatus(env, social), tools: CATALOG.length, recent: results });
   }
+  if (path === '/promo/funnel' && req.method === 'GET') {
+    const { results } = await env.DB.prepare("select day, name, n from funnel_events where day >= date('now','-30 day') order by day desc, name").all();
+    return json({ days: results });
+  }
   if (path === '/promo/run' && req.method === 'POST') {
     const b = await readJson(req);
     return json(await runPromo(env, { force: true, tool: b.tool || null }));

@@ -321,3 +321,8 @@ test('promotion: connect Facebook/Instagram and Pinterest, post to them and to X
   await call('/promo/disconnect', { body: { platform: 'facebook' }, token: a.access_token });
   assert.equal((await get('/promo/status')).j.social.find((x) => x.name === 'facebook').connected, false);
 });
+
+test('funnel events: only known names are accepted', async () => {
+  assert.equal((await call('/api/event', { body: { name: 'bogus' } })).s, 400);
+  assert.equal((await call('/api/event', { body: { name: 'tool_download' } })).s, 200);
+});

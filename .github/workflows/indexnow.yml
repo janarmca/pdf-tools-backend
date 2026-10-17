@@ -1,0 +1,20 @@
+name: IndexNow (tell Bing about changed pages)
+on:
+  push:
+    branches: [main]
+    paths: ['**.html', 'sitemap.xml']
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      # Cloudflare Pages needs ~1-2 minutes to publish the new files; IndexNow checks the key file after submit.
+      - run: sleep 90
+      - run: node .github/scripts/indexnow.mjs
+        env:
+          BEFORE: ${{ github.event.before }}

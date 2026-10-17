@@ -61,7 +61,8 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
       <div><label>உயரம் px (விருப்பம்)</label><input type="number" id="h" min="20" max="6000" placeholder="எ.கா. 230" value="" inputmode="numeric"></div>
     </div>
     <div class="chips" id="pxChips"></div>
-    <div class="row"><div><label>குறைந்தபட்ச அளவு KB (விருப்பம்)</label><input type="number" id="minkb" min="0" max="5000" placeholder="எ.கா. 10" inputmode="numeric"></div></div>
+    <div class="row"><div><label>குறைந்தபட்ச அளவு KB (விருப்பம்)</label><input type="number" id="minkb" min="0" max="5000" placeholder="எ.கா. 10" value="" inputmode="numeric"></div></div>
+    
     <div class="note">உங்கள் படிவம் கேட்கும் அளவுகளை அதன் வழிமுறையில் பார்த்து உள்ளிடுங்கள் — தேர்வு வாரியங்கள் அளவுகளை மாற்றலாம். இரண்டு அளவுகளையும் கொடுத்தால் படம் நடுவில் வெட்டப்பட்டு அதே அளவாகும்; ஒன்றை மட்டும் கொடுத்தால் விகிதம் மாறாது.</div>
     <div style="margin-top:12px"><button class="btn" id="go" disabled>அளவு மாற்று</button></div>
   </div>
@@ -74,6 +75,7 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
       <a class="btn wa" id="wa" target="_blank" rel="noopener">WhatsApp-ல் share</a>
     </div>
     <div class="note" id="warn"></div>
+    <div class="note" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">வேலைக்கு விண்ணப்பிக்கிறீர்களா? உங்கள் Resume-ஐ <a href="/?tool=resumebuilder" style="color:var(--brand);font-weight:800">இலவசமாக உருவாக்குங்கள்</a>; தேவைப்பட்டால் <a href="/?tool=airesume" style="color:var(--brand);font-weight:800">AI Resume Reviewer</a> (AI பயன்படும் இடத்தில் மட்டும் சிறு கட்டணம்).</div>
   </div>
 
   <div class="card seo">
@@ -90,16 +92,18 @@ input[type=number],select{width:100%;padding:11px;border:1px solid #d3dbe7;borde
     <p><b>px அளவையும் மாற்ற முடியுமா?</b><br>ஆம். அகலம், உயரம் இரண்டையும் உள்ளிடுங்கள். படிவம் கேட்கும் சரியான px அளவைப் படிவ வழிமுறையில் பார்த்து உள்ளிடுங்கள்.</p>
     <p><b>என் படம் எங்காவது அனுப்பப்படுமா?</b><br>இல்லை. எல்லாம் உங்கள் சாதனத்தின் browser-க்குள் நடக்கிறது.</p>
     <h2>மற்ற அளவுகள்</h2>
-    <div class="links"><a href="/photo-resizer">Photo Resizer Free — Resize Photo to 20KB, 50KB, 100KB</a><a href="/photo-50kb">Resize Photo to 50KB</a><a href="/photo-100kb">Resize Photo to 100KB</a><a href="/photo-200kb">Resize Photo to 200KB</a><a href="/signature-resize">Resize Signature to 140x60 px, 20KB</a></div>
+    <div class="links"><a href="/photo-resizer">Photo Resizer Free — Resize Photo to 20KB, 50KB, 100KB</a><a href="/photo-50kb">Resize Photo to 50KB</a><a href="/photo-100kb">Resize Photo to 100KB</a><a href="/photo-200kb">Resize Photo to 200KB</a><a href="/tnpsc-photo-signature">TNPSC Photo &amp; Signature Resize (20-50KB) Free</a><a href="/signature-resize">Resize Signature to 140x60 px, 20KB</a></div>
   </div>
 </div>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
 var imgEl=null, srcName='photo', outUrl=null;
+var EXTRA=[];
 var KBS=[20,50,100,200,500], PXS=[['Signature 140×60',140,60],['3.5×4.5 cm (413×531)',413,531],['200×230',200,230],['Passport 600×600',600,600]];
 function chips(id,list,fn){var b=$(id);list.forEach(function(x){var c=document.createElement('button');c.type='button';c.className='chip';c.textContent=x[0];c.onclick=function(){fn(x)};b.appendChild(c)})}
 chips('kbChips',KBS.map(function(k){return[k+' KB',k]}),function(x){$('kb').value=x[1]});
+chips('pxChips',EXTRA.map(function(x){return[x[0],x]}),function(x){var q=x[1];$('kb').value=q[1];$('minkb').value=q[2]||'';$('w').value=q[3]||'';$('h').value=q[4]||''});
 chips('pxChips',PXS,function(x){$('w').value=x[1];$('h').value=x[2]});
 $('drop').onclick=function(){$('file').click()};
 $('file').onchange=function(){var f=this.files[0];if(!f)return;srcName=f.name.replace(/\.[^.]+$/,'')||'photo';
@@ -129,6 +133,7 @@ async function run(){
   $('stat').innerHTML='<span class="'+(ok?'':'bad')+'">'+(b.size/1024).toFixed(1)+' KB</span><span>'+c.width+'×'+c.height+' px</span><span>JPG</span>';
   $('warn').textContent=warn.join(' ');
   $('wa').href='https://wa.me/?text='+encodeURIComponent('படத்தை KB அளவுக்குள் இலவசமாக மாற்றினேன் 👍 நீங்களும் செய்யுங்கள் (Login வேண்டாம்):\nhttps://pdftoolsindia.com/photo-20kb?utm_source=whatsapp&utm_medium=share&utm_campaign=photoresize');
+  try{fetch('/cfapi/api/event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'photo_resize'}),keepalive:true}).catch(function(){})}catch(e){}
   $('res').classList.add('on');$('res').scrollIntoView({behavior:'smooth',block:'nearest'})}
 $('go').onclick=function(){$('go').disabled=true;run().catch(function(e){alert('பிழை: '+e.message)}).then(function(){$('go').disabled=false})};
 })();

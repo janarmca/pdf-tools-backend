@@ -287,7 +287,7 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/matrimony/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/matrimony/en/`, freq: 'weekly', pri: '0.7', alts: MATRIMONY_ALTS },
     { loc: `${SITE}/poster-maker`, freq: 'monthly', pri: '0.7' },
-    ...['photo-resizer', 'photo-20kb', 'photo-50kb', 'photo-100kb', 'photo-200kb', 'signature-resize'].map((s) => ({ loc: `${SITE}/${s}`, freq: 'monthly', pri: '0.8' })),
+    ...['photo-resizer', 'photo-20kb', 'photo-50kb', 'photo-100kb', 'photo-200kb', 'signature-resize', 'tnpsc-photo-signature'].map((s) => ({ loc: `${SITE}/${s}`, freq: 'monthly', pri: '0.8' })),
     { loc: `${SITE}/tn-rent-agreement`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/tn-sale-deed`, freq: 'monthly', pri: '0.6' },
     { loc: `${SITE}/blog/how-to-merge-pdf-files-free`, freq: 'monthly', pri: '0.7' },

@@ -205,3 +205,9 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 ## UPDATE_39 — Photo Resizer (exam-form KB / px)
 - `photo-resizer.template.html` + `node generate-photo-pages.mjs` -> photo-resizer, photo-20kb/50kb/100kb/200kb, signature-resize (.html). Tool id `photoresize` (cat image, standalone). Binary search on JPEG quality, centre-crop when both width and height given, optional min KB. Exam-specific official sizes are NOT hard-coded (boards change them) — user types the size from the form.
 - Edit the template, rerun the generator, commit the generated pages. SEO titles <= 60 chars, descriptions <= 160 (generator throws otherwise).
+
+## UPDATE_40 — income groundwork from the "90 day income plan" research (reports/pdftoolsindia 90 day income plan.md)
+- Funnel counters: Worker `POST /cfapi/api/event {name}` (allow-list in api.js FUNNEL_EVENTS) -> D1 `funnel_events(day,name,n)` (migration 0005, applied by the deploy workflow). Events: tool_download, whatsapp_share, paywall_seen, checkout_open, paid, photo_resize, poster_export. Admin read: GET /cfapi/promo/funnel (matrimony admins) or query D1 directly. No IP / user id stored. `trackEvent()` in index.source.html.
+- IndexNow: `.github/workflows/indexnow.yml` + `.github/scripts/indexnow.mjs`; key file `<32 hex>.txt` in repo root must stay. Only Bing/Yandex/Naver/Seznam — Google is not part of IndexNow.
+- `/tnpsc-photo-signature` (generate-photo-pages.mjs): TNPSC photo 20-50 KB, signature 10-20 KB (200 dpi) from Prepp (3rd party, Feb 2026) — px derived from cm; page tells users to confirm on tnpsc.gov.in. Re-verify when TNPSC publishes new instructions.
+- Existing Worker already supports Telegram channel posting (TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL secrets) — owner only has to create the bot/channel and add the two secrets.

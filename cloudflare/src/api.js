@@ -3,7 +3,7 @@
 // Astrology+, and the matrimony chat-unlock payment + horoscope reading.
 // The server-side video "Fast Server Mode" (native ffmpeg) is retired: video tools run free in the browser.
 import { Buffer } from 'node:buffer';
-import { json, err, readJson, now, userFromRequest, rateLimit, safeEqual } from './util.js';
+import { json, err, readJson, now, userFromRequest, rateLimit, safeEqual, clientIp } from './util.js';
 import {
   astrologerCall, toSubject, buildRasiFromSubject, calcNakshatra, calculatePorutham, buildNavamsaFromSubject, SIGN_NAME_MAP,
 } from './astro.js';
@@ -564,9 +564,23 @@ const AUTHED_FORM = {
   '/api/matrimony/jathagam-extract': matJathagam,
 };
 
+// Anonymous funnel counters for measuring what converts (tool used -> paywall -> checkout -> paid).
+// Only a fixed list of event names is accepted; nothing about the visitor is stored.
+export const FUNNEL_EVENTS = new Set(['tool_download', 'whatsapp_share', 'paywall_seen', 'checkout_open', 'paid', 'photo_resize', 'poster_export']);
+async function funnelEvent(env, req) {
+  const b = await readJson(req);
+  const name = String((b && b.name) || '');
+  if (!FUNNEL_EVENTS.has(name)) return err(400, 'Unknown event');
+  if (!(await rateLimit(env, 'ev:' + clientIp(req), 120, 3600))) return json({ ok: true, limited: true });
+  const day = new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10); // IST day
+  await env.DB.prepare('insert into funnel_events (day, name, n) values (?, ?, 1) on conflict(day, name) do update set n = n + 1').bind(day, name).run();
+  return json({ ok: true });
+}
+
 export async function handleApi(req, env, path) {
   const m = req.method;
   if (path === '/api/pricing' && m === 'GET') return json((await env.DB.prepare('select * from pricing_plans order by amount_inr').all()).results);
+  if (path === '/api/event' && m === 'POST') return funnelEvent(env, req);
   if (path === '/api/payment/webhook' && m === 'POST') return webhook(env, req);
   if (path.startsWith('/api/video/')) return err(410, 'Fast Server Mode has been retired — video tools now run free in your browser.');
   if (path === '/api/me' || AUTHED_POST[path] || AUTHED_FORM[path]) {

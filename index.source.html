@@ -879,6 +879,7 @@ async function startCheckout(planId, btn){
       body: JSON.stringify({ planId })
     });
     if(order.error) throw new Error(order.error);
+    trackEvent('checkout_open');
     const rzp = new Razorpay({
       key: order.keyId, amount: order.amount, currency: order.currency,
       name: 'PDF Tools', description: 'Credits / Plan',
@@ -901,6 +902,7 @@ async function startCheckout(planId, btn){
             })
           });
           if(result.error) throw new Error(result.error);
+          trackEvent('paid');
           await refreshProfile(); updateCreditsBadgeInline();
           showToast('✅ Payment successful! Credits have been added.', 'success');
         }catch(e){
@@ -966,7 +968,10 @@ function fmtBytes(b){
 }
 // Immediate download: one anchor click, straight to the browser's Downloads folder.
 // No Save-As dialog, no share sheet, no intermediate page — the file just downloads.
+// Anonymous funnel counter (see Worker /api/event): which step of "use tool -> paywall -> checkout -> paid" people reach. Nothing personal is sent.
+function trackEvent(name){ try{ fetch(APP_CONFIG.BACKEND_URL + '/api/event', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }), keepalive:true }).catch(()=>{}); }catch(e){} }
 async function downloadBlob(blob, filename){
+  trackEvent('tool_download');
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
@@ -992,7 +997,7 @@ function showDownloadToast(filename){
     <div style="position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:#1B5E20; color:#fff; padding:12px 20px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.3); font-size:13.5px; font-weight:700; z-index:9999; display:flex; align-items:center; gap:8px; opacity:0; transition:opacity .25s, transform .25s; max-width:88vw;">
       <span style="font-size:16px;">✅</span>
       <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Downloaded: ${escapeHtml(filename)}</span>
-      <a href="${escapeHtml(whatsappShareUrl())}" target="_blank" rel="noopener" style="flex:0 0 auto; background:#25D366; color:#fff; text-decoration:none; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">WhatsApp-ல் share</a>
+      <a href="${escapeHtml(whatsappShareUrl())}" onclick="trackEvent('whatsapp_share')" target="_blank" rel="noopener" style="flex:0 0 auto; background:#25D366; color:#fff; text-decoration:none; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">WhatsApp-ல் share</a>
     </div>
   `);
   document.body.appendChild(toast);
@@ -2008,6 +2013,7 @@ async function mountPaidGate(body, tool, onUnlock){
   }
   const credits = authState.profile ? authState.profile.credits : 0;
   if(credits < tool.cost){
+    trackEvent('paywall_seen');
     const box = el(`<div style="text-align:center; padding:40px 20px;">
       <div style="font-size:40px; margin-bottom:12px;">💳</div>
       <div style="font-weight:900; font-size:16px; margin-bottom:6px;">Not enough credits</div>
