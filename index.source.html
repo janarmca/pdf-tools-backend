@@ -9560,17 +9560,18 @@ TOOL_IMPL.livetranslate = {
 /* ===================== TEXT TO IMAGE (Gemini) ===================== */
 TOOL_IMPL.texttoimage = {
   mount(container){
-    let prompt = '', generatedImages = []; // [{dataUrl, prompt}]
+    let prompt = '', generatedImages = []; // [{dataUrl, prompt, usedPrompt}]
+    const L = (ta, en) => (__appLang === 'ta' ? ta : en);
     const body = el(`<div></div>`); container.appendChild(body);
 
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Describe in detail what image you want — AI will generate it. 5 credits per image.</div>`));
-      const ta = el(`<textarea id="t2iPrompt" rows="3" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="e.g.: A watercolor painting of the Ilkal fort at sunset, warm orange sky, birds flying">${escapeHtml(prompt)}</textarea>`);
+      body.appendChild(el(`<div class="note">${L('எந்தப் படம் வேண்டும் என்று விரிவாக எழுதுங்கள் — தமிழ், ஆங்கிலம், இந்தி எதிலும் எழுதலாம் (தமிழில் எழுதினால் முதலில் ஆங்கிலமாக மாற்றப்படும்). ஒரு படத்துக்கு 5 credits. படத்துக்குள் எழுத்துகள் தேவைப்பட்டால் AI அவற்றைத் தவறாக வரையும் — எழுத்தில்லாமல் கேளுங்கள். AI படம் உண்மைச் சம்பவத்தின் புகைப்படம் அல்ல.', 'Describe in detail what image you want — in English, Tamil or Hindi (Tamil/Hindi is translated to English first). 5 credits per image. AI draws written letters wrongly, so ask for pictures without text. AI images are not real photographs of real events.')}</div>`));
+      const ta = el(`<textarea id="t2iPrompt" rows="3" style="display:block; width:100%; max-width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="${L('எ.கா.: கிராமத்து ஓட்டு வீட்டின் முன் அக்காவும் தம்பியும் விளையாடுகிறார்கள், காலை வெயில், புகைப்படம்', 'e.g.: A watercolor painting of the Ilkal fort at sunset, warm orange sky, birds flying')}">${escapeHtml(prompt)}</textarea>`);
       ta.addEventListener('input',(e)=> prompt = e.target.value);
       body.appendChild(ta);
       const row = el(`<div class="btn-row" style="margin-top:10px;"></div>`);
-      const btn = el(`<button class="btn">🎨 Generate Image</button>`);
+      const btn = el(`<button class="btn">🎨 ${L('படம் உருவாக்கு', 'Generate Image')}</button>`);
       btn.onclick = doGenerate;
       row.appendChild(btn);
       body.appendChild(row);
@@ -9579,14 +9580,14 @@ TOOL_IMPL.texttoimage = {
       [...generatedImages].reverse().forEach(img=>{
         const card = el(`<div style="border:1px solid var(--line); border-radius:12px; overflow:hidden;"></div>`);
         card.appendChild(el(`<img src="${img.dataUrl}" style="width:100%; display:block;">`));
-        const cap = el(`<div style="padding:8px 12px; font-size:11.5px; color:var(--sub);">${escapeHtml(img.prompt)}</div>`);
+        const cap = el(`<div style="padding:8px 12px; font-size:11.5px; color:var(--sub);">${escapeHtml(img.prompt)}${img.usedPrompt && img.usedPrompt !== img.prompt ? `<br><b>${L('AI-க்கு அனுப்பிய ஆங்கில விளக்கம்:', 'English description sent to the AI:')}</b> ${escapeHtml(img.usedPrompt)}` : ''}</div>`);
         card.appendChild(cap);
         const dlRow = el(`<div style="padding:0 12px 12px;"></div>`);
-        const dlBtn = el(`<button class="btn secondary" style="padding:7px 14px; font-size:12px;">📥 Download</button>`);
+        const dlBtn = el(`<button class="btn secondary" style="padding:7px 14px; font-size:12px;">📥 ${L('பதிவிறக்கு', 'Download')}</button>`);
         dlBtn.onclick = async ()=>{
           const res = await fetch(img.dataUrl);
           const blob = await res.blob();
-          downloadBlob(blob, 'ai-image-'+Date.now()+'.png');
+          downloadBlob(blob, 'ai-image-'+Date.now()+'.jpg');
         };
         dlRow.appendChild(dlBtn);
         card.appendChild(dlRow);
@@ -9596,13 +9597,13 @@ TOOL_IMPL.texttoimage = {
     }
 
     async function doGenerate(){
-      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'Please sign in to use AI image generation.').style.background='#FDEDEC'; return; }
+      if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, L('AI படம் உருவாக்க முதலில் உள்நுழையுங்கள்.', 'Please sign in to use AI image generation.')).style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#t2iPrompt').value || '').trim();
-      if(!p){ mountResult(body, 'Please describe the image first.').style.background='#FDEDEC'; return; }
+      if(!p){ mountResult(body, L('முதலில் படத்தை விவரியுங்கள்.', 'Please describe the image first.')).style.background='#FDEDEC'; return; }
       const ok = await confirmCreditSpend(body, '5 credits');
       if(!ok) return;
       const prog = mountProgress(body);
-      prog.set(20, 'Generating image…');
+      prog.set(20, L('படம் உருவாகிறது…', 'Generating image…'));
       try{
         const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/image', {
           method:'POST',
@@ -9610,12 +9611,12 @@ TOOL_IMPL.texttoimage = {
           body: JSON.stringify({ prompt: p, toolId: 'texttoimage' })
         });
         if(result.error) throw new Error(result.error);
-        prog.set(90, 'Finishing…');
-        const dataUrl = `data:${result.mimeType||'image/png'};base64,${result.imageBase64}`;
-        generatedImages.push({ dataUrl, prompt: p });
-        prog.set(100,'Done'); prog.remove();
+        prog.set(90, L('முடிக்கிறது…', 'Finishing…'));
+        const dataUrl = `data:${result.mimeType||'image/jpeg'};base64,${result.imageBase64}`;
+        generatedImages.push({ dataUrl, prompt: p, usedPrompt: result.usedPrompt || '' });
+        prog.set(100, L('முடிந்தது', 'Done')); prog.remove();
         paint();
-      }catch(err){ prog.remove(); mountResult(body, 'Error: '+err.message).style.background='#FDEDEC'; }
+      }catch(err){ prog.remove(); mountResult(body, L('பிழை: ', 'Error: ')+err.message).style.background='#FDEDEC'; }
     }
     paint();
   }
@@ -9640,7 +9641,7 @@ TOOL_IMPL.aibgreplace = {
       if(!file) return;
       mountFileList(body, [file], ()=>{ file=null; cutoutBlob=null; paint(); });
       body.appendChild(el(`<img src="${URL.createObjectURL(file)}" style="max-width:100%; max-height:260px; border-radius:10px; margin:8px 0; display:block;">`));
-      const ta = el(`<textarea id="abgPrompt" rows="2" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="e.g.: a clean white studio background, soft shadow, professional product photography">${escapeHtml(prompt)}</textarea>`);
+      const ta = el(`<textarea id="abgPrompt" rows="2" style="display:block; width:100%; max-width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit;" placeholder="e.g.: a clean white studio background, soft shadow, professional product photography">${escapeHtml(prompt)}</textarea>`);
       ta.addEventListener('input',(e)=> prompt = e.target.value);
       body.appendChild(ta);
       const row = el(`<div class="btn-row" style="margin-top:10px;"></div>`);

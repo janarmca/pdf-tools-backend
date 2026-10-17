@@ -8,6 +8,8 @@ import {
   astrologerCall, toSubject, buildRasiFromSubject, calcNakshatra, calculatePorutham, buildNavamsaFromSubject, SIGN_NAME_MAP,
 } from './astro.js';
 import { matRecordUnlock } from './mat.js';
+import { prepareImagePrompt } from './imgprompt.js';
+import { clampText, planProviders, runWithFallback, TRUNC_NOTE } from './aitext.js';
 
 const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 const NVIDIA_MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
@@ -197,37 +199,54 @@ async function aiAsk(env, req, user) {
   });
 }
 
+async function nvidiaText(env, content, maxTokens) {
+  let r;
+  try {
+    r = await fetch(base(env, 'NVIDIA_API_BASE', 'https://integrate.api.nvidia.com') + '/v1/chat/completions', {
+      method: 'POST', signal: AbortSignal.timeout(45000),
+      headers: { Authorization: `Bearer ${env.NVIDIA_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: NVIDIA_MODEL, temperature: 0.3, max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
+          { role: 'user', content },
+        ],
+      }),
+    });
+  } catch (e) {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') throw fail(504, 'The AI service took too long to respond (over 45 seconds) — please try again in a moment.');
+    throw fail(502, 'Could not reach the AI service — please check your connection and try again. (' + e.message + ')');
+  }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const detail = j.error?.message || (typeof j.error === 'string' ? j.error : null) || j.message || j.detail;
+    throw fail(502, detail ? `${detail} (NVIDIA HTTP ${r.status})` : `AI request failed (NVIDIA HTTP ${r.status})`);
+  }
+  return { text: j.choices?.[0]?.message?.content || '', truncated: j.choices?.[0]?.finish_reason === 'length' };
+}
+
+async function geminiText(env, content) {
+  const text = await gemini(env, [{ text: content }], { generationConfig: { temperature: 0.3, maxOutputTokens: 8192 } });
+  return { text, truncated: false };
+}
+
 async function aiText(env, user, b) {
-  if (!env.NVIDIA_API_KEY) return err(501, 'AI feature not set up yet (NVIDIA_API_KEY missing).');
-  const cost = b.creditCost ? Number(b.creditCost) : 1;
   const toolId = String(b.toolId || 'aisummarize');
-  const text = String(b.text || ''), instruction = String(b.instruction || '');
+  const order = planProviders(env, toolId);
+  if (!order.length) return err(501, 'AI feature not set up yet (NVIDIA_API_KEY / GEMINI_API_KEY missing).');
+  const cost = b.creditCost ? Number(b.creditCost) : 1;
+  const instruction = String(b.instruction || '');
   if (!instruction.trim()) return err(400, 'Missing instruction.');
+  const { text, cut } = clampText(b.text);
   return charged(env, user.id, cost, toolId, async () => {
     const content = text.trim() ? `${instruction}\n\n---\nDocument content:\n${text}` : instruction;
-    let r;
-    try {
-      r = await fetch(base(env, 'NVIDIA_API_BASE', 'https://integrate.api.nvidia.com') + '/v1/chat/completions', {
-        method: 'POST', signal: AbortSignal.timeout(45000),
-        headers: { Authorization: `Bearer ${env.NVIDIA_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: NVIDIA_MODEL, temperature: 0.3, max_tokens: 1500,
-          messages: [
-            { role: 'system', content: 'You are a precise, helpful assistant. Follow the instruction exactly and output only what is asked for — no preamble like "Here is the summary", no notes about what you did.' },
-            { role: 'user', content },
-          ],
-        }),
-      });
-    } catch (e) {
-      if (e.name === 'TimeoutError' || e.name === 'AbortError') throw fail(504, 'The AI service took too long to respond (over 45 seconds) — please try again in a moment.');
-      throw fail(502, 'Could not reach the AI service — please check your connection and try again. (' + e.message + ')');
-    }
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      const detail = j.error?.message || (typeof j.error === 'string' ? j.error : null) || j.message || j.detail;
-      throw fail(502, detail ? `${detail} (NVIDIA HTTP ${r.status})` : `AI request failed (NVIDIA HTTP ${r.status})`);
-    }
-    return json({ ok: true, answer: j.choices?.[0]?.message?.content || 'No answer returned.' });
+    // translation output is as long as the input (Tamil needs many tokens per word) — the old 1500-token cap silently cut it
+    const maxTokens = toolId === 'aitranslate' || toolId === 'livetranslate' ? 8192 : 3000;
+    const r = await runWithFallback(order, { nvidia: (c) => nvidiaText(env, c, maxTokens), gemini: (c) => geminiText(env, c) }, content);
+    let answer = r.text;
+    if (r.truncated) answer += TRUNC_NOTE;
+    if (cut) answer += `\n\n[Note: only the first ${Math.round(120000 / 1000)},000 characters of the document were read.]`;
+    return json({ ok: true, answer });
   });
 }
 
@@ -238,9 +257,10 @@ async function aiImage(env, user, b) {
   if (!prompt) return err(400, 'Prompt தேவை.');
   const toolId = String(b.toolId || 'texttoimage');
   return charged(env, user.id, toolId === 'aibgreplace' ? 0 : 5, toolId, async () => {
-    const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: prompt.slice(0, 2048) });
+    const prep = await prepareImagePrompt(env, prompt); // Tamil/Hindi → English first (FLUX only understands English)
+    const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: prep.prompt });
     if (!out || !out.image) throw fail(502, 'Model did not return an image — try rephrasing the prompt.');
-    return json({ ok: true, imageBase64: out.image, mimeType: 'image/jpeg' });
+    return json({ ok: true, imageBase64: out.image, mimeType: 'image/jpeg', usedPrompt: prep.prompt, translated: prep.translated });
   });
 }
 
