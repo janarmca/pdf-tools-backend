@@ -196,3 +196,8 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - Every download toast (`showDownloadToast`, used by all tools) now has a green "WhatsApp-ல் share" button (`whatsappShareUrl()`, wa.me link the user taps themselves; UTM utm_source=whatsapp&utm_medium=share&utm_campaign=download). Poster maker has the same in its toast.
 - YouTube Short descriptions link `?utm_source=youtube&utm_medium=short&utm_campaign=<tool id>`.
 - Still owner-side: Search Console + Bing sitemap, CA call (GST/LUT/ITR), Razorpay KYC, affiliate programs (check they are live), AdSense only after unique text per tool page (owner decided to wait 3-4 months).
+
+## Tamil text on tool pages (Oct 2026)
+- `seo-content-ta.mjs` (`SEO_TA`) holds a hand-written Tamil intro + 3 tips + Tamil FAQs for the 20 most searched tools (merge, split, compress, img2pdf, imgcompress, imgcompresskb, examphoto, imgpassport, pdf2word, word2pdf, sign, rotate, remove, pdfprotect, pdfunlock, watermark, emicalc, incometaxcalc, receipts, salaryslip). `generate-tool-pages.mjs` renders it as "தமிழில் சுருக்கமாக" under the steps and adds the Tamil FAQs to the FAQ list + FAQPage schema. Rule: only restate what the English entry in `seo-content.mjs` already says — no new claims. Add more tools by adding keys, then `node generate-tool-pages.mjs`.
+- Why: unique per-page text (needed before an AdSense application in ~3-4 months, and against "templated pages" spam signals). ~144 pages still use only the generic text.
+- Blog pages (18) now have the Instagram / YouTube / Facebook / support e-mail footer (`footer.site .soc` in blog/blog.css).

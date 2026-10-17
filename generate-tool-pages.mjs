@@ -23,6 +23,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SEO_EXTRA } from './seo-content.mjs';
+import { SEO_TA } from './seo-content-ta.mjs';
 import { TA_TOOL } from './ta-names.mjs';
 import { CAT_THEME, BASE_CSS, HEADER, FOOTER } from './pages-style.mjs';
 import { AUDIENCE_HUBS, audienceHtml, hubSections } from './audience-hubs.mjs';
@@ -92,6 +93,7 @@ function pageHtml(t, slug, related) {
 
   const free = !isPaid;
   const faqs = [
+    ...((SEO_TA[t.id] && SEO_TA[t.id].faqs) || []),
     ...((SEO_EXTRA[t.id] && SEO_EXTRA[t.id].faqs) || []),
     [`Is ${t.name} free to use?`, free ? `Yes. ${t.name} is free on PDF Tools India — no signup, no watermark and no daily limit.` : `${t.name} is AI-powered, so it uses ${t.cost} credit${t.cost>1?'s':''} per run. You always see the cost and confirm before anything is charged; the rest of the site's tools stay free.`],
     [`Is my data safe when I use ${t.name}?`, (t.cat === 'pdf' || t.cat === 'image' || t.cat === 'education') ? `Yes. ${t.name} runs inside your own browser, so your files and text never leave your device.` : (t.cat === 'ai' ? `Your file is sent only to the AI service needed to produce the result, over an encrypted connection, and is not kept after processing.` : `Most processing happens in your browser. Heavy video jobs can optionally use a faster server, and files there are deleted after processing.`)],
@@ -160,7 +162,12 @@ function pageHtml(t, slug, related) {
         <li>Download or copy your result — that's it.</li>`}
       </ol>
     </div>
-${X && X.uses ? `    <div class="section">
+${SEO_TA[t.id] ? `    <div class="section">
+      <h2>தமிழில் சுருக்கமாக <small>In Tamil</small></h2>
+      <p>${escapeHtml(SEO_TA[t.id].intro)}</p>
+      <ul>${SEO_TA[t.id].tips.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    </div>
+` : ''}${X && X.uses ? `    <div class="section">
       <h2>எதற்குப் பயன்படும்? <small>Common uses</small></h2>
       <ul>${X.uses.map(u => `<li>${escapeHtml(u)}</li>`).join('')}</ul>
     </div>
