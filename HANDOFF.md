@@ -185,3 +185,9 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - NOT built yet (waiting for the owner's photo): "owner explains the new update" talking video. Zero-cost options are limited — a still photo with a moving mouth needs a lip-sync model (heavy on free CI); the safe plan is the photo in a framed circle with a subtle speaking pulse + the Gemini voice, or the owner records the voice/screen himself and the pipeline adds logo + info card.
 - Live log check (Oct 2026, D1 `promo_posts`): YouTube, Facebook, Instagram all `sent` on 16 Oct; one Instagram `Application request limit reached` after many manual test runs (the daily single post is far below the limit); "uploaded as private" rows came from privacy=private test runs. Scheduled runs are delayed by GitHub (03:50 UTC cron started 08:31 UTC on 16 Oct) — normal.
 
+
+## UPDATE_35 — Tamil Poster Maker (no AI, Phase 1)
+- `poster-maker.html` + `poster-core.js` (Fabric 7.4.0 in `libs/`, fonts in `fonts/poster/`). Tool id `postermaker` (cat image, standalone `/poster-maker`, opens via mountEmbeddedTool). 13 code-drawn templates, sizes incl. A4 + flex, brand footer (name/phone/address/UPI QR from `libs/qrcode-generator.js`, saved only in localStorage), PNG/JPG/raster-PDF export, .json save/open, undo/redo.
+- Rules: every text line is one Textbox run (no letter-spacing/curved text) so Tamil stays correct; text edited via the side textarea (`editable:false` on canvas); fabric 7 defaults originX/Y to center so `boot()` sets them to left/top.
+- Festival dates in `FESTS` (poster-core.js) are provisional — update yearly (Deepavali 2026-11-08, 2027-10-29).
+- NOT built yet: Reel maker (Mediabunny/WebCodecs), on-device AI (background removal, TTS) — owner decision needed.
