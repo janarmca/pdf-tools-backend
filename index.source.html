@@ -338,7 +338,7 @@
 <link rel="stylesheet" href="/fonts/tamil.css">
 </head>
 <body>
-<h1 style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">PDF Tools India — இலவச PDF, Image, Video &amp; GST கருவிகள்</h1>
+<h1 id="seoH1" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">PDF Tools India — இலவச PDF, Image, Video &amp; GST கருவிகள்</h1>
 <div id="app"></div>
 
 <!-- pdf-lib, pdf.js, jszip, tesseract.js, xlsx, mammoth, html2canvas, docx and
@@ -1558,6 +1558,7 @@ function renderHero(){
   const ph = ta ? (narrow ? 'கருவியைத் தேடு… (சுருக்கு, GST)' : `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”`) : (narrow ? 'Search tools… (compress, GST)' : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`);
   const pills = ta ? [`🧰 ${TOOLS.length} கருவிகள்`,'✓ இலவசம்','🔒 கோப்பு உங்கள் போனிலேயே','⚡ AI-க்கு மட்டும் credit']
     : [`🧰 ${TOOLS.length} tools`,'✓ Mostly free','🔒 Files stay on device','⚡ Credits only for AI'];
+  const __seo = document.getElementById('seoH1'); if(__seo) __seo.remove(); // the visible hero <h1> below replaces the static SEO one (exactly one h1 once rendered)
   const h = el(`
     <section class="hero2 tamil${__searchQuery.trim()?' searching':''}">
       <h1>${title}</h1>
