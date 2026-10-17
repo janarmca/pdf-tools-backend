@@ -191,3 +191,8 @@ Bulk salary slips from a CSV; invoice → receipt link; Tamil number-to-words fo
 - Rules: every text line is one Textbox run (no letter-spacing/curved text) so Tamil stays correct; text edited via the side textarea (`editable:false` on canvas); fabric 7 defaults originX/Y to center so `boot()` sets them to left/top.
 - Festival dates in `FESTS` (poster-core.js) are provisional — update yearly (Deepavali 2026-11-08, 2027-10-29).
 - NOT built yet: Reel maker (Mediabunny/WebCodecs), on-device AI (background removal, TTS) — owner decision needed.
+
+## UPDATE_36 — growth/income groundwork (from the promotion & income plan)
+- Every download toast (`showDownloadToast`, used by all tools) now has a green "WhatsApp-ல் share" button (`whatsappShareUrl()`, wa.me link the user taps themselves; UTM utm_source=whatsapp&utm_medium=share&utm_campaign=download). Poster maker has the same in its toast.
+- YouTube Short descriptions link `?utm_source=youtube&utm_medium=short&utm_campaign=<tool id>`.
+- Still owner-side: Search Console + Bing sitemap, CA call (GST/LUT/ITR), Razorpay KYC, affiliate programs (check they are live), AdSense only after unique text per tool page (owner decided to wait 3-4 months).

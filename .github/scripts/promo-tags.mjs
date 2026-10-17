@@ -60,6 +60,6 @@ export function buildCaptions(t, day = Math.floor(Date.now() / 86400000), date =
   const ig = lines(hook, season.join('\n'), price, `🔎 ${t.name} · ${kw}`, '📌 Save பண்ணுங்க · 📲 இது தேவைப்படும் friend-க்கு Send பண்ணுங்க', '👉 Link in bio — pdftoolsindia.com', FOLLOW, hashtags(t, day, 'instagram').join(' '));
   const fb = lines(`${aud.ta} 👇\n${ta} — ${desc}`, season.join('\n'), price, '🔁 Share பண்ணுங்க — உங்க நண்பர்களுக்கு உதவும்! (pdftoolsindia.com)', FOLLOW, hashtags(t, day, 'facebook').join(' '));
   const ytTags = hashtags(t, day, 'youtube');
-  const yt = lines(`${t.name} — ${ta}\n${desc}`, season.join('\n'), `🔎 ${kw}`, `👉 ${t.url}`, price, FOLLOW, [...ytTags, '#Shorts'].join(' '));
+  const yt = lines(`${t.name} — ${ta}\n${desc}`, season.join('\n'), `🔎 ${kw}`, `👉 ${t.url}?utm_source=youtube&utm_medium=short&utm_campaign=${t.id}`, price, FOLLOW, [...ytTags, '#Shorts'].join(' '));
   return { audience: aud.key, instagram: ig, facebook: fb, youtube: yt, youtubeTags: uniq(['pdftoolsindia', 'free tools', 'tamil', 'tanglish', t.name, t.ta, ...kw.split(' · ')]).slice(0, 15) };
 }

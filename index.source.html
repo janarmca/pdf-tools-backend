@@ -977,12 +977,20 @@ async function downloadBlob(blob, filename){
 // each individual tool) gives every single one a clear "your file is ready"
 // confirmation for free, instead of a silent download users couldn't be
 // sure had actually happened.
+// WhatsApp share (user taps it themselves -> no bulk/automated sending, within WhatsApp rules). UTM tags show in analytics which channel works.
+function whatsappShareUrl(){
+  let link = 'https://pdftoolsindia.com/';
+  try{ const t = new URLSearchParams(location.search).get('tool'); if(t) link += '?tool=' + encodeURIComponent(t) + '&'; else link += '?'; }catch(e){ link += '?'; }
+  link += 'utm_source=whatsapp&utm_medium=share&utm_campaign=download';
+  return 'https://wa.me/?text=' + encodeURIComponent('இந்த இலவச tool எனக்கு உதவியது 👍 நீங்களும் பயன்படுத்துங்க (Login வேண்டாம், Phone-லேயே):\n' + link);
+}
 let __toastStack = [];
 function showDownloadToast(filename){
   const toast = el(`
     <div style="position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:#1B5E20; color:#fff; padding:12px 20px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.3); font-size:13.5px; font-weight:700; z-index:9999; display:flex; align-items:center; gap:8px; opacity:0; transition:opacity .25s, transform .25s; max-width:88vw;">
       <span style="font-size:16px;">✅</span>
       <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Downloaded: ${escapeHtml(filename)}</span>
+      <a href="${escapeHtml(whatsappShareUrl())}" target="_blank" rel="noopener" style="flex:0 0 auto; background:#25D366; color:#fff; text-decoration:none; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">WhatsApp-ல் share</a>
     </div>
   `);
   document.body.appendChild(toast);
@@ -993,7 +1001,7 @@ function showDownloadToast(filename){
   setTimeout(()=>{
     toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(20px)';
     setTimeout(()=>{ toast.remove(); __toastStack = __toastStack.filter(t=>t!==toast); }, 300);
-  }, 3200);
+  }, 7000);
 }
 function readFileAsArrayBuffer(file){
   return new Promise((resolve,reject)=>{

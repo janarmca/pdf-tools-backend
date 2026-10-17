@@ -49,9 +49,11 @@ function loadBrand(){
   try { return JSON.parse(localStorage.getItem('pm_brand')||'{}') || {}; } catch(e){ return {}; }
 }
 function saveBrand(){ try { localStorage.setItem('pm_brand', JSON.stringify(brand)); } catch(e){} }
-function toast(msg){
-  var t=$('toast'); t.textContent=msg; t.classList.remove('hide');
-  clearTimeout(toast._t); toast._t=setTimeout(function(){ t.classList.add('hide'); },2600);
+function toast(msg, share){
+  var t=$('toast'); t.textContent=msg;
+  if (share){ var a=document.createElement('a'); a.href='https://wa.me/?text='+encodeURIComponent('Tamil போஸ்டரை இலவசமாக நானே செய்தேன் 👍 நீங்களும் செய்து பாருங்க (Login வேண்டாம்):\nhttps://pdftoolsindia.com/poster-maker?utm_source=whatsapp&utm_medium=share&utm_campaign=poster'); a.target='_blank'; a.rel='noopener'; a.textContent=' · WhatsApp-ல் share'; a.style.cssText='color:#7CFC9A;font-weight:800;text-decoration:none'; t.appendChild(a); }
+  t.style.pointerEvents='auto'; t.classList.remove('hide');
+  clearTimeout(toast._t); toast._t=setTimeout(function(){ t.classList.add('hide'); },share?7000:2600);
 }
 
 /* ---------- drawing helpers ---------- */
@@ -699,7 +701,7 @@ function exportImg(fmt){
   try {
     var u = renderUrl(fmt);
     download(new Blob([dataUrlToBytes(u)],{type:fmt==='png'?'image/png':'image/jpeg'}), 'poster-'+stamp()+'.'+(fmt==='png'?'png':'jpg'));
-    toast('பதிவிறக்கம் தொடங்கியது');
+    toast('பதிவிறக்கம் தொடங்கியது',1);
   } catch(e){ toast('இந்த அளவு உங்கள் சாதனத்தில் முடியவில்லை — "உயர் தரம்" குறியை நீக்கிப் பாருங்கள்'); }
 }
 function exportPdf(){
@@ -720,7 +722,7 @@ function exportPdf(){
     for (var i=1;i<=5;i++) x += ('0000000000'+offs[i]).slice(-10)+' 00000 n \n';
     push(x+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
     download(new Blob(parts,{type:'application/pdf'}), 'poster-'+stamp()+'.pdf');
-    toast('PDF பதிவிறக்கம் தொடங்கியது');
+    toast('PDF பதிவிறக்கம் தொடங்கியது',1);
   } catch(e){ toast('PDF உருவாக்க முடியவில்லை'); }
 }
 function saveProject(){
