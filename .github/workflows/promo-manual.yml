@@ -66,11 +66,12 @@ on:
           - 'readaloud — உரக்கப் படி / Read Aloud'
           - 'obituary — இரங்கல் அறிவிப்பு / Obituary / Death Announcement'
       tool_image:
-        description: 'Image tools (25) — pick one, or leave (none)'
+        description: 'Image tools (26) — pick one, or leave (none)'
         type: choice
         default: '(none)'
         options:
           - '(none)'
+          - 'photoresize — படம் KB, px அளவு மாற்று / Photo Resizer'
           - 'postermaker — போஸ்டர் தயாரிப்பு / Tamil Poster Maker'
           - 'imgcompress — படம் சுருக்கு / Compress Image'
           - 'imgcompresskb — KB அளவுக்குச் சுருக்கு / Compress to Target KB'
