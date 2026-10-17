@@ -73,3 +73,8 @@ footer.site{ text-align:center; padding:30px 20px; color:var(--sub); font-size:1
 
 /* wide tables scroll sideways on phones instead of widening the page */
 article table{ display:block; overflow-x:auto; max-width:100%; }
+footer.site .soc{ margin-top:10px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+footer.site .soc a{ display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; font-weight:800; font-size:12.5px; text-decoration:none; color:var(--sub); }
+footer.site .soc a.ig,footer.site .soc a.yt,footer.site .soc a.fb{ color:#fff; }
+footer.site .soc a.ig{ background:#C13584; } footer.site .soc a.yt{ background:#C4302B; } footer.site .soc a.fb{ background:#1877F2; }
+
