@@ -152,6 +152,11 @@ async function upload(token, file, t, text, capOverride) {
   return j;
 }
 
+// Has a SHORT already gone out today? The Worker's 09:05 image posts also write 'facebook' / 'instagram' rows into promo_posts;
+// those rows carry the caption in `text`, whereas Short rows (log() below) have text NULL. Without `text is null` the Worker's
+// own posts made this job exit with "Already posted today" every morning, so no YouTube Short or Reel was ever made (found 18 Oct 2026).
+export const SHORT_TODAY_SQL = "select 1 from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' and text is null and created_at >= date('now')";
+
 const main = async () => {
   if ((await setting('enabled')) === 'off') return console.log('Promotion is switched off on the admin page.');
   const refresh = await setting('yt_refresh');
@@ -159,7 +164,7 @@ const main = async () => {
   const metaEnv = { META_TOKEN: process.env.META_TOKEN || await setting('fb_page_token'), FB_PAGE_ID: process.env.FB_PAGE_ID || await setting('fb_page_id'), IG_USER_ID: process.env.IG_USER_ID || await setting('ig_user_id') };
   const meta = metaConfigured(metaEnv);
   if (!refresh && !meta.facebook && !meta.instagram && !process.env.DRY_RUN) return console.log('Nothing is connected yet (YouTube on the admin page; Facebook/Instagram via the META_* secrets).');
-  if (!process.env.TOOL && (await sql("select 1 from promo_posts where platform in ('youtube','instagram','facebook') and status = 'sent' and created_at >= date('now')")).length) return console.log('Already posted today.');
+  if (!process.env.TOOL && (await sql(SHORT_TODAY_SQL)).length) return console.log('A Short was already posted today.');
   // The brain picks today's tool from Google Trends (India) + the Indian calendar + evergreen demand, avoiding tools posted recently.
   let t, why = null, news = null;
   // A pending "what's new" announcement goes first (logo + news + 3 steps + our info); otherwise the tool-of-the-day brain chooses.

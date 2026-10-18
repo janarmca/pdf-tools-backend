@@ -2,8 +2,22 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import http from 'node:http';
-import { speechText, makeVideo, makeVoice } from '../.github/scripts/promo-youtube.mjs';
+import { speechText, makeVideo, makeVoice, SHORT_TODAY_SQL } from '../.github/scripts/promo-youtube.mjs';
 let fail = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fail++; };
+// regression (18 Oct 2026): the Worker's own facebook/instagram image posts must not count as "a Short was already posted today"
+{
+  const { DatabaseSync } = await import('node:sqlite'); const db = new DatabaseSync(':memory:');
+  db.exec("create table promo_posts (id integer primary key autoincrement, tool_id text, platform text, status text, message_id text, text text, error text, created_at text not null default (strftime('%Y-%m-%dT%H:%M:%fZ','now')))");
+  const ins = db.prepare('insert into promo_posts (tool_id, platform, status, text) values (?, ?, ?, ?)');
+  ins.run('pdfcrop', 'telegram', 'sent', 'caption'); ins.run('pdfcrop', 'facebook', 'sent', 'caption'); ins.run('pdfcrop', 'instagram', 'sent', 'caption');
+  ok(db.prepare(SHORT_TODAY_SQL).all().length === 0, "Worker image posts (text set) do not block today's Short");
+  ins.run('pdfcrop', 'youtube', 'sent', null);
+  ok(db.prepare(SHORT_TODAY_SQL).all().length === 1, 'a Short already uploaded today (text NULL) does block a second one');
+  db.exec("delete from promo_posts"); ins.run('x', 'youtube', 'failed', null);
+  ok(db.prepare(SHORT_TODAY_SQL).all().length === 0, 'a failed Short does not block a retry');
+  db.exec("delete from promo_posts; insert into promo_posts (tool_id, platform, status, text, created_at) values ('old','youtube','sent',null,'2000-01-01T00:00:00.000Z')");
+  ok(db.prepare(SHORT_TODAY_SQL).all().length === 0, "yesterday's Short does not block today's");
+}
 const t = { ta: 'PAN / TAN சரிபார்ப்பு 🪪', taDesc: 'ரூபாய் ₹200 e-Sign https://x.y', name: 'PAN checker' };
 const sp = speechText(t);
 ok(!/[🪪/]|https?:/.test(sp), 'emoji, slashes and URLs removed from the speech');
