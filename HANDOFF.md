@@ -259,3 +259,8 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 ## UPDATE_48 — daily Short scheduled 3x
 - Manual runs of promo-youtube post fine (D1 rows 43-45, 49-51) but the 09:20 IST scheduled run left no rows on 18 and 19 Oct. GitHub does not guarantee cron runs (delays/skips). Workflow now has 3 crons (03:50, 05:20, 06:50 UTC); the `text is null` guard exits early if a Short was already posted, so no duplicates.
 - Cause of the missing scheduled runs is NOT verified (Actions logs unreadable from the session). Owner should check Actions run list.
+
+## UPDATE_49 — support email on every page; legal pages brought up to date
+- `/contact` (contact.html) rewritten: current About, "உருவாக்கியவர்" maker profile (name + Tamil teacher — owner to confirm wording), support@pdftoolsindia.com first; personal gmail removed from the public page.
+- privacy/terms/refund: removed Supabase, Render, "Fast Server Mode" (all retired); now list Cloudflare, Google (login/Gemini/fonts), NVIDIA + Workers AI (AI tools only), Brevo (login code mail), Razorpay, CDN libs; AI content is sent to providers only when an AI tool is used. Dated Oct 2026. Owner should read once for accuracy (not legal advice).
+- 25 pages that lacked the email got a `.site-trust` strip (marker `<!--site-trust-->`); 404 + carrom use a fixed bottom variant. sw.js v85.
