@@ -255,3 +255,7 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Fix: exported `SHORT_TODAY_SQL` adds `text is null` (Worker rows carry the caption in `text`, Short rows have NULL). Regression test in tests/promo-youtube.test.mjs (node:sqlite). Connection state in D1 was healthy: enabled=on, yt_refresh, fb_page_token, fb_page_id, ig_user_id all present.
 - After merge: Actions → "Promotion — daily Short (YouTube + Facebook + Instagram)" → Run workflow (leave tool/news empty) to get today's Short immediately; the schedule (09:20 IST) takes over after that.
 - Watch: Google OAuth consent screen in "Testing" status makes the YouTube refresh token expire after ~7 days (connected ~15–16 Oct → expect expiry ≈ 22–23 Oct): the job then fails with 'press "Connect YouTube" again'. Durable fix = set the consent screen to "In production" (own-use, unverified-app warning is fine). Also: videos from an unaudited API project may be forced private (see promo_posts rows 25, 30).
+
+## UPDATE_48 — daily Short scheduled 3x
+- Manual runs of promo-youtube post fine (D1 rows 43-45, 49-51) but the 09:20 IST scheduled run left no rows on 18 and 19 Oct. GitHub does not guarantee cron runs (delays/skips). Workflow now has 3 crons (03:50, 05:20, 06:50 UTC); the `text is null` guard exits early if a Short was already posted, so no duplicates.
+- Cause of the missing scheduled runs is NOT verified (Actions logs unreadable from the session). Owner should check Actions run list.

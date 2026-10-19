@@ -8,8 +8,13 @@ name: Promotion — daily Short (YouTube + Facebook + Instagram)
 on:
   # Daily at 09:20 IST (after the 09:05 promotion post). YouTube is connected. If promotion is switched off the run just exits.
   # To stop the daily Short: put '#' in front of the two lines below (or switch promotion off on the admin page).
+  # GitHub does NOT guarantee scheduled runs (they can be delayed by hours or skipped at busy times), so the job is scheduled three
+  # times; the script exits at once with "A Short was already posted today" when an earlier run already did the work, so there are no
+  # duplicates — and if the first run failed or never started, a later one retries.
   schedule:
     - cron: '50 3 * * *'   # 09:20 IST
+    - cron: '20 5 * * *'   # 10:50 IST (backup)
+    - cron: '50 6 * * *'   # 12:20 IST (backup)
   workflow_dispatch:
     inputs:
       tool:
