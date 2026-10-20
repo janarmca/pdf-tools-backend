@@ -218,13 +218,13 @@ Owner's worry: students will use AI for everything and forget where computing/AI
 - New widgets: `learn/foundation-widgets.js` (`logicGates, compilerPipeline, gradientDescent, nextWord, timeline`), merged into `WIDGETS` in `learn/index.html` (script tag + `KALVI_WIDGETS_F`). Pure logic is exported as `KALVI_WF_PURE` and tested by `node learn/tests/foundation.test.cjs` (122 checks incl. gates-only addition 0..7, compiler vs JS arithmetic, gradient descent convergence/divergence).
 - Lessons are `learn/lessons/*.json`, registered in `learn/catalog.json` (`futureGroups` + `future`); validate with `node learn/tests/lessons.test.cjs` (widget names must be added to its `WIDGETS` set).
 - History facts used are well-documented milestones only; Pingala/zero are hedged (dating disputed). Do not add dates you cannot source.
-- Honest gaps: Tamil wording was written by the AI session, not proof-read by a Tamil teacher — owner (a teacher) should read the five lessons once and fix phrasing.
+- Honest gaps: Tamil wording was written by the AI session, not proof-read by a Tamil expert — the owner (an employee of an ordinary company, NOT a teacher) can read the five lessons once; ask a Tamil-literate friend/teacher to proofread if possible.
 
 ## UPDATE_42 — Farmer Toolbox (`/uzhavar-tools`)
 - `farm-core.js` (pure maths, `globalThis.KALVI_FARM`) + `tests/farm-core.test.cjs` (142 checks) + `uzhavar-tools.html` (Tamil/English UI, tabs: land, planting, rice fertiliser bags, spray mix, cost/break-even, test-vs-comparison plot book, rice seasons, official links, evidence).
 - Registered like photoresize: TOOLS `uzhavartools` (cat business), TOOL_STANDALONE_PAGES, TOOL_IMPL, ta-names (index.source.html + ta-names.mjs), generate-tool-pages.mjs, audience-hubs.mjs, promo catalog regenerated, promo-news `uzhavar-tools`, sw.js v80.
 - Content policy: only verified facts. Unverified (NOT published): pesticide ban lists, IARC classes, PM-KISAN/PMFBY amounts, jeevamrutha quantities, non-rice doses, folk/lunar timing, rainfall normals. Evidence tab labels each item established / association / unproven.
-- Owner to-do: have a Tamil teacher proofread; verify recipes with TNAU/KVK; confirm KCC number 1800-180-1551 and source originals for evidence-tab figures.
+- Owner to-do: have a Tamil-literate person proofread (the owner is NOT a Tamil teacher); verify recipes with TNAU/KVK; confirm KCC number 1800-180-1551 and source originals for evidence-tab figures.
 
 ## UPDATE_43 — fact-check corrections (18 Oct 2026)
 Full audit report: reports "மூன்று நாள் பணிகள் சரிபார்ப்பு.md" (outside repo). Fixed:
@@ -261,6 +261,10 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Cause of the missing scheduled runs is NOT verified (Actions logs unreadable from the session). Owner should check Actions run list.
 
 ## UPDATE_49 — support email on every page; legal pages brought up to date
-- `/contact` (contact.html) rewritten: current About, "உருவாக்கியவர்" maker profile (name + Tamil teacher — owner to confirm wording), support@pdftoolsindia.com first; personal gmail removed from the public page.
+- `/contact` (contact.html) rewritten: current About, "உருவாக்கியவர்" maker profile (name + 'an employee of a company who built this so everyone can use it free as far as possible' — the owner is NOT a teacher), support@pdftoolsindia.com first; personal gmail removed from the public page.
 - privacy/terms/refund: removed Supabase, Render, "Fast Server Mode" (all retired); now list Cloudflare, Google (login/Gemini/fonts), NVIDIA + Workers AI (AI tools only), Brevo (login code mail), Razorpay, CDN libs; AI content is sent to providers only when an AI tool is used. Dated Oct 2026. Owner should read once for accuracy (not legal advice).
 - 25 pages that lacked the email got a `.site-trust` strip (marker `<!--site-trust-->`); 404 + carrom use a fixed bottom variant. sw.js v85.
+
+## Owner facts (corrected 20 Oct 2026)
+- The owner is an ordinary employee of a company — NOT a Tamil teacher. Never write "Tamil teacher/ஆசிரியர்" about the owner anywhere. Purpose of the site, in the owner's words: it exists so that everyone can use it for free as far as possible. Keep this tone in public text (contact page, about, social bios).
+
