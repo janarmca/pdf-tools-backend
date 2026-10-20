@@ -268,3 +268,8 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 ## Owner facts (corrected 20 Oct 2026)
 - The owner is an ordinary employee of a company — NOT a Tamil teacher. Never write "Tamil teacher/ஆசிரியர்" about the owner anywhere. Purpose of the site, in the owner's words: it exists so that everyone can use it for free as far as possible. Keep this tone in public text (contact page, about, social bios).
 
+
+## UPDATE_50 — Sign PDF: place the signature anywhere
+- Before: `TOOL_IMPL.sign` always stamped at a fixed spot (65 % from left, 15 % from bottom). Now: live page preview (pdf.js canvas) with the signature as a draggable overlay (pointer events = mouse/touch/pen), tap-the-page to centre it, size slider 8–60 %, ◀ ▶ page buttons, "same place on every page". `sigPos` = {u,v} fractions of the page AS DISPLAYED; `doApply` converts to PDF space and honours `/Rotate` 0/90/180/270 (image rotated to stay upright). Verified in Chromium (pdf-lib + pdf.js 3.11.174 served locally): preview position == output position for a normal and a 90°-rotated page.
+- Checked 20 Oct from D1: Telegram + Facebook posted 09:05 IST; Instagram image post "skipped" by design (tool dscverify has no poster image, social.js); the daily Short posted 14:25 IST (a delayed backup cron — so the 3-cron change in UPDATE_48 is what rescued the day).
+- promo-news entry `sign-place` (2026-10-28). sw.js v86.

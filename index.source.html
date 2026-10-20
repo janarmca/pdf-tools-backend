@@ -4561,7 +4561,8 @@ TOOL_IMPL.sign = {
   mount(container){
     let file = null, pdfjsDoc = null, pageCount = 0, currentPage = 1;
     let sigDataUrl = null;
-    let sigPos = {xPct:0.65, yPct:0.15};
+    // u/v = where the signature's top-left corner sits, as a fraction of the page as DISPLAYED (0..1 from left / from top).
+    let sigPos = {u:0.55, v:0.72}, sigWidthPct = 25, signAllPages = false, refreshOverlay = null, placerToken = 0;
     let sigMode = 'draw', typedSigText = '';
     const body = el(`<div></div>`); container.appendChild(body);
 
@@ -4614,7 +4615,7 @@ TOOL_IMPL.sign = {
         modeArea.querySelector('#clearSig').onclick = ()=>{
           const c = modeArea.querySelector('#sigPad');
           c.getContext('2d').clearRect(0,0,c.width,c.height);
-          sigDataUrl = null;
+          sigDataUrl = null; if(refreshOverlay) refreshOverlay();
         };
       } else if(sigMode==='type'){
         const FONTS = [
@@ -4648,12 +4649,12 @@ TOOL_IMPL.sign = {
           const color = modeArea.querySelector('#sigTypeColor').value;
           const ctx = typeCanvas.getContext('2d');
           ctx.clearRect(0,0,typeCanvas.width,typeCanvas.height);
-          if(!typedSigText){ sigDataUrl = null; return; }
+          if(!typedSigText){ sigDataUrl = null; if(refreshOverlay) refreshOverlay(); return; }
           ctx.fillStyle = color;
           ctx.font = `60px ${font.css}`;
           ctx.textBaseline = 'middle';
           ctx.fillText(typedSigText, 20, typeCanvas.height/2);
-          sigDataUrl = typeCanvas.toDataURL('image/png');
+          sigDataUrl = typeCanvas.toDataURL('image/png'); if(refreshOverlay) refreshOverlay();
         }
         modeArea.querySelector('#sigTypeText').addEventListener('input', renderTypedSig);
         modeArea.querySelector('#sigTypeFont').addEventListener('change', renderTypedSig);
@@ -4675,22 +4676,89 @@ TOOL_IMPL.sign = {
         }
       }
 
-      const opts = el(`
-        <div class="opts" style="margin-top:14px;">
-          <div class="field">
-            <label>Which page (out of ${pageCount})</label>
-            <input type="number" id="signPage" value="${currentPage}" min="1" max="${pageCount}">
+      // ---- placement: real page preview + draggable signature ----
+      const placer = el(`
+        <div style="margin-top:16px;">
+          <label style="font-size:11.5px; font-weight:700; color:var(--sub); display:block; margin-bottom:6px;">Place it — drag the signature to where it should go (or tap the page)</label>
+          <div class="btn-row" style="align-items:center; margin-bottom:8px; gap:8px;">
+            <button class="btn secondary" id="signPrev" aria-label="Previous page">◀</button>
+            <span id="signPageLbl" style="font-weight:700; font-size:13px; min-width:92px; text-align:center;"></span>
+            <button class="btn secondary" id="signNext" aria-label="Next page">▶</button>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-left:auto;"><input type="checkbox" id="signAll" ${signAllPages?'checked':''}> Same place on every page</label>
           </div>
-          <div class="field">
-            <label>Signature width (%)</label>
-            <input type="number" id="sigWidthPct" value="25" min="10" max="60">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12.5px;">
+            <span style="font-weight:700;">Size</span>
+            <input type="range" id="sigWidthPct" min="8" max="60" value="${sigWidthPct}" style="flex:1;">
+            <span id="sigWidthLbl" style="min-width:34px; text-align:right;">${sigWidthPct}%</span>
+          </div>
+          <div id="signStage" style="position:relative; width:100%; max-width:720px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; touch-action:pan-y; user-select:none; -webkit-user-select:none;">
+            <canvas id="signCanvas" style="display:block; width:100%; height:auto;"></canvas>
+            <img id="signOverlay" alt="Signature" draggable="false" style="position:absolute; display:none; cursor:grab; touch-action:none; outline:2px dashed #AF3F73; outline-offset:2px; background:rgba(175,63,115,.06); max-width:none;">
+            <div id="signHint" style="position:absolute; inset:auto 0 8px 0; text-align:center; font-size:12px; color:#AF3F73; font-weight:700; pointer-events:none;"></div>
           </div>
         </div>
       `);
-      body.appendChild(opts);
+      body.appendChild(placer);
+      const stage = placer.querySelector('#signStage'), cvs = placer.querySelector('#signCanvas'), ov = placer.querySelector('#signOverlay'), hint = placer.querySelector('#signHint');
+      const lbl = placer.querySelector('#signPageLbl');
+      let aspect = 0.4; // signature height / width
+      function layoutOverlay(){
+        if(!sigDataUrl){ ov.style.display = 'none'; hint.textContent = 'Draw, type or upload your signature above — it will appear here.'; return; }
+        hint.textContent = '';
+        const W = stage.clientWidth, H = stage.clientHeight; if(!W || !H) return;
+        const w = W * sigWidthPct/100, h = w * aspect;
+        sigPos.u = Math.min(Math.max(sigPos.u, 0), Math.max(0, 1 - w/W));
+        sigPos.v = Math.min(Math.max(sigPos.v, 0), Math.max(0, 1 - h/H));
+        ov.style.display = 'block'; ov.style.width = w+'px'; ov.style.height = h+'px';
+        ov.style.left = (sigPos.u*W)+'px'; ov.style.top = (sigPos.v*H)+'px';
+      }
+      refreshOverlay = function(){
+        if(!sigDataUrl){ layoutOverlay(); return; }
+        const im = new Image(); im.onload = ()=>{ aspect = (im.naturalHeight||1)/(im.naturalWidth||1); ov.src = sigDataUrl; layoutOverlay(); }; im.src = sigDataUrl;
+      };
+      async function showPage(){
+        const my = ++placerToken;
+        lbl.textContent = `Page ${currentPage} / ${pageCount}`;
+        placer.querySelector('#signPrev').disabled = currentPage<=1; placer.querySelector('#signNext').disabled = currentPage>=pageCount;
+        const pg = await pdfjsDoc.getPage(currentPage);
+        const vp1 = pg.getViewport({scale:1});
+        const cssW = Math.min(720, stage.clientWidth || 600), sc = (cssW / vp1.width) * Math.min(2, window.devicePixelRatio||1);
+        const vp = pg.getViewport({scale: sc});
+        const off = document.createElement('canvas'); off.width = Math.ceil(vp.width); off.height = Math.ceil(vp.height);
+        await pg.render({canvasContext: off.getContext('2d'), viewport: vp}).promise;
+        if(my !== placerToken) return;
+        cvs.width = off.width; cvs.height = off.height; cvs.getContext('2d').drawImage(off, 0, 0);
+        layoutOverlay();
+      }
+      placer.querySelector('#signPrev').onclick = ()=>{ if(currentPage>1){ currentPage--; showPage(); } };
+      placer.querySelector('#signNext').onclick = ()=>{ if(currentPage<pageCount){ currentPage++; showPage(); } };
+      placer.querySelector('#signAll').onchange = e=>{ signAllPages = e.target.checked; };
+      const wr = placer.querySelector('#sigWidthPct');
+      wr.oninput = ()=>{ sigWidthPct = Number(wr.value)||25; placer.querySelector('#sigWidthLbl').textContent = sigWidthPct+'%'; layoutOverlay(); };
+      // drag (mouse + touch + pen)
+      let drag = null;
+      ov.addEventListener('pointerdown', e=>{
+        drag = {dx: e.clientX - ov.getBoundingClientRect().left, dy: e.clientY - ov.getBoundingClientRect().top};
+        try{ ov.setPointerCapture(e.pointerId); }catch(_){} ov.style.cursor = 'grabbing'; e.preventDefault(); e.stopPropagation();
+      });
+      ov.addEventListener('pointermove', e=>{
+        if(!drag) return; const r = stage.getBoundingClientRect();
+        sigPos.u = (e.clientX - drag.dx - r.left)/r.width; sigPos.v = (e.clientY - drag.dy - r.top)/r.height; layoutOverlay(); e.preventDefault();
+      });
+      const endDrag = ()=>{ drag = null; ov.style.cursor = 'grab'; };
+      ov.addEventListener('pointerup', endDrag); ov.addEventListener('pointercancel', endDrag);
+      // tap / click on the page = put the signature's centre there
+      stage.addEventListener('click', e=>{
+        if(e.target === ov || !sigDataUrl) return; const r = stage.getBoundingClientRect();
+        const w = sigWidthPct/100, h = (w * r.width * aspect) / r.height;
+        sigPos.u = (e.clientX - r.left)/r.width - w/2; sigPos.v = (e.clientY - r.top)/r.height - h/2; layoutOverlay();
+      });
+      window.addEventListener('resize', layoutOverlay, {passive:true});
+      refreshOverlay();
+      showPage();
 
-      const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">✍️ Sign</button>`);
+      const row = el(`<div class="btn-row" style="margin-top:14px;"></div>`);
+      const btn = el(`<button class="btn">✍️ Sign & download</button>`);
       btn.onclick = doApply;
       row.appendChild(btn);
       body.appendChild(row);
@@ -4714,7 +4782,7 @@ TOOL_IMPL.sign = {
         ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke();
         last = p; e.preventDefault();
       }
-      function end(){ if(drawing){ drawing=false; sigDataUrl = canvas.toDataURL('image/png'); } }
+      function end(){ if(drawing){ drawing=false; sigDataUrl = canvas.toDataURL('image/png'); if(refreshOverlay) refreshOverlay(); } }
       canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
       window.addEventListener('mouseup', end);
       canvas.addEventListener('touchstart', start, {passive:false});
@@ -4724,26 +4792,36 @@ TOOL_IMPL.sign = {
 
     async function doApply(){
       if(!sigDataUrl){ mountResult(body, 'Please draw your signature first.').style.background='#FDEDEC'; return; }
-      const pageNum = Math.min(pageCount, Math.max(1, Number(body.querySelector('#signPage').value)||1));
-      const widthPct = (Number(body.querySelector('#sigWidthPct').value)||25)/100;
+      const pageNum = currentPage, widthPct = sigWidthPct/100;
       const prog = mountProgress(body);
       try{
         prog.set(20,'Reading…');
         const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const pngBytes = Uint8Array.from(atob(sigDataUrl.split(',')[1]), c=>c.charCodeAt(0));
         const sigImg = await doc.embedPng(pngBytes);
-        const page = doc.getPages()[pageNum-1];
-        const {width, height} = page.getSize();
-        const sigW = width*widthPct;
-        const sigH = sigW * (sigImg.height/sigImg.width);
+        const pages = doc.getPages();
         prog.set(60,'Signing…');
-        page.drawImage(sigImg, { x: width*sigPos.xPct, y: height*sigPos.yPct, width: sigW, height: sigH });
+        const targets = signAllPages ? pages.map((_,i)=>i) : [pageNum-1];
+        targets.forEach(i=>{
+          const page = pages[i]; const {width: W, height: H} = page.getSize();
+          let r = ((Math.round(page.getRotation().angle) % 360) + 360) % 360; if(r % 90) r = 0;
+          const Wd = (r===90||r===270) ? H : W, Hd = (r===90||r===270) ? W : H;   // page size as the user sees it
+          const sw = Wd*widthPct, sh = sw*(sigImg.height/sigImg.width);
+          const dx0 = Math.min(Math.max(sigPos.u*Wd, 0), Math.max(0, Wd - sw)), dy0 = Math.min(Math.max(sigPos.v*Hd, 0), Math.max(0, Hd - sh));
+          // displayed (top-left origin) -> PDF user space, for the image's bottom-left corner, honouring /Rotate
+          let x, y;
+          if(r===0){ x = dx0; y = H - (dy0 + sh); }
+          else if(r===90){ x = dy0 + sh; y = dx0; }
+          else if(r===180){ x = W - dx0; y = dy0 + sh; }
+          else { x = W - dy0 - sh; y = H - dx0; }
+          page.drawImage(sigImg, { x, y, width: sw, height: sh, rotate: degrees(r) });
+        });
         prog.set(90,'Preparing…');
         const bytes = await doc.save();
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'signed.pdf');
         prog.remove();
-        mountResult(body, `Signed PDF downloaded (page ${pageNum}).`);
+        mountResult(body, signAllPages ? `Signed PDF downloaded (all ${pages.length} pages).` : `Signed PDF downloaded (page ${pageNum}).`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
