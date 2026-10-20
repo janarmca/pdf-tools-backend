@@ -273,3 +273,8 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Before: `TOOL_IMPL.sign` always stamped at a fixed spot (65 % from left, 15 % from bottom). Now: live page preview (pdf.js canvas) with the signature as a draggable overlay (pointer events = mouse/touch/pen), tap-the-page to centre it, size slider 8–60 %, ◀ ▶ page buttons, "same place on every page". `sigPos` = {u,v} fractions of the page AS DISPLAYED; `doApply` converts to PDF space and honours `/Rotate` 0/90/180/270 (image rotated to stay upright). Verified in Chromium (pdf-lib + pdf.js 3.11.174 served locally): preview position == output position for a normal and a 90°-rotated page.
 - Checked 20 Oct from D1: Telegram + Facebook posted 09:05 IST; Instagram image post "skipped" by design (tool dscverify has no poster image, social.js); the daily Short posted 14:25 IST (a delayed backup cron — so the 3-cron change in UPDATE_48 is what rescued the day).
 - promo-news entry `sign-place` (2026-10-28). sw.js v86.
+
+## UPDATE_51 — Stamp PDF: position, size, page range
+- `TOOL_IMPL.pdfstamp`: new Position (centre/top/bottom/4 corners), Size, and Pages (empty = all, or "1, 3-5") fields; text auto-shrinks to fit; tilt 0 is now honoured (it used to fall back to −30). Verified: stamp on page 2 only, top-right, page 1 untouched.
+- Audit 21 Oct: all 169 TOOLS open without a JS error or horizontal scroll at 390 px (local Chromium, CDN libs stubbed). This is a mount smoke test only — it does not prove every tool's processing is correct.
+- Known gaps (not built): page-number / header-footer / QR-stamp placement have only preset positions (no drag); the shared drag-placer from Sign PDF could be extracted for them.
