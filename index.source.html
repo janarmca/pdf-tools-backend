@@ -232,7 +232,8 @@
   .hero2-search{position:relative; z-index:1;}
   .hero2-search input{width:100%; border:none; border-radius:16px; padding:16px 18px 16px 50px; font-size:16px; font-family:inherit; outline:none; background:#fff; color:var(--ink); box-shadow:0 6px 18px rgba(20,10,80,.25);}
   .hero2-search input:focus{box-shadow:0 0 0 3px rgba(255,210,120,.9),0 6px 18px rgba(20,10,80,.25);}
-  .hero2-search .si{position:absolute; left:17px; top:50%; transform:translateY(-50%); font-size:19px; pointer-events:none;}
+  .hero2-search .si{position:absolute; left:6px; top:50%; transform:translateY(-50%); font-size:19px; background:none; border:0; padding:10px 11px; cursor:pointer; line-height:1; z-index:2;}
+  .hero2-search .sx{position:absolute; right:6px; top:50%; transform:translateY(-50%); background:#EEF0F5; border:0; border-radius:50%; width:28px; height:28px; font-size:13px; cursor:pointer; color:var(--sub); z-index:2; line-height:1;}
   .hero2-pills{position:relative; display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
   .hero2-pill{background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); border-radius:20px; padding:6px 12px; font-size:12px; font-weight:700;}
   .sec2{margin-top:26px;}
@@ -1536,7 +1537,11 @@ const TOOL_ALIAS = {
   examphoto:'exam photo signature neet tnpsc upsc ssc', sign:'signature sign', pdfprotect:'password lock', pdfunlock:'password remove unlock', agecalc:'age birthday வயது', interestcalc:'interest vatti meter vatti வட்டி',
   unitconv:'cent acre land sqft nilam நிலம்', percentcalc:'percentage percent', datecalc:'date days difference', kalvikalanjiyam:'kalvi kalanjiyam school class students கல்வி களஞ்சியம்', cgpacalc:'cgpa marks percentage mark',
   daarrears:'da arrears dearness allowance dr relief pension government employee agavilaipadi nilavai அகவிலைப்படி நிலுவை அரசு ஊழியர்', attendcalc:'attendance percentage 75 percent classes miss bunk hajar வருகை', invitation:'wedding invitation card kalyana pathirikai marriage invite அழைப்பிதழ் பத்திரிகை', starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
-  namepicker:'random name group lucky draw', jsonfmt:'json format', b64:'base64 encode decode', videotogif:'gif', heic2jpg:'iphone heic', pdf2img:'pdf to jpg', pdf2excel:'pdf table excel', excel2pdf:'xls xlsx pdf',
+  videotrim:'video editor edit video cut cutter trim clip video cutter video trimmer split part remove middle fade வெட்டு', videocrop:'crop frame square vertical portrait 9:16 1:1 வெட்டு', videoresize:'resolution 1080p 720p 480p 4k size reels shorts instagram whatsapp status youtube dimension அளவு',
+  screenrec:'screen capture record desktop tab window lecture tutorial class meeting திரை பதிவு', vidvoice:'mp3 audio extract voice record add audio music sound song', vidsplit:'cut trim split parts', videomerge:'join combine clips', videorotate:'rotate flip mirror turn',
+  videospeed:'slow motion fast forward timelapse', videowatermark:'logo text overlay add image to video add text to video', videosubtitle:'captions subtitles text on video add text to video srt', videothumb:'thumbnail frame screenshot',
+  pdfunlock:'password remove unlock aadhaar aadhar e-aadhaar pan password', examphoto:'exam photo signature neet tnpsc upsc ssc ibps aadhaar aadhar photo size', imgpassport:'passport photo id photo aadhaar aadhar visa',
+  pdfeditor:'edit pdf text editor add text fill form', txt2pdf:'text to pdf txt notepad', extractpages:'extract pages pick pages select pages save pages', namepicker:'random name group lucky draw', jsonfmt:'json format', b64:'base64 encode decode', videotogif:'gif', heic2jpg:'iphone heic', pdf2img:'pdf to jpg', pdf2excel:'pdf table excel', excel2pdf:'xls xlsx pdf',
 };
 function taOn(){ return __appLang === 'ta'; }
 function splitName(t){
@@ -1551,6 +1556,39 @@ function splitName(t){
   return { main: eng, alt: '' };
 }
 function toolDesc(t){ if(taOn()){ const m = TA_TOOL[t.id]; if(m && m[1]) return m[1]; } return t.desc; }
+// Ranked search: every word must match (name hits first, then aliases); if nothing matches every word we show the closest tools
+// (any word, or a one-letter typo) instead of an empty page.
+let __searchTokens = null;
+function __lev1(a, b){ // true when a and b differ by at most one edit
+  if(a === b) return true; const la = a.length, lb = b.length; if(Math.abs(la - lb) > 1) return false;
+  let i = 0, j = 0, miss = 0;
+  while(i < la && j < lb){
+    if(a[i] === b[j]){ i++; j++; continue; }
+    if(++miss > 1) return false;
+    if(la > lb) i++; else if(lb > la) j++; else { i++; j++; }
+  }
+  return miss + (la - i) + (lb - j) <= 1;
+}
+function searchTools(q){
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!words.length) return {list: TOOLS.slice(), approx: false};
+  const toks = (t, h)=> (__searchTokens || (__searchTokens = {}))[t.id] || (__searchTokens[t.id] = h.split(/[^a-z0-9\u0B80-\u0BFF]+/).filter(x=>x.length >= 3));
+  const rows = TOOLS.map(t=>{
+    const h = toolSearchText(t), nm = (t.name + ' ' + ((TA_TOOL[t.id] || [])[0] || '')).toLowerCase(), al = (TOOL_ALIAS[t.id] || '').toLowerCase();
+    let hit = 0, bonus = 0, fz = 0;
+    words.forEach(w=>{
+      if(h.includes(w)){ hit++; fz++; bonus += nm.includes(w) ? 2 : al.includes(w) ? 1 : 0; }
+      else if(w.length >= 4 && toks(t, h).some(k=>__lev1(w, k))) fz++; // one-letter typo: "compres", "resise", "wtermark"
+    });
+    return {t, hit, fz, bonus};
+  });
+  const exact = rows.filter(r=>r.hit === words.length).sort((a,b)=>b.bonus - a.bonus);
+  if(exact.length) return {list: exact.map(r=>r.t), approx: false};
+  const all = rows.filter(r=>r.fz === words.length).sort((a,b)=>b.bonus - a.bonus);
+  if(all.length) return {list: all.slice(0, 12).map(r=>r.t), approx: true};
+  const part = rows.filter(r=>r.fz > 0).sort((a,b)=>(b.fz - a.fz) || (b.bonus - a.bonus));
+  return part.length ? {list: part.slice(0, 12).map(r=>r.t), approx: true} : {list: [], approx: false};
+}
 function toolSearchText(t){
   const m = TA_TOOL[t.id] || [];
   return (t.name + ' ' + t.desc + ' ' + (m[0]||'') + ' ' + (m[1]||'') + ' ' + (TOOL_ALIAS[t.id]||'')).toLowerCase();
@@ -1581,15 +1619,24 @@ function renderHero(){
     <section class="hero2 tamil${__searchQuery.trim()?' searching':''}">
       <h1>${title}</h1>
       <p>${sub}</p>
-      <div class="hero2-search"><span class="si">🔍</span><input type="search" id="__toolSearch" placeholder="${esc2(ph)}" value="${esc2(__searchQuery)}" autocomplete="off" enterkeyhint="search"></div>
+      <form class="hero2-search" id="__searchForm" role="search" action="javascript:void(0)"><button type="submit" class="si" id="__searchGo" aria-label="Search">🔍</button><input type="search" id="__toolSearch" placeholder="${esc2(ph)}" value="${esc2(__searchQuery)}" autocomplete="off" enterkeyhint="search" aria-label="Search tools"><button type="button" class="sx" id="__searchClear" aria-label="Clear search" style="display:${__searchQuery.trim()?'block':'none'}">✕</button></form>
       <div class="hero2-pills">${pills.map(p=>`<span class="hero2-pill">${p}</span>`).join('')}</div>
     </section>`);
-  h.querySelector('#__toolSearch').addEventListener('input', (e)=>{
+  const __inp = h.querySelector('#__toolSearch'), __clr = h.querySelector('#__searchClear');
+  __inp.addEventListener('input', (e)=>{
     const was = __searchQuery.trim(); __searchQuery = e.target.value;
     h.classList.toggle('searching', !!__searchQuery.trim());
+    __clr.style.display = __searchQuery.trim() ? 'block' : 'none';
     renderHomeBody();
     if(!was && __searchQuery.trim()){ const y = h.getBoundingClientRect().top + window.scrollY - 60; window.scrollTo({top:Math.max(0,y), behavior:'smooth'}); }
   });
+  // the 🔍 button / Enter / the phone keyboard's "search" key: show the results and put the keyboard away
+  h.querySelector('#__searchForm').addEventListener('submit', (e)=>{
+    e.preventDefault(); __searchQuery = __inp.value; h.classList.toggle('searching', !!__searchQuery.trim()); renderHomeBody();
+    if(!__searchQuery.trim()){ __inp.focus(); return; }
+    __inp.blur(); const y = h.getBoundingClientRect().top + window.scrollY - 60; window.scrollTo({top:Math.max(0,y), behavior:'smooth'});
+  });
+  __clr.addEventListener('click', ()=>{ __searchQuery = ''; __inp.value = ''; h.classList.remove('searching'); __clr.style.display = 'none'; renderHomeBody(); __inp.focus(); });
   return h;
 }
 function renderTrustBanner(){ return el(`<div></div>`); }
@@ -1827,9 +1874,8 @@ function renderHomeBody(){
 
   const q = __searchQuery.trim().toLowerCase();
   if(q){
-    const words = q.split(/\s+/).filter(Boolean);
-    const matches = TOOLS.filter(t=>{ const h = toolSearchText(t); return words.every(w=>h.includes(w)); });
-    holder.appendChild(el(`<div class="tamil" style="font-weight:800; font-size:13px; color:var(--sub); margin:18px 2px 12px;">${ta ? `“${esc2(__searchQuery)}” — ${matches.length} முடிவுகள்` : `${matches.length} result${matches.length===1?'':'s'} for “${esc2(__searchQuery)}”`}</div>`));
+    const __sr = searchTools(q), matches = __sr.list;
+    holder.appendChild(el(`<div class="tamil" style="font-weight:800; font-size:13px; color:var(--sub); margin:18px 2px 12px;">${__sr.approx ? (ta ? `“${esc2(__searchQuery)}” — சரியான பொருத்தம் இல்லை; நெருக்கமான கருவிகள்` : `No exact match for “${esc2(__searchQuery)}” — closest tools`) : ta ? `“${esc2(__searchQuery)}” — ${matches.length} முடிவுகள்` : `${matches.length} result${matches.length===1?'':'s'} for “${esc2(__searchQuery)}”`}</div>`));
     const grid = el(`<div class="grid2"></div>`);
     if(!matches.length) holder.appendChild(el(`<div class="note tamil">${ta ? 'எதுவும் கிடைக்கவில்லை — வேறு சொல்லில் தேடுங்கள் (எ.கா. “pdf”, “படம்”, “GST”), அல்லது கீழே வகைகளைப் பாருங்கள்.' : 'No tools matched — try a different word, or browse by category.'}</div>`));
     matches.forEach(t=> grid.appendChild(renderToolCard(t)));
