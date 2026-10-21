@@ -285,3 +285,6 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 ## UPDATE_53 — Search Console follow-up (21 Oct)
 - Owner's GSC snapshot: "pdf text editor online free" (11 impr, pos 8.7), "text to pdf" (11, pos 9.4), "extract pages from pdf" (9, pos 6.3). Tiny volumes — the site is only starting to be indexed; no ranking claim can be made from this.
 - Titles tuned to the exact phrases (pdfeditor → "Free PDF Text Editor Online…", txt2pdf → "Text to PDF Free Online…"); added an honest FAQ to the editor page (adds new text on top; does not rewrite original text). Pages + sitemap regenerated (sitemap changes are lastmod only). extract-pages title already matched.
+
+## UPDATE_54 — Short job heartbeat (21 Oct)
+- 21 Oct: by 14:07 IST none of the three scheduled runs had posted a Short (20 Oct's Short also only appeared at 14:25 IST). Cause unknown — Actions logs are unreadable from the session. `promo-youtube.mjs` now writes `promo_settings.yt_last_run` = "<ISO time> <schedule|workflow_dispatch> started|finished|FAILED: <msg>" and logs a `run-error` failed row on any crash. Next time: `select * from promo_settings where key='yt_last_run'` tells whether GitHub ran the job at all (no row update ⇒ GitHub did not start it) and how it ended.
