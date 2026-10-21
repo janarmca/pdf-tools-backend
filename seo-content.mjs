@@ -313,6 +313,38 @@ export const SEO_EXTRA = {
     uses: ['Hiding Aadhaar, PAN or account numbers before sharing a document', 'Removing names from a document for a case study', 'Protecting private details on a statement'],
     faqs: [['Is redaction reversible?', 'The redacted copy is permanent, so keep your original file separately.'], ['Does it work on scanned pages?', 'Scanned pages are pictures; check the result carefully and keep the original safe.']]
   },
+  videotrim: {
+    title: 'Video Trimmer — Cut Video Online for Free (MP4, MOV, WEBM) | PDF Tools India',
+    desc: 'Cut or trim a video online: drag the handles on the timeline, keep or remove a part, add fade in/out. Free, no signup, nothing is uploaded.',
+    intro: 'Trim the start and end of a video, cut a clip out of the middle, or remove a part you do not want — right in your browser, with a visual timeline.',
+    steps: ['Open Trim / Cut Video and choose your video.', 'Drag the two handles (or type the times) to select the part.', 'Pick Keep or Remove, then press Cut & download.'],
+    uses: ['Trimming a long recording to the part you need', 'Cutting a clip for WhatsApp status or Reels', 'Removing a mistake from the middle of a video', 'Adding a smooth fade at the start and end'],
+    faqs: [['Is my video uploaded anywhere?', 'No. The cut happens inside your browser, so the video never leaves your device.'], ['What is the difference between Exact and Fast?', 'Exact re-encodes and cuts at the precise frame. Fast copies the video without re-encoding, which is instant and lossless, but it may start a little earlier at the nearest key-frame.'], ['Which formats work?', 'MP4, MOV, WEBM and other formats your browser can open. The result is saved as MP4 (or the same format when you use Fast).']]
+  },
+  videocrop: {
+    title: 'Crop Video Online Free — Square, 9:16, 16:9 | PDF Tools India',
+    desc: 'Crop a video online: drag a box on the picture or pick a ratio (1:1, 9:16, 16:9, 4:5). Free, no signup, runs in your browser.',
+    intro: 'Keep only the part of the picture you want — turn a wide video into a square or vertical one for Instagram, Reels and Shorts.',
+    steps: ['Open Crop Video and choose your video.', 'Pick a ratio or drag the yellow box and its corners.', 'Press Crop & download.'],
+    uses: ['Making a vertical 9:16 video from a landscape one', 'Square 1:1 crop for Instagram posts', 'Cutting away black bars or an unwanted corner'],
+    faqs: [['Does cropping lower the quality?', 'The video is re-encoded at good quality. The picture inside the box keeps its original pixels; the output is simply smaller in size.'], ['Is my video uploaded?', 'No, everything runs in your browser.']]
+  },
+  videoresize: {
+    title: 'Resize Video Online Free — 1080p, 720p, Reels, Shorts | PDF Tools India',
+    desc: 'Change the size (resolution) of a video for YouTube, Shorts, Reels, Instagram or a smaller file. Free, no signup, runs in your browser.',
+    intro: 'Pick a ready size — 1080p, 720p, 480p, vertical 9:16, square, 4:5 — or type your own width and height.',
+    steps: ['Open Resize Video and choose your video.', 'Pick a size and, for a new shape, Fit / Fill / Stretch.', 'Press Resize & download.'],
+    uses: ['Making a video smaller to share on WhatsApp', 'Fitting a landscape video into a 9:16 Reels frame with bars', 'Exporting a 720p copy for a slow connection'],
+    faqs: [['What do Fit, Fill and Stretch mean?', 'Fit keeps the whole picture and adds black bars. Fill crops the edges so the frame is fully covered. Stretch squeezes the picture to the new shape.'], ['Will making the video bigger improve quality?', 'No. A larger size only enlarges the same pixels; the tool warns you when the new size is larger than the original.']]
+  },
+  screenrec: {
+    title: 'Free Online Screen Recorder — Record Screen with Sound | PDF Tools India',
+    desc: 'Record your computer screen, a window or a browser tab with sound, free in your browser. Save as WebM or convert to MP4.',
+    intro: 'Record what is on your screen — a tutorial, a meeting window or a browser tab — with system sound and/or your voice. Nothing is uploaded.',
+    steps: ['Open Screen Recorder and press Start recording.', 'Choose the screen, window or tab to share.', 'Press Stop & save, then download (WebM or MP4).'],
+    uses: ['Recording a how-to for students or customers', 'Capturing a browser tab with its sound', 'Saving a presentation with your voice-over'],
+    faqs: [['Does it work on a phone?', 'No. Phone browsers do not let websites record the screen. Use Chrome, Edge or Firefox on a computer, or your phone\'s built-in screen recorder.'], ['Can I record the sound?', 'Yes. Tick the sound option and, in Chrome, tick “Share tab audio” / “Share system audio” in the box that appears. You can also add your microphone.']]
+  },
   txt2pdf: {
     title: 'Text to PDF Free Online — Convert TXT or Typed Text to PDF | PDF Tools India',
     desc: 'Turn a .txt file or text you type into a PDF. Free, no signup, runs in your browser.',
