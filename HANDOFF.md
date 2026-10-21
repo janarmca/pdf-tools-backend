@@ -281,3 +281,7 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 
 ## UPDATE_52 — Sign PDF: a separate placement per page
 - Owner feedback: after moving the signature on another page, coming back to the old page lost its spot. Now `placements[pageNo] = {u,v,w}` — every page remembers its own position and size; a page with no entry stays unsigned (hint "Tap here to place…"). Buttons: "Copy to all pages", "Remove here"; a summary line lists the pages that will be signed. Verified: p1 top-left, p2 bottom-right, back to p1 → still top-left; output PDF matches. sw.js v88.
+
+## UPDATE_53 — Search Console follow-up (21 Oct)
+- Owner's GSC snapshot: "pdf text editor online free" (11 impr, pos 8.7), "text to pdf" (11, pos 9.4), "extract pages from pdf" (9, pos 6.3). Tiny volumes — the site is only starting to be indexed; no ranking claim can be made from this.
+- Titles tuned to the exact phrases (pdfeditor → "Free PDF Text Editor Online…", txt2pdf → "Text to PDF Free Online…"); added an honest FAQ to the editor page (adds new text on top; does not rewrite original text). Pages + sitemap regenerated (sitemap changes are lastmod only). extract-pages title already matched.

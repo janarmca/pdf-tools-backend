@@ -274,12 +274,12 @@ export const SEO_EXTRA = {
     faqs: [['Can it unlock a PDF without the password?', 'This tool needs the current password. Use it only on files you own or are allowed to open.'], ['Is the password stored?', 'No. It is used inside your browser and not sent anywhere.']]
   },
   pdfeditor: {
-    title: 'Free PDF Editor Online — Add Text, Images, Shapes and Signature | PDF Tools India',
+    title: 'Free PDF Text Editor Online — Add Text, Images, Shapes and Signature | PDF Tools India',
     desc: 'Edit a PDF online: add text, images, signatures and shapes. Core editing is free, no signup, runs in your browser.',
     intro: 'Fill in a form, add a line of text, place a signature or draw a shape on a PDF without installing software.',
     steps: ['Open PDF Editor and choose your PDF.', 'Pick text, image, signature or shape and place it on the page.', 'Download the edited PDF.'],
     uses: ['Filling a printed-style form on a phone', 'Adding a signature or stamp image', 'Writing a note on a document before returning it', 'Covering a small area with a shape'],
-    faqs: [['Can I change the existing text of a scanned PDF?', 'This editor adds new text, images and shapes on top of pages. Scanned pages are pictures, so their original text is not editable.'], ['Is the editing free?', 'Core editing is free.']]
+    faqs: [['Is this a free online PDF text editor?', 'Yes — you can add new text anywhere on a page, plus images, shapes and a signature, free and in your browser. It writes on top of the page; it does not rewrite the original text inside the PDF.'], ['Can I change the existing text of a scanned PDF?', 'This editor adds new text, images and shapes on top of pages. Scanned pages are pictures, so their original text is not editable.'], ['Is the editing free?', 'Core editing is free.']]
   },
   pdfocrsearchable: {
     title: 'OCR PDF to Searchable PDF Free — Make Scans Searchable | PDF Tools India',
@@ -314,7 +314,7 @@ export const SEO_EXTRA = {
     faqs: [['Is redaction reversible?', 'The redacted copy is permanent, so keep your original file separately.'], ['Does it work on scanned pages?', 'Scanned pages are pictures; check the result carefully and keep the original safe.']]
   },
   txt2pdf: {
-    title: 'Text to PDF Free — Convert TXT or Typed Text to PDF | PDF Tools India',
+    title: 'Text to PDF Free Online — Convert TXT or Typed Text to PDF | PDF Tools India',
     desc: 'Turn a .txt file or text you type into a PDF. Free, no signup, runs in your browser.',
     intro: 'Make a clean PDF from plain text such as notes, a letter draft or log output, ready to print or share.',
     steps: ['Open Text to PDF.', 'Type or paste text, or choose a .txt file.', 'Download the PDF.'],
