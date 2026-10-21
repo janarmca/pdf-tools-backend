@@ -225,4 +225,16 @@ const main = async () => {
   }
   if (failed) throw failed;
 };
-if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((e) => { console.error(e.message || e); process.exit(1); });
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  // Heartbeat in D1 (promo_settings.yt_last_run): shows whether a scheduled run started at all and how it ended, because the Actions log
+  // cannot be read from outside. A crash before the upload step is also logged as a failed row so it no longer vanishes silently.
+  const ev = process.env.GITHUB_EVENT_NAME || 'local';
+  const mark = (m) => sql("insert or replace into promo_settings (key, value) values ('yt_last_run', ?)", [`${new Date().toISOString()} ${ev} ${m}`]).catch(() => {});
+  await mark('started');
+  try { await main(); await mark('finished'); }
+  catch (e) {
+    const msg = String(e.message || e).slice(0, 250);
+    await mark('FAILED: ' + msg); await log('run-error', 'failed', null, msg).catch(() => {});
+    console.error(e.message || e); process.exit(1);
+  }
+}
