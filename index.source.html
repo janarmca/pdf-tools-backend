@@ -4562,7 +4562,9 @@ TOOL_IMPL.sign = {
     let file = null, pdfjsDoc = null, pageCount = 0, currentPage = 1;
     let sigDataUrl = null;
     // u/v = where the signature's top-left corner sits, as a fraction of the page as DISPLAYED (0..1 from left / from top).
-    let sigPos = {u:0.55, v:0.72}, sigWidthPct = 25, signAllPages = false, refreshOverlay = null, placerToken = 0;
+    // Each page keeps its OWN placement: placements[pageNo] = {u, v, w} (u/v = top-left as a fraction of the page as displayed, w = width % of the page).
+    // A page with no entry is left unsigned. Going back to a page shows exactly what was set there.
+    let placements = {}, lastW = 25, refreshOverlay = null, placerToken = 0;
     let sigMode = 'draw', typedSigText = '';
     const body = el(`<div></div>`); container.appendChild(body);
 
@@ -4684,13 +4686,15 @@ TOOL_IMPL.sign = {
             <button class="btn secondary" id="signPrev" aria-label="Previous page">◀</button>
             <span id="signPageLbl" style="font-weight:700; font-size:13px; min-width:92px; text-align:center;"></span>
             <button class="btn secondary" id="signNext" aria-label="Next page">▶</button>
-            <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-left:auto;"><input type="checkbox" id="signAll" ${signAllPages?'checked':''}> Same place on every page</label>
+            <button class="btn secondary" id="signCopyAll" style="margin-left:auto;" title="Put the signature on every page, at this position">📋 Copy to all pages</button>
+            <button class="btn secondary" id="signRemove" title="Leave this page unsigned">🗑 Remove here</button>
           </div>
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12.5px;">
             <span style="font-weight:700;">Size</span>
-            <input type="range" id="sigWidthPct" min="8" max="60" value="${sigWidthPct}" style="flex:1;">
-            <span id="sigWidthLbl" style="min-width:34px; text-align:right;">${sigWidthPct}%</span>
+            <input type="range" id="sigWidthPct" min="8" max="60" value="${(placements[currentPage]||{w:lastW}).w}" style="flex:1;">
+            <span id="sigWidthLbl" style="min-width:34px; text-align:right;">${(placements[currentPage]||{w:lastW}).w}%</span>
           </div>
+          <div id="signSummary" style="font-size:12.5px; color:var(--sub); margin-bottom:8px;"></div>
           <div id="signStage" style="position:relative; width:100%; max-width:720px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; touch-action:pan-y; user-select:none; -webkit-user-select:none;">
             <canvas id="signCanvas" style="display:block; width:100%; height:auto;"></canvas>
             <img id="signOverlay" alt="Signature" draggable="false" style="position:absolute; display:none; cursor:grab; touch-action:none; outline:2px dashed #AF3F73; outline-offset:2px; background:rgba(175,63,115,.06); max-width:none;">
@@ -4702,15 +4706,25 @@ TOOL_IMPL.sign = {
       const stage = placer.querySelector('#signStage'), cvs = placer.querySelector('#signCanvas'), ov = placer.querySelector('#signOverlay'), hint = placer.querySelector('#signHint');
       const lbl = placer.querySelector('#signPageLbl');
       let aspect = 0.4; // signature height / width
+      const sumEl = placer.querySelector('#signSummary'), wRange = placer.querySelector('#sigWidthPct'), wLbl = placer.querySelector('#sigWidthLbl');
+      function summary(){
+        const ks = Object.keys(placements).map(Number).sort((x,y)=>x-y);
+        sumEl.textContent = ks.length ? `Signature will be added on page${ks.length>1?'s':''}: ${ks.join(', ')}` : 'No page has a signature yet — tap the page to place it.';
+        placer.querySelector('#signRemove').disabled = !placements[currentPage];
+      }
       function layoutOverlay(){
+        summary();
+        const pl = placements[currentPage];
         if(!sigDataUrl){ ov.style.display = 'none'; hint.textContent = 'Draw, type or upload your signature above — it will appear here.'; return; }
+        if(!pl){ ov.style.display = 'none'; hint.textContent = 'Tap here to place your signature on this page'; wRange.value = lastW; wLbl.textContent = lastW+'%'; return; }
         hint.textContent = '';
         const W = stage.clientWidth, H = stage.clientHeight; if(!W || !H) return;
-        const w = W * sigWidthPct/100, h = w * aspect;
-        sigPos.u = Math.min(Math.max(sigPos.u, 0), Math.max(0, 1 - w/W));
-        sigPos.v = Math.min(Math.max(sigPos.v, 0), Math.max(0, 1 - h/H));
+        const w = W * pl.w/100, h = w * aspect;
+        pl.u = Math.min(Math.max(pl.u, 0), Math.max(0, 1 - w/W));
+        pl.v = Math.min(Math.max(pl.v, 0), Math.max(0, 1 - h/H));
         ov.style.display = 'block'; ov.style.width = w+'px'; ov.style.height = h+'px';
-        ov.style.left = (sigPos.u*W)+'px'; ov.style.top = (sigPos.v*H)+'px';
+        ov.style.left = (pl.u*W)+'px'; ov.style.top = (pl.v*H)+'px';
+        wRange.value = pl.w; wLbl.textContent = pl.w+'%';
       }
       refreshOverlay = function(){
         if(!sigDataUrl){ layoutOverlay(); return; }
@@ -4732,9 +4746,12 @@ TOOL_IMPL.sign = {
       }
       placer.querySelector('#signPrev').onclick = ()=>{ if(currentPage>1){ currentPage--; showPage(); } };
       placer.querySelector('#signNext').onclick = ()=>{ if(currentPage<pageCount){ currentPage++; showPage(); } };
-      placer.querySelector('#signAll').onchange = e=>{ signAllPages = e.target.checked; };
-      const wr = placer.querySelector('#sigWidthPct');
-      wr.oninput = ()=>{ sigWidthPct = Number(wr.value)||25; placer.querySelector('#sigWidthLbl').textContent = sigWidthPct+'%'; layoutOverlay(); };
+      placer.querySelector('#signCopyAll').onclick = ()=>{
+        const pl = placements[currentPage]; if(!pl){ hint.textContent = 'Place the signature on this page first.'; return; }
+        for(let i=1;i<=pageCount;i++) placements[i] = Object.assign({}, pl); layoutOverlay();
+      };
+      placer.querySelector('#signRemove').onclick = ()=>{ delete placements[currentPage]; layoutOverlay(); };
+      wRange.oninput = ()=>{ const v = Number(wRange.value)||25; lastW = v; if(placements[currentPage]) placements[currentPage].w = v; layoutOverlay(); };
       // drag (mouse + touch + pen)
       let drag = null;
       ov.addEventListener('pointerdown', e=>{
@@ -4743,15 +4760,17 @@ TOOL_IMPL.sign = {
       });
       ov.addEventListener('pointermove', e=>{
         if(!drag) return; const r = stage.getBoundingClientRect();
-        sigPos.u = (e.clientX - drag.dx - r.left)/r.width; sigPos.v = (e.clientY - drag.dy - r.top)/r.height; layoutOverlay(); e.preventDefault();
+        const pl = placements[currentPage]; if(!pl) return;
+        pl.u = (e.clientX - drag.dx - r.left)/r.width; pl.v = (e.clientY - drag.dy - r.top)/r.height; layoutOverlay(); e.preventDefault();
       });
       const endDrag = ()=>{ drag = null; ov.style.cursor = 'grab'; };
       ov.addEventListener('pointerup', endDrag); ov.addEventListener('pointercancel', endDrag);
       // tap / click on the page = put the signature's centre there
       stage.addEventListener('click', e=>{
         if(e.target === ov || !sigDataUrl) return; const r = stage.getBoundingClientRect();
-        const w = sigWidthPct/100, h = (w * r.width * aspect) / r.height;
-        sigPos.u = (e.clientX - r.left)/r.width - w/2; sigPos.v = (e.clientY - r.top)/r.height - h/2; layoutOverlay();
+        const pl = placements[currentPage] || (placements[currentPage] = {u:0, v:0, w:lastW});
+        const w = pl.w/100, h = (w * r.width * aspect) / r.height;
+        pl.u = (e.clientX - r.left)/r.width - w/2; pl.v = (e.clientY - r.top)/r.height - h/2; layoutOverlay();
       });
       window.addEventListener('resize', layoutOverlay, {passive:true});
       refreshOverlay();
@@ -4792,7 +4811,8 @@ TOOL_IMPL.sign = {
 
     async function doApply(){
       if(!sigDataUrl){ mountResult(body, 'Please draw your signature first.').style.background='#FDEDEC'; return; }
-      const pageNum = currentPage, widthPct = sigWidthPct/100;
+      const keys = Object.keys(placements).map(Number).filter(n=>n>=1 && n<=pageCount).sort((x,y)=>x-y);
+      if(!keys.length){ mountResult(body, 'Tap a page to place your signature first (each page can have its own place).').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         prog.set(20,'Reading…');
@@ -4801,13 +4821,12 @@ TOOL_IMPL.sign = {
         const sigImg = await doc.embedPng(pngBytes);
         const pages = doc.getPages();
         prog.set(60,'Signing…');
-        const targets = signAllPages ? pages.map((_,i)=>i) : [pageNum-1];
-        targets.forEach(i=>{
-          const page = pages[i]; const {width: W, height: H} = page.getSize();
+        keys.forEach(n=>{
+          const pl = placements[n], page = pages[n-1]; const {width: W, height: H} = page.getSize();
           let r = ((Math.round(page.getRotation().angle) % 360) + 360) % 360; if(r % 90) r = 0;
           const Wd = (r===90||r===270) ? H : W, Hd = (r===90||r===270) ? W : H;   // page size as the user sees it
-          const sw = Wd*widthPct, sh = sw*(sigImg.height/sigImg.width);
-          const dx0 = Math.min(Math.max(sigPos.u*Wd, 0), Math.max(0, Wd - sw)), dy0 = Math.min(Math.max(sigPos.v*Hd, 0), Math.max(0, Hd - sh));
+          const sw = Wd*(pl.w/100), sh = sw*(sigImg.height/sigImg.width);
+          const dx0 = Math.min(Math.max(pl.u*Wd, 0), Math.max(0, Wd - sw)), dy0 = Math.min(Math.max(pl.v*Hd, 0), Math.max(0, Hd - sh));
           // displayed (top-left origin) -> PDF user space, for the image's bottom-left corner, honouring /Rotate
           let x, y;
           if(r===0){ x = dx0; y = H - (dy0 + sh); }
@@ -4821,7 +4840,7 @@ TOOL_IMPL.sign = {
         prog.set(100,'Done');
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), 'signed.pdf');
         prog.remove();
-        mountResult(body, signAllPages ? `Signed PDF downloaded (all ${pages.length} pages).` : `Signed PDF downloaded (page ${pageNum}).`);
+        mountResult(body, `Signed PDF downloaded (page${keys.length>1?'s':''} ${keys.join(', ')}).`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();

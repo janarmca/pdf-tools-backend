@@ -278,3 +278,6 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - `TOOL_IMPL.pdfstamp`: new Position (centre/top/bottom/4 corners), Size, and Pages (empty = all, or "1, 3-5") fields; text auto-shrinks to fit; tilt 0 is now honoured (it used to fall back to −30). Verified: stamp on page 2 only, top-right, page 1 untouched.
 - Audit 21 Oct: all 169 TOOLS open without a JS error or horizontal scroll at 390 px (local Chromium, CDN libs stubbed). This is a mount smoke test only — it does not prove every tool's processing is correct.
 - Known gaps (not built): page-number / header-footer / QR-stamp placement have only preset positions (no drag); the shared drag-placer from Sign PDF could be extracted for them.
+
+## UPDATE_52 — Sign PDF: a separate placement per page
+- Owner feedback: after moving the signature on another page, coming back to the old page lost its spot. Now `placements[pageNo] = {u,v,w}` — every page remembers its own position and size; a page with no entry stays unsigned (hint "Tap here to place…"). Buttons: "Copy to all pages", "Remove here"; a summary line lists the pages that will be signed. Verified: p1 top-left, p2 bottom-right, back to p1 → still top-left; output PDF matches. sw.js v88.
