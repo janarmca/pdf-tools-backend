@@ -816,7 +816,7 @@ async function boot(){
   if (!F){ $('stage').textContent = 'Fabric.js ஏற்ற முடியவில்லை — பக்கத்தைப் புதுப்பிக்கவும்'; return; }
   try{ F.FabricObject.ownDefaults.originX='left'; F.FabricObject.ownDefaults.originY='top'; }catch(e){}
   canvas = new F.Canvas('c',{width:W,height:H,preserveObjectStacking:true,selection:false,backgroundColor:'#ffffff',enableRetinaScaling:false,allowTouchScrolling:true});
-  window.__poster = {canvas:canvas, F:F, state:function(){ return {W:W,H:H,sizeId:sizeId,tplId:tplId}; }, applyTemplate:applyTemplate, setSize:setSize, templates:TPLS, fonts:FONTS, ensureFont:ensureFont, toast:toast, readImage:readImage, downscale:downscale, centerAdd:centerAdd, syncProps:syncProps, addPhoto:addPhoto, commit:function(){ pushHist(); }, brand:function(){ return brand; }};
+  window.__poster = {canvas:canvas, F:F, mk:function(c,w,h){ return mk(c,w,h); }, K:{FH:FH,FC:FC,FM:FM,FS:FS,FT:FT,FN:FN}, ensureFonts:function(a){ return ensureFonts(a); }, addTemplate:function(t){ TPLS.push(t); return t.id; }, state:function(){ return {W:W,H:H,sizeId:sizeId,tplId:tplId}; }, applyTemplate:applyTemplate, setSize:setSize, templates:TPLS, fonts:FONTS, ensureFont:ensureFont, toast:toast, readImage:readImage, downscale:downscale, centerAdd:centerAdd, syncProps:syncProps, addPhoto:addPhoto, commit:function(){ pushHist(); }, brand:function(){ return brand; }};
   document.dispatchEvent(new Event('poster-ready'));
   var sz = $('sizes');
   SIZES.forEach(function(s){

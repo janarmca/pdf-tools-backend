@@ -36,6 +36,7 @@
       x.addEventListener('click', function () { if (x.dataset.close === 'side') closeSide(); else { $('propCard').classList.remove('has'); $('propCard').dataset.dismissed = '1'; } });
     });
     $('topDl').addEventListener('click', function () { openPane('dl', true); if (!phone()) $('xPng').focus(); });
+    document.querySelectorAll('[data-goto]').forEach(function (b) { b.addEventListener('click', function () { openPane(b.dataset.goto, true); }); });
     // picking a design on a phone closes the sheet so the poster is visible
     document.addEventListener('poster-picked', function () { if (phone()) closeSide(); });
 

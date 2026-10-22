@@ -66,7 +66,7 @@ on:
           - 'readaloud — உரக்கப் படி / Read Aloud'
           - 'obituary — இரங்கல் அறிவிப்பு / Obituary / Death Announcement'
       tool_image:
-        description: 'Image tools (26) — pick one, or leave (none)'
+        description: 'Image tools (28) — pick one, or leave (none)'
         type: choice
         default: '(none)'
         options:
@@ -91,11 +91,13 @@ on:
           - 'exifremove — படத்தின் மறைதகவல் நீக்கு / Strip Photo Privacy Data'
           - 'imgwatermark — படத்தில் Watermark / Watermark an Image'
           - 'imgcollage — படத் தொகுப்பு (Collage) / Image Collage'
-          - 'imgsketch — படம் → ஓவியம் / Image → Sketch'
+          - 'imgsketch — படம் → ஓவியம் & Art / Photo → Sketch & Art'
           - 'imgmeme — Meme உருவாக்கு / Meme Maker'
+          - 'imgblur — படத்தில் மறை / Blur / Blur / Hide Part of Photo'
+          - 'imgsplit — படத்தை கட்டங்களாக பிரி / Split Image into Grid'
           - 'imgsticker — Sticker வெட்டு / Sticker Cutout'
           - 'colorpicker — வண்ணம் எடு / Color Picker'
-          - 'aibgreplace — பின்னணி மாற்று (AI) / AI Background Replace'
+          - 'aibgreplace — பின்னணி மாற்று (AI) / AI Background Replace (AI, paid)'
           - 'examphoto — தேர்வுப் புகைப்படம் / Exam Photo & Signature Resizer'
       tool_business:
         description: 'Business tools (44) — pick one, or leave (none)'
@@ -148,7 +150,7 @@ on:
           - 'ebbill — மின் கட்டணம் (TNEB) / TNEB Bill Calculator'
           - 'invitation — திருமண அழைப்பிதழ் / Wedding Invitation Maker'
       tool_video:
-        description: 'Video tools (16) — pick one, or leave (none)'
+        description: 'Video tools (32) — pick one, or leave (none)'
         type: choice
         default: '(none)'
         options:
@@ -169,12 +171,29 @@ on:
           - 'videosubtitle — வசன வரிகள் / Video Captions/Subtitles'
           - 'videotogif — வீடியோ → GIF / Video → GIF'
           - 'videothumb — வீடியோ Thumbnail / Video Thumbnail'
+          - 'videotrim — வீடியோ வெட்டு (Trim) / Trim / Cut Video'
+          - 'videocrop — வீடியோ Crop / Crop Video'
+          - 'videoresize — வீடியோ அளவு மாற்று / Resize Video'
+          - 'screenrec — திரைப் பதிவு (Screen Recorder) / Screen Recorder'
+          - 'audiocut — ஆடியோ வெட்டு / Ringtone / Audio Cutter & Ringtone Maker'
+          - 'audioconvert — ஆடியோ மாற்றி (MP3/WAV) / Audio Converter'
+          - 'videotomp3 — வீடியோ → MP3 / Video to MP3'
+          - 'audiomerge — ஆடியோ இணை / Merge Audio / Join MP3'
+          - 'audioeffects — ஆடியோ ஒலி அளவு & Effects / Audio Volume & Effects'
+          - 'voicerec — குரல் பதிவு (Voice Recorder) / Voice Recorder'
+          - 'texttospeech — எழுத்து → குரல் (MP3) / Text to Speech (MP3) (AI, paid)'
+          - 'audiopitch — குரல் Pitch & வேகம் / Change Pitch & Speed'
+          - 'audioeq — ஆடியோ Equalizer / Audio Equalizer'
+          - 'vocalremove — பாடகர் குரல் நீக்கு (Karaoke) / Vocal Remover (Karaoke)'
+          - 'audiodenoise — இரைச்சல் குறை / Reduce Noise'
+          - 'videochroma — பச்சை திரை நீக்கு (Green Screen) / Remove Green Screen (Chroma Key)'
       tool_ai:
-        description: 'AI tools (11) — pick one, or leave (none)'
+        description: 'AI tools (13) — pick one, or leave (none)'
         type: choice
         default: '(none)'
         options:
           - '(none)'
+          - 'aitranscribe — பேச்சு → எழுத்து / Subtitle (AI) / Audio / Video → Text & Subtitles (AI) (AI, paid)'
           - 'askai — ஆவணத்திடம் கேள் (AI) / Ask AI About Document (AI, paid)'
           - 'aisummarize — சுருக்கம் (AI) / AI Summarize (AI, paid)'
           - 'aitranslate — மொழிபெயர்ப்பு (AI) / AI Translate Document (AI, paid)'
@@ -185,6 +204,7 @@ on:
           - 'camscan — கேமரா ஸ்கேனர் / 📷 Camera Scanner'
           - 'aihandwriting — கையெழுத்து → எழுத்து (AI) / Handwriting → Text (AI, paid)'
           - 'livetranslate — நேரடி மொழிபெயர்ப்பு / Live Speech Translator'
+          - 'aistyle — AI படம் Style (Anime/3D) / AI Photo Style (AI, paid)'
           - 'texttoimage — எழுத்து → படம் (AI) / Text → Image (AI, paid)'
       tool_education:
         description: 'Education tools (20) — pick one, or leave (none)'

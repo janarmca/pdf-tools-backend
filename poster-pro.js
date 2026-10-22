@@ -82,6 +82,50 @@
     C.on('selection:updated', function () { if (curTab !== 'el') showTab(curTab); refreshLayers(); });
     C.on('selection:cleared', function () { if (curTab === 'tx' || curTab === 'ph') showTab(curTab); refreshLayers(); });
     C.on('object:added', refreshLayers); C.on('object:removed', refreshLayers);
+    // elements made of several parts (offer badge, ribbon, price tag, speech bubble…): edit their words and colours
+    C.on('selection:created', syncGroup); C.on('selection:updated', syncGroup); C.on('selection:cleared', syncGroup);
+    C.on('mouse:dblclick', function (e) { var o = e.target; if (o && isGroup(o)) { syncGroup(); var t = document.querySelector('#groupProps textarea'); if (t) { t.focus(); t.select(); } } });
+  }
+  function isGroup(o) { return o && F.Group && o instanceof F.Group && !(F.ActiveSelection && o instanceof F.ActiveSelection); }
+  function groupTexts(o) { return o.getObjects().filter(function (x) { return x instanceof F.Textbox || (F.IText && x instanceof F.IText) || (F.FabricText && x instanceof F.FabricText); }); }
+  function relayout(g) { try { if (g.triggerLayout) g.triggerLayout(); } catch (e) {} g.dirty = true; g.setCoords(); C.requestRenderAll(); }
+  function syncGroup() {
+    var box = $('groupProps'); if (!box) return;
+    var o = act();
+    if (!isGroup(o)) { box.classList.add('hide'); box.innerHTML = ''; return; }
+    var texts = groupTexts(o), shapes = o.getObjects().filter(function (x) { return texts.indexOf(x) < 0 && typeof x.fill === 'string' && x.fill; });
+    var sp = $('shapeProps'); if (sp) sp.classList.add('hide');
+    box.classList.remove('hide'); box.innerHTML = '';
+    if (texts.length) box.appendChild(el('<label>இதில் உள்ள எழுத்து · Text in this element</label>'));
+    texts.forEach(function (t, i) {
+      var row = el('<div style="margin-bottom:8px"><textarea lang="ta" style="min-height:60px">' + esc(t.text) + '</textarea>' +
+        '<div class="row" style="margin-top:4px"><input type="color" value="' + toHex(t.fill) + '" title="எழுத்து நிறம்"><div class="grow"><input type="range" min="10" max="400" value="' + Math.round(t.fontSize) + '" title="அளவு"></div></div></div>');
+      var ta = row.querySelector('textarea'), col = row.querySelector('input[type=color]'), sz = row.querySelector('input[type=range]');
+      ta.oninput = function () { t.set('text', ta.value); if (t.initDimensions) t.initDimensions(); relayout(o); };
+      col.oninput = function () { t.set('fill', col.value); relayout(o); };
+      sz.oninput = function () { t.set('fontSize', +sz.value); if (t.initDimensions) t.initDimensions(); relayout(o); };
+      [ta, col, sz].forEach(function (x) { x.onchange = function () { changed(o); P.commit && P.commit(); }; });
+      box.appendChild(row);
+    });
+    if (shapes.length) {
+      box.appendChild(el('<label>வடிவ நிறம் · Shape colour</label>'));
+      var row = el('<div class="row"></div>');
+      shapes.slice(0, 3).forEach(function (sh) {
+        var c = el('<input type="color" value="' + toHex(sh.fill) + '">');
+        c.oninput = function () { sh.set('fill', c.value); relayout(o); };
+        c.onchange = function () { changed(o); P.commit && P.commit(); };
+        row.appendChild(c);
+      });
+      box.appendChild(row);
+    }
+    box.appendChild(el('<div class="note">இரு முறை தட்டினாலும் (double-tap) இங்கே எழுத்தை மாற்றலாம்.</div>'));
+  }
+  function toHex(c) {
+    if (typeof c !== 'string') return '#000000';
+    if (/^#[0-9a-f]{6}$/i.test(c)) return c;
+    if (/^#[0-9a-f]{3}$/i.test(c)) return '#' + c.slice(1).split('').map(function (x) { return x + x; }).join('');
+    var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/i.exec(c); if (m) return '#' + [m[1], m[2], m[3]].map(function (v) { return (+v).toString(16).padStart(2, '0'); }).join('');
+    return '#000000';
   }
   var curTab = 'el';
   var TITLES = { el: '🧩 Elements · வடிவங்கள், Stickers', tx: '🔤 எழுத்து · Text effects', ph: '🖼️ படம் · Photo', ar: '📐 அமைப்பு · Align & Layers', ai: '✨ AI உதவி (credits)' };
@@ -378,10 +422,130 @@
   }
   function loginNote(b) { b.appendChild(el('<div class="note" style="background:#fff4e5;padding:10px;border-radius:10px">AI-க்கு login தேவை. <a href="/?login=1" target="_blank"><b>இங்கே login செய்யுங்கள்</b></a> (Google அல்லது மின்னஞ்சல் code) — பிறகு இந்தப் பக்கத்துக்குத் திரும்பி மீண்டும் தட்டுங்கள்.</div>')); }
   var STYLES = [['photo', 'புகைப்படம் போல', 'realistic photograph, soft light, high detail'], ['fest', 'பண்டிகை ஓவியம்', 'festive colourful illustration, Indian style, rich colours'], ['water', 'Watercolor', 'soft watercolor painting'], ['flat', 'Flat / Vector', 'flat vector illustration, clean shapes, bright colours'], ['3d', '3D', '3D render, glossy, studio lighting']];
+  /* draws one AI design spec {layout, decor, palette, headline, subline, highlight, body[], cta, emoji, photo} with the mk() helpers */
+  function drawDesign(h, d) {
+    var w = h.w, H = h.h, u = h.u, K = P.K, p = d.palette, NS0 = { selectable: false, evented: false };
+    var land = w > H * 1.1;
+    var fitT = function (t, op, lines) { var tb = h.text(t, op); tb.initDimensions(); for (var n = 0; n < 40 && (tb.textLines || []).length > (lines || 1); n++) { tb.set({ fontSize: tb.fontSize * 0.93 }); tb.initDimensions(); } return tb; };
+    var lum = function (c) { var m = /^#(..)(..)(..)/.exec(c || '#000000'); return m ? (0.299 * parseInt(m[1], 16) + 0.587 * parseInt(m[2], 16) + 0.114 * parseInt(m[3], 16)) : 0; };
+    var onSoft = lum(p.soft) > 150 ? '#111827' : '#ffffff', onAccent = lum(p.accent) > 150 ? '#111827' : '#ffffff';
+    var decor = function (x0, y0, ww, hh, col) {
+      if (d.decor === 'rays') h.rays(x0 + ww / 2, y0 + hh * 0.35, 0, Math.max(ww, hh) * 1.1, 30, col || 'rgba(255,255,255,.09)');
+      else if (d.decor === 'dots') h.dots(x0 + ww * 0.05, y0 + hh * 0.03, 10, 6, ww * 0.1, 3 * u, col || 'rgba(255,255,255,.28)');
+      else if (d.decor === 'confetti') { var cs = [p.accent, '#ffffff', p.bg2, '#f472b6', '#22d3ee']; for (var i = 0; i < 26; i++) { var rx = Math.sin(i * 12.9898) * 43758.5453, ry = Math.sin(i * 78.233) * 12543.21; rx -= Math.floor(rx); ry -= Math.floor(ry); h.rect(x0 + rx * ww, y0 + ry * hh * 0.45, 14 * u, 30 * u, cs[i % cs.length], Object.assign({ angle: (i * 37) % 180, opacity: 0.85 }, NS0)); } }
+      else if (d.decor === 'waves') { h.path('M 0 60 Q 150 0 300 60 T 600 60 T 900 60 T 1200 60 L 1200 200 L 0 200 Z', x0 + ww / 2, y0 + hh - 60 * u, 'rgba(255,255,255,.12)', Object.assign({ scaleX: ww / 1200, scaleY: u }, NS0)); }
+    };
+    var badge = function (cx, cy, r) { if (!d.highlight) return; h.star(cx, cy, r, r * 0.8, 18, p.accent, NS0); fitT(d.highlight, { left: cx - r * 0.75, top: cy - r * 0.3, w: r * 1.5, size: r * 0.42, font: K.FH, color: onAccent, bold: 1, align: 'center' }, 2); };
+    var bodyList = function (x, y, ww, size, col, maxY) {
+      var cur = y; (d.body || []).forEach(function (t) { var tb = fitT('✦  ' + t, { left: x, top: cur, w: ww, size: size, font: K.FM, color: col, bold: 1, align: 'left' }, 2); cur += tb.height + size * 0.35; });
+      return cur;
+    };
+    var cta = function (y, hh, bg, fg) { if (!d.cta) return; h.rect(w * 0.08, y, w * 0.84, hh, bg, Object.assign({ rx: hh / 2, ry: hh / 2 }, NS0)); var tb = fitT(d.cta, { left: w * 0.1, top: y, w: w * 0.8, size: hh * 0.46, font: K.FH, color: fg, bold: 1, align: 'center' }); tb.set({ top: y + (hh - tb.height) / 2 }); };
+    // stack text blocks one under another from y (real heights, so 2-line Tamil headings never overlap)
+    var stack = function (x, ww, y, align, items, maxY) {
+      items.forEach(function (it) {
+        if (!it || !it.t || (maxY && y > maxY)) return;
+        var tb = fitT(it.t, { left: x, top: y, w: ww, size: it.s, font: it.f || K.FM, color: it.c, bold: it.b ? 1 : 0, align: align, shadow: it.sh ? 1 : 0 }, it.l || 1);
+        y += tb.height + (it.g != null ? it.g : it.s * 0.35);
+      });
+      return y;
+    };
+    var bodyItems = function (size, col, mark) { return (d.body || []).map(function (t) { return { t: (mark || '') + t, s: size, c: col, b: 1, l: 2, g: size * 0.3 }; }); };
+    var emo = function (x, y, size) { if (!d.emoji) return y; h.text(d.emoji, { left: x - size, top: y, w: size * 2, size: size, font: 'Noto Color Emoji, Apple Color Emoji, sans-serif', color: '#000', align: 'center', noSel: true }); return y + size * 1.25; };
+    var big = land ? 0.075 : 0.115, mid = land ? 0.04 : 0.05, small = land ? 0.034 : 0.044;
+    var L = d.layout, y;
+    if (L === 'band') {
+      h.bg(p.soft);
+      var band = h.rect(0, 0, w, H * 0.42, h.grad([[0, p.bg1], [1, p.bg2]]), NS0); decor(0, 0, w, H * 0.42);
+      y = emo(w / 2, H * 0.03, w * 0.09);
+      y = stack(w * 0.06, w * 0.88, y, 'center', [{ t: d.headline, s: w * big, f: K.FH, c: p.text, b: 1, sh: 1, l: 2, g: H * 0.01 }, { t: d.subline, s: w * mid, c: p.text, b: 1, l: 2 }]);
+      var bandH = Math.max(H * 0.36, y + H * 0.03); band.set({ height: bandH, fill: h.grad([[0, p.bg1], [1, p.bg2]], true, 0, bandH) });
+      badge(w * 0.84, H * 0.08, w * 0.1);
+      y = stack(w * 0.1, d.photo ? w * 0.56 : w * 0.8, bandH + H * 0.04, 'left', bodyItems(w * small, onSoft, '✦  '), H * 0.8);
+      if (d.photo) h.slot(w * 0.8, Math.min(bandH + w * 0.17, H * 0.7), w * 0.26, w * 0.26, 'round', p.bg1);
+      cta(H * 0.86, H * 0.065, p.bg1, p.text);
+    } else if (L === 'split' && !land) {
+      h.bg(h.grad([[0, p.bg1], [1, p.bg2]])); decor(0, 0, w, H);
+      var top = H * 0.5;
+      h.slot(w / 2, H * 0.26, w * 0.6, H * 0.3, 'round', p.accent);
+      badge(w * 0.84, H * 0.08, w * 0.11);
+      h.rect(0, top, w, H - top, p.soft, NS0);
+      y = stack(w * 0.06, w * 0.88, top + H * 0.03, 'center', [{ t: d.headline, s: w * big * 0.85, f: K.FH, c: p.bg1, b: 1, l: 2, g: H * 0.008 }, { t: d.subline, s: w * mid * 0.9, c: onSoft, b: 1, l: 2 }]);
+      stack(w * 0.12, w * 0.76, y + H * 0.01, 'left', bodyItems(w * small * 0.92, onSoft, '✦  '), H * 0.82);
+      cta(H * 0.88, H * 0.065, p.bg1, p.text);
+    } else if (L === 'frame') {
+      h.bg(p.soft);
+      h.rect(w * 0.035, H * 0.025, w * 0.93, H * 0.95, 'rgba(0,0,0,0)', Object.assign({ stroke: p.bg1, strokeWidth: 10 * u }, NS0));
+      h.rect(w * 0.06, H * 0.04, w * 0.88, H * 0.92, 'rgba(0,0,0,0)', Object.assign({ stroke: p.accent, strokeWidth: 4 * u }, NS0));
+      y = emo(w / 2, H * 0.08, w * 0.09);
+      y = stack(w * 0.1, w * 0.8, y + H * 0.01, 'center', [{ t: d.headline, s: w * big * 0.9, f: K.FT, c: p.bg1, b: 1, l: 2, g: H * 0.012 }, { t: d.subline, s: w * mid * 0.95, f: K.FS, c: onSoft, l: 3 }]);
+      h.rect(w * 0.35, y + H * 0.005, w * 0.3, 3 * u, p.accent, NS0); y += H * 0.03;
+      if (d.photo) { h.slot(w / 2, y + w * 0.15, w * 0.3, w * 0.3, 'circle', p.bg1); y += w * 0.32; }
+      stack(w * 0.12, w * 0.76, y, 'center', (d.body || []).map(function (t) { return { t: t, s: w * small, f: K.FS, c: onSoft, l: 2, g: w * 0.012 }; }), H * 0.82);
+      if (d.cta) fitT(d.cta, { left: w * 0.1, top: H * 0.87, w: w * 0.8, size: w * mid, font: K.FH, color: p.bg1, bold: 1, align: 'center' });
+    } else if (L === 'diagonal') {
+      h.bg(p.bg1); decor(0, 0, w, H);
+      h.poly([{ x: -w * 0.6, y: -H * 0.05 }, { x: w * 0.6, y: -H * 0.25 }, { x: w * 0.6, y: H * 0.2 }, { x: -w * 0.6, y: H * 0.4 }], w / 2, H * 0.62, p.bg2, NS0);
+      h.poly([{ x: -w * 0.6, y: H * 0.36 }, { x: w * 0.6, y: H * 0.16 }, { x: w * 0.6, y: H * 0.22 }, { x: -w * 0.6, y: H * 0.42 }], w / 2, H * 0.62, p.accent, NS0);
+      y = stack(w * 0.07, w * 0.86, H * 0.06, 'left', [{ t: d.headline, s: w * big, f: K.FH, c: p.text, b: 1, sh: 1, l: 2, g: H * 0.01 }, { t: d.subline, s: w * mid, c: p.text, b: 1, l: 2 }]);
+      var by = Math.max(y + w * 0.16, H * 0.45);
+      if (d.photo) h.slot(w * 0.3, by, w * 0.34, w * 0.34, 'circle', p.accent);
+      badge(d.photo ? w * 0.75 : w / 2, by, w * 0.13);
+      stack(w * 0.08, w * 0.84, by + w * 0.2, 'left', bodyItems(w * small, p.text, '✦  '), H * 0.82);
+      cta(H * 0.87, H * 0.065, p.accent, onAccent);
+    } else if (L === 'circle') {
+      h.bg(h.grad([[0, p.bg2], [1, p.bg1]])); decor(0, 0, w, H);
+      var cr = Math.min(w * 0.28, H * 0.17), cy = H * 0.05 + cr;
+      h.circ(w / 2, cy, cr, p.accent, NS0); h.circ(w / 2, cy, cr * 0.87, 'rgba(255,255,255,.25)', NS0);
+      if (d.photo) h.slot(w / 2, cy, cr * 1.6, cr * 1.6, 'circle', '#ffffff');
+      else if (d.emoji) h.text(d.emoji, { left: w / 2 - cr, top: cy - cr * 0.45, w: cr * 2, size: cr * 0.8, font: 'Noto Color Emoji, Apple Color Emoji, sans-serif', color: '#000', align: 'center', noSel: true });
+      badge(w * 0.84, H * 0.08, w * 0.1);
+      y = stack(w * 0.06, w * 0.88, cy + cr + H * 0.03, 'center', [{ t: d.headline, s: w * big, f: K.FH, c: p.text, b: 1, sh: 1, l: 2, g: H * 0.01 }, { t: d.subline, s: w * mid, c: p.text, b: 1, l: 2 }]);
+      stack(w * 0.1, w * 0.8, y + H * 0.005, 'center', (d.body || []).slice(0, 4).map(function (t) { return { t: t, s: w * small * 0.95, c: p.text, l: 1, g: w * 0.01 }; }), H * 0.83);
+      cta(H * 0.87, H * 0.065, '#ffffff', p.bg1);
+    } else { // center (also 'split' on wide posters)
+      h.bg(h.grad([[0, p.bg1], [1, p.bg2]])); decor(0, 0, w, H);
+      y = emo(w / 2, H * 0.05, w * 0.1);
+      y = stack(w * 0.06, w * 0.88, y, 'center', [{ t: d.headline, s: w * big * 1.1, f: K.FH, c: p.text, b: 1, sh: 1, l: 2, g: H * 0.012 }, { t: d.subline, s: w * mid, c: p.text, b: 1, l: 2 }]);
+      var r = w * 0.13;
+      if (d.highlight) { badge(w / 2, y + r * 1.05, r); y += r * 2.25; }
+      else if (d.photo) { h.slot(w / 2, y + w * 0.16, w * 0.3, w * 0.3, 'circle', p.accent); y += w * 0.34; }
+      stack(w * 0.1, w * 0.8, y, 'center', (d.body || []).slice(0, 4).map(function (t) { return { t: t, s: w * small, c: p.text, l: 1, g: w * 0.01 }; }), H * 0.83);
+      cta(H * 0.87, H * 0.065, p.accent, onAccent);
+    }
+  }
+  window.__posterDrawDesign = drawDesign; // used by tests
   function tabAI(b) {
     b.appendChild(el('<div class="note" style="margin-bottom:10px">✨ AI உதவி விருப்பமானது. மற்ற அனைத்தும் இலவசம். AI பயன்படுத்தும்போது மட்டும் Credits செலவாகும் — தட்டும் முன் எவ்வளவு என்று காட்டுவோம்.</div>'));
+    // --- AI design: 3 complete posters (layout + colours + Tamil wording) drawn by our engine
+    b.appendChild(el('<label>🪄 AI Design — முழு போஸ்டர் வடிவமைப்பு (3 வகை) — 1 credit</label>'));
+    var dq = el('<textarea lang="ta" placeholder="எ.கா. ஜவுளிக் கடை தீபாவளி தள்ளுபடி 30%, நாகர்கோவில் · அல்லது: மகள் பிறந்தநாள் விழா அழைப்பு, 5 நவம்பர் மாலை 6 மணி" style="min-height:70px"></textarea>'); b.appendChild(dq);
+    var drow = el('<div class="row" style="margin-top:8px"><button type="button" class="btn p" id="aiDesign">🪄 3 வடிவமைப்பு உருவாக்கு (1 credit)</button></div>'); b.appendChild(drow);
+    var dout = el('<div class="tpls" style="margin-top:8px"></div>'); b.appendChild(dout);
+    drow.querySelector('#aiDesign').onclick = async function () {
+      var q = dq.value.trim(); if (!q) { dq.focus(); return; }
+      if (!confirm('AI Design-க்கு 1 credit செலவாகும். தொடரலாமா?')) return;
+      var bt = this; bt.disabled = true; dout.innerHTML = '<div class="note" style="grid-column:1/-1">⏳ AI வடிவமைக்கிறது… (5–15 வினாடி)</div>';
+      try {
+        var st = P.state(), shape = st.W > st.H * 1.1 ? 'landscape (wide)' : st.H > st.W * 1.4 ? 'tall portrait (phone status)' : st.H > st.W * 1.1 ? 'portrait' : 'square';
+        var j = await call('/api/ai/design', { prompt: q, shape: shape });
+        dout.innerHTML = '';
+        await P.ensureFonts([P.K.FH, P.K.FM, P.K.FS, P.K.FT]);
+        (j.designs || []).forEach(function (d, i) {
+          var id = 'ai-' + Date.now().toString(36) + '-' + i;
+          P.addTemplate({ id: id, cat: 'blank', label: 'AI ' + (i + 1), fonts: [P.K.FH, P.K.FM, P.K.FS, P.K.FT], build: function (h) { drawDesign(h, d); } });
+          var btn = el('<button type="button" class="tpl"><img alt=""><span>AI வடிவம் ' + (i + 1) + '</span></button>');
+          try { var tw = 540, th = Math.round(540 * st.H / st.W), sc = new F.StaticCanvas(null, { width: tw, height: th }); drawDesign(P.mk(sc, tw, th), d); sc.getObjects().forEach(function (o) { if (o.initDimensions) o.initDimensions(); }); sc.renderAll(); btn.querySelector('img').src = sc.toDataURL({ format: 'jpeg', quality: 0.75, multiplier: 0.35 }); btn.querySelector('img').style.aspectRatio = tw + '/' + th; sc.dispose(); } catch (e) {}
+          btn.onclick = function () { P.applyTemplate(id); dout.querySelectorAll('.tpl').forEach(function (x) { x.classList.toggle('on', x === btn); }); };
+          dout.appendChild(btn);
+        });
+        dout.appendChild(el('<div class="note" style="grid-column:1/-1">தட்டினால் போஸ்டரில் வரும்; பிறகு எழுத்து, நிறம், படம் எல்லாம் மாற்றலாம். AI தவறு செய்யலாம் — சரிபார்த்து பயன்படுத்துங்கள்.</div>'));
+        if (j.designs && j.designs[0]) dout.querySelector('.tpl').click();
+      } catch (e) { dout.innerHTML = ''; if (e.login) loginNote(dout); else dout.appendChild(el('<div class="note" style="grid-column:1/-1;background:#fdeded;padding:10px;border-radius:10px">' + esc(e.message) + '</div>')); }
+      bt.disabled = false;
+    };
     // --- AI picture
-    b.appendChild(el('<label>🎨 AI படம் / பின்னணி — 5 credits</label>'));
+    b.appendChild(el('<label style="margin-top:16px">🎨 AI படம் / பின்னணி — 5 credits</label>'));
     var pr = el('<textarea lang="ta" placeholder="எ.கா. தீபாவளி விளக்குகள், இரவு வானம், பட்டாசு — அல்லது English-ல் எழுதலாம்" style="min-height:70px"></textarea>'); b.appendChild(pr);
     var stl = el('<div class="chips" style="margin:8px 0"></div>'); var cur = 'fest';
     STYLES.forEach(function (s) { var c = el('<button type="button" class="chip' + (s[0] === cur ? ' on' : '') + '">' + s[1] + '</button>'); c.onclick = function () { cur = s[0]; stl.querySelectorAll('.chip').forEach(function (x) { x.classList.toggle('on', x === c); }); }; stl.appendChild(c); });

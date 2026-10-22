@@ -498,7 +498,7 @@ const TOOLS = [
   {id:'imgconvert', name:'Convert Image Format', desc:'JPG ⇄ PNG ⇄ WEBP', icon:'🔁', color:'#2E86C1', cat:'image', cost:0},
   {id:'img2excel', name:'Image → Excel', desc:'Screenshot or photo of a table → editable .xlsx. Fixes grid lines, dark mode, tilted photos; cleans numbers & dates — free, in your browser', icon:'📸', color:'#1E7145', cat:'image', cost:0},
   {id:'heic2jpg', name:'HEIC → JPG/PNG', desc:'Convert iPhone HEIC photos to JPG or PNG — 100% in your browser, free', icon:'📱', color:'#546E7A', cat:'image', cost:0},
-  {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
+  {id:'bgremove', name:'Remove Background', desc:'AI cut-out on your phone + background colour/photo swap + touch-up — free', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
   {id:'imgenhance', name:'Image Enhancer', desc:'Sharpen, denoise, contrast & colour with a before/after slider', icon:'✨', color:'#C96A2C', cat:'image', cost:0, lazy:'imgx'},
@@ -544,6 +544,7 @@ const TOOLS = [
   {id:'audioeffects', name:'Audio Volume & Effects', desc:'Louder or softer, normalise, speed, bass, treble, fade, reverse, hum removal', icon:'🎛️', color:'#5C7CFA', cat:'video', cost:0, lazy:'audio'},
   {id:'voicerec', name:'Voice Recorder', desc:'Record your voice with the microphone and save as MP3 or WAV', icon:'🎙️', color:'#C92A2A', cat:'video', cost:0, lazy:'audio'},
   {id:'texttospeech', name:'Text to Speech (MP3) — தமிழ் குரல்', desc:'Type Tamil, English or Hindi text — a natural AI voice reads it; download MP3', icon:'🗣️', color:'#0B7285', cat:'video', cost:2, lazy:'audio'},
+  {id:'aitranscribe', name:'Audio / Video → Text & Subtitles (AI)', desc:'Tamil, English, Hindi speech → typed text or SRT subtitles — 1 credit per 2 minutes', icon:'📝', color:'#5B21B6', cat:'ai', cost:2, lazy:'audio'},
   {id:'audiopitch', name:'Change Pitch & Speed', desc:'Voice higher/lower without changing speed — or speed without the chipmunk voice', icon:'🎚️', color:'#7048E8', cat:'video', cost:0, lazy:'audio'},
   {id:'audioeq', name:'Audio Equalizer', desc:'10-band EQ with presets — bass boost, voice clarity, podcast, treble', icon:'🎛️', color:'#1864AB', cat:'video', cost:0, lazy:'audio'},
   {id:'vocalremove', name:'Vocal Remover (Karaoke)', desc:'Remove the singer from a stereo song or music video — or keep only the voice', icon:'🎤', color:'#C2255C', cat:'video', cost:0, lazy:'audio'},
@@ -561,7 +562,7 @@ const TOOLS = [
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'aistyle', name:'AI Photo Style — Anime, 3D, Tanjore', desc:'AI re-draws your photo as anime, 3D cartoon, comic, watercolour, Tanjore painting…', icon:'🪄', color:'#AE3EC9', cat:'ai', cost:5, lazy:'art'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
-  {id:'aibgreplace', name:'AI Background Replace', desc:'AI draws a new background for product / portrait photos — 3 credits (the cut-out itself is free)', icon:'🪄', color:'#7C3AED', cat:'image', cost:3},
+  {id:'aibgreplace', name:'AI Background Replace', desc:'AI draws a new background for product / portrait photos — 5 credits (the cut-out itself is free)', icon:'🪄', color:'#7C3AED', cat:'image', cost:5},
   {id:'kalvikalanjiyam', name:'Kalvi Kalanjiyam — கல்வி களஞ்சியம் (Class 1–10)', desc:'Free Tamil-medium lessons, games & tests for Samacheer Classes 1–10 — understand first, then practise. No login', icon:'📚', color:'#3B2FC9', cat:'education', cost:0},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
@@ -770,7 +771,7 @@ async function authSignOut(){
 function isPro(){
   const p = authState.profile;
   if(!p) return false;
-  if(p.plan !== 'pro' && p.plan !== 'business') return false;
+  if(p.plan !== 'pro' && p.plan !== 'business' && p.plan !== 'admin') return false;
   return !p.plan_expires_at || new Date(p.plan_expires_at) > new Date();
 }
 
@@ -857,7 +858,7 @@ function mountAuthModal(){
 
 async function mountPricingModal(){
   const overlay = el(`<div style="position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;"></div>`);
-  const card = el(`<div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;"><div style="font-weight:900; font-size:17px; margin-bottom:14px;">💎 Credits / Plan Buy</div><div id="pricingList">Loading…</div><button id="pricClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button></div>`);
+  const card = el(`<div class="tamil" style="background:#fff; border-radius:18px; padding:24px; max-width:420px; width:100%; position:relative; max-height:85vh; overflow-y:auto;"><div style="font-weight:900; font-size:17px; margin-bottom:14px;">💎 Buy Credits</div><div id="pricingList">Loading…</div><button id="pricClose" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--sub);">✕</button></div>`);
   overlay.appendChild(card);
   card.querySelector('#pricClose').onclick = ()=> overlay.remove();
   overlay.addEventListener('click',(e)=>{ if(e.target===overlay) overlay.remove(); });
@@ -1078,7 +1079,10 @@ function getRecentTools(){
 // accidentally reused by a later, unrelated visit to that tool.
 let __pendingSmartUploadFile = null;
 const TOOL_MOVED = {gstinvoice:'quotepo', rentreceipt:'receipts', tuitionreceipt:'receipts', paymentvoucher:'receipts'}; // old ids (bookmarks, shared links, saved recents) land on the merged tools
-function openTool(id){ id = TOOL_MOVED[id] || id; stopAnyActiveCamera(); recordRecentTool(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
+// counts which tools are used (owner's dashboard /admin): one tiny request per tool opened; signed-in users are counted
+// per account, others anonymously. Nothing about the files is sent.
+function trackToolOpen(id){ try{ const h = {'Content-Type':'application/json'}; if(authState && authState.session) h.Authorization = 'Bearer '+authState.session.access_token; fetch(APP_CONFIG.BACKEND_URL + '/api/track', { method:'POST', headers:h, body: JSON.stringify({ toolId:id }), keepalive:true }).catch(()=>{}); }catch(e){} }
+function openTool(id){ id = TOOL_MOVED[id] || id; stopAnyActiveCamera(); recordRecentTool(id); trackToolOpen(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
 // Social profiles — fill in the full https URLs and they appear in the footer automatically (empty = hidden).
 const SOCIAL_LINKS = { instagram:'https://www.instagram.com/pdftoolsindia/', youtube:'https://www.youtube.com/@pdftoolsindia', facebook:'https://www.facebook.com/profile.php?id=61595156705561' }; // keep in sync with pages-style.mjs SOCIAL
@@ -1152,7 +1156,7 @@ function renderSettingsPage(){
       body.appendChild(el(`<div class="note">Sign-in isn't set up on this deployment yet.</div>`));
     } else if(!authState.session){
       const row = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:20px;">
-        <div style="font-size:13px; color:var(--sub); margin-bottom:12px;">You're not signed in. Sign in to use AI tools, credits, and Pro features.</div>
+        <div style="font-size:13px; color:var(--sub); margin-bottom:12px;">You're not signed in. Sign in to use AI tools and credits — new accounts get 5 free credits.</div>
       </div>`);
       const btn = el(`<button class="btn">Sign In</button>`);
       btn.onclick = ()=> mountAuthModal();
@@ -1163,9 +1167,10 @@ function renderSettingsPage(){
       const card = el(`
         <div style="border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:20px;">
           <div style="font-weight:800; font-size:14px; margin-bottom:2px;">${authState.session.user.email}</div>
-          <div style="font-size:12.5px; color:var(--sub); margin-bottom:14px;">${p ? (isPro() ? 'Pro plan · '+ (p.plan_expires_at ? 'renews '+new Date(p.plan_expires_at).toLocaleDateString() : '') : p.credits+' credits available') : 'Loading…'}</div>
+          <div style="font-size:12.5px; color:var(--sub); margin-bottom:14px;">${p ? (p.plan==='admin' ? '👑 Admin · unlimited credits' : isPro() ? 'Pro plan · '+ (p.plan_expires_at ? 'renews '+new Date(p.plan_expires_at).toLocaleDateString() : '') : p.credits+' credits available') : 'Loading…'}</div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn" id="__stManage" style="padding:8px 16px; font-size:12.5px;">Manage Plan / Buy Credits</button>
+            <button class="btn" id="__stManage" style="padding:8px 16px; font-size:12.5px;">Buy Credits</button>
+            ${p && p.is_admin ? '<a class="btn" href="/admin" style="padding:8px 16px; font-size:12.5px; text-decoration:none; background:#7B3FA0;">📊 Admin dashboard</a>' : ''}
             <button class="btn secondary" id="__stLogout" style="padding:8px 16px; font-size:12.5px;">Sign Out</button>
           </div>
         </div>
@@ -1501,6 +1506,7 @@ audiomerge:['ஆடியோ இணை','பல பாடல்/பதிவு�
 audioeffects:['ஆடியோ ஒலி அளவு & Effects','சத்தம் கூட்டு/குறை, வேகம், Bass, Fade'],
 voicerec:['குரல் பதிவு (Voice Recorder)','மைக்கில் பேசி MP3 ஆக சேமி'],
 texttospeech:['எழுத்து → குரல் (MP3)','தமிழ்/ஆங்கில உரையை இயல்பான AI குரலில் MP3 ஆக்கு'],
+aitranscribe:['பேச்சு → எழுத்து / Subtitle (AI)','ஆடியோ, வீடியோ பேச்சை தமிழ் எழுத்தாகவும் SRT subtitle-ஆகவும் மாற்று'],
 audiopitch:['குரல் Pitch & வேகம்','குரலை உயர்த்து/தாழ்த்து, வேகம் மாற்று'],
 audioeq:['ஆடியோ Equalizer','Bass, குரல் தெளிவு, Treble சரிசெய்'],
 vocalremove:['பாடகர் குரல் நீக்கு (Karaoke)','பாடலிலிருந்து குரலை நீக்கி Karaoke செய்'],
@@ -1569,6 +1575,7 @@ const TOOL_ALIAS = {
   daarrears:'da arrears dearness allowance dr relief pension government employee agavilaipadi nilavai அகவிலைப்படி நிலுவை அரசு ஊழியர்', attendcalc:'attendance percentage 75 percent classes miss bunk hajar வருகை', invitation:'wedding invitation card kalyana pathirikai marriage invite அழைப்பிதழ் பத்திரிகை', starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
   imgsketch:'sketch pencil drawing cartoon comic oil painting watercolor art filter photo to art', aistyle:'ai anime ghibli cartoon 3d pixar photo to anime ai art tanjore caricature chatgpt style ai filter',
   imgblur:'blur pixelate hide mask aadhaar masked aadhaar pan number face number plate censor redact photo', imgsplit:'split image grid instagram grid 3x3 carousel puzzle tiles cut image',
+  aitranscribe:'speech to text transcribe transcription audio to text video to text subtitles srt captions tamil voice typing dictation interview notes youtube subtitles',
   texttospeech:'text to speech tts tamil voice read aloud mp3 voice over narration speech audio from text', audiopitch:'pitch shift change pitch voice changer chipmunk deep voice tempo time stretch speed without pitch', audioeq:'equalizer eq bass treble boost voice clarity', vocalremove:'vocal remover karaoke remove voice instrumental acapella', audiodenoise:'noise reduction remove noise denoise background noise hiss hum clean audio', videochroma:'green screen chroma key remove background video remove color blue screen',
   audiocut:'audio cutter mp3 cutter ringtone maker trim audio cut song cut mp3 ரிங்டோன் பாடல் வெட்டு', audioconvert:'audio converter mp3 converter wav to mp3 m4a to mp3 ogg flac aac opus convert audio', videotomp3:'video to mp3 extract audio mp4 to mp3 song from video sound',
   audiomerge:'merge audio join mp3 combine songs audio joiner mix', audioeffects:'volume booster increase volume louder normalize bass boost speed up audio slow down reverse audio fade', voicerec:'voice recorder audio recorder mic record voice memo dictaphone',
@@ -2021,7 +2028,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261022c`;
+    s.src = `category-${cat}.js?v=20261022d`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -2051,7 +2058,9 @@ function renderToolPanel(toolId){
   }
   const wrap = panelShell(toolId, '');
   const body = wrap.querySelector('.panel-body');
-  if(tool && tool.cost && AUTH_CONFIGURED && !state.unlocked){
+  // tools that charge per action (AI) open straight away — they show the cost and ask to sign in / confirm only when
+  // the AI button is pressed (confirmCreditSpend), never on entry
+  if(tool && tool.cost && AUTH_CONFIGURED && !state.unlocked && !ACTION_CHARGED_TOOLS.has(toolId)){
     mountPaidGate(body, tool, ()=>{ state.unlocked = true; body.innerHTML=''; impl.mount(body); });
   } else {
     impl.mount(body);
@@ -2067,7 +2076,7 @@ function renderToolPanel(toolId){
 // deducts its own 5 credits server-side (see server.js), so the paid-gate
 // must only CHECK affordability (checkOnly:true) instead of also deducting
 // on unlock — otherwise a single image generation cost 10 credits, not 5.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','aistyle','texttospeech','aibgreplace']);
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','aistyle','texttospeech','aibgreplace','aitranscribe']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -2814,6 +2823,13 @@ async function autoDetectQuad(canvas){
 // SharedArrayBuffer / cross-origin-isolation headers (unlike the old v0.11 API
 // and unlike the multi-thread "core-mt" build) — important because this file is
 // opened as a plain static HTML file with no server headers we control.
+// Background removal (bg-remove-core.js: U²-Netp, Apache-2.0, runs in the browser) behind the same small API the
+// image tools used with the old library: removeBackground(blobOrFile, {progress(key,cur,total)}) → PNG Blob.
+window.__loadBgRemove = async function(){
+  if(!window.BgRemove) await loadScriptOnce('/bg-remove-core.js?v=1');
+  const fn = (src, o)=> window.BgRemove.cutoutBlob(src, { mode:'object', onProgress:(p)=>{ try{ if(o && o.progress) o.progress('compute', Math.round(p*100), 100); }catch(e){} } });
+  return { default: fn, removeBackground: fn };
+};
 function loadScriptOnce(src){
   return new Promise((resolve, reject)=>{
     if(document.querySelector(`script[data-src="${src}"]`)){ resolve(); return; }
@@ -9907,7 +9923,7 @@ TOOL_IMPL.texttoimage = {
 
 /* ===================== AI BACKGROUND REPLACE =====================
    Combines two already-proven pieces: bgremove's background-cutout
-   (@imgly/background-removal, same library, same import pattern) and
+   (bg-remove-core.js — U²-Netp, Apache-2.0; replaced the AGPL @imgly library) and
    texttoimage's backend call (/api/ai/image — Cloudflare Workers AI,
    free) — generates a described background and composites the cutout
    subject onto it. Canva/Fotor offer this; Picsart gates it behind Pro
@@ -9918,7 +9934,7 @@ TOOL_IMPL.aibgreplace = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Upload a photo (product/portrait) — the subject is cut out on your phone (free), then AI draws the background you describe on our server: <b>3 credits</b> per background (you confirm first; refunded if it fails). Only a plain colour or your own photo behind the subject? Use the free “Remove Background” tool.</div>`));
+      body.appendChild(el(`<div class="note">Upload a photo (product/portrait) — the subject is cut out on your phone (free), then AI draws the background you describe on our server: <b>5 credits</b> per background (you confirm first; refunded if it fails). Only a plain colour or your own photo behind the subject? Use the free “Remove Background” tool.</div>`));
       mountUploader(body, { accept:'image/*', label:'Photo drag & drop or tap', sublabel:'',
         onAdd: (fl)=>{ file = fl[0]; cutoutBlob = null; paint(); } });
       if(!file) return;
@@ -9937,21 +9953,21 @@ TOOL_IMPL.aibgreplace = {
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'Please sign in to use this feature.').style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#abgPrompt').value || '').trim();
       if(!p){ mountResult(body, 'Please describe the background first.').style.background='#FDEDEC'; return; }
-      if(!(await confirmCreditSpend(body, '3 credits'))) return;
+      if(!(await confirmCreditSpend(body, '5 credits'))) return;
       const prog = mountProgress(body);
       try{
         // Step 1: cut out the subject — same library/call bgremove already
         // uses and has proven reliable, not a new/untested dependency.
         if(!cutoutBlob){
-          prog.set(10,'AI is detecting the subject… (first time downloads a ~15-40MB model)');
-          const mod = await import('https://esm.sh/@imgly/background-removal@1.7.0');
+          prog.set(10,'AI is detecting the subject… (first time downloads a ~5 MB model)');
+          const mod = await window.__loadBgRemove();
           const removeBackground = mod.default || mod.removeBackground;
           cutoutBlob = await removeBackground(file, {
             progress: (key, cur, total) => { if(total) prog.set(10 + Math.round(cur/total*35), 'AI is detecting the subject… '+Math.round(cur/total*100)+'%'); }
           });
         }
         // Step 2: generate the described background via the same backend
-        // endpoint texttoimage already uses (Cloudflare Workers AI) — 3 credits, charged by the server.
+        // endpoint texttoimage already uses (Cloudflare Workers AI) — 5 credits, charged by the server.
         prog.set(50, 'Generating background…');
         const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/image', {
           method:'POST',
@@ -13375,6 +13391,12 @@ TOOL_IMPL.pdfqrstamp = {
 // credits balance. Renders inline (not native confirm()) to match the
 // app's own visual style and behave the same on mobile.
 function confirmCreditSpend(container, costLabel){
+  // AI costs credits: a visitor who is not signed in gets the sign-in box first (new accounts get 5 free credits)
+  if(typeof AUTH_CONFIGURED !== 'undefined' && AUTH_CONFIGURED && !authState.session){
+    try{ mountAuthModal(); }catch(e){}
+    try{ const n = mountResult(container, 'Please sign in to use AI — new accounts get 5 free credits.'); n.style.background = '#FFF6E5'; }catch(e){}
+    return Promise.resolve(false);
+  }
   return new Promise(resolve=>{
     const box = el(`<div style="margin:10px 0; border:1px solid #BBD6FF; background:#EAF2FF; border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
       <div style="font-size:12.5px; font-weight:700; color:var(--ink);">🤖 This uses AI — costs ${costLabel}. Continue?</div>

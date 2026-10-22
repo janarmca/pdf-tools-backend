@@ -27,12 +27,14 @@ export function startMock(port = 8790) {
         f.size = bytes.length; f.first = bytes[0];
         return send(200, { file: { name: 'files/f' + files.indexOf(f), uri: 'mock://files/f' + files.indexOf(f), mimeType: f.mime } });
       }
+      if (req.method === 'GET' && req.url.startsWith('/v1beta/files/')) return send(200, { name: req.url.split('?')[0].slice(8), state: 'ACTIVE' });
       if (req.method === 'DELETE' && req.url.startsWith('/v1beta/files/')) { deleted.push(req.url.split('?')[0]); return send(200, {}); }
       if (req.url.startsWith('/v1beta/models/')) {
         if (behaviour.geminiFail) return send(500, { error: { message: 'mock gemini down' } });
         const parts = j?.contents?.[0]?.parts || [];
         const txt = parts[0]?.text || '';
         if (/general physician/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: JSON.stringify({ urgency: 'see_doctor_soon', urgency_reason: 'r', summary: 's', possible_causes: [{ cause: 'Viral fever', likelihood: 'high', angle: 'infection', why: 'w' }, { cause: 'x', likelihood: 'weird', angle: 'nope' }], self_care: ['rest', 3], siddha_keys: ['nilavembu', 'made_up_herb'], medicine_advice: 'paracetamol as per label', tests_to_consider: [], see_doctor_if: ['fever > 3 days'], questions_for_doctor: [], missing_info: [] }) }] } }] });
+        if (/senior Tamil poster designer/.test(txt)) { calls.push({ url: req.url.split('?')[0], body: j }); return send(200, { candidates: [{ content: { parts: [{ text: JSON.stringify({ designs: [{ layout: 'band', decor: 'rays', palette: { bg1: '#b91c1c', bg2: '#f97316', accent: '#facc15', text: '#ffffff', soft: '#fff7ed' }, headline: 'தீபாவளி சலுகை', subline: 'அனைத்து புத்தாடைகளுக்கும்', highlight: '30% OFF', body: ['பட்டுச் சேலை', 'குழந்தை ஆடைகள்'], cta: 'இன்றே வாருங்கள்', emoji: '🪔', photo: true }, { layout: 'nope', palette: { bg1: 'red' }, headline: 'இரண்டாவது' }, { headline: '' }] }) }] } }] }); }
         if (/social media post/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"ta":"தமிழ் பதிவு <b>சோதனை</b>","en":"English post"}' }] } }] });
         if (/horoscope/.test(txt)) return send(200, { candidates: [{ content: { parts: [{ text: '{"name":"Kavya R","gender":"F","dob":"1999-04-12","star":"rohini","raasi":"rishabam","phone":"9876543210"}' }] } }] });
         const fd = parts.find((p) => p.file_data);

@@ -5,7 +5,7 @@
 // (i.e. loading the app itself). It does not touch any other request type,
 // so it can never interfere with blob: URLs, downloads, CDN library loads,
 // backend API calls, or anything a tool does while running.
-const CACHE_NAME = 'pdf-tools-shell-v99';
+const CACHE_NAME = 'pdf-tools-shell-v100';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -17,8 +17,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      // only old copies of the app shell — never the free Tamil voice model cache (pocket-tts-*), which is ~110 MB the visitor downloaded once
-      Promise.all(keys.filter((k) => k !== CACHE_NAME && k.indexOf('pdf-tools-shell') === 0).map((k) => caches.delete(k)))
+      // old copies of the app shell, and the retired free-Tamil-voice model (pocket-tts-*, ~110 MB) — the AI model caches of
+      // tools still in use (bg-models-*) are kept
+      Promise.all(keys.filter((k) => k !== CACHE_NAME && (k.indexOf('pdf-tools-shell') === 0 || k.indexOf('pocket-tts') === 0)).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();

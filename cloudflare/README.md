@@ -42,6 +42,7 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `ASTROLOGER_API_KEY` | RapidAPI → Astrologer API (இலவச tier) | Astrology+ |
 | `MAT_ADMIN_EMAILS` | திருமண அமைப்பக admin email(கள்), comma பிரித்து | விருப்பம் |
 | `TELEGRAM_BOT_TOKEN` | Telegram → @BotFather → `/newbot` தரும் token. Bot-ஐ `@pdftoolsindia` channel-ல் Admin ஆக்கவும் (channel பெயர் `wrangler.toml`-ல் உள்ளது) | தினசரி promotion post-க்கு |
+| `SITE_ADMIN_EMAILS` (wrangler.toml `[vars]`, secret அல்ல) | இயல்பு `pdftoolsindia@gmail.com` — இந்த மின்னஞ்சல்களுக்கு credits வரம்பு இல்லை + `pdftoolsindia.com/admin` பயன்பாட்டுப் புள்ளிவிவரம் | Admin |
 | `FB_APP_ID`, `FB_APP_SECRET` | developers.facebook.com → My Apps → Create app (Business) → Settings → Basic. *Facebook Login for Business* → Valid OAuth Redirect URI: `https://pdftoolsindia.com/cfapi/promo/oauth/facebook` | Facebook Page + Instagram post-க்கு |
 | `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET` | developers.pinterest.com → My apps → Connect app. Redirect URI: `https://pdftoolsindia.com/cfapi/promo/oauth/pinterest` | Pinterest pin-க்கு |
 | `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | developer.x.com → Project → App → User authentication: **Read and write** → Keys and tokens → API Key & Secret + Access Token & Secret | X (Twitter) post-க்கு |

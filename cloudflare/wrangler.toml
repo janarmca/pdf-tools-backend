@@ -15,6 +15,7 @@ routes = [
 [vars]
 PUBLIC_API_URL = "https://pdftoolsindia.com/cfapi"
 TELEGRAM_CHANNEL = "@pdftoolsindia"   # public channel for the daily promotion posts (not a secret)
+SITE_ADMIN_EMAILS = "pdftoolsindia@gmail.com"   # site owner(s): unlimited credits + /admin usage dashboard (comma separated)
 
 [[d1_databases]]
 binding = "DB"

@@ -741,7 +741,15 @@
   };
 
   /* ===================================================================== TEXT TO SPEECH (AI voice, credits) */
-  const TTS_VOICES = [['Kore', 'Kore — firm'], ['Puck', 'Puck — upbeat'], ['Charon', 'Charon — informative'], ['Aoede', 'Aoede — breezy'], ['Leda', 'Leda — youthful'], ['Orus', 'Orus — firm'], ['Achird', 'Achird — friendly'], ['Sulafat', 'Sulafat — warm'], ['Zephyr', 'Zephyr — bright'], ['Fenrir', 'Fenrir — excitable'], ['Gacrux', 'Gacrux — mature'], ['Vindemiatrix', 'Vindemiatrix — gentle']];
+  // Gemini TTS voices (gender as listed in Google's voice table)
+  const TTS_VOICES = [
+    ['Kore', '👩 Female', 'Kore — firm'], ['Aoede', '👩 Female', 'Aoede — breezy'], ['Leda', '👩 Female', 'Leda — youthful'], ['Sulafat', '👩 Female', 'Sulafat — warm'],
+    ['Zephyr', '👩 Female', 'Zephyr — bright'], ['Gacrux', '👩 Female', 'Gacrux — mature'], ['Vindemiatrix', '👩 Female', 'Vindemiatrix — gentle'], ['Despina', '👩 Female', 'Despina — smooth'],
+    ['Puck', '👨 Male', 'Puck — upbeat'], ['Charon', '👨 Male', 'Charon — informative'], ['Orus', '👨 Male', 'Orus — firm'], ['Achird', '👨 Male', 'Achird — friendly'],
+    ['Fenrir', '👨 Male', 'Fenrir — excitable'], ['Iapetus', '👨 Male', 'Iapetus — clear'], ['Algieba', '👨 Male', 'Algieba — smooth'], ['Sadaltager', '👨 Male', 'Sadaltager — knowledgeable']
+  ];
+  // credits per 1,000 characters: 2× what Google charges us (their TTS price doubles on 1 Jan 2027) — same rule in the Worker
+  const ttsRate = function () { return Date.now() >= Date.UTC(2026, 11, 31, 18, 30) ? 3 : 2; };
   const TTS_STYLES = [['', 'Normal'], ['calm and clear', 'Calm & clear'], ['cheerful and friendly', 'Cheerful'], ['news reader', 'News reader'], ['storytelling, expressive', 'Story telling'], ['slow and clear for students', 'Slow, for students'], ['respectful announcement', 'Announcement']];
   function b64ToBytes(b64) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
   function findAudio(j) { // Interactions API: steps[].content[] {type:'audio', data, mime_type} · generateContent: candidates[0].content.parts[].inlineData
@@ -757,67 +765,116 @@
     for (let i = 0; i < n; i++) c[i] = dv.getInt16(i * 2, true) / 32768;
     return { sampleRate: rate, channels: [c] };
   }
-  // free Tamil voice — runs in a Web Worker on the visitor's device (tts-tamil-worker.js); the worker is kept so the model loads once per visit
-  let tamilWorker = null;
-  function tamilTTS(text, onProgress) {
-    return new Promise(function (resolve, reject) {
-      if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') { reject(new Error('This browser cannot run the free voice. Please use a recent Chrome, Edge, Firefox or Safari.')); return; }
-      try { if (!tamilWorker) tamilWorker = new Worker('/tts-tamil-worker.js?v=2', { type: 'module' }); } catch (e) { reject(new Error('This browser cannot run the free voice (' + e.message + ').')); return; }
-      const w = tamilWorker;
-      w.onmessage = function (e) {
-        const m = e.data || {};
-        if (m.type === 'progress') onProgress(m.pct, m.text);
-        else if (m.type === 'audio') resolve({ data: m.data, sampleRate: m.sampleRate });
-        else if (m.type === 'error') { reject(new Error(m.error)); if (/download|memory|wasm|abort/i.test(m.error)) { try { w.terminate(); } catch (x) {} tamilWorker = null; } }
-      };
-      w.onerror = function (e) { try { w.terminate(); } catch (x) {} tamilWorker = null; reject(new Error('The free voice stopped (' + ((e && e.message) || 'out of memory?') + '). Close other tabs and try again.')); };
-      w.postMessage({ type: 'generate', text: text });
-    });
+  /* ===================================================================== AI TRANSCRIBE / SUBTITLES */
+  // audio or video → mono 16 kHz MP3 at 32 kbps (≈ 4 KB per second, so the server knows the length from the size) →
+  // Gemini writes the text (with [mm:ss] times) or SRT subtitles. 1 credit per 2 minutes (min 2).
+  const sttCost = function (sec) { return Math.max(2, Math.ceil(sec / 120)); };
+  function parseSrt(t) {
+    return String(t).replace(/\r/g, '').split(/\n\s*\n/).map(function (b) {
+      const m = /(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s*\n([\s\S]*)/.exec(b.trim());
+      return m ? { a: m[1].replace('.', ','), b: m[2].replace('.', ','), t: m[3].trim() } : null;
+    }).filter(Boolean);
   }
+  TOOL_IMPL.aitranscribe = {
+    mount: function (container) {
+      ensureStyle();
+      let file = null, buf = null, dur = 0;
+      const body = el('<div></div>'); container.appendChild(body);
+      function paint() {
+        body.innerHTML = '';
+        body.appendChild(el('<div class="note">🎙️ Interview, class, speech, YouTube video, voice note… → <b>typed text</b> or <b>subtitles (SRT)</b> in Tamil, English, Hindi and more, by Google Gemini AI. Costs <b>1 credit per 2 minutes</b> (minimum 2) — shown before you start, refunded if it fails. Up to about 60 minutes per file.</div>'));
+        mountUploader(body, { accept: 'audio/*,video/*', label: 'Drop an audio or video file, or tap to choose', sublabel: 'MP3 · M4A · WAV · OGG · MP4 · MOV · WEBM',
+          onAdd: async function (fl) {
+            file = fl[0]; body.innerHTML = '<div class="note">Reading the sound…</div>';
+            try { buf = await decode(file); dur = len(buf) / buf.sampleRate; } catch (e) { file = null; buf = null; paint(); errBox(body, e.message); return; }
+            paint();
+          } });
+        if (!file || !buf) return;
+        mountFileList(body, [file], function () { file = null; buf = null; paint(); });
+        if (dur > 62 * 60) { errBox(body, 'This is ' + fmtT(dur) + ' long — please cut it into parts of up to 60 minutes (Audio Cutter).'); return; }
+        const cost = sttCost(dur);
+        const o = el('<div class="opts"><div class="field"><label>Spoken language</label><select id="sttL"><option value="auto">Detect automatically</option><option value="Tamil">தமிழ் (Tamil)</option><option value="English">English</option><option value="Hindi">हिन्दी (Hindi)</option><option value="Malayalam">Malayalam</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option></select></div>' +
+          '<div class="field"><label>Output</label><select id="sttF"><option value="text">Text with time stamps</option><option value="srt">Subtitles (.srt) for videos</option></select></div></div>');
+        body.appendChild(o);
+        body.appendChild(el('<div class="note">Length <b>' + fmtT(dur) + '</b> · cost <b>' + cost + ' credits</b></div>'));
+        const row = el('<div class="btn-row"><button class="btn">🤖 Make text (' + cost + ' credits)</button></div>'); body.appendChild(row);
+        const out = el('<div></div>'); body.appendChild(out);
+        row.querySelector('button').onclick = async function () {
+          if (!(await confirmCreditSpend(body, cost + ' credits'))) return;
+          const btn = this; btn.disabled = true; out.innerHTML = ''; const prog = mountProgress(body);
+          try {
+            prog.set(5, 'Preparing the sound…');
+            let mono = buf.channels.length > 1 ? { sampleRate: buf.sampleRate, channels: [buf.channels[0].map(function (v, i) { let t = 0; for (let c = 0; c < buf.channels.length; c++) t += buf.channels[c][i]; return t / buf.channels.length; })] } : buf;
+            mono = await resample(mono, 16000);
+            const mp3 = await mp3Bytes(mono, 32, function (p) { prog.set(5 + p * 35, 'Compressing the sound… ' + Math.round(p * 100) + '%'); });
+            prog.set(45, 'AI is listening… (about 1 minute for every 10 minutes of audio)');
+            const f = new FormData();
+            f.append('file', new File([mp3], 'audio.mp3', { type: 'audio/mpeg' }));
+            f.append('lang', o.querySelector('#sttL').value); f.append('format', o.querySelector('#sttF').value);
+            const r = await fetch(APP_CONFIG.BACKEND_URL + '/api/ai/transcribe', { method: 'POST', headers: { Authorization: 'Bearer ' + authState.session.access_token }, body: f });
+            const j = await r.json().catch(function () { return {}; });
+            if (!r.ok || j.error) throw new Error(j.error || ('Error ' + r.status));
+            prog.remove();
+            try { if (typeof refreshProfile === 'function') refreshProfile(); } catch (e) {}
+            const isSrt = j.format === 'srt', cues = isSrt ? parseSrt(j.text) : [];
+            const ta = el('<textarea lang="ta" rows="14" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px;line-height:1.6"></textarea>');
+            ta.value = j.text; out.appendChild(ta);
+            out.appendChild(el('<div class="note">' + (isSrt ? cues.length + ' subtitle lines' : 'Text ready') + ' — you can correct it here before saving. AI can mishear names; please check.</div>'));
+            const r2 = el('<div class="btn-row"><button class="btn secondary" data-a="copy">📋 Copy</button><button class="btn" data-a="dl">⬇️ Download ' + (isSrt ? '.srt' : '.txt') + '</button>' + (isSrt ? '<button class="btn secondary" data-a="vid">💬 Put on a video</button>' : '') + '</div>');
+            out.appendChild(r2);
+            r2.querySelector('[data-a=copy]').onclick = function () { try { navigator.clipboard.writeText(ta.value); this.textContent = '✅ Copied'; } catch (e) { ta.select(); document.execCommand('copy'); } };
+            r2.querySelector('[data-a=dl]').onclick = function () { downloadBlob(new Blob([ta.value], { type: isSrt ? 'application/x-subrip' : 'text/plain' }), baseName(file) + (isSrt ? '.srt' : '.txt')); };
+            const v = r2.querySelector('[data-a=vid]'); if (v) v.onclick = function () { try { downloadBlob(new Blob([ta.value], { type: 'application/x-subrip' }), baseName(file) + '.srt'); } catch (e) {} openTool('videosubtitle'); };
+          } catch (e) { prog.remove(); errBox(body, (e && e.message) || e); }
+          btn.disabled = false;
+        };
+      }
+      paint();
+    }
+  };
+
   TOOL_IMPL.texttospeech = {
     mount: function (container) {
       ensureStyle();
       const body = el('<div></div>'); container.appendChild(body);
-      body.innerHTML = '<div class="note">Type or paste text in <b>Tamil, English, Hindi</b> or 100+ languages → a natural AI voice → download MP3 / WAV. Costs <b>2 credits per 1,000 characters</b> (you confirm first; refunded if it fails). “Listen free” uses your phone\'s own voice and cannot be downloaded.</div>' +
-        '<div class="note" style="margin-top:8px;background:#EBFBEE;border-color:#B2F2BB">🆓 <b>New — free Tamil voice (Beta):</b> makes a <b>downloadable</b> Tamil voice file <b>on your own phone/computer</b> — no credits, nothing uploaded. First use downloads the voice model once (~110 MB, use Wi-Fi); after that it works quickly. Tamil text only; long text takes a while on older phones.</div>';
+      const rate = ttsRate();
+      body.innerHTML = '<div class="note">Type or paste text in <b>Tamil, English, Hindi</b> or 100+ languages → a natural AI voice (choose 👩 female or 👨 male) → download MP3 / WAV. Costs <b>' + rate + ' credits per 1,000 characters</b> — asked only when you press “AI voice file” (refunded if it fails). “Listen free” uses your phone\'s own voice and cannot be downloaded.</div>';
       const ta = el('<textarea lang="ta" rows="7" maxlength="4000" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:15px;line-height:1.6" placeholder="எ.கா. அனைவருக்கும் வணக்கம்! இன்று நாம் ஒரு புதிய பாடத்தைக் கற்போம்."></textarea>'); body.appendChild(ta);
       const cnt = el('<div class="note" style="margin-top:6px"></div>'); body.appendChild(cnt);
-      const o = el('<div class="opts"><div class="field"><label>Voice</label><select id="ttsV">' + TTS_VOICES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div><div class="field"><label>Style</label><select id="ttsS">' + TTS_STYLES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div></div>'); body.appendChild(o);
-      const upd = function () { const n = ta.value.trim().length; cnt.innerHTML = n + ' / 4000 characters · AI voice cost <b>' + (n ? 2 * Math.ceil(n / 1000) : 0) + ' credits</b> · free Tamil voice <b>0</b>'; }; ta.oninput = upd; upd();
+      const voiceOpts = ['👩 Female', '👨 Male'].map(function (g) { return '<optgroup label="' + g + '">' + TTS_VOICES.filter(function (v) { return v[1] === g; }).map(function (v) { return '<option value="' + v[0] + '">' + v[1].slice(0, 2) + ' ' + v[2] + '</option>'; }).join('') + '</optgroup>'; }).join('');
+      const o = el('<div class="opts"><div class="field"><label>Voice</label><div class="filter-row" id="ttsG" style="margin:0 0 6px"><button type="button" class="filter-chip active" data-g="👩 Female">👩 Female</button><button type="button" class="filter-chip" data-g="👨 Male">👨 Male</button></div><select id="ttsV">' + voiceOpts + '</select></div><div class="field"><label>Style</label><select id="ttsS">' + TTS_STYLES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div></div>'); body.appendChild(o);
+      const vSel = o.querySelector('#ttsV');
+      const syncG = function () { const v = TTS_VOICES.filter(function (x) { return x[0] === vSel.value; })[0]; o.querySelectorAll('#ttsG button').forEach(function (b) { b.classList.toggle('active', !!v && b.dataset.g === v[1]); }); };
+      o.querySelectorAll('#ttsG button').forEach(function (b) { b.onclick = function () { const first = TTS_VOICES.filter(function (x) { return x[1] === b.dataset.g; })[0]; if (first) vSel.value = first[0]; syncG(); }; });
+      vSel.onchange = syncG; syncG();
+      const upd = function () { const n = ta.value.trim().length; cnt.innerHTML = n + ' / 4000 characters · AI voice cost <b>' + (n ? rate * Math.ceil(n / 1000) : 0) + ' credits</b> · Listen free <b>0</b>'; }; ta.oninput = upd; upd();
       const picker = formatPicker(body, 'mp3');
-      const row = el('<div class="btn-row"><button class="btn secondary" id="ttsFree">🔊 Listen free</button><button class="btn secondary" id="ttsTa" style="border-color:#2F9E44;color:#2B8A3E">🆓 Free Tamil voice file (Beta)</button><button class="btn" id="ttsGo">🎙️ AI voice file</button></div>'); body.appendChild(row);
-      row.querySelector('#ttsFree').onclick = function () {
+      const row = el('<div class="btn-row"><button class="btn secondary" id="ttsFree">🔊 Listen free</button><button class="btn" id="ttsGo">🎙️ AI voice file</button></div>'); body.appendChild(row);
+      const freeBtn = row.querySelector('#ttsFree');
+      let speaking = false;
+      const setIdle = function () { speaking = false; freeBtn.textContent = '🔊 Listen free'; };
+      freeBtn.onclick = function () {
         if (!window.speechSynthesis) { errBox(body, 'This browser has no built-in voice.'); return; }
+        if (speaking) { speechSynthesis.cancel(); setIdle(); return; } // Stop
         speechSynthesis.cancel(); const t = ta.value.trim(); if (!t) { ta.focus(); return; }
         const u = new SpeechSynthesisUtterance(t), ta_ = /[஀-௿]/.test(t), hi = /[ऀ-ॿ]/.test(t); u.lang = ta_ ? 'ta-IN' : hi ? 'hi-IN' : 'en-IN';
         const v = speechSynthesis.getVoices().filter(function (x) { return x.lang && x.lang.toLowerCase().indexOf(u.lang.slice(0, 2)) === 0; })[0]; if (v) u.voice = v;
         if (ta_ && !v) mountResult(body, 'Your phone has no Tamil voice installed — the free preview may sound wrong. The AI voice file reads Tamil properly.');
+        u.onend = setIdle; u.onerror = setIdle;
+        speaking = true; freeBtn.textContent = '⏹ Stop';
         speechSynthesis.speak(u);
       };
-      row.querySelector('#ttsTa').onclick = async function () {
-        const t = ta.value.trim(); if (!t) { ta.focus(); return; }
-        if (!/[஀-௿]/.test(t)) { errBox(body, 'The free voice reads Tamil only. For English or Hindi use “AI voice file”.'); return; }
-        let ready = false; try { ready = localStorage.getItem('ptTamilReady') === '1'; } catch (e) {}
-        if (!ready && !window.confirm('Free Tamil voice (Beta)\n\nThe first time, your browser downloads the voice model once (about 110 MB — please use Wi-Fi). It is saved in the browser, so next time it starts quickly.\n\nEverything runs on your device: free, no credits, nothing uploaded.\n\nContinue?')) return;
-        const btn = this; btn.disabled = true; const prog = mountProgress(body); prog.set(1, 'Starting…');
-        try {
-          const r = await tamilTTS(t, function (pct, text) { prog.set(pct, text); });
-          try { localStorage.setItem('ptTamilReady', '1'); } catch (e) {}
-          prog.remove();
-          if (!r.data.length) throw new Error('The voice came out empty — please try a shorter sentence.');
-          await saveResult(body, { sampleRate: r.sampleRate, channels: [r.data] }, picker, 'tamil-voice-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-'), 'Saving');
-          mountResult(body, '<small>Free voice: Pocket TTS Tamil by Prasad Vittaldev, based on Kyutai Pocket TTS (CC-BY-4.0). Beta — if a word sounds wrong, tell us at support@pdftoolsindia.com.</small>');
-        } catch (e) { prog.remove(); errBox(body, (e && e.message) || e); }
-        btn.disabled = false;
-      };
+      // leaving the tool stops the free voice too
+      const stopWhenGone = setInterval(function () { if (!document.body.contains(body)) { try { speechSynthesis.cancel(); } catch (e) {} clearInterval(stopWhenGone); } }, 1000);
       row.querySelector('#ttsGo').onclick = async function () {
         const t = ta.value.trim(); if (!t) { ta.focus(); return; }
-        if (typeof AUTH_CONFIGURED !== 'undefined' && (!AUTH_CONFIGURED || !authState.session)) { errBox(body, 'Please sign in first (top right) — the AI voice uses credits.'); return; }
-        const cost = 2 * Math.ceil(t.length / 1000);
-        if (typeof confirmCreditSpend === 'function' && !(await confirmCreditSpend(body, cost + ' credit' + (cost > 1 ? 's' : '')))) return;
+        if (speaking) { speechSynthesis.cancel(); setIdle(); }
+        if (typeof AUTH_CONFIGURED !== 'undefined' && (!AUTH_CONFIGURED || !authState.session)) { if (typeof mountAuthModal === 'function') mountAuthModal(); errBox(body, 'Please sign in first — the AI voice uses credits (new accounts get 5 free).'); return; }
+        const cost = rate * Math.ceil(t.length / 1000);
+        if (typeof confirmCreditSpend === 'function' && !(await confirmCreditSpend(body, cost + ' credits'))) return;
         const btn = this; btn.disabled = true; const prog = mountProgress(body); prog.set(20, 'Making the voice… (a few seconds per paragraph)');
         try {
-          const r = await fetch(APP_CONFIG.BACKEND_URL + '/api/ai/speech', { method: 'POST', headers: { Authorization: 'Bearer ' + authState.session.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t, voice: o.querySelector('#ttsV').value, style: o.querySelector('#ttsS').value }) });
+          const r = await fetch(APP_CONFIG.BACKEND_URL + '/api/ai/speech', { method: 'POST', headers: { Authorization: 'Bearer ' + authState.session.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t, voice: vSel.value, style: o.querySelector('#ttsS').value }) });
           const j = await r.json().catch(function () { return {}; });
           if (!r.ok || j.error) throw new Error((j.error && (j.error.message || j.error)) || ('Error ' + r.status));
           const a = findAudio(j); if (!a) throw new Error('The voice service answered without audio — please try again.');

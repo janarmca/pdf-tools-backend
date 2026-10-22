@@ -62,5 +62,36 @@
   {"id": "audio-tools", "date": "2026-10-30", "icon": "🎵", "title": "ஆடியோ கருவிகள் — MP3 வெட்டு, இணை, மாற்று!", "line": "Ringtone செய், பாடலை வெட்டு, MP3 ஆக மாற்று, சத்தம் கூட்டு, குரல் பதிவு — இலவசம், கோப்பு வெளியே போகாது.", "steps": ["pdftoolsindia.com-ல் Video Tools திறங்கள்", "Audio Cutter அல்லது Converter தேர்வு", "MP3 ஆகப் பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/video-tools"},
   {"id": "poster-pro", "date": "2026-10-31", "icon": "🖼️", "title": "போஸ்டர் மேக்கர் — 33 டிசைன் + AI!", "line": "பண்டிகை, கடை Offer, மெனு, வேலைவாய்ப்பு, Tuition டிசைன்கள்; Stickers, Badge, Effects; விருப்பமான AI படம்.", "steps": ["pdftoolsindia.com/poster-maker திறங்கள்", "டிசைன் தேர்ந்து உங்கள் விவரம் எழுதுங்கள்", "PNG / PDF ஆகப் பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/poster-maker"},
   {"id": "img-blur-split", "date": "2026-11-01", "icon": "🫥", "title": "ஆதார் எண்ணை மறைக்க — இலவசம்!", "line": "படத்தில் ஆதார் எண், முகம், வண்டி எண்ணை Blur செய்யுங்கள்; Instagram-க்கு 3×3 Grid ஆகப் பிரியுங்கள்.", "steps": ["pdftoolsindia.com-ல் Image Tools திறங்கள்", "Blur / Hide அல்லது Split Grid தேர்வு", "பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/image-tools"},
-  {"id": "photo-art-ai", "date": "2026-11-02", "icon": "🪄", "title": "புகைப்படம் → ஓவியம் & Anime!", "line": "14 இலவச styles: பென்சில், கார்ட்டூன், Comic, Oil, Watercolour. AI Photo Style: Anime, 3D, தஞ்சாவூர் ஓவியம்.", "steps": ["pdftoolsindia.com-ல் Image Tools திறங்கள்", "Photo → Sketch & Art தேர்வு", "Style தேர்ந்து பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/image-tools"}
+  {"id": "photo-art-ai", "date": "2026-11-02", "icon": "🪄", "title": "புகைப்படம் → ஓவியம் & Anime!", "line": "14 இலவச styles: பென்சில், கார்ட்டூன், Comic, Oil, Watercolour. AI Photo Style: Anime, 3D, தஞ்சாவூர் ஓவியம்.", "steps": ["pdftoolsindia.com-ல் Image Tools திறங்கள்", "Photo → Sketch & Art தேர்வு", "Style தேர்ந்து பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/image-tools"},
+  {"id": "tts-audio-pro", "date": "2026-11-03", "icon": "🗣️", "title": "தமிழ் Text to Speech + Karaoke!", "line": "உரையை இயல்பான தமிழ் குரலில் MP3 ஆக்குங்கள்; பாடலிலிருந்து குரல் நீக்கம், இரைச்சல் குறைப்பு, Pitch, Equalizer, Green screen.", "steps": ["pdftoolsindia.com-ல் Video Tools திறங்கள்", "Text to Speech அல்லது Vocal Remover", "MP3 / MP4 பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/video-tools"},
+  {
+    "id": "pdf-edit-samefont", "date": "2026-11-04", "icon": "✏️", "title": "PDF எழுத்தை அதே font-ல் மாற்றுங்கள்!",
+    "line": "PDF Editor-ல் உள்ள எழுத்தைத் தொட்டு மாற்றினால், அதே font, அளவு, நிறத்தில் மாறும் — வெள்ளை box இல்லை, பக்கம் தெளிவாகவே இருக்கும்.",
+    "steps": ["PDF Editor-ல் PDF-ஐப் போடுங்கள்", "மாற்ற வேண்டிய எழுத்தைத் தொடுங்கள்", "புதிய எழுத்து → Download"],
+    "url": "pdftoolsindia.com/?tool=pdfeditor"
+  },
+  {
+    "id": "poster-editor-v2", "date": "2026-11-05", "icon": "🖼️", "title": "போஸ்டர் Maker — புதிய Editor!",
+    "line": "இடப்பக்கம் எல்லா கருவிகளும், 40+ தமிழ் வடிவங்கள், காலி பக்கம் — போனிலும் எளிதாக போஸ்டர் செய்யுங்கள்.",
+    "steps": ["Poster Maker திறங்கள்", "வடிவம் அல்லது காலி பக்கம் தேர்வு", "எழுத்து மாற்றி PNG / PDF"],
+    "url": "pdftoolsindia.com/poster-maker"
+  },
+  {
+    "id": "video-wm-drag", "date": "2026-11-06", "icon": "💧", "title": "வீடியோவில் Logo / எழுத்து — இழுத்து வைக்கலாம்!",
+    "line": "Video Watermark-ல் உங்கள் logo அல்லது தமிழ் எழுத்தை வீடியோ மேலே இழுத்து, அளவு மாற்றி, சரியான இடத்தில் வையுங்கள்.",
+    "steps": ["Video Watermark-ல் வீடியோ போடுங்கள்", "Logo / எழுத்தை இழுத்து வையுங்கள்", "Download — MP4 தயார்"],
+    "url": "pdftoolsindia.com/?tool=videowatermark"
+  },
+  {
+    "id": "ai-transcribe", "date": "2026-11-07", "icon": "📝", "title": "பேச்சு → தமிழ் எழுத்து & Subtitle!",
+    "line": "ஆடியோ / வீடியோவில் பேசியதை AI தமிழ் எழுத்தாகவும் YouTube-க்கு SRT subtitle-ஆகவும் மாற்றும்.",
+    "steps": ["Speech to Text-ல் file போடுங்கள்", "Text அல்லது Subtitle தேர்வு", "சரிபார்த்து Download"],
+    "url": "pdftoolsindia.com/?tool=aitranscribe"
+  },
+  {
+    "id": "poster-ai-design", "date": "2026-11-08", "icon": "🪄", "title": "AI Design — 3 போஸ்டர் வடிவம் உடனே!",
+    "line": "Poster Maker-ல் உங்கள் கடை / நிகழ்ச்சி விவரம் எழுதினால், AI 3 முழு போஸ்டர் வடிவமைப்பைத் தமிழில் தரும்.",
+    "steps": ["Poster Maker → ✨ AI", "விவரம் எழுதி AI Design தட்டுங்கள்", "பிடித்ததைத் தேர்ந்து திருத்துங்கள்"],
+    "url": "pdftoolsindia.com/poster-maker"
+  }
 ]

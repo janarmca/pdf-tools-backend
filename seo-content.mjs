@@ -425,6 +425,14 @@ export const SEO_EXTRA = {
     uses: ["Anime profile picture", "3D cartoon of your child", "Tanjore-style family portrait", "Sticker of your pet"],
     faqs: [["How much does it cost?", "5 credits per picture; if the AI fails the credits are refunded automatically."], ["Is my photo kept?", "It is sent to the AI service only to make the picture; we do not store it."]]
   },
+  aitranscribe: {
+    title: "Tamil Speech to Text & Subtitles (SRT) from Audio or Video — AI | PDF Tools India",
+    desc: "Turn a Tamil, English or Hindi recording, class, interview or video into typed text with time stamps, or SRT subtitles. Google Gemini AI, 1 credit per 2 minutes.",
+    intro: "Upload an audio or video file — the sound is compressed on your phone and sent only to the AI that writes the text. Correct anything before downloading.",
+    steps: ["Open Speech to Text and choose the audio or video.", "Pick the language and Text or Subtitles (.srt).", "Press Make text, check it and download."],
+    uses: ["Subtitles for YouTube / Reels in Tamil", "Notes from a class or meeting recording", "Typing out an interview or a speech"],
+    faqs: [["Does it understand Tamil?", "Yes — Tamil speech is written in Tamil script; mixed Tamil–English is written as spoken."], ["How much does it cost?", "1 credit per 2 minutes of audio (minimum 2 credits), shown before you start and refunded if it fails."], ["Is there a limit?", "About 60 minutes per file — longer recordings can be cut into parts with Audio Cutter."]]
+  },
   texttospeech: {
     title: "Text to Speech in Tamil — Free Online TTS to MP3 | PDF Tools India",
     desc: "Type Tamil, English, Hindi or 100+ languages and get a natural AI voice as MP3 or WAV. Listen free in the browser; downloads cost 2 credits per 1,000 characters.",

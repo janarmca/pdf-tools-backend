@@ -41,7 +41,7 @@ test('profile, pricing, credits, Pro users, redeem codes', async () => {
   assert.equal(me.j.credits, 5);
   assert.equal(me.j.plan, 'free');
   const pricing = await call('/api/pricing', { method: 'GET' });
-  assert.deepEqual(pricing.j.map((p) => p.id), ['credits_20', 'pro_monthly', 'credits_100', 'pro_yearly', 'business']);
+  assert.deepEqual(pricing.j.map((p) => p.id), ['credits_20', 'credits_100'], 'Pro / Business plans are switched off (UPDATE_66)');
   assert.equal((await call('/api/credits/use', { body: { toolId: 't', cost: 3, checkOnly: true }, token: u.access_token })).s, 200);
   assert.equal((await call('/api/credits/use', { body: { toolId: 't', cost: 3 }, token: u.access_token })).s, 200);
   assert.equal((await call('/api/credits/use', { body: { toolId: 't', cost: 3 }, token: u.access_token })).s, 402);
@@ -126,16 +126,15 @@ test('payments: order, verify signature, webhook credits exactly once, plans', a
   // verify after webhook = already credited
   const v = await call('/api/payment/verify', { body: { razorpay_order_id: o.j.orderId, razorpay_payment_id: 'pay_' + run, razorpay_signature: sign(RZP_SECRET, o.j.orderId + '|pay_' + run) }, token: u.access_token });
   assert.deepEqual(v.j, { ok: true, already: true });
-  // plan purchase through verify
-  const o2 = await call('/api/payment/create-order', { body: { planId: 'pro_monthly' }, token: u.access_token });
-  const v2 = await call('/api/payment/verify', { body: { razorpay_order_id: o2.j.orderId, razorpay_payment_id: 'pay2_' + run, razorpay_signature: sign(RZP_SECRET, o2.j.orderId + '|pay2_' + run) }, token: u.access_token });
-  assert.deepEqual(v2.j, { ok: true, already: false });
-  const me = (await call('/api/me', { method: 'GET', token: u.access_token })).j;
-  assert.equal(me.plan, 'pro');
-  assert.ok(me.plan_expires_at > new Date(Date.now() + 29 * 86400e3).toISOString());
+  // Pro / Business plans are switched off — they can no longer be bought
+  assert.equal((await call('/api/payment/create-order', { body: { planId: 'pro_monthly' }, token: u.access_token })).s, 400);
+  const o2 = await call('/api/payment/create-order', { body: { planId: 'credits_100' }, token: u.access_token });
   // someone else cannot claim this order
   const other = await user('pay2');
   assert.equal((await call('/api/payment/verify', { body: { razorpay_order_id: o2.j.orderId, razorpay_payment_id: 'pay2_' + run, razorpay_signature: sign(RZP_SECRET, o2.j.orderId + '|pay2_' + run) }, token: other.access_token })).s, 404);
+  const v2 = await call('/api/payment/verify', { body: { razorpay_order_id: o2.j.orderId, razorpay_payment_id: 'pay2_' + run, razorpay_signature: sign(RZP_SECRET, o2.j.orderId + '|pay2_' + run) }, token: u.access_token });
+  assert.deepEqual(v2.j, { ok: true, already: false });
+  assert.equal(await credits(u), 125);
 });
 
 test('matrimony: chat unlock payment + AI horoscope reading', async () => {
@@ -325,4 +324,66 @@ test('promotion: connect Facebook/Instagram and Pinterest, post to them and to X
 test('funnel events: only known names are accepted', async () => {
   assert.equal((await call('/api/event', { body: { name: 'bogus' } })).s, 400);
   assert.equal((await call('/api/event', { body: { name: 'tool_download' } })).s, 200);
+});
+
+test('site admin: unlimited credits, usage dashboard, tool-open counters', async () => {
+  // SITE_ADMIN_EMAILS in .dev.vars = boss.admin@test.in
+  const o = await call('/auth/v1/otp', { body: { email: 'boss.admin@test.in' } });
+  const a = (await call('/auth/v1/verify', { body: { email: 'boss.admin@test.in', token: o.j.dev_code } })).j;
+  const me = (await call('/api/me', { method: 'GET', token: a.access_token })).j;
+  assert.equal(me.plan, 'admin'); assert.equal(me.is_admin, true);
+  const before = me.credits;
+  assert.equal((await call('/api/credits/use', { body: { toolId: 'texttoimage', cost: 50 }, token: a.access_token })).s, 200, 'admin: never short of credits');
+  assert.equal((await call('/api/me', { method: 'GET', token: a.access_token })).j.credits, before, 'admin: nothing deducted');
+  // counters: signed-in and anonymous; unknown tool ids are ignored
+  const u = await user('tracker');
+  for (let i = 0; i < 3; i++) await call('/api/track', { body: { toolId: 'merge' }, token: u.access_token });
+  await call('/api/track', { body: { toolId: 'compress' }, token: u.access_token });
+  await call('/api/track', { body: { toolId: 'merge' } });
+  assert.deepEqual((await call('/api/track', { body: { toolId: 'nope; drop table' } })).j, { ok: false });
+  // only the admin may read the dashboard
+  assert.equal((await call('/api/admin/stats', { method: 'GET', token: u.access_token })).s, 403);
+  assert.equal((await call('/api/admin/stats', { method: 'GET' })).s, 401);
+  const st = (await call('/api/admin/stats?days=7', { method: 'GET', token: a.access_token })).j;
+  const merge = st.signedIn.find((r) => r.tool_id === 'merge');
+  assert.ok(merge && merge.opens >= 3 && merge.users >= 1 && merge.name === 'Merge PDF', JSON.stringify(st.signedIn));
+  assert.ok(st.anonymous.find((r) => r.tool_id === 'merge').opens >= 1);
+  assert.ok(st.topUsers.some((r) => r.email.startsWith('tracker.')));
+  assert.ok(st.paidUses.some((r) => r.tool_id === 'texttoimage' && r.credits === 0), 'admin use is logged with 0 credits');
+  assert.ok(st.totals.users >= 2);
+  // a normal user is not admin
+  const meU = (await call('/api/me', { method: 'GET', token: u.access_token })).j;
+  assert.equal(meU.is_admin, false); assert.equal(meU.plan, 'free');
+});
+
+test('poster AI design: 1 credit, 3 cleaned designs from the smart model', async () => {
+  const u = await user('design');
+  await setCredits(u, 3);
+  const r = await call('/api/ai/design', { body: { prompt: 'ஜவுளிக் கடை தீபாவளி 30% தள்ளுபடி', shape: 'portrait' }, token: u.access_token });
+  assert.equal(r.s, 200, JSON.stringify(r.j));
+  assert.equal(r.j.designs.length, 2, 'the empty one is dropped');
+  assert.equal(r.j.designs[0].layout, 'band'); assert.equal(r.j.designs[0].highlight, '30% OFF');
+  assert.equal(r.j.designs[1].palette.bg1, '#1e3a8a', 'bad colours are replaced'); assert.ok(['center', 'band', 'split', 'frame', 'diagonal', 'circle'].includes(r.j.designs[1].layout));
+  assert.equal(await credits(u), 2);
+  const c = calls.filter((x) => /generateContent/.test(x.url)).pop();
+  assert.match(c.url, /gemini-3\.8-flash:generateContent/);
+  assert.equal(c.body.generationConfig.responseMimeType, 'application/json');
+  assert.equal((await call('/api/ai/design', { body: { prompt: '' }, token: u.access_token })).s, 400);
+});
+
+test('AI transcribe: cost from the audio length, big files go through the Files API and are deleted', async () => {
+  const u = await user('stt');
+  await setCredits(u, 20);
+  const small = new FormData(); small.append('file', new Blob([new Uint8Array(4000 * 30)], { type: 'audio/mpeg' }), 'a.mp3'); small.append('format', 'srt');
+  const r1 = await call('/api/ai/transcribe', { form: small, token: u.access_token });
+  assert.equal(r1.s, 200, JSON.stringify(r1.j)); assert.equal(r1.j.credits, 2); assert.equal(r1.j.format, 'srt');
+  assert.equal(await credits(u), 18);
+  const big = new FormData(); big.append('file', new Blob([new Uint8Array(4360 * 600)], { type: 'audio/mpeg' }), 'b.mp3');
+  const r2 = await call('/api/ai/transcribe', { form: big, token: u.access_token });
+  assert.equal(r2.s, 200, JSON.stringify(r2.j)); assert.equal(r2.j.credits, 5, '10 minutes = 5 credits');
+  assert.match(r2.j.text, /file audio\/mpeg 2616000 bytes/);
+  assert.equal(await credits(u), 13);
+  assert.ok(deleted.length > 0, 'uploaded audio is deleted afterwards');
+  const none = new FormData(); none.append('format', 'text');
+  assert.equal((await call('/api/ai/transcribe', { form: none, token: u.access_token })).s, 400);
 });

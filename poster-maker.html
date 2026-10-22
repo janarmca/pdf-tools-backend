@@ -164,6 +164,7 @@ details>summary{cursor:pointer;font-weight:800;padding:6px 0}
     <button type="button" class="x" data-close="side" aria-label="மூடு">✕</button>
     <div class="pane on" data-pane="tpl">
       <h3>🗂️ வடிவங்கள் <small style="font-weight:600;color:var(--sub)">Templates</small></h3>
+      <button type="button" class="btn p" data-goto="ai" style="width:100%;margin-bottom:10px">🪄 AI Design — உங்கள் விவரத்துக்கு 3 புதிய வடிவம் (1 credit)</button>
       <div id="festCard"><div class="fest" id="fest"></div>
         <div class="note" style="margin-bottom:10px">சில பண்டிகைத் தேதிகள் ஆண்டுதோறும் மாறும்; அரசு அறிவிப்பைப் பார்த்து உறுதி செய்யுங்கள்.</div></div>
       <div class="tpls" id="tpls"></div>
@@ -241,6 +242,7 @@ details>summary{cursor:pointer;font-weight:800;padding:6px 0}
       <div class="row"><div><label>நிறம்</label><input type="color" id="sColor"></div>
       <div class="grow"><label>ஒளிபுகுதன்மை</label><input type="range" id="sOpacity" min="10" max="100" value="100"></div></div>
     </div>
+    <div id="groupProps" class="hide"></div>
     <div class="row" style="margin-top:10px"><div><label>பின்னணி நிறம் (முழுவதும்)</label><input type="color" id="bgColor" value="#ffffff"></div></div>
     <div class="note">மேலும்: இடப்பக்கம் 🔤 எழுத்து (outline, glow, gradient), 🖼️ படம் (filters, crop), 📐 அமைப்பு (align, layers).</div>
   </aside>
@@ -265,11 +267,11 @@ details>summary{cursor:pointer;font-weight:800;padding:6px 0}
 
 <script src="/libs/fabric.min.js"></script>
 <script src="/libs/qrcode-generator.js"></script>
-<script src="/poster-templates.js?v=20261022c"></script>
-<script src="/poster-core.js?v=20261022c"></script>
+<script src="/poster-templates.js?v=20261022d"></script>
+<script src="/poster-core.js?v=20261022d"></script>
 <script src="/cf-auth.js"></script>
-<script src="/poster-pro.js?v=20261022c"></script>
-<script src="/poster-layout.js?v=20261022c"></script>
+<script src="/poster-pro.js?v=20261022d"></script>
+<script src="/poster-layout.js?v=20261022d"></script>
 <!--site-trust--><div class="site-trust" style="clear:both;box-sizing:border-box;width:100%;max-width:100%;margin:28px 0 0;padding:16px 14px;text-align:center;font:600 12.5px/1.8 system-ui,'Noto Sans Tamil','Inter',sans-serif;color:#6B7280;background:transparent;border-top:1px solid #E6E8EC;">
 <div style="margin-bottom:4px;">தொடர்புக்கு / Support: <a href="mailto:support@pdftoolsindia.com" style="color:#28407F;font-weight:800;text-decoration:none;">support@pdftoolsindia.com</a></div>
 <div><a href="/contact" style="color:#6B7280;">Contact</a> &nbsp;·&nbsp; <a href="/privacy" style="color:#6B7280;">Privacy</a> &nbsp;·&nbsp; <a href="/terms" style="color:#6B7280;">Terms</a> &nbsp;·&nbsp; <a href="/refund" style="color:#6B7280;">Refund</a> &nbsp;·&nbsp; <a href="/" style="color:#6B7280;">pdftoolsindia.com</a></div>

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin Dashboard | PDF Tools India</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/fonts/tamil.css">
+<style>
+:root{--ink:#14213d;--sub:#5b6b80;--line:#e3e8f0;--bg:#f3f6fb;--card:#fff;--brand:#3752A6;--ok:#16794a;--bar:#3752A6;--bar2:#9aa9d6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ink:#e7ecf5;--sub:#9aa7bb;--line:#2a3446;--bg:#0f1520;--card:#172030;--brand:#8ea5ff;--bar:#8ea5ff;--bar2:#4a5a86}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header a{color:var(--ink);text-decoration:none;font-weight:800}
+header h1{font-size:1rem;margin:0}
+.sp{flex:1}
+select,button{font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+main{max-width:1150px;margin:0 auto;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi b{display:block;font-size:1.6rem;margin-top:4px}
+.kpi span{color:var(--sub);font-size:.78rem;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.card h2{font-size:.95rem;margin:0 0 10px}
+.note{color:var(--sub);font-size:.8rem;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--sub);font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.barc{width:38%}
+.bar{height:10px;border-radius:5px;background:var(--bar);min-width:2px}
+.scroll{max-height:520px;overflow:auto}
+.days{display:flex;align-items:flex-end;gap:2px;height:120px;padding-top:6px}
+.days div{flex:0 1 28px;background:var(--bar);border-radius:3px 3px 0 0;min-height:1px;position:relative}
+.days div:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;color:#fff;font-size:11px;padding:3px 6px;border-radius:6px;white-space:nowrap}
+.msg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;text-align:center}
+.tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+</style>
+</head>
+<body>
+<header>
+  <a href="/">← pdftoolsindia.com</a>
+  <h1>📊 Admin dashboard</h1>
+  <span class="sp"></span>
+  <select id="days"><option value="1">Today</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">1 year</option></select>
+  <button id="reload">↻</button>
+</header>
+<main id="main"><div class="msg">Loading…</div></main>
+<script src="/cf-auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  var API = 'https://pdftoolsindia.com/cfapi';
+  if (/^(localhost|127\.)/.test(location.hostname) && window.__ADMIN_API) API = window.__ADMIN_API;
+  var main = document.getElementById('main');
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var fmt = function(n){ return Number(n||0).toLocaleString('en-IN'); };
+  async function token(){
+    try{ var c = window.supabase.createClient(API); var r = await c.auth.getSession(); return r && r.data && r.data.session && r.data.session.access_token || null; }catch(e){ return null; }
+  }
+  function table(rows, cols, max){
+    if(!rows.length) return '<div class="note">No data yet for this period.</div>';
+    var top = Math.max.apply(null, rows.map(function(r){ return +r[cols[1][0]] || 0; })) || 1;
+    return '<div class="scroll"><table><thead><tr><th>#</th>' + cols.map(function(c){ return '<th' + (c[2] ? ' class="n"' : '') + '>' + c[1] + '</th>'; }).join('') + '<th class="barc"></th></tr></thead><tbody>' +
+      rows.slice(0, max || 200).map(function(r, i){
+        return '<tr><td>' + (i + 1) + '</td>' + cols.map(function(c){ return '<td' + (c[2] ? ' class="n"' : '') + '>' + (c[2] ? fmt(r[c[0]]) : esc(r[c[0]])) + '</td>'; }).join('') +
+          '<td class="barc"><div class="bar" style="width:' + Math.max(1, (+r[cols[1][0]] || 0) / top * 100) + '%"></div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  function days(rows, key, label){
+    if(!rows.length) return '<div class="note">No data yet.</div>';
+    var top = Math.max.apply(null, rows.map(function(r){ return +r[key] || 0; })) || 1;
+    return '<div class="days">' + rows.map(function(r){ return '<div style="height:' + Math.max(1, (+r[key]||0) / top * 100) + '%" data-t="' + esc(r.day) + ': ' + fmt(r[key]) + ' ' + label + '"></div>'; }).join('') + '</div>';
+  }
+  async function load(){
+    var t = await token();
+    if(!t){ main.innerHTML = '<div class="msg">Please <a href="/?login=1">sign in</a> with the admin e-mail first, then open this page again.</div>'; return; }
+    var d = document.getElementById('days').value;
+    main.innerHTML = '<div class="msg">Loading…</div>';
+    var r, j;
+    try{ r = await fetch(API + '/api/admin/stats?days=' + d, { headers: { Authorization: 'Bearer ' + t } }); j = await r.json(); }
+    catch(e){ main.innerHTML = '<div class="msg">Could not reach the server: ' + esc(e.message) + '</div>'; return; }
+    if(r.status === 403){ main.innerHTML = '<div class="msg">This page is only for the site admin.</div>'; return; }
+    if(!r.ok){ main.innerHTML = '<div class="msg">Error: ' + esc(j.error || r.status) + '</div>'; return; }
+    var opensSigned = j.signedIn.reduce(function(a, x){ return a + x.opens; }, 0), opensAnon = j.anonymous.reduce(function(a, x){ return a + x.opens; }, 0);
+    var all = {}; j.signedIn.concat(j.anonymous).forEach(function(x){ var o = all[x.tool_id] || (all[x.tool_id] = { tool_id:x.tool_id, name:x.name, opens:0, signed:0, users:0 }); o.opens += x.opens; if(x.users != null){ o.signed += x.opens; o.users += x.users; } });
+    var allRows = Object.keys(all).map(function(k){ return all[k]; }).sort(function(a, b){ return b.opens - a.opens; });
+    var f = {}; (j.funnel || []).forEach(function(x){ f[x.name] = x.n; });
+    main.innerHTML =
+      '<div class="kpis">' +
+        '<div class="kpi"><span>Registered users (all time)</span><b>' + fmt(j.totals.users) + '</b></div>' +
+        '<div class="kpi"><span>Active signed-in users</span><b>' + fmt(j.totals.activeUsers) + '</b></div>' +
+        '<div class="kpi"><span>Tool opens — signed in / visitors</span><b>' + fmt(opensSigned) + ' / ' + fmt(opensAnon) + '</b></div>' +
+        '<div class="kpi"><span>Paid orders · revenue</span><b>' + fmt(j.totals.paid.orders) + ' · ₹' + fmt(j.totals.paid.inr) + '</b></div>' +
+        '<div class="kpi"><span>Paywall seen → checkout → paid</span><b>' + fmt(f.paywall_seen) + ' → ' + fmt(f.checkout_open) + ' → ' + fmt(f.paid) + '</b></div>' +
+      '</div>' +
+      '<div class="grid">' +
+        '<div class="card"><h2>🔐 Most used tools — signed-in users</h2>' + table(j.signedIn, [['name','Tool'],['opens','Opens',1],['users','Users',1]]) + '</div>' +
+        '<div class="card"><h2>🌐 Most used tools — everyone (signed in + visitors)</h2>' + table(allRows, [['name','Tool'],['opens','Opens',1],['signed','Signed-in',1]]) + '</div>' +
+        '<div class="card"><h2>💳 AI / paid uses (credits spent)</h2>' + table(j.paidUses, [['name','Tool'],['uses','Uses',1],['credits','Credits',1]]) + '<div class="note">Admin uses count with 0 credits.</div></div>' +
+        '<div class="card"><h2>👥 Most active signed-in users</h2>' + table(j.topUsers, [['email','E-mail'],['opens','Opens',1],['tools','Tools',1]], 25) + '</div>' +
+        '<div class="card"><h2>📈 Tool opens per day (signed in)</h2>' + days(j.perDay, 'opens', 'opens') + '<div class="note">From ' + esc(j.from) + ' (IST days). Hover a bar for the number.</div></div>' +
+        '<div class="card"><h2>🆕 New sign-ups per day</h2>' + days(j.newUsers, 'n', 'sign-ups') + '</div>' +
+      '</div>' +
+      '<p class="note" style="margin-top:14px">Counting started with UPDATE_66 — earlier days have no tool-open data. Only the tool name and the day are stored (and the account for signed-in users) — never files or IP addresses.</p>';
+  }
+  document.getElementById('days').onchange = load;
+  document.getElementById('reload').onclick = load;
+  load();
+})();
+</script>
+</body>
+</html>

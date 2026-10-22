@@ -10,16 +10,22 @@ import {
 import { matRecordUnlock } from './mat.js';
 import { prepareImagePrompt } from './imgprompt.js';
 import { clampText, planProviders, runWithFallback, TRUNC_NOTE } from './aitext.js';
+import { CATALOG } from './promo-catalog.js';
 
 const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+// best free-tier model (Oct 2026) for jobs where quality matters and the answer is short: poster designs, transcripts
+const GEMINI_SMART = 'gemini-3.8-flash';
 const NVIDIA_MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
-const NO_CREDITS = 'Not enough credits — please buy more or upgrade to Pro.';
+const NO_CREDITS = 'Not enough credits — please buy more credits.';
 const MAX_UPLOAD = 15 * 1024 * 1024;
 // upstream base URLs (overridable only so the test suite can point them at a local mock)
 const base = (env, k, d) => env[k] || d;
 
 // ---------------------------------------------------------------- credits
-const IS_PRO = (n) => `(plan in ('pro','business') and (plan_expires_at is null or plan_expires_at > ?${n}))`;
+// 'admin' = site owner (SITE_ADMIN_EMAILS): never charged, like the (retired) Pro plans of people who bought them earlier
+const IS_PRO = (n) => `(plan in ('pro','business','admin') and (plan_expires_at is null or plan_expires_at > ?${n}))`;
+export const isSiteAdmin = (env, email) => !!email && String(env.SITE_ADMIN_EMAILS || 'pdftoolsindia@gmail.com').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean).includes(String(email).toLowerCase());
+const TOOL_NAMES = new Map(CATALOG.map((t) => [t.id, t.name]));
 
 // atomic: the UPDATE only succeeds when enough credits are left. Pro/Business users are never charged (logged as 0).
 export async function deductCredits(env, uid, amount, toolId) {
@@ -88,9 +94,10 @@ export async function gemini(env, parts, extra = {}) {
 }
 
 async function geminiCall(env, parts, extra) {
-  const r = await fetch(`${base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com')}/v1beta/models/${GEMINI_MODEL}:generateContent?key=${env.GEMINI_API_KEY}`, {
+  const { model, ...rest } = extra || {};
+  const r = await fetch(`${base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com')}/v1beta/models/${model || GEMINI_MODEL}:generateContent?key=${env.GEMINI_API_KEY}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts }], ...extra }),
+    body: JSON.stringify({ contents: [{ parts }], ...rest }),
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw fail(502, j.error?.message || 'AI request failed');
@@ -145,7 +152,53 @@ async function me(env, user) {
     env.DB.prepare('insert or ignore into profiles (id, email, credits) values (?, ?, 5)').bind(user.id, user.email || null),
     env.DB.prepare('select * from profiles where id = ?').bind(user.id),
   ]);
-  return json(r.results[0]);
+  let p = r.results[0];
+  // the site owner gets unlimited credits (plan 'admin'); if an e-mail is removed from SITE_ADMIN_EMAILS it goes back to free
+  const admin = isSiteAdmin(env, user.email || (p && p.email));
+  if (p && admin && p.plan !== 'admin') { await env.DB.prepare("update profiles set plan = 'admin', plan_expires_at = null where id = ?").bind(user.id).run(); p = { ...p, plan: 'admin', plan_expires_at: null }; }
+  if (p && !admin && p.plan === 'admin') { await env.DB.prepare("update profiles set plan = 'free' where id = ?").bind(user.id).run(); p = { ...p, plan: 'free' }; }
+  return json({ ...p, is_admin: admin });
+}
+
+// ---------------------------------------------------------------- tool usage (for the owner's dashboard)
+// one tiny upsert per tool opened; signed-in visitors are counted per user, others anonymously. No IP, no file data.
+const TOOL_ID_RE = /^[a-z0-9_]{2,40}$/;
+const istDay = (t = Date.now()) => new Date(t + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
+async function trackOpen(env, req) {
+  const b = await readJson(req);
+  const toolId = String((b && b.toolId) || '');
+  if (!TOOL_ID_RE.test(toolId) || !TOOL_NAMES.has(toolId)) return json({ ok: false });
+  const user = await userFromRequest(req, env).catch(() => null);
+  const day = istDay();
+  if (user) await env.DB.prepare('insert into tool_opens (day, tool_id, user_id, n) values (?, ?, ?, 1) on conflict(day, tool_id, user_id) do update set n = n + 1').bind(day, toolId, user.id).run();
+  else await env.DB.prepare('insert into tool_opens_anon (day, tool_id, n) values (?, ?, 1) on conflict(day, tool_id) do update set n = n + 1').bind(day, toolId).run();
+  return json({ ok: true });
+}
+async function adminStats(env, user, url) {
+  if (!isSiteAdmin(env, user.email)) return err(403, 'Admins only');
+  const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') || '30', 10) || 30));
+  const from = istDay(Date.now() - (days - 1) * 86400000), fromTs = new Date(Date.now() - days * 86400000).toISOString();
+  const db = env.DB;
+  const q = (sql, ...a) => db.prepare(sql).bind(...a);
+  const [signed, anon, paid, perDay, users, newUsers, activeUsers, money, topUsers, funnel] = await db.batch([
+    q('select tool_id, sum(n) as opens, count(distinct user_id) as users from tool_opens where day >= ? group by tool_id order by opens desc limit 200', from),
+    q('select tool_id, sum(n) as opens from tool_opens_anon where day >= ? group by tool_id order by opens desc limit 200', from),
+    q("select tool_id, count(*) as uses, sum(credits_used) as credits from usage_logs where created_at >= ? and tool_id not like '%_refund' group by tool_id order by uses desc limit 200", fromTs),
+    q('select day, sum(n) as opens, count(distinct user_id) as users from tool_opens where day >= ? group by day order by day', from),
+    q('select count(*) as n from profiles'),
+    q('select substr(created_at, 1, 10) as day, count(*) as n from profiles where created_at >= ? group by day order by day', fromTs),
+    q('select count(distinct user_id) as n from tool_opens where day >= ?', from),
+    q("select count(*) as orders, coalesce(sum(amount_inr), 0) as inr, coalesce(sum(credits_purchased), 0) as credits from transactions where status = 'paid' and created_at >= ?", fromTs),
+    q('select p.email as email, sum(o.n) as opens, count(distinct o.tool_id) as tools from tool_opens o join profiles p on p.id = o.user_id where o.day >= ? group by o.user_id order by opens desc limit 25', from),
+    q('select name, sum(n) as n from funnel_events where day >= ? group by name', from),
+  ]);
+  const name = (r) => ({ ...r, name: TOOL_NAMES.get(r.tool_id) || r.tool_id });
+  return json({
+    days, from,
+    totals: { users: users.results[0].n, activeUsers: activeUsers.results[0].n, paid: money.results[0] },
+    signedIn: signed.results.map(name), anonymous: anon.results.map(name), paidUses: paid.results.map(name),
+    perDay: perDay.results, newUsers: newUsers.results, topUsers: topUsers.results, funnel: funnel.results,
+  });
 }
 
 async function creditsUse(env, user, b) {
@@ -154,7 +207,7 @@ async function creditsUse(env, user, b) {
   if (b.checkOnly) {
     const p = await env.DB.prepare('select credits, plan, plan_expires_at from profiles where id = ?').bind(user.id).first();
     if (!p) return err(500, 'Profile not found — please sign in again');
-    const pro = (p.plan === 'pro' || p.plan === 'business') && (!p.plan_expires_at || p.plan_expires_at > now());
+    const pro = (p.plan === 'pro' || p.plan === 'business' || p.plan === 'admin') && (!p.plan_expires_at || p.plan_expires_at > now());
     return pro || p.credits >= cost ? json({ ok: true }) : err(402, NO_CREDITS);
   }
   return (await deductCredits(env, user.id, cost, String(b.toolId))) ? json({ ok: true }) : err(402, NO_CREDITS);
@@ -251,13 +304,13 @@ async function aiText(env, user, b) {
   });
 }
 
-// Text-to-image: Workers AI (FLUX.1-schnell). texttoimage / posterai = 5 credits, aibgreplace (background only) = 3 credits.
+// Text-to-image: Workers AI (FLUX.1-schnell). texttoimage / posterai / aibgreplace = 5 credits.
 async function aiImage(env, user, b) {
   if (!env.AI) return err(501, 'AI image feature is not set up (Workers AI binding missing).');
   const prompt = String(b.prompt || '').trim();
   if (!prompt) return err(400, 'Prompt தேவை.');
   const toolId = String(b.toolId || 'texttoimage');
-  return charged(env, user.id, toolId === 'aibgreplace' ? 3 : 5, toolId, async () => {
+  return charged(env, user.id, 5, toolId, async () => {
     const prep = await prepareImagePrompt(env, prompt); // Tamil/Hindi → English first (FLUX only understands English)
     const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: prep.prompt });
     if (!out || !out.image) throw fail(502, 'Model did not return an image — try rephrasing the prompt.');
@@ -307,10 +360,12 @@ async function aiRestyle(env, user, b) {
   });
 }
 
-// Text → speech (Tamil, English, Hindi … 100+ languages) with Gemini TTS. 2 credits per 1,000 characters (min 2), max 4,000.
+// Text → speech (Tamil, English, Hindi … 100+ languages) with Gemini TTS. 2 credits per 1,000 characters (3 from 1 Jan 2027 — see ttsRate), max 4,000.
 // The audio answer is streamed straight back to the browser WITHOUT parsing it here (a minute of WAV is ~4 MB of base64 —
 // JSON.parse of that would blow the free plan's 10 ms CPU). The browser finds the audio in either response shape.
-const TTS_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Aoede', 'Leda', 'Orus', 'Achird', 'Sulafat', 'Zephyr', 'Fenrir', 'Gacrux', 'Vindemiatrix']);
+const TTS_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Aoede', 'Leda', 'Orus', 'Achird', 'Sulafat', 'Zephyr', 'Fenrir', 'Gacrux', 'Vindemiatrix', 'Despina', 'Iapetus', 'Algieba', 'Sadaltager']);
+// credits per 1,000 characters = 2× Google's TTS price for us: ~₹1.3 per 1,000 chars until 31 Dec 2026, double from 1 Jan 2027 (IST)
+export const ttsRate = (t = Date.now()) => (t >= Date.UTC(2026, 11, 31, 18, 30) ? 3 : 2);
 async function aiSpeech(env, user, b) {
   if (!env.GEMINI_API_KEY) return err(501, 'Text to speech is not set up yet (GEMINI_API_KEY missing).');
   const text = String(b.text || '').trim();
@@ -318,7 +373,7 @@ async function aiSpeech(env, user, b) {
   if (text.length > 4000) return err(400, 'Please send at most 4,000 characters at a time.');
   const voice = TTS_VOICES.has(b.voice) ? b.voice : 'Kore';
   const style = String(b.style || '').trim().slice(0, 80);
-  const cost = 2 * Math.ceil(text.length / 1000);
+  const cost = ttsRate() * Math.ceil(text.length / 1000);
   return charged(env, user.id, cost, 'texttospeech', async () => {
     const g = base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com');
     const tried = [];
@@ -348,6 +403,90 @@ async function aiSpeech(env, user, b) {
     console.log('tts failed', tried.join(' | '));
     const quota = tried.some((t) => / 429/.test(t));
     throw fail(502, (quota ? 'Google\'s voice limit for now is used up — please try again later.' : 'The AI voice service did not answer.') + ' Your credits were returned. (details: ' + tried.join(' | ').slice(0, 600) + ')');
+  });
+}
+
+// Poster "AI design": Gemini writes 3 complete poster designs (layout, colours, Tamil wording) as JSON; the browser draws
+// them with the poster engine (no image model, so it is cheap). 1 credit ≥ 2× the paid-tier cost of one call.
+const DESIGN_LAYOUTS = ['center', 'band', 'split', 'frame', 'diagonal', 'circle'];
+const DESIGN_DECOR = ['rays', 'dots', 'confetti', 'waves', 'none'];
+const hex = (v, d) => (/^#[0-9a-f]{6}$/i.test(String(v || '').trim()) ? String(v).trim() : d);
+const clip = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
+export function cleanDesigns(j) {
+  const list = Array.isArray(j) ? j : Array.isArray(j && j.designs) ? j.designs : [];
+  return list.slice(0, 3).map((d, i) => {
+    const p = (d && d.palette) || {};
+    return {
+      layout: DESIGN_LAYOUTS.includes(d && d.layout) ? d.layout : DESIGN_LAYOUTS[i % DESIGN_LAYOUTS.length],
+      decor: DESIGN_DECOR.includes(d && d.decor) ? d.decor : 'dots',
+      palette: { bg1: hex(p.bg1, '#1e3a8a'), bg2: hex(p.bg2, '#7c3aed'), accent: hex(p.accent, '#facc15'), text: hex(p.text, '#ffffff'), soft: hex(p.soft, '#f8fafc') },
+      headline: clip(d && d.headline, 60), subline: clip(d && d.subline, 110), highlight: clip(d && d.highlight, 24),
+      body: (Array.isArray(d && d.body) ? d.body : []).map((x) => clip(x, 70)).filter(Boolean).slice(0, 5),
+      cta: clip(d && d.cta, 60), emoji: clip(d && d.emoji, 4), photo: !!(d && d.photo),
+    };
+  }).filter((d) => d.headline);
+}
+async function aiDesign(env, user, b) {
+  const brief = clip(b.prompt, 600);
+  if (!brief) return err(400, 'Describe the poster first.');
+  const shape = clip(b.shape, 30) || 'portrait';
+  return charged(env, user.id, 1, 'posteraidesign', async () => {
+    const instr = `You are a senior Tamil poster designer. Design 3 DIFFERENT printed posters (${shape}) for this request: "${brief}".
+Write all poster text in natural Tamil script (English only for brand names, numbers, "OFF" etc.). Keep it short and catchy.
+Never invent phone numbers, addresses, prices, discounts or dates that were not given (leave those out).
+Return ONLY JSON: {"designs":[{"layout":one of ${JSON.stringify(DESIGN_LAYOUTS)},"decor":one of ${JSON.stringify(DESIGN_DECOR)},
+"palette":{"bg1":"#hex","bg2":"#hex","accent":"#hex","text":"#hex","soft":"#hex"},"headline":"max 5 words","subline":"max 12 words",
+"highlight":"very short badge text like 50% OFF or புதிது, or empty","body":["up to 4 short lines"],"cta":"short call to action","emoji":"one emoji","photo":true if a photo of the product/person would help}]}
+Make the 3 designs clearly different (layout, colours, mood). Colours must have strong contrast between text and background.`;
+    let out = '';
+    try { out = await gemini(env, [{ text: instr }], { model: env.GEMINI_DESIGN_MODEL || GEMINI_SMART, generationConfig: { temperature: 0.9, responseMimeType: 'application/json', maxOutputTokens: 4096 } }); }
+    catch (e) { out = await gemini(env, [{ text: instr }], { generationConfig: { temperature: 0.9, responseMimeType: 'application/json', maxOutputTokens: 4096 } }); }
+    let j = null; try { j = JSON.parse(String(out).replace(/^```(json)?|```$/g, '').trim()); } catch (e) { j = null; }
+    const designs = cleanDesigns(j);
+    if (!designs.length) throw fail(502, 'The AI did not return a design — please try again with a little more detail.');
+    return json({ ok: true, designs });
+  });
+}
+
+// Audio / video → text or subtitles (Tamil, English, Hindi …) with Gemini. The browser sends a small mono MP3 (32 kbps,
+// ~4,000 bytes per second), so the length is known from the file size: 1 credit per 2 minutes (min 2) ≥ 2× Google's
+// paid price for us (~₹0.44 per minute). Max 15 MB ≈ 60 minutes.
+export const transcribeCost = (bytes) => Math.max(2, Math.ceil(bytes / 4400 / 120)); // 32 kbps MP3 ≈ 4,360 bytes/s incl. frame headers
+async function waitActive(env, name) { // audio uploaded to the Files API must be ACTIVE before it can be used
+  const g = base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com');
+  for (let i = 0; i < 20; i++) {
+    const r = await fetch(`${g}/v1beta/${name}?key=${env.GEMINI_API_KEY}`).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!j.state || j.state === 'ACTIVE') return;
+    if (j.state === 'FAILED') throw fail(502, 'The AI could not read this audio — try another file.');
+    await new Promise((res) => setTimeout(res, 1500));
+  }
+}
+async function aiTranscribe(env, req, user) {
+  if (!env.GEMINI_API_KEY) return err(501, 'AI feature not set up yet (GEMINI_API_KEY missing).');
+  const form = await req.formData();
+  const file = form.get('file');
+  if (!isFile(file)) return err(400, 'Please choose an audio or video file.');
+  if (file.size > MAX_UPLOAD) return err(413, 'Too long — please send at most about 60 minutes at a time.');
+  const fmt = form.get('format') === 'srt' ? 'srt' : 'text';
+  const lang = clip(form.get('lang') || 'auto', 30);
+  const cost = transcribeCost(file.size);
+  return charged(env, user.id, cost, 'aitranscribe', async () => {
+    const part = await filePart(env, file);
+    if (part._name) await waitActive(env, part._name);
+    const want = lang === 'auto' ? 'in the language that is spoken (Tamil in Tamil script, English in English, mixed speech exactly as spoken)' : `in ${lang} script`;
+    const instr = fmt === 'srt'
+      ? `Transcribe this audio ${want}. Output ONLY valid SRT subtitles: numbered cues, timestamps "HH:MM:SS,mmm --> HH:MM:SS,mmm", at most 2 short lines (about 42 characters) per cue, each cue 1–6 seconds, following the real timing of the speech. No commentary.`
+      : `Transcribe this audio ${want}. Write the full text with paragraphs; start each paragraph with a [mm:ss] time stamp; mark different speakers as "Speaker 1:", "Speaker 2:" when there is more than one. Do not summarise, do not translate, no commentary.`;
+    const { _name, ...clean } = part, parts = [{ text: instr }, clean], cfg = { temperature: 0.1, maxOutputTokens: 32768 };
+    let text;
+    try {
+      try { text = await geminiCall(env, parts, { model: env.GEMINI_TRANSCRIBE_MODEL || GEMINI_SMART, generationConfig: cfg }); }
+      catch (e) { text = await geminiCall(env, parts, { generationConfig: cfg }); } // fall back to the default model
+    } finally { await forgetFiles(env, [{ _name }]); }
+    text = String(text || '').replace(/^```(srt|text)?\s*|```\s*$/g, '').trim();
+    if (!text) throw fail(502, 'No speech was found in this file.');
+    return json({ ok: true, text, format: fmt, credits: cost });
   });
 }
 
@@ -660,6 +799,7 @@ const AUTHED_POST = {
   '/api/ai/image': (env, req, u, b) => aiImage(env, u, b),
   '/api/ai/restyle': (env, req, u, b) => aiRestyle(env, u, b),
   '/api/ai/speech': (env, req, u, b) => aiSpeech(env, u, b),
+  '/api/ai/design': (env, req, u, b) => aiDesign(env, u, b),
   '/api/ai/health': (env, req, u, b) => aiHealth(env, u, b),
   '/api/payment/create-order': (env, req, u, b) => createOrder(env, u, b),
   '/api/payment/verify': (env, req, u, b) => verifyPayment(env, u, b),
@@ -670,6 +810,7 @@ const AUTHED_POST = {
 };
 const AUTHED_FORM = {
   '/api/ai/ask': aiAsk,
+  '/api/ai/transcribe': aiTranscribe,
   '/api/matrimony/jathagam-extract': matJathagam,
 };
 
@@ -690,6 +831,12 @@ export async function handleApi(req, env, path) {
   const m = req.method;
   if (path === '/api/pricing' && m === 'GET') return json((await env.DB.prepare('select * from pricing_plans order by amount_inr').all()).results);
   if (path === '/api/event' && m === 'POST') return funnelEvent(env, req);
+  if (path === '/api/track' && m === 'POST') return trackOpen(env, req);
+  if (path === '/api/admin/stats' && m === 'GET') {
+    const user = await userFromRequest(req, env);
+    if (!user) return err(401, 'உள்நுழையவும் (Login required)');
+    return adminStats(env, user, new URL(req.url));
+  }
   if (path === '/api/payment/webhook' && m === 'POST') return webhook(env, req);
   if (path.startsWith('/api/video/')) return err(410, 'Fast Server Mode has been retired — video tools now run free in your browser.');
   if (path === '/api/me' || AUTHED_POST[path] || AUTHED_FORM[path]) {
