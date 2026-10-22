@@ -352,3 +352,9 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - AI voice (`/api/ai/speech`) showed only "busy or not available". Worker now tries Interactions API with gemini-3.8-flash-tts → gemini-3.8-flash-lite-tts (style as `speech_metadata` annotation), then generateContent with gemini-3.1-flash-tts-preview → gemini-2.5-flash-preview-tts, and returns Google's real status/message in the error ("details: …"), 429 → "limit used up". Credits still refunded. NOT verified live (needs the key) — the next error text tells the real cause.
 - Free Tamil voice: errors now say which step failed (`[step: download/load|start <file>|voice|speak]`) and list the model's input/output names. Owner said "not fine" without details — waiting for the exact message/behaviour.
 - promo-news `pdf-edit-samefont` (4 Nov), SEO pdfeditor text, sw v97, loadCategoryScript ?v=20261022b, worker ?v=2.
+
+## UPDATE_64 — Search Console "Page with redirect" (22 Oct)
+- Owner sent the GSC report (validation failed 17 Oct): listed URLs are OLD `.html` addresses (last crawled 24 Sep–15 Oct) plus `http://` and `/index.html`. Cloudflare Pages always 308-redirects `x.html` → `x`, so those can never "pass" — that is correct, not an error; Google indexes the target instead.
+- Checked: sitemap.xml has 236 URLs, none with `.html`, every one maps to a real file with no redirect (no folder-without-slash cases); every page's canonical equals its own extensionless URL; no site page links to a `.html` address.
+- Fixed the last internal `.html` targets in the app (Support links contact/privacy/terms/refund, and the standalone-tool openers gst-checking, astrology-plus, tn-property…, uzhavar-tools, photo-resizer, poster-maker, tn-rent-agreement, tn-sale-deed, learn/) → extensionless absolute paths. sw v98.
+- Owner steps (GSC): don't re-run validation for "Page with redirect"; resubmit sitemap; inspect a few target URLs (without .html) and Request indexing.

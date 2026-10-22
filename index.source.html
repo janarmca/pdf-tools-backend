@@ -1206,10 +1206,10 @@ function renderSettingsPage(){
     const supportLinks = [
       ['💡 What\'s New', ()=> { try{ localStorage.removeItem('pdfToolsDiscoverShown_v6'); }catch(e){} maybeShowDiscoverModal(true); }],
       ['📝 Blog', ()=> window.open('blog/','_blank')],
-      ['📞 Contact Us', ()=> window.open('contact.html','_blank')],
-      ['🔒 Privacy Policy', ()=> window.open('privacy.html','_blank')],
-      ['📄 Terms of Service', ()=> window.open('terms.html','_blank')],
-      ['💳 Refund Policy', ()=> window.open('refund.html','_blank')],
+      ['📞 Contact Us', ()=> window.open('/contact','_blank')],
+      ['🔒 Privacy Policy', ()=> window.open('/privacy','_blank')],
+      ['📄 Terms of Service', ()=> window.open('/terms','_blank')],
+      ['💳 Refund Policy', ()=> window.open('/refund','_blank')],
     ];
     const supportBox = el(`<div style="border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:20px;"></div>`);
     supportLinks.forEach(([label,fn],i)=>{
@@ -15947,16 +15947,16 @@ function mountEmbeddedTool(container, filename, title, needsAuth){
   openIt(); // auto-open right away — the button above is only a fallback if the browser blocked it
 }
 
-TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, 'gst-checking.html', 'GST Checking'); } };
+TOOL_IMPL.gstchecking = { mount(container){ mountEmbeddedTool(container, '/gst-checking', 'GST Checking'); } };
 // hrattendance lives in category-docs.js (native, no React/Babel)
-TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, 'astrology-plus.html', 'Astrology+', true); } };
-TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, 'tn-property-registration-calculator.html', 'TN Property Registration Calculator'); } };
-TOOL_IMPL.kalvikalanjiyam = { mount(container){ mountEmbeddedTool(container, 'learn/', 'Kalvi Kalanjiyam (கல்வி களஞ்சியம்)'); } };
-TOOL_IMPL.uzhavartools = { mount(container){ mountEmbeddedTool(container, 'uzhavar-tools.html', 'Farmer Toolbox'); } };
-TOOL_IMPL.photoresize = { mount(container){ mountEmbeddedTool(container, 'photo-resizer.html', 'Photo Resizer'); } };
-TOOL_IMPL.postermaker = { mount(container){ mountEmbeddedTool(container, 'poster-maker.html', 'Tamil Poster Maker'); } };
-TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, 'tn-rent-agreement.html', 'TN Rent Agreement Maker'); } };
-TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, 'tn-sale-deed.html', 'TN Sale Deed Draft'); } };
+TOOL_IMPL.astrologyplus = { mount(container){ mountEmbeddedTool(container, '/astrology-plus', 'Astrology+', true); } };
+TOOL_IMPL.tnpropertycalc = { mount(container){ mountEmbeddedTool(container, '/tn-property-registration-calculator', 'TN Property Registration Calculator'); } };
+TOOL_IMPL.kalvikalanjiyam = { mount(container){ mountEmbeddedTool(container, '/learn/', 'Kalvi Kalanjiyam (கல்வி களஞ்சியம்)'); } };
+TOOL_IMPL.uzhavartools = { mount(container){ mountEmbeddedTool(container, '/uzhavar-tools', 'Farmer Toolbox'); } };
+TOOL_IMPL.photoresize = { mount(container){ mountEmbeddedTool(container, '/photo-resizer', 'Photo Resizer'); } };
+TOOL_IMPL.postermaker = { mount(container){ mountEmbeddedTool(container, '/poster-maker', 'Tamil Poster Maker'); } };
+TOOL_IMPL.tnrentagreement = { mount(container){ mountEmbeddedTool(container, '/tn-rent-agreement', 'TN Rent Agreement Maker'); } };
+TOOL_IMPL.tnsaledeed = { mount(container){ mountEmbeddedTool(container, '/tn-sale-deed', 'TN Sale Deed Draft'); } };
 
 render();
 // Deep-link support: a URL like pdftoolsindia.com/?tool=merge opens that
