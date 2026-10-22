@@ -511,8 +511,10 @@ const TOOLS = [
   {id:'exifremove', name:'Strip Photo Privacy Data', desc:'Remove GPS/camera info (EXIF)', icon:'🛡️', color:'#1F6F78', cat:'image', cost:0},
   {id:'imgwatermark', name:'Watermark an Image', desc:'Stamp text/logo onto a photo', icon:'💧', color:'#2980B9', cat:'image', cost:0},
   {id:'imgcollage', name:'Image Collage', desc:'Combine multiple photos into one grid', icon:'🖇️', color:'#B5482A', cat:'image', cost:0},
-  {id:'imgsketch', name:'Image → Sketch', desc:'Pencil sketch / cartoon effect', icon:'🖊️', color:'#6E2C00', cat:'image', cost:0},
+  {id:'imgsketch', name:'Photo → Sketch & Art', desc:'14 free styles: pencil, colour pencil, cartoon, comic, oil, watercolour, pop art, neon…', icon:'🖊️', color:'#6E2C00', cat:'image', cost:0, lazy:'art'},
   {id:'imgmeme', name:'Meme Maker', desc:'Add top/bottom captions to make a meme', icon:'😄', color:'#CA6F1E', cat:'image', cost:0},
+  {id:'imgblur', name:'Blur / Hide Part of Photo', desc:'Pixelate, blur or black-out an Aadhaar number, face, number plate or address', icon:'🫥', color:'#495057', cat:'image', cost:0, lazy:'imgx'},
+  {id:'imgsplit', name:'Split Image into Grid', desc:'Cut a picture into 1×3, 2×3 or 3×3 tiles for Instagram — ZIP download', icon:'🔳', color:'#C2255C', cat:'image', cost:0, lazy:'imgx'},
   {id:'imgsticker', name:'Sticker Cutout', desc:'Cut out a subject with a white sticker border', icon:'🏷️', color:'#B03A2E', cat:'image', cost:0},
   {id:'colorpicker', name:'Color Picker', desc:'Pick a color from an image + build a palette', icon:'🎨', color:'#8E44AD', cat:'image', cost:0},
   {id:'vidsplit', name:'Split Video', desc:'Cut into equal parts or a chosen time range', icon:'🎬', color:'#B5482A', cat:'video', cost:0},
@@ -535,6 +537,12 @@ const TOOLS = [
   {id:'videocrop', name:'Crop Video', desc:'Drag a box to keep only part of the picture — square, 9:16, 16:9 and more', icon:'⬛', color:'#5F3DC4', cat:'video', cost:0, lazy:'video'},
   {id:'videoresize', name:'Resize Video', desc:'Change the size for YouTube, Shorts/Reels, Instagram or a smaller file', icon:'📐', color:'#1971C2', cat:'video', cost:0, lazy:'video'},
   {id:'screenrec', name:'Screen Recorder', desc:'Record your screen, a window or a tab with sound — free, on your computer', icon:'🖥️', color:'#E03131', cat:'video', cost:0, lazy:'video'},
+  {id:'audiocut', name:'Audio Cutter & Ringtone Maker', desc:'Cut a song or recording on its waveform — keep or remove a part, fade in/out, save MP3', icon:'🎵', color:'#E8590C', cat:'video', cost:0, lazy:'audio'},
+  {id:'audioconvert', name:'Audio Converter', desc:'Convert to MP3, WAV, M4A or OGG — many files at once, mono, even volume', icon:'🔁', color:'#0C8599', cat:'video', cost:0, lazy:'audio'},
+  {id:'videotomp3', name:'Video to MP3', desc:'Take the sound out of a video as MP3, WAV or M4A', icon:'🎧', color:'#862E9C', cat:'video', cost:0, lazy:'audio'},
+  {id:'audiomerge', name:'Merge Audio / Join MP3', desc:'Join songs or recordings one after another — gap or smooth cross-fade', icon:'🔗', color:'#2B8A3E', cat:'video', cost:0, lazy:'audio'},
+  {id:'audioeffects', name:'Audio Volume & Effects', desc:'Louder or softer, normalise, speed, bass, treble, fade, reverse, hum removal', icon:'🎛️', color:'#5C7CFA', cat:'video', cost:0, lazy:'audio'},
+  {id:'voicerec', name:'Voice Recorder', desc:'Record your voice with the microphone and save as MP3 or WAV', icon:'🎙️', color:'#C92A2A', cat:'video', cost:0, lazy:'audio'},
   {id:'askai', name:'Ask AI About Document', desc:'Upload any document and ask questions about it', icon:'💬', color:'#0E6655', cat:'ai', cost:2},
   {id:'aisummarize', name:'AI Summarize', desc:'Long document → short, clear summary in seconds', icon:'📋', color:'#1F618D', cat:'ai', cost:2},
   {id:'aitranslate', name:'AI Translate Document', desc:'Read a document in any language, get it in yours', icon:'🌐', color:'#117A65', cat:'ai', cost:2},
@@ -545,6 +553,7 @@ const TOOLS = [
   {id:'camscan', name:'📷 Camera Scanner', desc:'AI auto-edge detect + enhance → multi-page PDF (use OCR tool after, for text)', icon:'📷', color:'#B5482A', cat:'ai', cost:0},
   {id:'aihandwriting', name:'Handwriting → Text', desc:'AI reads messy handwritten notes better than OCR', icon:'✍️', color:'#8E44AD', cat:'ai', cost:2},
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
+  {id:'aistyle', name:'AI Photo Style — Anime, 3D, Tanjore', desc:'AI re-draws your photo as anime, 3D cartoon, comic, watercolour, Tanjore painting…', icon:'🪄', color:'#AE3EC9', cat:'ai', cost:5, lazy:'art'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
   {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
   {id:'kalvikalanjiyam', name:'Kalvi Kalanjiyam — கல்வி களஞ்சியம் (Class 1–10)', desc:'Free Tamil-medium lessons, games & tests for Samacheer Classes 1–10 — understand first, then practise. No login', icon:'📚', color:'#3B2FC9', cat:'education', cost:0},
@@ -1451,7 +1460,8 @@ imgfilters:['படத்துக்கு Filter','வண்ண மாற்�
 exifremove:['படத்தின் மறைதகவல் நீக்கு','இடம், கேமரா விவரங்களை அழி'],
 imgwatermark:['படத்தில் Watermark','உங்கள் பெயர் / லோகோ சேர்'],
 imgcollage:['படத் தொகுப்பு (Collage)','பல படங்களை ஒன்றாக்கு'],
-imgsketch:['படம் → ஓவியம்','புகைப்படத்தைப் பென்சில் ஓவியமாக்கு'],
+imgsketch:['படம் → ஓவியம் & Art','பென்சில், கார்ட்டூன், Comic, Oil, Watercolour — 14 இலவச styles'],
+aistyle:['AI படம் Style (Anime/3D)','AI உங்கள் படத்தை Anime, 3D, தஞ்சாவூர் ஓவியமாக மாற்றும்'],
 imgmeme:['Meme உருவாக்கு','படத்தில் எழுத்து சேர்'],
 imgsticker:['Sticker வெட்டு','பொருளை மட்டும் வெட்டி எடு'],
 colorpicker:['வண்ணம் எடு','படத்திலிருந்து வண்ணக் குறியீடு'],
@@ -1476,6 +1486,14 @@ videotrim:['வீடியோ வெட்டு (Trim)','வீடியோவ
 videocrop:['வீடியோ Crop','படத்தின் தேவையான பகுதியை மட்டும் வெட்டு'],
 videoresize:['வீடியோ அளவு மாற்று','YouTube / Reels / Shorts அளவுக்கு மாற்று'],
 screenrec:['திரைப் பதிவு (Screen Recorder)','கணினித் திரையை ஒலியுடன் பதிவு செய்'],
+imgblur:['படத்தில் மறை / Blur','ஆதார் எண், முகம், வண்டி எண்ணை மங்கலாக்கு'],
+imgsplit:['படத்தை கட்டங்களாக பிரி','Instagram-க்கு 3×3 grid ஆக வெட்டு'],
+audiocut:['ஆடியோ வெட்டு / Ringtone','பாடலை வெட்டி ரிங்டோன் செய் — MP3'],
+audioconvert:['ஆடியோ மாற்றி (MP3/WAV)','MP3, WAV, M4A, OGG ஆக மாற்று'],
+videotomp3:['வீடியோ → MP3','வீடியோவிலிருந்து ஒலியை MP3 ஆக எடு'],
+audiomerge:['ஆடியோ இணை','பல பாடல்/பதிவுகளை ஒன்றாக்கு'],
+audioeffects:['ஆடியோ ஒலி அளவு & Effects','சத்தம் கூட்டு/குறை, வேகம், Bass, Fade'],
+voicerec:['குரல் பதிவு (Voice Recorder)','மைக்கில் பேசி MP3 ஆக சேமி'],
 askai:['ஆவணத்திடம் கேள் (AI)','PDF அல்லது படத்தைப் பற்றிக் கேள்வி கேள்'],
 aisummarize:['சுருக்கம் (AI)','நீண்ட ஆவணத்தின் சுருக்கம்'],
 aitranslate:['மொழிபெயர்ப்பு (AI)','ஆவணத்தை மொழிபெயர்'],
@@ -1537,6 +1555,10 @@ const TOOL_ALIAS = {
   examphoto:'exam photo signature neet tnpsc upsc ssc', sign:'signature sign', pdfprotect:'password lock', pdfunlock:'password remove unlock', agecalc:'age birthday வயது', interestcalc:'interest vatti meter vatti வட்டி',
   unitconv:'cent acre land sqft nilam நிலம்', percentcalc:'percentage percent', datecalc:'date days difference', kalvikalanjiyam:'kalvi kalanjiyam school class students கல்வி களஞ்சியம்', cgpacalc:'cgpa marks percentage mark',
   daarrears:'da arrears dearness allowance dr relief pension government employee agavilaipadi nilavai அகவிலைப்படி நிலுவை அரசு ஊழியர்', attendcalc:'attendance percentage 75 percent classes miss bunk hajar வருகை', invitation:'wedding invitation card kalyana pathirikai marriage invite அழைப்பிதழ் பத்திரிகை', starfinder:'natchathiram nakshatra star rasi raasi lagnam jathagam நட்சத்திரம் ராசி லக்னம்', porutham:'porutham marriage matching kundali jathagam பொருத்தம் திருமணம்', goldcalc:'gold rate jewellery nagai wastage seidharam gold loan தங்கம் நகை', pfcalc:'epf pf provident fund gratuity pension', ebbill:'eb bill tneb tangedco electricity current bill மின் கட்டணம் கரண்ட்',
+  imgsketch:'sketch pencil drawing cartoon comic oil painting watercolor art filter photo to art', aistyle:'ai anime ghibli cartoon 3d pixar photo to anime ai art tanjore caricature chatgpt style ai filter',
+  imgblur:'blur pixelate hide mask aadhaar masked aadhaar pan number face number plate censor redact photo', imgsplit:'split image grid instagram grid 3x3 carousel puzzle tiles cut image',
+  audiocut:'audio cutter mp3 cutter ringtone maker trim audio cut song cut mp3 ரிங்டோன் பாடல் வெட்டு', audioconvert:'audio converter mp3 converter wav to mp3 m4a to mp3 ogg flac aac opus convert audio', videotomp3:'video to mp3 extract audio mp4 to mp3 song from video sound',
+  audiomerge:'merge audio join mp3 combine songs audio joiner mix', audioeffects:'volume booster increase volume louder normalize bass boost speed up audio slow down reverse audio fade', voicerec:'voice recorder audio recorder mic record voice memo dictaphone',
   videotrim:'video editor edit video cut cutter trim clip video cutter video trimmer split part remove middle fade வெட்டு', videocrop:'crop frame square vertical portrait 9:16 1:1 வெட்டு', videoresize:'resolution 1080p 720p 480p 4k size reels shorts instagram whatsapp status youtube dimension அளவு',
   screenrec:'screen capture record desktop tab window lecture tutorial class meeting திரை பதிவு', vidvoice:'mp3 audio extract voice record add audio music sound song', vidsplit:'cut trim split parts', videomerge:'join combine clips', videorotate:'rotate flip mirror turn',
   videospeed:'slow motion fast forward timelapse', videowatermark:'logo text overlay add image to video add text to video', videosubtitle:'captions subtitles text on video add text to video srt', videothumb:'thumbnail frame screenshot',
@@ -1596,7 +1618,7 @@ function toolSearchText(t){
 const CAT_V2 = {
   pdf:       { g:'linear-gradient(135deg,#4263EB,#2B3F9E)', big:'📄', ta:'PDF-ஐ இணை, பிரி, சுருக்கு, மாற்று, கையொப்பமிடு', en:'Merge, split, compress, convert and sign PDFs' },
   image:     { g:'linear-gradient(135deg,#9C36B5,#5F2A8A)', big:'🖼️', ta:'படத்தைச் சுருக்கு, மாற்று, Background நீக்கு', en:'Compress, convert and clean up photos' },
-  video:     { g:'linear-gradient(135deg,#C2410C,#9A3412)', big:'🎬', ta:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு', en:'Trim, merge, compress and convert video' },
+  video:     { g:'linear-gradient(135deg,#C2410C,#9A3412)', big:'🎬', ta:'வீடியோ & ஆடியோ: வெட்டு, இணை, சுருக்கு, MP3', en:'Video & audio: trim, merge, compress, MP3' },
   business:  { g:'linear-gradient(135deg,#1F7A38,#14532D)', big:'💼', ta:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்', en:'GST bills, calculators, forms and documents' },
   ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', big:'🤖', ta:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)', en:'AI that reads, summarises and translates (needs credits)' },
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', big:'🎓', ta:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் கருவிகள், மாணவர் கருவிகள்', en:'Learning games, Tamil tools and student tools' },
@@ -2032,7 +2054,7 @@ function renderToolPanel(toolId){
 // deducts its own 5 credits server-side (see server.js), so the paid-gate
 // must only CHECK affordability (checkOnly:true) instead of also deducting
 // on unlock — otherwise a single image generation cost 10 credits, not 5.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage']);
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','aistyle']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -2610,7 +2632,10 @@ self.onmessage = async (e)=>{
       const gray = track(new cv.Mat()); cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
       const blur = track(new cv.Mat()); cv.medianBlur(gray, blur, 7);
       const edges = track(new cv.Mat()); cv.adaptiveThreshold(blur, edges, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9);
-      const color = track(new cv.Mat()); cv.bilateralFilter(src, color, 9, 250, 250);
+      // bilateralFilter only accepts 1- or 3-channel images — on RGBA it threw a bare number ("Error: 2465752")
+      const rgb3 = track(new cv.Mat()); cv.cvtColor(src, rgb3, cv.COLOR_RGBA2RGB);
+      const color3 = track(new cv.Mat()); cv.bilateralFilter(rgb3, color3, 9, 250, 250);
+      const color = track(new cv.Mat()); cv.cvtColor(color3, color, cv.COLOR_RGB2RGBA);
       const edgesRgba = track(new cv.Mat()); cv.cvtColor(edges, edgesRgba, cv.COLOR_GRAY2RGBA);
       const cartoon = track(new cv.Mat()); cv.bitwise_and(color, edgesRgba, cartoon);
       outData = new Uint8ClampedArray(cartoon.data);
@@ -7818,6 +7843,82 @@ TOOL_IMPL.vidvoice = {
   mount(container){
     let mode = 'replace'; // replace | extract
     let videoFile = null, audioFile = null, videoUrl = null, audioUrl = null;
+    // drag-to-choose timing: which part of the voice (aSel) and where it starts in the video (vAt)
+    let aInfo = null, aInfoFor = null, aSel = null, vDur = 0, vDurFor = null, vAt = 0;
+    async function loadTiming(){
+      if(audioFile && aInfoFor !== audioFile){
+        aInfoFor = audioFile; aInfo = null; aSel = null;
+        try{
+          const AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+          const ab = await ac.decodeAudioData(await audioFile.arrayBuffer()); try{ ac.close(); }catch(e){}
+          const ch = ab.getChannelData(0), cols = 600, step = Math.max(1, Math.floor(ch.length/cols)), pk = [];
+          for(let x=0; x<cols; x++){ let mx = 0; for(let i=x*step, z=Math.min(ch.length,(x+1)*step); i<z; i+=Math.max(1,Math.floor(step/50))){ const v = Math.abs(ch[i]); if(v>mx) mx=v; } pk.push(mx); }
+          aInfo = { dur: ab.duration, peaks: pk }; aSel = { s: 0, e: ab.duration };
+        }catch(e){ aInfo = { dur: 0, peaks: [], failed: true }; }
+        if(audioFile === aInfoFor) paint();
+      }
+      if(videoFile && vDurFor !== videoFile){ vDurFor = videoFile; try{ vDur = await getVideoDuration(videoFile); }catch(e){ vDur = 0; } vAt = Math.min(vAt, vDur||0); paint(); }
+    }
+    function vvFmt(t){ t = Math.max(0, t||0); const m = Math.floor(t/60), r = t - m*60; return String(m).padStart(2,'0') + ':' + (r<10?'0':'') + r.toFixed(1); }
+    function mountTiming(host){
+      const box = el(`<div class="vv-tl" style="margin-top:12px;"></div>`); host.appendChild(box);
+      if(!aInfo){ box.appendChild(el(`<div class="note">Reading the voice file…</div>`)); return; }
+      if(aInfo.failed || !aInfo.dur){ box.appendChild(el(`<div class="note">The voice timeline could not be drawn for this file — the whole voice will be used.</div>`)); return; }
+      const A = aInfo.dur;
+      box.innerHTML = `
+        <div style="font-weight:800; font-size:13px; margin:4px 0 6px;">🎧 Voice part to use — drag the two handles</div>
+        <div class="vv-wave" style="position:relative; height:86px; border-radius:12px; background:#151a24; touch-action:none; user-select:none; -webkit-user-select:none;">
+          <canvas style="position:absolute; inset:0; width:100%; height:100%; border-radius:12px;"></canvas>
+          <div class="vv-dim1" style="position:absolute; top:0; bottom:0; left:0; background:rgba(0,0,0,.6); pointer-events:none;"></div>
+          <div class="vv-dim2" style="position:absolute; top:0; bottom:0; right:0; background:rgba(0,0,0,.6); pointer-events:none;"></div>
+          <div class="vv-h1" style="position:absolute; top:-4px; bottom:-4px; width:18px; margin-left:-9px; background:#F59F00; border-radius:7px; cursor:ew-resize; touch-action:none;"></div>
+          <div class="vv-h2" style="position:absolute; top:-4px; bottom:-4px; width:18px; margin-left:-9px; background:#F59F00; border-radius:7px; cursor:ew-resize; touch-action:none;"></div>
+          <div class="vv-ph" style="position:absolute; top:0; bottom:0; width:2px; background:#fff; pointer-events:none; display:none;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; font-size:12.5px; margin-top:6px;">
+          <span>From <b class="vv-s"></b></span><span>Length <b class="vv-len"></b></span><span>To <b class="vv-e"></b></span>
+        </div>
+        <div class="btn-row" style="margin-top:8px;"><button type="button" class="btn secondary vv-play" style="padding:8px 14px; font-size:12.5px;">▶ Play this part</button></div>
+        <div style="font-weight:800; font-size:13px; margin:14px 0 6px;">🎬 Where the voice starts in the video — drag the orange block</div>
+        <div class="vv-track" style="position:relative; height:46px; border-radius:10px; background:#e9ecef; touch-action:none; user-select:none; -webkit-user-select:none; overflow:hidden;">
+          <div class="vv-blk" style="position:absolute; top:6px; bottom:6px; border-radius:8px; background:linear-gradient(90deg,#F59F00,#E8590C); cursor:grab; touch-action:none; color:#fff; font:800 11px system-ui; display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden;">🎤 voice</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-top:6px;"><span>Starts at <b class="vv-at"></b></span><span>Video length <b>${vDur ? vvFmt(vDur) : '…'}</b></span></div>`;
+      const wave = box.querySelector('.vv-wave'), cv = wave.querySelector('canvas'), H1 = box.querySelector('.vv-h1'), H2 = box.querySelector('.vv-h2'), D1 = box.querySelector('.vv-dim1'), D2 = box.querySelector('.vv-dim2'), PH = box.querySelector('.vv-ph');
+      const track = box.querySelector('.vv-track'), blk = box.querySelector('.vv-blk');
+      requestAnimationFrame(()=>{
+        const W = Math.max(50, cv.clientWidth), Hh = Math.max(40, cv.clientHeight), dpr = Math.min(2, window.devicePixelRatio||1);
+        cv.width = W*dpr; cv.height = Hh*dpr; const g = cv.getContext('2d'); g.scale(dpr,dpr); g.fillStyle = '#4DABF7';
+        const pk = aInfo.peaks, mx = Math.max(0.01, ...pk);
+        for(let x=0; x<W; x++){ const v = pk[Math.floor(x/W*pk.length)]/mx, hh = Math.max(1, v*Hh*0.9); g.fillRect(x, (Hh-hh)/2, 1, hh); }
+      });
+      const pct = (t, tot)=> (tot ? t/tot*100 : 0) + '%';
+      function layout(){
+        H1.style.left = pct(aSel.s, A); H2.style.left = pct(aSel.e, A);
+        D1.style.width = pct(aSel.s, A); D2.style.width = (100 - aSel.e/A*100) + '%';
+        box.querySelector('.vv-s').textContent = vvFmt(aSel.s); box.querySelector('.vv-e').textContent = vvFmt(aSel.e); box.querySelector('.vv-len').textContent = vvFmt(aSel.e - aSel.s);
+        const T = vDur || Math.max(A, vAt + (aSel.e - aSel.s)), len = aSel.e - aSel.s;
+        vAt = Math.min(Math.max(0, vAt), Math.max(0, (vDur || T) - Math.min(len, vDur || T)));
+        blk.style.left = pct(vAt, T); blk.style.width = 'max(28px,' + pct(Math.min(len, T - vAt), T) + ')';
+        box.querySelector('.vv-at').textContent = vvFmt(vAt);
+        const st = body.querySelector('#vvStart'); if(st) st.value = vvFmt(vAt).replace(/\.\d$/, '');
+      }
+      const drag = (h, set)=>{
+        h.addEventListener('pointerdown', e=>{ h.setPointerCapture(e.pointerId); h._d = true; e.preventDefault(); e.stopPropagation(); });
+        h.addEventListener('pointermove', e=>{ if(!h._d) return; const r = wave.getBoundingClientRect(); set(Math.min(1, Math.max(0, (e.clientX - r.left)/r.width)) * A); layout(); });
+        const up = ()=>{ h._d = false; }; h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+      };
+      drag(H1, t=>{ aSel.s = Math.min(t, aSel.e - 0.2); }); drag(H2, t=>{ aSel.e = Math.max(t, aSel.s + 0.2); });
+      let bd = null;
+      blk.addEventListener('pointerdown', e=>{ blk.setPointerCapture(e.pointerId); const r = track.getBoundingClientRect(); bd = { x: e.clientX, at: vAt, w: r.width }; blk.style.cursor = 'grabbing'; e.preventDefault(); });
+      blk.addEventListener('pointermove', e=>{ if(!bd) return; const T = vDur || A; vAt = bd.at + (e.clientX - bd.x)/bd.w*T; layout(); });
+      const bup = ()=>{ bd = null; blk.style.cursor = 'grab'; }; blk.addEventListener('pointerup', bup); blk.addEventListener('pointercancel', bup);
+      track.addEventListener('pointerdown', e=>{ if(e.target === blk) return; const r = track.getBoundingClientRect(), T = vDur || A; vAt = (e.clientX - r.left)/r.width*T - (aSel.e - aSel.s)/2; layout(); });
+      const au = host.querySelector('audio');
+      box.querySelector('.vv-play').onclick = ()=>{ if(!au) return; au.currentTime = aSel.s; au.play(); PH.style.display = 'block'; };
+      if(au) au.addEventListener('timeupdate', ()=>{ PH.style.left = pct(au.currentTime, A); if(!au.paused && au.currentTime >= aSel.e) au.pause(); });
+      layout();
+    }
     const body = el(`<div></div>`); container.appendChild(body);
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
 
@@ -7857,12 +7958,14 @@ TOOL_IMPL.vidvoice = {
           body.appendChild(el(`<audio src="${audioUrl}" controls style="width:100%; margin:6px 0 12px;"></audio>`));
         }
         if(videoFile && audioFile){
+          loadTiming();
+          mountTiming(body);
           mountFastServerNote(body, 2, 'vvFastR', videoFile.size + audioFile.size);
           const opts = el(`
             <div class="opts">
               <div class="field">
                 <label>What time in the video should the new voice start (mm:ss)</label>
-                <input type="text" id="vvStart" value="00:00" placeholder="00:00">
+                <input type="text" id="vvStart" value="${vvFmt(vAt).replace(/\.\d$/, '')}" placeholder="00:00">
               </div>
               <div class="field" style="grid-column:1/-1;">
                 <label>What should happen to the original video's voice?</label>
@@ -7875,9 +7978,12 @@ TOOL_IMPL.vidvoice = {
                 <input type="checkbox" id="vvLoopAudio" style="width:auto; margin:0;">
                 <label for="vvLoopAudio" style="margin:0; font-weight:600; font-size:12.5px;">If the new audio is shorter than the video — loop it until it fills the rest (otherwise, by default, the rest stays silent)</label>
               </div>
+              <div class="field"><label>Video's own sound volume (Mix): <b id="vvVoOut">100%</b></label><input type="range" id="vvVo" min="0" max="200" value="100" oninput="document.getElementById('vvVoOut').textContent=this.value+'%'"></div>
+              <div class="field"><label>New voice / music volume: <b id="vvVnOut">100%</b></label><input type="range" id="vvVn" min="0" max="300" value="100" oninput="document.getElementById('vvVnOut').textContent=this.value+'%'"></div>
             </div>
           `);
           body.appendChild(opts);
+          opts.querySelector('#vvStart').addEventListener('change', (e)=>{ const t = parseTimeToSec(e.target.value); if(t != null && !isNaN(t)){ vAt = t; paint(); } });
           const row = el(`<div class="btn-row"></div>`);
           const btn = el(`<button class="btn">🔁 Merge / Convert Voice</button>`);
           btn.onclick = doReplace;
@@ -7969,8 +8075,11 @@ TOOL_IMPL.vidvoice = {
 
     async function doReplace(){
       const mix = body.querySelector('#vvMode').value === 'mix';
-      const startSec = parseTimeToSec(body.querySelector('#vvStart').value) || 0;
+      const typed = parseTimeToSec(body.querySelector('#vvStart').value) || 0;
+      const startSec = (aInfo && aInfo.dur && Math.abs(typed - Math.floor(vAt)) < 1) ? vAt : typed; // the dragged block (to 0.1 s) unless the box was edited
       const loopAudio = body.querySelector('#vvLoopAudio').checked;
+      const cut = aInfo && aInfo.dur && aSel && (aSel.s > 0.05 || aSel.e < aInfo.dur - 0.05) ? { s: aSel.s, e: aSel.e } : null;
+      const volO = (Number((body.querySelector('#vvVo')||{}).value)||100)/100, volN = (Number((body.querySelector('#vvVn')||{}).value)||100)/100;
       const prog = mountProgress(body);
       if(AUTH_CONFIGURED && isFastModeChecked('vvFastR')){
         try{
@@ -8000,16 +8109,20 @@ TOOL_IMPL.vidvoice = {
         // duration=first (mix) / -shortest (replace) below, which stop the
         // output at the video's own length, this fills the whole video with
         // repeated audio instead of trailing off into silence.
-        const audioInputFlags = loopAudio ? ['-stream_loop','-1'] : [];
+        // the chosen voice part: trim it (and when looping, repeat only that part — aloop needs a known sample rate, hence aresample)
+        const trimF = cut ? `atrim=start=${cut.s.toFixed(3)}:end=${cut.e.toFixed(3)},asetpts=PTS-STARTPTS,` + (loopAudio ? `aresample=48000,aloop=loop=-1:size=${Math.max(1, Math.round((cut.e - cut.s) * 48000))},` : '') : '';
+        const audioInputFlags = loopAudio && !cut ? ['-stream_loop','-1'] : [];
         // Always re-encode (rather than "-c:v copy") — stream-copying a webm/mkv video
         // straight into an .mp4 container fails whenever the source codec isn't natively
         // mp4-compatible. Re-encoding to h264+aac guarantees a playable result regardless
         // of the input format, at the cost of a little extra time.
-        if(mix){
-          await ffmpeg.exec(['-i','in_v.'+vExt, ...audioInputFlags,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]`,'-map','0:v:0','-map','[aout]','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
-        } else {
-          await ffmpeg.exec(['-i','in_v.'+vExt, ...audioInputFlags,'-i','in_a.'+aExt,'-filter_complex',`[1:a]${delayedAudio}apad[a1]`,'-map','0:v:0','-map','[a1]','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
-        }
+        // Phone videos (MP4/MOV with H.264) keep their picture as-is (-c:v copy = seconds, no quality loss); anything else,
+        // or a copy that fails, is re-encoded to H.264 so the .mp4 always plays.
+        const graph = mix ? `[0:a]volume=${volO}[a0];[1:a]${trimF}${delayedAudio}volume=${volN},apad[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=2[aout]` : `[1:a]${trimF}${delayedAudio}volume=${volN},apad[aout]`;
+        const run = (vcodec)=> ffmpeg.exec(['-i','in_v.'+vExt, ...audioInputFlags,'-i','in_a.'+aExt,'-filter_complex',graph,'-map','0:v:0','-map','[aout]', ...vcodec,'-c:a','aac','-b:a','192k','-shortest','out.mp4']);
+        let code = /^(mp4|m4v|mov)$/.test(vExt) ? await run(['-c:v','copy']) : 1;
+        if(code !== 0){ try{ await ffmpeg.deleteFile('out.mp4'); }catch(e){} code = await run(['-c:v','libx264','-preset','ultrafast']); }
+        if(code !== 0) throw new Error('Could not combine this video and audio — try an MP4 video and an MP3 voice file.');
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), videoFile.name.replace(/\.[^.]+$/,'')+'-newvoice.mp4');
@@ -9998,7 +10111,7 @@ TOOL_IMPL.videospeed = {
         else atempoChain.push(remaining);
         const atempoStr = atempoChain.map(v=>`atempo=${v.toFixed(4)}`).join(',');
         prog.set(15,'Processing…');
-        await ffmpeg.exec(['-i','in.'+ext,'-filter_complex',`[0:v]setpts=${videoPts}*PTS[v];[0:a]${atempoStr}[a]`,'-map','[v]','-map','[a]','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
+        await ffmpeg.exec(['-i','in.'+ext,'-filter_complex',`[0:v]setpts=${videoPts}*PTS[v];[0:a]${atempoStr}[a]`,'-map','[v]','-map','[a]','-c:v','libx264','-preset','ultrafast','-c:a','aac','out.mp4']);
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+`-${speed}x.mp4`);
@@ -10052,7 +10165,7 @@ TOOL_IMPL.videoreverse = {
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
         prog.set(15,'Processing…');
-        await ffmpeg.exec(['-i','in.'+ext,'-vf','reverse','-af','areverse','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
+        await ffmpeg.exec(['-i','in.'+ext,'-vf','reverse','-af','areverse','-c:v','libx264','-preset','ultrafast','-c:a','aac','out.mp4']);
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-reversed.mp4');
@@ -10620,7 +10733,7 @@ TOOL_IMPL.videowmremove = {
           return;
         }
         const fc = `[0:v]format=gbrp[v0];[1:v]fps=${F},format=gbrp[p0];${plateMask('v0','p0','mo')};[mo]scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p[vout]`;
-        const base = ['-y','-i', inputName, '-i', cur, '-filter_complex', fc, '-map','[vout]','-map','0:a?','-c:v','libx264','-preset','veryfast','-crf', o.crf, '-pix_fmt','yuv420p'];
+        const base = ['-y','-i', inputName, '-i', cur, '-filter_complex', fc, '-map','[vout]','-map','0:a?','-c:v','libx264','-preset','ultrafast','-crf', o.crf, '-pix_fmt','yuv420p'];
         try{
           await run([...base, '-c:a','copy','-movflags','+faststart','wm_out.mp4'], 30, 96, 'Step 4/4 · removing watermark…');
         }catch(e){
@@ -10689,7 +10802,7 @@ TOOL_IMPL.videowmremove = {
         progHandler = ({progress})=>{ const p = Math.min(1, Math.max(0, progress || 0)); prog.set(12 + p*78, 'Removing watermark… ' + Math.round(p*100) + '%'); };
         ffmpeg.on('progress', progHandler);
         prog.set(12, 'Removing watermark…');
-        const baseArgs = ['-y','-i', inputName, ...graphArgs(graph, true), '-c:v','libx264','-preset','veryfast','-crf', o.crf, '-pix_fmt','yuv420p'];
+        const baseArgs = ['-y','-i', inputName, ...graphArgs(graph, true), '-c:v','libx264','-preset','ultrafast','-crf', o.crf, '-pix_fmt','yuv420p'];
         try{ await ffmpeg.deleteFile('wm_out.mp4'); }catch(e){}
         let code = await ffmpeg.exec([...baseArgs, '-c:a','copy','-movflags','+faststart','wm_out.mp4']);
         if(code !== 0){ // audio codec not allowed inside .mp4 — re-encode just the audio
@@ -10774,7 +10887,7 @@ TOOL_IMPL.videorotate = {
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
         prog.set(15,'Processing…');
-        await ffmpeg.exec(['-i','in.'+ext,'-vf',vfMap[op],'-c:v','libx264','-preset','veryfast','-c:a','copy','out.mp4']);
+        await ffmpeg.exec(['-i','in.'+ext,'-vf',vfMap[op],'-c:v','libx264','-preset','ultrafast','-c:a','copy','out.mp4']);
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-rotated.mp4');
@@ -10895,7 +11008,7 @@ TOOL_IMPL.videomerge = {
         }catch(e){
           // Fall back to re-encoding if the clips aren't compatible for a direct stream copy
           prog.set(65,'Direct merge did not work — re-encoding…');
-          await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
+          await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','ultrafast','-c:a','aac','out.mp4']);
         }
         prog.set(92,'Preparing file…');
         const data = await ffmpeg.readFile('out.mp4');
@@ -12985,7 +13098,7 @@ TOOL_IMPL.videowave = {
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
         const filter = `[0:a]showwaves=s=1280x360:mode=cline:colors=${fg}:rate=25[wave];color=c=${bg}:s=1280x360:rate=25[bgv];[bgv][wave]overlay=format=auto[outv]`;
         prog.set(15,'Generating…');
-        await ffmpeg.exec(['-i','in.'+ext,'-filter_complex',filter,'-map','[outv]','-map','0:a','-c:v','libx264','-preset','veryfast','-c:a','aac','-shortest','out.mp4']);
+        await ffmpeg.exec(['-i','in.'+ext,'-filter_complex',filter,'-map','[outv]','-map','0:a','-c:v','libx264','-preset','ultrafast','-c:a','aac','-shortest','out.mp4']);
         prog.set(92,'Preparing…');
         const data = await ffmpeg.readFile('out.mp4');
         downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-waveform.mp4');
@@ -13047,7 +13160,7 @@ TOOL_IMPL.videoloop = {
         try{
           await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4']);
         }catch(e){
-          await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','veryfast','-c:a','aac','out.mp4']);
+          await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c:v','libx264','-preset','ultrafast','-c:a','aac','out.mp4']);
         }
         prog.set(92,'Preparing…');
         const data = await ffmpeg.readFile('out.mp4');
@@ -15802,6 +15915,8 @@ render();
   try{
     const params = new URLSearchParams(window.location.search);
     const deepLinkTool = TOOL_MOVED[params.get('tool')] || params.get('tool');
+    // /?login=1 (from standalone pages such as the poster maker's AI panel) opens the sign-in box once the page is ready
+    if(params.get('login')==='1') setTimeout(()=>{ try{ if(!(authState && authState.session)) mountAuthModal(); }catch(e){} }, 900);
     const deepCat = params.get('cat'); if(deepCat && CATEGORY_META[deepCat]) { __activeCategory = deepCat; try{ sessionStorage.removeItem(LAST_TOOL_KEY); }catch(e){} return; } // /?cat=pdf → that category's tool list directly
     if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
       // /?tool=<id> is the same page as the static /tools/<slug> landing page — point Google at that one.

@@ -47,7 +47,7 @@
     const vf = o.fade ? ['-vf', 'fade=t=in:st=0:d=' + secArg(f) + ',fade=t=out:st=' + secArg(dur - f) + ':d=' + secArg(f)] : [];
     const af = o.fade ? ['-af', 'afade=t=in:st=0:d=' + secArg(f) + ',afade=t=out:st=' + secArg(dur - f) + ':d=' + secArg(f)] : [];
     const base = ['-ss', secArg(o.start), '-i', inName, '-t', secArg(dur)];
-    const enc = ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+    const enc = ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
     const withAudio = base.concat(vf, o.mute ? ['-an'] : af.concat(['-c:a', 'aac', '-b:a', '160k']), enc, [outName]);
     const noAudio = base.concat(vf, ['-an'], enc, [outName]);
     return { withAudio: withAudio, noAudio: noAudio };
@@ -55,7 +55,7 @@
   function trimRemoveArgs(inName, outName, o) {
     // keep [0,start] + [end,total]; always re-encoded
     const s = secArg(o.start), e = secArg(o.end);
-    const enc = ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+    const enc = ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
     const vparts = '[0:v]trim=0:' + s + ',setpts=PTS-STARTPTS[v0];[0:v]trim=start=' + e + ',setpts=PTS-STARTPTS[v1];';
     const aparts = '[0:a]atrim=0:' + s + ',asetpts=PTS-STARTPTS[a0];[0:a]atrim=start=' + e + ',asetpts=PTS-STARTPTS[a1];';
     const withAudio = ['-i', inName, '-filter_complex', vparts + aparts + '[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]', '-map', '[v]', '-map', '[a]']
@@ -96,6 +96,88 @@
   const baseName = function (f) { return (f.name || 'video').replace(/\.[^.]+$/, ''); };
   const extOf = function (f) { const e = ((f.name || '').split('.').pop() || 'mp4').toLowerCase(); return /^[a-z0-9]{2,5}$/.test(e) ? e : 'mp4'; };
   const errBox = function (body, msg) { const b = mountResult(body, 'Error: ' + escapeHtml(String(msg))); b.style.background = '#FDEDEC'; return b; };
+
+
+  /* ===================================================================== FAST ENGINE (WebCodecs)
+   * Mediabunny (MPL-2.0, ~200 KB) uses the device's own hardware video encoder/decoder through WebCodecs — many times faster
+   * than ffmpeg.wasm and nothing big to download. Used first by every tool here; if the browser has no WebCodecs or cannot
+   * handle the file, we fall back to ffmpeg.wasm (ultrafast preset). */
+  const MB_URL = 'https://cdn.jsdelivr.net/npm/mediabunny@1.61.0/dist/bundles/mediabunny.min.mjs';
+  let mbPromise = null;
+  function loadMB() {
+    if (!('VideoEncoder' in window) || !('VideoDecoder' in window)) return Promise.resolve(null);
+    if (!mbPromise) mbPromise = import(MB_URL).catch(function (e) { mbPromise = null; console.warn('fast engine unavailable', e); return null; });
+    return mbPromise;
+  }
+  // opts: {trim:{start,end}, crop:{left,top,width,height}, width, height, fit, rotate, flip, mute, exact, fade:{dur, total}, cut:{start,end}}
+  // returns {blob, ext} or null when this browser/file cannot be handled (caller then uses ffmpeg)
+  async function fastConvert(file, o, prog, label) {
+    const MB = await loadMB(); if (!MB) return null;
+    prog.set(8, label + ' (fast engine)…');
+    let input;
+    try { input = new MB.Input({ source: new MB.BlobSource(file), formats: MB.ALL_FORMATS }); await input.getPrimaryVideoTrack(); }
+    catch (e) { return null; }
+    const vt = await input.getPrimaryVideoTrack(); if (!vt) return null;
+    const total = await input.computeDuration();
+    const fadeDur = o.fade ? Math.min(o.fade, ((o.trim ? o.trim.end - o.trim.start : total) || 2) / 2) : 0;
+    const outLen = o.trim ? o.trim.end - o.trim.start : o.cut ? total - (o.cut.end - o.cut.start) : total;
+    const t0 = o.trim ? o.trim.start : 0;
+    // timestamps arrive in INPUT time; map to output time (after trim / removed middle). Returns null to drop.
+    const mapT = function (ts) {
+      if (o.cut) { if (ts >= o.cut.start && ts < o.cut.end) return null; return ts >= o.cut.end ? ts - (o.cut.end - o.cut.start) : ts; }
+      return ts;
+    };
+    const rel = function (ts) { return (o.trim && ts >= t0 - 1e-6 && t0 > 0) ? ts - t0 : ts; };
+    const gainAt = function (t) { if (!fadeDur) return 1; return clamp(Math.min(t / fadeDur, (outLen - t) / fadeDur), 0, 1); };
+    let canvas = null, g = null;
+    const video = { width: o.width, height: o.height, fit: o.fit, crop: o.crop, rotate: o.rotate, flip: o.flip, forceTranscode: !!(o.exact || o.crop || o.width || o.height || o.rotate || o.flip || o.fade || o.cut), quality: MB.QUALITY_HIGH };
+    if (o.fade || o.cut) {
+      video.process = function (sample) {
+        const ts = mapT(sample.timestamp); if (ts === null) return null;
+        if (o.cut && ts !== sample.timestamp) sample.setTimestamp(ts);
+        if (!o.fade) return sample;
+        const a = gainAt(rel(ts));
+        if (a >= 0.999) return sample;
+        const w = sample.displayWidth, h = sample.displayHeight;
+        if (!canvas || canvas.width !== w || canvas.height !== h) { canvas = new OffscreenCanvas(w, h); g = canvas.getContext('2d'); }
+        g.globalAlpha = 1; g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.globalAlpha = a; sample.draw(g, 0, 0, w, h); g.globalAlpha = 1;
+        return canvas;
+      };
+    }
+    const audio = o.mute ? { discard: true } : {};
+    if (!o.mute && (o.fade || o.cut)) {
+      audio.forceTranscode = true;
+      audio.process = function (s) {
+        const ts = mapT(s.timestamp); if (ts === null) return null;
+        if (o.cut && ts !== s.timestamp) s.setTimestamp(ts);
+        if (!o.fade) return s;
+        const tRel = rel(ts), a0 = gainAt(tRel), a1 = gainAt(tRel + s.duration);
+        if (a0 >= 0.999 && a1 >= 0.999) return s;
+        const n = s.numberOfFrames, ch = s.numberOfChannels, data = new Float32Array(n * ch);
+        for (let c = 0; c < ch; c++) { const plane = data.subarray(c * n, (c + 1) * n); s.copyTo(plane, { planeIndex: c, format: 'f32-planar' }); for (let i = 0; i < n; i++) plane[i] *= a0 + (a1 - a0) * (i / n); }
+        return new MB.AudioSample({ data: data, format: 'f32-planar', numberOfChannels: ch, sampleRate: s.sampleRate, timestamp: ts });
+      };
+    }
+    const attempt = async function (format, mime, ext) {
+      // prefer the most compatible codecs (H.264 + AAC plays on WhatsApp / iPhone / TV); fall back to VP9 / AV1 / Opus
+      const vs = format.getSupportedVideoCodecs(), as = format.getSupportedAudioCodecs();
+      const vc = await MB.getFirstEncodableVideoCodec(['avc', 'vp9', 'av1', 'hevc', 'vp8'].filter(function (c) { return vs.indexOf(c) >= 0; }));
+      const ac = await MB.getFirstEncodableAudioCodec(['aac', 'opus', 'mp3', 'vorbis'].filter(function (c) { return as.indexOf(c) >= 0; }));
+      if (!vc) return null;
+      video.codec = vc; if (ac && !audio.discard) audio.codec = ac;
+      const target = new MB.BufferTarget();
+      const output = new MB.Output({ format: format, target: target });
+      const conv = await MB.Conversion.init({ input: input, output: output, video: video, audio: audio, trim: o.trim, showWarnings: false });
+      if (!conv.isValid || conv.discardedTracks.some(function (d) { return d.reason !== 'discarded_by_user'; })) { try { await conv.cancel(); } catch (e) {} return null; }
+      conv.onProgress = function (p) { prog.set(10 + clamp(p, 0, 1) * 82, label + ' ' + Math.round(clamp(p, 0, 1) * 100) + '%'); };
+      await conv.execute();
+      return { blob: new Blob([target.buffer], { type: mime }), ext: ext };
+    };
+    try {
+      return (await attempt(new MB.Mp4OutputFormat({ fastStart: 'in-memory' }), 'video/mp4', 'mp4')) || (await attempt(new MB.WebMOutputFormat(), 'video/webm', 'webm'));
+    } catch (e) { console.warn('fast engine failed, falling back', e); return null; }
+  }
+  window.VideoFast = { load: loadMB, convert: fastConvert };
 
   // Run one ffmpeg job; retries with the "no audio track" variant when the clip has no sound. Returns the output bytes.
   async function runFfmpeg(file, variants, outName, prog, label) {
@@ -159,7 +241,6 @@
   TOOL_IMPL.videotrim = {
     mount: function (container) {
       ensureStyle();
-      ensureFFmpeg().catch(function () {});
       let file = null, url = null, dur = 0, start = 0, end = 0, mode = 'keep', fade = false, mute = false, fast = null, thumbToken = 0;
       const body = el('<div></div>'); container.appendChild(body);
 
@@ -172,7 +253,7 @@
               file = fl[0]; if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(file);
               try { dur = await getVideoDuration(file); } catch (e) { dur = 0; }
               if (!dur || !isFinite(dur)) { file = null; body.innerHTML = ''; paint(); errBox(body, 'This video could not be read. Try an MP4 or MOV file.'); return; }
-              start = 0; end = dur; fast = dur > 180; mode = 'keep'; paint();
+              start = 0; end = dur; fast = !('VideoEncoder' in window) && dur > 180; mode = 'keep'; paint(); // with the hardware engine an exact cut is quick, so Exact stays the default
             }
           });
           return;
@@ -278,18 +359,23 @@
       async function doCut() {
         const prog = mountProgress(body);
         try {
-          const useFast = mode === 'keep' && fast && !fade, ext = useFast ? extOf(file) : 'mp4';
+          let s = start, e = end, cut = null;
+          if (mode === 'remove') {
+            if (start <= 0.05) { s = end; e = dur; } else if (end >= dur - 0.05) { s = 0; e = start; } else { cut = { start: start, end: end }; s = 0; e = dur; }
+          }
+          if (e - s < 0.1) throw new Error('Nothing would be left — choose a shorter part to remove.');
+          // 1) fast hardware engine
+          const fr = await fastConvert(file, cut ? { cut: cut, mute: mute } : { trim: (s > 0.01 || e < dur - 0.01) ? { start: s, end: e } : undefined, exact: !fast, fade: fade ? 1 : 0, mute: mute }, prog, 'Cutting');
+          if (fr) {
+            downloadBlob(fr.blob, baseName(file) + '-cut.' + fr.ext); prog.set(100, 'Done'); prog.remove();
+            mountResult(body, 'Done — your cut video was downloaded.'); return;
+          }
+          // 2) fallback: ffmpeg.wasm
+          const useFast = !cut && fast && !fade, ext = useFast ? extOf(file) : 'mp4';
           const outName = 'out.' + ext;
           let build;
-          if (mode === 'keep' || start <= 0.05 || end >= dur - 0.05) {
-            // "remove" at either edge is simply keeping the other side
-            let s = start, e = end;
-            if (mode === 'remove') { if (start <= 0.05) { s = end; e = dur; } else { s = 0; e = start; } }
-            if (e - s < 0.1) throw new Error('Nothing would be left — choose a shorter part to remove.');
-            build = function (inN, outN, noAudio) { const v = trimKeepArgs(inN, outN, { start: s, end: e, fast: useFast, fade: fade, fadeSec: 1, mute: mute }); return noAudio ? v.noAudio : v.withAudio; };
-          } else {
-            build = function (inN, outN, noAudio) { const v = trimRemoveArgs(inN, outN, { start: start, end: end, mute: mute }); return noAudio ? v.noAudio : v.withAudio; };
-          }
+          if (!cut) build = function (inN, outN, noAudio) { const v = trimKeepArgs(inN, outN, { start: s, end: e, fast: useFast, fade: fade, fadeSec: 1, mute: mute }); return noAudio ? v.noAudio : v.withAudio; };
+          else build = function (inN, outN, noAudio) { const v = trimRemoveArgs(inN, outN, { start: cut.start, end: cut.end, mute: mute }); return noAudio ? v.noAudio : v.withAudio; };
           const data = await runFfmpeg(file, { withAudio: function (i, o) { return build(i, o, false); }, noAudio: function (i, o) { return build(i, o, true); } }, outName, prog, 'Cutting');
           const mime = ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4';
           downloadBlob(new Blob([data], { type: mime }), baseName(file) + '-cut.' + ext);
@@ -305,7 +391,6 @@
   TOOL_IMPL.videocrop = {
     mount: function (container) {
       ensureStyle();
-      ensureFFmpeg().catch(function () {});
       let file = null, url = null, vw = 0, vh = 0, ratio = 'free', rect = { x: 0.1, y: 0.1, w: 0.8, h: 0.8 };
       const body = el('<div></div>'); container.appendChild(body);
       const RATIOS = [['free', 'Free'], ['1:1', '1:1 Square'], ['9:16', '9:16 Reels/Shorts'], ['16:9', '16:9 Wide'], ['4:5', '4:5 Portrait'], ['4:3', '4:3']];
@@ -394,7 +479,9 @@
         const prog = mountProgress(body);
         try {
           const c = cropFilter(vw, vh, rect);
-          const mk = function (i, o) { return ['-i', i, '-vf', c.filter, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
+          const fr = await fastConvert(file, { crop: { left: c.x, top: c.y, width: c.w, height: c.h } }, prog, 'Cropping');
+          if (fr) { downloadBlob(fr.blob, baseName(file) + '-crop-' + c.w + 'x' + c.h + '.' + fr.ext); prog.set(100, 'Done'); prog.remove(); mountResult(body, 'Done — cropped video (' + c.w + ' × ' + c.h + ') downloaded.'); return; }
+          const mk = function (i, o) { return ['-i', i, '-vf', c.filter, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
           const data = await runFfmpeg(file, { withAudio: mk, noAudio: null }, 'out.mp4', prog, 'Cropping');
           downloadBlob(new Blob([data], { type: 'video/mp4' }), baseName(file) + '-crop-' + c.w + 'x' + c.h + '.mp4');
           prog.set(100, 'Done'); prog.remove(); mountResult(body, 'Done — cropped video (' + c.w + ' × ' + c.h + ') downloaded.');
@@ -408,7 +495,6 @@
   TOOL_IMPL.videoresize = {
     mount: function (container) {
       ensureStyle();
-      ensureFFmpeg().catch(function () {});
       let file = null, url = null, vw = 0, vh = 0, preset = '1080p', fit = 'pad', cw = 1280, ch = 720;
       const body = el('<div></div>'); container.appendChild(body);
       const PRESETS = [
@@ -470,8 +556,10 @@
         const prog = mountProgress(body);
         try {
           const t = target(), isP = ['1080p', '720p', '480p', '360p'].indexOf(preset) >= 0;
+          const fr = await fastConvert(file, { width: t.w, height: t.h, fit: isP ? 'fill' : fit === 'pad' ? 'contain' : fit === 'fill' ? 'cover' : 'fill' }, prog, 'Resizing');
+          if (fr) { downloadBlob(fr.blob, baseName(file) + '-' + t.w + 'x' + t.h + '.' + fr.ext); prog.set(100, 'Done'); prog.remove(); mountResult(body, 'Done — resized video (' + t.w + ' × ' + t.h + ') downloaded.'); return; }
           const vf = resizeFilter(t.w, t.h, isP ? 'stretch' : fit); // the 1080p/720p… presets already follow the picture's own shape
-          const mk = function (i, o) { return ['-i', i, '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
+          const mk = function (i, o) { return ['-i', i, '-vf', vf, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
           const data = await runFfmpeg(file, { withAudio: mk, noAudio: null }, 'out.mp4', prog, 'Resizing');
           downloadBlob(new Blob([data], { type: 'video/mp4' }), baseName(file) + '-' + t.w + 'x' + t.h + '.mp4');
           prog.set(100, 'Done'); prog.remove(); mountResult(body, 'Done — resized video (' + t.w + ' × ' + t.h + ') downloaded.');
@@ -560,7 +648,9 @@
             cv.disabled = true; const prog = mountProgress(body);
             try {
               const f = new File([blob], 'screen-recording.webm', { type: blob.type });
-              const mk = function (i, o) { return ['-i', i, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
+              const fr = await fastConvert(f, { exact: true }, prog, 'Converting');
+              if (fr && fr.ext === 'mp4') { downloadBlob(fr.blob, 'screen-recording.mp4'); prog.remove(); mountResult(body, 'Done — MP4 downloaded.'); cv.disabled = false; return; }
+              const mk = function (i, o) { return ['-i', i, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', o]; };
               const data = await runFfmpeg(f, { withAudio: mk, noAudio: null }, 'out.mp4', prog, 'Converting');
               downloadBlob(new Blob([data], { type: 'video/mp4' }), 'screen-recording.mp4'); prog.remove(); mountResult(body, 'Done — MP4 downloaded.');
             } catch (err) { prog.remove(); errBox(body, err.message || err); }

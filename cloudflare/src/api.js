@@ -234,7 +234,8 @@ async function aiText(env, user, b) {
   const toolId = String(b.toolId || 'aisummarize');
   const order = planProviders(env, toolId);
   if (!order.length) return err(501, 'AI feature not set up yet (NVIDIA_API_KEY / GEMINI_API_KEY missing).');
-  const cost = b.creditCost ? Number(b.creditCost) : 1;
+  // never trust the browser below 1 credit (a negative / tiny / NaN value used to make AI text free)
+  const cost = Math.min(20, Math.max(1, Math.round(Number(b.creditCost) || 1)));
   const instruction = String(b.instruction || '');
   if (!instruction.trim()) return err(400, 'Missing instruction.');
   const { text, cut } = clampText(b.text);
@@ -261,6 +262,48 @@ async function aiImage(env, user, b) {
     const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: prep.prompt });
     if (!out || !out.image) throw fail(502, 'Model did not return an image — try rephrasing the prompt.');
     return json({ ok: true, imageBase64: out.image, mimeType: 'image/jpeg', usedPrompt: prep.prompt, translated: prep.translated });
+  });
+}
+
+// Photo → AI style (anime, 3D cartoon, Tanjore…): FLUX.2 [klein] 4B edits the user's photo (reference image ≤ 512 px,
+// sent by the browser as JPEG base64). 5 credits, refunded automatically if the model fails. Prompts never name a studio or artist.
+const RESTYLE = {
+  anime: 'a hand-drawn Japanese anime film illustration, soft painted background, clean line art, warm light',
+  cartoon3d: 'a cute 3D animated movie character render, soft studio lighting, big expressive eyes',
+  comic: 'a bold comic book illustration with black ink outlines, flat colours and halftone shading',
+  watercolor: 'a delicate watercolour painting on textured paper with soft colour bleeds',
+  oil: 'a classic oil painting on canvas with visible brush strokes and rich colours',
+  pencil: 'a detailed graphite pencil drawing on white paper with realistic shading',
+  tanjore: 'a traditional South Indian Tanjore painting with rich colours, gold leaf ornaments and a decorative border',
+  clay: 'a handmade clay figure (claymation) scene with soft shadows',
+  pixel: 'retro 16-bit pixel art',
+  popart: 'a colourful pop-art print with bold flat colours and dots',
+  caricature: 'a friendly, flattering caricature drawing with a slightly larger head, clean colours',
+  sticker: 'a die-cut cartoon sticker with a thick white border on a plain light background',
+};
+async function aiRestyle(env, user, b) {
+  if (!env.AI) return err(501, 'AI image feature is not set up (Workers AI binding missing).');
+  const b64 = String(b.imageBase64 || '');
+  if (!b64 || b64.length > 1400000 || !/^[A-Za-z0-9+/=]+$/.test(b64)) return err(400, 'Photo missing or too large (send ≤ 512 px JPEG).');
+  const style = RESTYLE[String(b.style || '')];
+  const extra = String(b.prompt || '').trim().slice(0, 200);
+  if (!style && !extra) return err(400, 'Choose a style.');
+  const dim = (v) => Math.min(1024, Math.max(256, Math.round((Number(v) || 1024) / 16) * 16));
+  const W = dim(b.width), H = dim(b.height);
+  return charged(env, user.id, 5, 'aistyle', async () => {
+    const extraEn = extra ? (await prepareImagePrompt(env, extra)).prompt : '';
+    const prompt = `Redraw image 0 as ${style || 'an artwork'}. Keep the same people, faces, expressions, pose, clothes and composition; keep it family-friendly.${extraEn ? ' Also: ' + extraEn + '.' : ''} No text, no watermark.`;
+    const bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const form = new FormData();
+    form.append('prompt', prompt);
+    form.append('input_image_0', new Blob([bytes], { type: 'image/jpeg' }), 'photo.jpg');
+    form.append('width', String(W));
+    form.append('height', String(H));
+    const fr = new Response(form); // serialises the form and gives the multipart boundary
+    const out = await env.AI.run('@cf/black-forest-labs/flux-2-klein-4b', { multipart: { body: fr.body, contentType: fr.headers.get('content-type') } });
+    if (!out || !out.image) throw fail(502, 'The AI did not return a picture — try another photo or style.');
+    return json({ ok: true, imageBase64: out.image, style: b.style || null });
   });
 }
 
@@ -571,6 +614,7 @@ const AUTHED_POST = {
   '/api/redeem': (env, req, u, b) => redeem(env, req, u, b),
   '/api/ai/text': (env, req, u, b) => aiText(env, u, b),
   '/api/ai/image': (env, req, u, b) => aiImage(env, u, b),
+  '/api/ai/restyle': (env, req, u, b) => aiRestyle(env, u, b),
   '/api/ai/health': (env, req, u, b) => aiHealth(env, u, b),
   '/api/payment/create-order': (env, req, u, b) => createOrder(env, u, b),
   '/api/payment/verify': (env, req, u, b) => verifyPayment(env, u, b),

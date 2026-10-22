@@ -153,7 +153,7 @@ function mk(c, w, h){
 /* ---------- templates ---------- */
 function shop(){ return brand.name || 'உங்கள் கடை பெயர்'; }
 var TPLS = [
- {id:'greet', label:'வாழ்த்து (பொது)', fonts:[FH,FM], build:function(h){
+ {id:'greet', cat:'fest', label:'வாழ்த்து (பொது)', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#6a11cb'],[1,'#ec4899']]));
    h.dots(w*0.06,H*0.04,9,4,w*0.1,5*u,'rgba(255,255,255,.18)');
@@ -165,7 +165,7 @@ var TPLS = [
      {t:'உங்கள் வாழ்வில் மகிழ்ச்சியும் வெற்றியும் நிறைந்திருக்கட்டும்',s:0.04,f:FM,c:'#ffffff',w:0.78}
    ]);
  }},
- {id:'pongal', label:'பொங்கல்', fonts:[FH,FM], build:function(h){
+ {id:'pongal', cat:'fest', label:'பொங்கல்', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#ff9a00'],[0.6,'#ffd23f'],[1,'#fff3b0']]));
    h.rays(w/2,H*0.25,0,w*1.1,24,'rgba(255,255,255,.22)');
@@ -185,7 +185,7 @@ var TPLS = [
      {t:'உங்கள் பெயர் / குடும்பத்தினர்',s:0.048,f:FH,c:'#14532d',b:1}
    ]);
  }},
- {id:'tny', label:'தமிழ் புத்தாண்டு', fonts:[FH,FM,FS], build:function(h){
+ {id:'tny', cat:'fest', label:'தமிழ் புத்தாண்டு', fonts:[FH,FM,FS], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#0b6e4f'],[1,'#08a045']]));
    h.rays(w/2,H*0.26,0,w*1.1,28,'rgba(255,224,102,.14)');
@@ -202,7 +202,7 @@ var TPLS = [
      {t:'உங்கள் பெயர்',s:0.05,f:FH,c:'#ffe066',b:1}
    ]);
  }},
- {id:'deepavali', label:'தீபாவளி', fonts:[FH,FM], build:function(h){
+ {id:'deepavali', cat:'fest', label:'தீபாவளி', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#1b0a3c'],[1,'#5b1a7a']]));
    h.star(w/2,H*0.22,w*0.30,w*0.13,16,'rgba(255,196,0,.18)',{selectable:false,evented:false});
@@ -219,7 +219,7 @@ var TPLS = [
      {t:'உங்கள் பெயர் / கடை பெயர்',s:0.05,f:FH,c:'#ffffff',b:1}
    ]);
  }},
- {id:'republic', label:'சுதந்திர / குடியரசு தினம்', fonts:[FH,FM], build:function(h){
+ {id:'republic', cat:'fest', label:'சுதந்திர / குடியரசு தினம்', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg('#ffffff');
    h.rect(0,0,w,H*0.33,'#ff9933',{selectable:false,evented:false});
@@ -238,7 +238,7 @@ var TPLS = [
      {t:'உங்கள் பெயர் / நிறுவனம்',s:0.05,f:FH,c:'#ffffff',b:1}
    ]);
  }},
- {id:'teachers', label:'ஆசிரியர் தினம்', fonts:[FH,FM], build:function(h){
+ {id:'teachers', cat:'fest', label:'ஆசிரியர் தினம்', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg('#1f3d2b');
    h.rect(w*0.04,H*0.03,w*0.92,H*0.84,'rgba(0,0,0,0)',{stroke:'#c08a4b',strokeWidth:16*u,rx:10*u,ry:10*u,selectable:false,evented:false});
@@ -250,7 +250,7 @@ var TPLS = [
      {t:'— உங்கள் பெயர்',s:0.05,f:FH,c:'#ffd166',b:1}
    ]);
  }},
- {id:'sale', label:'தள்ளுபடி / விற்பனை', fonts:[FH,FM], build:function(h){
+ {id:'sale', cat:'business', label:'தள்ளுபடி / விற்பனை', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#d90429'],[1,'#8d0801']]));
    h.rays(w/2,H*0.30,0,w*1.1,30,'rgba(255,214,0,.13)');
@@ -265,7 +265,7 @@ var TPLS = [
      {t:'வருக! வருக! குடும்பத்துடன் வருக!',s:0.045,f:FM,c:'#ffe3e3'}
    ]);
  }},
- {id:'opening', label:'திறப்பு விழா', fonts:[FH,FM,FS], build:function(h){
+ {id:'opening', cat:'business', label:'திறப்பு விழா', fonts:[FH,FM,FS], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#0b1d51'],[1,'#162a6b']]));
    h.rect(w*0.04,H*0.03,w*0.92,H*0.84,'rgba(0,0,0,0)',{stroke:'#ffc300',strokeWidth:8*u,selectable:false,evented:false});
@@ -281,7 +281,7 @@ var TPLS = [
      {t:'திறப்பு விழா சலுகைகள் உண்டு',s:0.042,f:FM,c:'#ffffff'}
    ]);
  }},
- {id:'condolence', label:'கண்ணீர் அஞ்சலி', fonts:[FH,FM,FS], build:function(h){
+ {id:'condolence', cat:'notice', label:'கண்ணீர் அஞ்சலி', fonts:[FH,FM,FS], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#f4f4f4'],[1,'#d9d9d9']]));
    h.rect(0,0,w,H*0.04,'#111',{selectable:false,evented:false});
@@ -295,7 +295,7 @@ var TPLS = [
      {t:'— குடும்பத்தினர் / நண்பர்கள்',s:0.042,f:FM,c:'#444'}
    ]);
  }},
- {id:'wedding', label:'திருமண அழைப்பிதழ்', fonts:[FT,FH,FM,FS], build:function(h){
+ {id:'wedding', cat:'events', label:'திருமண அழைப்பிதழ்', fonts:[FT,FH,FM,FS], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg('#fff7e6');
    h.rect(w*0.035,H*0.025,w*0.93,H*0.85,'rgba(0,0,0,0)',{stroke:'#8d0f2f',strokeWidth:14*u,selectable:false,evented:false});
@@ -313,7 +313,7 @@ var TPLS = [
      {t:'இடம்: திருமண மண்டபம் பெயர், ஊர்',s:0.045,f:FM,c:'#2b2b2b'}
    ]);
  }},
- {id:'birthday', label:'பிறந்தநாள்', fonts:[FH,FM], build:function(h){
+ {id:'birthday', cat:'events', label:'பிறந்தநாள்', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#00c6ff'],[1,'#0072ff']]));
    var cols=['#ffd60a','#ff4d6d','#7CFC00','#ffffff','#ff9f1c'];
@@ -329,7 +329,7 @@ var TPLS = [
      {t:'நீடூழி வாழ்க! நலமுடன் வாழ்க!',s:0.045,f:FM,c:'#e0f2ff'}
    ]);
  }},
- {id:'notice', label:'அறிவிப்பு', fonts:[FH,FM], build:function(h){
+ {id:'notice', cat:'notice', label:'அறிவிப்பு', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg('#ffffff');
    h.rect(0,0,w,H*0.17,'#0b5ed7',{selectable:false,evented:false});
@@ -343,7 +343,7 @@ var TPLS = [
      {t:'தொடர்புக்கு: கீழே உள்ள எண்ணில்',s:0.045,f:FM,c:'#1f2937',a:'left'}
    ]);
  }},
- {id:'morning', label:'காலை வணக்கம்', fonts:[FH,FM], build:function(h){
+ {id:'morning', cat:'fest', label:'காலை வணக்கம்', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#ff7e5f'],[0.55,'#feb47b'],[1,'#ffe29a']]));
    h.rays(w/2,H*0.62,0,w*1.2,26,'rgba(255,255,255,.2)');
@@ -358,6 +358,8 @@ var TPLS = [
    h.text('— உங்கள் பெயர்',{left:w*0.1,top:H*0.775,w:w*0.8,size:w*0.05,font:FH,color:'#ffffff',bold:1,align:'center'});
  }}
 ];
+/* extra ready-made designs from poster-templates.js (loaded before this file) */
+(window.__posterExtraTemplates||[]).forEach(function(fn){ try { TPLS.push.apply(TPLS, fn({FH:FH,FC:FC,FM:FM,FS:FS,FT:FT,FN:FN,shop:shop})); } catch(e){ console.warn('extra templates', e); } });
 function tplById(id){ for (var i=0;i<TPLS.length;i++) if (TPLS[i].id===id) return TPLS[i]; return TPLS[0]; }
 
 /* ---------- canvas setup / zoom ---------- */
@@ -466,7 +468,7 @@ async function makeThumbs(){
   for (var i=0;i<TPLS.length;i++){
     var t = TPLS[i];
     var b = document.createElement('button');
-    b.className = 'tpl'; b.dataset.id = t.id; b.type='button';
+    b.className = 'tpl'; b.dataset.id = t.id; b.dataset.cat = t.cat || 'other'; b.type='button';
     b.innerHTML = '<img alt="" width="96" height="128"><span>'+t.label+'</span>';
     (function(tt){ b.addEventListener('click', function(){ applyTemplate(tt.id); }); })(t);
     box.appendChild(b);
@@ -806,7 +808,8 @@ async function boot(){
   if (!F){ $('stage').textContent = 'Fabric.js ஏற்ற முடியவில்லை — பக்கத்தைப் புதுப்பிக்கவும்'; return; }
   try{ F.FabricObject.ownDefaults.originX='left'; F.FabricObject.ownDefaults.originY='top'; }catch(e){}
   canvas = new F.Canvas('c',{width:W,height:H,preserveObjectStacking:true,selection:false,backgroundColor:'#ffffff',enableRetinaScaling:false,allowTouchScrolling:true});
-  window.__poster = {canvas:canvas, state:function(){ return {W:W,H:H,sizeId:sizeId,tplId:tplId}; }, applyTemplate:applyTemplate, setSize:setSize};
+  window.__poster = {canvas:canvas, F:F, state:function(){ return {W:W,H:H,sizeId:sizeId,tplId:tplId}; }, applyTemplate:applyTemplate, setSize:setSize, templates:TPLS, fonts:FONTS, ensureFont:ensureFont, toast:toast, readImage:readImage, downscale:downscale, centerAdd:centerAdd, syncProps:syncProps, addPhoto:addPhoto, commit:function(){ pushHist(); }, brand:function(){ return brand; }};
+  document.dispatchEvent(new Event('poster-ready'));
   var sz = $('sizes');
   SIZES.forEach(function(s){
     var b = document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=s.id; b.textContent=s.label;

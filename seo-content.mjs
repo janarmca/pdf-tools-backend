@@ -345,6 +345,86 @@ export const SEO_EXTRA = {
     uses: ['Recording a how-to for students or customers', 'Capturing a browser tab with its sound', 'Saving a presentation with your voice-over'],
     faqs: [['Does it work on a phone?', 'No. Phone browsers do not let websites record the screen. Use Chrome, Edge or Firefox on a computer, or your phone\'s built-in screen recorder.'], ['Can I record the sound?', 'Yes. Tick the sound option and, in Chrome, tick “Share tab audio” / “Share system audio” in the box that appears. You can also add your microphone.']]
   },
+  audiocut: {
+    title: "Audio Cutter & Ringtone Maker — Cut MP3 Online Free | PDF Tools India",
+    desc: "Cut an MP3 or any audio on its waveform: keep or remove a part, fade in/out, save as MP3, WAV or OGG. Free, no signup, nothing is uploaded.",
+    intro: "Make a ringtone, cut a song intro, or remove a mistake from a recording — drag the two handles on the waveform and save.",
+    steps: ["Open Audio Cutter and choose a song, recording or video.", "Drag the handles (or type the times) and pick Keep or Remove.", "Choose MP3 / WAV and press Cut & download."],
+    uses: ["Making a 30-second ringtone", "Cutting the silence at the start of a recording", "Taking one song out of a long audio file"],
+    faqs: [["Can I cut audio from a video?", "Yes. Choose the video file; the tool uses its sound."], ["Is my file uploaded?", "No. Everything happens in your browser."]]
+  },
+  audioconvert: {
+    title: "Audio Converter Online Free — MP3, WAV, M4A, OGG | PDF Tools India",
+    desc: "Convert audio to MP3, WAV, M4A or OGG in your browser — many files at once, optional mono and even volume. Free, no signup.",
+    intro: "Change WAV, M4A, AAC, OGG, FLAC or a video's sound into MP3 (or the other way round) without installing anything.",
+    steps: ["Open Audio Converter and add one or more files.", "Pick the format and quality.", "Press Convert & download."],
+    uses: ["WAV to MP3 to save space", "M4A voice notes to MP3", "Making a voice recording mono and evenly loud"],
+    faqs: [["Which formats can I make?", "MP3 and WAV always; M4A and OGG when your browser supports them (the menu shows only what works)."], ["Is there a file limit?", "Files up to about 400 MB each."]]
+  },
+  videotomp3: {
+    title: "Video to MP3 Converter Online Free — Extract Audio from MP4 | PDF Tools India",
+    desc: "Take the sound out of an MP4, MOV or WEBM video as MP3, WAV or M4A. Free, in your browser, nothing is uploaded.",
+    intro: "Save the song, speech or class audio from a video so you can listen to it like music.",
+    steps: ["Open Video to MP3 and choose one or more videos.", "Pick MP3 (or WAV) and the quality.", "Press Convert & download."],
+    uses: ["Saving a lecture video as audio", "Keeping a song from your own video", "Smaller files to share on WhatsApp"],
+    faqs: [["Does it work with phone videos?", "Yes — MP4 and MOV from phones work."], ["Is the video uploaded?", "No, it stays on your device."]]
+  },
+  audiomerge: {
+    title: "Merge Audio Files Online Free — Join MP3 Songs | PDF Tools India",
+    desc: "Join MP3, WAV, M4A or OGG files one after another, with silence between or a smooth cross-fade. Free, in your browser.",
+    intro: "Put several songs or recordings together into one file — choose the order, add a gap or cross-fade.",
+    steps: ["Open Merge Audio and add the files.", "Set the order with the arrows and pick back-to-back, silence or cross-fade.", "Press Join & download."],
+    uses: ["A song medley for a function", "Joining several voice recordings", "Adding an intro before a speech"],
+    faqs: [["Can I mix different formats?", "Yes, MP3, WAV, M4A, OGG and video sound can be joined together."]]
+  },
+  audioeffects: {
+    title: "Audio Volume Booster & Effects Online Free — Louder, Bass, Speed | PDF Tools India",
+    desc: "Make audio louder or softer, normalise, change speed, boost bass or treble, fade, reverse and remove low hum — free in your browser.",
+    intro: "Fix a quiet recording or give a song more bass, then save as MP3 or WAV.",
+    steps: ["Open Audio Volume & Effects and choose a file.", "Move the sliders and tick the options; press Preview to listen.", "Press Apply & download."],
+    uses: ["Making a quiet phone recording louder", "Bass boost for a song", "Removing fan or AC hum"],
+    faqs: [["Does changing speed change the pitch?", "Yes — like a faster tape, a higher speed also raises the pitch."]]
+  },
+  voicerec: {
+    title: "Online Voice Recorder Free — Record and Save as MP3 | PDF Tools India",
+    desc: "Record your voice with the microphone and save it as MP3 or WAV. Free, works on phones and computers, nothing is uploaded.",
+    intro: "A simple microphone recorder with a level meter, pause and noise reduction.",
+    steps: ["Open Voice Recorder and press Start recording.", "Allow the microphone; speak; press Stop.", "Listen, then save as MP3 or WAV."],
+    uses: ["Voice notes and dictation", "Recording a speech or song practice", "Making a voice-over for a video"],
+    faqs: [["Is the recording stored online?", "No, it stays on your device until you download it."]]
+  },
+  imgblur: {
+    title: "Blur or Hide Part of a Photo Online Free — Mask Aadhaar, Face | PDF Tools India",
+    desc: "Pixelate, blur or black-out any part of a photo — mask an Aadhaar or PAN number, a face, a number plate or an address. Free, in your browser.",
+    intro: "Before sharing a photo or ID copy, hide what others should not see. Drag a box, choose pixelate, blur or a solid box, and save.",
+    steps: ["Open the tool and choose the photo.", "Drag boxes over what must be hidden and pick the style.", "Press Download."],
+    uses: ["Masked Aadhaar copy (hide the first 8 digits)", "Hiding faces of children before posting", "Covering a vehicle number plate or address"],
+    faqs: [["Can the hidden part be recovered?", "No — the saved copy contains only the pixelated / blurred / filled pixels."], ["Is my photo uploaded?", "No. It never leaves your device."]]
+  },
+  imgsplit: {
+    title: "Split Image into Grid Online Free — Instagram 3×3 Grid Maker | PDF Tools India",
+    desc: "Cut a picture into 1×2, 1×3, 2×3 or 3×3 tiles for an Instagram carousel or profile grid, downloaded as one ZIP. Free, in your browser.",
+    intro: "Make a seamless carousel or a big picture across your profile grid by cutting one image into equal tiles.",
+    steps: ["Open the tool and choose a picture.", "Pick the grid and square tiles.", "Download the ZIP of tiles."],
+    uses: ["Instagram 3×3 profile puzzle", "Panorama carousel in 3 slides", "Printing a big poster on A4 sheets"],
+    faqs: [["In which order do I post the tiles?", "For a profile grid, post from the last number to the first so they line up."]]
+  },
+  imgsketch: {
+    title: "Photo to Sketch & Cartoon Online Free — Pencil, Comic, Oil, Watercolour | PDF Tools India",
+    desc: "Turn a photo into a pencil sketch, colour pencil, charcoal, line art, cartoon, comic, oil painting, watercolour, pop art, neon or pixel art — 14 free styles in your browser.",
+    intro: "Pick a style, move the sliders and compare with the original before you download. Made by image-processing code on your device — no AI, no upload, no credits.",
+    steps: ["Open Photo → Sketch & Art and choose a photo.", "Tap a style and adjust Detail, Colours and Line thickness.", "Download JPG or PNG."],
+    uses: ["Pencil sketch of a family photo", "Cartoon profile picture", "Comic-style poster image", "Watercolour greeting card"],
+    faqs: [["Is it free?", "Yes — all 14 styles are free and work offline after the page loads."], ["How is it different from AI Photo Style?", "These styles are filters on your own photo. AI Photo Style re-draws the picture with an AI model (5 credits)."]]
+  },
+  aistyle: {
+    title: "AI Photo Style — Convert Photo to Anime, 3D Cartoon, Tanjore Painting | PDF Tools India",
+    desc: "Turn your photo into anime, 3D cartoon, comic, watercolour, oil painting, Tanjore painting, clay or caricature with an AI image model. 5 credits per picture.",
+    intro: "An AI image model re-draws your photo in the style you choose while keeping the faces, pose and clothes. Add an extra wish in Tamil or English.",
+    steps: ["Sign in and open AI Photo Style.", "Choose a photo and a style (anime, 3D, Tanjore…).", "Press Make AI picture and download."],
+    uses: ["Anime profile picture", "3D cartoon of your child", "Tanjore-style family portrait", "Sticker of your pet"],
+    faqs: [["How much does it cost?", "5 credits per picture; if the AI fails the credits are refunded automatically."], ["Is my photo kept?", "It is sent to the AI service only to make the picture; we do not store it."]]
+  },
   txt2pdf: {
     title: 'Text to PDF Free Online — Convert TXT or Typed Text to PDF | PDF Tools India',
     desc: 'Turn a .txt file or text you type into a PDF. Free, no signup, runs in your browser.',
