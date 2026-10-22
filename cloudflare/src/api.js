@@ -307,6 +307,38 @@ async function aiRestyle(env, user, b) {
   });
 }
 
+// Text → speech (Tamil, English, Hindi … 100+ languages) with Gemini TTS. 1 credit per 1,000 characters (min 1), max 4,000.
+// The audio answer is streamed straight back to the browser WITHOUT parsing it here (a minute of WAV is ~4 MB of base64 —
+// JSON.parse of that would blow the free plan's 10 ms CPU). The browser finds the audio in either response shape.
+const TTS_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Aoede', 'Leda', 'Orus', 'Achird', 'Sulafat', 'Zephyr', 'Fenrir', 'Gacrux', 'Vindemiatrix']);
+async function aiSpeech(env, user, b) {
+  if (!env.GEMINI_API_KEY) return err(501, 'Text to speech is not set up yet (GEMINI_API_KEY missing).');
+  const text = String(b.text || '').trim();
+  if (!text) return err(400, 'Type the text to read.');
+  if (text.length > 4000) return err(400, 'Please send at most 4,000 characters at a time.');
+  const voice = TTS_VOICES.has(b.voice) ? b.voice : 'Kore';
+  const style = String(b.style || '').trim().slice(0, 80);
+  const cost = Math.max(1, Math.ceil(text.length / 1000));
+  return charged(env, user.id, cost, 'texttospeech', async () => {
+    const g = base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com');
+    const say = style ? `Read this aloud in a ${style} voice:\n${text}` : text;
+    // 1) current Interactions API
+    let r = await fetch(`${g}/v1beta/interactions`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body: JSON.stringify({ model: env.GEMINI_TTS_MODEL || 'gemini-3.8-flash-tts', input: [{ type: 'user_input', content: [{ type: 'text', text: say }] }], response_format: { type: 'audio' }, generation_config: { speech_config: [{ voice }] } }),
+    });
+    // 2) older generateContent shape, if the first is not available on this key/region
+    if (!r.ok) {
+      r = await fetch(`${g}/v1beta/models/${env.GEMINI_TTS_FALLBACK || 'gemini-2.5-flash-preview-tts'}:generateContent?key=${env.GEMINI_API_KEY}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: say }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } }),
+      });
+    }
+    if (!r.ok) throw fail(502, 'The voice service is busy or not available right now — your credits were returned. Please try again later.');
+    return new Response(r.body, { status: 200, headers: { 'Content-Type': 'application/json', 'X-Credits-Used': String(cost) } });
+  });
+}
+
 // ---------------------------------------------------------------- payments (Razorpay)
 async function createOrder(env, user, b) {
   const plan = await env.DB.prepare('select * from pricing_plans where id = ?').bind(b.planId).first();
@@ -615,6 +647,7 @@ const AUTHED_POST = {
   '/api/ai/text': (env, req, u, b) => aiText(env, u, b),
   '/api/ai/image': (env, req, u, b) => aiImage(env, u, b),
   '/api/ai/restyle': (env, req, u, b) => aiRestyle(env, u, b),
+  '/api/ai/speech': (env, req, u, b) => aiSpeech(env, u, b),
   '/api/ai/health': (env, req, u, b) => aiHealth(env, u, b),
   '/api/payment/create-order': (env, req, u, b) => createOrder(env, u, b),
   '/api/payment/verify': (env, req, u, b) => verifyPayment(env, u, b),

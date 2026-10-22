@@ -509,4 +509,291 @@
       paint();
     }
   };
+
+  /* ===================================================================== DSP: time-stretch (WSOLA), FFT, noise reduction */
+  // WSOLA time-stretch: makes audio longer/shorter WITHOUT changing pitch. ratio > 1 = longer (slower).
+  function wsola(b, ratio) {
+    const n = len(b), N = 2048, Hs = 1024, Ha = Hs / ratio, outLen = Math.max(1, Math.round(n * ratio)), tol = 384, D = 4;
+    const win = new Float32Array(N); for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+    const mono = new Float32Array(n); b.channels.forEach(function (c) { for (let i = 0; i < n; i++) mono[i] += c[i] / b.channels.length; });
+    const out = b.channels.map(function () { return new Float32Array(outLen + N); }), norm = new Float32Array(outLen + N);
+    let prev = 0; // input position of the previous chosen frame
+    for (let k = 0, op = 0; op < outLen; k++, op += Hs) {
+      const ideal = Math.round(k * Ha);
+      let best = ideal;
+      if (k > 0) { // choose the offset whose start best continues the previous frame (natural continuation = prev + Hs)
+        const nat = prev + Hs; let bc = -Infinity;
+        for (let d = -tol; d <= tol; d += 2) {
+          const s = ideal + d; if (s < 0 || s + N >= n) continue;
+          let c = 0; for (let i = 0; i < N / 2; i += D) { const a = nat + i < n ? mono[nat + i] : 0; c += a * mono[s + i]; }
+          if (c > bc) { bc = c; best = s; }
+        }
+      }
+      best = clamp(best, 0, Math.max(0, n - 1)); prev = best;
+      for (let ch = 0; ch < out.length; ch++) { const src = b.channels[ch], dst = out[ch]; for (let i = 0; i < N && best + i < n; i++) dst[op + i] += src[best + i] * win[i]; }
+      for (let i = 0; i < N; i++) norm[op + i] += win[i];
+    }
+    return { sampleRate: b.sampleRate, channels: out.map(function (c) { const r = new Float32Array(outLen); for (let i = 0; i < outLen; i++) r[i] = norm[i] > 1e-3 ? c[i] / norm[i] : 0; return r; }) };
+  }
+  function fft(re, im) { // in-place radix-2
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+    for (let size = 2; size <= n; size <<= 1) {
+      const ang = -2 * Math.PI / size, wr = Math.cos(ang), wi = Math.sin(ang);
+      for (let s = 0; s < n; s += size) { let cr = 1, ci = 0; for (let k = 0; k < size / 2; k++) { const a = s + k, c = a + size / 2, tr = re[c] * cr - im[c] * ci, ti = re[c] * ci + im[c] * cr; re[c] = re[a] - tr; im[c] = im[a] - ti; re[a] += tr; im[a] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } }
+    }
+  }
+  // spectral subtraction: learns the background noise from the quietest moments, then lowers it everywhere
+  async function denoise(b, strength, onP) {
+    const N = 2048, H = 512, n = len(b), win = new Float32Array(N); for (let i = 0; i < N; i++) win[i] = Math.sqrt(0.5 - 0.5 * Math.cos(2 * Math.PI * i / N));
+    const frames = Math.max(1, Math.ceil((n - N) / H) + 1), re = new Float32Array(N), im = new Float32Array(N);
+    const olaK = 2 * H / N; // sqrt-Hann analysis × synthesis = Hann; Hann windows at hop N/4 add up to N/(2H)
+    const out = [];
+    for (let ch = 0; ch < b.channels.length; ch++) {
+      const x = b.channels[ch], mags = [], energy = new Float32Array(frames);
+      for (let f = 0; f < frames; f++) { const o = f * H; let e = 0; for (let i = 0; i < N; i++) { const v = o + i < n ? x[o + i] : 0; e += v * v; } energy[f] = e; }
+      const order = Array.from(energy.keys()).sort(function (a, c) { return energy[a] - energy[c]; }).slice(0, Math.max(3, Math.round(frames * 0.1)));
+      const noise = new Float32Array(N / 2 + 1);
+      order.forEach(function (f) { const o = f * H; for (let i = 0; i < N; i++) { re[i] = (o + i < n ? x[o + i] : 0) * win[i]; im[i] = 0; } fft(re, im); for (let k = 0; k <= N / 2; k++) noise[k] += Math.hypot(re[k], im[k]) / order.length; });
+      const y = new Float32Array(n + N), k1 = 1 + strength * 2.5, floor = 0.08;
+      for (let f = 0; f < frames; f++) {
+        const o = f * H;
+        for (let i = 0; i < N; i++) { re[i] = (o + i < n ? x[o + i] : 0) * win[i]; im[i] = 0; }
+        fft(re, im);
+        for (let k = 0; k <= N / 2; k++) { const m = Math.hypot(re[k], im[k]), g = m > 1e-9 ? Math.max(floor, (m - k1 * noise[k]) / m) : 0; re[k] *= g; im[k] *= g; if (k > 0 && k < N / 2) { re[N - k] = re[k]; im[N - k] = -im[k]; } }
+        for (let i = 0; i < N; i++) im[i] = -im[i]; fft(re, im); // inverse FFT via conjugation
+        for (let i = 0; i < N; i++) y[o + i] += (re[i] / N) * win[i] * olaK; // olaK undoes the window overlap gain
+        if (f % 200 === 0) { if (onP) onP((ch + f / frames) / b.channels.length); await tick(); }
+      }
+      out.push(y.subarray(0, n).slice());
+    }
+    return { sampleRate: b.sampleRate, channels: out };
+  }
+  // RBJ biquad low-pass (used twice = 24 dB/octave) to keep only the bass from the centre channel
+  function lowpass(x, sr, fc) {
+    const w0 = 2 * Math.PI * fc / sr, al = Math.sin(w0) / (2 * 0.7071), cw = Math.cos(w0), a0 = 1 + al;
+    const b0 = (1 - cw) / 2 / a0, b1 = (1 - cw) / a0, b2 = b0, a1 = -2 * cw / a0, a2 = (1 - al) / a0, y = new Float32Array(x.length);
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < x.length; i++) { const v = b0 * x[i] + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = v; y[i] = v; }
+    return y;
+  }
+  function vocalRemove(b, keep) {
+    if (b.channels.length < 2) throw new Error('This file is mono (one channel). Vocal removal needs a stereo song where the singer is in the centre.');
+    const L = b.channels[0], R = b.channels[1], n = L.length, sr = b.sampleRate, mid = new Float32Array(n), side = new Float32Array(n);
+    for (let i = 0; i < n; i++) { mid[i] = (L[i] + R[i]) / 2; side[i] = (L[i] - R[i]) / 2; }
+    const bass = lowpass(lowpass(mid, sr, 140), sr, 140), oL = new Float32Array(n), oR = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      if (keep) { oL[i] = oR[i] = mid[i] - bass[i] - side[i] * 0.5; } // rough “vocals only”: centre minus bass minus the wide instruments
+      else { oL[i] = side[i] + bass[i]; oR[i] = -side[i] + bass[i]; } // karaoke: centre removed, bass kept
+    }
+    return { sampleRate: sr, channels: [oL, oR] };
+  }
+  Object.assign(window.AudioCore, { wsola: wsola, fft: fft, vocalRemove: vocalRemove, denoise: denoise });
+
+  /* ---------------------------------------------------------------- "keep it as a video" for any of these tools */
+  const isVideoFile = function (f) { return f && (/^video\//.test(f.type) || /\.(mp4|mov|m4v|webm|mkv|avi|3gp)$/i.test(f.name || '')); };
+  async function muxIntoVideo(videoFile, buf, prog) {
+    prog.set(55, 'Putting the new sound into the video…');
+    const eng = await ensureFFmpeg(), ff = eng.ffmpeg, ext = ((videoFile.name || '').split('.').pop() || 'mp4').toLowerCase();
+    await ff.writeFile('vin.' + ext, await eng.fetchFile(videoFile)); await ff.writeFile('ain.wav', wavBytes(buf));
+    const run = function (v) { return ff.exec(['-i', 'vin.' + ext, '-i', 'ain.wav', '-map', '0:v:0', '-map', '1:a:0'].concat(v, ['-c:a', 'aac', '-b:a', '192k', '-shortest', 'vout.mp4'])); };
+    let code = /^(mp4|m4v|mov)$/.test(ext) ? await run(['-c:v', 'copy']) : 1;
+    if (code !== 0) { try { await ff.deleteFile('vout.mp4'); } catch (e) {} code = await run(['-c:v', 'libx264', '-preset', 'ultrafast', '-pix_fmt', 'yuv420p']); }
+    if (code !== 0) throw new Error('Could not rebuild the video — the cleaned sound can still be saved as audio.');
+    const data = await ff.readFile('vout.mp4');
+    ['vin.' + ext, 'ain.wav', 'vout.mp4'].forEach(function (x) { try { ff.deleteFile(x); } catch (e) {} });
+    return new Blob([data], { type: 'video/mp4' });
+  }
+  function keepVideoBox(body, file) {
+    if (!isVideoFile(file)) return { get: function () { return false; } };
+    const b = el('<label class="ac-chk"><input type="checkbox" checked><span>Save as a video (keep the picture, replace the sound)<small>Untick to save only the sound as MP3 / WAV</small></span></label>'); body.appendChild(b);
+    return { get: function () { return b.querySelector('input').checked; } };
+  }
+  async function finish(body, file, buf, picker, keep, suffix, label) {
+    if (!keep.get()) return saveResult(body, buf, picker, baseName(file) + '-' + suffix, label);
+    const prog = mountProgress(body);
+    try { const v = await muxIntoVideo(file, buf, prog); downloadBlob(v, baseName(file) + '-' + suffix + '.mp4'); prog.remove(); mountResult(body, 'Done — video with the new sound downloaded (' + (v.size / 1048576).toFixed(1) + ' MB).'); }
+    catch (e) { prog.remove(); errBox(body, e.message || e); }
+  }
+  // common "open one file → controls → preview 15 s → apply" shell
+  function singleFileTool(container, opts) {
+    ensureStyle();
+    let file = null, buf = null;
+    const body = el('<div></div>'); container.appendChild(body);
+    let prevSrc = null;
+    function paint() {
+      body.innerHTML = '';
+      if (opts.intro) body.appendChild(el('<div class="note">' + opts.intro + '</div>'));
+      if (!buf) {
+        mountUploader(body, { accept: 'audio/*,video/*', label: 'Drop a song, recording or video here, or tap to choose', sublabel: opts.sub || 'MP3 · WAV · M4A · OGG · or a video',
+          onAdd: async function (fl) { file = fl[0]; body.innerHTML = '<div class="note">Reading the sound…</div>'; try { buf = await decode(file); } catch (e) { buf = null; paint(); errBox(body, e.message); return; } paint(); } });
+        return;
+      }
+      mountFileList(body, [file], function () { buf = null; file = null; paint(); });
+      body.appendChild(el('<div class="note">Length ' + fmtT(len(buf) / buf.sampleRate) + ' · ' + buf.channels.length + ' channel' + (buf.channels.length > 1 ? 's' : '') + '</div>'));
+      opts.controls(body);
+      const keep = keepVideoBox(body, file), picker = formatPicker(body, 'mp3');
+      const row = el('<div class="btn-row"><button class="btn secondary">▶ Preview 15 s</button><button class="btn">' + (opts.button || 'Apply & download') + '</button></div>'); body.appendChild(row);
+      const [bp, bg] = row.querySelectorAll('button');
+      bp.onclick = async function () {
+        try { if (prevSrc) { try { prevSrc.stop(); } catch (e) {} } const part = slice(buf, 0, Math.min(15, len(buf) / buf.sampleRate)); const r = await opts.process(part, function () {}); const c = ctx(); if (c.state === 'suspended') await c.resume(); prevSrc = c.createBufferSource(); prevSrc.buffer = toAB(r); prevSrc.connect(c.destination); prevSrc.start(); }
+        catch (e) { errBox(body, e.message || e); }
+      };
+      bg.onclick = async function () {
+        bg.disabled = true; const prog = mountProgress(body); prog.set(10, 'Working…');
+        try { const out = await opts.process(buf, function (p) { prog.set(10 + p * 40, 'Working… ' + Math.round(p * 100) + '%'); }); prog.remove(); await finish(body, file, out, picker, keep, opts.suffix, 'Saving'); }
+        catch (e) { prog.remove(); errBox(body, e.message || e); }
+        bg.disabled = false;
+      };
+    }
+    paint();
+  }
+  function rangeRow(holder, label, min, max, step, val, fmt, on) {
+    const s = el('<div class="ac-slider"><b>' + label + '</b><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '"><span>' + fmt(val) + '</span></div>');
+    const r = s.querySelector('input'); r.oninput = function () { on(+r.value); s.querySelector('span').textContent = fmt(+r.value); }; holder.appendChild(s); return s;
+  }
+
+  /* ===================================================================== CHANGE PITCH / SPEED (independently) */
+  TOOL_IMPL.audiopitch = {
+    mount: function (container) {
+      const st = { speed: 1, semis: 0 };
+      singleFileTool(container, {
+        intro: 'Change the <b>speed without changing the voice</b>, or the <b>pitch (voice higher / lower) without changing the speed</b> — or both.', suffix: 'pitch-speed', button: '🎚️ Apply & download',
+        controls: function (b) {
+          rangeRow(b, '⏩ Speed', 0.5, 2, 0.05, st.speed, function (v) { return v.toFixed(2) + '×'; }, function (v) { st.speed = v; });
+          rangeRow(b, '🎵 Pitch', -12, 12, 1, st.semis, function (v) { return (v > 0 ? '+' : '') + v + ' semitone' + (Math.abs(v) === 1 ? '' : 's'); }, function (v) { st.semis = v; });
+          b.appendChild(el('<div class="note" style="margin-top:6px;">+12 = one octave higher (child / cartoon voice) · −5 = deeper voice · speed 0.75× = slower for learning a song.</div>'));
+        },
+        process: async function (b) {
+          const p = Math.pow(2, st.semis / 12);
+          if (Math.abs(p - 1) < 1e-3 && Math.abs(st.speed - 1) < 1e-3) return b;
+          let x = b;
+          if (Math.abs(p - 1) > 1e-3) { // resample (changes pitch AND length), then stretch the length back
+            const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, n = Math.ceil(len(b) / p);
+            const oc = new OC(b.channels.length, Math.max(1, n), b.sampleRate), src = oc.createBufferSource(); src.buffer = toAB(b); src.playbackRate.value = p; src.connect(oc.destination); src.start();
+            x = fromAB(await oc.startRendering());
+          }
+          return wsola(x, p / st.speed);
+        }
+      });
+    }
+  };
+
+  /* ===================================================================== EQUALIZER */
+  const BANDS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+  const EQ_PRESETS = { 'Flat': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'Bass boost': [7, 6, 5, 2, 0, 0, 0, 0, 0, 0], 'Voice clarity': [-6, -4, -2, 0, 1, 3, 4, 3, 1, 0], 'Podcast / speech': [-8, -5, -1, 1, 2, 3, 3, 2, 0, -2], 'Treble boost': [0, 0, 0, 0, 0, 1, 3, 5, 6, 6], 'Telephone': [-12, -12, -8, 0, 4, 6, 4, 0, -12, -12], 'Music (V-shape)': [5, 4, 2, 0, -2, -2, 0, 2, 4, 5] };
+  TOOL_IMPL.audioeq = {
+    mount: function (container) {
+      let g = EQ_PRESETS['Flat'].slice();
+      singleFileTool(container, {
+        intro: '10-band equaliser — boost or cut bass, voice and treble. Pick a preset or move the sliders.', suffix: 'eq', button: '🎛️ Apply EQ & download',
+        controls: function (b) {
+          const pr = el('<div class="filter-row" style="margin-top:8px;flex-wrap:wrap;"></div>'); b.appendChild(pr);
+          const holder = el('<div></div>'); b.appendChild(holder);
+          const draw = function () { holder.innerHTML = ''; BANDS.forEach(function (f, i) { rangeRow(holder, (f >= 1000 ? f / 1000 + ' kHz' : f + ' Hz'), -12, 12, 1, g[i], function (v) { return (v > 0 ? '+' : '') + v + ' dB'; }, function (v) { g[i] = v; }); }); };
+          Object.keys(EQ_PRESETS).forEach(function (k) { const c = el('<button class="filter-chip">' + k + '</button>'); c.onclick = function () { g = EQ_PRESETS[k].slice(); [].forEach.call(pr.children, function (x) { x.classList.toggle('active', x === c); }); draw(); }; pr.appendChild(c); });
+          draw();
+        },
+        process: async function (b) {
+          const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OC(b.channels.length, Math.max(1, len(b)), b.sampleRate), src = oc.createBufferSource(); src.buffer = toAB(b);
+          let node = src;
+          BANDS.forEach(function (f, i) { if (!g[i] || f >= b.sampleRate / 2) return; const q = oc.createBiquadFilter(); q.type = i === 0 ? 'lowshelf' : i === BANDS.length - 1 ? 'highshelf' : 'peaking'; q.frequency.value = f; q.Q.value = 1.1; q.gain.value = g[i]; node.connect(q); node = q; });
+          const lim = oc.createDynamicsCompressor(); lim.threshold.value = -1; lim.ratio.value = 20; lim.attack.value = 0.003; lim.release.value = 0.1; node.connect(lim); lim.connect(oc.destination); // stop boosts from clipping
+          src.start(); return fromAB(await oc.startRendering());
+        }
+      });
+    }
+  };
+
+  /* ===================================================================== VOCAL REMOVER / KARAOKE */
+  TOOL_IMPL.vocalremove = {
+    mount: function (container) {
+      let keep = false;
+      singleFileTool(container, {
+        intro: 'Make a <b>karaoke track</b> (singer removed) or an approximate <b>vocals-only</b> track from a stereo song or a music video. Works best on studio songs where the voice is in the centre; it cannot separate a mono recording (that needs AI).', suffix: 'karaoke', button: '🎤 Process & download',
+        controls: function (b) {
+          const m = el('<div class="filter-row" style="margin-top:8px;flex-wrap:wrap;"><button class="filter-chip active" data-k="0">🎶 Remove vocals (karaoke)</button><button class="filter-chip" data-k="1">🗣️ Keep vocals only (rough)</button></div>');
+          m.onclick = function (e) { const c = e.target.closest('[data-k]'); if (!c) return; keep = c.getAttribute('data-k') === '1'; [].forEach.call(m.children, function (x) { x.classList.toggle('active', x === c); }); };
+          b.appendChild(m);
+        },
+        process: async function (b) { const r = vocalRemove(b, keep); return peak(r) > 1 ? normalize(r, -1) : r; } // never boost what is left — only stop clipping
+      });
+    }
+  };
+
+  /* ===================================================================== NOISE REDUCTION */
+  TOOL_IMPL.audiodenoise = {
+    mount: function (container) {
+      const st = { strength: 0.6, rumble: true };
+      singleFileTool(container, {
+        intro: 'Lower steady background noise — fan, AC hum, hiss, traffic rumble — in a voice recording or a video. It learns the noise from the quietest moments, so start or end your recording with 1–2 seconds of silence for the best result.', suffix: 'clean', button: '🧹 Clean & download',
+        controls: function (b) {
+          rangeRow(b, '🧹 Strength', 0.1, 1, 0.05, st.strength, function (v) { return Math.round(v * 100) + '%'; }, function (v) { st.strength = v; });
+          const c = el('<label class="ac-chk"><input type="checkbox" checked><span>Also cut low rumble below 80 Hz</span></label>'); c.querySelector('input').onchange = function (e) { st.rumble = e.target.checked; }; b.appendChild(c);
+        },
+        process: async function (b, onP) {
+          let x = b;
+          if (st.rumble) { const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OC(b.channels.length, Math.max(1, len(b)), b.sampleRate), src = oc.createBufferSource(); src.buffer = toAB(b); const hp = oc.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 80; src.connect(hp); hp.connect(oc.destination); src.start(); x = fromAB(await oc.startRendering()); }
+          return await denoise(x, st.strength, onP);
+        }
+      });
+    }
+  };
+
+  /* ===================================================================== TEXT TO SPEECH (AI voice, credits) */
+  const TTS_VOICES = [['Kore', 'Kore — firm'], ['Puck', 'Puck — upbeat'], ['Charon', 'Charon — informative'], ['Aoede', 'Aoede — breezy'], ['Leda', 'Leda — youthful'], ['Orus', 'Orus — firm'], ['Achird', 'Achird — friendly'], ['Sulafat', 'Sulafat — warm'], ['Zephyr', 'Zephyr — bright'], ['Fenrir', 'Fenrir — excitable'], ['Gacrux', 'Gacrux — mature'], ['Vindemiatrix', 'Vindemiatrix — gentle']];
+  const TTS_STYLES = [['', 'Normal'], ['calm and clear', 'Calm & clear'], ['cheerful and friendly', 'Cheerful'], ['news reader', 'News reader'], ['storytelling, expressive', 'Story telling'], ['slow and clear for students', 'Slow, for students'], ['respectful announcement', 'Announcement']];
+  function b64ToBytes(b64) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+  function findAudio(j) { // Interactions API: steps[].content[] {type:'audio', data, mime_type} · generateContent: candidates[0].content.parts[].inlineData
+    try { const steps = j.steps || j.outputs || []; for (let i = steps.length - 1; i >= 0; i--) { const c = steps[i].content || []; for (let k = c.length - 1; k >= 0; k--) if (c[k] && (c[k].type === 'audio' || c[k].data) && c[k].data) return { data: c[k].data, mime: c[k].mime_type || c[k].mimeType || '' }; } } catch (e) {}
+    try { const parts = j.candidates[0].content.parts; for (let i = 0; i < parts.length; i++) { const d = parts[i].inlineData || parts[i].inline_data; if (d && d.data) return { data: d.data, mime: d.mimeType || d.mime_type || '' }; } } catch (e) {}
+    if (j.output_audio && j.output_audio.data) return { data: j.output_audio.data, mime: j.output_audio.mime_type || '' };
+    return null;
+  }
+  async function audioToBuf(a) {
+    const bytes = b64ToBytes(a.data);
+    if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) return fromAB(await ctx().decodeAudioData(bytes.buffer.slice(0)));
+    const rate = +((/rate=(\d+)/.exec(a.mime) || [])[1] || 24000), n = bytes.length >> 1, dv = new DataView(bytes.buffer), c = new Float32Array(n); // raw 16-bit little-endian PCM
+    for (let i = 0; i < n; i++) c[i] = dv.getInt16(i * 2, true) / 32768;
+    return { sampleRate: rate, channels: [c] };
+  }
+  TOOL_IMPL.texttospeech = {
+    mount: function (container) {
+      ensureStyle();
+      const body = el('<div></div>'); container.appendChild(body);
+      body.innerHTML = '<div class="note">Type or paste text in <b>Tamil, English, Hindi</b> or 100+ languages → a natural AI voice → download MP3 / WAV. Costs <b>1 credit per 1,000 characters</b> (you confirm first; refunded if it fails). “Listen free” uses your phone\'s own voice and cannot be downloaded.</div>';
+      const ta = el('<textarea lang="ta" rows="7" maxlength="4000" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:15px;line-height:1.6" placeholder="எ.கா. அனைவருக்கும் வணக்கம்! இன்று நாம் ஒரு புதிய பாடத்தைக் கற்போம்."></textarea>'); body.appendChild(ta);
+      const cnt = el('<div class="note" style="margin-top:6px"></div>'); body.appendChild(cnt);
+      const o = el('<div class="opts"><div class="field"><label>Voice</label><select id="ttsV">' + TTS_VOICES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div><div class="field"><label>Style</label><select id="ttsS">' + TTS_STYLES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div></div>'); body.appendChild(o);
+      const upd = function () { const n = ta.value.trim().length; cnt.innerHTML = n + ' / 4000 characters · cost <b>' + (n ? Math.max(1, Math.ceil(n / 1000)) : 0) + ' credit' + (Math.ceil(n / 1000) > 1 ? 's' : '') + '</b>'; }; ta.oninput = upd; upd();
+      const picker = formatPicker(body, 'mp3');
+      const row = el('<div class="btn-row"><button class="btn secondary" id="ttsFree">🔊 Listen free</button><button class="btn" id="ttsGo">🎙️ Make voice file</button></div>'); body.appendChild(row);
+      row.querySelector('#ttsFree').onclick = function () {
+        if (!window.speechSynthesis) { errBox(body, 'This browser has no built-in voice.'); return; }
+        speechSynthesis.cancel(); const t = ta.value.trim(); if (!t) { ta.focus(); return; }
+        const u = new SpeechSynthesisUtterance(t), ta_ = /[஀-௿]/.test(t), hi = /[ऀ-ॿ]/.test(t); u.lang = ta_ ? 'ta-IN' : hi ? 'hi-IN' : 'en-IN';
+        const v = speechSynthesis.getVoices().filter(function (x) { return x.lang && x.lang.toLowerCase().indexOf(u.lang.slice(0, 2)) === 0; })[0]; if (v) u.voice = v;
+        if (ta_ && !v) mountResult(body, 'Your phone has no Tamil voice installed — the free preview may sound wrong. The AI voice file reads Tamil properly.');
+        speechSynthesis.speak(u);
+      };
+      row.querySelector('#ttsGo').onclick = async function () {
+        const t = ta.value.trim(); if (!t) { ta.focus(); return; }
+        if (typeof AUTH_CONFIGURED !== 'undefined' && (!AUTH_CONFIGURED || !authState.session)) { errBox(body, 'Please sign in first (top right) — the AI voice uses credits.'); return; }
+        const cost = Math.max(1, Math.ceil(t.length / 1000));
+        if (typeof confirmCreditSpend === 'function' && !(await confirmCreditSpend(body, cost + ' credit' + (cost > 1 ? 's' : '')))) return;
+        const btn = this; btn.disabled = true; const prog = mountProgress(body); prog.set(20, 'Making the voice… (a few seconds per paragraph)');
+        try {
+          const r = await fetch(APP_CONFIG.BACKEND_URL + '/api/ai/speech', { method: 'POST', headers: { Authorization: 'Bearer ' + authState.session.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t, voice: o.querySelector('#ttsV').value, style: o.querySelector('#ttsS').value }) });
+          const j = await r.json().catch(function () { return {}; });
+          if (!r.ok || j.error) throw new Error((j.error && (j.error.message || j.error)) || ('Error ' + r.status));
+          const a = findAudio(j); if (!a) throw new Error('The voice service answered without audio — please try again.');
+          prog.set(50, 'Saving…'); const buf = await audioToBuf(a); prog.remove();
+          await saveResult(body, buf, picker, 'voice-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-'), 'Saving');
+          try { if (typeof refreshProfile === 'function') refreshProfile(); } catch (e) {}
+        } catch (e) { prog.remove(); errBox(body, e.message || e); }
+        btn.disabled = false;
+      };
+    }
+  };
+
 })();

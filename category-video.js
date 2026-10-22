@@ -663,4 +663,85 @@
       paint();
     }
   };
+
+  /* ===================================================================== GREEN SCREEN (chroma key) */
+  function hexToRgb(h) { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  // same idea as ffmpeg's chromakey: distance in the colour (U/V) plane, so shadows on the green screen are removed too
+  function keyAlpha(r, g, b, key, sim, blend) {
+    const u = -0.169 * r - 0.331 * g + 0.5 * b, v = 0.5 * r - 0.419 * g - 0.081 * b, ku = -0.169 * key[0] - 0.331 * key[1] + 0.5 * key[2], kv = 0.5 * key[0] - 0.419 * key[1] - 0.081 * key[2];
+    const d = Math.hypot(u - ku, v - kv) / 255 / Math.SQRT2;
+    if (d < sim) return 0; if (!blend || d > sim + blend) return 1; return (d - sim) / blend;
+  }
+  window.VideoCore.keyAlpha = keyAlpha; window.VideoCore.hexToRgb = hexToRgb;
+  TOOL_IMPL.videochroma = {
+    mount: function (container) {
+      ensureStyle();
+      let file = null, url = null, vw = 0, vh = 0, key = '#00ff00', sim = 0.12, blend = 0.08, bgMode = 'color', bgColor = '#ffffff', bgFile = null, bgImg = null;
+      const body = el('<div></div>'); container.appendChild(body);
+      function paint() {
+        body.innerHTML = '';
+        if (!file) {
+          mountUploader(body, { accept: 'video/*', label: 'Drop a green-screen (or blue-screen) video here, or tap to choose', sublabel: 'Then tap the background colour on the picture to remove it',
+            onAdd: async function (fl) { file = fl[0]; if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(file); const t = document.createElement('video'); t.preload = 'metadata'; t.muted = true; t.src = url; try { await waitMeta(t); vw = t.videoWidth; vh = t.videoHeight; } catch (e) { file = null; paint(); errBox(body, e.message); return; } paint(); } });
+          return;
+        }
+        mountFileList(body, [file], function () { file = null; paint(); });
+        const v = el('<video src="' + url + '" muted playsinline preload="auto" style="display:none"></video>'); body.appendChild(v);
+        const cv = document.createElement('canvas'), sc = Math.min(1, 720 / Math.max(vw, vh)); cv.width = Math.round(vw * sc); cv.height = Math.round(vh * sc);
+        cv.style.cssText = 'width:100%;height:auto;display:block;border-radius:10px;cursor:crosshair;margin-top:10px;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/20px 20px';
+        body.appendChild(cv); body.appendChild(el('<div class="note">👆 Tap the green (or blue) background on the picture to pick the colour to remove. Use the slider below the picture to look at other moments.</div>'));
+        const seek = el('<input type="range" min="0" max="1000" value="50" style="width:100%;margin-top:6px">'); body.appendChild(seek);
+        const raw = document.createElement('canvas'); raw.width = cv.width; raw.height = cv.height; const rg = raw.getContext('2d', { willReadFrequently: true }), g = cv.getContext('2d');
+        function render() {
+          rg.drawImage(v, 0, 0, raw.width, raw.height);
+          const src = rg.getImageData(0, 0, raw.width, raw.height), d = src.data, K = hexToRgb(key);
+          g.clearRect(0, 0, cv.width, cv.height);
+          if (bgMode === 'color') { g.fillStyle = bgColor; g.fillRect(0, 0, cv.width, cv.height); }
+          else if (bgMode === 'image' && bgImg) { const s2 = Math.max(cv.width / bgImg.naturalWidth, cv.height / bgImg.naturalHeight); g.drawImage(bgImg, (cv.width - bgImg.naturalWidth * s2) / 2, (cv.height - bgImg.naturalHeight * s2) / 2, bgImg.naturalWidth * s2, bgImg.naturalHeight * s2); }
+          for (let p = 0; p < d.length; p += 4) d[p + 3] = Math.round(255 * keyAlpha(d[p], d[p + 1], d[p + 2], K, sim, blend));
+          const tmp = document.createElement('canvas'); tmp.width = raw.width; tmp.height = raw.height; tmp.getContext('2d').putImageData(src, 0, 0); g.drawImage(tmp, 0, 0);
+        }
+        v.addEventListener('seeked', render); v.addEventListener('loadeddata', function () { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); });
+        seek.oninput = function () { if (v.duration) v.currentTime = (+seek.value / 1000) * v.duration; };
+        cv.addEventListener('click', function (e) {
+          const r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * raw.width), y = Math.floor((e.clientY - r.top) / r.height * raw.height), px = rg.getImageData(x, y, 1, 1).data;
+          key = '#' + [px[0], px[1], px[2]].map(function (n) { return n.toString(16).padStart(2, '0'); }).join(''); kc.value = key; render();
+        });
+        const ctl = el('<div></div>'); body.appendChild(ctl);
+        ctl.innerHTML = '<div class="vc-row"><label style="font-size:13px;font-weight:800">Colour to remove <input type="color" id="ckKey" value="' + key + '"></label><button class="vc-mini" data-k="#00ff00">Green</button><button class="vc-mini" data-k="#0000ff">Blue</button></div>' +
+          '<div class="vc-row" style="font-size:13px"><b style="min-width:110px">How much to remove</b><input type="range" id="ckSim" min="0.02" max="0.4" step="0.01" value="' + sim + '" style="flex:1"></div>' +
+          '<div class="vc-row" style="font-size:13px"><b style="min-width:110px">Soft edges</b><input type="range" id="ckBl" min="0" max="0.3" step="0.01" value="' + blend + '" style="flex:1"></div>' +
+          '<div class="filter-row" style="margin-top:12px;flex-wrap:wrap;"><button class="filter-chip ' + (bgMode === 'color' ? 'active' : '') + '" data-b="color">🎨 Colour behind</button><button class="filter-chip ' + (bgMode === 'image' ? 'active' : '') + '" data-b="image">🖼️ Picture behind</button></div>' +
+          '<div id="ckBgOpt" class="vc-row"></div>';
+        const kc = ctl.querySelector('#ckKey');
+        kc.oninput = function () { key = kc.value; render(); };
+        ctl.querySelectorAll('[data-k]').forEach(function (b) { b.onclick = function () { key = b.getAttribute('data-k'); kc.value = key; render(); }; });
+        ctl.querySelector('#ckSim').oninput = function (e) { sim = +e.target.value; render(); };
+        ctl.querySelector('#ckBl').oninput = function (e) { blend = +e.target.value; render(); };
+        ctl.querySelectorAll('[data-b]').forEach(function (b) { b.onclick = function () { bgMode = b.getAttribute('data-b'); paint(); }; });
+        const bo = ctl.querySelector('#ckBgOpt');
+        if (bgMode === 'color') { bo.innerHTML = '<label style="font-size:13px;font-weight:800">Background colour <input type="color" value="' + bgColor + '"></label>'; bo.querySelector('input').oninput = function (e) { bgColor = e.target.value; render(); }; }
+        else { const fi = el('<input type="file" accept="image/*">'); bo.appendChild(fi); if (bgFile) bo.appendChild(el('<span style="font-size:12.5px">' + escapeHtml(bgFile.name) + '</span>')); fi.onchange = async function () { bgFile = fi.files[0]; if (!bgFile) return; bgImg = new Image(); bgImg.src = URL.createObjectURL(bgFile); await bgImg.decode().catch(function () {}); paint(); }; }
+        const row = el('<div class="btn-row"><button class="btn">🟩 Remove background & download</button></div>'); body.appendChild(row);
+        row.querySelector('button').onclick = doKey;
+      }
+      async function doKey() {
+        if (bgMode === 'image' && !bgFile) { errBox(body, 'Choose the background picture first.'); return; }
+        const prog = mountProgress(body);
+        try {
+          const W = even(vw), H = even(vh), kx = '0x' + key.replace('#', ''), ck = 'chromakey=' + kx + ':' + sim.toFixed(3) + ':' + blend.toFixed(3);
+          let pre = [], bgIn;
+          if (bgMode === 'image') { const eng = await ensureFFmpeg(); await eng.ffmpeg.writeFile('bg.img', await eng.fetchFile(bgFile)); pre = ['-loop', '1', '-i', 'bg.img']; bgIn = '[1:v]scale=' + W + ':' + H + ':force_original_aspect_ratio=increase,crop=' + W + ':' + H + ',setsar=1[bg];'; }
+          else { pre = ['-f', 'lavfi', '-i', 'color=c=0x' + bgColor.replace('#', '') + ':s=' + W + 'x' + H + ':r=30']; bgIn = '[1:v]setsar=1[bg];'; }
+          const graph = bgIn + '[0:v]scale=' + W + ':' + H + ',setsar=1,' + ck + '[fg];[bg][fg]overlay=shortest=1:format=auto,format=yuv420p[v]';
+          const mk = function (withA) { return function (i, o) { return ['-i', i].concat(pre, ['-filter_complex', graph, '-map', '[v]'], withA ? ['-map', '0:a?', '-c:a', 'aac', '-b:a', '160k'] : ['-an'], ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '22', '-movflags', '+faststart', '-shortest', o]); }; };
+          const data = await runFfmpeg(file, { withAudio: mk(true), noAudio: mk(false) }, 'out.mp4', prog, 'Removing background');
+          downloadBlob(new Blob([data], { type: 'video/mp4' }), baseName(file) + '-new-background.mp4'); prog.set(100, 'Done'); prog.remove();
+          mountResult(body, 'Done — video with the new background downloaded.');
+        } catch (e) { prog.remove(); errBox(body, e.message || e); }
+      }
+      paint();
+    }
+  };
+
 })();

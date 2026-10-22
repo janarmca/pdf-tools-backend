@@ -17,4 +17,12 @@ b = A.toMono({ sampleRate: 1000, channels: [new Float32Array([1, 1]), new Float3
 const w = A.wavBytes(tone(1, 8000, 2, 0.5)); const dv = new DataView(w.buffer);
 ok(String.fromCharCode(...w.slice(0, 4)) === 'RIFF' && dv.getUint32(24, true) === 8000 && dv.getUint16(22, true) === 2 && w.length === 44 + 8000 * 2 * 2 && dv.getInt16(44, true) === Math.round(0.5 * 0x7FFF) - 0 || dv.getInt16(44, true) === 16383, 'WAV header + 16-bit samples');
 const pk = A.peaks(tone(2, 1000, 1, 0.3), 10); ok(pk.length === 10 && Math.abs(pk[3][1] - 0.3) < 1e-6, 'waveform peaks');
+
+// --- DSP added in UPDATE_61
+{ const sr = 8000, n = sr * 2, b = A.make(sr, 2, n); for (let i = 0; i < n; i++) b.channels[0][i] = b.channels[1][i] = Math.sin(2 * Math.PI * 440 * i / sr) * 0.5;
+  const zc = c => { let z = 0; for (let i = 1; i < c.length; i++) if (c[i - 1] < 0 && c[i] >= 0) z++; return z; };
+  const s = A.wsola(b, 2); ok(Math.abs(s.channels[0].length - 2 * n) < 2 && Math.abs(zc(s.channels[0].subarray(sr / 2, 3 * sr)) / 2.5 - 440) < 12, 'WSOLA ×2 doubles the length and keeps 440 Hz');
+  const h = A.wsola(b, 0.5); ok(Math.abs(h.channels[0].length - n / 2) < 2 && Math.abs(zc(h.channels[0].subarray(800, 7200)) / 0.8 - 440) < 15, 'WSOLA ×0.5 halves the length and keeps 440 Hz');
+  const v = A.vocalRemove(b, false); let e = 0; for (let i = sr; i < n; i++) e += v.channels[0][i] ** 2; ok(Math.sqrt(e / sr) < 0.01, 'vocal remover cancels a centred 440 Hz voice'); }
+{ const re = new Float32Array(16), im = new Float32Array(16); re[3] = 1; const r0 = re.slice(); A.fft(re, im); for (let i = 0; i < 16; i++) im[i] = -im[i]; A.fft(re, im); ok(Math.abs(re[3] / 16 - 1) < 1e-6 && Math.abs(re[5] / 16) < 1e-6, 'FFT → inverse FFT returns the input'); }
 console.log('\nALL ' + n + ' AUDIO-CORE CHECKS PASS');

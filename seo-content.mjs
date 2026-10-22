@@ -425,6 +425,54 @@ export const SEO_EXTRA = {
     uses: ["Anime profile picture", "3D cartoon of your child", "Tanjore-style family portrait", "Sticker of your pet"],
     faqs: [["How much does it cost?", "5 credits per picture; if the AI fails the credits are refunded automatically."], ["Is my photo kept?", "It is sent to the AI service only to make the picture; we do not store it."]]
   },
+  texttospeech: {
+    title: "Text to Speech in Tamil — Free Online TTS to MP3 | PDF Tools India",
+    desc: "Type Tamil, English, Hindi or 100+ languages and get a natural AI voice as MP3 or WAV. Listen free in the browser; downloads cost 1 credit per 1,000 characters.",
+    intro: "Make a voice-over for a video, an announcement or a lesson — pick a voice and a style (calm, cheerful, news reader, story telling).",
+    steps: ["Open Text to Speech and type or paste the text.", "Choose a voice and style; press Listen free to try.", "Press Make voice file and download MP3."],
+    uses: ["Voice-over for YouTube / Reels", "Announcement for a shop or school", "Reading a lesson aloud for students"],
+    faqs: [["Does it speak Tamil properly?", "Yes — the AI voice reads Tamil script. The free preview uses your phone’s own voice, which may not have Tamil."], ["How much does it cost?", "1 credit per 1,000 characters (minimum 1), refunded if it fails."]]
+  },
+  audiopitch: {
+    title: "Change Pitch or Speed of Audio Online Free — Without Chipmunk Effect | PDF Tools India",
+    desc: "Make a voice higher or lower without changing speed, or change speed without changing the voice. Free, in your browser.",
+    intro: "Uses a time-stretch method (WSOLA) so slowing a song for practice keeps its tune, and a pitch change keeps the timing.",
+    steps: ["Open the tool and choose a file.", "Move Speed and/or Pitch; press Preview.", "Press Apply & download."],
+    uses: ["Slowing a song to learn it", "Funny cartoon voice", "Deeper voice for a narration"],
+    faqs: [["Can I change only the pitch?", "Yes — leave Speed at 1.00× and move Pitch."]]
+  },
+  audioeq: {
+    title: "Audio Equalizer Online Free — Bass Boost, Voice Clarity | PDF Tools India",
+    desc: "10-band equaliser with presets (bass boost, voice clarity, podcast, treble, telephone). Free, in your browser.",
+    intro: "Shape the sound of a song or a recording and save it as MP3 or WAV — with a limiter so boosts do not crackle.",
+    steps: ["Open Audio Equalizer and choose a file.", "Pick a preset or move the 10 sliders.", "Apply & download."],
+    uses: ["Bass boost for a song", "Clearer voice in a phone recording", "Podcast sound"],
+    faqs: [["Will boosting cause distortion?", "A built-in limiter stops the sound from clipping."]]
+  },
+  vocalremove: {
+    title: "Vocal Remover Online Free — Make Karaoke from a Song | PDF Tools India",
+    desc: "Remove the singer from a stereo song or music video to make a karaoke track, or keep a rough vocals-only track. Free, in your browser.",
+    intro: "Uses centre-channel cancellation with the bass kept — works on studio songs where the voice is in the centre.",
+    steps: ["Open Vocal Remover and choose a song or video.", "Choose Remove vocals or Keep vocals.", "Process & download (MP3, WAV or video)."],
+    uses: ["Karaoke for a function", "Practising a song", "Instrumental for a video"],
+    faqs: [["Does it work on every song?", "Best on stereo studio songs; mono recordings or live recordings cannot be separated without AI."]]
+  },
+  audiodenoise: {
+    title: "Reduce Background Noise from Audio & Video Online Free | PDF Tools India",
+    desc: "Lower fan, AC hum, hiss and traffic noise in a voice recording or a video. Free, in your browser.",
+    intro: "Learns the noise from the quietest moments and reduces it everywhere; can save the result back into the video.",
+    steps: ["Open Reduce Noise and choose a recording or video.", "Set the strength; press Preview.", "Clean & download."],
+    uses: ["Online class recording", "Phone video with fan noise", "Voice-over cleanup"],
+    faqs: [["Can it remove music or talking behind me?", "No — it removes steady noise (fan, hiss, hum). Changing sounds need AI separation."]]
+  },
+  videochroma: {
+    title: "Remove Green Screen from Video Online Free — Chroma Key | PDF Tools India",
+    desc: "Remove a green or blue background from a video and put a colour or your own picture behind it. Free, in your browser.",
+    intro: "Tap the background colour on the picture, adjust how much to remove, choose the new background, download MP4.",
+    steps: ["Open Remove Green Screen and choose the video.", "Tap the green background and adjust the sliders.", "Pick a colour or picture and download."],
+    uses: ["YouTube intro with a new background", "Product video on a white background", "Fun videos with a picture behind"],
+    faqs: [["Does it need a real green screen?", "Yes — an even green or blue background gives the cleanest edges."]]
+  },
   txt2pdf: {
     title: 'Text to PDF Free Online — Convert TXT or Typed Text to PDF | PDF Tools India',
     desc: 'Turn a .txt file or text you type into a PDF. Free, no signup, runs in your browser.',
