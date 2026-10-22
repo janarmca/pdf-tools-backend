@@ -49,15 +49,16 @@
       row.appendChild(b);
     });
     box.parentNode.insertBefore(row, box);
-    var cnt = el('<div class="note" style="margin:0 0 6px">' + P.templates.length + ' வடிவங்கள் · இடது-வலது நகர்த்திப் பாருங்கள்</div>'); box.parentNode.insertBefore(cnt, box);
+    var cnt = el('<div class="note" style="margin:0 0 6px">' + P.templates.filter(function (t) { return t.cat !== 'blank'; }).length + ' வடிவங்கள் — தட்டினால் போஸ்டரில் வரும்</div>'); box.parentNode.insertBefore(cnt, box);
   }
 
   /* ---------------------------------------------------------------- the panel */
   var TABS = [['el', '🧩 Elements'], ['tx', '🔤 எழுத்து'], ['ph', '🖼️ படம்'], ['ar', '📐 அமைப்பு'], ['ai', '✨ AI']];
   function buildPanel() {
-    var stageCard = $('stage').closest('.card');
-    var card = el('<div class="card" id="proCard"><h2>🧰 கூடுதல் கருவிகள் <small style="font-weight:600;color:var(--sub)">Pro tools</small></h2><div class="seg" id="proTabs" style="margin-bottom:10px"></div><div id="proBody"></div></div>');
-    stageCard.parentNode.insertBefore(card, stageCard.nextSibling);
+    var card = el('<div id="proCard"><h3 id="proTitle" style="font-size:.95rem;margin:0 0 10px">🧩 Elements</h3><div class="seg" id="proTabs" style="margin-bottom:10px"></div><div id="proBody"></div></div>');
+    var host = $('proHost');
+    if (host) host.appendChild(card); // editor layout: the left rail picks the tab
+    else { var stageCard = $('stage').closest('.card'); card.className = 'card'; stageCard.parentNode.insertBefore(card, stageCard.nextSibling); }
     var tabs = card.querySelector('#proTabs');
     TABS.forEach(function (t, i) {
       var b = el('<button type="button" data-t="' + t[0] + '"' + (i ? '' : ' class="on"') + '>' + t[1] + '</button>');
@@ -83,8 +84,12 @@
     C.on('object:added', refreshLayers); C.on('object:removed', refreshLayers);
   }
   var curTab = 'el';
+  var TITLES = { el: '🧩 Elements · வடிவங்கள், Stickers', tx: '🔤 எழுத்து · Text effects', ph: '🖼️ படம் · Photo', ar: '📐 அமைப்பு · Align & Layers', ai: '✨ AI உதவி (credits)' };
+  window.__posterPro = { showTab: function (t) { showTab(t); } };
   function showTab(t) {
     curTab = t; var b = $('proBody'); b.innerHTML = '';
+    var ti = $('proTitle'); if (ti) ti.textContent = TITLES[t] || '';
+    var tb = $('proTabs'); if (tb) tb.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
     ({ el: tabElements, tx: tabText, ph: tabPhoto, ar: tabArrange, ai: tabAI })[t](b);
   }
 

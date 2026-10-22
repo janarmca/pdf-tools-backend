@@ -300,6 +300,101 @@
           { t: 'கற்க வேண்டியவற்றை குற்றமறக் கற்று, கற்றபின் அதற்கேற்ப நடக்க வேண்டும்.', s: 0.044, f: FS, c: '#451a03', w: 0.78, g: 0.03 },
           { t: shop(), s: 0.05, f: FH, c: '#92400e', b: 1 }
         ]);
+      } },
+      /* ------------------------------------------------ more designs (Oct 2026) */
+      { id: 'newyear', label: 'ஆங்கிலப் புத்தாண்டு', cat: 'fest', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#0f0c29'], [0.55, '#302b63'], [1, '#24243e']]));
+        h.dots(w * 0.04, H * 0.03, 12, 7, w * 0.085, 2.5 * u, 'rgba(255,255,255,.35)');
+        [[0.22, 0.16, '#ffd60a'], [0.78, 0.12, '#f72585'], [0.5, 0.24, '#4cc9f0'], [0.15, 0.34, '#80ffdb'], [0.86, 0.3, '#ffd60a']].forEach(function (f) { h.star(w * f[0], H * f[1], w * 0.06, w * 0.012, 8, f[2], NS); });
+        T(h, '2027', { left: w * 0.05, top: H * 0.36, w: w * 0.9, size: w * 0.3, font: FH, color: '#ffd60a', bold: 1, align: 'center', shadow: 1 });
+        h.flow(H * 0.62, [
+          { t: 'இனிய ஆங்கிலப் புத்தாண்டு நல்வாழ்த்துகள்', s: 0.068, f: FH, c: '#ffffff', b: 1, g: 0.012 },
+          { t: 'Happy New Year', s: 0.06, f: FH, c: '#f72585', b: 1, g: 0.025 },
+          { t: shop(), s: 0.058, f: FH, c: '#ffd60a', b: 1 }
+        ]);
+      } },
+      { id: 'goodnight', label: 'இனிய இரவு', cat: 'fest', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#0b1d3a'], [1, '#1b3b6f']]));
+        h.dots(w * 0.05, H * 0.04, 10, 8, w * 0.1, 2.2 * u, 'rgba(255,255,255,.5)');
+        h.circ(w * 0.66, H * 0.22, w * 0.17, '#fef3c7', NS); h.circ(w * 0.74, H * 0.19, w * 0.16, '#0f2a52', NS);
+        h.flow(H * 0.45, [
+          { t: 'இனிய இரவு வணக்கம்', s: 0.09, f: FH, c: '#fde68a', b: 1, sh: 1, g: 0.012 },
+          { t: 'Good Night', s: 0.06, f: FH, c: '#ffffff', b: 1, g: 0.03 },
+          { t: 'இன்றைய களைப்பு நீங்கி, நாளை புத்துணர்வுடன் விடியட்டும்', s: 0.044, f: FM, c: '#dbeafe', g: 0.04 },
+          { t: shop(), s: 0.055, f: FH, c: '#fde68a', b: 1 }
+        ]);
+      } },
+      { id: 'blood', label: 'இரத்த தான முகாம்', cat: 'notice', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg('#fff5f5');
+        h.rect(0, 0, w, H * 0.3, h.grad([[0, '#b91c1c'], [1, '#ef4444']]), NS);
+        h.path('M 0 -60 C 30 -20 50 10 50 35 A 50 50 0 0 1 -50 35 C -50 10 -30 -20 0 -60 Z', w / 2, H * 0.12, '#ffffff', Object.assign({ scaleX: 1.2 * u, scaleY: 1.2 * u }, NS));
+        T(h, 'இரத்த தான முகாம்', { left: w * 0.04, top: H * 0.2, w: w * 0.92, size: w * 0.085, font: FH, color: '#ffffff', bold: 1, align: 'center' });
+        T(h, 'இரத்தம் கொடுப்போம் · உயிர் காப்போம்', { left: w * 0.05, top: H * 0.33, w: w * 0.9, size: w * 0.055, font: FH, color: '#991b1b', bold: 1, align: 'center' });
+        bullets(h, w * 0.1, H * 0.42, w * 0.82, ['நாள்: ஞாயிறு, 15 நவம்பர்', 'நேரம்: காலை 9 – மதியம் 1', 'இடம்: சமுதாயக் கூடம்', '18 – 60 வயது, 50 kg மேல் உள்ளவர்கள்', 'இலவச உடல் பரிசோதனை'], w * 0.05, '#450a0a', '🩸', H * 0.77);
+        phoneBar(h, H * 0.79, '#b91c1c', '#ffffff', '📞 பதிவுக்கு: 98xxx xxx21');
+      } },
+      { id: 'beauty', label: 'அழகு நிலையம் / Salon', cat: 'business', fonts: [FH, FM, FS], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#fdf2f8'], [1, '#fbcfe8']]));
+        h.circ(w * 0.85, H * 0.08, w * 0.3, 'rgba(236,72,153,.18)', NS); h.circ(w * 0.1, H * 0.92, w * 0.35, 'rgba(236,72,153,.15)', NS);
+        h.slot(w / 2, H * 0.27, w * 0.48, w * 0.48, 'circle', '#db2777');
+        T(h, shop() + ' Beauty Parlour', { left: w * 0.05, top: H * 0.5, w: w * 0.9, size: w * 0.07, font: FH, color: '#9d174d', bold: 1, align: 'center' });
+        T(h, 'பெண்களுக்கான அழகு நிலையம்', { left: w * 0.05, top: H * 0.565, w: w * 0.9, size: w * 0.05, font: FM, color: '#be185d', bold: 1, align: 'center' });
+        bullets(h, w * 0.14, H * 0.63, w * 0.76, ['மணப்பெண் அலங்காரம்', 'Facial · Hair cut · Threading', 'மெஹந்தி · Pedicure'], w * 0.045, '#831843', '✿', H * 0.79);
+        phoneBar(h, H * 0.8, '#db2777', '#ffffff', '📞 Appointment: 98xxx xxx21');
+      } },
+      { id: 'sports', label: 'விளையாட்டுப் போட்டி', cat: 'events', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#064e3b'], [1, '#16a34a']]));
+        h.rays(w / 2, H * 0.2, 0, w * 1.2, 28, 'rgba(255,255,255,.08)');
+        h.circ(w / 2, H * 0.2, w * 0.15, '#facc15', NS);
+        T(h, '🏆', { left: w * 0.3, top: H * 0.13, w: w * 0.4, size: w * 0.16, font: FM, color: '#000', align: 'center' });
+        T(h, 'மாபெரும் கிரிக்கெட் போட்டி', { left: w * 0.04, top: H * 0.36, w: w * 0.92, size: w * 0.085, font: FH, color: '#facc15', bold: 1, align: 'center', shadow: 1 });
+        T(h, 'முதல் பரிசு ₹ 25,000 · இரண்டாம் பரிசு ₹ 15,000', { left: w * 0.05, top: H * 0.47, w: w * 0.9, size: w * 0.048, font: FH, color: '#ffffff', bold: 1, align: 'center' });
+        bullets(h, w * 0.12, H * 0.56, w * 0.8, ['நாள்: 20, 21 டிசம்பர்', 'இடம்: அரசு பள்ளி மைதானம்', 'நுழைவுக் கட்டணம்: ₹ 1,000 / அணி'], w * 0.047, '#ecfccb', '⚑', H * 0.77);
+        phoneBar(h, H * 0.79, '#facc15', '#064e3b', '📞 அணிப் பதிவு: 98xxx xxx21');
+      } },
+      { id: 'mobileshop', label: 'மொபைல் கடை Offer', cat: 'business', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#111827'], [1, '#1f2937']]));
+        h.rect(w * 0.6, 0, w * 0.4, H, h.grad([[0, '#06b6d4'], [1, '#3b82f6']]), NS);
+        h.slot(w * 0.78, H * 0.33, w * 0.34, H * 0.4, 'round', '#ffffff');
+        T(h, 'மெகா', { left: w * 0.05, top: H * 0.08, w: w * 0.55, size: w * 0.1, font: FH, color: '#ffffff', bold: 1, align: 'left' });
+        T(h, 'மொபைல் ஆஃபர்', { left: w * 0.05, top: H * 0.17, w: w * 0.55, size: w * 0.08, font: FH, color: '#22d3ee', bold: 1, align: 'left' }, 2);
+        h.star(w * 0.25, H * 0.47, w * 0.16, w * 0.125, 18, '#facc15', NS);
+        T(h, '30% OFF', { left: w * 0.09, top: H * 0.44, w: w * 0.32, size: w * 0.07, font: FH, color: '#111827', bold: 1, align: 'center' });
+        bullets(h, w * 0.06, H * 0.62, w * 0.52, ['EMI வசதி · 0% வட்டி', 'பழைய போனுக்கு Exchange', 'Accessories இலவசம்'], w * 0.04, '#e5e7eb', '✔', H * 0.77);
+        phoneBar(h, H * 0.8, '#06b6d4', '#111827', '📞 ' + shop() + ' · 98xxx xxx21');
+      } },
+      { id: 'temple', label: 'கோவில் திருவிழா', cat: 'events', fonts: [FH, FM, FS], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg(h.grad([[0, '#7c2d12'], [1, '#b45309']]));
+        h.rays(w / 2, H * 0.24, 0, w * 1.1, 36, 'rgba(255,220,150,.12)');
+        h.poly([{ x: 0, y: -H * 0.13 }, { x: w * 0.2, y: H * 0.08 }, { x: -w * 0.2, y: H * 0.08 }], w / 2, H * 0.2, '#fbbf24', NS);
+        h.rect(w * 0.32, H * 0.28, w * 0.36, H * 0.05, '#f59e0b', NS);
+        h.star(w / 2, H * 0.055, w * 0.03, w * 0.012, 6, '#fff7ed', NS);
+        h.flow(H * 0.38, [
+          { t: 'அருள்மிகு ஸ்ரீ முத்துமாரியம்மன்', s: 0.062, f: FH, c: '#fde68a', b: 1, g: 0.008 },
+          { t: 'திருக்கோவில் திருவிழா', s: 0.085, f: FH, c: '#ffffff', b: 1, sh: 1, g: 0.02 },
+          { t: 'கொடியேற்றம் · தேரோட்டம் · அன்னதானம்', s: 0.046, f: FM, c: '#ffedd5', g: 0.02 },
+          { t: 'நவம்பர் 10 முதல் 17 வரை', s: 0.055, f: FH, c: '#fde68a', b: 1, g: 0.03 },
+          { t: 'அனைவரும் வருக · அருள் பெறுக', s: 0.05, f: FS, c: '#ffffff', g: 0.02 },
+          { t: shop(), s: 0.05, f: FH, c: '#fde68a', b: 1 }
+        ]);
+      } },
+      { id: 'annualday', label: 'பள்ளி ஆண்டு விழா', cat: 'events', fonts: [FH, FM], build: function (h) {
+        var w = h.w, H = h.h, u = h.u;
+        h.bg('#eff6ff');
+        h.rect(0, 0, w, H * 0.26, h.grad([[0, '#1e3a8a'], [1, '#2563eb']], false, w), NS);
+        [0.1, 0.3, 0.5, 0.7, 0.9].forEach(function (x, i) { h.circ(w * x, H * 0.27, w * 0.03, ['#f43f5e', '#facc15', '#22c55e', '#38bdf8', '#a855f7'][i], NS); });
+        T(h, shop() + ' பள்ளி', { left: w * 0.05, top: H * 0.05, w: w * 0.9, size: w * 0.07, font: FH, color: '#bfdbfe', bold: 1, align: 'center' });
+        T(h, 'ஆண்டு விழா 2027', { left: w * 0.05, top: H * 0.12, w: w * 0.9, size: w * 0.1, font: FH, color: '#ffffff', bold: 1, align: 'center' });
+        h.slot(w / 2, H * 0.45, w * 0.7, H * 0.25, 'round', '#2563eb');
+        bullets(h, w * 0.12, H * 0.61, w * 0.8, ['நாள்: சனி, 24 ஜனவரி · மாலை 5 மணி', 'சிறப்பு விருந்தினர்: மாவட்ட ஆட்சியர்', 'கலை நிகழ்ச்சிகள் · பரிசளிப்பு'], w * 0.045, '#1e3a8a', '★', H * 0.79);
+        phoneBar(h, H * 0.8, '#1e3a8a', '#ffffff', 'பெற்றோர்கள் அனைவரும் வருக!');
       } }
     ];
   });

@@ -153,6 +153,8 @@ function mk(c, w, h){
 /* ---------- templates ---------- */
 function shop(){ return brand.name || 'உங்கள் கடை பெயர்'; }
 var TPLS = [
+ /* blank page — colour (or gradient stops) from window.__posterBlankBg; hidden from the gallery, opened from the 📄 pane */
+ {id:'blank', cat:'blank', label:'காலி பக்கம்', fonts:[FM], build:function(h){ var b = window.__posterBlankBg || '#ffffff'; h.bg(Array.isArray(b) ? h.grad(b) : b); }},
  {id:'greet', cat:'fest', label:'வாழ்த்து (பொது)', fonts:[FH,FM], build:function(h){
    var w=h.w, H=h.h, u=h.u;
    h.bg(h.grad([[0,'#6a11cb'],[1,'#ec4899']]));
@@ -366,7 +368,8 @@ function tplById(id){ for (var i=0;i<TPLS.length;i++) if (TPLS[i].id===id) retur
 function fitCss(){
   var stage = $('stage');
   var avail = stage.clientWidth - 24;
-  var maxH = Math.max(320, window.innerHeight*0.78);
+  // editor layout: the stage has its own height (fills the screen); old layout: up to 78 % of the window
+  var maxH = stage.clientHeight > 160 ? stage.clientHeight - 24 : Math.max(320, window.innerHeight*0.78);
   var k = Math.min(1, avail/W, maxH/H);
   if (!isFinite(k) || k<=0.05) k = 0.3;
   canvas.setDimensions({width:Math.round(W*k), height:Math.round(H*k)},{cssOnly:true});
@@ -468,9 +471,10 @@ async function makeThumbs(){
   for (var i=0;i<TPLS.length;i++){
     var t = TPLS[i];
     var b = document.createElement('button');
+    if (t.cat==='blank') b.style.display='none';
     b.className = 'tpl'; b.dataset.id = t.id; b.dataset.cat = t.cat || 'other'; b.type='button';
     b.innerHTML = '<img alt="" width="96" height="128"><span>'+t.label+'</span>';
-    (function(tt){ b.addEventListener('click', function(){ applyTemplate(tt.id); }); })(t);
+    (function(tt){ b.addEventListener('click', function(){ applyTemplate(tt.id); document.dispatchEvent(new Event('poster-picked')); }); })(t);
     box.appendChild(b);
   }
   await ensureFonts([FH,FM,FS,FT]);
@@ -613,7 +617,11 @@ function centerAdd(obj){
 }
 async function addText(){
   await ensureFont(FM);
-  var t = new F.Textbox('உங்கள் உரை',{left:W*0.1,top:H*0.4,width:W*0.8,fontSize:W*0.07,fontFamily:FM,fontWeight:700,fill:'#222222',textAlign:'center',lineHeight:1.28,editable:false,name:'text'});
+  // readable on any background: white text on a dark poster, dark text on a light one
+  var bg = canvas.getObjects().filter(function(o){ return o.name==='bg'; })[0], col = (bg && typeof bg.fill==='string') ? bg.fill : (typeof canvas.backgroundColor==='string' ? canvas.backgroundColor : '#ffffff');
+  if (bg && bg.fill && bg.fill.colorStops) col = bg.fill.colorStops[0].color;
+  var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(String(col||'')), dark = m ? (0.299*parseInt(m[1],16)+0.587*parseInt(m[2],16)+0.114*parseInt(m[3],16)) < 140 : false;
+  var t = new F.Textbox('உங்கள் உரை',{left:W*0.1,top:H*0.4,width:W*0.8,fontSize:W*0.07,fontFamily:FM,fontWeight:700,fill:dark?'#ffffff':'#222222',textAlign:'center',lineHeight:1.28,editable:false,name:'text'});
   canvas.add(t); canvas.setActiveObject(t); canvas.requestRenderAll();
   setTimeout(function(){ var ta=$('tTxt'); ta.focus(); ta.select(); },50);
 }
@@ -798,7 +806,7 @@ function drawFest(){
   upcoming().forEach(function(x){
     var b = document.createElement('button'); b.type='button';
     b.textContent = x.f.n+' — '+(x.days===0?'இன்று':x.days+' நாள்');
-    b.addEventListener('click', function(){ applyTemplate(x.f.tpl); document.getElementById('stage').scrollIntoView({behavior:'smooth',block:'center'}); });
+    b.addEventListener('click', function(){ applyTemplate(x.f.tpl); document.dispatchEvent(new Event('poster-picked')); });
     box.appendChild(b);
   });
 }

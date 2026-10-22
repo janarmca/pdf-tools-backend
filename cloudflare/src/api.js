@@ -251,13 +251,13 @@ async function aiText(env, user, b) {
   });
 }
 
-// Text-to-image: Workers AI (FLUX.1-schnell), free 10,000 Neurons/day. aibgreplace is advertised as free.
+// Text-to-image: Workers AI (FLUX.1-schnell). texttoimage / posterai = 5 credits, aibgreplace (background only) = 3 credits.
 async function aiImage(env, user, b) {
   if (!env.AI) return err(501, 'AI image feature is not set up (Workers AI binding missing).');
   const prompt = String(b.prompt || '').trim();
   if (!prompt) return err(400, 'Prompt தேவை.');
   const toolId = String(b.toolId || 'texttoimage');
-  return charged(env, user.id, toolId === 'aibgreplace' ? 0 : 5, toolId, async () => {
+  return charged(env, user.id, toolId === 'aibgreplace' ? 3 : 5, toolId, async () => {
     const prep = await prepareImagePrompt(env, prompt); // Tamil/Hindi → English first (FLUX only understands English)
     const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: prep.prompt });
     if (!out || !out.image) throw fail(502, 'Model did not return an image — try rephrasing the prompt.');

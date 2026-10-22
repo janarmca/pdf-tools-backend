@@ -490,7 +490,7 @@ const TOOLS = [
   {id:'tnpropertycalc', name:'TN Property Registration Calculator', desc:'Stamp duty & registration fee for Sale, Gift, Settlement, Partition, Mortgage & POA deeds in Tamil Nadu', icon:'🏛️', color:'#0F2A4A', cat:'business'},
   {id:'uzhavartools', name:'Farmer Toolbox — land, fertiliser, cost', desc:'Free Tamil farmer tools: cent/acre/kuzhi converter, fertiliser bags, spray mix, cost and break-even, trial-plot book', icon:'🌾', color:'#2F7D32', cat:'business', cost:0},
   {id:'photoresize', name:'Photo Resizer — KB & px for forms', desc:'Resize a photo or signature to an exact KB and pixel size for exam and job forms', icon:'📐', color:'#1B6B5A', cat:'image', cost:0},
-  {id:'postermaker', name:'Tamil Poster Maker — போஸ்டர் & பேனர்', desc:'Festival, offer, opening, wedding posters in Tamil with your shop footer and UPI QR — free, no watermark', icon:'🖼️', color:'#7C2D9A', cat:'image', cost:0},
+  {id:'postermaker', name:'Tamil Poster Maker — போஸ்டர் & பேனர்', desc:'Canva-style editor: 40+ Tamil designs or a blank page, stickers, text effects, your shop footer and UPI QR — free, no watermark', icon:'🖼️', color:'#7C2D9A', cat:'image', cost:0},
   {id:'tnrentagreement', name:'TN Rent Agreement Maker — வாடகை ஒப்பந்தம்', desc:'Tamil Nadu rent / tenancy agreement in Tamil or English, print-ready — free', icon:'🏠', color:'#1B6B5A', cat:'business', cost:0},
   {id:'tnsaledeed', name:'TN Sale Deed Draft — கிரைய சாசனம்', desc:'Tamil Nadu sale deed draft in Tamil or English with property schedule — free', icon:'📜', color:'#7A4A1B', cat:'business', cost:0},
   {id:'imgcompress', name:'Compress Image', desc:'Shrink JPG/PNG file size', icon:'🗜️', color:'#7A5C1E', cat:'image', cost:0},
@@ -501,12 +501,12 @@ const TOOLS = [
   {id:'bgremove', name:'Remove Background', desc:'remove.bg-quality AI cutout + background color/photo swap + touch-up', icon:'🪄', color:'#8E44AD', cat:'image', cost:0},
   {id:'batchbgremove', name:'Batch Background Remove', desc:'Remove background from many product photos at once', icon:'🪄', color:'#8E44AD', cat:'image'},
   {id:'wmremove', name:'Remove Watermark', desc:'Hide/remove a watermark from a PDF or image', icon:'🧽', color:'#2980B9', cat:'image', cost:0},
-  {id:'imgenhance', name:'Image Enhancer', desc:'Upscale + Sharpen + Denoise — AI-style enhancement', icon:'✨', color:'#C96A2C', cat:'image', cost:0},
-  {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0},
+  {id:'imgenhance', name:'Image Enhancer', desc:'Sharpen, denoise, contrast & colour with a before/after slider', icon:'✨', color:'#C96A2C', cat:'image', cost:0, lazy:'imgx'},
+  {id:'aiupscale', name:'AI Image Upscaler', desc:'Genuine neural-network upscaling (up to 4x) — 100% in your browser, free', icon:'🔍', color:'#0277BD', cat:'image', cost:0, lazy:'imgx'},
   {id:'imgcrop', name:'Crop / Resize Image', desc:'Crop a region or change size', icon:'✂️', color:'#D35400', cat:'image', cost:0},
   {id:'imgpassport', name:'Passport / ID Photo', desc:'Standard size + background + 4-up print sheet', icon:'🪪', color:'#5B2C6F', cat:'image', cost:0},
   {id:'imgbatchresize', name:'Batch Resize Images', desc:'Resize many images to one size at once', icon:'📐', color:'#7D3C98', cat:'image', cost:0},
-  {id:'imgborder', name:'Add Border to Image', desc:'Add a frame/border and rounded corners', icon:'🖼️', color:'#935116', cat:'image', cost:0},
+  {id:'imgborder', name:'Add Border to Image', desc:'Frames with live preview — simple, double, polaroid, shadow, gradient, square', icon:'🖼️', color:'#935116', cat:'image', cost:0, lazy:'imgx'},
   {id:'imgfilters', name:'Photo Filters', desc:'Vivid, B&W, Sepia, Vintage, Cool, Warm, Vignette — pick a look, adjust intensity', icon:'🎞️', color:'#7B2CBF', cat:'image', cost:0},
   {id:'exifremove', name:'Strip Photo Privacy Data', desc:'Remove GPS/camera info (EXIF)', icon:'🛡️', color:'#1F6F78', cat:'image', cost:0},
   {id:'imgwatermark', name:'Watermark an Image', desc:'Stamp text/logo onto a photo', icon:'💧', color:'#2980B9', cat:'image', cost:0},
@@ -528,7 +528,7 @@ const TOOLS = [
   {id:'videomute', name:'Mute Video', desc:'Strip audio fast (no re-encode)', icon:'🔇', color:'#616A6B', cat:'video', cost:0},
   {id:'videovolume', name:'Video Volume', desc:'Raise/lower volume or normalize it', icon:'🔊', color:'#1A5276', cat:'video', cost:0},
   {id:'videowave', name:'Audio → Waveform Video', desc:'Turn a song/voice into an animated waveform video', icon:'🌊', color:'#0E6655', cat:'video', cost:0},
-  {id:'videowatermark', name:'Video Watermark', desc:'Add your logo/text to a video before sharing', icon:'💧', color:'#2980B9', cat:'video'},
+  {id:'videowatermark', name:'Video Watermark', desc:'Drag your logo or Tamil/English text anywhere on the video, resize, set opacity', icon:'💧', color:'#2980B9', cat:'video'},
   {id:'videowmremove', name:'Video Watermark Remover', desc:'Remove logos & running/moving text from videos — draw a box or use clean-background match, free in your browser', icon:'🧽', color:'#C0392B', cat:'video', cost:0},
   {id:'videosubtitle', name:'Video Captions/Subtitles', desc:'Burn in timed text captions', icon:'💬', color:'#154360', cat:'video', cost:0},
   {id:'videotogif', name:'Video → GIF', desc:'Turn a clip into an animated GIF', icon:'🎞️', color:'#B8860B', cat:'video', cost:0},
@@ -561,7 +561,7 @@ const TOOLS = [
   {id:'livetranslate', name:'Live Speech Translator', desc:'Speak in one language, hear it translated instantly in another — free on Chrome/Edge desktop', icon:'🗣️', color:'#8E44AD', cat:'ai'},
   {id:'aistyle', name:'AI Photo Style — Anime, 3D, Tanjore', desc:'AI re-draws your photo as anime, 3D cartoon, comic, watercolour, Tanjore painting…', icon:'🪄', color:'#AE3EC9', cat:'ai', cost:5, lazy:'art'},
   {id:'texttoimage', name:'Text → Image', desc:'Describe an image in words — AI generates it', icon:'🎨', color:'#D81B60', cat:'ai', cost:5},
-  {id:'aibgreplace', name:'AI Background Replace', desc:'AI-generated background for product/portrait photos — competitors put this behind Pro, we’re free', icon:'🪄', color:'#7C3AED', cat:'image'},
+  {id:'aibgreplace', name:'AI Background Replace', desc:'AI draws a new background for product / portrait photos — 3 credits (the cut-out itself is free)', icon:'🪄', color:'#7C3AED', cat:'image', cost:3},
   {id:'kalvikalanjiyam', name:'Kalvi Kalanjiyam — கல்வி களஞ்சியம் (Class 1–10)', desc:'Free Tamil-medium lessons, games & tests for Samacheer Classes 1–10 — understand first, then practise. No login', icon:'📚', color:'#3B2FC9', cat:'education', cost:0},
   {id:'numberjungle', name:'Number Jungle — Learning Game', desc:'Math & Science quiz game, Grades 1-12, Tamil + English, XP & badges', icon:'🦜', color:'#FF6B35', cat:'education'},
   {id:'mathpractice', name:'Math Practice Sheets', desc:'Printable practice worksheets with answer key', icon:'🔢', color:'#B8860B', cat:'education'},
@@ -2021,7 +2021,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261022b`;
+    s.src = `category-${cat}.js?v=20261022c`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -2067,7 +2067,7 @@ function renderToolPanel(toolId){
 // deducts its own 5 credits server-side (see server.js), so the paid-gate
 // must only CHECK affordability (checkOnly:true) instead of also deducting
 // on unlock — otherwise a single image generation cost 10 credits, not 5.
-const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','aistyle','texttospeech']);
+const ACTION_CHARGED_TOOLS = new Set(['videocompress','askai','aisummarize','aitranslate','aihandwriting','aireceipt','airesume','texttoimage','aistyle','texttospeech','aibgreplace']);
 async function mountPaidGate(body, tool, onUnlock){
   body.innerHTML = '';
   if(!authState.session){
@@ -9918,7 +9918,7 @@ TOOL_IMPL.aibgreplace = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Upload a photo (product/portrait) — the subject will be automatically cut out, and the AI background you describe will be placed behind it.</div>`));
+      body.appendChild(el(`<div class="note">Upload a photo (product/portrait) — the subject is cut out on your phone (free), then AI draws the background you describe on our server: <b>3 credits</b> per background (you confirm first; refunded if it fails). Only a plain colour or your own photo behind the subject? Use the free “Remove Background” tool.</div>`));
       mountUploader(body, { accept:'image/*', label:'Photo drag & drop or tap', sublabel:'',
         onAdd: (fl)=>{ file = fl[0]; cutoutBlob = null; paint(); } });
       if(!file) return;
@@ -9937,6 +9937,7 @@ TOOL_IMPL.aibgreplace = {
       if(!AUTH_CONFIGURED || !authState.session){ mountResult(body, 'Please sign in to use this feature.').style.background='#FDEDEC'; return; }
       const p = (body.querySelector('#abgPrompt').value || '').trim();
       if(!p){ mountResult(body, 'Please describe the background first.').style.background='#FDEDEC'; return; }
+      if(!(await confirmCreditSpend(body, '3 credits'))) return;
       const prog = mountProgress(body);
       try{
         // Step 1: cut out the subject — same library/call bgremove already
@@ -9950,7 +9951,7 @@ TOOL_IMPL.aibgreplace = {
           });
         }
         // Step 2: generate the described background via the same backend
-        // endpoint texttoimage already uses (Cloudflare Workers AI, free).
+        // endpoint texttoimage already uses (Cloudflare Workers AI) — 3 credits, charged by the server.
         prog.set(50, 'Generating background…');
         const result = await backendFetchJson(APP_CONFIG.BACKEND_URL + '/api/ai/image', {
           method:'POST',
@@ -9958,6 +9959,7 @@ TOOL_IMPL.aibgreplace = {
           body: JSON.stringify({ prompt: p, toolId: 'aibgreplace' })
         });
         if(result.error) throw new Error(result.error);
+        try{ if(typeof refreshProfile==='function') refreshProfile(); }catch(e){}
         prog.set(80, 'Compositing…');
         const bgImg = new Image();
         await new Promise((res,rej)=>{ bgImg.onload=res; bgImg.onerror=rej; bgImg.src = `data:${result.mimeType||'image/png'};base64,${result.imageBase64}`; });
@@ -14509,107 +14511,197 @@ TOOL_IMPL.pdfbookmark = {
 TOOL_IMPL.videowatermark = {
   mount(container){
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
-    let file = null, logoFile = null;
-    let wmType = 'logo', position = 'bottomright', opacity = 70;
+    // The watermark (a logo picture, or text drawn into a picture) is shown ON the video and can be dragged anywhere
+    // and resized with the corner handle; its place is kept as fractions of the video size, so the export puts it
+    // exactly where it was in the preview. Text is drawn by the browser (Tamil works) — ffmpeg.wasm has no fonts.
+    let file = null, logoFile = null, logoUrl = null, wmType = 'logo';
+    let vw = 0, vh = 0;                                   // real video size
+    const pos = { fx: 0.70, fy: 0.80, fw: 0.22 };         // left / top / width as a fraction of the video
+    const tx = { text: '', color: '#ffffff', size: 6, bold: true, box: true, boxColor: '#000000', boxAlpha: 35, shadow: true };
+    let opacity = 80, wmUrl = null, wmAR = 0.3;           // current watermark picture + its height/width
     const body = el(`<div></div>`); container.appendChild(body);
-    function esc(s){ return s.replace(/\\/g,'\\\\').replace(/:/g,'\\:').replace(/'/g,"\u2019"); }
+
+    async function textPng(){
+      const W = Math.max(320, vw || 1280), fs = Math.max(8, Math.round(W * tx.size / 100));
+      try{ await document.fonts.load(`${tx.bold?800:500} ${fs}px "Noto Sans Tamil"`); }catch(e){}
+      const font = `${tx.bold?800:500} ${fs}px "Noto Sans Tamil", system-ui, sans-serif`;
+      const lines = (tx.text || ' ').split('\n');
+      const m = document.createElement('canvas').getContext('2d'); m.font = font;
+      const pad = tx.box ? Math.round(fs*0.35) : Math.round(fs*0.12), lh = Math.round(fs*1.3);
+      const w = Math.ceil(Math.max(...lines.map(l=> m.measureText(l).width))) + pad*2, h = lh*lines.length + pad*2 - Math.round(fs*0.2);
+      const cv = document.createElement('canvas'); cv.width = Math.max(2, w); cv.height = Math.max(2, h);
+      const g = cv.getContext('2d');
+      if(tx.box){ g.fillStyle = tx.boxColor; g.globalAlpha = tx.boxAlpha/100; const r = Math.round(fs*0.25); g.beginPath(); g.roundRect ? g.roundRect(0,0,cv.width,cv.height,r) : g.rect(0,0,cv.width,cv.height); g.fill(); g.globalAlpha = 1; }
+      g.font = font; g.textBaseline = 'top'; g.fillStyle = tx.color;
+      if(tx.shadow && !tx.box){ g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = fs*0.12; g.shadowOffsetX = g.shadowOffsetY = fs*0.04; }
+      lines.forEach((l,i)=> g.fillText(l, pad, pad + i*lh));
+      return { url: cv.toDataURL('image/png'), frac: cv.width / W, ar: cv.height / cv.width };
+    }
+    async function refreshText(keepWidth){
+      if(!tx.text.trim()){ wmUrl = null; drawOverlay(); return; }
+      const r = await textPng(); wmUrl = r.url; wmAR = r.ar; if(!keepWidth) pos.fw = Math.min(0.98, r.frac);
+      clampPos(); drawOverlay();
+    }
+    function clampPos(){
+      pos.fw = Math.max(0.03, Math.min(1, pos.fw));
+      const hFrac = vw && vh ? pos.fw * wmAR * vw / vh : pos.fw * wmAR;
+      pos.fx = Math.max(0, Math.min(1 - pos.fw, pos.fx));
+      pos.fy = Math.max(0, Math.min(Math.max(0, 1 - hFrac), pos.fy));
+    }
+    let overlayEl = null, stageEl = null;
+    function drawOverlay(){
+      if(!stageEl) return;
+      if(overlayEl) overlayEl.remove(); overlayEl = null;
+      if(!wmUrl) return;
+      overlayEl = el(`<div style="position:absolute; left:${pos.fx*100}%; top:${pos.fy*100}%; width:${pos.fw*100}%; cursor:move; touch-action:none; outline:2px dashed #ffd60a; outline-offset:2px;">
+        <img src="${wmUrl}" alt="" draggable="false" style="display:block; width:100%; height:auto; opacity:${opacity/100}; pointer-events:none;">
+        <div class="vw-h" style="position:absolute; right:-11px; bottom:-11px; width:22px; height:22px; border-radius:50%; background:#ffd60a; border:2px solid #000; cursor:nwse-resize; touch-action:none;"></div></div>`);
+      stageEl.appendChild(overlayEl);
+      const handle = overlayEl.querySelector('.vw-h');
+      let mode = null, sx = 0, sy = 0, s0 = null;
+      const start = (e, m)=>{ e.preventDefault(); e.stopPropagation(); mode = m; sx = e.clientX; sy = e.clientY; s0 = Object.assign({}, pos); try{ e.target.setPointerCapture(e.pointerId); }catch(x){} };
+      overlayEl.addEventListener('pointerdown', e=> start(e, e.target === handle ? 'size' : 'move'));
+      const move = (e)=>{
+        if(!mode) return;
+        const r = stageEl.getBoundingClientRect(), dx = (e.clientX - sx)/r.width, dy = (e.clientY - sy)/r.height;
+        if(mode === 'move'){ pos.fx = s0.fx + dx; pos.fy = s0.fy + dy; }
+        else { pos.fw = s0.fw + dx; }
+        clampPos();
+        overlayEl.style.left = pos.fx*100+'%'; overlayEl.style.top = pos.fy*100+'%'; overlayEl.style.width = pos.fw*100+'%';
+      };
+      const end = async ()=>{
+        if(mode === 'size' && wmType === 'text' && vw){ // resizing text = bigger / smaller letters (re-drawn sharp)
+          const r = await textPng(); tx.size = Math.max(1, Math.min(30, tx.size * pos.fw / r.frac));
+          const sz = body.querySelector('#vwSize'); if(sz){ sz.value = tx.size.toFixed(1); body.querySelector('#vwSizeV').textContent = tx.size.toFixed(1); }
+          await refreshText(true);
+        }
+        mode = null;
+      };
+      overlayEl.addEventListener('pointermove', move); handle.addEventListener('pointermove', move);
+      overlayEl.addEventListener('pointerup', end); overlayEl.addEventListener('pointercancel', end);
+      handle.addEventListener('pointerup', end); handle.addEventListener('pointercancel', end);
+    }
+    function snap(where){
+      clampPos();
+      const hFrac = vw && vh ? pos.fw * wmAR * vw / vh : pos.fw * wmAR, m = 0.03;
+      const X = { l: m, c: (1-pos.fw)/2, r: 1-pos.fw-m }, Y = { t: m, c: (1-hFrac)/2, b: 1-hFrac-m };
+      pos.fx = X[where[1]]; pos.fy = Y[where[0]]; clampPos(); drawOverlay();
+    }
 
     function paint(){
-      body.innerHTML = '';
-      mountUploader(body, { accept:'video/*', label:'Drop your video', sublabel:'',
-        onAdd:(fl)=>{ file = fl[0]; paint(); } });
+      body.innerHTML = ''; stageEl = null; overlayEl = null;
+      mountUploader(body, { accept:'video/*', label:'Drop your video', sublabel:'MP4 · MOV · WEBM — processed on your device',
+        onAdd:(fl)=>{ file = fl[0]; vw = vh = 0; paint(); } });
       if(!file) return;
       mountFileList(body, [file], ()=>{ file=null; paint(); });
-      body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
 
-      body.appendChild(el(`<div style="font-weight:900; font-size:12px; color:var(--sub); text-transform:uppercase; margin:14px 0 8px;">Watermark Type</div>`));
-      const typeRow = el(`<div class="filter-row"></div>`);
-      [['logo','Logo Image'],['text','Text']].forEach(([val,label])=>{
+      const wrap = el(`<div style="position:relative; width:100%; max-width:720px; margin:8px auto 4px; background:#000; border-radius:10px; overflow:hidden;">
+        <video src="${URL.createObjectURL(file)}" playsinline muted controls style="display:block; width:100%; height:auto;"></video>
+        <div class="vw-stage" style="position:absolute; left:0; top:0; right:0;"></div></div>`);
+      body.appendChild(wrap);
+      const video = wrap.querySelector('video');
+      stageEl = wrap.querySelector('.vw-stage');
+      const sizeStage = ()=>{ // the overlay covers the picture area only (not the browser's control bar)
+        if(!video.videoWidth) return;
+        vw = video.videoWidth; vh = video.videoHeight;
+        stageEl.style.height = (wrap.clientWidth * vh / vw) + 'px';
+      };
+      video.addEventListener('loadedmetadata', async ()=>{ sizeStage(); clampPos(); if(wmType==='text') await refreshText(true); drawOverlay(); });
+      new ResizeObserver(sizeStage).observe(wrap);
+      body.appendChild(el(`<div class="note" style="text-align:center;">✋ Drag the yellow box to place the watermark · drag the round corner to resize · press ▶ to check it while the video plays</div>`));
+
+      const typeRow = el(`<div class="filter-row" style="margin-top:12px;"></div>`);
+      [['logo','🖼️ Logo / picture'],['text','🔤 Text']].forEach(([val,label])=>{
         const chip = el(`<button class="filter-chip ${wmType===val?'active':''}">${label}</button>`);
-        chip.onclick = ()=>{ wmType = val; paint(); };
+        chip.onclick = async ()=>{ wmType = val; if(val==='logo'){ wmUrl = logoUrl; if(logoUrl){ const im = new Image(); im.src = logoUrl; await im.decode().catch(()=>{}); wmAR = im.naturalHeight/(im.naturalWidth||1); } } paint(); if(val==='text') await refreshText(true); };
         typeRow.appendChild(chip);
       });
       body.appendChild(typeRow);
 
       if(wmType==='logo'){
         mountUploader(body, { accept:'image/*', label:'Drop your logo (PNG with transparency works best)', sublabel:'',
-          onAdd:(fl)=>{ logoFile = fl[0]; paint(); } });
-        if(logoFile) mountFileList(body, [logoFile], ()=>{ logoFile=null; paint(); });
+          onAdd: async (fl)=>{
+            logoFile = fl[0]; if(logoUrl) URL.revokeObjectURL(logoUrl); logoUrl = URL.createObjectURL(logoFile);
+            const im = new Image(); im.src = logoUrl; await im.decode().catch(()=>{}); wmAR = im.naturalHeight/(im.naturalWidth||1);
+            wmUrl = logoUrl; pos.fw = 0.2; snap('br'); paint();
+          }});
+        if(logoFile) mountFileList(body, [logoFile], ()=>{ logoFile=null; logoUrl=null; wmUrl=null; paint(); });
+        wmUrl = logoUrl;
       } else {
-        body.appendChild(el(`<div class="field" style="margin-top:10px;"><label>Watermark Text</label><input type="text" id="vwText" autocomplete="off"></div>`));
+        const f = el(`<div class="opts" style="margin-top:10px;">
+          <div class="field" style="grid-column:1/-1;"><label>Watermark text (Tamil or English)</label><textarea id="vwText" rows="2" lang="ta" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; font:inherit;" placeholder="எ.கா. © ஸ்ரீ முருகன் ஸ்டுடியோ · 98xxxxxx21">${escapeHtml(tx.text)}</textarea></div>
+          <div class="field"><label>Text size — <b id="vwSizeV">${tx.size.toFixed(1)}</b></label><input type="range" id="vwSize" min="1.5" max="20" step="0.5" value="${tx.size}"></div>
+          <div class="field"><label>Text colour</label><input type="color" id="vwColor" value="${tx.color}" style="width:100%; height:38px; padding:2px; border:1px solid var(--line); border-radius:8px;"></div>
+          <div class="field-inline"><input type="checkbox" id="vwBold" ${tx.bold?'checked':''}><label for="vwBold">Bold</label></div>
+          <div class="field-inline"><input type="checkbox" id="vwBox" ${tx.box?'checked':''}><label for="vwBox">Background strip</label></div>
+          <div class="field"><label>Strip colour</label><input type="color" id="vwBoxC" value="${tx.boxColor}" style="width:100%; height:38px; padding:2px; border:1px solid var(--line); border-radius:8px;"></div>
+          <div class="field"><label>Strip darkness — <b id="vwBoxAV">${tx.boxAlpha}</b>%</label><input type="range" id="vwBoxA" min="0" max="100" value="${tx.boxAlpha}"></div>
+        </div>`);
+        body.appendChild(f);
+        let tt = 0; const later = (fn)=>{ clearTimeout(tt); tt = setTimeout(fn, 120); };
+        f.querySelector('#vwText').oninput = (e)=>{ tx.text = e.target.value; later(()=> refreshText(false)); };
+        f.querySelector('#vwSize').oninput = (e)=>{ tx.size = +e.target.value; f.querySelector('#vwSizeV').textContent = tx.size.toFixed(1); later(()=> refreshText(false)); };
+        f.querySelector('#vwColor').oninput = (e)=>{ tx.color = e.target.value; later(()=> refreshText(true)); };
+        f.querySelector('#vwBold').onchange = (e)=>{ tx.bold = e.target.checked; refreshText(false); };
+        f.querySelector('#vwBox').onchange = (e)=>{ tx.box = e.target.checked; refreshText(false); };
+        f.querySelector('#vwBoxC').oninput = (e)=>{ tx.boxColor = e.target.value; later(()=> refreshText(true)); };
+        f.querySelector('#vwBoxA').oninput = (e)=>{ tx.boxAlpha = +e.target.value; f.querySelector('#vwBoxAV').textContent = e.target.value; later(()=> refreshText(true)); };
       }
 
-      body.appendChild(el(`<div class="opts" style="margin-top:14px;">
-        <div class="field"><label>Position</label>
-          <select id="vwPos">
-            <option value="topleft">Top Left</option>
-            <option value="topright">Top Right</option>
-            <option value="bottomleft">Bottom Left</option>
-            <option value="bottomright" selected>Bottom Right</option>
-          </select>
-        </div>
-        <div class="field"><label>Opacity %</label><input type="number" id="vwOpacity" min="10" max="100" value="${opacity}"></div>
-      </div>`));
+      const quick = el(`<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:12px;"><span style="font-size:12px; font-weight:800; color:var(--sub);">Quick place:</span></div>`);
+      [['tl','↖'],['tc','⬆'],['tr','↗'],['cc','⊙'],['bl','↙'],['bc','⬇'],['br','↘']].forEach(([k,lab])=>{
+        const b = el(`<button type="button" class="filter-chip" style="min-width:42px;">${lab}</button>`); b.onclick = ()=> snap(k); quick.appendChild(b);
+      });
+      body.appendChild(quick);
+      const op = el(`<div class="field" style="margin-top:10px;"><label>Opacity — <b>${opacity}</b>%</label><input type="range" min="10" max="100" value="${opacity}"></div>`);
+      op.querySelector('input').oninput = (e)=>{ opacity = +e.target.value; op.querySelector('b').textContent = opacity; const im = overlayEl && overlayEl.querySelector('img'); if(im) im.style.opacity = opacity/100; };
+      body.appendChild(op);
 
       const row = el(`<div class="btn-row"></div>`);
-      const btn = el(`<button class="btn">💧 Add Watermark</button>`);
+      const btn = el(`<button class="btn">💧 Add Watermark & Download</button>`);
       btn.onclick = doWatermark;
       row.appendChild(btn);
       body.appendChild(row);
-    }
-
-    function overlayXY(pos){
-      const pad = 20;
-      const map = {
-        topleft: `${pad}:${pad}`,
-        topright: `main_w-overlay_w-${pad}:${pad}`,
-        bottomleft: `${pad}:main_h-overlay_h-${pad}`,
-        bottomright: `main_w-overlay_w-${pad}:main_h-overlay_h-${pad}`
-      };
-      return map[pos] || map.bottomright;
-    }
-    function drawtextXY(pos){
-      const pad = 24;
-      const map = {
-        topleft: `x=${pad}:y=${pad}`,
-        topright: `x=w-tw-${pad}:y=${pad}`,
-        bottomleft: `x=${pad}:y=h-th-${pad}`,
-        bottomright: `x=w-tw-${pad}:y=h-th-${pad}`
-      };
-      return map[pos] || map.bottomright;
+      if(video.readyState >= 1){ sizeStage(); drawOverlay(); }
     }
 
     async function doWatermark(){
-      position = body.querySelector('#vwPos').value;
-      opacity = Number(body.querySelector('#vwOpacity').value)||70;
-      const alpha = (opacity/100).toFixed(2);
       if(wmType==='logo' && !logoFile){ mountResult(body,'Please add a logo image.').style.background='#FDEDEC'; return; }
-      const text = wmType==='text' ? body.querySelector('#vwText').value.trim() : '';
-      if(wmType==='text' && !text){ mountResult(body,'Please enter watermark text.').style.background='#FDEDEC'; return; }
-
+      if(wmType==='text' && !tx.text.trim()){ mountResult(body,'Please enter watermark text.').style.background='#FDEDEC'; return; }
+      if(!vw || !vh){ mountResult(body,'The video is still loading — wait a second and try again.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         prog.set(5,'Loading video engine… (first time takes a bit longer)');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
         const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
-        let args;
-        if(wmType==='logo'){
-          await ffmpeg.writeFile('logo.png', await fetchFile(logoFile));
-          const filter = `[1:v]scale=iw*0.15:-1,format=rgba,colorchannelmixer=aa=${alpha}[wm];[0:v][wm]overlay=${overlayXY(position)}`;
-          args = ['-i','in.'+ext, '-i','logo.png', '-filter_complex', filter, '-codec:a','copy', 'out.'+ext];
-        } else {
-          const filter = `drawtext=text='${esc(text)}':fontcolor=white@${alpha}:fontsize=28:${drawtextXY(position)}:box=1:boxcolor=black@0.3:boxborderw=8`;
-          args = ['-i','in.'+ext, '-vf', filter, '-codec:a','copy', 'out.'+ext];
-        }
+        let png;
+        if(wmType==='text'){ const r = await textPng(); png = new Uint8Array(await (await fetch(r.url)).arrayBuffer()); }
+        else png = await fetchFile(logoFile);
+        await ffmpeg.writeFile('wm.png', png);
+        const even = (v)=> Math.max(2, Math.round(v/2)*2);
+        const pw = even(pos.fw * vw), x = Math.round(pos.fx * vw), y = Math.round(pos.fy * vh), alpha = (opacity/100).toFixed(2);
+        const filter = `[1:v]scale=${pw}:-2,format=rgba,colorchannelmixer=aa=${alpha}[wm];[0:v][wm]overlay=${x}:${y}`;
+        // MP4 / MOV keep their container (audio copied); anything else (WEBM, MKV, AVI…) becomes MP4 — it plays everywhere
+        // (WhatsApp, phones) and the browser engine's default WEBM encoder is unreliable.
+        const keep = /^(mp4|m4v|mov)$/.test(ext), outExt = keep ? (ext==='m4v' ? 'mp4' : ext) : 'mp4';
+        const args = ['-i','in.'+ext, '-i','wm.png', '-filter_complex', filter, '-c:v','libx264','-preset','veryfast','-crf','20','-pix_fmt','yuv420p'];
+        args.push.apply(args, keep ? ['-c:a','copy'] : ['-c:a','aac','-b:a','160k']);
+        args.push('-movflags','+faststart','out.'+outExt);
         prog.set(20,'Adding watermark…');
-        await ffmpeg.exec(args);
-        prog.set(85,'Preparing…');
-        const data = await ffmpeg.readFile('out.'+ext);
-        downloadBlob(new Blob([data],{type:'video/'+ext}), file.name.replace(/\.[^.]+$/,'')+'-watermarked.'+ext);
+        const onProg = ({progress})=>{ if(progress>0 && progress<=1) prog.set(20 + progress*65, 'Adding watermark… '+Math.round(progress*100)+'%'); };
+        try{ ffmpeg.on && ffmpeg.on('progress', onProg); }catch(e){}
+        try{ await ffmpeg.exec(args); } finally { try{ ffmpeg.off && ffmpeg.off('progress', onProg); }catch(e){} }
+        prog.set(88,'Preparing…');
+        const data = await ffmpeg.readFile('out.'+outExt);
+        if(!data || !data.length) throw new Error('the video engine made an empty file');
+        const blob = new Blob([data],{type: outExt==='mov' ? 'video/quicktime' : 'video/mp4'});
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-watermarked.'+outExt);
+        try{ await ffmpeg.deleteFile('in.'+ext); await ffmpeg.deleteFile('out.'+outExt); }catch(e){}
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Watermarked video downloaded.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — try a smaller/shorter video if this keeps failing.').style.background='#FDEDEC'; }
+        mountResult(body, 'Watermarked video downloaded. Preview:');
+        body.appendChild(el(`<video src="${URL.createObjectURL(blob)}" controls playsinline style="width:100%; max-width:720px; display:block; margin:8px auto; border-radius:10px; background:#000;"></video>`));
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+escapeHtml(err.message||String(err))+' — try a smaller/shorter video if this keeps failing.').style.background='#FDEDEC'; }
     }
     paint();
   }
