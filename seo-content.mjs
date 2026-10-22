@@ -427,11 +427,11 @@ export const SEO_EXTRA = {
   },
   texttospeech: {
     title: "Text to Speech in Tamil — Free Online TTS to MP3 | PDF Tools India",
-    desc: "Type Tamil, English, Hindi or 100+ languages and get a natural AI voice as MP3 or WAV. Listen free in the browser; downloads cost 1 credit per 1,000 characters.",
+    desc: "Type Tamil, English, Hindi or 100+ languages and get a natural AI voice as MP3 or WAV. Listen free in the browser; downloads cost 2 credits per 1,000 characters.",
     intro: "Make a voice-over for a video, an announcement or a lesson — pick a voice and a style (calm, cheerful, news reader, story telling).",
     steps: ["Open Text to Speech and type or paste the text.", "Choose a voice and style; press Listen free to try.", "Press Make voice file and download MP3."],
     uses: ["Voice-over for YouTube / Reels", "Announcement for a shop or school", "Reading a lesson aloud for students"],
-    faqs: [["Does it speak Tamil properly?", "Yes — the AI voice reads Tamil script. The free preview uses your phone’s own voice, which may not have Tamil."], ["How much does it cost?", "1 credit per 1,000 characters (minimum 1), refunded if it fails."]]
+    faqs: [["Does it speak Tamil properly?", "Yes — the AI voice reads Tamil script. The free preview uses your phone’s own voice, which may not have Tamil."], ["How much does it cost?", "2 credits per 1,000 characters (minimum 2), refunded if it fails."]]
   },
   audiopitch: {
     title: "Change Pitch or Speed of Audio Online Free — Without Chipmunk Effect | PDF Tools India",

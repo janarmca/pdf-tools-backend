@@ -307,7 +307,7 @@ async function aiRestyle(env, user, b) {
   });
 }
 
-// Text → speech (Tamil, English, Hindi … 100+ languages) with Gemini TTS. 1 credit per 1,000 characters (min 1), max 4,000.
+// Text → speech (Tamil, English, Hindi … 100+ languages) with Gemini TTS. 2 credits per 1,000 characters (min 2), max 4,000.
 // The audio answer is streamed straight back to the browser WITHOUT parsing it here (a minute of WAV is ~4 MB of base64 —
 // JSON.parse of that would blow the free plan's 10 ms CPU). The browser finds the audio in either response shape.
 const TTS_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Aoede', 'Leda', 'Orus', 'Achird', 'Sulafat', 'Zephyr', 'Fenrir', 'Gacrux', 'Vindemiatrix']);
@@ -318,7 +318,7 @@ async function aiSpeech(env, user, b) {
   if (text.length > 4000) return err(400, 'Please send at most 4,000 characters at a time.');
   const voice = TTS_VOICES.has(b.voice) ? b.voice : 'Kore';
   const style = String(b.style || '').trim().slice(0, 80);
-  const cost = Math.max(1, Math.ceil(text.length / 1000));
+  const cost = 2 * Math.ceil(text.length / 1000);
   return charged(env, user.id, cost, 'texttospeech', async () => {
     const g = base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com');
     const say = style ? `Read this aloud in a ${style} voice:\n${text}` : text;

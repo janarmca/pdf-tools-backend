@@ -757,17 +757,35 @@
     for (let i = 0; i < n; i++) c[i] = dv.getInt16(i * 2, true) / 32768;
     return { sampleRate: rate, channels: [c] };
   }
+  // free Tamil voice — runs in a Web Worker on the visitor's device (tts-tamil-worker.js); the worker is kept so the model loads once per visit
+  let tamilWorker = null;
+  function tamilTTS(text, onProgress) {
+    return new Promise(function (resolve, reject) {
+      if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') { reject(new Error('This browser cannot run the free voice. Please use a recent Chrome, Edge, Firefox or Safari.')); return; }
+      try { if (!tamilWorker) tamilWorker = new Worker('/tts-tamil-worker.js?v=1', { type: 'module' }); } catch (e) { reject(new Error('This browser cannot run the free voice (' + e.message + ').')); return; }
+      const w = tamilWorker;
+      w.onmessage = function (e) {
+        const m = e.data || {};
+        if (m.type === 'progress') onProgress(m.pct, m.text);
+        else if (m.type === 'audio') resolve({ data: m.data, sampleRate: m.sampleRate });
+        else if (m.type === 'error') { reject(new Error(m.error)); if (/download|memory|wasm|abort/i.test(m.error)) { try { w.terminate(); } catch (x) {} tamilWorker = null; } }
+      };
+      w.onerror = function (e) { try { w.terminate(); } catch (x) {} tamilWorker = null; reject(new Error('The free voice stopped (' + ((e && e.message) || 'out of memory?') + '). Close other tabs and try again.')); };
+      w.postMessage({ type: 'generate', text: text });
+    });
+  }
   TOOL_IMPL.texttospeech = {
     mount: function (container) {
       ensureStyle();
       const body = el('<div></div>'); container.appendChild(body);
-      body.innerHTML = '<div class="note">Type or paste text in <b>Tamil, English, Hindi</b> or 100+ languages → a natural AI voice → download MP3 / WAV. Costs <b>1 credit per 1,000 characters</b> (you confirm first; refunded if it fails). “Listen free” uses your phone\'s own voice and cannot be downloaded.</div>';
+      body.innerHTML = '<div class="note">Type or paste text in <b>Tamil, English, Hindi</b> or 100+ languages → a natural AI voice → download MP3 / WAV. Costs <b>2 credits per 1,000 characters</b> (you confirm first; refunded if it fails). “Listen free” uses your phone\'s own voice and cannot be downloaded.</div>' +
+        '<div class="note" style="margin-top:8px;background:#EBFBEE;border-color:#B2F2BB">🆓 <b>New — free Tamil voice (Beta):</b> makes a <b>downloadable</b> Tamil voice file <b>on your own phone/computer</b> — no credits, nothing uploaded. First use downloads the voice model once (~110 MB, use Wi-Fi); after that it works quickly. Tamil text only; long text takes a while on older phones.</div>';
       const ta = el('<textarea lang="ta" rows="7" maxlength="4000" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:15px;line-height:1.6" placeholder="எ.கா. அனைவருக்கும் வணக்கம்! இன்று நாம் ஒரு புதிய பாடத்தைக் கற்போம்."></textarea>'); body.appendChild(ta);
       const cnt = el('<div class="note" style="margin-top:6px"></div>'); body.appendChild(cnt);
       const o = el('<div class="opts"><div class="field"><label>Voice</label><select id="ttsV">' + TTS_VOICES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div><div class="field"><label>Style</label><select id="ttsS">' + TTS_STYLES.map(function (v) { return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join('') + '</select></div></div>'); body.appendChild(o);
-      const upd = function () { const n = ta.value.trim().length; cnt.innerHTML = n + ' / 4000 characters · cost <b>' + (n ? Math.max(1, Math.ceil(n / 1000)) : 0) + ' credit' + (Math.ceil(n / 1000) > 1 ? 's' : '') + '</b>'; }; ta.oninput = upd; upd();
+      const upd = function () { const n = ta.value.trim().length; cnt.innerHTML = n + ' / 4000 characters · AI voice cost <b>' + (n ? 2 * Math.ceil(n / 1000) : 0) + ' credits</b> · free Tamil voice <b>0</b>'; }; ta.oninput = upd; upd();
       const picker = formatPicker(body, 'mp3');
-      const row = el('<div class="btn-row"><button class="btn secondary" id="ttsFree">🔊 Listen free</button><button class="btn" id="ttsGo">🎙️ Make voice file</button></div>'); body.appendChild(row);
+      const row = el('<div class="btn-row"><button class="btn secondary" id="ttsFree">🔊 Listen free</button><button class="btn secondary" id="ttsTa" style="border-color:#2F9E44;color:#2B8A3E">🆓 Free Tamil voice file (Beta)</button><button class="btn" id="ttsGo">🎙️ AI voice file</button></div>'); body.appendChild(row);
       row.querySelector('#ttsFree').onclick = function () {
         if (!window.speechSynthesis) { errBox(body, 'This browser has no built-in voice.'); return; }
         speechSynthesis.cancel(); const t = ta.value.trim(); if (!t) { ta.focus(); return; }
@@ -776,10 +794,26 @@
         if (ta_ && !v) mountResult(body, 'Your phone has no Tamil voice installed — the free preview may sound wrong. The AI voice file reads Tamil properly.');
         speechSynthesis.speak(u);
       };
+      row.querySelector('#ttsTa').onclick = async function () {
+        const t = ta.value.trim(); if (!t) { ta.focus(); return; }
+        if (!/[஀-௿]/.test(t)) { errBox(body, 'The free voice reads Tamil only. For English or Hindi use “AI voice file”.'); return; }
+        let ready = false; try { ready = localStorage.getItem('ptTamilReady') === '1'; } catch (e) {}
+        if (!ready && !window.confirm('Free Tamil voice (Beta)\n\nThe first time, your browser downloads the voice model once (about 110 MB — please use Wi-Fi). It is saved in the browser, so next time it starts quickly.\n\nEverything runs on your device: free, no credits, nothing uploaded.\n\nContinue?')) return;
+        const btn = this; btn.disabled = true; const prog = mountProgress(body); prog.set(1, 'Starting…');
+        try {
+          const r = await tamilTTS(t, function (pct, text) { prog.set(pct, text); });
+          try { localStorage.setItem('ptTamilReady', '1'); } catch (e) {}
+          prog.remove();
+          if (!r.data.length) throw new Error('The voice came out empty — please try a shorter sentence.');
+          await saveResult(body, { sampleRate: r.sampleRate, channels: [r.data] }, picker, 'tamil-voice-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-'), 'Saving');
+          mountResult(body, '<small>Free voice: Pocket TTS Tamil by Prasad Vittaldev, based on Kyutai Pocket TTS (CC-BY-4.0). Beta — if a word sounds wrong, tell us at support@pdftoolsindia.com.</small>');
+        } catch (e) { prog.remove(); errBox(body, (e && e.message) || e); }
+        btn.disabled = false;
+      };
       row.querySelector('#ttsGo').onclick = async function () {
         const t = ta.value.trim(); if (!t) { ta.focus(); return; }
         if (typeof AUTH_CONFIGURED !== 'undefined' && (!AUTH_CONFIGURED || !authState.session)) { errBox(body, 'Please sign in first (top right) — the AI voice uses credits.'); return; }
-        const cost = Math.max(1, Math.ceil(t.length / 1000));
+        const cost = 2 * Math.ceil(t.length / 1000);
         if (typeof confirmCreditSpend === 'function' && !(await confirmCreditSpend(body, cost + ' credit' + (cost > 1 ? 's' : '')))) return;
         const btn = this; btn.disabled = true; const prog = mountProgress(body); prog.set(20, 'Making the voice… (a few seconds per paragraph)');
         try {

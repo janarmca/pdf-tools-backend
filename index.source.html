@@ -543,7 +543,7 @@ const TOOLS = [
   {id:'audiomerge', name:'Merge Audio / Join MP3', desc:'Join songs or recordings one after another — gap or smooth cross-fade', icon:'🔗', color:'#2B8A3E', cat:'video', cost:0, lazy:'audio'},
   {id:'audioeffects', name:'Audio Volume & Effects', desc:'Louder or softer, normalise, speed, bass, treble, fade, reverse, hum removal', icon:'🎛️', color:'#5C7CFA', cat:'video', cost:0, lazy:'audio'},
   {id:'voicerec', name:'Voice Recorder', desc:'Record your voice with the microphone and save as MP3 or WAV', icon:'🎙️', color:'#C92A2A', cat:'video', cost:0, lazy:'audio'},
-  {id:'texttospeech', name:'Text to Speech (MP3) — தமிழ் குரல்', desc:'Type Tamil, English or Hindi text — a natural AI voice reads it; download MP3', icon:'🗣️', color:'#0B7285', cat:'video', cost:1, lazy:'audio'},
+  {id:'texttospeech', name:'Text to Speech (MP3) — தமிழ் குரல்', desc:'Type Tamil, English or Hindi text — a natural AI voice reads it; download MP3', icon:'🗣️', color:'#0B7285', cat:'video', cost:2, lazy:'audio'},
   {id:'audiopitch', name:'Change Pitch & Speed', desc:'Voice higher/lower without changing speed — or speed without the chipmunk voice', icon:'🎚️', color:'#7048E8', cat:'video', cost:0, lazy:'audio'},
   {id:'audioeq', name:'Audio Equalizer', desc:'10-band EQ with presets — bass boost, voice clarity, podcast, treble', icon:'🎛️', color:'#1864AB', cat:'video', cost:0, lazy:'audio'},
   {id:'vocalremove', name:'Vocal Remover (Karaoke)', desc:'Remove the singer from a stereo song or music video — or keep only the voice', icon:'🎤', color:'#C2255C', cat:'video', cost:0, lazy:'audio'},
@@ -2021,7 +2021,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261016b`;
+    s.src = `category-${cat}.js?v=20261022a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
