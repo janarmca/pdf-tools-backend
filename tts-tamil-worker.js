@@ -100,9 +100,10 @@ async function run(sess, feeds, manifest) {
   const f = {};
   for (const name of sess.inputNames) {
     if (feeds[name]) f[name] = feeds[name];
-    else { const e = manifest && manifest.find(function (x) { return x.input_name === name; }); if (!e) throw new Error('Model input "' + name + '" missing'); f[name] = T(e.dtype, filled(e.shape, e.dtype, e.fill), e.shape); }
+    else { const e = manifest && manifest.find(function (x) { return x.input_name === name; }); if (!e) throw new Error('Model input "' + name + '" missing (model wants: ' + sess.inputNames.join(', ') + ')'); f[name] = T(e.dtype, filled(e.shape, e.dtype, e.fill), e.shape); }
   }
-  return sess.run(f);
+  try { return await sess.run(f); }
+  catch (e) { throw new Error(((e && e.message) || String(e)) + ' (inputs: ' + sess.inputNames.join(', ') + ' / outputs: ' + sess.outputNames.join(', ') + ')'); }
 }
 function keepState(state, out, manifest) { for (const e of manifest) if (out[e.output_name]) state[e.input_name] = out[e.output_name]; }
 
@@ -124,7 +125,9 @@ async function load() {
   progress(84, 'Starting the voice engine…');
   const opt = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
   for (const k of ['text_conditioner', 'flow_lm_main', 'flow_lm_flow', 'mimi_decoder', 'mimi_encoder']) {
-    S[k] = await ort.InferenceSession.create(new Uint8Array(bufs[k]), opt); bufs[k] = null;
+    try { S[k] = await ort.InferenceSession.create(new Uint8Array(bufs[k]), opt); }
+    catch (e) { throw new Error('[step: start ' + FILES[k] + '] ' + ((e && e.message) || e)); }
+    bufs[k] = null;
   }
   const spm = await import('./vendor/sentencepiece.mjs');
   sp = new spm.SentencePieceProcessor(); await sp._loadModel(new Uint8Array(bufs.tokenizer));
@@ -132,6 +135,9 @@ async function load() {
 
   // voice: the repo ships one real recording (Geetha); turn it into the model's voice prompt once per visit
   progress(92, 'Preparing the voice…');
+  try { await makeVoice(bufs); } catch (e) { throw new Error('[step: voice] ' + ((e && e.message) || e)); }
+}
+async function makeVoice(bufs) {
   const wav = parseWav(bufs.voice, meta.sample_rate || 24000);
   const enc = await run(S.mimi_encoder, { audio: T('float32', wav, [1, 1, wav.length]) }, meta.mimi_state_manifest);
   const e0 = enc[S.mimi_encoder.outputNames[0]];
@@ -224,7 +230,11 @@ self.onmessage = async function (e) {
   if (m.type !== 'generate') return;
   if (busy) { post({ type: 'error', error: 'Already speaking — please wait.' }); return; }
   busy = true;
-  try { const r = await generate(m.text); post({ type: 'audio', data: r.data, sampleRate: r.sampleRate }, [r.data.buffer]); }
+  try {
+    try { await load(); } catch (e) { throw /^\[step/.test(e.message || '') ? e : new Error('[step: download/load] ' + ((e && e.message) || e)); }
+    let r; try { r = await generate(m.text); } catch (e) { throw /^\[step/.test(e.message || '') ? e : new Error('[step: speak] ' + ((e && e.message) || e)); }
+    post({ type: 'audio', data: r.data, sampleRate: r.sampleRate }, [r.data.buffer]);
+  }
   catch (err) { post({ type: 'error', error: String((err && err.message) || err) }); }
   busy = false;
 };

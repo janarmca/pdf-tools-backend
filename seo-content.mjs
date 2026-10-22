@@ -275,11 +275,11 @@ export const SEO_EXTRA = {
   },
   pdfeditor: {
     title: 'Free PDF Text Editor Online — Add Text, Images, Shapes and Signature | PDF Tools India',
-    desc: 'Edit a PDF online: add text, images, signatures and shapes. Core editing is free, no signup, runs in your browser.',
+    desc: 'Edit a PDF online: change existing text in the same font, add text, images, signatures and shapes. Free, no signup, runs in your browser.',
     intro: 'Fill in a form, add a line of text, place a signature or draw a shape on a PDF without installing software.',
     steps: ['Open PDF Editor and choose your PDF.', 'Pick text, image, signature or shape and place it on the page.', 'Download the edited PDF.'],
     uses: ['Filling a printed-style form on a phone', 'Adding a signature or stamp image', 'Writing a note on a document before returning it', 'Covering a small area with a shape'],
-    faqs: [['Is this a free online PDF text editor?', 'Yes — you can add new text anywhere on a page, plus images, shapes and a signature, free and in your browser. It writes on top of the page; it does not rewrite the original text inside the PDF.'], ['Can I change the existing text of a scanned PDF?', 'This editor adds new text, images and shapes on top of pages. Scanned pages are pictures, so their original text is not editable.'], ['Is the editing free?', 'Core editing is free.']]
+    faqs: [['Is this a free online PDF text editor?', 'Yes — tap any existing text to change it: the PDF\'s own text is rewritten in the same font, size and colour when that font has the letters you type (otherwise the closest standard font is used). You can also add new text, images, shapes and a signature. The rest of the page stays sharp and selectable.'], ['Can I change the existing text of a scanned PDF?', 'Scanned pages are pictures, so they have no text to change — you can still add new text, images and shapes on top.'], ['Is the editing free?', 'Core editing is free.']]
   },
   pdfocrsearchable: {
     title: 'OCR PDF to Searchable PDF Free — Make Scans Searchable | PDF Tools India',

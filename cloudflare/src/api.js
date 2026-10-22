@@ -321,21 +321,33 @@ async function aiSpeech(env, user, b) {
   const cost = 2 * Math.ceil(text.length / 1000);
   return charged(env, user.id, cost, 'texttospeech', async () => {
     const g = base(env, 'GEMINI_API_BASE', 'https://generativelanguage.googleapis.com');
+    const tried = [];
+    const why = async (r, label) => { let m = ''; try { const j = JSON.parse((await r.text()).slice(0, 4000)); m = (j.error && (j.error.message || j.error.status)) || ''; } catch (e) { /* not JSON */ } tried.push(`${label}: ${r.status}${m ? ' ' + String(m).slice(0, 160) : ''}`); };
+    // 1) Interactions API (current) — Gemini 3.8 Flash TTS, then Flash-Lite TTS
+    for (const model of [env.GEMINI_TTS_MODEL || 'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts']) {
+      const content = { type: 'text', text };
+      if (style) content.annotations = [{ type: 'speech_metadata', style }];
+      const r = await fetch(`${g}/v1beta/interactions`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+        body: JSON.stringify({ model, input: [{ type: 'user_input', content: [content] }], response_format: { type: 'audio' }, generation_config: { speech_config: [{ voice }] } }),
+      });
+      if (r.ok) return new Response(r.body, { status: 200, headers: { 'Content-Type': 'application/json', 'X-Credits-Used': String(cost) } });
+      await why(r, model);
+      if (r.status === 401 || r.status === 403) break; // key problem — other models will say the same
+    }
+    // 2) generateContent (older API shape) with the preview TTS models
     const say = style ? `Read this aloud in a ${style} voice:\n${text}` : text;
-    // 1) current Interactions API
-    let r = await fetch(`${g}/v1beta/interactions`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify({ model: env.GEMINI_TTS_MODEL || 'gemini-3.8-flash-tts', input: [{ type: 'user_input', content: [{ type: 'text', text: say }] }], response_format: { type: 'audio' }, generation_config: { speech_config: [{ voice }] } }),
-    });
-    // 2) older generateContent shape, if the first is not available on this key/region
-    if (!r.ok) {
-      r = await fetch(`${g}/v1beta/models/${env.GEMINI_TTS_FALLBACK || 'gemini-2.5-flash-preview-tts'}:generateContent?key=${env.GEMINI_API_KEY}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+    for (const model of [env.GEMINI_TTS_FALLBACK || 'gemini-3.1-flash-tts-preview', 'gemini-2.5-flash-preview-tts']) {
+      const r = await fetch(`${g}/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
         body: JSON.stringify({ contents: [{ parts: [{ text: say }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } }),
       });
+      if (r.ok) return new Response(r.body, { status: 200, headers: { 'Content-Type': 'application/json', 'X-Credits-Used': String(cost) } });
+      await why(r, model);
     }
-    if (!r.ok) throw fail(502, 'The voice service is busy or not available right now — your credits were returned. Please try again later.');
-    return new Response(r.body, { status: 200, headers: { 'Content-Type': 'application/json', 'X-Credits-Used': String(cost) } });
+    console.log('tts failed', tried.join(' | '));
+    const quota = tried.some((t) => / 429/.test(t));
+    throw fail(502, (quota ? 'Google\'s voice limit for now is used up — please try again later.' : 'The AI voice service did not answer.') + ' Your credits were returned. (details: ' + tried.join(' | ').slice(0, 600) + ')');
   });
 }
 

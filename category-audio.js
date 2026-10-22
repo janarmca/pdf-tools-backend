@@ -762,7 +762,7 @@
   function tamilTTS(text, onProgress) {
     return new Promise(function (resolve, reject) {
       if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') { reject(new Error('This browser cannot run the free voice. Please use a recent Chrome, Edge, Firefox or Safari.')); return; }
-      try { if (!tamilWorker) tamilWorker = new Worker('/tts-tamil-worker.js?v=1', { type: 'module' }); } catch (e) { reject(new Error('This browser cannot run the free voice (' + e.message + ').')); return; }
+      try { if (!tamilWorker) tamilWorker = new Worker('/tts-tamil-worker.js?v=2', { type: 'module' }); } catch (e) { reject(new Error('This browser cannot run the free voice (' + e.message + ').')); return; }
       const w = tamilWorker;
       w.onmessage = function (e) {
         const m = e.data || {};

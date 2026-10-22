@@ -2021,7 +2021,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261022a`;
+    s.src = `category-${cat}.js?v=20261022b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -11920,6 +11920,10 @@ TOOL_IMPL.pdfeditor = {
     let elIdCounter = 0;
     let extractedFontsByPage = null; // set on upload — see extractEmbeddedFontsByPage; may stay empty if extraction isn't possible for this PDF
     let currentCanvasEl = null; // the actually-rendered <canvas> DOM node for the current page — used to compute a reliable display-scale for text sizing (see fontSizeToPx)
+    // Real text editing (pdf-edit-core.js): edits of EXISTING text are stored as {type:'textedit'} entries in
+    // elementsByPage (so Undo/Redo covers them) and applied to the PDF's own content stream. The preview is the
+    // edited PDF itself, re-rendered by pdf.js — what you see is exactly what you download.
+    let origBytes = null, editedBytes = null, builtSig = '', renderDoc = null, editSeq = 0, lastEditNote = '';
     let undoStack = [], redoStack = [];
     // Snapshots elementsByPage before a mutation so it can be undone. Uses
     // structuredClone (not JSON.stringify) specifically because matchedFontBytes
@@ -11983,70 +11987,130 @@ TOOL_IMPL.pdfeditor = {
           <div>4️⃣ Anything you've placed can be **dragged to move**; select it and drag the blue handle to make it **bigger/smaller**.</div>
           <div>5️⃣ Made a mistake? ↩️ Undo, or ↪️ Redo to go forward again.</div>
           <div>6️⃣ When done, click "✅ Apply Changes & Download PDF".</div>
-          <div style="margin-top:6px; color:var(--sub); font-size:12px;">The final export turns the page into an image (like any free online editor does) — the original text can't be individually selected afterward.</div>
+          <div style="margin-top:6px; color:var(--sub); font-size:12px;">Editing existing text changes the PDF's own text — same font, size and colour when the PDF's font has those letters; the rest of the page stays exactly as it was (still sharp, still selectable).</div>
         </div>
       `));
       mountUploader(body, { accept:'application/pdf', label:'Drop a PDF file', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
           pdfjsDoc = await loadPdfJs(file._buf);
-          numPages = pdfjsDoc.numPages; curPage = 1; elementsByPage = {};
-          extractedFontsByPage = null;
-          try{
-            // Load the SAME file via pdf-lib (separately from pdf.js, which
-            // only handles rendering/text-position — this is for reaching
-            // into the PDF's own embedded font objects). Failure here just
-            // means font-matching won't be available for this PDF; editing
-            // still works normally with the generic font.
-            const srcDoc = await PDFDocument.load(file._buf.slice(0), { ignoreEncryption:true });
-            extractedFontsByPage = await extractEmbeddedFontsByPage(srcDoc);
-          }catch(fontExtractErr){ extractedFontsByPage = null; }
+          numPages = pdfjsDoc.numPages; curPage = 1; elementsByPage = {}; undoStack = []; redoStack = [];
+          origBytes = new Uint8Array(file._buf.slice(0)); editedBytes = null; builtSig = ''; renderDoc = pdfjsDoc; lastEditNote = '';
+          extractedFontsByPage = null; pageData = null;
           await paintEditor();
         }});
     }
 
     async function loadPageData(pageNum){
-      const page = await pdfjsDoc.getPage(pageNum);
+      const page = await (renderDoc || pdfjsDoc).getPage(pageNum);
       const viewport = page.getViewport({scale});
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
-      const ctx2d = canvas.getContext('2d');
+      const ctx2d = canvas.getContext('2d', { willReadFrequently:true });
       await page.render({canvasContext: ctx2d, viewport}).promise;
       const content = await page.getTextContent();
-      // content.styles maps each item's internal fontName to style info PDF.js
-      // extracted from the PDF's own font resources — fontFamily strings from
-      // real-world PDFs often carry hints like "Bold"/"Italic"/"Black" in the
-      // name (e.g. "ArialMT-Bold"), which is a genuinely reliable enough
-      // signal to approximate the original weight/slant without needing to
-      // extract and re-embed the PDF's actual (often proprietary/subsetted)
-      // font program — that's a much deeper problem pdf-lib doesn't solve.
+      // content.styles: pdf.js's view of each font (family name hints like "Bold"/"Italic" decide the
+      // substitute font if the PDF's own font can't write the new letters)
       const styles = content.styles || {};
       const items = content.items.filter(it=>it.str && it.str.trim().length).map(it=>{
-        const x = it.transform[4]*scale, yTop = viewport.height - (it.transform[5]*scale);
-        const h = (Math.abs(it.transform[3])||10)*scale;
-        const w = (it.width||(it.str.length*(it.transform[0]||6)*0.5))*scale;
+        const t = it.transform, size = Math.hypot(t[2], t[3]) || 10, len = Math.hypot(t[0], t[1]) || 1, dir = [t[0]/len, t[1]/len], nrm = [-dir[1], dir[0]];
+        const wU = it.width || it.str.length*size*0.5;
+        // the text box in PDF space (baseline origin → width along the text, ascent ~0.85 em, descent ~0.22 em) → screen box
+        const corners = [[0,-0.22],[wU/size,-0.22],[0,0.85],[wU/size,0.85]].map(([a,b])=> viewport.convertToViewportPoint(t[4]+dir[0]*a*size+nrm[0]*b*size, t[5]+dir[1]*a*size+nrm[1]*b*size));
+        const xs = corners.map(c=>c[0]), ys = corners.map(c=>c[1]);
+        const x = Math.min(...xs), y = Math.min(...ys), w = Math.max(...xs)-x, h = Math.max(...ys)-y;
         const styleInfo = styles[it.fontName] || {};
-        const famLower = (styleInfo.fontFamily||'').toLowerCase();
-        const isBold = /bold|black|heavy|700|800|900/.test(famLower);
+        const fam = (styleInfo.fontFamily||'') + ' ' + (it.fontName||'');
+        const famLower = fam.toLowerCase();
+        const isBold = /bold|black|heavy|semibold|demi/.test(famLower);
         const isItalic = /italic|oblique/.test(famLower);
-        // Sample the actual rendered pixel color at the middle of this text
-        // run — far more reliable than guessing, since we already have the
-        // fully-rendered page sitting right there on canvas.
-        let color = '#000000';
+        // ink colour: darkest pixel inside the box; background: most common colour on the box border
+        let color = '#000000', bg = '#ffffff';
         try{
-          const sampleX = Math.min(canvas.width-1, Math.max(0, Math.round(x + w*0.15)));
-          const sampleY = Math.min(canvas.height-1, Math.max(0, Math.round(yTop-h + h*0.65)));
-          const px = ctx2d.getImageData(sampleX, sampleY, 1, 1).data;
-          // Only trust the sample if it's dark-ish (i.e. actually landed on
-          // glyph ink, not the background) — otherwise fall back to black
-          // rather than picking up a stray background/highlight color.
-          if((px[0]+px[1]+px[2])/3 < 180){
-            color = '#'+[px[0],px[1],px[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+          const X0 = Math.max(0, Math.floor(x)), Y0 = Math.max(0, Math.floor(y)), X1 = Math.min(canvas.width-1, Math.ceil(x+w)), Y1 = Math.min(canvas.height-1, Math.ceil(y+h));
+          if(X1>X0 && Y1>Y0){
+            const img = ctx2d.getImageData(X0, Y0, X1-X0+1, Y1-Y0+1).data, W = X1-X0+1, H = Y1-Y0+1;
+            let best = 765, bi = 0; const counts = {};
+            for(let yy=0; yy<H; yy++) for(let xx=0; xx<W; xx++){
+              const i = (yy*W+xx)*4, sum = img[i]+img[i+1]+img[i+2];
+              if(sum < best){ best = sum; bi = i; }
+              if(yy===0 || yy===H-1 || xx===0 || xx===W-1){ const k = (img[i]>>3)+','+(img[i+1]>>3)+','+(img[i+2]>>3); counts[k] = (counts[k]||0)+1; }
+            }
+            if(best < 600) color = '#'+[img[bi],img[bi+1],img[bi+2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+            const top = Object.entries(counts).sort((p,q)=>q[1]-p[1])[0];
+            if(top){ const [r,g,b2] = top[0].split(',').map(v=>Math.min(255, (+v<<3)+4)); bg = '#'+[r,g,b2].map(v=>v.toString(16).padStart(2,'0')).join(''); }
           }
-        }catch(e){ /* getImageData can fail on tainted canvases from cross-origin content — keep default black */ }
-        return { str: it.str, x, y: yTop-h, w, h, fontSize: Math.abs(it.transform[3])||10, bold:isBold, italic:isItalic, color, fontFamily: styleInfo.fontFamily||'' };
+        }catch(e){ /* tainted canvas — keep defaults */ }
+        return { str: it.str, x, y, w, h, fontSize: size*scale, bold:isBold, italic:isItalic, color, bg, fontFamily: styleInfo.fontFamily||'', fontName: it.fontName,
+                 user: { str: it.str, x: t[4], y: t[5], width: wU, size, dir } };
       });
-      return { canvas, items, pageWidthPt: viewport.width/scale, pageHeightPt: viewport.height/scale };
+      return { canvas, items, viewport, rotation: viewport.rotation||0, pageWidthPt: viewport.width/scale, pageHeightPt: viewport.height/scale };
+    }
+
+    // --- real text edits -------------------------------------------------------------
+    function ensureEditCore(){
+      if(window.__pdfEditCore) return Promise.resolve(window.__pdfEditCore);
+      return loadScriptOnce('/pdf-edit-core.js?v=1').then(()=> (window.__pdfEditCore = window.PdfEditCore(window.PDFLib)));
+    }
+    function allTextEdits(){
+      const list = [];
+      Object.keys(elementsByPage).forEach(pn=> (elementsByPage[pn]||[]).forEach(e=>{ if(e.type==='textedit') list.push(Object.assign({pn:+pn}, e)); }));
+      return list.sort((a,b)=>a.seq-b.seq);
+    }
+    function editsSig(){ return JSON.stringify(allTextEdits().map(e=>[e.pn,e.seq,e.newText,e.align,e.color,e.item.x,e.item.y])); }
+    const LATIN1_OK = /^[\x20-\x7E -ÿ‘’“”–—…•€]*$/;
+    async function substituteFont(doc, text, e, cache){
+      const fam = (e.fontFamily||'').toLowerCase(), b = !!e.bold, i = !!e.italic;
+      let key;
+      if(LATIN1_OK.test(text)){
+        if(/mono|courier|consol/.test(fam)) key = b&&i?'CourierBoldOblique':b?'CourierBold':i?'CourierOblique':'Courier';
+        else if(/serif|times|roman|georgia|garamond|cambria|book/.test(fam) && !/sans/.test(fam)) key = b&&i?'TimesRomanBoldItalic':b?'TimesRomanBold':i?'TimesRomanItalic':'TimesRoman';
+        else key = b&&i?'HelveticaBoldOblique':b?'HelveticaBold':i?'HelveticaOblique':'Helvetica';
+        if(!cache[key]) cache[key] = await doc.embedFont(StandardFonts[key]);
+        return { font: cache[key], fake: false };
+      }
+      if(!cache.unicode) cache.unicode = await embedUnicodeFont(doc); // Noto Sans Tamil: Tamil + English + ₹
+      return { font: cache.unicode, fake: b };
+    }
+    // Applies every text edit (in the order they were made) to a fresh copy of the original PDF.
+    async function buildEdited(){
+      const edits = allTextEdits();
+      if(!edits.length){ editedBytes = null; if(renderDoc && renderDoc !== pdfjsDoc){ try{ renderDoc.destroy(); }catch(e){} } renderDoc = pdfjsDoc; return; }
+      const core = await ensureEditCore();
+      const doc = await PDFDocument.load(origBytes.slice(0), { ignoreEncryption:true });
+      const fontCache = {};
+      for(const e of edits){
+        const page = doc.getPage(e.pn-1);
+        let r = { ok:false };
+        try{ r = core.replaceText(doc, e.pn-1, e.item, e.newText, { align: e.align }); }catch(err){ r = { ok:false, reason: err.message }; }
+        let status;
+        if(r.ok && r.mode === 'same-font'){ status = 'same'; }
+        else {
+          const ang = r.ok ? Math.atan2(r.dir[1], r.dir[0]) : Math.atan2(e.item.dir[1], e.item.dir[0]);
+          let x = r.ok ? r.x : e.item.x, y = r.ok ? r.y : e.item.y; const size = r.ok ? r.size : e.item.size;
+          if(!r.ok){
+            // the text could not be found in the page's own content (e.g. it is inside a form object) — cover it tightly in its own background colour
+            const d = e.item.dir, n = [-d[1], d[0]], W = e.item.width + size*0.1, a0 = -0.25*size, a1 = 0.9*size;
+            const bx = x - d[0]*size*0.05 + n[0]*a0, by = y - d[1]*size*0.05 + n[1]*a0;
+            page.drawRectangle({ x:bx, y:by, width: W, height: a1-a0, color: hexToRgb(e.bg||'#ffffff'), rotate: degrees(ang*180/Math.PI) });
+          }
+          if(e.newText){
+            const { font, fake } = await substituteFont(doc, e.newText, e, fontCache);
+            const newW = font.widthOfTextAtSize(e.newText, size), oldW = r.ok ? r.oldWidth : e.item.width;
+            const shift = e.align === 'right' ? oldW - newW : e.align === 'center' ? (oldW - newW)/2 : 0;
+            x += Math.cos(ang)*shift; y += Math.sin(ang)*shift;
+            const o = { x, y, size, font, color: hexToRgb(e.color||'#000000'), rotate: degrees(ang*180/Math.PI) };
+            page.drawText(e.newText, o);
+            if(fake) page.drawText(e.newText, Object.assign({}, o, { x: x + Math.cos(ang)*size*0.03, y: y + Math.sin(ang)*size*0.03 }));
+          }
+          status = r.ok ? 'substitute' : 'cover';
+        }
+        const live = (elementsByPage[e.pn]||[]).find(x=>x.id===e.id); if(live) live.status = status;
+      }
+      editedBytes = await doc.save();
+      const old = renderDoc;
+      renderDoc = await loadPdfJs(editedBytes.buffer.slice(editedBytes.byteOffset, editedBytes.byteOffset + editedBytes.byteLength));
+      if(old && old !== pdfjsDoc){ try{ old.destroy(); }catch(e){} }
     }
 
     function newEl(base){ elIdCounter++; const e = Object.assign({id:'el'+elIdCounter}, base); (elementsByPage[curPage] = elementsByPage[curPage]||[]).push(e); return e; }
@@ -12145,6 +12209,13 @@ TOOL_IMPL.pdfeditor = {
         }
       }
 
+      const sig = editsSig();
+      if(sig !== builtSig){
+        const wait = el(`<div class="note">⏳ Updating the page…</div>`); body.appendChild(wait);
+        try{ await buildEdited(); builtSig = sig; }catch(err){ builtSig = sig; editedBytes = null; renderDoc = pdfjsDoc; lastEditNote = '⚠️ Could not apply the text change: '+escapeHtml(err.message||String(err)); }
+        wait.remove(); pageData = null;
+      }
+      if(lastEditNote){ body.appendChild(el(`<div class="note" style="margin-bottom:8px;">${lastEditNote}</div>`)); }
       if(!pageData) pageData = await loadPageData(curPage);
       const wrap = el(`<div style="position:relative; width:100%; max-width:${pageData.canvas.width}px; margin:0 auto; border:1px solid var(--line); border-radius:8px; overflow:hidden; touch-action:none;"></div>`);
       const canvasEl = document.createElement('canvas');
@@ -12178,7 +12249,7 @@ TOOL_IMPL.pdfeditor = {
       }
 
       // Render placed elements
-      (elementsByPage[curPage]||[]).forEach(e=> wrap.appendChild(renderElementDom(e)));
+      (elementsByPage[curPage]||[]).forEach(e=>{ if(e.type!=='textedit') wrap.appendChild(renderElementDom(e)); });
 
       wrap.addEventListener('click', (ev)=>{
         if(ev.target !== canvasEl) return; // clicked on an element/hit-zone, not raw canvas
@@ -12196,21 +12267,24 @@ TOOL_IMPL.pdfeditor = {
     }
 
     function editExistingText(item){
-      const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
-      const fontMatchFound = !!matchExtractedFont(pageFontMap, item.fontFamily);
+      // default alignment: text that ends near the right side of the page (a value column) stays right-aligned,
+      // text centred on the page stays centred — so a shorter/longer new value keeps the original layout
+      const pw = pageData.canvas.width, cx = item.x + item.w/2;
+      const autoAlign = Math.abs(cx - pw/2) < pw*0.04 ? 'center' : (item.x > pw*0.5 && item.x + item.w > pw*0.72) ? 'right' : 'left';
       const overlay = el(`
         <div style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
           <div style="background:#fff; border-radius:14px; padding:18px; width:min(92vw,420px); max-height:85vh; overflow-y:auto;">
             <div style="font-weight:800; margin-bottom:10px;">Edit Text</div>
             <textarea id="editTextArea" rows="3" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; margin-bottom:10px;">${escapeHtml(item.str)}</textarea>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px; color:var(--sub);">
-              <span>Detected color:</span>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; font-size:12px; color:var(--sub);">
+              <span>Keep aligned:</span>
+              <select id="editAlign" style="padding:5px 8px; border:1px solid var(--line); border-radius:6px; font-size:12.5px;">
+                <option value="left">Left (same start)</option><option value="right">Right (same end)</option><option value="center">Centre</option>
+              </select>
+              <span style="margin-left:6px;">Colour:</span>
               <input type="color" id="editColorInput" value="${item.color||'#000000'}" style="width:32px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;">
-              ${item.bold ? '<span style="font-weight:800; margin-left:4px;">Bold detected</span>' : ''}
             </div>
-            <div style="font-size:11.5px; color:${fontMatchFound?'#1E7145':'#8A6D00'}; margin-bottom:10px;">
-              ${fontMatchFound ? '✓ Original document font matched — new text will use the exact same font.' : '⚠️ Could not match the exact original font for this text — a similar substitute font will be used instead.'}
-            </div>
+            <div style="font-size:11.5px; color:var(--sub); margin-bottom:10px;">The PDF's own font, size and colour are kept when that font has all the letters you type. If not, the closest standard font is used (colour from here).</div>
             <div class="btn-row" style="margin-bottom:10px;">
               <button class="btn" id="editManualBtn" style="flex:1; padding:9px; font-size:12.5px;">✅ Use This Text</button>
             </div>
@@ -12231,30 +12305,21 @@ TOOL_IMPL.pdfeditor = {
       document.body.appendChild(overlay);
       const textarea = overlay.querySelector('#editTextArea');
       const colorInput = overlay.querySelector('#editColorInput');
+      const alignSel = overlay.querySelector('#editAlign'); alignSel.value = autoAlign;
       const statusEl = overlay.querySelector('#editAiStatus');
-      function applyText(newText){
-        if(newText && newText.trim() && newText!==item.str){
+      async function applyText(newText){
+        newText = String(newText||'').replace(/\s*\n\s*/g,' ');
+        if(newText !== item.str){
           snapshotForUndo();
-          // Simulated "edit" — the same technique most free PDF editors use
-          // for non-scanned PDFs: cover the original text with a white
-          // box, then draw the new text in its place. True in-place PDF
-          // text mutation isn't something pdf-lib/PDF.js support.
-          // Padding is generous (not just 1-2px) because a PDF text item's
-          // reported bounding box often doesn't fully contain the visual ink
-          // — ascenders, descenders, italic slant, and font-specific overshoot
-          // can extend past it, which is exactly why the original text was
-          // still faintly visible around the edges before this fix.
-          const padX = Math.max(8, item.w*0.10), padY = Math.max(8, item.h*0.5);
-          const whiteoutEl = newEl({ type:'whiteout', x:item.x-padX, y:item.y-padY, w:item.w+padX*2, h:item.h+padY*2 });
-          const pageFontMap = extractedFontsByPage ? extractedFontsByPage[curPage-1] : null;
-          const matchedFontBytes = matchExtractedFont(pageFontMap, item.fontFamily);
-          // linkedWhiteoutId ties this text run to its cover box — when the
-          // text is later resized, its whiteout resizes proportionally too,
-          // so growing the text (e.g. via "zoom to fit font") can't outgrow
-          // its cover and let the original text show through at the edges.
-          newEl({ type:'text', x:item.x, y:item.y, w:item.w, h:item.h, text:newText, fontSize:item.fontSize*scale, color:colorInput.value, bold:!!item.bold, matchedFontBytes, linkedWhiteoutId: whiteoutEl.id });
+          newEl({ type:'textedit', seq: ++editSeq, item: item.user, newText, align: alignSel.value, color: colorInput.value, bg: item.bg, bold: !!item.bold, italic: !!item.italic, fontFamily: item.fontFamily });
         }
-        overlay.remove(); paintEditor();
+        overlay.remove();
+        await paintEditor();
+        const mine = allTextEdits().pop();
+        lastEditNote = !mine ? '' : mine.status === 'same' ? '✅ Changed in the PDF\'s own font, size and colour.'
+          : mine.status === 'substitute' ? '✅ Changed. The PDF\'s font does not contain some of these letters, so a close standard font is used for this text.'
+          : mine.status === 'cover' ? '⚠️ This text is drawn in a special way inside the PDF, so it was covered with its background colour and the new text written on top.' : '';
+        await paintEditor();
       }
       overlay.querySelector('#editManualBtn').onclick = ()=> applyText(textarea.value);
       overlay.querySelector('#editCancelBtn').onclick = ()=> overlay.remove();
@@ -12539,68 +12604,43 @@ TOOL_IMPL.pdfeditor = {
       const prog = mountProgress(body);
       try{
         prog.set(15,'Loading…');
-        const outDoc = await PDFDocument.create();
-        const font = await embedUnicodeFont(outDoc);
-        // Caches embedded fonts by the exact bytes-array reference (the same
-        // extracted font is commonly reused across several edited text runs
-        // on the same page) — avoids embedding identical font data multiple
-        // times, which would otherwise bloat the output file and slow export.
-        const fontEmbedCache = new Map();
-        async function embedMatchedFont(bytes){
-          if(!bytes) return null;
-          if(fontEmbedCache.has(bytes)) return fontEmbedCache.get(bytes);
-          let embedded = null;
-          try{
-            const fk = await ensureFontkitLib();
-            outDoc.registerFontkit(fk);
-            embedded = await outDoc.embedFont(bytes, { subset:true });
-          }catch(embedErr){
-            // This specific extracted font didn't embed cleanly (unsupported
-            // internal format, corrupt subset, etc.) — cache the failure too,
-            // so we don't retry the same broken bytes for every text run.
-            embedded = null;
-          }
-          fontEmbedCache.set(bytes, embedded);
-          return embedded;
-        }
+        // start from the PDF itself (with the real text edits already applied) — pages stay vector, text stays selectable
+        if(editsSig() !== builtSig){ await buildEdited(); builtSig = editsSig(); }
+        const outDoc = await PDFDocument.load((editedBytes || origBytes).slice(0), { ignoreEncryption:true });
+        let font = null;
+        const srcDoc = renderDoc || pdfjsDoc;
         for(let pn=1; pn<=numPages; pn++){
-          prog.set(15 + (pn/numPages)*70, `Rendering page ${pn}/${numPages}…`);
-          const pd = (pn===curPage && pageData) ? pageData : await loadPageData(pn);
-          const pngBytes = await (await fetch(pd.canvas.toDataURL('image/png'))).arrayBuffer();
-          const pngImage = await outDoc.embedPng(pngBytes);
-          const page = outDoc.addPage([pd.pageWidthPt, pd.pageHeightPt]);
-          page.drawImage(pngImage, {x:0,y:0,width:pd.pageWidthPt, height:pd.pageHeightPt});
-          const els = elementsByPage[pn] || [];
+          const els = (elementsByPage[pn] || []).filter(e=>e.type!=='textedit');
+          if(!els.length) continue;
+          prog.set(15 + (pn/numPages)*70, `Page ${pn}/${numPages}…`);
+          const vp = (await srcDoc.getPage(pn)).getViewport({scale});
+          const page = outDoc.getPage(pn-1);
+          const rot = degrees(((vp.rotation||0)%360+360)%360);
+          const P = (x,y)=> vp.convertToPdfPoint(x,y); // screen px → PDF point (handles page rotation and offset boxes)
           for(const e of els){
-            const px = e.x/scale, pyTop = e.y/scale, pw = e.w/scale, ph = e.h/scale;
-            const py = pd.pageHeightPt - pyTop - ph; // flip to PDF bottom-left origin
+            const bl = P(e.x, e.y+e.h), pw = e.w/scale, ph = e.h/scale;
             if(e.type==='whiteout'){
-              page.drawRectangle({x:px,y:py,width:pw,height:ph,color:rgb(1,1,1)});
+              page.drawRectangle({x:bl[0],y:bl[1],width:pw,height:ph,color:rgb(1,1,1),rotate:rot});
             } else if(e.type==='text'){
+              if(!font) font = await embedUnicodeFont(outDoc);
               const textColor = hexToRgb(e.color);
-              // Genuine exact-font match, when one was found for this text
-              // run — falls back to the generic font if extraction/matching
-              // didn't succeed for this particular PDF/font.
-              const matchedFont = await embedMatchedFont(e.matchedFontBytes);
-              const useFont = matchedFont || font;
-              page.drawText(e.text, {x:px, y:py+ph*0.2, size:e.fontSize/scale, font:useFont, color: textColor});
+              const base = P(e.x, e.y + e.h*0.8), size = e.fontSize/scale;
+              page.drawText(e.text, {x:base[0], y:base[1], size, font, color:textColor, rotate:rot});
               if(e.bold){
-                // Faux-bold: draw the same text again with a hairline offset —
-                // a standard technique when a genuine separate bold font file
-                // isn't available. Not identical to real bold, but a close,
-                // legible approximation.
-                page.drawText(e.text, {x:px+0.4, y:py+ph*0.2, size:e.fontSize/scale, font:useFont, color: textColor});
+                // faux bold: the same text again, a hairline to the side (no separate bold font file needed)
+                const b2 = P(e.x + 0.6, e.y + e.h*0.8);
+                page.drawText(e.text, {x:b2[0], y:b2[1], size, font, color:textColor, rotate:rot});
               }
             } else if(e.type==='image'){
               const imgBytes = await (await fetch(e.src)).arrayBuffer();
               const isJpeg = e.src.startsWith('data:image/jpeg');
               const img = isJpeg ? await outDoc.embedJpg(imgBytes) : await outDoc.embedPng(imgBytes);
-              page.drawImage(img, {x:px,y:py,width:pw,height:ph});
+              page.drawImage(img, {x:bl[0],y:bl[1],width:pw,height:ph,rotate:rot});
             } else if(e.type==='shape'){
               const c = hexToRgb(e.color);
-              if(e.shape==='rect') page.drawRectangle({x:px,y:py,width:pw,height:ph,borderColor:c,borderWidth:2});
-              else if(e.shape==='ellipse') page.drawEllipse({x:px+pw/2,y:py+ph/2,xScale:pw/2,yScale:ph/2,borderColor:c,borderWidth:2});
-              else page.drawLine({start:{x:px,y:py+ph/2},end:{x:px+pw,y:py+ph/2},thickness:2,color:c});
+              if(e.shape==='rect') page.drawRectangle({x:bl[0],y:bl[1],width:pw,height:ph,borderColor:c,borderWidth:2,rotate:rot});
+              else if(e.shape==='ellipse'){ const cc = P(e.x+e.w/2, e.y+e.h/2); page.drawEllipse({x:cc[0],y:cc[1],xScale:pw/2,yScale:ph/2,borderColor:c,borderWidth:2,rotate:rot}); }
+              else { const a1 = P(e.x, e.y+e.h/2), a2 = P(e.x+e.w, e.y+e.h/2); page.drawLine({start:{x:a1[0],y:a1[1]},end:{x:a2[0],y:a2[1]},thickness:2,color:c}); }
             }
           }
         }
@@ -12609,7 +12649,7 @@ TOOL_IMPL.pdfeditor = {
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-edited.pdf');
         prog.set(100,'Done'); prog.remove();
         mountResult(body, 'Edited PDF downloaded.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+escapeHtml(err.message||String(err))).style.background='#FDEDEC'; }
     }
     function hexToRgb(hex){ const n=parseInt(hex.replace('#',''),16); return rgb(((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255); }
 
