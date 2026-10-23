@@ -428,5 +428,18 @@
       "டோக்கனை WhatsApp-ல் அனுப்புங்கள்"
     ],
     "url": "pdftoolsindia.com/?tool=shopslip"
+  },
+  {
+    "id": "quick-bill-upi",
+    "date": "2026-11-20",
+    "icon": "🛒",
+    "title": "WhatsApp ஆர்டர் → உடனடி பில் + UPI QR!",
+    "line": "\"தக்காளி 2 கிலோ, புதினா 10 ரூபாய்\" — ஆர்டரை ஒட்டினால் அட்டவணை, மொத்தம், உங்கள் GPay / PhonePe QR உடன் பில். இலவசம்.",
+    "steps": [
+      "'WhatsApp ஆர்டர் → பில்' திறங்கள்",
+      "வந்த ஆர்டரை ஒட்டி விலை போடுங்கள்",
+      "பில்லை WhatsApp-ல் அனுப்புங்கள்"
+    ],
+    "url": "pdftoolsindia.com/?tool=quickbill"
   }
 ]

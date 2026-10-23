@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>UPI பணம் செலுத்துதல் | PDF Tools India</title>
+<link rel="stylesheet" href="/fonts/tamil.css">
+<style>
+  :root{--ink:#1F2933;--sub:#5B6673;--line:#E3E7EC;--bg:#F4F7F5;--brand:#176B45;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.55}
+  .wrap{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:12px;text-align:center}
+  h1{font-size:21px;margin:0}
+  .sub{color:var(--sub);font-size:14px;font-weight:600;margin-top:4px}
+  .amt{font-size:42px;font-weight:900;color:var(--brand);margin:10px 0 0}
+  canvas{width:min(280px,80vw);height:auto;display:block;margin:14px auto 0;border:1px solid var(--line);border-radius:12px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:14px;border:0;font:800 16px/1.2 inherit;font-family:inherit;cursor:pointer;text-decoration:none;margin-top:10px}
+  .pri{background:var(--brand);color:#fff}.sec{background:#fff;color:var(--ink);border:2px solid var(--line)}.wa{background:#1E8E5A;color:#fff}
+  .vpa{font-size:16px;font-weight:800;word-break:break-all;margin-top:12px}
+  .note{background:#FFF8E6;border:1px solid #F3DFA2;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;text-align:left;margin-top:12px}
+  .err{background:#FDEDEC;border:1px solid #F5C6C2;color:#9B2C20;border-radius:12px;padding:14px;font-weight:700}
+  label{display:block;text-align:left;font-size:13px;font-weight:700;color:var(--sub);margin-top:12px}
+  input{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px;font-family:inherit;margin-top:4px}
+  .foot{text-align:center;color:var(--sub);font-size:12px;margin-top:18px}
+  .foot a{color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="card">ஏற்றுகிறது… / Loading…</div></div>
+<script src="/libs/qrcode-generator.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  var app = document.getElementById('app');
+  var P = {};
+  location.hash.replace(/^#/, '').split('&').forEach(function (kv) { if (!kv) return; var i = kv.indexOf('='); var k = i < 0 ? kv : kv.slice(0, i); try { P[k] = decodeURIComponent(i < 0 ? '' : kv.slice(i + 1)); } catch (e) { P[k] = ''; } });
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  var pa = String(P.pa || '').trim(), am = parseFloat(P.am), pn = String(P.pn || '').slice(0, 50), tn = String(P.tn || (P.b ? 'Bill ' + P.b : '')).replace(/[^\x20-\x7E]/g, '').trim().slice(0, 50), shop = String(P.s || pn || '').slice(0, 60), bill = String(P.b || '').slice(0, 20), ph = String(P.ph || '').replace(/\D/g, '');
+  if (!/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z][a-zA-Z0-9.\-]{1,63}$/.test(pa) || !(am > 0) || am > 10000000) {
+    app.innerHTML = '<div class="card"><div class="err">இந்த இணைப்பு முழுமையாக இல்லை. கடைக்காரரிடம் மீண்டும் அனுப்பச் சொல்லுங்கள்.<br><small>This payment link is incomplete. Ask the shop to send it again.</small></div></div>';
+    return;
+  }
+  var upi = 'upi://pay?pa=' + pa + (pn ? '&pn=' + encodeURIComponent(pn) : '') + '&am=' + am.toFixed(2) + '&cu=INR' + (tn ? '&tn=' + encodeURIComponent(tn) : '');
+  var amt = '₹ ' + am.toLocaleString('en-IN', { minimumFractionDigits: am % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  app.innerHTML =
+    '<div class="card"><h1>' + esc(shop || 'UPI') + '</h1>' + (bill ? '<div class="sub">பில் / Bill #' + esc(bill) + '</div>' : '') +
+    '<div class="amt">' + esc(amt) + '</div>' +
+    '<a class="btn pri" id="pay" href="' + esc(upi) + '">💳 UPI app-ல் செலுத்து · Pay with UPI app</a>' +
+    '<canvas id="qr" width="560" height="560" aria-label="UPI QR"></canvas>' +
+    '<div class="sub">வேறு போனில் ஸ்கேன் செய்யலாம் · Scan from another phone</div>' +
+    '<button class="btn sec" id="save">⬇️ QR படத்தைச் சேமி · Save QR picture</button>' +
+    '<div class="vpa">UPI ID: ' + esc(pa) + (pn ? '<br><span class="sub">' + esc(pn) + '</span>' : '') + '</div>' +
+    '<button class="btn sec" id="copy">📋 UPI ID நகலெடு · Copy UPI ID</button>' +
+    '<div class="note">“UPI app-ல் செலுத்து” வேலை செய்யவில்லை என்றால்: QR படத்தைச் சேமித்து GPay / PhonePe-ல் ஸ்கேனர் → “Gallery / Upload QR” மூலம் திறக்கவும், அல்லது UPI ID-ஐ நகலெடுத்து ' + esc(amt) + ' அனுப்பவும். பணம் செலுத்தும் முன் பெயர் / UPI ID சரியா என்று பாருங்கள்.<br><small>If the button does not open your app: save the QR and open it from the scanner’s gallery option, or copy the UPI ID and send ' + esc(amt) + '. Check the name / UPI ID before paying.</small></div></div>' +
+    (ph ? '<div class="card"><b>பணம் செலுத்திவிட்டீர்களா? · Paid?</b><label for="utr">UPI Ref / UTR எண் (விரும்பினால்) · optional</label><input id="utr" inputmode="numeric" autocomplete="off" placeholder="123456789012"><label for="nm">உங்கள் பெயர் · Your name</label><input id="nm" autocomplete="name"><a class="btn wa" id="paid" target="_blank" rel="noopener" href="#">✅ செலுத்தினேன் — கடைக்கு WhatsApp · Tell the shop</a></div>' : '') +
+    '<div class="foot">பணம் நேரடியாகக் கடையின் UPI கணக்குக்குச் செல்லும்; pdftoolsindia.com பணத்தைக் கையாளுவதில்லை, எந்தக் கட்டணமும் இல்லை. இது அரசு அல்லது வங்கித் தளம் அல்ல. UPI PIN-ஐ யாருக்கும் சொல்லாதீர்கள்.<br>Money goes straight to the shop’s UPI account; pdftoolsindia.com never handles it and charges nothing. Never share your UPI PIN.<br><a href="/">pdftoolsindia.com</a></div>';
+  // QR
+  try {
+    var q = qrcode(0, 'M'); q.addData(upi); q.make();
+    var cv = document.getElementById('qr'), ctx = cv.getContext('2d'), n = q.getModuleCount(), cell = cv.width / (n + 8), off = cell * 4;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.fillStyle = '#000';
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(Math.floor(off + c * cell), Math.floor(off + r * cell), Math.ceil(cell), Math.ceil(cell));
+    document.getElementById('save').onclick = function () { cv.toBlob(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'upi-qr-' + (bill || 'pay') + '.png'; document.body.appendChild(a); a.click(); a.remove(); }, 'image/png'); };
+  } catch (e) { document.getElementById('qr').style.display = 'none'; document.getElementById('save').style.display = 'none'; }
+  document.getElementById('copy').onclick = function () {
+    var b = this, done = function () { b.textContent = '✓ நகலெடுக்கப்பட்டது · Copied'; };
+    try { navigator.clipboard.writeText(pa).then(done, function () { prompt('UPI ID', pa); }); } catch (e) { prompt('UPI ID', pa); }
+  };
+  if (ph) {
+    var paid = document.getElementById('paid'), utr = document.getElementById('utr'), nm = document.getElementById('nm');
+    var upd = function () {
+      var t = '✅ பணம் செலுத்தினேன் / Paid' + '\n' + (shop ? shop + ' — ' : '') + (bill ? 'பில் #' + bill + ' — ' : '') + amt + (utr.value.trim() ? '\nUPI Ref / UTR: ' + utr.value.trim() : '') + (nm.value.trim() ? '\n— ' + nm.value.trim() : '') + '\n(உங்கள் UPI app-ல் பணம் வந்ததைச் சரிபாருங்கள் / please check your UPI app)';
+      paid.href = 'https://wa.me/' + ph + '?text=' + encodeURIComponent(t);
+    };
+    utr.addEventListener('input', upd); nm.addEventListener('input', upd); upd();
+  }
+})();
+</script>
+</body>
+</html>

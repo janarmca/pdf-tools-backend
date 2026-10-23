@@ -494,6 +494,7 @@ const TOOLS = [
   {id:'woodcalc', name:'Carpenter & Timber Calculator', desc:'Timber cut list in cft, round log, plywood sheets needed, area cost, feet-inch to cm', icon:'🪚', color:'#8A5A2B', cat:'business', cost:0, lazy:'biz'},
   {id:'tripcalc', name:'Trip Bill for Drivers & Taxi', desc:'Per km, local package (8 hr / 80 km) or fixed fare; waiting, batta, toll; bill picture, WhatsApp, trip diary', icon:'🚖', color:'#2B8A3E', cat:'business', cost:0, lazy:'biz'},
   {id:'shopslip', name:'Order Book & Token Slip', desc:'Item-wise orders for laundry, tailor, repair, photo, flowers, catering and more: your rates, token slip, ready message, delivery check', icon:'🎫', color:'#0B7285', cat:'business', cost:0, lazy:'biz'},
+  {id:'quickbill', name:'WhatsApp Order to Bill + UPI QR', desc:'Paste a WhatsApp order (tomato 2 kg, mint Rs 10): instant table and total, pay link and QR for your own UPI ID, paid / unpaid list', icon:'🛒', color:'#176B45', cat:'business', cost:0, lazy:'biz'},
   {id:'wamsg', name:'WhatsApp Messages for Shops', desc:'Ready customer messages: order ready, payment due, booking, festival wishes', icon:'💬', color:'#1E8E5A', cat:'business', cost:0, lazy:'biz'},
   {id:'profitcalc', name:'Profit & Selling Price Calculator', desc:'Cost to selling price, margin vs markup, GST price, break-even units', icon:'📈', color:'#C2255C', cat:'business', cost:0, lazy:'biz'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
@@ -1437,7 +1438,7 @@ sigstrip3:['3 கையொப்பப் படம் (UPSC)','மூன்ற�
 photosignjoin:['புகைப்படம் + கையொப்பம் இணை','இரண்டையும் ஒரே படமாக்கு'],
 cardprint:['ஆதார் / PAN அட்டை அச்சு','முன், பின் பக்கம் உண்மை அளவில் A4-இல்'],
 hracalc:['HRA வரிவிலக்கு கணிப்பான்','வீட்டு வாடகைப் படியில் வரி இல்லாத பகுதி — 2026 விதி'],
-examage:['தேர்வு வயது தகுதி','வயது வரம்பு, சலுகை, பிறந்த தேதி வரம்பு'],khata:['உதார் கணக்குப் புத்தகம்','யார் எவ்வளவு தர வேண்டும் — பதிவு, WhatsApp நினைவூட்டல், Backup'],ratecard:['விலைப்பட்டியல் தயாரிப்பு','கடைக்கான விலைப்பட்டியல் படம் — WhatsApp-ல் பகிர, ஒட்ட'],stampmaker:['ரப்பர் ஸ்டாம்ப் வடிவமைப்பு','வட்டம், செவ்வகம், நீள்வட்டம் — உண்மை அளவில், கண்ணாடிப் பிம்பத்துடன்'],woodcalc:['தச்சு — மர அளவு கணக்கு','பல அளவு பலகைகளின் மொத்த cft, உருளை மரம், பிளைவுட் ஷீட், அடி ↔ செ.மீ'],tripcalc:['வாகனப் பயணக் கட்டணம்','கி.மீ, உள்ளூர் பேக்கேஜ், நிலையான கட்டணம் — பில் படம், WhatsApp, பயணப் பதிவேடு'],shopslip:['ஆர்டர் புத்தகம் & டோக்கன் ரசீது','சலவை, தையல், பழுது, போட்டோ, பூக்கடை… பொருள் வாரியாக ஆர்டர், டோக்கன், தயார் செய்தி, கொடுக்கும்போது சரிபார்ப்பு'],wamsg:['கடைக்கான WhatsApp செய்திகள்','ஆர்டர் தயார், பணம் நிலுவை, பண்டிகை வாழ்த்து — ஒரே தொடுதலில்'],profitcalc:['லாபம் & விற்பனை விலை கணிப்பான்','வாங்கிய விலையிலிருந்து விற்பனை விலை, லாப %, break-even'],
+examage:['தேர்வு வயது தகுதி','வயது வரம்பு, சலுகை, பிறந்த தேதி வரம்பு'],khata:['உதார் கணக்குப் புத்தகம்','யார் எவ்வளவு தர வேண்டும் — பதிவு, WhatsApp நினைவூட்டல், Backup'],ratecard:['விலைப்பட்டியல் தயாரிப்பு','கடைக்கான விலைப்பட்டியல் படம் — WhatsApp-ல் பகிர, ஒட்ட'],stampmaker:['ரப்பர் ஸ்டாம்ப் வடிவமைப்பு','வட்டம், செவ்வகம், நீள்வட்டம் — உண்மை அளவில், கண்ணாடிப் பிம்பத்துடன்'],woodcalc:['தச்சு — மர அளவு கணக்கு','பல அளவு பலகைகளின் மொத்த cft, உருளை மரம், பிளைவுட் ஷீட், அடி ↔ செ.மீ'],tripcalc:['வாகனப் பயணக் கட்டணம்','கி.மீ, உள்ளூர் பேக்கேஜ், நிலையான கட்டணம் — பில் படம், WhatsApp, பயணப் பதிவேடு'],shopslip:['ஆர்டர் புத்தகம் & டோக்கன் ரசீது','சலவை, தையல், பழுது, போட்டோ, பூக்கடை… பொருள் வாரியாக ஆர்டர், டோக்கன், தயார் செய்தி, கொடுக்கும்போது சரிபார்ப்பு'],quickbill:['WhatsApp ஆர்டர் → உடனடி பில் + UPI','ஆர்டரை ஒட்டினால் அட்டவணை, மொத்தம், GPay / PhonePe QR — காய்கறி, மளிகை, பழம், பால், பூ'],wamsg:['கடைக்கான WhatsApp செய்திகள்','ஆர்டர் தயார், பணம் நிலுவை, பண்டிகை வாழ்த்து — ஒரே தொடுதலில்'],profitcalc:['லாபம் & விற்பனை விலை கணிப்பான்','வாங்கிய விலையிலிருந்து விற்பனை விலை, லாப %, break-even'],
 gifmaker:['படங்கள் → GIF','பல படங்களை அசையும் GIF ஆக்கு'],
 gifedit:['GIF திருத்து','அளவு, வேகம், பின்னோக்கு, எழுத்து சேர்'],
 socialresize:['சமூக ஊடக அளவுகள்','ஒரு படம் → Instagram, Status, YouTube அளவுகள் அனைத்தும்'],
@@ -1640,6 +1641,7 @@ const TOOL_ALIAS = {
   woodcalc:'carpenter timber wood cft cubic feet cut list plywood sheet log feet inch cm தச்சு மரம் பலகை கன அடி',
   tripcalc:'driver taxi cab trip bill km local package 8hr 80km airport drop fixed fare waiting batta toll rental vehicle diary ஓட்டுநர் டாக்ஸி வாடகை வாகனம் பயணம் பேக்கேஜ்',
   shopslip:'order book token slip receipt laundry dry clean ironing tailor measurement repair mobile mechanic photo studio booking flower catering delivery thermal 58mm 80mm ஆர்டர் டோக்கன் ரசீது சலவை இஸ்திரி தையல் அளவு பழுது',
+  quickbill:'whatsapp order bill vegetable grocery shop upi qr gpay phonepe paytm payment link price list kirana fruits milk காய்கறி மளிகை ஆர்டர் பில் தக்காளி விலை யுபிஐ',
   wamsg:'whatsapp message template customer reminder greeting pongal deepavali வாட்ஸ்அப் செய்தி வாழ்த்து',
   profitcalc:'profit margin markup selling price cost gst break even shop லாபம் விற்பனை விலை',
   exampresets:'upsc ssc ibps sbi neet rrb photo size kb signature thumb impression declaration postcard exam photo', sigclean:'signature clean white background black ink enhance', sigstrip3:'upsc three signature 3 signature strip', photosignjoin:'photo signature join combine one image', cardprint:'aadhaar print pan card print voter id driving licence front back a4 real size', hracalc:'hra exemption house rent allowance tax calculator metro', examage:'age limit eligibility relaxation obc sc st pwd exam age calculator born between', gifmaker:'gif maker animation photos to gif', gifedit:'gif resize speed reverse boomerang frames', socialresize:'instagram size whatsapp status youtube thumbnail facebook cover social media resize',
@@ -2160,7 +2162,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261024c`;
+    s.src = `category-${cat}.js?v=20261024d`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);

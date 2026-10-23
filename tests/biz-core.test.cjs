@@ -105,4 +105,22 @@ t('carpenter cut list adds every row, skips incomplete rows', () => {
   assert.strictEqual(C.cutListCft([{ len: '10', wid: '6', thk: '2', qty: '1' }, { len: '7', wid: '4', thk: '3', qty: '4' }, { len: '', wid: '5', thk: '2', qty: '9' }]), 3.167);
   assert.strictEqual(C.cutListCost([{ len: '10', wid: '6', thk: '2' }, { len: '7', wid: '4', thk: '3', qty: '4' }], 2400), 7600); // not 3.167 × 2400 = 7600.80
 });
+t('quick bill: WhatsApp order text is read in Tamil, Tanglish and English', () => {
+  const rows = C.parseOrder('Like thakali 2 kg, vendaka 250 gm, podalanga 100 gram, puthina 10 rs\nதக்காளி அரை கிலோ\n2kg vengayam 1/2 kg urulai\n₹20 kothamalli\n1. coconut 2\nmalli poo 2 muzham');
+  const got = rows.map(r => [C.matchGoods(r.name), r.qty, r.unit]);
+  assert.deepStrictEqual(got, [['tomato', 2, 'kg'], ['okra', 250, 'g'], ['snakegourd', 100, 'g'], ['mint', 10, 'rs'], ['tomato', 0.5, 'kg'], ['onion', 2, 'kg'], ['potato', 0.5, 'kg'], ['coriander', 20, 'rs'], ['coconut', 2, null], ['jasmine', 2, 'muzham']]);
+  assert.strictEqual(C.matchName('Like thakali').exact, false); assert.strictEqual(C.matchName('thakkali').exact, true);
+  assert.strictEqual(C.matchGoods('pepper'), 'pepper'); assert.strictEqual(C.matchGoods('poo'), null); assert.strictEqual(C.matchGoods('xyzabc'), null);
+});
+t('quick bill: amounts for kg, grams, rupees, round off', () => {
+  assert.strictEqual(C.qbLine({ qty: '2', unit: 'kg', rate: '30' }), 60); assert.strictEqual(C.qbLine({ qty: '250', unit: 'g', rate: '60' }), 15);
+  assert.strictEqual(C.qbLine({ qty: '10', unit: 'rs', rate: '999' }), 10); assert.strictEqual(C.qbLine({ qty: '500', unit: 'ml', rate: '64' }), 32);
+  const b = { lines: [{ qty: '2', unit: 'kg', rate: '30' }, { qty: '250', unit: 'g', rate: '58' }, { qty: '10', unit: 'rs' }], delivery: '10', discount: '0', roundOff: true };
+  assert.deepStrictEqual(C.qbTotals(b), { sub: 84.5, del: 10, dis: 0, total: 95, roundOff: 0.5 });
+});
+t('quick bill: UPI link and pay page link', () => {
+  assert.ok(C.validVpa('murugan.veg@okaxis')); assert.ok(!C.validVpa('murugan')); assert.ok(!C.validVpa('a b@ok'));
+  assert.strictEqual(C.upiString({ pa: 'shop@ybl', pn: 'Murugan Veg', am: 95, tn: 'Bill 7' }), 'upi://pay?pa=shop@ybl&pn=Murugan%20Veg&am=95.00&cu=INR&tn=Bill%207');
+  assert.strictEqual(C.payLink({ pa: 'shop@ybl', pn: 'M', am: 95, tn: 'Bill 7', shop: 'முருகன்', bill: 7, phone: '98765 43210' }), 'https://pdftoolsindia.com/pay#pa=shop%40ybl&pn=M&am=95.00&tn=Bill%207&s=%E0%AE%AE%E0%AF%81%E0%AE%B0%E0%AF%81%E0%AE%95%E0%AE%A9%E0%AF%8D&b=7&ph=919876543210');
+});
 console.log(n + ' tests passed');

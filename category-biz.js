@@ -7,6 +7,7 @@
  *   shopslip    — order book for 12 trades: item-wise orders (5 pants, 3 shirts…), own rates, token slip, ready/deliver with count check, payments, tailor measurements, today summary
  *   wamsg       — ready-made WhatsApp messages for customers (order ready, payment due, festival wishes …)
  *   profitcalc  — cost → selling price, margin vs markup, GST-inclusive price, break-even units
+ *   quickbill   — paste a WhatsApp order ("thakali 2 kg, puthina 10 rs") → bill table, total, UPI pay link + QR, paid/unpaid list, customer list sender
  * Host globals: TOOL_IMPL, downloadBlob, escapeHtml (optional), __appLang (optional).
  * Pure helpers on window.BizCore for tests (tests/biz-core.test.cjs).
  */
@@ -263,12 +264,259 @@
     return rows.map(r => r.map(csvCell).join(',')).join('\r\n');
   }
 
+  // --- quick bill from a WhatsApp order ("thakali 2 kg, vendaka 250 gm, puthina 10 rs")
+  // [id, Tamil, English, base unit, aliases (Tanglish / English / Tamil variants)]; prices are never preset
+  const GOODS = [
+    // vegetables
+    ['tomato', 'தக்காளி', 'Tomato', 'kg', 'thakkali thakali takkali tomato tomatoes தக்காலி'],
+    ['onion', 'பெரிய வெங்காயம்', 'Onion (big)', 'kg', 'vengayam vengaayam venkayam onion onions periya vengayam bellary pallari பல்லாரி வெங்காயம்'],
+    ['sonion', 'சின்ன வெங்காயம்', 'Small onion', 'kg', 'chinna vengayam sinna vengayam small onion sambar onion shallot சாம்பார் வெங்காயம்'],
+    ['potato', 'உருளைக்கிழங்கு', 'Potato', 'kg', 'urulai urulaikizhangu urulai kilangu urulaikilangu potato potatoes aloo alu உருளை'],
+    ['brinjal', 'கத்தரிக்காய்', 'Brinjal', 'kg', 'kathirikai kathrikai kathirikkai kathrikka brinjal eggplant கத்திரிக்காய் கத்திரி'],
+    ['okra', 'வெண்டைக்காய்', 'Ladies finger', 'kg', 'vendakkai vendakai vendaka vendakka vendai bhindi ladies finger ladiesfinger okra வெண்டை'],
+    ['snakegourd', 'புடலங்காய்', 'Snake gourd', 'kg', 'pudalangai podalangai podalanga pudalanga pudalankai snake gourd snakegourd புடலை'],
+    ['bittergourd', 'பாகற்காய்', 'Bitter gourd', 'kg', 'pavakkai pavakai pagarkai paagarkai bitter gourd bittergourd karela பாவக்காய்'],
+    ['bottlegourd', 'சுரைக்காய்', 'Bottle gourd', 'kg', 'suraikai suraikkai suraikka sorakkai bottle gourd lauki'],
+    ['ridgegourd', 'பீர்க்கங்காய்', 'Ridge gourd', 'kg', 'peerkangai peerkankai peerkanga ridge gourd'],
+    ['ashgourd', 'வெள்ளைப் பூசணி', 'Ash gourd', 'kg', 'vellai poosani poosani poosanikai ash gourd ashgourd neer poosani வெண்பூசணி பூசணிக்காய்'],
+    ['pumpkin', 'பரங்கிக்காய்', 'Pumpkin', 'kg', 'parangikai parangikkai manjal poosani pumpkin மஞ்சள் பூசணி'],
+    ['drumstick', 'முருங்கைக்காய்', 'Drumstick', 'pc', 'murungakkai murungaikai murungakai murunga drumstick drumsticks முருங்கை'],
+    ['carrot', 'கேரட்', 'Carrot', 'kg', 'carrot carrots karat kerat'],
+    ['beans', 'பீன்ஸ்', 'Beans', 'kg', 'beans beens french beans'],
+    ['beetroot', 'பீட்ரூட்', 'Beetroot', 'kg', 'beetroot beet root beet'],
+    ['cabbage', 'முட்டைக்கோஸ்', 'Cabbage', 'kg', 'muttaikose muttaikos muttakose cabbage kose கோஸ்'],
+    ['cauliflower', 'காலிஃபிளவர்', 'Cauliflower', 'pc', 'cauliflower cauli gobi gobhi caulifower காலிபிளவர்'],
+    ['cucumber', 'வெள்ளரிக்காய்', 'Cucumber', 'kg', 'vellarikai vellarikkai vellari cucumber'],
+    ['gchilli', 'பச்சை மிளகாய்', 'Green chilli', 'kg', 'pachai milagai pachamilagai pachai molagai green chilli green chillies chilli chillies milagai molagai மிளகாய்'],
+    ['ginger', 'இஞ்சி', 'Ginger', 'kg', 'inji ginger'],
+    ['garlic', 'பூண்டு', 'Garlic', 'kg', 'poondu pundu garlic vellai poondu'],
+    ['rawbanana', 'வாழைக்காய்', 'Raw banana', 'pc', 'vazhakkai valakkai vazhaikai valaikai raw banana plantain'],
+    ['bananaflower', 'வாழைப்பூ', 'Banana flower', 'pc', 'vazhaipoo valaipoo vazhai poo banana flower'],
+    ['bananastem', 'வாழைத்தண்டு', 'Banana stem', 'pc', 'vazhaithandu valaithandu vazhai thandu banana stem'],
+    ['broadbeans', 'அவரைக்காய்', 'Broad beans', 'kg', 'avarakkai avaraikai avarai avarakai broad beans'],
+    ['clusterbeans', 'கொத்தவரங்காய்', 'Cluster beans', 'kg', 'kothavarangai kothavaranga kothavarai cluster beans'],
+    ['chowchow', 'சௌசௌ', 'Chow chow', 'kg', 'chow chow chowchow chayote sow sow'],
+    ['radish', 'முள்ளங்கி', 'Radish', 'kg', 'mullangi mulangi radish'],
+    ['yam', 'சேனைக்கிழங்கு', 'Yam', 'kg', 'senai senaikizhangu senai kilangu yam elephant yam'],
+    ['colocasia', 'சேப்பங்கிழங்கு', 'Colocasia', 'kg', 'seppankizhangu seppan kilangu seppankilangu arbi colocasia'],
+    ['sweetpotato', 'சர்க்கரைவள்ளிக்கிழங்கு', 'Sweet potato', 'kg', 'sakkaravalli sakkaravalli kilangu sweet potato'],
+    ['tapioca', 'மரவள்ளிக்கிழங்கு', 'Tapioca', 'kg', 'maravalli maravalli kilangu tapioca kappa'],
+    ['capsicum', 'குடைமிளகாய்', 'Capsicum', 'kg', 'kudaimilagai kudai milagai capsicum bell pepper'],
+    ['peas', 'பச்சைப் பட்டாணி', 'Green peas', 'kg', 'pattani green peas peas பட்டாணி'],
+    ['mushroom', 'காளான்', 'Mushroom', 'pc', 'kalan kaalan mushroom mushrooms'],
+    ['lemon', 'எலுமிச்சை', 'Lemon', 'pc', 'elumichai elumichampazham lemon lemons lime எலுமிச்சம்பழம்'],
+    ['coconut', 'தேங்காய்', 'Coconut', 'pc', 'thengai thenga thengaai coconut coconuts'],
+    ['rawmango', 'மாங்காய்', 'Raw mango', 'kg', 'mangai maangai raw mango'],
+    ['corn', 'மக்காச்சோளம்', 'Sweet corn', 'pc', 'makkacholam solam corn sweet corn சோளம்'],
+    // greens (bunch)
+    ['coriander', 'கொத்தமல்லி', 'Coriander', 'bunch', 'kothamalli kothamali kotthamalli malli coriander cilantro மல்லி இலை'],
+    ['mint', 'புதினா', 'Mint', 'bunch', 'puthina pudina pudhina mint'],
+    ['curryleaf', 'கறிவேப்பிலை', 'Curry leaves', 'bunch', 'karuveppilai kariveppilai karivepilai karuvepilai curry leaves curryleaves கருவேப்பிலை'],
+    ['keerai', 'கீரை', 'Greens', 'bunch', 'keerai kirai greens spinach'],
+    ['araikeerai', 'அரைக்கீரை', 'Arai keerai', 'bunch', 'arai keerai araikeerai'],
+    ['mulaikeerai', 'முளைக்கீரை', 'Mulai keerai', 'bunch', 'mulai keerai mulaikeerai amaranth'],
+    ['sirukeerai', 'சிறுகீரை', 'Siru keerai', 'bunch', 'siru keerai sirukeerai'],
+    ['palak', 'பாலக் கீரை', 'Palak', 'bunch', 'palak palak keerai'],
+    ['murungaikeerai', 'முருங்கைக்கீரை', 'Drumstick leaves', 'bunch', 'murungai keerai murungaikeerai drumstick leaves moringa'],
+    ['agathi', 'அகத்திக்கீரை', 'Agathi keerai', 'bunch', 'agathi keerai agathikeerai agathi'],
+    ['venthayakeerai', 'வெந்தயக்கீரை', 'Fenugreek leaves', 'bunch', 'venthaya keerai vendhaya keerai methi fenugreek leaves'],
+    ['ponnanganni', 'பொன்னாங்கண்ணி', 'Ponnanganni', 'bunch', 'ponnanganni ponnanganni keerai'],
+    ['manathakkali', 'மணத்தக்காளிக் கீரை', 'Manathakkali keerai', 'bunch', 'manathakkali keerai manathakali'],
+    // fruits
+    ['banana', 'வாழைப்பழம்', 'Banana', 'dozen', 'vazhaipazham valaipazham vazhapazham banana bananas pazham பழம்'],
+    ['apple', 'ஆப்பிள்', 'Apple', 'kg', 'apple apples'],
+    ['orange', 'ஆரஞ்சு', 'Orange', 'kg', 'orange oranges'],
+    ['mosambi', 'சாத்துக்குடி', 'Mosambi', 'kg', 'sathukudi sathukkudi mosambi sweet lime'],
+    ['grapes', 'திராட்சை', 'Grapes', 'kg', 'thiratchai thratchai grapes'],
+    ['pomegranate', 'மாதுளை', 'Pomegranate', 'kg', 'mathulai madhulai pomegranate'],
+    ['papaya', 'பப்பாளி', 'Papaya', 'pc', 'pappali papaya'],
+    ['guava', 'கொய்யா', 'Guava', 'kg', 'koyya koiya guava'],
+    ['watermelon', 'தர்பூசணி', 'Watermelon', 'kg', 'tharpoosani tharbusani watermelon'],
+    ['pineapple', 'அன்னாசி', 'Pineapple', 'pc', 'annasi annachi pineapple'],
+    ['mango', 'மாம்பழம்', 'Mango', 'kg', 'mampazham maambazham mango mangoes'],
+    ['sapota', 'சப்போட்டா', 'Sapota', 'kg', 'sapota chikoo chiku'],
+    // grocery
+    ['rice', 'அரிசி', 'Rice', 'kg', 'arisi rice ponni arisi'],
+    ['toordal', 'துவரம் பருப்பு', 'Toor dal', 'kg', 'thuvaram paruppu thuvaram paruppu toor dal dal paruppu பருப்பு'],
+    ['moongdal', 'பாசிப் பருப்பு', 'Moong dal', 'kg', 'pasi paruppu paasi paruppu moong dal pasiparuppu'],
+    ['uraddal', 'உளுத்தம் பருப்பு', 'Urad dal', 'kg', 'ulundu ulutham paruppu urad dal uzhunthu'],
+    ['chanadal', 'கடலைப் பருப்பு', 'Chana dal', 'kg', 'kadalai paruppu chana dal kadalaparuppu'],
+    ['sugar', 'சர்க்கரை', 'Sugar', 'kg', 'sakkarai seeni sugar சீனி'],
+    ['salt', 'உப்பு', 'Salt', 'pc', 'uppu salt'],
+    ['atta', 'கோதுமை மாவு', 'Wheat flour', 'kg', 'gothumai mavu kothumai maavu atta wheat flour'],
+    ['rava', 'ரவை', 'Rava', 'kg', 'ravai rava sooji semolina'],
+    ['maida', 'மைதா', 'Maida', 'kg', 'maida maidha'],
+    ['gingellyoil', 'நல்லெண்ணெய்', 'Gingelly oil', 'l', 'nallennai nallenai gingelly oil sesame oil'],
+    ['groundnutoil', 'கடலை எண்ணெய்', 'Groundnut oil', 'l', 'kadalai ennai kadalennai groundnut oil'],
+    ['sunfloweroil', 'சூரியகாந்தி எண்ணெய்', 'Sunflower oil', 'l', 'sunflower oil refined oil'],
+    ['coconutoil', 'தேங்காய் எண்ணெய்', 'Coconut oil', 'l', 'thengai ennai coconut oil'],
+    ['tamarind', 'புளி', 'Tamarind', 'kg', 'puli tamarind'],
+    ['jaggery', 'வெல்லம்', 'Jaggery', 'kg', 'vellam jaggery'],
+    ['milk', 'பால்', 'Milk', 'l', 'paal pal milk'],
+    ['curd', 'தயிர்', 'Curd', 'pc', 'thayir curd'],
+    ['egg', 'முட்டை', 'Egg', 'pc', 'muttai egg eggs'],
+    ['bread', 'பிரட்', 'Bread', 'pc', 'bread'],
+    ['teapowder', 'டீ தூள்', 'Tea powder', 'pc', 'tea powder tea thool tea'],
+    ['coffeepowder', 'காபி தூள்', 'Coffee powder', 'pc', 'coffee powder coffee thool coffee'],
+    ['mustard', 'கடுகு', 'Mustard', 'kg', 'kadugu mustard'],
+    ['cumin', 'சீரகம்', 'Cumin', 'kg', 'seeragam jeeragam jeera cumin'],
+    ['pepper', 'மிளகு', 'Pepper', 'kg', 'milagu pepper'],
+    ['drychilli', 'காய்ந்த மிளகாய்', 'Dry red chilli', 'kg', 'vara milagai kaintha milagai dry chilli red chilli வர மிளகாய்'],
+    ['turmeric', 'மஞ்சள் தூள்', 'Turmeric powder', 'pc', 'manjal thool manjal podi turmeric'],
+    ['chillipowder', 'மிளகாய்த் தூள்', 'Chilli powder', 'pc', 'milagai thool milagai podi chilli powder'],
+    // flowers
+    ['jasmine', 'மல்லிகைப் பூ', 'Jasmine', 'muzham', 'malli poo mallipoo malligai poo malligai jasmine மல்லிகை மல்லிப்பூ மல்லிகைப்பூ'],
+    ['mullai', 'முல்லைப் பூ', 'Mullai', 'muzham', 'mullai poo mullaipoo mullai முல்லை'],
+    ['kanakambaram', 'கனகாம்பரம்', 'Kanakambaram', 'muzham', 'kanakambaram kanagambaram'],
+    ['rose', 'ரோஜா', 'Rose', 'pc', 'roja rose roses'],
+    ['samanthi', 'சாமந்திப் பூ', 'Chrysanthemum', 'kg', 'samanthi sevanthi chrysanthemum சாமந்தி சேவந்தி'],
+    // meat & fish
+    ['chicken', 'கோழிக்கறி', 'Chicken', 'kg', 'chicken kozhi kozhikari kozhi kari koli சிக்கன்'],
+    ['mutton', 'ஆட்டுக்கறி', 'Mutton', 'kg', 'mutton aattukari attukari aatu kari மட்டன்'],
+    ['fish', 'மீன்', 'Fish', 'kg', 'meen fish'],
+    ['prawn', 'இறால்', 'Prawn', 'kg', 'iral eral prawn prawns shrimp']
+  ];
+  const UNIT_WORDS = {
+    kg: ['kg', 'kgs', 'kilo', 'kilos', 'kilogram', 'kilograms', 'kl', 'கிலோ', 'கி.கி', 'கிகி'],
+    g: ['g', 'gm', 'gms', 'gram', 'grams', 'grm', 'grms', 'gr', 'கிராம்', 'கி'],
+    l: ['l', 'ltr', 'ltrs', 'lit', 'litre', 'litres', 'liter', 'liters', 'லிட்டர்', 'லி'],
+    ml: ['ml', 'mls', 'மிலி', 'மி.லி'],
+    pc: ['pc', 'pcs', 'piece', 'pieces', 'no', 'nos', 'number', 'numbers', 'packet', 'packets', 'pkt', 'pkts', 'pack', 'எண்ணம்', 'எண்', 'பாக்கெட்', 'காய்'],
+    bunch: ['bunch', 'bunches', 'kattu', 'kaddu', 'katu', 'கட்டு', 'கட்டுகள்'],
+    dozen: ['dozen', 'dozens', 'doz', 'dz', 'டஜன்'],
+    muzham: ['muzham', 'mulam', 'mozham', 'muzam', 'mulum', 'முழம்'],
+    rs: ['rs', 'rs.', 'rupees', 'rupee', 'rupa', 'roopa', 'ruba', 'inr', 'ரூ', 'ரூ.', 'ரூபாய்', 'ரூபாய்க்கு', '₹']
+  };
+  const NUM_WORDS = { oru: 1, onnu: 1, one: 1, ஒரு: 1, ஒன்று: 1, ஒன்னு: 1, rendu: 2, irandu: 2, two: 2, இரண்டு: 2, ரெண்டு: 2, moonu: 3, munu: 3, three: 3, மூன்று: 3, மூணு: 3, naalu: 4, nalu: 4, four: 4, நான்கு: 4, நாலு: 4, anju: 5, five: 5, ஐந்து: 5, அஞ்சு: 5, aaru: 6, six: 6, ஆறு: 6, pathu: 10, ten: 10, பத்து: 10,
+    arai: 0.5, ara: 0.5, half: 0.5, அரை: 0.5, kaal: 0.25, quarter: 0.25, கால்: 0.25, mukkal: 0.75, முக்கால்: 0.75, onnara: 1.5, onnarai: 1.5, ஒன்றரை: 1.5, ஒன்னரை: 1.5 };
+  const STOP = new Set(['venum', 'vendum', 'veenum', 'please', 'pls', 'plz', 'and', 'ku', 'kku', 'kum', 'mattum', 'vena', 'also', 'அப்புறம்', 'வேண்டும்', 'வேணும்', 'மட்டும்', 'and', 'with', 'of', 'the', 'a', 'kudunga', 'anupunga', 'anuppunga', 'கொடுங்க', 'அனுப்புங்க', 'அனுப்பவும்', 'சார்', 'sir', 'anna', 'அண்ணா', 'hi', 'hello', 'வணக்கம்']);
+  const unitOf = w => { w = String(w).toLowerCase().replace(/\.$/, ''); for (const u in UNIT_WORDS) if (UNIT_WORDS[u].indexOf(w) >= 0 || UNIT_WORDS[u].indexOf(w + '.') >= 0) return u; return null; };
+  function phon(s) { // loose Tanglish key: thakkali / thakali / takkali → takali
+    s = String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+    s = s.replace(/zh/g, 'l').replace(/sh/g, 's').replace(/th/g, 't').replace(/dh/g, 'd').replace(/ph/g, 'p').replace(/bh/g, 'b').replace(/kh/g, 'k').replace(/ch/g, 's').replace(/w/g, 'v').replace(/ee/g, 'i').replace(/oo/g, 'u').replace(/aa/g, 'a').replace(/y$/, 'i');
+    return s.replace(/(.)\1+/g, '$1');
+  }
+  function lev(a, b) {
+    if (a === b) return 0; if (!a.length) return b.length; if (!b.length) return a.length;
+    let prev = Array.from({ length: b.length + 1 }, (x, i) => i);
+    for (let i = 1; i <= a.length; i++) { const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+    return prev[b.length];
+  }
+  const GENERIC = new Set(['poo', 'oil', 'powder', 'thool', 'podi', 'ennai', 'mavu', 'kari', 'leaves', 'kilangu', 'kizhangu', 'root', 'flour', 'green', 'red', 'big', 'small', 'raw', 'sweet', 'dry', 'white', 'periya', 'chinna', 'sinna', 'vellai', 'manjal', 'pachai', 'neer', 'french', 'bell', 'elephant', 'refined', 'ponni', 'thandu'].map(phon)); // too general to name an item alone
+  const tamilKey = s => String(s || '').replace(/[\s‌‍.]/g, '');
+  let goodsIndex = null;
+  function buildIndex() { // every Tamil name, English name, alias word and 2–3 word alias phrase
+    const idx = [];
+    GOODS.forEach(g => {
+      const ws = String(g[4] || '').split(' ').filter(Boolean), phrases = [g[1], g[2]].concat(ws);
+      for (let i = 0; i < ws.length - 1; i++) { phrases.push(ws[i] + ' ' + ws[i + 1]); if (i < ws.length - 2) phrases.push(ws[i] + ' ' + ws[i + 1] + ' ' + ws[i + 2]); }
+      phrases.forEach((p, i) => { if (/[\u0B80-\u0BFF]/.test(p)) idx.push({ id: g[0], t: tamilKey(p), ta: true }); else { const k = phon(p); if (k.length >= 2 && (i < 2 || p.indexOf(' ') > 0 || !GENERIC.has(k))) idx.push({ id: g[0], t: k, ta: false, words: p.split(' ').length, pri: i < 2 ? 1 : 0 }); } });
+    });
+    return idx;
+  }
+  function matchGoods(name) { const m = matchName(name); return m ? m.id : null; }
+  function matchName(name) { // whole phrase first, then the longest run of words that matches ("Like thakali" → thakali)
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean); if (!w.length) return null;
+    for (let len = w.length; len >= 1; len--) {
+      let best = null;
+      for (let i = 0; i + len <= w.length; i++) { const r = matchOne(w.slice(i, i + len).join(' ')); if (r && (!best || r.s < best.s)) best = r; }
+      if (best) return { id: best.id, exact: best.s === 0 && len === w.length, s: best.s };
+    }
+    return null;
+  }
+  function matchOne(name) {
+    const idx = goodsIndex = goodsIndex || buildIndex();
+    const raw = String(name || '').trim(); if (!raw) return null;
+    if (/[஀-௿]/.test(raw)) {
+      const k = tamilKey(raw); let best = null;
+      idx.forEach(e => { if (!e.ta) return; if (e.t === k) best = best && best.s === 0 ? best : { id: e.id, s: 0 }; else if ((k.indexOf(e.t) === 0 || e.t.indexOf(k) === 0) && Math.min(k.length, e.t.length) >= 3) { const s = Math.abs(k.length - e.t.length) + 1; if (!best || s < best.s) best = { id: e.id, s: s }; } });
+      return best;
+    }
+    const k = phon(raw); if (k.length < 2) return null;
+    let best = null;
+    idx.forEach(e => {
+      if (e.ta) return;
+      let s;
+      if (e.t === k) s = 0;
+      else { const d = lev(k, e.t), lim = k.length <= 3 ? 0 : k.length <= 5 ? 1 : k.length <= 8 ? 2 : 3; if (d <= lim) s = d + 0.5; else if (k.length >= 5 && (e.t.indexOf(k) === 0 || k.indexOf(e.t) === 0) && e.t.length >= 5) s = 2 + Math.abs(k.length - e.t.length) / 10; }
+      if (s != null && (!best || s < best.s || (s === best.s && ((e.pri || 0) > (best.p || 0) || ((e.pri || 0) === (best.p || 0) && (e.words || 1) > (best.w || 1)))))) best = { id: e.id, s: s, w: e.words, p: e.pri };
+    });
+    return best;
+  }
+  const goodsById = id => GOODS.find(g => g[0] === id) || null;
+  function toNum(tok) {
+    let t = String(tok).replace(/[௦-௯]/g, c => String('௦௧௨௩௪௫௬௭௮௯'.indexOf(c))).replace(/½/g, '.5').replace(/¼/g, '.25').replace(/¾/g, '.75');
+    if (/^\d+\/\d+$/.test(t)) { const p = t.split('/'); return +p[1] ? +p[0] / +p[1] : NaN; }
+    if (/^\d*\.?\d+$/.test(t)) return parseFloat(t);
+    const w = t.toLowerCase(); return Object.prototype.hasOwnProperty.call(NUM_WORDS, w) ? NUM_WORDS[w] : NaN;
+  }
+  function parseOrder(text) { // → [{ name, qty, unit, raw }]
+    const out = [];
+    String(text || '').replace(/\r/g, '').split(/\n|,|;|،|\|/).forEach(seg => {
+      seg = seg.replace(/^\s*(\d+[.)]|[-*•●▪➤✔️✅]+)\s+/, '').replace(/[()]/g, ' ').trim(); if (!seg) return;
+      // split glued number+unit ("2kg", "250gm", "rs10", "₹10") and unit+number
+      const toks = seg.replace(/(\d)([a-zA-Z஀-௿₹])/g, '$1 $2').replace(/([a-zA-Z₹.])(\d)/g, '$1 $2').replace(/₹/g, ' ₹ ').split(/\s+/).filter(Boolean);
+      let cur = { name: [], qty: null, unit: null }, rsNext = false;
+      const push = () => { const n = cur.name.join(' ').trim(); if (n || cur.qty != null) out.push({ name: n, qty: cur.qty, unit: cur.unit, raw: seg }); cur = { name: [], qty: null, unit: null }; };
+      for (let i = 0; i < toks.length; i++) {
+        const tk = toks[i], low = tk.toLowerCase(), n = toNum(tk), u = unitOf(tk);
+        if (!isNaN(n) && !(NUM_WORDS[low] != null && cur.qty != null && !cur.unit && cur.name.length)) {
+          if (cur.qty != null && cur.name.length) push();
+          if (cur.qty != null && !cur.name.length) cur.qty = round2(cur.qty + n); // "1 1/2" style or "oru arai"
+          else cur.qty = n;
+          if (rsNext) { cur.unit = 'rs'; rsNext = false; }
+          continue;
+        }
+        if (u) {
+          if (u === 'rs' && cur.qty == null) { rsNext = true; continue; }
+          if (cur.qty != null && !cur.unit) { cur.unit = u; continue; }
+          if (cur.qty == null) { cur.unit = u; cur.qty = 1; continue; } // "kilo thakkali"
+          continue;
+        }
+        if (STOP.has(low)) continue;
+        if (cur.qty != null && cur.name.length) push();
+        cur.name.push(tk);
+      }
+      push();
+    });
+    return out.filter(x => x.name || x.qty);
+  }
+  const UNIT_LABEL = { muzham: ['முழம்', 'muzham'], kg: ['கிலோ', 'kg'], g: ['கிராம்', 'g'], l: ['லிட்டர்', 'L'], ml: ['மி.லி', 'ml'], pc: ['எண்ணம்', 'pc'], bunch: ['கட்டு', 'bunch'], dozen: ['டஜன்', 'dozen'], rs: ['ரூபாய்க்கு', '₹ worth'] };
+  const RATE_UNIT = { muzham: 'muzham', kg: 'kg', g: 'kg', l: 'l', ml: 'l', pc: 'pc', bunch: 'bunch', dozen: 'dozen', rs: null };
+  function qbLine(l) { // amount of one bill line; rate is per base unit (per kg / per litre / per piece / per bunch / per dozen)
+    const q = n0(num(l.qty)), r = n0(num(l.rate));
+    if (l.unit === 'rs') return round2(q);
+    const mult = l.unit === 'g' || l.unit === 'ml' ? q / 1000 : q;
+    return round2(mult * r);
+  }
+  function qbTotals(b) {
+    const sub = round2((b.lines || []).reduce((a, l) => a + qbLine(l), 0));
+    const del = round2(n0(num(b.delivery))), dis = round2(n0(num(b.discount)));
+    let total = round2(Math.max(0, sub + del - dis)); const exact = total;
+    if (b.roundOff) total = Math.round(total);
+    return { sub: sub, del: del, dis: dis, total: total, roundOff: round2(total - exact) };
+  }
+  function validVpa(v) { return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z][a-zA-Z0-9.\-]{1,63}$/.test(String(v || '').trim()); }
+  function upiString(o) { // NPCI UPI deep link; the payee address is kept unescaped (validated characters only)
+    const p = ['pa=' + String(o.pa).trim()];
+    if (o.pn) p.push('pn=' + encodeURIComponent(String(o.pn).trim().slice(0, 50)));
+    if (n0(o.am) > 0) p.push('am=' + n0(o.am).toFixed(2));
+    p.push('cu=INR');
+    if (o.tn) p.push('tn=' + encodeURIComponent(String(o.tn).trim().slice(0, 50)));
+    return 'upi://pay?' + p.join('&');
+  }
+  function payLink(o) { // our static page; everything after # stays in the phone (never sent to a server)
+    const q = [['pa', o.pa], ['pn', o.pn], ['am', n0(o.am).toFixed(2)], ['tn', o.tn], ['s', o.shop], ['b', o.bill], ['ph', waNumber(o.phone)]].filter(x => x[1] != null && String(x[1]) !== '').map(x => x[0] + '=' + encodeURIComponent(String(x[1])));
+    return (o.base || 'https://pdftoolsindia.com') + '/pay#' + q.join('&');
+  }
+
   window.BizCore = {
     num: num, inr: inr, balanceOf: balanceOf, khataTotals: khataTotals, khataCsv: khataCsv,
     timberCft: timberCft, roundLogCft: roundLogCft, sheetsNeeded: sheetsNeeded, ftInToCm: ftInToCm, cmToFtIn: cmToFtIn,
     tripBill: tripBill, tripFare: tripFare, cutListCft: cutListCft, cutListCost: cutListCost, priceFromCost: priceFromCost, priceFromMarkup: priceFromMarkup, profitOf: profitOf, withGst: withGst, withoutGst: withoutGst, breakEven: breakEven,
     waNumber: waNumber, waLink: waLink, fillTemplate: fillTemplate, graphemes: graphemes, mmToPx: mmToPx, nextToken: nextToken, MESSAGES: MESSAGES, PRESETS: PRESETS,
-    TRADES: TRADES, MEASURES: MEASURES, addDaysIso: addDaysIso, lineAmt: lineAmt, orderCalc: orderCalc, itemSummary: itemSummary, isOverdue: isOverdue, dayStats: dayStats, ordersCsv: ordersCsv
+    TRADES: TRADES, MEASURES: MEASURES, addDaysIso: addDaysIso, lineAmt: lineAmt, orderCalc: orderCalc, itemSummary: itemSummary, isOverdue: isOverdue, dayStats: dayStats, ordersCsv: ordersCsv,
+    GOODS: GOODS, phon: phon, lev: lev, matchGoods: matchGoods, matchName: matchName, parseOrder: parseOrder, qbLine: qbLine, qbTotals: qbTotals, validVpa: validVpa, upiString: upiString, payLink: payLink
   };
   if (typeof TOOL_IMPL === 'undefined') return;
 
@@ -1188,6 +1436,274 @@
           const u = breakEven(f, pr, v);
           out.innerHTML = isFinite(u) ? resCard(T('நஷ்டமில்லாமல் இருக்க மாதம் விற்க வேண்டியது', 'Units to sell per month to break even'), u + ' ' + T('எண்ணிக்கை', 'units'), T('விற்பனை ', 'Sales ') + inr(u * pr) + T(' · ஒன்றுக்கு கிடைக்கும் பங்களிப்பு ', ' · contribution per unit ') + inr(pr - v), 'ok') : '<div class="bz-msg">' + T('விற்கும் விலை செலவை விடக் குறைவு — எத்தனை விற்றாலும் நஷ்டம்', 'Selling price is not above cost — you lose on every unit') + '</div>';
         }
+      }
+      draw();
+    }
+  };
+  /* ===================================================================== 9. quickbill — WhatsApp order → bill + UPI pay link / QR */
+  let qrLibP = null;
+  const loadQr = () => qrLibP || (qrLibP = new Promise((res, rej) => { if (window.qrcode) return res(window.qrcode); const sc = document.createElement('script'); sc.src = '/libs/qrcode-generator.js?v=1'; sc.onload = () => res(window.qrcode); sc.onerror = () => { qrLibP = null; rej(new Error('QR library could not load')); }; document.head.appendChild(sc); }));
+  function drawQr(ctx, qrc, text, x, y, size) {
+    const q = qrc(0, 'M'); q.addData(text); q.make();
+    const n = q.getModuleCount(), cell = size / (n + 8), off = cell * 4;
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y, size, size); ctx.fillStyle = '#000000';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(Math.floor(x + off + c * cell), Math.floor(y + off + r * cell), Math.ceil(cell), Math.ceil(cell));
+  }
+  TOOL_IMPL.quickbill = {
+    mount(body) {
+      const root = makeRoot(body), KEY = 'bz_qbill_v1';
+      const D = { shop: '', vpa: '', pn: '', phone: '', round: true, delivery: '', next: 1, rates: {}, bills: [], shopPhone: '', clist: '' };
+      let db = Object.assign({}, D, lsGet(KEY, {})); if (!Array.isArray(db.bills)) db.bills = []; if (!db.rates || typeof db.rates !== 'object') db.rates = {};
+      let view = (db.vpa || db.shop) ? 'bill' : 'set', bill = null, flash = '', filter = 'unpaid';
+      const save = () => { if (!lsSet(KEY, db)) flash = T('சேமிக்க முடியவில்லை — Backup எடுத்து பழைய பில்களை நீக்குங்கள்.', 'Could not save — take a backup and delete old bills.'); };
+      const nm = g => isEn() ? g[2] : g[1];
+      const ul = u => (UNIT_LABEL[u] || [u, u])[isEn() ? 1 : 0];
+      const rateKey = l => (l.id || ('x:' + (phon(l.name) || tamilKey(l.name)))) + '|' + RATE_UNIT[l.unit];
+      const rateFor = l => { if (l.unit === 'rs') return ''; const v = db.rates[rateKey(l)]; return v != null ? String(v) : ''; };
+      function newBill() { return { text: '', cust: '', cph: '', lines: [], delivery: db.delivery || '', discount: '', roundOff: db.round !== false, no: null }; }
+      function fromText(text) {
+        const lines = parseOrder(text).map(p => {
+          const m = matchName(p.name), g = m ? goodsById(m.id) : null;
+          let unit = p.unit, qty = p.qty == null ? 1 : p.qty;
+          if (!unit) { unit = g ? g[3] : 'pc'; if ((unit === 'kg' || unit === 'l') && qty >= 50) unit = unit === 'kg' ? 'g' : 'ml'; } // "inji 100" means 100 g
+          if (g && (unit === 'kg' || unit === 'g') && (g[3] === 'l')) unit = unit === 'kg' ? 'l' : 'ml';
+          const l = { id: g ? g[0] : null, name: g ? nm(g) : p.name, said: p.raw, qty: String(qty), unit: unit, rate: '', check: !m || !m.exact };
+          l.rate = rateFor(l); return l;
+        });
+        return lines;
+      }
+      function nav() {
+        const unpaid = db.bills.filter(b => !b.paid).length;
+        return '<div class="bz-tabs">' + [['bill', '🧾 ' + T('பில் போடு', 'Make bill')], ['list', '📋 ' + T('பில்கள்', 'Bills') + (unpaid ? '<span class="bz-badge">' + unpaid + '</span>' : '')], ['rates', '🏷️ ' + T('என் விலைகள்', 'My prices')], ['set', '⚙️ ' + T('கடை & UPI', 'Shop & UPI')], ['cust', '🛒 ' + T('வாடிக்கையாளர்', 'Customer')]]
+          .map(i => '<button type="button" class="bz-tab' + (i[0] === view ? ' on' : '') + '" data-view="' + i[0] + '">' + i[1] + '</button>').join('') + '</div>';
+      }
+      function draw() {
+        root.innerHTML = purpose('WhatsApp-ல் வந்த ஆர்டரை ("தக்காளி 2 கிலோ, வெண்டைக்காய் 250 கிராம், புதினா 10 ரூபாய்") இங்கே ஒட்டினால் தானாக அட்டவணை + மொத்தத் தொகை. உங்கள் GPay / PhonePe UPI ID-க்கு பணம் செலுத்தும் இணைப்பு, QR-உடன் பில்லை ஒரே தொடுதலில் அனுப்புங்கள்.',
+          'Paste the WhatsApp order ("tomato 2 kg, okra 250 g, mint ₹10") and get a table with the total. Send the bill with a pay link and QR for your own GPay / PhonePe UPI ID in one tap.') +
+          nav() + (flash ? '<div class="bz-msg">' + esc(flash) + '</div>' : '') + '<div data-k="pane"></div>';
+        $$(root, '[data-view]').forEach(b => { b.onclick = () => { view = b.getAttribute('data-view'); flash = ''; draw(); }; });
+        const pane = $(root, '[data-k=pane]');
+        ({ bill: drawBill, list: drawList, rates: drawRates, set: drawSet, cust: drawCust })[view](pane);
+      }
+
+      /* ---------- make a bill */
+      function drawBill(pane) {
+        if (!bill) bill = newBill();
+        const t = qbTotals(bill), opts = GOODS.map(g => '<option value="' + esc(nm(g)) + '"></option>').join('');
+        pane.innerHTML = (db.vpa ? '' : '<div class="bz-info">⚙️ ' + T('"கடை & UPI" பகுதியில் உங்கள் UPI ID-ஐ ஒருமுறை சேமித்தால், பில்லுடன் பணம் செலுத்தும் இணைப்பும் QR-உம் வரும்.', 'Save your UPI ID once in "Shop & UPI" to add a pay link and QR to every bill.') + '</div>') +
+          '<div class="bz-f"><label>' + T('வாடிக்கையாளர் அனுப்பிய ஆர்டர் (WhatsApp-ல் இருந்து நகலெடுத்து இங்கே ஒட்டுங்கள்)', 'Customer\'s order (copy from WhatsApp and paste here)') + '</label><textarea data-k="text" placeholder="' + esc('தக்காளி 2 கிலோ\nvendaka 250 gm\nputhina 10 rs') + '">' + esc(bill.text) + '</textarea></div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn" data-act="parse">➡️ ' + T('அட்டவணை போடு', 'Make the table') + '</button><button type="button" class="bz-btn sec" data-act="paste">📋 ' + T('ஒட்டு (Paste)', 'Paste') + '</button><button type="button" class="bz-btn sec" data-act="new">🧹 ' + T('புதிய பில்', 'New bill') + '</button></div>' +
+          '<div class="bz-grid">' + textField(T('வாடிக்கையாளர் பெயர்', 'Customer name'), 'cust', bill.cust) + field(T('வாடிக்கையாளர் WhatsApp', 'Customer WhatsApp'), 'cph', bill.cph, { mode: 'tel' }) + '</div>' +
+          '<datalist id="bz-qb-goods">' + opts + '</datalist><div class="bz-items" data-k="lines"></div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="add">➕ ' + T('பொருள் சேர்', 'Add item') + '</button></div>' +
+          '<div class="bz-grid">' + field(T('டெலிவரி கட்டணம் (₹)', 'Delivery (₹)'), 'delivery', bill.delivery, { ph: '0' }) + field(T('தள்ளுபடி (₹)', 'Discount (₹)'), 'discount', bill.discount, { ph: '0' }) + '</div>' +
+          '<label class="bz-chk"><input type="checkbox" data-k="roundOff"' + (bill.roundOff ? ' checked' : '') + '> ' + T('மொத்தத்தை முழு ரூபாய்க்கு மாற்று (round off)', 'Round the total to whole rupees') + '</label>' +
+          '<div data-k="tot"></div>' +
+          '<div class="bz-actions"><a class="bz-btn green" data-k="wa" target="_blank" rel="noopener" href="#">💬 ' + T('WhatsApp-ல் அனுப்பு', 'Send on WhatsApp') + '</a><button type="button" class="bz-btn sec" data-act="copy">📋 ' + T('பில் உரை நகலெடு', 'Copy bill text') + '</button><button type="button" class="bz-btn sec" data-act="img">🖼️ ' + T('பில் படம் + QR', 'Bill picture + QR') + '</button></div>' +
+          '<canvas class="bz-canvas" data-k="cv" hidden></canvas><div class="bz-actions" data-k="imgacts" hidden><button type="button" class="bz-btn" data-act="dl">⬇️ PNG</button><button type="button" class="bz-btn green" data-act="share">📤 ' + T('பகிர்', 'Share') + '</button></div>' +
+          '<div class="bz-info">' + T('விலைகள் உங்களுடையவை — ஒருமுறை எழுதினால் அடுத்த பில்லில் தானாக வரும். ⚠️ குறியிட்ட பொருளை ஒருமுறை சரிபாருங்கள்.', 'Prices are yours — type once and they come back next time. Check rows marked ⚠️.') + '</div>';
+        drawLines(); refresh();
+        const ta = $(pane, '[data-k=text]'); ta.addEventListener('input', () => { bill.text = ta.value; });
+        $(pane, '[data-act=parse]').onclick = () => { bill.text = ta.value; const add = fromText(bill.text); if (!add.length) { flash = T('பொருள் எதுவும் கண்டுபிடிக்க முடியவில்லை. ஒவ்வொரு பொருளையும் தனி வரியில் அல்லது காற்புள்ளியுடன் எழுதுங்கள்.', 'No items found. Put each item on its own line or separate with commas.'); draw(); return; } bill.lines = bill.lines.filter(l => String(l.name).trim()).concat(add); flash = ''; drawBill(pane); };
+        $(pane, '[data-act=paste]').onclick = async () => { try { const v = await navigator.clipboard.readText(); if (v) { bill.text = v; ta.value = v; $(pane, '[data-act=parse]').click(); } } catch (e) { ta.focus(); flash = T('நேரடியாக ஒட்ட முடியவில்லை — பெட்டியை நீண்ட நேரம் அழுத்தி "Paste" தட்டுங்கள்.', 'Could not paste directly — long-press the box and tap Paste.'); draw(); } };
+        $(pane, '[data-act=new]').onclick = () => { bill = newBill(); flash = ''; drawBill(pane); };
+        $(pane, '[data-act=add]').onclick = () => { bill.lines.push({ id: null, name: '', said: '', qty: '1', unit: 'kg', rate: '', check: false }); drawLines(); const ins = $$(pane, '[data-lf=name]'); if (ins.length) ins[ins.length - 1].focus(); };
+        ['cust', 'cph', 'delivery', 'discount'].forEach(k => { const i = $(pane, '[data-k=' + k + ']'); i.addEventListener('input', () => { bill[k] = i.value; refresh(); }); });
+        $(pane, '[data-k=roundOff]').addEventListener('change', e => { bill.roundOff = e.target.checked; refresh(); });
+        $(pane, '[data-k=wa]').addEventListener('click', () => { commit(); });
+        $(pane, '[data-act=copy]').onclick = function () { commit(); copyText(billText(bill), this); };
+        $(pane, '[data-act=img]').onclick = async () => { commit(); const cv = $(pane, '[data-k=cv]'); try { await paintBillImg(cv, bill); cv.hidden = false; $(pane, '[data-k=imgacts]').hidden = false; } catch (e) { flash = T('படம் உருவாக்க முடியவில்லை (இணைய இணைப்பைச் சரிபாருங்கள்)', 'Could not make the picture (check the internet connection)'); draw(); } };
+        $(pane, '[data-act=dl]').onclick = () => saveCanvas($(pane, '[data-k=cv]'), 'bill-' + (bill.no || '') + '.png');
+        $(pane, '[data-act=share]').onclick = async () => { const cv = $(pane, '[data-k=cv]'); if (!(await shareCanvas(cv, 'bill-' + bill.no + '.png', billText(bill)))) saveCanvas(cv, 'bill-' + bill.no + '.png'); };
+      }
+      function drawLines() {
+        const box = $(root, '[data-k=lines]'); if (!box) return;
+        if (!bill.lines.length) { box.innerHTML = ''; return; }
+        const units = ['kg', 'g', 'l', 'ml', 'pc', 'bunch', 'dozen', 'muzham', 'rs'];
+        box.innerHTML = bill.lines.map((l, i) => '<div class="bz-ol"' + (l.check ? ' style="border-color:#F3DFA2;background:#FFFBEF"' : '') + '>' +
+          '<input class="full" type="text" list="bz-qb-goods" data-li="' + i + '" data-lf="name" value="' + esc(l.name) + '" placeholder="' + esc(T('பொருள்', 'Item')) + '">' +
+          (l.said ? '<small class="full" style="color:var(--sub);font-weight:600">' + (l.check ? '⚠️ ' : '') + T('வாடிக்கையாளர் எழுதியது: ', 'Customer wrote: ') + esc(l.said) + '</small>' : '') +
+          '<input type="text" inputmode="decimal" data-li="' + i + '" data-lf="qty" value="' + esc(l.qty) + '" aria-label="qty">' +
+          '<select data-li="' + i + '" data-lf="unit">' + units.map(u => '<option value="' + u + '"' + (u === l.unit ? ' selected' : '') + '>' + esc(ul(u)) + '</option>').join('') + '</select>' +
+          (l.unit === 'rs' ? '<div class="full" style="font-size:13px;color:var(--sub);font-weight:700">' + T('ரூபாய்க்குக் கேட்டது — தொகை மாறாது', 'Asked by rupees — amount is fixed') + '</div>'
+            : '<input type="text" inputmode="decimal" data-li="' + i + '" data-lf="rate" value="' + esc(l.rate) + '" placeholder="' + esc('₹ / ' + ul(RATE_UNIT[l.unit])) + '">') +
+          '<div class="amt' + (l.unit === 'rs' ? ' full' : '') + '"><span data-amt="' + i + '">' + inr(qbLine(l)) + '</span><button type="button" class="bz-x" data-rm="' + i + '" aria-label="remove">✕</button></div></div>').join('');
+        $$(box, '[data-lf]').forEach(inp => {
+          inp.addEventListener(inp.tagName === 'SELECT' ? 'change' : 'input', () => {
+            const i = +inp.getAttribute('data-li'), l = bill.lines[i], f = inp.getAttribute('data-lf'); l[f] = inp.value;
+            if (f === 'name') { const g = GOODS.find(x => x[1] === l.name || x[2] === l.name); l.id = g ? g[0] : null; l.check = false; const r = rateFor(l); if (r !== '') { l.rate = r; const ri = $(box, '[data-li="' + i + '"][data-lf="rate"]'); if (ri) ri.value = r; } }
+            if (f === 'unit') { const r = rateFor(l); if (r !== '') l.rate = r; drawLines(); }
+            refresh();
+          });
+        });
+        $$(box, '[data-rm]').forEach(b => { b.onclick = () => { bill.lines.splice(+b.getAttribute('data-rm'), 1); drawLines(); refresh(); }; });
+      }
+      function refresh() {
+        const t = qbTotals(bill), tot = $(root, '[data-k=tot]'); if (!tot) return;
+        bill.lines.forEach((l, i) => { const a = $(root, '[data-amt="' + i + '"]'); if (a) a.textContent = inr(qbLine(l)); });
+        const missing = bill.lines.filter(l => String(l.name).trim() && l.unit !== 'rs' && !(num(l.rate) > 0)).length;
+        tot.innerHTML = resCard(T('மொத்தம்', 'Total') + ' · ' + bill.lines.filter(l => String(l.name).trim()).length + ' ' + T('பொருட்கள்', 'items'), inr(t.total), (t.del ? T('டெலிவரி ', 'Delivery ') + inr(t.del) + ' · ' : '') + (t.dis ? T('தள்ளுபடி ', 'Discount ') + inr(t.dis) + ' · ' : '') + (t.roundOff ? 'round off ' + (t.roundOff > 0 ? '+' : '') + fmtNum(t.roundOff, 2) : '') + (missing ? ' ⚠️ ' + missing + T(' பொருளுக்கு விலை இல்லை', ' item(s) without a price') : ''), missing ? 'warn' : 'ok');
+        const wa = $(root, '[data-k=wa]'); if (wa) wa.href = waLink(bill.cph, billText(bill));
+      }
+      function commit() { // give the bill a number, remember the prices, keep it in the list
+        bill.lines.forEach(l => { if (l.unit !== 'rs' && num(l.rate) > 0 && String(l.name).trim()) db.rates[rateKey(l)] = num(l.rate); });
+        const t = qbTotals(bill);
+        if (!bill.no) { bill.no = db.next; db.next = (Math.floor(num(db.next)) || 1) + 1; bill.d = todayIso(); const n = new Date(); bill.t = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); }
+        const rec = { no: bill.no, d: bill.d, t: bill.t, cust: bill.cust, cph: bill.cph, lines: bill.lines.filter(l => String(l.name).trim()).map(l => ({ name: l.name, qty: l.qty, unit: l.unit, rate: l.rate, id: l.id })), delivery: bill.delivery, discount: bill.discount, roundOff: bill.roundOff, total: t.total };
+        const i = db.bills.findIndex(b => b.no === bill.no);
+        if (i >= 0) { rec.paid = db.bills[i].paid; rec.pm = db.bills[i].pm; rec.pd = db.bills[i].pd; db.bills[i] = rec; } else { rec.paid = false; db.bills.push(rec); }
+        save(); const wa = $(root, '[data-k=wa]'); if (wa) wa.href = waLink(bill.cph, billText(bill));
+      }
+      function lineText(l) {
+        const a = qbLine(l), q = fmtNum(num(l.qty), 3);
+        if (l.unit === 'rs') return l.name + ' — ' + inr(a);
+        if (l.unit === 'g' || l.unit === 'ml') return l.name + ' — ' + q + ' ' + ul(l.unit) + ' (' + inr(num(l.rate)) + '/' + ul(RATE_UNIT[l.unit]) + ') = ' + inr(a);
+        return l.name + ' — ' + q + ' ' + ul(l.unit) + ' × ' + inr(num(l.rate)) + ' = ' + inr(a);
+      }
+      function payOf(b) { const t = qbTotals(b); return db.vpa && validVpa(db.vpa) && t.total > 0 ? payLink({ pa: db.vpa.trim(), pn: db.pn || db.shop, am: t.total, tn: 'Bill ' + (b.no || ''), shop: db.shop, bill: b.no, phone: db.phone }) : ''; }
+      function billText(b) {
+        const t = qbTotals(b), L = [];
+        L.push('🧾 *' + (db.shop || T('பில்', 'Bill')) + '*' + (b.no ? ' — ' + T('பில் ', 'Bill ') + '#' + b.no : ''));
+        L.push(dmy(b.d || todayIso()) + (b.t ? ' ' + b.t : '') + (b.cust ? ' · ' + b.cust : ''));
+        L.push('');
+        b.lines.filter(l => String(l.name).trim()).forEach((l, i) => L.push((i + 1) + '. ' + lineText(l)));
+        L.push('');
+        if (t.del) L.push(T('டெலிவரி: ', 'Delivery: ') + inr(t.del)); if (t.dis) L.push(T('தள்ளுபடி: ', 'Discount: ') + '− ' + inr(t.dis)); if (t.roundOff) L.push('Round off: ' + (t.roundOff > 0 ? '+' : '') + fmtNum(t.roundOff, 2));
+        L.push('*' + T('மொத்தம்: ', 'Total: ') + inr(t.total) + '*');
+        const pl = payOf(b);
+        if (pl) { L.push(''); L.push('💳 ' + T('GPay / PhonePe / எந்த UPI-லும் செலுத்த:', 'Pay by GPay / PhonePe / any UPI:')); L.push(pl); L.push('UPI ID: ' + db.vpa.trim()); }
+        L.push(''); L.push(T('நன்றி 🙏', 'Thank you 🙏') + (db.phone ? ' · ' + db.phone : ''));
+        return L.join('\n');
+      }
+      async function paintBillImg(cv, b) {
+        const t = qbTotals(b), lines = b.lines.filter(l => String(l.name).trim()), W = 800, pad = 40, rowH = 52;
+        const upi = db.vpa && validVpa(db.vpa) && t.total > 0 ? upiString({ pa: db.vpa.trim(), pn: db.pn || db.shop, am: t.total, tn: 'Bill ' + b.no }) : '';
+        const qrSize = upi ? 420 : 0, H = 190 + lines.length * rowH + 150 + (upi ? qrSize + 130 : 40);
+        const qrc = upi ? await loadQr() : null;
+        cv.width = W; cv.height = H; const ctx = cv.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#176B45'; ctx.fillRect(0, 0, W, 130);
+        ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        fitFont(ctx, db.shop || T('பில்', 'Bill'), W - 2 * pad, 50, '800', 24); ctx.fillText(db.shop || T('பில்', 'Bill'), W / 2, 50);
+        const sub = T('பில் #', 'Bill #') + b.no + ' · ' + dmy(b.d) + (b.cust ? ' · ' + b.cust : ''); fitFont(ctx, sub, W - 2 * pad, 28, '600', 16); ctx.fillText(sub, W / 2, 100);
+        let y = 165; ctx.fillStyle = '#111827';
+        lines.forEach((l, i) => {
+          if (i % 2 === 0) { ctx.fillStyle = '#F3F4F6'; ctx.fillRect(0, y - rowH / 2, W, rowH); ctx.fillStyle = '#111827'; }
+          const amt = inr(qbLine(l)); ctx.font = '800 28px ' + FONT; const aw = ctx.measureText(amt).width;
+          ctx.textAlign = 'right'; ctx.fillText(amt, W - pad, y);
+          const left = l.name + '  ' + (l.unit === 'rs' ? '' : fmtNum(num(l.qty), 3) + ' ' + ul(l.unit));
+          ctx.textAlign = 'left'; fitFont(ctx, left, W - 2 * pad - aw - 20, 28, '600', 14); ctx.fillText(left, pad, y); y += rowH;
+        });
+        y += 10; ctx.fillStyle = '#176B45'; ctx.fillRect(pad, y, W - 2 * pad, 3); y += 45; ctx.fillStyle = '#111827';
+        const extra = [t.del ? T('டெலிவரி ', 'Delivery ') + inr(t.del) : '', t.dis ? T('தள்ளுபடி ', 'Discount ') + '−' + inr(t.dis) : ''].filter(Boolean).join('  ·  ');
+        if (extra) { ctx.textAlign = 'center'; fitFont(ctx, extra, W - 2 * pad, 26, '500', 14); ctx.fillText(extra, W / 2, y); y += 40; }
+        ctx.textAlign = 'center'; ctx.font = '900 46px ' + FONT; ctx.fillText(T('மொத்தம் ', 'Total ') + inr(t.total), W / 2, y + 10); y += 70;
+        if (upi) {
+          drawQr(ctx, qrc, upi, (W - qrSize) / 2, y, qrSize); y += qrSize + 30;
+          ctx.fillStyle = '#111827'; fitFont(ctx, T('GPay / PhonePe / எந்த UPI app-லும் ஸ்கேன் செய்யுங்கள்', 'Scan with GPay / PhonePe / any UPI app'), W - 2 * pad, 26, '700', 14); ctx.fillText(T('GPay / PhonePe / எந்த UPI app-லும் ஸ்கேன் செய்யுங்கள்', 'Scan with GPay / PhonePe / any UPI app'), W / 2, y); y += 38;
+          fitFont(ctx, 'UPI ID: ' + db.vpa.trim(), W - 2 * pad, 26, '600', 14); ctx.fillText('UPI ID: ' + db.vpa.trim(), W / 2, y);
+        }
+        ctx.fillStyle = '#9CA3AF'; ctx.font = '500 20px ' + FONT; ctx.fillText('pdftoolsindia.com', W / 2, H - 22);
+      }
+
+      /* ---------- bills list */
+      function drawList(pane) {
+        const iso = todayIso(), today = db.bills.filter(b => b.d === iso);
+        const sum = (arr, f) => round2(arr.reduce((a, b) => a + (f(b) ? n0(b.total) : 0), 0));
+        const rows = db.bills.filter(b => filter === 'all' || (filter === 'unpaid' ? !b.paid : b.paid)).sort((a, b) => b.no - a.no).slice(0, 300);
+        pane.innerHTML = '<div class="bz-stats"><div class="bz-stat"><b>' + today.length + '</b><span>' + T('இன்றைய பில்கள்', "Today's bills") + '</span></div><div class="bz-stat"><b>' + inr(sum(today, () => true)) + '</b><span>' + T('இன்றைய மொத்தம்', 'Billed today') + '</span></div><div class="bz-stat"><b>' + inr(sum(db.bills, b => b.paid && b.pd === iso)) + '</b><span>' + T('இன்று வந்த பணம்', 'Received today') + '</span></div><div class="bz-stat"><b>' + inr(sum(db.bills, b => !b.paid)) + '</b><span>' + T('இன்னும் வர வேண்டியது', 'Still to collect') + '</span></div></div>' +
+          '<div class="bz-chips">' + [['unpaid', T('பணம் வர வேண்டியவை', 'Unpaid')], ['paid', T('பணம் வந்தவை', 'Paid')], ['all', T('எல்லாம்', 'All')]].map(f => '<button type="button" class="bz-chip' + (f[0] === filter ? ' on' : '') + '" data-flt="' + f[0] + '">' + f[1] + '</button>').join('') + '</div>' +
+          '<div class="bz-list">' + (rows.length ? rows.map(b => '<div class="bz-card" style="cursor:default;flex-wrap:wrap"><span><b>#' + b.no + ' · ' + esc(b.cust || T('பெயர் இல்லை', 'No name')) + '</b><small>' + esc(dmy(b.d)) + ' ' + esc(b.t || '') + ' · ' + b.lines.length + T(' பொருட்கள்', ' items') + (b.paid ? ' · ✅ ' + (b.pm === 'upi' ? 'UPI' : T('ரொக்கம்', 'Cash')) : '') + '</small></span><span class="bz-amt ' + (b.paid ? 'adv' : 'owe') + '">' + inr(b.total) + '</span>' +
+            '<div class="bz-actions" style="width:100%;margin-top:6px">' + (b.paid ? '<button type="button" class="bz-btn sec sm" data-unpay="' + b.no + '">↩️ ' + T('பணம் வரவில்லை', 'Mark unpaid') + '</button>' + (b.cph ? '<a class="bz-btn green sm" target="_blank" rel="noopener" href="' + esc(waLink(b.cph, T('வணக்கம் ', 'Hello ') + (b.cust || '') + ', ' + T('பில் #', 'bill #') + b.no + ' — ' + inr(b.total) + T(' பணம் பெற்றோம். நன்றி 🙏', ' received. Thank you 🙏') + (db.shop ? ' — ' + db.shop : ''))) + '">💬 ' + T('பெற்றோம் செய்தி', 'Receipt msg') + '</a>' : '')
+              : '<button type="button" class="bz-btn green sm" data-pay="' + b.no + '" data-m="upi">✅ UPI ' + T('வந்தது', 'received') + '</button><button type="button" class="bz-btn sm" data-pay="' + b.no + '" data-m="cash">💵 ' + T('ரொக்கம் வந்தது', 'Cash received') + '</button>' + (b.cph ? '<a class="bz-btn sec sm" target="_blank" rel="noopener" href="' + esc(waLink(b.cph, billText(b))) + '">💬 ' + T('மீண்டும் அனுப்பு', 'Resend') + '</a>' : '')) +
+            '<button type="button" class="bz-btn sec sm" data-edit="' + b.no + '">✏️</button><button type="button" class="bz-x" data-del="' + b.no + '" aria-label="delete">✕</button></div></div>').join('') : '<div class="bz-info">' + T('இங்கே பில் இல்லை.', 'No bills here.') + '</div>') + '</div>' +
+          '<div class="bz-info">' + T('பணம் வந்ததா என்பதை உங்கள் GPay / PhonePe / வங்கி app-ல் பார்த்த பிறகே "வந்தது" தட்டுங்கள். வாடிக்கையாளரின் "செலுத்தினேன்" செய்தி மட்டும் ஆதாரம் அல்ல.', 'Tap "received" only after you see the money in your GPay / PhonePe / bank app. The customer\'s "I paid" message alone is not proof.') + '</div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="csv">📊 Excel (.csv)</button><button type="button" class="bz-btn sec sm" data-act="bk">💾 Backup</button><label class="bz-btn sec sm" style="cursor:pointer">📂 ' + T('மீட்டெடு', 'Restore') + '<input type="file" accept=".json,application/json" data-act="rs" hidden></label></div>';
+        const find = no => db.bills.find(b => b.no === +no);
+        $$(pane, '[data-flt]').forEach(b => { b.onclick = () => { filter = b.getAttribute('data-flt'); drawList(pane); }; });
+        $$(pane, '[data-pay]').forEach(b => { b.onclick = () => { const x = find(b.getAttribute('data-pay')); if (x) { x.paid = true; x.pm = b.getAttribute('data-m'); x.pd = todayIso(); save(); drawList(pane); } }; });
+        $$(pane, '[data-unpay]').forEach(b => { b.onclick = () => { const x = find(b.getAttribute('data-unpay')); if (x) { x.paid = false; delete x.pd; save(); drawList(pane); } }; });
+        $$(pane, '[data-edit]').forEach(b => { b.onclick = () => { const x = find(b.getAttribute('data-edit')); if (!x) return; bill = { text: '', cust: x.cust, cph: x.cph, lines: x.lines.map(l => Object.assign({ said: '', check: false }, l)), delivery: x.delivery, discount: x.discount, roundOff: x.roundOff, no: x.no, d: x.d, t: x.t }; view = 'bill'; draw(); window.scrollTo(0, 0); }; });
+        $$(pane, '[data-del]').forEach(b => { b.onclick = () => { if (!window.confirm(T('இந்தப் பில்லை நீக்கவா?', 'Delete this bill?'))) return; db.bills = db.bills.filter(x => x.no !== +b.getAttribute('data-del')); save(); drawList(pane); }; });
+        $(pane, '[data-act=csv]').onclick = () => { const rows2 = [['Bill', 'Date', 'Time', 'Customer', 'Phone', 'Items', 'Total', 'Paid', 'Mode', 'Paid on']].concat(db.bills.map(b => [b.no, b.d, b.t, b.cust, b.cph, b.lines.map(l => l.name + ' ' + l.qty + ' ' + l.unit).join('; '), b.total, b.paid ? 'yes' : 'no', b.pm || '', b.pd || ''])); const bl = new Blob(['﻿' + rows2.map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }); if (typeof downloadBlob === 'function') downloadBlob(bl, 'bills-' + todayIso() + '.csv'); };
+        $(pane, '[data-act=bk]').onclick = () => { const bl = new Blob([JSON.stringify(db)], { type: 'application/json' }); if (typeof downloadBlob === 'function') downloadBlob(bl, 'quick-bill-backup-' + todayIso() + '.json'); };
+        $(pane, '[data-act=rs]').onchange = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { const v = JSON.parse(String(r.result)); if (!v || !Array.isArray(v.bills)) throw new Error('bad'); if (!window.confirm(T('இப்போது உள்ள பில்கள் இந்த Backup-ஆல் மாற்றப்படும். தொடரவா?', 'Current bills will be replaced by this backup. Continue?'))) return; db = Object.assign({}, D, v); save(); flash = T('மீட்டெடுக்கப்பட்டது', 'Restored'); draw(); } catch (err) { flash = T('இது சரியான Backup file இல்லை', 'Not a valid backup file'); draw(); } }; r.readAsText(f); };
+      }
+
+      /* ---------- my prices (and today's price list) */
+      function drawRates(pane) {
+        let q = '';
+        pane.innerHTML = '<div class="bz-info">' + T('தினமும் விலை மாறினால் இங்கே மாற்றுங்கள்; பில்லில் தானாக வரும். "இன்றைய விலை" செய்தியை வாடிக்கையாளர் குழுவுக்கு அனுப்பலாம்.', 'If prices change daily, update them here; bills pick them up. Send "today\'s prices" to your customer group.') + '</div>' +
+          '<div class="bz-f"><input type="text" data-k="rq" placeholder="' + esc(T('பொருள் தேடு (தக்காளி / tomato / thakkali)', 'Search item (tomato / thakkali)')) + '"></div><div class="bz-list" data-k="rl"></div>' +
+          '<div class="bz-actions"><a class="bz-btn green" data-k="rwa" target="_blank" rel="noopener" href="#">💬 ' + T('இன்றைய விலை — WhatsApp', "Today's prices — WhatsApp") + '</a><button type="button" class="bz-btn sec" data-act="rcp">📋 ' + T('நகலெடு', 'Copy') + '</button><button type="button" class="bz-btn sec" data-act="rcard">🏷️ ' + T('விலைப்பட்டியல் படம்', 'Price-list picture') + '</button></div>';
+        const priced = () => GOODS.filter(g => db.rates[g[0] + '|' + RATE_UNIT[g[3]]] != null);
+        const todayText = () => ['🛒 *' + (db.shop || T('இன்றைய விலை', "Today's prices")) + '* — ' + T('இன்றைய விலை ', 'prices ') + dmy(todayIso()), ''].concat(priced().map(g => nm(g) + ' — ' + inr(db.rates[g[0] + '|' + RATE_UNIT[g[3]]]) + ' / ' + ul(RATE_UNIT[g[3]]))).concat(['', T('ஆர்டருக்கு WhatsApp செய்யுங்கள்', 'WhatsApp your order') + (db.phone ? ': ' + db.phone : '')]).join('\n');
+        function fill() {
+          const s = q.trim(), k = phon(s), list = GOODS.filter(g => !s || g[1].indexOf(s) >= 0 || g[2].toLowerCase().indexOf(s.toLowerCase()) >= 0 || (k.length >= 2 && (phon(g[4]).indexOf(k) >= 0))).sort((a, b) => (db.rates[b[0] + '|' + RATE_UNIT[b[3]]] != null) - (db.rates[a[0] + '|' + RATE_UNIT[a[3]]] != null));
+          $(pane, '[data-k=rl]').innerHTML = list.slice(0, s ? 40 : 60).map(g => { const rk = g[0] + '|' + RATE_UNIT[g[3]]; return '<div class="bz-item"><span style="font-weight:700">' + esc(nm(g)) + ' <small style="color:var(--sub)">/ ' + esc(ul(RATE_UNIT[g[3]])) + '</small></span><input type="text" inputmode="decimal" data-rk="' + esc(rk) + '" value="' + esc(db.rates[rk] != null ? db.rates[rk] : '') + '" placeholder="₹"><span></span></div>'; }).join('');
+          $$(pane, '[data-rk]').forEach(i => i.addEventListener('input', () => { const v = num(i.value); if (i.value.trim() === '') delete db.rates[i.getAttribute('data-rk')]; else if (v >= 0) db.rates[i.getAttribute('data-rk')] = v; save(); $(pane, '[data-k=rwa]').href = waLink('', todayText()); }));
+          $(pane, '[data-k=rwa]').href = waLink('', todayText());
+        }
+        $(pane, '[data-k=rq]').addEventListener('input', e => { q = e.target.value; fill(); });
+        $(pane, '[data-act=rcp]').onclick = function () { copyText(todayText(), this); };
+        $(pane, '[data-act=rcard]').onclick = () => {
+          const items = priced().map(g => ({ n: nm(g) + ' (' + ul(RATE_UNIT[g[3]]) + ')', p: String(db.rates[g[0] + '|' + RATE_UNIT[g[3]]]) }));
+          if (!items.length) { flash = T('முதலில் விலைகளை எழுதுங்கள்', 'Type some prices first'); draw(); return; }
+          const rc = lsGet('bz_ratecard_v1', {}) || {}; rc.preset = 'blank'; rc.items = items; rc.tag = T('இன்றைய விலை ', "Today's prices ") + dmy(todayIso()); if (db.shop) rc.shop = db.shop; if (db.phone) rc.phone = db.phone; lsSet('bz_ratecard_v1', rc);
+          try { if (typeof openTool === 'function') { openTool('ratecard'); return; } } catch (e) { /* fall back */ }
+          location.href = '/?tool=ratecard';
+        };
+        fill();
+      }
+
+      /* ---------- shop & UPI */
+      function drawSet(pane) {
+        pane.innerHTML = '<div class="bz-grid">' + textField(T('கடை பெயர்', 'Shop name'), 'shop', db.shop, 'எ.கா. முருகன் காய்கறி') + field(T('கடை WhatsApp எண்', 'Shop WhatsApp number'), 'phone', db.phone, { mode: 'tel' }) + '</div>' +
+          '<div class="bz-grid">' + textField(T('UPI ID (GPay / PhonePe / Paytm)', 'UPI ID (GPay / PhonePe / Paytm)'), 'vpa', db.vpa, 'name@okaxis') + textField(T('UPI-ல் உள்ள பெயர் (ஆங்கிலத்தில்)', 'Name on UPI (in English)'), 'pn', db.pn) + '</div>' +
+          '<div data-k="vmsg"></div>' +
+          '<div class="bz-actions"><label class="bz-btn sec sm" style="cursor:pointer">📷 ' + T('என் கடை QR படத்திலிருந்து UPI ID எடு', 'Read UPI ID from my shop QR picture') + '<input type="file" accept="image/*" data-act="qrimg" hidden></label></div>' +
+          '<div class="bz-grid">' + field(T('வழக்கமான டெலிவரி கட்டணம் (₹)', 'Usual delivery charge (₹)'), 'delivery', db.delivery, { ph: '0' }) + field(T('அடுத்த பில் எண்', 'Next bill number'), 'next', db.next) + '</div>' +
+          '<label class="bz-chk"><input type="checkbox" data-k="round"' + (db.round !== false ? ' checked' : '') + '> ' + T('மொத்தத்தை முழு ரூபாய்க்கு மாற்று', 'Round totals to whole rupees') + '</label>' +
+          '<div class="bz-actions" data-k="testpay"></div>' +
+          '<div class="bz-info">' + T('பணம் நேரடியாக உங்கள் UPI கணக்குக்கே செல்லும்; நாங்கள் பணத்தைத் தொடுவதில்லை, கட்டணம் எதுவும் இல்லை. உங்கள் விவரங்கள் இந்த phone-ல் மட்டும் இருக்கும். UPI PIN, OTP-ஐ யாருக்கும் சொல்லாதீர்கள் — பணம் பெற PIN தேவையே இல்லை.', 'Money goes straight to your own UPI account; we never touch it and charge nothing. Your details stay on this phone. Never share your UPI PIN or OTP — you never need a PIN to receive money.') + '</div>' +
+          '<div class="bz-info">' + T('குறிப்பு: வாடிக்கையாளர் பணம் செலுத்தியதும் தானாக உங்களுக்குச் செய்தி வர வேண்டுமென்றால் அதற்குக் கட்டண payment gateway தேவை. இங்கே இலவச வழி: பணம் வந்ததும் உங்கள் UPI app அறிவிப்பு வரும்; வாடிக்கையாளரும் பணம் செலுத்தும் பக்கத்தில் "செலுத்தினேன்" தட்டினால் உங்களுக்கு WhatsApp வரும்.', 'Note: an automatic "paid" alert from the bank needs a paid payment gateway. The free way here: your UPI app notifies you, and the customer can tap "I paid" on the pay page, which sends you a WhatsApp.') + '</div>';
+        function check() {
+          const v = String(db.vpa || '').trim(), m = $(pane, '[data-k=vmsg]'), tp = $(pane, '[data-k=testpay]');
+          m.innerHTML = !v ? '' : validVpa(v) ? '<div class="bz-info">✅ ' + T('UPI ID சரியான வடிவில் உள்ளது. ஒருமுறை ₹1 சோதனைப் பணம் அனுப்பி உங்கள் கணக்குக்கு வருகிறதா என்று பாருங்கள்.', 'UPI ID looks valid. Send a ₹1 test payment once to confirm it reaches your account.') + '</div>' : '<div class="bz-msg">' + T('UPI ID சரியில்லை — name@bank போல இருக்க வேண்டும்', 'UPI ID looks wrong — it should look like name@bank') + '</div>';
+          tp.innerHTML = validVpa(v) ? '<a class="bz-btn sec sm" target="_blank" rel="noopener" href="' + esc(payLink({ pa: v, pn: db.pn || db.shop, am: 1, tn: 'Test', shop: db.shop, bill: 'TEST', phone: db.phone, base: location.origin })) + '">🔍 ' + T('₹1 சோதனை பணம் செலுத்தும் பக்கம்', '₹1 test pay page') + '</a>' : '';
+        }
+        const map = { shop: v => { db.shop = v; }, phone: v => { db.phone = v; }, vpa: v => { db.vpa = v.trim(); }, pn: v => { db.pn = v; }, delivery: v => { db.delivery = v; }, next: v => { const n = Math.floor(num(v)); if (n > 0) db.next = n; } };
+        Object.keys(map).forEach(k => { const i = $(pane, '[data-k=' + k + ']'); i.addEventListener('input', () => { map[k](i.value); save(); check(); }); });
+        $(pane, '[data-k=round]').addEventListener('change', e => { db.round = e.target.checked; save(); });
+        $(pane, '[data-act=qrimg]').onchange = async e => {
+          const f = e.target.files && e.target.files[0]; if (!f) return;
+          try {
+            if (typeof ensureJsQr !== 'function') throw new Error('no decoder');
+            const jsQR = await ensureJsQr(), img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(f); });
+            const sc = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+            const cx = c.getContext('2d'); cx.drawImage(img, 0, 0, c.width, c.height); const d = cx.getImageData(0, 0, c.width, c.height), r = jsQR(d.data, d.width, d.height);
+            if (!r || !/^upi:\/\/pay\?/i.test(r.data)) throw new Error('not upi');
+            const u = new URLSearchParams(r.data.replace(/^upi:\/\/pay\?/i, ''));
+            if (!validVpa(u.get('pa'))) throw new Error('bad pa');
+            db.vpa = u.get('pa'); if (u.get('pn')) db.pn = u.get('pn'); save(); flash = T('உங்கள் QR-லிருந்து UPI ID எடுக்கப்பட்டது: ', 'UPI ID read from your QR: ') + db.vpa; draw();
+          } catch (err) { flash = T('இந்தப் படத்தில் UPI QR கண்டுபிடிக்க முடியவில்லை. தெளிவான QR படம் போடுங்கள் அல்லது UPI ID-ஐ நேரடியாக எழுதுங்கள்.', 'Could not find a UPI QR in this picture. Use a clear QR picture or type the UPI ID.'); draw(); }
+        };
+        check();
+      }
+
+      /* ---------- customer side: make a list and send it to the shop */
+      function drawCust(pane) {
+        const common = ['tomato', 'onion', 'sonion', 'potato', 'brinjal', 'okra', 'carrot', 'beans', 'gchilli', 'ginger', 'garlic', 'coriander', 'curryleaf', 'mint', 'coconut', 'lemon', 'banana', 'milk', 'egg', 'rice'];
+        pane.innerHTML = '<div class="bz-info">' + T('வாடிக்கையாளர்களுக்கு: பொருளைத் தட்டி அளவைச் சேர்த்து, கடைக்கு WhatsApp-ல் ஒரே தொடுதலில் அனுப்புங்கள்.', 'For customers: tap items, set amounts and send the list to the shop on WhatsApp in one tap.') + '</div>' +
+          '<div class="bz-grid one">' + field(T('கடையின் WhatsApp எண்', "Shop's WhatsApp number"), 'sph', db.shopPhone, { mode: 'tel' }) + '</div>' +
+          '<div class="bz-chips">' + common.map(id => { const g = goodsById(id); return '<button type="button" class="bz-chip" data-cadd="' + id + '">' + esc(nm(g)) + '</button>'; }).join('') + '</div>' +
+          '<div class="bz-f"><label>' + T('என் பட்டியல் (மாற்றலாம்)', 'My list (you can edit)') + '</label><textarea data-k="clist">' + esc(db.clist || '') + '</textarea></div>' +
+          '<div class="bz-actions"><a class="bz-btn green" data-k="cwa" target="_blank" rel="noopener" href="#">💬 ' + T('கடைக்கு அனுப்பு', 'Send to shop') + '</a><button type="button" class="bz-btn sec" data-act="cclear">🧹 ' + T('காலி செய்', 'Clear') + '</button></div>';
+        const ta = $(pane, '[data-k=clist]'), link = () => { $(pane, '[data-k=cwa]').href = waLink(db.shopPhone, T('வணக்கம், இந்தப் பொருட்கள் வேண்டும்:', 'Hello, please send:') + '\n' + (db.clist || '')); };
+        $$(pane, '[data-cadd]').forEach(b => { b.onclick = () => { const g = goodsById(b.getAttribute('data-cadd')); const def = { kg: '1 ' + ul('kg'), bunch: '1 ' + ul('bunch'), pc: '1', dozen: '1 ' + ul('dozen'), l: '1 ' + ul('l'), muzham: '1 ' + ul('muzham') }[g[3]] || '1'; db.clist = (db.clist ? db.clist.replace(/\s+$/, '') + '\n' : '') + nm(g) + ' ' + def; ta.value = db.clist; save(); link(); }; });
+        ta.addEventListener('input', () => { db.clist = ta.value; save(); link(); });
+        $(pane, '[data-k=sph]').addEventListener('input', e => { db.shopPhone = e.target.value; save(); link(); });
+        $(pane, '[data-act=cclear]').onclick = () => { db.clist = ''; ta.value = ''; save(); link(); };
+        link();
       }
       draw();
     }
