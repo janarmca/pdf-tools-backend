@@ -1,110 +1,44 @@
-# PDF Tools India — pdftoolsindia.com
+# PDF Tools India — pdftoolsindia.com (React + Vite)
 
-123+ free, browser-based PDF/Image/Video/Business/Education tools, in Tamil + English, built by a Tamilian for Tamil people. Most tools run entirely client-side (merge, split, compress, convert, OCR, watermark) — no upload, no server cost, no daily limits. A small set of AI-powered tools and "Fast Server Mode" reach the backend and cost credits. The guiding rule for every new tool: deterministic/programmed logic is always free; only genuinely AI-dependent or heavy-backend features cost credits.
+120+ free, privacy-first PDF, Image, Video, Business, Education and Tamil tools built for India. All tools execute client-side in the browser (Merge, Split, Watermark, Invoices, Receipts, Salary Slips, Exam Photo Resizer, Tamil Typing, Pomodoro Study Timer, Land Converter) with zero forced data upload and device-local privacy.
 
-## Live Architecture
+## Features & Architecture
 
-| Layer | Service | Notes |
-|---|---|---|
-| Frontend | **Cloudflare Pages** | Auto-deploys from this repo's `main` branch — pushing `index.html` here goes live. |
-| Backend | **Cloudflare Worker `pdf-tools-api`** — `cloudflare/` (free plan) | Everything server-side: login (Google or a 6-digit e-mail code — no passwords), credits, promo codes, Razorpay payments + webhook, AI tools (Gemini, NVIDIA, Workers AI image), Astrology+, matrimony. Served at `https://pdftoolsindia.com/cfapi/*`. Database: Cloudflare D1; matrimony photos: Cloudflare KV. Setup: [`cloudflare/README.md`](cloudflare/README.md). (Replaced Supabase + Google Cloud Run — ₹0 running cost.) |
-| Payments | **Razorpay** | Credit top-ups and the matrimony chat unlock. No monthly fee. |
+- **Framework**: React 18 SPA built with Vite and Tailwind CSS.
+- **Client-Side PDF Processing**: Browser-based PDF manipulation (merging, splitting, watermarking, images-to-PDF) powered by `pdf-lib`.
+- **Tamil Language & Transliteration**:
+  - Full Tamil and English UI with instant language toggle.
+  - Tanglish phonetic transliteration (`vanakkam` -> `வணக்கம்`, `nandri` -> `நன்றி`).
+  - Bamini/TSCII legacy fonts to modern Unicode converter.
+  - Number to Words converter in both English and Tamil words (e.g. `1,25,000` -> `ஒரு லட்சத்து இருபத்தைந்தாயிரம் ரூபாய் மட்டும்`).
+- **Business & Office Tools**:
+  - GST Invoice, Quotation, Cash Bill & Purchase Order generator with state tax split (CGST+SGST or IGST), round-off, and print/PDF export.
+  - Receipts & Vouchers (Rent receipt with landlord PAN for HRA proof, tuition fee, cash receipt, payment voucher).
+  - Salary Slip (Monthly payslip with basic, HRA, PF 12%, ESI, professional tax, LOP deductions).
+  - Formal Leave Application Letter generator in Tamil, English, and Bilingual format.
+  - Income Tax Calculator comparing Old vs New Tax Regime side-by-side for FY 2026-27 with rebate u/s 87A.
+  - EMI & Loan Repayment Calculator with amortization breakdown.
+  - GST Calculator (Add/Remove GST with 5%, 12%, 18%, 28% slabs).
+- **Exam & Image Tools**:
+  - Exam Photo & Signature Resizer with presets for TNPSC, UPSC, SSC, IBPS, and NEET.
+  - Image compressor with quality tuning and before/after size readout.
+  - Image format converter (JPG ⇄ PNG ⇄ WEBP).
+- **Audience Hubs**:
+  - **Government Employees Hub**: DA/DR Arrears calculator, salary slip, leave letter, income tax comparison.
+  - **Students Hub**: Pomodoro study timer, TNEA engineering cut-off calculator, exam photo resizer.
+  - **Farmer Toolbox**: TNAU rice fertilizer dosage (Urea, DAP, MOP), knapsack spray ratio, and crop economics.
+  - **Kalvi Kalanjiyam**: Classes 1–10 Samacheer syllabus quiz games and science/math concepts.
+  - **Matrimony & Marriage Biodata**: Sri Chowdeshwari Thirumana Amaippagam and printable biodata maker.
 
-Backend deploys automatically: `.github/workflows/deploy-cloudflare.yml` runs on every push that touches `cloudflare/` (or by hand from the Actions tab after changing a secret).
-Frontend deploys automatically on push to `main` — no manual step needed.
-
-## File Structure
-
-### Main app
-- **`index.source.html`** — the readable, human-maintainable source. **Edit this file**, not `index.html`.
-- **`index.html`** — a **minified build** generated from `index.source.html` via `terser` (compress + mangle, property names untouched). This is what's actually served. After editing the source, re-minify and replace this file before shipping — never hand-edit it directly.
-- **`category-education.js`**, **`category-image.js`** — tool code for the Education and Image categories, split out of `index.source.html`/`index.html` and **lazy-loaded** (only fetched the first time a person opens a tool from that category), to keep the initial page smaller. The remaining categories (PDF, Business, Video, AI) are still bundled directly into `index.html`. More categories may move to this pattern over time — see `LAZY_LOAD_CATEGORIES` in the source for the current list.
-
-### Standalone embedded tools
-A few tools are full standalone apps (their own HTML/CSS/JS), opened in a new browser tab rather than bundled inline — `mountEmbeddedTool()` in the source handles this:
-- `Resume_build.html` — Resume Builder (also calls the real `/api/ai/ask` backend for AI-generated summary/bullets/skills when signed in, falling back to a built-in template library otherwise)
-- `gst-checking.html` — GST Checking
-- `hr-attendance-register.html` — HR Attendance Register
-- `astrology-plus.html` — Astrology+ (needs auth — receives the session token via `postMessage`). Porutham (marriage-matching) now returns a weighted `verdict` (🟢 strong / 🟡 moderate / 🟠 weak / 🔴 caution) computed from classically-recognized relative severity of the 10 poruthams (Rajju/Vedha/Dina/Gana/Rasi weighted higher), not just a raw match count — calculation lives in `server.js`, fully deterministic, no AI.
-- `tn-property-registration-calculator.html` — TN Property Registration & Stamp Duty Calculator (Sale/Gift/Settlement/Release/Partition/Mortgage/POA deeds, Tamil Nadu rates). No auth needed, 100% free, no AI — pure formula.
-- `number-jungle-game-engine.html`, `typing-race-game.html` — education games (embedded via a separate iframe pattern, not `mountEmbeddedTool`). `typing-race-game.html` is Type Race — a typing speed/accuracy practice game (English words/sentences + Tamil words typed in Tanglish), with its own XP/level/badge system in `localStorage`, same style as Number Jungle.
-
-### Site pages
-`blog/` (SEO guide posts + index), `contact.html`, `privacy.html`, `terms.html`, `refund.html`, `robots.txt`, `sitemap.xml`, `manifest.json`, `sw.js`, `icon-192.png`, `icon-512.png`.
-
-### Backend
-`cloudflare/` — the whole backend (Worker source, D1 migrations, tests). `cf-auth.js` — the browser login client (supabase-js style API: e-mail code + Google). `supabase_schema.sql` — the old Supabase schema, kept for reference only (no longer used). Video tools run entirely in the browser (ffmpeg.wasm); the old server-side "Fast Server Mode" is retired (`APP_CONFIG.FAST_SERVER = false`).
-
-### Data
-`thirukkural-daily.json` — all 1330 Thirukkural verses, used by the homepage's daily-verse widget.
-
-## Rebuilding the minified `index.html` after editing the source
+## Development & Build
 
 ```bash
-npm install terser --no-save
-# then, per <script> block over ~100 chars in index.source.html:
-npx terser <extracted-script>.js --compress --mangle --output <extracted-script>.min.js
-# reassemble into index.html, verify with: node --check <extracted-script>.js
+# Start development server on port 3000
+npm run dev
+
+# Compile TypeScript and build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
-(This project's own commit history has the exact Python reassembly steps used each time — search recent commits mentioning "terser" if you need the precise script.)
-
-## Adding a new tool
-1. Register it in the `TOOLS` array in `index.source.html`: `{id:'yourtool', name:'...', desc:'...', icon:'...', color:'#hex', cat:'pdf'|'business'|'image'|'video'|'ai'|'education'}`.
-2. Add `TOOL_IMPL.yourtool = { mount(container){ ... } }` — either inline in `index.source.html`, or in the relevant `category-*.js` file if that category is already split out.
-3. If it uses any of the 9 lazy-loaded libraries (`pdf-lib`, `pdf.js`, `jszip`, `tesseract.js`, `xlsx`, `mammoth`, `html2canvas`, `docx`, `pptxgenjs`), add an entry to `TOOL_LIBS` in `index.source.html` (e.g. `yourtool:['pdflib']`) — otherwise `mount()` may run before the library has loaded. No entry needed for tools that don't use any of these.
-4. Re-minify and ship.
-
-## Known follow-ups
-- PDF, Business, Video, and AI categories remain bundled in `index.html` — candidates for the same lazy-load split Education and Image already received, if the pattern continues to prove stable.
-- One dead file still pending manual deletion on GitHub (the web upload UI can't delete files, only add/replace): `images/tools/littlestar.jpg` — the two dead HTML files (`kids-arcade.html`, `tools/little-star-education-arcade.html`) have already been deleted.
-
-## ⚠️ Service worker (`sw.js`) gotcha
-`sw.js` caches `index.html` for offline use, keyed by `CACHE_NAME`. Browsers only detect a new service worker (and re-cache) when **`sw.js` itself changes byte-for-byte** — editing `index.html` alone, however many times, never triggers this. A user's browser can keep running a service worker (and its cached app shell) from weeks ago even after many deploys, and hard refresh does **not** reliably force an active service worker to update in every browser. **Bump `CACHE_NAME` (e.g. `v2` → `v3`) whenever a change needs to reach service-worker-controlled clients promptly** — this was the actual cause of AI tool images not appearing for a user despite multiple confirmed-correct deploys and hard refreshes.
-
-## ⚠️ Backend secrets
-All keys (Gemini, NVIDIA, Razorpay, e-mail, Google sign-in…) are **GitHub repository secrets**; the "Deploy Cloudflare API" workflow copies them into the Worker. After adding or changing one, re-run that workflow (Actions tab). `https://pdftoolsindia.com/cfapi/health` shows which features are configured. Full list: [`cloudflare/README.md`](cloudflare/README.md).
-
-## ⚠️ NVIDIA model end-of-life gotcha
-NVIDIA's build.nvidia.com catalog retires models on short notice — `meta/llama-3.3-70b-instruct` (the model `/api/ai/text` originally used; now set as `NVIDIA_MODEL` in `cloudflare/src/api.js`) hit end-of-life on 2026-08-26 and started returning HTTP 410, which briefly broke Summarize/Resume Reviewer/Translate/Ask AI/Resume Builder in production with a bare "AI request failed" until the error handling was improved to show the real reason. Currently using `nvidia/nemotron-3.5-lightning-30b-a3b` (NVIDIA's own model line, likely more durable than a hosted third-party checkpoint, but not guaranteed forever). If this ever breaks again: check the error message first (it now includes the HTTP status and NVIDIA's real reason, e.g. "...has reached its end of life... (NVIDIA HTTP 410)"), then check build.nvidia.com for a current model with a "Free Endpoint" badge to swap in — the `model:` field is the only line in `/api/ai/text` (server.js) that needs to change.
-
-## Recent major changes
-- **2026-10 — Backend moved to the Cloudflare free plan (₹0).** Supabase (auth + database) and Google Cloud Run (API server) were replaced by one Cloudflare Worker (`cloudflare/`, D1 + KV + Workers AI). Login is now passwordless: "Continue with Google" or a 6-digit code e-mailed via Brevo/Resend (free tiers). Server-side video "Fast Server Mode" (native ffmpeg) was retired — no free host can run it — and video tools run in the browser as before. Large AI uploads are streamed to the Gemini Files API so the Worker stays inside the free plan's 10 ms CPU limit.
-- **2026-09-30 — TN documents + Health Check.** New standalone pages (free unless noted): `tn-rent-agreement.html` — tenancy agreement in Tamil/English built on the First Schedule particulars of the TN Regulation of Rights and Responsibilities of Landlords and Tenants Act 2017 (Sec. 4/6/7/9/11/21/29, Second Schedule repair split, 90-day Rent Authority registration per Rules 2019), deposit >3 months warning, stamp-duty estimate, Word/PDF export; `tn-sale-deed.html` — கிரைய சாசனம் draft (title recital, payments with Sec. 269SS cash warning and 194-IA TDS note, covenants, schedule with boundaries), 7% + 2% estimate; `health-check.html` + `POST /api/ai/health` (2 credits, NVIDIA) — client-side emergency red-flag screen first (108/104/Tele-MANAS 14416), amber rules for <5 / >65 / pregnancy / fever ≥3 days, then multi-angle cause analysis returning JSON; Siddha suggestions restricted to a vetted whitelist in `server.js` (`SIDDHA_WHITELIST`); always shows "AI-generated, not a diagnosis — consult a qualified doctor" + eSanjeevani link. Tool IDs: `tnrentagreement`, `tnsaledeed`, `healthcheck` (in `ACTION_CHARGED_TOOLS`).
-- **2026-09-30 — NVIDIA fixes + new Audio/Video → Text tool.** (1) `/api/ai/text` was returning empty/cut-off answers because `nvidia/nemotron-3.5-lightning-30b-a3b` is a *reasoning* model that spent its whole `max_tokens` budget "thinking". Now sends `chat_template_kwargs: {enable_thinking:false}`, strips any `<think>` block, raises `max_tokens` to 4096, and falls back through `NVIDIA_TEXT_MODELS` if a model is retired/not enabled (403/404/410/5xx). Shared helper: `callNvidiaChat()` in `server.js`. (2) New `POST /api/ai/transcribe` + `audiototext` tool: NVIDIA's speech models are gRPC-only (Riva ASR proto, vendored in `proto/`), so the backend uses `@grpc/grpc-js` against `grpc.nvcf.nvidia.com:443` with Whisper Large-v3's `function-id`. ffmpeg converts any audio/video to 16 kHz mono PCM, split into 60 s chunks. 2 credits per started 5 min, max 30 min / 60 MB, refunded on failure.
-- **NVIDIA Nemotron (free) now powers text-only AI work, saving Gemini cost for genuine photo/scan work**: a new shared client-side helper, `extractDocumentText(file)` in `index.source.html`, tries to pull real text out of an uploaded file first — using the already-lazy-loaded `pdf.js` (for a PDF that has an actual text layer, not a scan), `mammoth.js` (`.docx`), or `xlsx.js` (`.xlsx`/`.xls`/`.csv`) — entirely in the browser, at zero server cost. If that succeeds (more than ~20 characters of text), the extracted text is sent to the new `POST /api/ai/text` backend endpoint, which calls NVIDIA's free `nvidia/nemotron-3.5-lightning-30b-a3b` model instead of Gemini. If extraction fails or yields too little text (a photo, or a scanned/image-only PDF), the tool falls back to the original `/api/ai/ask` Gemini **vision** path unchanged — so nothing that worked before stops working. This hybrid routing is wired into:
-  - **AI Summarize** (`aisummarize`) — rewritten to accept PDF/DOCX/XLSX/XLS/CSV/photo (previously photo/PDF only), routing text-based files through NVIDIA and photos/scans through Gemini vision as before.
-  - **AI Resume Reviewer** (`airesume`) — now also accepts `.docx` (previously image/PDF only), using the same hybrid routing.
-  - **Resume Builder**'s "AI suggest" buttons (`Resume_build.html`) — switched outright to `/api/ai/text` (pure instruction, no file involved, so no vision was ever needed here).
-  - See the "New required env var" section below — `NVIDIA_API_KEY` must be added to Cloud Run before `/api/ai/text` will work in production.
-  - Not changed: **AI Handwriting** and **Receipt/Invoice Extract** stay on Gemini vision — NVIDIA's OCR model doesn't support Tamil. Audio/video transcription via NVIDIA was investigated but not implemented — its Tamil-capable model variant appears to need self-hosted GPU infrastructure, not the simple free hosted API, so this needs further verification before it's worth building.
-- **Download "Save As" dialog fixed to show the correct file type**: `downloadBlob()` (used by every tool's download button) calls the browser's native File System Access "Save As" dialog on desktop Chrome/Edge, but was calling it without telling it what kind of file it is — so the dialog's type dropdown only ever showed "All Files", regardless of whether the output was a PDF, ZIP, image, etc. (reported as the save dialog not showing/enforcing the right file extension). Fixed by passing a `types` option built from the file's extension (`DOWNLOAD_TYPE_MAP` in `index.source.html`, covering pdf/zip/docx/xlsx/pptx/png/jpg/gif/webp/mp4/mp3/wav/txt/csv/json) — the dialog now defaults to the correct type (e.g. "PDF file") and the browser enforces the right extension when saving. Unknown extensions fall back to the old behavior (harmless). Doesn't affect Safari/Firefox/mobile, which never used this dialog (they already download straight to the Downloads folder with the extension embedded in the filename).
-- **Initial page load sped up — the 9 heavy non-auth libraries are now lazy-loaded per tool**, fixing the "slow first paint on every visit" issue: `pdf-lib`, `pdf.js`, `jszip`, `tesseract.js`, `xlsx`, `mammoth`, `html2canvas`, `docx`, and `pptxgenjs` no longer load in `<head>` on every visit — each is fetched only the first time a tool that actually needs it is opened (`supabase-js` stays eager, since auth/credits are needed site-wide immediately, not tied to one tool). A `defer`-based fix was tried earlier and reverted (see prior note, now removed) because it had a real script-ordering failure mode; this replacement uses explicit `await ensureXXX()` calls instead of browser-native `defer`, so ordering is never in question even if a library fails to load — the tool just shows a clear error ("Could not load ___ — check your internet connection and try again.") instead of silently breaking. A failed load is also retried automatically the next time that tool is opened, rather than staying broken for the rest of the tab's life. `TOOL_LIBS` in `index.source.html` is the one table listing which of the 9 libraries each tool needs (covers tools in `index.source.html` itself plus `category-image.js`/`category-education.js`); `renderToolPanel()` shows the same "⏳ Loading…" placeholder already used for lazy category loading while it waits. Verified with a Playwright smoke test (mocked CDN responses) covering: a no-library tool loading instantly with zero extra requests, a library loading once and being reused across multiple tools without re-fetching, a simulated failed library load showing the friendly error without corrupting other tools, and a successful retry of that same tool afterward with no page reload needed.
-- **Cache bug fixed**: `_headers` had no `Cache-Control` rule for `.js`/`.json` files, so Cloudflare's default long-lived asset caching meant a browser (or the CDN edge) could keep serving an old, already-fixed-on-GitHub version of a lazy-loaded category file (or a stale day's `thirukkural-daily.json`) for a long time after a deploy — this was the recurring "site/tool looks old even after a fix" complaint. Fixed by making `.js` and `.json` always revalidate, same as `index.html`.
-- **Memory-leak guard added**: a global `URL.createObjectURL`/`revokeObjectURL` tracker in `index.source.html`, swept on every screen transition (`render()`), auto-releases preview `blob:` URLs that a tool created but never revoked itself — fixes memory buildup from image/video/audio preview tools over a long session, without touching each tool's own code.
-- **Porutham now gives a real verdict, not just a match count** — see `astrology-plus.html` entry above.
-- **New tool: Type Race** — typing speed/accuracy practice game (English + Tamil), Education category, free, gamified (XP/levels/badges via `localStorage`). See `typing-race-game.html` above.
-- **New tool: TN Property Registration & Stamp Duty Calculator** — Business category, free, no AI. See `tn-property-registration-calculator.html` above.
-- **Text-to-Image now runs on Cloudflare Workers AI (FLUX.1-schnell)** — confirmed live in production (`/api/ai/image` correctly returns the login-required auth error, not route-not-found). Genuinely free, ~10,000 Neurons/day, no credit card needed — see the env var table in `.env.example`.
-- **Password Recovery suite** (PDF/Excel/Word): common-password dictionary, personal-details-based guessing with cross-combination, name+number and name+digit+symbol brute-force with honest time estimates, and a "your own remembered guesses" mode — all client-side, all clearly scoped to genuinely weak/guessable passwords (AES-256 with a real strong password is not crackable, and the tool doesn't pretend otherwise).
-- **PDF Protect/Unlock** upgraded to AES-256 (previously RC4-only, which real-world PDFs from banks/government rarely use).
-- **EMI/Loan, Income Tax (FY 2026-27 Old vs New regime), Age, and Percentage calculators** added.
-- **Photo Filters** tool added (Vivid/B&W/Sepia/Vintage/Cool/Warm/Vignette presets with live thumbnail gallery).
-- **Resume Builder**'s "AI suggest" buttons upgraded from a static template library to genuine backend AI calls (with the template library kept as an honest fallback).
-- Consolidated 3 overlapping business document tools (Bill/Quotation Maker, Purchase Order Generator) into the single, more capable Quotation/Bill/PO/Performa tool.
-- Homepage redesigned (bento-grid category layout, trust banner, Tamil/English/Hindi language switcher), Blog section added for SEO.
-- Site-wide minification for basic source-code protection (see File Structure above).
-- Education and Image categories split into lazy-loaded `category-*.js` files (see File Structure above) to reduce initial page weight.
-- Confirmed `server.js` (with the `/api/ai/image` Text-to-Image endpoint) is deployed to Cloud Run and live — verified via `curl -X POST .../api/ai/image` returning the expected "login required" auth error (not "route not found").
-- Removed 2 dead files from the repo: `bill-quotation-maker.html` (its tool was consolidated away) and `kamakshi_gst_checking.html` (an exact byte-for-byte duplicate of `gst-checking.html`). Also removed `bar-collection-register.html` (never wired up as a tool, confirmed no longer needed).
-
-
-## தமிழ் கருவிகள் (Tamil toolkit — free, no AI, runs in the browser)
-- `tamiltyping` Tamil Typing (Tanglish → Unicode Tamil), `tamilfont` Tamil Font Converter, `tamilnumwords` Number → Tamil words, `tamiltext` Tamil Text Tools. All `cat:'education'`, `cost:0`.
-- Logic lives in the inline `TamilCore` module in `index.source.html` (numbers, phonetic typing, sorting, letter analysis).
-- `tamil-legacy-converter.js` is the MIT-licensed npm package `tamil-to-unicode-convertor` (Bamini/TSCII/TAB/… tables), lazy-loaded only by the font converter.
-- Do NOT run `generate-tool-pages.mjs` blindly: it drops hand-added sitemap URLs and renames some slugs.
-
-### Tamil typing lexicon (`tamil-lexicon.txt`)
-- 100,000 words ordered by frequency, lazy-fetched by Tamil Typing only. Words ending in `*` are lower-confidence extras (the `*` is stripped on load).
-- Sources: KaniyamFoundation/all_tamil_words frequency lists (Public Domain) + vigneshwaran-chandrasekaran/tamil-language-words-list (MIT) for words containing ீ / ங, which are missing from the first source (frequency estimated from stem-family size).
-- Matching = `TamilLex` in `index.source.html`: Tamil words and typed Tanglish are reduced to the same sound key (ந/ன/ண, ல/ள/ழ, ர/ற, ட/த, long/short vowels, double letters) and ranked by frequency; run-on words are split into two or three lexicon words; rule-based `TamilCore` is the fallback.

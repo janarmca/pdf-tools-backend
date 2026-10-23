@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --ink: #20242B;
+    --sub: #566070;
+    --line: #E6E8EC;
+    --bg: #F6F7FB;
+    --card: #FFFFFF;
+    --brand: #3752A6;
+    --brand-dark: #28407F;
+    --accent: #E8894A;
+    --accent-dark: #C96A2C;
+    --ok: #1E8E5A;
+    --warn: #C0392B;
+    --chip: #EEF1FA;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', 'Noto Sans Tamil', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.tamil-font {
+  font-family: 'Noto Sans Tamil', 'Inter', sans-serif;
+}
