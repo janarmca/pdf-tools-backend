@@ -466,6 +466,16 @@ const TOOLS = [
   {id:'pdfprotect', name:'Protect PDF (Password)', desc:'Add a password so only people who know it can open the file', icon:'🔐', color:'#7A2E2E', cat:'pdf'},
   {id:'pdfunlock', name:'Unlock PDF (Remove Password)', desc:'Remove password protection when you know the current password', icon:'🔓', color:'#2E7A5A', cat:'pdf'},
   {id:'pdfpwrecover', name:'Document Password Recovery', desc:'Forgot the password on your own PDF, Excel, or Word file? Try common/weak passwords automatically', icon:'🔍', color:'#B8860B', cat:'pdf'},
+  {id:'pdfaltmix', name:'Merge Two-Sided Scans (Alternate & Mix)', desc:'Fronts + backs scanned separately → pages back in the right order', icon:'🔀', color:'#5B4BA6', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfsplithalf', name:'Split Pages in Half', desc:'Cut each page into two — A3 → A4, book scans with two pages per sheet', icon:'✂️', color:'#AD5A2C', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfresize', name:'Resize PDF Pages to A4', desc:'Make every page A4 / Letter / Legal / A5 — text stays sharp', icon:'📏', color:'#2E6B8A', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfbates', name:'Bates Numbering', desc:'Running numbers like DOC-000001 on every page, across many PDFs', icon:'🔢', color:'#3D5A80', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfletterhead', name:'Add Letterhead to PDF', desc:'Put your letterhead (PDF or image) behind or over every page', icon:'📨', color:'#1F6F8B', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfremoveblank', name:'Remove Blank Pages', desc:'Finds empty scanned pages automatically — preview, then remove', icon:'🧹', color:'#6C757D', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdfautoredact', name:'Hide Aadhaar / PAN / Phone in PDF', desc:'Finds Aadhaar, PAN, mobile numbers, e-mails or your words and blacks them out for good', icon:'🔒', color:'#212529', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdf2md', name:'PDF → Markdown / HTML', desc:'PDF text with headings and lists, as .md or a web page', icon:'Ⓜ️', color:'#495057', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'md2pdf', name:'Markdown / Text → PDF', desc:'Write with headings, lists and tables, see it live, save as PDF — Tamil works', icon:'📝', color:'#5C3D99', cat:'pdf', cost:0, lazy:'pdfx'},
+  {id:'pdflongimg', name:'PDF → One Long Image', desc:'All pages stacked into one picture — easy to send on WhatsApp', icon:'🧻', color:'#B85C38', cat:'pdf', cost:0, lazy:'pdfx'},
   {id:'pdfredact', name:'Redact PDF', desc:'Permanently blackout & remove text', icon:'⬛', color:'#1C1C1C', cat:'pdf'},
   {id:'qrgen', name:'QR Code Generator', desc:'Turn text/link/Wi‑Fi into a QR, download PNG', icon:'▦', color:'#1E7145', cat:'pdf'},
   {id:'qrscan', name:'Scan QR / Barcode', desc:'Read the QR code in an image', icon:'📱', color:'#1E7145', cat:'pdf'},
@@ -476,6 +486,8 @@ const TOOLS = [
   {id:'salaryslip', name:'Salary Slip Generator', desc:'Payslip with LOP days, PF / ESI auto-calculation, allowances, saved employees — Tamil / English PDF', icon:'💵', color:'#2E7D32', cat:'business',lazy:'docs'},
   {id:'emicalc', name:'EMI / Loan Calculator', desc:'Home, car, or personal loan — monthly EMI, total interest, full repayment schedule', icon:'🏦', color:'#1A5D8A', cat:'business'},
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
+  {id:'hracalc', name:'HRA Exemption Calculator', desc:'Tax-free part of house rent allowance — 2026 rule with 8 cities at 50%', icon:'🏠', color:'#2B8A3E', cat:'business', cost:0, lazy:'examx'},
+  {id:'examage', name:'Exam Age Eligibility & Relaxation', desc:'Am I eligible? Age on the cut-off date, OBC/SC/ST/PwBD relaxation, born-between dates', icon:'🎂', color:'#5F3DC4', cat:'education', cost:0, lazy:'examx'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Daily attendance with weekly off / holiday, paid days and wages, month grid, Excel muster roll, print, backup — works offline', icon:'📇', color:'#1F2A44', cat:'business',lazy:'docs'},
@@ -515,6 +527,14 @@ const TOOLS = [
   {id:'imgmeme', name:'Meme Maker', desc:'Add top/bottom captions to make a meme', icon:'😄', color:'#CA6F1E', cat:'image', cost:0},
   {id:'imgblur', name:'Blur / Hide Part of Photo', desc:'Pixelate, blur or black-out an Aadhaar number, face, number plate or address', icon:'🫥', color:'#495057', cat:'image', cost:0, lazy:'imgx'},
   {id:'imgsplit', name:'Split Image into Grid', desc:'Cut a picture into 1×3, 2×3 or 3×3 tiles for Instagram — ZIP download', icon:'🔳', color:'#C2255C', cat:'image', cost:0, lazy:'imgx'},
+  {id:'exampresets', name:'Exam Photo Size by Exam — UPSC, SSC, IBPS, NEET', desc:'Pick the exam: exact px + KB range filled in for photo, signature, thumb, declaration, postcard', icon:'🎓', color:'#C2255C', cat:'image', cost:0, lazy:'examx'},
+  {id:'sigclean', name:'Signature Cleaner', desc:'Phone photo of a signature → clean white paper, dark black/blue ink, cropped', icon:'✍️', color:'#1D3557', cat:'image', cost:0, lazy:'examx'},
+  {id:'sigstrip3', name:'3-Signature Strip (UPSC)', desc:'Three signatures one below the other in one image, 350–500 px, 20–100 KB', icon:'🖋️', color:'#264653', cat:'image', cost:0, lazy:'examx'},
+  {id:'photosignjoin', name:'Photo + Signature Joiner', desc:'Photo on top, signature below — one image for forms and admit cards', icon:'🧑‍💼', color:'#6A4C93', cat:'image', cost:0, lazy:'examx'},
+  {id:'cardprint', name:'Aadhaar / PAN Card Print (A4)', desc:'Front and back at the real card size on A4, with Aadhaar masking — cut and fold', icon:'🪪', color:'#0B7285', cat:'image', cost:0, lazy:'examx'},
+  {id:'gifmaker', name:'Photos → GIF Maker', desc:'Turn photos into an animated GIF — speed, size, loop, smooth fade', icon:'🎞️', color:'#D9480F', cat:'image', cost:0, lazy:'gifx'},
+  {id:'gifedit', name:'GIF Editor', desc:'Resize, speed up / slow down, reverse, boomerang, caption, or save frames', icon:'🌀', color:'#9C36B5', cat:'image', cost:0, lazy:'gifx'},
+  {id:'socialresize', name:'Social Media Image Sizes', desc:'One picture → Instagram, Story / WhatsApp Status, YouTube thumbnail, Facebook, LinkedIn sizes (ZIP)', icon:'📱', color:'#E64980', cat:'image', cost:0, lazy:'gifx'},
   {id:'imgsticker', name:'Sticker Cutout', desc:'Cut out a subject with a white sticker border', icon:'🏷️', color:'#B03A2E', cat:'image', cost:0},
   {id:'colorpicker', name:'Color Picker', desc:'Pick a color from an image + build a palette', icon:'🎨', color:'#8E44AD', cat:'image', cost:0},
   {id:'vidsplit', name:'Split Video', desc:'Cut into equal parts or a chosen time range', icon:'🎬', color:'#B5482A', cat:'video', cost:0},
@@ -1292,18 +1312,32 @@ function maybeShowDiscoverModal(forceShow){
 function detectInitialLang(){
   try{
     const saved = localStorage.getItem('pdfToolsLang');
-    if(saved && ['ta','en','hi'].includes(saved)) return saved;
+    if(saved && ['ta','en','hi','te','kn','ml'].includes(saved)) return saved;
   }catch(e){}
   const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
   if(nav.startsWith('hi')) return 'hi';
+  if(nav.startsWith('te')) return 'te';
+  if(nav.startsWith('kn')) return 'kn';
+  if(nav.startsWith('ml')) return 'ml';
   return 'ta'; // Tamil-first site: only people who pick EN/HI themselves (or have an Hindi browser) see another language
 }
 let __appLang = detectInitialLang();
+// Language packs (UPDATE_67): tool names + home text for हिन्दी / తెలుగు / ಕನ್ನಡ / മലയാളം, translated once and served as small
+// static files (/lang/<code>.js) — loaded only when that language is picked. The rest of a tool's text can be turned into
+// the language on the visitor's own device with the browser's built-in Translator (free, no server) — see langBanner().
+const LANG_PACKS = { hi:'हिन्दी', te:'తెలుగు', kn:'ಕನ್ನಡ', ml:'മലയാളം' };
+function LP(){ return (window.__LP && window.__LP[__appLang]) || null; }
+function ensureLangPack(lang){
+  if(!LANG_PACKS[lang] || (window.__LP && window.__LP[lang])) return Promise.resolve();
+  return loadScriptOnce('/lang/' + lang + '.js?v=1').then(()=>{ __searchTokens = null; }).catch(()=>{});
+}
 function setAppLang(lang){
   __appLang = lang;
   try{ localStorage.setItem('pdfToolsLang', lang); }catch(e){}
-  render();
+  try{ document.documentElement.lang = lang; }catch(e){}
+  ensureLangPack(lang).then(()=> render());
 }
+if(LANG_PACKS[__appLang]){ try{ document.documentElement.lang = __appLang; }catch(e){} ensureLangPack(__appLang).then(()=>{ if(typeof render === 'function') render(); }); }
 const I18N = {
   heroTitle: { en:'PDF, Business, Video, AI & More — All in One Place', ta:'PDF, வணிகம், வீடியோ, AI மற்றும் பல — அனைத்தும் ஒரே இடத்தில்', hi:'PDF, बिज़नेस, वीडियो, AI और भी बहुत कुछ — सब एक ही जगह' },
   heroSub: { en:"Merge, compress, convert, translate, invoice, and more — one clean toolkit for documents, images, video, business, and learning. Your files stay on your device — only AI tools send what you choose to our server.", ta:'இணைத்தல், சுருக்குதல், மாற்றுதல், மொழிபெயர்ப்பு, விலைப்பட்டியல் மற்றும் பல — ஆவணங்கள், படங்கள், வீடியோ, வணிகம், கல்விக்கான ஒரே தூய்மையான கருவித்தொகுப்பு. AI கருவிகள் தவிர, உங்கள் கோப்புகள் உங்கள் சாதனத்திலேயே இருக்கும்.', hi:'मर्ज, कंप्रेस, कन्वर्ट, ट्रांसलेट, इनवॉइस और भी बहुत कुछ — दस्तावेज़ों, इमेज, वीडियो, बिज़नेस और शिक्षा के लिए एक साफ़-सुथरा टूलकिट। जब तक आप Fast Server Mode न चुनें, आपकी फ़ाइलें आपके डिवाइस पर ही रहती हैं।' },
@@ -1324,8 +1358,10 @@ const I18N = {
     education: { en:'Education', ta:'கல்வி', hi:'शिक्षा' },
   },
 };
-function tr(key){ return (I18N[key] && I18N[key][__appLang]) || (I18N[key] && I18N[key].en) || ''; }
-function catLabel(key){ return (I18N.catLabels[key] && I18N.catLabels[key][__appLang]) || (CATEGORY_META[key] && CATEGORY_META[key].label) || key; }
+function tr(key){ const p = LP(); return (p && p.ui && p.ui[key]) || (I18N[key] && I18N[key][__appLang]) || (I18N[key] && I18N[key].en) || ''; }
+function catLabel(key){ const p = LP(); return (p && p.cats && p.cats[key]) || (I18N.catLabels[key] && I18N.catLabels[key][__appLang]) || (CATEGORY_META[key] && CATEGORY_META[key].label) || key; }
+function catDesc(key, v){ const p = LP(); return taOn() ? v.ta : ((p && p.catDesc && p.catDesc[key]) || v.en); }
+function LPui(key, fallback){ const p = LP(); return (p && p.ui && p.ui[key]) || fallback; }
 
 function renderTopbar(){
   const bar = el(`
@@ -1343,11 +1379,14 @@ function renderTopbar(){
     widget.appendChild(sb);
   }
   const seg = el(`<div class="langseg" role="group" aria-label="Language"></div>`);
-  [['ta','தமிழ்'],['en','EN'],['hi','हि']].forEach(([code,label])=>{
+  [['ta','தமிழ்'],['en','EN']].forEach(([code,label])=>{
     const b = el(`<button type="button" class="${__appLang===code?'on':''}" aria-pressed="${__appLang===code}">${label}</button>`);
     b.onclick = ()=>{ if(__appLang!==code) setAppLang(code); };
     seg.appendChild(b);
   });
+  const more = el(`<select aria-label="More languages" title="More languages" class="${LANG_PACKS[__appLang]?'on':''}" style="border:none; background:${LANG_PACKS[__appLang]?'var(--brand-dark,#2B3F9E)':'transparent'}; color:${LANG_PACKS[__appLang]?'#fff':'inherit'}; font:inherit; font-weight:800; font-size:12.5px; padding:0 4px; width:${LANG_PACKS[__appLang]?'auto':'40px'}; max-width:96px; cursor:pointer; border-radius:0 999px 999px 0;"><option value="">🌐</option>${Object.keys(LANG_PACKS).map(c=>`<option value="${c}" ${__appLang===c?'selected':''}>${LANG_PACKS[c]}</option>`).join('')}</select>`);
+  more.onchange = ()=>{ if(more.value) setAppLang(more.value); };
+  seg.appendChild(more);
   widget.appendChild(seg);
   if(!AUTH_CONFIGURED){
     widget.appendChild(el(`<div class="free-badge">✓ No limits</div>`));
@@ -1374,6 +1413,26 @@ if(!window.__tbScrollBound){
 // ===================== v2 HOME DESIGN =====================
 // Tamil-first display names/descriptions (display only — SEO pages keep the English names).
 const TA_TOOL = {
+pdfaltmix:['இருபக்க scan இணை','முன், பின் பக்க scan-களைச் சரியான வரிசையில் சேர்'],
+pdfsplithalf:['பக்கத்தை இரண்டாகப் பிரி','A3 / புத்தக scan-ஐ இரண்டு பக்கங்களாக்கு'],
+pdfresize:['PDF பக்க அளவு மாற்று (A4)','எல்லாப் பக்கங்களையும் A4 / Letter அளவாக்கு'],
+pdfbates:['Bates தொடர் எண்','ஒவ்வொரு பக்கத்திலும் DOC-000001 போன்ற தொடர் எண்'],
+pdfletterhead:['லெட்டர்ஹெட் சேர்','உங்கள் லெட்டர்ஹெட்டை PDF பக்கங்களில் பதி'],
+pdfremoveblank:['வெற்றுப் பக்கங்களை நீக்கு','scan-இல் உள்ள காலிப் பக்கங்களைத் தானாக நீக்கு'],
+pdfautoredact:['ஆதார் / PAN எண் மறை','ஆதார், PAN, மொபைல் எண்களைத் தானாகக் கண்டு கருப்பாக்கு'],
+pdf2md:['PDF → Markdown / HTML','PDF எழுத்தைத் தலைப்புகளுடன் Markdown ஆக்கு'],
+md2pdf:['Markdown / உரை → PDF','எழுதி, முன்னோட்டம் பார்த்து PDF ஆக்கு'],
+pdflongimg:['PDF → ஒரே நீளப் படம்','எல்லாப் பக்கங்களையும் ஒரே படமாக்கு — WhatsApp-க்கு'],
+exampresets:['தேர்வு வாரியாகப் புகைப்பட அளவு','UPSC, SSC, IBPS, NEET — சரியான px, KB தானாக'],
+sigclean:['கையொப்பம் சுத்தமாக்கு','நிழல், சாம்பல் தாள் நீக்கி அடர் மை கையொப்பம்'],
+sigstrip3:['3 கையொப்பப் படம் (UPSC)','மூன்று கையொப்பங்கள் ஒன்றின் கீழ் ஒன்றாக'],
+photosignjoin:['புகைப்படம் + கையொப்பம் இணை','இரண்டையும் ஒரே படமாக்கு'],
+cardprint:['ஆதார் / PAN அட்டை அச்சு','முன், பின் பக்கம் உண்மை அளவில் A4-இல்'],
+hracalc:['HRA வரிவிலக்கு கணிப்பான்','வீட்டு வாடகைப் படியில் வரி இல்லாத பகுதி — 2026 விதி'],
+examage:['தேர்வு வயது தகுதி','வயது வரம்பு, சலுகை, பிறந்த தேதி வரம்பு'],
+gifmaker:['படங்கள் → GIF','பல படங்களை அசையும் GIF ஆக்கு'],
+gifedit:['GIF திருத்து','அளவு, வேகம், பின்னோக்கு, எழுத்து சேர்'],
+socialresize:['சமூக ஊடக அளவுகள்','ஒரு படம் → Instagram, Status, YouTube அளவுகள் அனைத்தும்'],
 merge:['PDF இணை','பல PDF கோப்புகளை ஒரே PDF ஆக்கு'],
 split:['PDF பிரி','பக்கங்களைத் தனித்தனி கோப்புகளாகப் பிரி'],
 remove:['பக்கங்களை நீக்கு','தேவையில்லாத பக்கங்களை நீக்கு'],
@@ -1566,6 +1625,8 @@ numsys:['எண் முறை மாற்றி','தசம, இரும, �
 };
 
 const TOOL_ALIAS = {
+  pdfaltmix:'duplex scan odd even pages interleave alternate mix front back scanner', pdfsplithalf:'split page half a3 to a4 book scan two pages one sheet', pdfresize:'resize pdf a4 size page size letter legal scale', pdfbates:'bates numbering legal court document number exhibit', pdfletterhead:'letterhead company pad overlay background', pdfremoveblank:'blank pages empty page remove scan', pdfautoredact:'aadhaar mask hide pan number phone redact auto privacy masked aadhaar', pdf2md:'pdf to markdown md html web page', md2pdf:'markdown to pdf md text to pdf notes', pdflongimg:'pdf to long image one image whatsapp screenshot',
+  exampresets:'upsc ssc ibps sbi neet rrb photo size kb signature thumb impression declaration postcard exam photo', sigclean:'signature clean white background black ink enhance', sigstrip3:'upsc three signature 3 signature strip', photosignjoin:'photo signature join combine one image', cardprint:'aadhaar print pan card print voter id driving licence front back a4 real size', hracalc:'hra exemption house rent allowance tax calculator metro', examage:'age limit eligibility relaxation obc sc st pwd exam age calculator born between', gifmaker:'gif maker animation photos to gif', gifedit:'gif resize speed reverse boomerang frames', socialresize:'instagram size whatsapp status youtube thumbnail facebook cover social media resize',
   merge:'join combine இணை சேர் ஒன்றாக்கு', split:'separate பிரி', compress:'reduce size smaller சுருக்கு kuraikka', pdf2word:'word doc convert',
   img2pdf:'jpg png photo to pdf', imgcompress:'reduce photo size jpg jpeg photo சுருக்கு', bgremove:'background remove பின்னணி cutout', videocompress:'video size reduce சுருக்கு',
   quotepo:'quotation bill invoice gst invoice tax invoice proforma purchase order challan பில் ஜிஎஸ்டி விலைப்பட்டியல்', receipts:'rent receipt tuition fee receipt payment voucher money receipt வாடகை ரசீது கல்விக் கட்டணம் பணம் செலுத்தும் சீட்டு', tamiltyping:'tamil type தமிழ் தட்டச்சு tanglish', tamilfont:'bamini tscii unicode converter', rupeewords:'amount in words cheque number to words ரூபாய்',
@@ -1594,10 +1655,10 @@ function splitName(t){
     const m = TA_TOOL[t.id];
     if(m) return { main: m[0], alt: eng };
     if(tamilPart) return { main: tamilPart.replace(/\s*\(.*?\)\s*$/,''), alt: eng };
-  } else if(__appLang === 'hi' && tamilPart){ return { main: eng, alt: '' }; }
+  } else { const p = LP(), m = p && p.tools && p.tools[t.id]; if(m) return { main: m[0], alt: eng }; }
   return { main: eng, alt: '' };
 }
-function toolDesc(t){ if(taOn()){ const m = TA_TOOL[t.id]; if(m && m[1]) return m[1]; } return t.desc; }
+function toolDesc(t){ if(taOn()){ const m = TA_TOOL[t.id]; if(m && m[1]) return m[1]; } else { const p = LP(), m = p && p.tools && p.tools[t.id]; if(m && m[1]) return m[1]; } return t.desc; }
 // Ranked search: every word must match (name hits first, then aliases); if nothing matches every word we show the closest tools
 // (any word, or a one-letter typo) instead of an empty page.
 let __searchTokens = null;
@@ -1614,7 +1675,7 @@ function __lev1(a, b){ // true when a and b differ by at most one edit
 function searchTools(q){
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   if(!words.length) return {list: TOOLS.slice(), approx: false};
-  const toks = (t, h)=> (__searchTokens || (__searchTokens = {}))[t.id] || (__searchTokens[t.id] = h.split(/[^a-z0-9\u0B80-\u0BFF]+/).filter(x=>x.length >= 3));
+  const toks = (t, h)=> (__searchTokens || (__searchTokens = {}))[t.id] || (__searchTokens[t.id] = h.split(/[^a-z0-9\u0900-\u0D7F]+/).filter(x=>x.length >= 3));
   const rows = TOOLS.map(t=>{
     const h = toolSearchText(t), nm = (t.name + ' ' + ((TA_TOOL[t.id] || [])[0] || '')).toLowerCase(), al = (TOOL_ALIAS[t.id] || '').toLowerCase();
     let hit = 0, bonus = 0, fz = 0;
@@ -1633,7 +1694,9 @@ function searchTools(q){
 }
 function toolSearchText(t){
   const m = TA_TOOL[t.id] || [];
-  return (t.name + ' ' + t.desc + ' ' + (m[0]||'') + ' ' + (m[1]||'') + ' ' + (TOOL_ALIAS[t.id]||'')).toLowerCase();
+  // names in every loaded language pack, so a Hindi / Telugu / Kannada / Malayalam word finds the tool too
+  const lp = window.__LP ? Object.keys(window.__LP).map(k=>{ const x = window.__LP[k].tools && window.__LP[k].tools[t.id]; return x ? x.join(' ') : ''; }).join(' ') : '';
+  return (t.name + ' ' + t.desc + ' ' + (m[0]||'') + ' ' + (m[1]||'') + ' ' + (TOOL_ALIAS[t.id]||'') + ' ' + lp).toLowerCase();
 }
 const CAT_V2 = {
   pdf:       { g:'linear-gradient(135deg,#4263EB,#2B3F9E)', big:'📄', ta:'PDF-ஐ இணை, பிரி, சுருக்கு, மாற்று, கையொப்பமிடு', en:'Merge, split, compress, convert and sign PDFs' },
@@ -1649,13 +1712,13 @@ function esc2(s){ return escapeHtml(String(s)); }
 
 function renderHero(){
   const ta = taOn();
-  const title = ta ? 'இன்று என்ன செய்ய வேண்டும்?' : (__appLang==='hi' ? 'आज क्या करना है?' : 'What would you like to do today?');
+  const title = ta ? 'இன்று என்ன செய்ய வேண்டும்?' : LPui('heroQ', 'What would you like to do today?');
   const sub = ta ? 'PDF, படம், வீடியோ, GST, தமிழ் கருவிகள் — எல்லாம் ஒரே இடத்தில். பெரும்பாலானவை முற்றிலும் இலவசம்.'
-    : (__appLang==='hi' ? 'PDF, इमेज, वीडियो, GST और तमिल टूल्स — एक ही जगह। ज़्यादातर मुफ़्त।' : 'PDF, image, video, GST and Tamil tools in one place. Most are completely free.');
+    : LPui('heroSub', 'PDF, image, video, GST and Tamil tools in one place. Most are completely free.');
   const narrow = window.innerWidth < 560;
-  const ph = ta ? (narrow ? 'கருவியைத் தேடு… (சுருக்கு, GST)' : `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”`) : (narrow ? 'Search tools… (compress, GST)' : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`);
+  const ph = ta ? (narrow ? 'கருவியைத் தேடு… (சுருக்கு, GST)' : `${TOOLS.length} கருவிகளில் தேடு — எ.கா. “சுருக்கு”, “merge”, “GST”`) : (LP() ? LPui('search','Search tools…') : (narrow ? 'Search tools… (compress, GST)' : `Search ${TOOLS.length} tools — e.g. 'compress', 'merge', 'GST'`));
   const pills = ta ? [`🧰 ${TOOLS.length} கருவிகள்`,'✓ இலவசம்','🔒 கோப்பு உங்கள் போனிலேயே','⚡ AI-க்கு மட்டும் credit']
-    : [`🧰 ${TOOLS.length} tools`,'✓ Mostly free','🔒 Files stay on device','⚡ Credits only for AI'];
+    : (LP() && LP().ui.pills ? LP().ui.pills.map(x=>x.replace('{n}', TOOLS.length)) : [`🧰 ${TOOLS.length} tools`,'✓ Mostly free','🔒 Files stay on device','⚡ Credits only for AI']);
   const __seo = document.getElementById('seoH1'); if(__seo) __seo.remove(); // the visible hero <h1> below replaces the static SEO one (exactly one h1 once rendered)
   const h = el(`
     <section class="hero2 tamil${__searchQuery.trim()?' searching':''}">
@@ -1688,7 +1751,7 @@ function iconTile(t, cls){ return `<span class="${cls||'ic'}" style="background:
 function renderToolCard(t){
   const n = splitName(t);
   const paid = !!t.cost;
-  const badge = paid ? `<span class="bd ai">⚡ ${t.cost}</span>` : `<span class="bd">${taOn()?'இலவசம்':'Free'}</span>`;
+  const badge = paid ? `<span class="bd ai">⚡ ${t.cost}</span>` : `<span class="bd">${taOn()?'இலவசம்':LPui('free','Free')}</span>`;
   return el(`
     <a class="tc2 tamil" href="${toolHref(t)}" data-open="${t.id}">
       ${iconTile(t)}
@@ -1706,7 +1769,7 @@ function renderToolCardCompact(t){
 }
 function renderCategoryTabs(){
   const wrap = el(`<div class="chips2 tamil"></div>`);
-  [['all','🗂️', taOn()?'எல்லாம்':'All'], ...Object.keys(CATEGORY_META).map(k=>[k, CATEGORY_META[k].icon, catLabel(k)])].forEach(([key,icon,label])=>{
+  [['all','🗂️', taOn()?'எல்லாம்':LPui('all','All')], ...Object.keys(CATEGORY_META).map(k=>[k, CATEGORY_META[k].icon, catLabel(k)])].forEach(([key,icon,label])=>{
     const b = el(`<button class="chip2${__activeCategory===key?' on':''}">${icon} ${label}</button>`);
     b.onclick = ()=>{ __activeCategory = key; renderHomeBody(); window.scrollTo({top:0}); };
     wrap.appendChild(b);
@@ -1721,10 +1784,10 @@ function renderCategoryCards(){
     const b = el(`
       <button class="cat2 tamil" style="background:${v.g};">
         <span class="big">${v.big}</span>
-        <span class="n">${count} ${taOn()?'கருவிகள்':'tools'}</span>
+        <span class="n">${count} ${taOn()?'கருவிகள்':LPui('toolsWord','tools')}</span>
         <span class="ico">${CATEGORY_META[key].icon}</span>
         <span class="t">${catLabel(key)}</span>
-        <span class="s">${taOn()? v.ta : v.en}</span>
+        <span class="s">${catDesc(key, v)}</span>
       </button>`);
     b.onclick = ()=>{ __activeCategory = key; renderHomeBody(); window.scrollTo({top:0}); };
     wrap.appendChild(b);
@@ -1928,7 +1991,7 @@ function renderHomeBody(){
 
   if(__activeCategory==='all'){
     // 1. Categories (first — the main way to find a tool)
-    const sec5 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'வகைகள்':'Browse by category'}</b><span>${ta?'தேவையான வகையைத் தேர்ந்தெடு':'Pick what you need'}</span></div></div>`);
+    const sec5 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'வகைகள்':LPui('browse','Browse by category')}</b><span>${ta?'தேவையான வகையைத் தேர்ந்தெடு':LPui('pick','Pick what you need')}</span></div></div>`);
     sec5.appendChild(renderCategoryCards()); holder.appendChild(sec5);
 
     // 2. Who are you? — separate pages for each audience (no long mixed lists)
@@ -1967,7 +2030,7 @@ function renderHomeBody(){
   const cat = __activeCategory, meta = CATEGORY_META[cat], v = CAT_V2[cat];
   const items = TOOLS.filter(t=>t.cat===cat);
   holder.appendChild(renderCategoryTabs());
-  holder.appendChild(el(`<div class="catbar tamil" style="background:${v.g};"><div class="ico">${meta.icon}</div><div><b>${catLabel(cat)}</b><span>${items.length} ${ta?'கருவிகள்':'tools'} — ${ta? v.ta : v.en}</span></div></div>`));
+  holder.appendChild(el(`<div class="catbar tamil" style="background:${v.g};"><div class="ico">${meta.icon}</div><div><b>${catLabel(cat)}</b><span>${items.length} ${ta?'கருவிகள்':LPui('toolsWord','tools')} — ${catDesc(cat, v)}</span></div></div>`));
   const section = el(`<div class="sec2" style="margin-top:16px;"></div>`);
   const grid = el(`<div class="grid2"></div>`);
   items.forEach(t=> grid.appendChild(renderToolCard(t)));
@@ -2002,15 +2065,66 @@ function panelShell(toolId, bodyHtml){
       <div class="panel-head">
         <button class="back-btn" data-back>←</button>
         <div>
-          <div class="panel-title">${tool.icon} ${tool.name}</div>
-          <div class="panel-sub">${tool.desc}</div>
+          <div class="panel-title">${tool.icon} ${LP() && LP().tools[toolId] ? escapeHtml(LP().tools[toolId][0]) + ' <small style="font-weight:600; color:var(--sub); font-size:13px;">· ' + tool.name + '</small>' : tool.name}</div>
+          <div class="panel-sub">${LP() && LP().tools[toolId] ? escapeHtml(LP().tools[toolId][1]) : tool.desc}</div>
         </div>
       </div>
       <div class="panel-body"></div>
     </div>
   `);
   wrap.querySelector('.panel-body').innerHTML = bodyHtml || '';
+  // tools that call a paid AI say so up front, in the visitor's language (everything else on the site is free)
+  if(tool.cost && bodyHtml === ''){
+    const n = tool.cost, msg = taOn() ? `🤖 இந்தக் கருவியின் AI பகுதிக்கு credit தேவை (குறைந்தது ${n}; credit எடுக்கும் முன் சரியான அளவு காட்டப்படும்). AI தேவைப்படாத கருவிகள் அனைத்தும் இலவசம்.`
+      : LPui('aiNote', `🤖 The AI part of this tool needs credits (from ${n}; the exact amount is shown before anything is charged). Every tool that does not need AI is free.`).replace('{n}', n);
+    wrap.querySelector('.panel-head').insertAdjacentElement('afterend', el(`<div class="note tamil" style="margin:0 0 10px; background:#FFF8E1; border-color:#FFE08A; font-size:12.5px;">${escapeHtml(msg)}</div>`));
+  }
+  if(LP() && bodyHtml === '') setTimeout(()=> langBanner(wrap), 0);
   return wrap;
+}
+// Turns the English text inside a tool into the chosen language ON THE DEVICE with the browser's built-in Translator
+// (Chrome / Edge desktop). No text is sent to our server. Elsewhere it shows how to use the browser's own "Translate".
+const __trCache = {};
+async function langBanner(wrap){
+  const p = LP(), lang = __appLang; if(!p || !wrap.isConnected) return;
+  const head = wrap.querySelector('.panel-head'); if(!head || wrap.querySelector('.lang-bar')) return;
+  const has = typeof self !== 'undefined' && 'Translator' in self;
+  let avail = 'no';
+  if(has){ try{ avail = await self.Translator.availability({ sourceLanguage:'en', targetLanguage: lang }); }catch(e){ avail = 'no'; } }
+  const bar = el(`<div class="lang-bar note tamil" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 10px; font-size:12.5px;"><span>🌐 ${escapeHtml(p.ui.trNote)}</span></div>`);
+  if(avail && avail !== 'unavailable' && avail !== 'no'){
+    const b = el(`<button class="btn" style="padding:6px 12px; font-size:12px;">${escapeHtml(p.ui.trBtn)}</button>`);
+    b.onclick = async ()=>{
+      b.disabled = true; b.textContent = '⏳ …';
+      try{
+        const t = await self.Translator.create({ sourceLanguage:'en', targetLanguage: lang });
+        const cache = __trCache[lang] || (__trCache[lang] = new Map());
+        const body = wrap.querySelector('.panel-body');
+        const run = async (root)=>{
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(n){
+            const pe = n.parentElement; if(!pe || /^(SCRIPT|STYLE|TEXTAREA|INPUT|CODE|PRE|OPTION)$/.test(pe.tagName) || pe.isContentEditable || pe.closest('[contenteditable]')) return NodeFilter.FILTER_REJECT;
+            return /[A-Za-z]{3,}/.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; } });
+          const nodes = []; while(walker.nextNode()) nodes.push(walker.currentNode);
+          for(const n of nodes){
+            const src = n.nodeValue, key = src.trim(); if(!key || n.__trDone) continue;
+            let out = cache.get(key);
+            if(out == null){ try{ out = await t.translate(key); }catch(e){ out = key; } cache.set(key, out); }
+            n.nodeValue = src.replace(key, out); n.__trDone = true;
+          }
+        };
+        await run(wrap.querySelector('.panel-head')); await run(body);
+        // tools redraw parts of themselves as you use them — translate new text too
+        let busy = false;
+        const mo = new MutationObserver(()=>{ if(busy || !wrap.isConnected){ if(!wrap.isConnected) mo.disconnect(); return; } busy = true; setTimeout(async ()=>{ try{ await run(body); } finally { busy = false; } }, 120); });
+        mo.observe(body, { childList:true, subtree:true });
+        b.replaceWith(el(`<span>✅ ${escapeHtml(p.ui.trDone)}</span>`));
+      }catch(e){ b.disabled = false; b.textContent = p.ui.trBtn; bar.appendChild(el(`<span style="color:#B3261E;">${escapeHtml(String(e.message||e))}</span>`)); }
+    };
+    bar.appendChild(b);
+  } else {
+    bar.appendChild(el(`<span style="color:var(--sub);">${escapeHtml(p.ui.trTip)}</span>`));
+  }
+  head.insertAdjacentElement('afterend', bar);
 }
 
 // Categories whose tool implementations are lazy-loaded from a separate
@@ -2028,7 +2142,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261022d`;
+    s.src = `category-${cat}.js?v=20261023a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -3420,6 +3534,8 @@ const LIB_LOADERS = {
 // category-education.js (those two also reference some of these libraries).
 // A tool not listed here needs none of the 9.
 const TOOL_LIBS = {
+  pdfaltmix:['pdflib'], pdfsplithalf:['pdfjs','pdflib'], pdfresize:['pdflib'], pdfbates:['pdflib','jszip'], pdfletterhead:['pdflib'], pdfremoveblank:['pdfjs','pdflib'],
+  pdfautoredact:['pdfjs','pdflib'], pdf2md:['pdfjs'], md2pdf:['pdflib','html2canvas'], pdflongimg:['pdfjs'], cardprint:['pdflib'], gifedit:['jszip'], socialresize:['jszip'],
   // These 5 share renderAiTextAnswer(), which now also offers Word/PDF export
   // (added so a downloaded result reads correctly even without an Indic font
   // installed — a plain .txt can't embed one, but Word/PDF can).
@@ -11971,6 +12087,9 @@ TOOL_IMPL.pdfeditor = {
     }
     const embeddedFontCache = {}; // baseFontName -> embedded pdf-lib font object, built lazily during export (avoids re-embedding the same font bytes per text run)
     const scale = 1.5;
+    // live-editing settings (UPDATE_67): zoom, "show editable text" outlines, pen / new-text defaults
+    let lastCommitAt = 0, zoom = 1, showEditable = true, penColor = '#D32F2F', penWidth = 3, liveEditor = null;
+    let newTextSize = 14, newTextColor = '#1a1a1a', newTextFont = 'sans';
     const body = el(`<div></div>`); container.appendChild(body);
 
     // Keyboard Delete/Backspace for the currently-selected element — a
@@ -11984,7 +12103,7 @@ TOOL_IMPL.pdfeditor = {
       if(!document.body.contains(body)){ document.removeEventListener('keydown', pdfEditorKeyHandler); return; }
       if(!selectedId) return;
       const active = document.activeElement;
-      if(active && (active.tagName==='INPUT' || active.tagName==='TEXTAREA')) return;
+      if(active && (active.tagName==='INPUT' || active.tagName==='TEXTAREA' || active.tagName==='SELECT' || active.isContentEditable)) return;
       if(ev.key==='Delete' || ev.key==='Backspace'){
         ev.preventDefault();
         snapshotForUndo();
@@ -12000,8 +12119,8 @@ TOOL_IMPL.pdfeditor = {
         <div class="note" style="line-height:1.8;">
           <div style="font-weight:800; margin-bottom:6px;">📖 How to use:</div>
           <div>1️⃣ Upload a PDF below.</div>
-          <div>2️⃣ Choose a tool from the toolbar above (Text/Image/Signature/Shapes/Whiteout), then click on the PDF to place it.</div>
-          <div>3️⃣ To edit existing text, stay on the "↖️ Select" tool and click that text.</div>
+          <div>2️⃣ <b>Click any text on the page and type</b> — it changes right there, live (Enter = done, Esc = cancel).</div>
+          <div>3️⃣ To add new text, pick "🅰️ Text" and click where it should go, then type on the page. Also: Image, Signature, Highlight, Draw, ✔ Tick, ✖ Cross, Shapes, Whiteout.</div>
           <div>4️⃣ Anything you've placed can be **dragged to move**; select it and drag the blue handle to make it **bigger/smaller**.</div>
           <div>5️⃣ Made a mistake? ↩️ Undo, or ↪️ Redo to go forward again.</div>
           <div>6️⃣ When done, click "✅ Apply Changes & Download PDF".</div>
@@ -12134,13 +12253,20 @@ TOOL_IMPL.pdfeditor = {
     function newEl(base){ elIdCounter++; const e = Object.assign({id:'el'+elIdCounter}, base); (elementsByPage[curPage] = elementsByPage[curPage]||[]).push(e); return e; }
 
     async function paintEditor(){
+      if(liveEditor){ try{ liveEditor.cleanup(); }catch(e){} liveEditor = null; }
+      // keep the page from jumping to the top while the editor is rebuilt (the old content's height is held until the new one is in)
+      body.style.minHeight = body.offsetHeight ? body.offsetHeight + 'px' : '';
+      try{ await paintEditorInner(); } finally { body.style.minHeight = ''; }
+    }
+    async function paintEditorInner(){
       body.innerHTML = '';
       mountFileList(body, [file], ()=>{ file=null; pdfjsDoc=null; paintUpload(); });
 
       // Toolbar
       const toolbar = el(`<div style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; padding:8px; background:#F5F6F8; border-radius:12px;"></div>`);
       const TOOLS = [
-        ['select','↖️ Select'], ['text','🅰️ Text'], ['image','🖼️ Image'], ['signature','✍️ Signature'],
+        ['select','↖️ Edit text / Select'], ['text','🅰️ Add Text'], ['image','🖼️ Image'], ['signature','✍️ Signature'],
+        ['highlight','🖍️ Highlight'], ['draw','✏️ Draw'], ['check','✔ Tick'], ['cross','✖ Cross'],
         ['shape-rect','▭ Rect'], ['shape-ellipse','⬭ Ellipse'], ['shape-line','／ Line'], ['whiteout','⬜ Whiteout']
       ];
       TOOLS.forEach(([key,label])=>{
@@ -12153,6 +12279,41 @@ TOOL_IMPL.pdfeditor = {
       undoBtn.onclick = undo; redoBtn.onclick = redo;
       toolbar.appendChild(undoBtn); toolbar.appendChild(redoBtn);
       body.appendChild(toolbar);
+      // second row: zoom, editable-text outlines, and the options of the chosen tool
+      const opt = el(`<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:-4px 0 10px; font-size:12px; color:var(--sub);"></div>`);
+      const zOut = el(`<button style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-weight:800; cursor:pointer;">－</button>`);
+      const zLbl = el(`<span style="font-weight:800; color:var(--ink); min-width:42px; text-align:center;">${Math.round(zoom*100)}%</span>`);
+      const zIn = el(`<button style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-weight:800; cursor:pointer;">＋</button>`);
+      zOut.onclick = ()=>{ zoom = Math.max(0.5, Math.round((zoom-0.25)*100)/100); paintEditor(); };
+      zIn.onclick = ()=>{ zoom = Math.min(2.5, Math.round((zoom+0.25)*100)/100); paintEditor(); };
+      opt.appendChild(el(`<span>🔍 Zoom</span>`)); opt.appendChild(zOut); opt.appendChild(zLbl); opt.appendChild(zIn);
+      if(tool==='select'){
+        const se = el(`<label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" ${showEditable?'checked':''}> Show editable text</label>`);
+        se.querySelector('input').onchange = (ev)=>{ showEditable = ev.target.checked; paintEditor(); };
+        opt.appendChild(se);
+      }
+      if(tool==='text'){
+        const tOpt = el(`<span style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">Font
+          <select data-k="font" style="padding:4px 6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="sans">Sans (Arial-like)</option><option value="serif">Serif (Times-like)</option><option value="mono">Mono (Courier)</option></select>
+          Size <input data-k="size" type="number" min="6" max="96" value="${newTextSize}" style="width:54px; padding:4px; border:1px solid var(--line); border-radius:6px; font-size:12px;">
+          Colour <input data-k="color" type="color" value="${newTextColor}" style="width:30px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0;"></span>`);
+        tOpt.querySelector('[data-k=font]').value = newTextFont;
+        tOpt.querySelector('[data-k=font]').onchange = (ev)=>{ newTextFont = ev.target.value; };
+        tOpt.querySelector('[data-k=size]').onchange = (ev)=>{ newTextSize = Math.max(6, Math.min(96, +ev.target.value||14)); };
+        tOpt.querySelector('[data-k=color]').oninput = (ev)=>{ newTextColor = ev.target.value; };
+        opt.appendChild(tOpt);
+      }
+      if(tool==='draw'){
+        const dOpt = el(`<span style="display:flex; gap:6px; align-items:center;">Pen <input type="color" value="${penColor}" style="width:30px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0;">
+          <select style="padding:4px 6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="2">Thin</option><option value="3">Normal</option><option value="6">Thick</option><option value="12">Marker</option></select></span>`);
+        dOpt.querySelector('input').oninput = (ev)=>{ penColor = ev.target.value; };
+        const ws = dOpt.querySelector('select'); ws.value = String(penWidth); ws.onchange = ()=>{ penWidth = +ws.value; };
+        opt.appendChild(dOpt);
+      }
+      const hint = { select:'Click any text to change it on the page.', text:'Click on the page where the new text should start.', highlight:'Click to place a highlight; drag the blue dot to size it.',
+        draw:'Draw with your finger or mouse; each stroke becomes one piece you can move.', check:'Click to place a tick mark.', cross:'Click to place a cross mark.' }[tool];
+      if(hint) opt.appendChild(el(`<span style="color:var(--sub);">· ${hint}</span>`));
+      body.appendChild(opt);
 
       // Page nav
       const nav = el(`<div class="btn-row" style="justify-content:center; align-items:center; gap:14px; margin-bottom:8px;"></div>`);
@@ -12206,6 +12367,21 @@ TOOL_IMPL.pdfeditor = {
             sizeDownBtn.onclick = ()=> adjustTextSize(-1);
             sizeUpBtn.onclick = ()=> adjustTextSize(1);
             selRow.appendChild(sizeDownBtn); selRow.appendChild(sizeUpBtn);
+            const editBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font-size:12px; font-weight:800; cursor:pointer;">✏️ Edit text</button>`);
+            editBtn.onclick = ()=> inlineEditPlaced(selEl);
+            selRow.appendChild(editBtn);
+            const colIn = el(`<input type="color" value="${selEl.color||'#000000'}" title="Colour" style="width:32px; height:28px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;">`);
+            colIn.onchange = ()=>{ snapshotForUndo(); selEl.color = colIn.value; paintEditor(); };
+            selRow.appendChild(colIn);
+            const fSel = el(`<select title="Font" style="padding:6px; border:1px solid var(--line); border-radius:8px; font-size:12px;"><option value="sans">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option></select>`);
+            fSel.value = selEl.font || 'sans';
+            fSel.onchange = ()=>{ snapshotForUndo(); selEl.font = fSel.value; paintEditor(); };
+            selRow.appendChild(fSel);
+          }
+          if(selEl.type==='shape' || selEl.type==='mark' || selEl.type==='highlight'){
+            const colIn = el(`<input type="color" value="${selEl.color||'#000000'}" title="Colour" style="width:32px; height:28px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;">`);
+            colIn.onchange = ()=>{ snapshotForUndo(); selEl.color = colIn.value; paintEditor(); };
+            selRow.appendChild(colIn);
           }
           const copyBtn = el(`<button style="padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;">📋 Duplicate</button>`);
           copyBtn.onclick = ()=>{
@@ -12235,7 +12411,9 @@ TOOL_IMPL.pdfeditor = {
       }
       if(lastEditNote){ body.appendChild(el(`<div class="note" style="margin-bottom:8px;">${lastEditNote}</div>`)); }
       if(!pageData) pageData = await loadPageData(curPage);
-      const wrap = el(`<div style="position:relative; width:100%; max-width:${pageData.canvas.width}px; margin:0 auto; border:1px solid var(--line); border-radius:8px; overflow:hidden; touch-action:none;"></div>`);
+      const scroller = el(`<div style="width:100%; overflow:auto; -webkit-overflow-scrolling:touch;"></div>`);
+      const wrap = el(`<div style="position:relative; width:${Math.round(zoom*100)}%; max-width:${Math.round(pageData.canvas.width*zoom)}px; margin:0 auto; border:1px solid var(--line); border-radius:8px; overflow:hidden; touch-action:${tool==='draw'?'none':'pan-x pan-y pinch-zoom'}; box-shadow:0 2px 10px rgba(0,0,0,.08);"></div>`);
+      scroller.appendChild(wrap);
       const canvasEl = document.createElement('canvas');
       canvasEl.width = pageData.canvas.width; canvasEl.height = pageData.canvas.height;
       canvasEl.style.cssText = 'width:100%; display:block;';
@@ -12250,7 +12428,7 @@ TOOL_IMPL.pdfeditor = {
       // on the canvas to size text correctly (see fontSizeToPx) — and a
       // detached element always reports zero width/height, which made every
       // text element render at 0px font-size, i.e. completely invisible.
-      body.appendChild(wrap);
+      body.appendChild(scroller);
 
       // Clickable overlays over existing text runs, for "edit existing text" —
       // subtly highlighted on hover so it's clear this text is editable
@@ -12258,10 +12436,10 @@ TOOL_IMPL.pdfeditor = {
       // left no visual cue that clicking here does anything).
       if(tool==='select'){
         pageData.items.forEach((it,idx)=>{
-          const hit = el(`<div data-existing-text-idx="${idx}" style="position:absolute; left:${(it.x/pageData.canvas.width)*100}%; top:${(it.y/pageData.canvas.height)*100}%; width:${(it.w/pageData.canvas.width)*100}%; height:${(it.h/pageData.canvas.height)*100}%; cursor:text; transition:background-color 0.1s;"></div>`);
+          const hit = el(`<div data-existing-text-idx="${idx}" title="Click to edit this text" style="position:absolute; left:${(it.x/pageData.canvas.width)*100}%; top:${(it.y/pageData.canvas.height)*100}%; width:${(it.w/pageData.canvas.width)*100}%; height:${(it.h/pageData.canvas.height)*100}%; cursor:text; transition:background-color 0.1s; border-radius:2px; ${showEditable?'outline:1px dashed rgba(21,101,192,.35);':''}"></div>`);
           hit.onmouseenter = ()=>{ hit.style.backgroundColor = 'rgba(21,101,192,0.15)'; };
           hit.onmouseleave = ()=>{ hit.style.backgroundColor = 'transparent'; };
-          hit.onclick = (ev)=>{ ev.stopPropagation(); editExistingText(it); };
+          hit.onclick = (ev)=>{ ev.stopPropagation(); if(Date.now()-lastCommitAt < 350) return; inlineEditExisting(it, wrap); };
           wrap.appendChild(hit);
         });
       }
@@ -12269,8 +12447,10 @@ TOOL_IMPL.pdfeditor = {
       // Render placed elements
       (elementsByPage[curPage]||[]).forEach(e=>{ if(e.type!=='textedit') wrap.appendChild(renderElementDom(e)); });
 
+      if(tool==='draw') mountDrawLayer(wrap);
       wrap.addEventListener('click', (ev)=>{
         if(ev.target !== canvasEl) return; // clicked on an element/hit-zone, not raw canvas
+        if(Date.now()-lastCommitAt < 350) return; // that click only closed the open text box
         const rect = wrap.getBoundingClientRect();
         const x = (ev.clientX-rect.left) * (pageData.canvas.width/rect.width);
         const y = (ev.clientY-rect.top) * (pageData.canvas.height/rect.height);
@@ -12284,7 +12464,137 @@ TOOL_IMPL.pdfeditor = {
       body.appendChild(row);
     }
 
-    function editExistingText(item){
+    // ---------- live, on-the-page editing (UPDATE_67) ----------
+    function cssFamily(fam, kind){
+      const f = (fam||'').toLowerCase(), k = kind || (/mono|courier|consol/.test(f) ? 'mono' : (/serif|times|roman|georgia|garamond|cambria|book/.test(f) && !/sans/.test(f)) ? 'serif' : 'sans');
+      return k==='mono' ? "'Courier New',Courier,monospace,'Noto Sans Tamil'" : k==='serif' ? "'Times New Roman',Times,serif,'Noto Sans Tamil'" : "Arial,Helvetica,'Noto Sans Tamil',sans-serif";
+    }
+    function displayScale(){ return currentCanvasEl ? currentCanvasEl.getBoundingClientRect().width / pageData.canvas.width : 1; }
+    // Puts an editable box ON the page (same place, size, font look, colour) with a small floating toolbar.
+    // opts: {x,y,w,h, text, fontPx, family, bold, italic, color, bg, multiline, extras(toolbar), onCommit(text), onCancel()}
+    function openInlineEditor(wrap, o){
+      if(liveEditor){ try{ liveEditor.commit(); }catch(e){} }
+      const W = pageData.canvas.width, H = pageData.canvas.height, ds0 = displayScale();
+      // on a small phone screen the page text can be ~7px: the typing box grows to at least 15px so it is readable,
+      // the PDF itself still gets the original size
+      const ds = Math.max(ds0, 15 / Math.max(1, o.fontPx));
+      const box = el(`<div contenteditable="true" spellcheck="false" style="position:absolute; z-index:30; left:${o.x/W*100}%; top:${o.y/H*100}%; min-width:${Math.max(24, o.w*ds)}px; min-height:${Math.max(10, o.h*ds)}px;
+        line-height:${Math.max(10, o.h*ds)}px; font-size:${o.fontPx*ds}px; font-family:${o.family}; font-weight:${o.bold?700:400}; font-style:${o.italic?'italic':'normal'};
+        color:${o.color||'#000'}; background:${o.bg||'#fff'}; white-space:pre; outline:2px solid #1565C0; outline-offset:1px; border-radius:2px; padding:0 1px; cursor:text; caret-color:#1565C0;"></div>`);
+      box.textContent = o.text || '';
+      const bar = el(`<div style="position:absolute; z-index:31; display:flex; gap:4px; align-items:center; flex-wrap:wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,.18); font-size:12px;"></div>`);
+      const below = o.y < 46/ds0;
+      bar.style.left = Math.min(o.x/W*100, 60) + '%';
+      if(below) bar.style.top = `calc(${(o.y+o.h)/H*100}% + 8px)`; else bar.style.bottom = `calc(${(1 - o.y/H)*100}% + 6px)`;
+      const ok = el(`<button style="padding:5px 10px; border:none; border-radius:7px; background:var(--brand-dark); color:#fff; font-weight:800; cursor:pointer;">✓ Done</button>`);
+      const no = el(`<button style="padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:#fff; cursor:pointer;">✕</button>`);
+      bar.appendChild(ok); bar.appendChild(no);
+      (o.extras||[]).forEach(x=> bar.appendChild(x));
+      wrap.appendChild(box); wrap.appendChild(bar);
+      let done = false;
+      const cleanup = ()=>{ document.removeEventListener('pointerdown', outside, true); box.remove(); bar.remove(); if(liveEditor && liveEditor.box===box) liveEditor = null; };
+      const commit = ()=>{ if(done) return; done = true; lastCommitAt = Date.now(); const t = box.innerText.replace(/ /g,' ').replace(/\n$/,''); cleanup(); o.onCommit(o.multiline ? t : t.replace(/\s*\n\s*/g,' ')); };
+      const cancel = ()=>{ if(done) return; done = true; lastCommitAt = Date.now(); cleanup(); if(o.onCancel) o.onCancel(); };
+      const outside = (ev)=>{ if(box.contains(ev.target) || bar.contains(ev.target)) return; commit(); };
+      setTimeout(()=> document.addEventListener('pointerdown', outside, true), 0);
+      box.addEventListener('keydown', (ev)=>{
+        if(ev.key==='Escape'){ ev.preventDefault(); cancel(); }
+        else if(ev.key==='Enter' && !(o.multiline && ev.shiftKey)){ ev.preventDefault(); commit(); }
+        ev.stopPropagation();
+      });
+      box.addEventListener('paste', (ev)=>{ ev.preventDefault(); const t = (ev.clipboardData||window.clipboardData).getData('text'); document.execCommand('insertText', false, t); });
+      ok.onclick = (ev)=>{ ev.stopPropagation(); commit(); };
+      no.onclick = (ev)=>{ ev.stopPropagation(); cancel(); };
+      liveEditor = { box, commit, cancel, cleanup };
+      box.focus();
+      try{ const r = document.createRange(); r.selectNodeContents(box); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }catch(e){}
+      try{ box.scrollIntoView({ block:'nearest', inline:'nearest' }); }catch(e){}
+      return liveEditor;
+    }
+    function autoAlignFor(item){
+      const pw = pageData.canvas.width, cx = item.x + item.w/2;
+      return Math.abs(cx - pw/2) < pw*0.04 ? 'center' : (item.x > pw*0.5 && item.x + item.w > pw*0.72) ? 'right' : 'left';
+    }
+    async function commitExistingEdit(item, newText, align, color){
+      newText = String(newText||'').replace(/\s*\n\s*/g,' ');
+      if(newText === item.str && (color||item.color) === item.color) return;
+      snapshotForUndo();
+      newEl({ type:'textedit', seq: ++editSeq, item: item.user, newText, align, color: color || item.color, bg: item.bg, bold: !!item.bold, italic: !!item.italic, fontFamily: item.fontFamily });
+      await paintEditor();
+      const mine = allTextEdits().pop();
+      lastEditNote = !mine ? '' : mine.status === 'same' ? '✅ Changed in the PDF\'s own font, size and colour.'
+        : mine.status === 'substitute' ? '✅ Changed. The PDF\'s font does not contain some of these letters, so a close standard font is used for this text.'
+        : mine.status === 'cover' ? '⚠️ This text is drawn in a special way inside the PDF, so it was covered with its background colour and the new text written on top.' : '';
+      await paintEditor();
+    }
+    function inlineEditExisting(item, wrap){
+      let align = autoAlignFor(item), color = item.color || '#000000';
+      const aSel = el(`<select title="Keep aligned" style="padding:4px; border:1px solid var(--line); border-radius:7px; font-size:12px;"><option value="left">⇤ Left</option><option value="center">↔ Centre</option><option value="right">⇥ Right</option></select>`);
+      aSel.value = align; aSel.onchange = ()=>{ align = aSel.value; };
+      const cIn = el(`<input type="color" title="Colour" value="${color}" style="width:28px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0; cursor:pointer;">`);
+      let ed;
+      cIn.oninput = ()=>{ color = cIn.value; if(ed) ed.box.style.color = color; };
+      const del = el(`<button title="Delete this text" style="padding:5px 8px; border:1px solid var(--line); border-radius:7px; background:#fff; color:#B3261E; cursor:pointer;">🗑️</button>`);
+      const ai = el(`<button title="AI: translate / improve (1 credit)" style="padding:5px 8px; border:1px solid var(--line); border-radius:7px; background:#fff; cursor:pointer;">🤖 AI</button>`);
+      ed = openInlineEditor(wrap, { x:item.x, y:item.y, w:item.w, h:item.h, text:item.str, fontPx:item.fontSize, family:cssFamily(item.fontFamily+' '+item.fontName), bold:item.bold, italic:item.italic,
+        color, bg:item.bg, extras:[aSel, cIn, del, ai], onCommit:(t)=> commitExistingEdit(item, t, align, color) });
+      del.onclick = (ev)=>{ ev.stopPropagation(); ed.cleanup(); commitExistingEdit(item, '', align, color); };
+      ai.onclick = (ev)=>{ ev.stopPropagation(); const cur = ed.box.innerText; ed.cleanup(); editExistingText(item, cur); };
+    }
+    function textBoxSize(text, fontSize){
+      const lines = String(text).split('\n'), longest = lines.reduce((m,l)=> Math.max(m, l.length), 1);
+      return { w: Math.max(40, longest*fontSize*0.56 + 6), h: lines.length*fontSize*1.25 };
+    }
+    function inlineNewText(x, y){
+      const wrap = currentCanvasEl.parentElement, fs = newTextSize*scale;
+      openInlineEditor(wrap, { x, y: y - fs*0.9, w: 60, h: fs*1.25, text:'', fontPx: fs, family: cssFamily('', newTextFont), color:newTextColor, bg:'rgba(255,255,255,0.0)', multiline:true,
+        onCommit:(t)=>{
+          if(!t.trim()){ paintEditor(); return; }
+          snapshotForUndo();
+          const sz = textBoxSize(t, fs);
+          const e = newEl({ type:'text', x, y: y - fs*0.9, w: sz.w, h: sz.h, text: t, fontSize: fs, color: newTextColor, font: newTextFont });
+          selectedId = e.id; paintEditor();
+        } });
+    }
+    function inlineEditPlaced(e){
+      const wrap = currentCanvasEl.parentElement;
+      openInlineEditor(wrap, { x:e.x, y:e.y, w:e.w, h:e.fontSize*1.25, text:e.text, fontPx:e.fontSize, family: cssFamily('', e.font), bold:e.bold, color:e.color, bg:'rgba(255,255,255,0.85)', multiline:true,
+        onCommit:(t)=>{
+          if(t === e.text){ paintEditor(); return; }
+          snapshotForUndo();
+          if(!t.trim()){ elementsByPage[curPage] = (elementsByPage[curPage]||[]).filter(x=>x.id!==e.id); selectedId = null; paintEditor(); return; }
+          e.text = t; const sz = textBoxSize(t, e.fontSize); e.w = Math.max(e.w, sz.w); e.h = sz.h; paintEditor();
+        } });
+    }
+    // freehand pen: strokes are drawn live on a layer over the page; each finished stroke becomes a movable transparent image
+    function mountDrawLayer(wrap){
+      const W = pageData.canvas.width, H = pageData.canvas.height;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      c.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; z-index:20; cursor:crosshair; touch-action:none;';
+      wrap.appendChild(c);
+      const g = c.getContext('2d'); let pts = null;
+      const pos = (ev)=>{ const r = c.getBoundingClientRect(); return [ (ev.clientX-r.left)*W/r.width, (ev.clientY-r.top)*H/r.height ]; };
+      c.addEventListener('pointerdown', (ev)=>{ ev.preventDefault(); try{ c.setPointerCapture(ev.pointerId); }catch(e){} pts = [pos(ev)]; g.lineCap='round'; g.lineJoin='round'; g.strokeStyle = penColor; g.lineWidth = penWidth*scale; });
+      c.addEventListener('pointermove', (ev)=>{ if(!pts) return; const p = pos(ev), q = pts[pts.length-1]; pts.push(p); g.beginPath(); g.moveTo(q[0],q[1]); g.lineTo(p[0],p[1]); g.stroke(); });
+      const end = ()=>{
+        if(!pts) return; const list = pts; pts = null;
+        if(list.length < 2){ g.clearRect(0,0,W,H); return; }
+        const lw = penWidth*scale, xs = list.map(p=>p[0]), ys = list.map(p=>p[1]);
+        const x0 = Math.max(0, Math.min(...xs)-lw), y0 = Math.max(0, Math.min(...ys)-lw), x1 = Math.min(W, Math.max(...xs)+lw), y1 = Math.min(H, Math.max(...ys)+lw);
+        const out = document.createElement('canvas'), k = 2; out.width = Math.max(2, Math.ceil((x1-x0)*k)); out.height = Math.max(2, Math.ceil((y1-y0)*k));
+        const o = out.getContext('2d'); o.scale(k,k); o.lineCap='round'; o.lineJoin='round'; o.strokeStyle = penColor; o.lineWidth = lw;
+        o.beginPath(); o.moveTo(list[0][0]-x0, list[0][1]-y0); list.slice(1).forEach(p=> o.lineTo(p[0]-x0, p[1]-y0)); o.stroke();
+        snapshotForUndo();
+        newEl({ type:'image', x:x0, y:y0, w:x1-x0, h:y1-y0, src: out.toDataURL('image/png'), drawn:true });
+        g.clearRect(0,0,W,H);
+        // add the stroke under the layer without a full repaint, so the next stroke can start at once
+        const last = elementsByPage[curPage][elementsByPage[curPage].length-1];
+        wrap.insertBefore(renderElementDom(last), c);
+      };
+      c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+    }
+
+    function editExistingText(item, startText){
       // default alignment: text that ends near the right side of the page (a value column) stays right-aligned,
       // text centred on the page stays centred — so a shorter/longer new value keeps the original layout
       const pw = pageData.canvas.width, cx = item.x + item.w/2;
@@ -12293,7 +12603,7 @@ TOOL_IMPL.pdfeditor = {
         <div style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
           <div style="background:#fff; border-radius:14px; padding:18px; width:min(92vw,420px); max-height:85vh; overflow-y:auto;">
             <div style="font-weight:800; margin-bottom:10px;">Edit Text</div>
-            <textarea id="editTextArea" rows="3" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; margin-bottom:10px;">${escapeHtml(item.str)}</textarea>
+            <textarea id="editTextArea" rows="3" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; margin-bottom:10px;">${escapeHtml(startText!=null ? startText : item.str)}</textarea>
             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; font-size:12px; color:var(--sub);">
               <span>Keep aligned:</span>
               <select id="editAlign" style="padding:5px 8px; border:1px solid var(--line); border-radius:6px; font-size:12.5px;">
@@ -12326,18 +12636,8 @@ TOOL_IMPL.pdfeditor = {
       const alignSel = overlay.querySelector('#editAlign'); alignSel.value = autoAlign;
       const statusEl = overlay.querySelector('#editAiStatus');
       async function applyText(newText){
-        newText = String(newText||'').replace(/\s*\n\s*/g,' ');
-        if(newText !== item.str){
-          snapshotForUndo();
-          newEl({ type:'textedit', seq: ++editSeq, item: item.user, newText, align: alignSel.value, color: colorInput.value, bg: item.bg, bold: !!item.bold, italic: !!item.italic, fontFamily: item.fontFamily });
-        }
         overlay.remove();
-        await paintEditor();
-        const mine = allTextEdits().pop();
-        lastEditNote = !mine ? '' : mine.status === 'same' ? '✅ Changed in the PDF\'s own font, size and colour.'
-          : mine.status === 'substitute' ? '✅ Changed. The PDF\'s font does not contain some of these letters, so a close standard font is used for this text.'
-          : mine.status === 'cover' ? '⚠️ This text is drawn in a special way inside the PDF, so it was covered with its background colour and the new text written on top.' : '';
-        await paintEditor();
+        await commitExistingEdit(item, newText, alignSel.value, colorInput.value);
       }
       overlay.querySelector('#editManualBtn').onclick = ()=> applyText(textarea.value);
       overlay.querySelector('#editCancelBtn').onclick = ()=> overlay.remove();
@@ -12371,7 +12671,15 @@ TOOL_IMPL.pdfeditor = {
 
     function handleCanvasClick(x,y){
       if(tool==='text'){
-        mountNewTextModal(x,y);
+        inlineNewText(x,y);
+      } else if(tool==='highlight'){
+        snapshotForUndo();
+        selectedId = newEl({ type:'highlight', x:x-60, y:y-12, w:120, h:24, color:'#FFEB3B' }).id;
+        paintEditor();
+      } else if(tool==='check' || tool==='cross'){
+        snapshotForUndo();
+        selectedId = newEl({ type:'mark', mark: tool, x:x-14, y:y-14, w:28, h:28, color: tool==='check' ? '#1B5E20' : '#B71C1C' }).id;
+        paintEditor();
       } else if(tool==='whiteout'){
         snapshotForUndo();
         newEl({ type:'whiteout', x:x-40, y:y-12, w:80, h:24 });
@@ -12486,7 +12794,9 @@ TOOL_IMPL.pdfeditor = {
       const isSelected = selectedId===e.id;
       const wrapStyle = `position:absolute; left:${pct(e.x,'width')}%; top:${pct(e.y,'height')}%; width:${pct(e.w,'width')}%; height:${pct(e.h,'height')}%; cursor:move; border:${isSelected?'2px dashed #1565C0':'none'}; touch-action:none;`;
       let inner;
-      if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${fontSizeToPx(e.fontSize)}px; color:${e.color}; font-weight:${e.bold?900:600}; white-space:nowrap; overflow:hidden; display:flex; align-items:center;">${escapeHtml(e.text)}</div>`);
+      if(e.type==='text') inner = el(`<div style="${wrapStyle} font-size:${fontSizeToPx(e.fontSize)}px; line-height:1.25; font-family:${cssFamily('', e.font)}; color:${e.color}; font-weight:${e.bold?700:400}; white-space:pre; overflow:visible;">${escapeHtml(e.text)}</div>`);
+      else if(e.type==='highlight') inner = el(`<div style="${wrapStyle} background:${e.color}; opacity:.4; mix-blend-mode:multiply;"></div>`);
+      else if(e.type==='mark') inner = el(`<div style="${wrapStyle}"><svg viewBox="0 0 10 10" preserveAspectRatio="none" style="width:100%; height:100%; pointer-events:none;">${e.mark==='check' ? `<polyline points="1,5.5 4,8.5 9,1.5" fill="none" stroke="${e.color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>` : `<path d="M1.5,1.5 L8.5,8.5 M8.5,1.5 L1.5,8.5" stroke="${e.color}" stroke-width="1.4" stroke-linecap="round"/>`}</svg></div>`);
       else if(e.type==='image') inner = el(`<div style="${wrapStyle}"><img src="${e.src}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;"></div>`);
       else if(e.type==='whiteout') inner = el(`<div style="${wrapStyle} background:#fff; border:1px dashed #B0B0B0;"></div>`);
       else if(e.type==='shape'){
@@ -12561,6 +12871,7 @@ TOOL_IMPL.pdfeditor = {
       inner.addEventListener('pointerup', endDrag);
       inner.addEventListener('pointercancel', endDrag);
       inner.onclick = (ev)=>{ ev.stopPropagation(); }; // selection already handled on pointerdown; suppress the extra click-triggered repaint from firing a second time
+      if(e.type==='text') inner.ondblclick = (ev)=>{ ev.stopPropagation(); inlineEditPlaced(e); };
 
       if(!isSelected) return inner;
 
@@ -12625,7 +12936,7 @@ TOOL_IMPL.pdfeditor = {
         // start from the PDF itself (with the real text edits already applied) — pages stay vector, text stays selectable
         if(editsSig() !== builtSig){ await buildEdited(); builtSig = editsSig(); }
         const outDoc = await PDFDocument.load((editedBytes || origBytes).slice(0), { ignoreEncryption:true });
-        let font = null;
+        let font = null, droppedChars = false;
         const srcDoc = renderDoc || pdfjsDoc;
         for(let pn=1; pn<=numPages; pn++){
           const els = (elementsByPage[pn] || []).filter(e=>e.type!=='textedit');
@@ -12639,16 +12950,34 @@ TOOL_IMPL.pdfeditor = {
             const bl = P(e.x, e.y+e.h), pw = e.w/scale, ph = e.h/scale;
             if(e.type==='whiteout'){
               page.drawRectangle({x:bl[0],y:bl[1],width:pw,height:ph,color:rgb(1,1,1),rotate:rot});
+            } else if(e.type==='highlight'){
+              page.drawRectangle({x:bl[0],y:bl[1],width:pw,height:ph,color:hexToRgb(e.color||'#FFEB3B'),opacity:0.4,rotate:rot});
+            } else if(e.type==='mark'){
+              const c = hexToRgb(e.color||'#000000'), th = Math.max(1, Math.min(pw,ph)*0.14);
+              const segs = e.mark==='check' ? [[0.1,0.55,0.4,0.85],[0.4,0.85,0.9,0.15]] : [[0.15,0.15,0.85,0.85],[0.85,0.15,0.15,0.85]];
+              segs.forEach(([ax,ay,bx,by])=>{ const a = P(e.x+e.w*ax, e.y+e.h*ay), b = P(e.x+e.w*bx, e.y+e.h*by); page.drawLine({start:{x:a[0],y:a[1]}, end:{x:b[0],y:b[1]}, thickness:th, color:c, lineCap: 1}); });
             } else if(e.type==='text'){
-              if(!font) font = await embedUnicodeFont(outDoc);
-              const textColor = hexToRgb(e.color);
-              const base = P(e.x, e.y + e.h*0.8), size = e.fontSize/scale;
-              page.drawText(e.text, {x:base[0], y:base[1], size, font, color:textColor, rotate:rot});
-              if(e.bold){
-                // faux bold: the same text again, a hairline to the side (no separate bold font file needed)
-                const b2 = P(e.x + 0.6, e.y + e.h*0.8);
-                page.drawText(e.text, {x:b2[0], y:b2[1], size, font, color:textColor, rotate:rot});
-              }
+              const textColor = hexToRgb(e.color), size = e.fontSize/scale;
+              let useFont, fakeBold = !!e.bold;
+              const lines = String(e.text).split('\n');
+              if((e.font==='serif' || e.font==='mono') && lines.every(l=> LATIN1_OK.test(l))){
+                const key = e.font==='mono' ? (e.bold?'CourierBold':'Courier') : (e.bold?'TimesRomanBold':'TimesRoman');
+                if(!embeddedFontCache['std:'+key]) embeddedFontCache['std:'+key] = await outDoc.embedFont(StandardFonts[key]);
+                useFont = embeddedFontCache['std:'+key]; fakeBold = false;
+              } else { if(!font) font = await embedUnicodeFont(outDoc); useFont = font; }
+              let charset = null; try{ charset = new Set(useFont.getCharacterSet()); }catch(err){}
+              lines.forEach((ln, li)=>{
+                // drop symbols the font has no letter shape for (they would print as empty boxes); ✔ ✖ have their own tools
+                if(charset){ const kept = [...ln].filter(ch=> ch===' ' || charset.has(ch.codePointAt(0))); if(kept.length !== [...ln].length) droppedChars = true; ln = kept.join(''); }
+                if(!ln.trim()) return;
+                const base = P(e.x, e.y + e.fontSize*(li*1.25 + 0.95));
+                page.drawText(ln, {x:base[0], y:base[1], size, font:useFont, color:textColor, rotate:rot});
+                if(fakeBold){
+                  // faux bold: the same text again, a hairline to the side (no separate bold font file needed)
+                  const b2 = P(e.x + 0.6, e.y + e.fontSize*(li*1.25 + 0.95));
+                  page.drawText(ln, {x:b2[0], y:b2[1], size, font:useFont, color:textColor, rotate:rot});
+                }
+              });
             } else if(e.type==='image'){
               const imgBytes = await (await fetch(e.src)).arrayBuffer();
               const isJpeg = e.src.startsWith('data:image/jpeg');
@@ -12666,7 +12995,7 @@ TOOL_IMPL.pdfeditor = {
         const bytes = await outDoc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-edited.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Edited PDF downloaded.');
+        mountResult(body, 'Edited PDF downloaded.' + (droppedChars ? ' (Some symbols such as ✓ are not in the font and were left out — use the ✔ Tick / ✖ Cross tools for marks.)' : ''));
       }catch(err){ prog.remove(); mountResult(body,'Error: '+escapeHtml(err.message||String(err))).style.background='#FDEDEC'; }
     }
     function hexToRgb(hex){ const n=parseInt(hex.replace('#',''),16); return rgb(((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255); }
