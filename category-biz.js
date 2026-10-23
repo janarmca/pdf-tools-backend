@@ -4,7 +4,7 @@
  *   stampmaker  — rubber-stamp artwork: round / rectangle / oval, real size in mm, mirror image for the stamp maker
  *   woodcalc    — carpenter: timber cft, round log, plywood sheets needed, area and cost, feet-inch ↔ cm
  *   tripcalc    — driver / taxi trip bill with minimum km, waiting, night batta, toll; bill picture + WhatsApp text
- *   shopslip    — token / delivery slip picture (laundry, tailor, repair shop, photo lab) with running token number
+ *   shopslip    — order book for 12 trades: item-wise orders (5 pants, 3 shirts…), own rates, token slip, ready/deliver with count check, payments, tailor measurements, today summary
  *   wamsg       — ready-made WhatsApp messages for customers (order ready, payment due, festival wishes …)
  *   profitcalc  — cost → selling price, margin vs markup, GST-inclusive price, break-even units
  * Host globals: TOOL_IMPL, downloadBlob, escapeHtml (optional), __appLang (optional).
@@ -78,6 +78,23 @@
     return { km: km, billKm: billKm, minApplied: minKm > km, fare: fare, wait: wait, batta: batta, other: other, sub: sub, tax: tax, total: total, due: due };
   }
 
+  function tripFare(o) { // mode: km (per km with minimum) | local (hours+km package) | fixed (airport / drop fixed price)
+    if (!o.mode || o.mode === 'km') return tripBill(o);
+    const km = Math.max(0, n0(o.endKm) - n0(o.startKm)), days = Math.max(1, Math.round(n0(o.days) || 1));
+    let fare, exHr = 0, exKm = 0;
+    if (o.mode === 'local') {
+      exHr = round2(Math.max(0, n0(o.hours) - n0(o.pkgHours))); exKm = round2(Math.max(0, km - n0(o.pkgKm)));
+      fare = round2(n0(o.pkgPrice) + exHr * n0(o.extraHrRate) + exKm * n0(o.extraKmRate));
+    } else fare = round2(n0(o.fixedPrice));
+    const wait = round2(n0(o.waitHours) * n0(o.waitRate)), batta = round2(n0(o.battaPerDay) * days);
+    const other = round2(n0(o.toll) + n0(o.parking) + n0(o.permit) + n0(o.other));
+    const sub = round2(fare + wait + batta + other), tax = round2(sub * n0(o.gstPct) / 100), total = round2(sub + tax);
+    return { km: km, billKm: km, minApplied: false, exHr: exHr, exKm: exKm, fare: fare, wait: wait, batta: batta, other: other, sub: sub, tax: tax, total: total, due: round2(total - n0(o.advance)) };
+  }
+  function cutListRaw(rows) { return (rows || []).reduce((a, r) => { const L = num(r.len), W = num(r.wid), H = num(r.thk); return L > 0 && W > 0 && H > 0 ? a + L * W * H / 144 * (num(r.qty) > 0 ? num(r.qty) : 1) : a; }, 0); }
+  function cutListCft(rows) { return Math.round(cutListRaw(rows) * 1000) / 1000; } // sum the exact volumes first, round once at the end
+  function cutListCost(rows, rate) { return round2(cutListRaw(rows) * n0(rate)); } // cost from the exact volume, not the rounded cft
+
   // --- profit
   function priceFromCost(cost, marginPct) { // margin on selling price
     const m = n0(marginPct) / 100; if (m >= 1) return NaN; return round2(n0(cost) / (1 - m));
@@ -142,11 +159,116 @@
     { id: 'blank', ta: 'காலி (நானே எழுதுவேன்)', en: 'Blank', items: ['', '', '', '', ''] }
   ];
 
+  // --- order book (shopslip): trade profiles. Item names "தமிழ் / English"; rates are always typed by the owner (never preset).
+  const TRADES = [
+    { id: 'laundry', icon: '👕', ta: 'சலவை / இஸ்திரி / ட்ரை கிளீன்', en: 'Laundry, ironing & dry clean', express: true,
+      svc: ['சலவை + இஸ்திரி / Wash & iron', 'இஸ்திரி மட்டும் / Iron only', 'ட்ரை கிளீன் / Dry clean', 'கஞ்சி / Starch', 'ரோல் பிரஸ் / Roll press', 'சாயம் / Dye'],
+      items: ['சட்டை / Shirt', 'பேன்ட் / Pant', 'டி-ஷர்ட் / T-shirt', 'வேட்டி / Dhoti', 'புடவை / Saree', 'பட்டுப் புடவை / Silk saree', 'சுடிதார் செட் / Churidar set', 'நைட்டி / Nightie', 'குழந்தை உடை / Kids wear', 'யூனிஃபார்ம் / Uniform', 'கோட் / Coat', 'போர்வை / Bedsheet', 'தலையணை உறை / Pillow cover', 'கம்பளி / Blanket', 'திரைச்சீலை / Curtain', 'துண்டு / Towel'],
+      fields: [] },
+    { id: 'tailor', icon: '🧵', ta: 'தையல் கடை', en: 'Tailor', measure: true,
+      svc: ['தையல் / Stitching', 'லைனிங் உடன் / With lining', 'ஆல்டரேஷன் / Alteration', 'ஆரி / எம்ப்ராய்டரி / Aari work', 'ஃபால்ஸ் + பிக்கோ / Fall & pico'],
+      items: ['ரவிக்கை / Blouse', 'சுடிதார் / Churidar', 'சல்வார் / Salwar', 'குர்தி / Kurti', 'பாவாடை / Skirt', 'நைட்டி / Nightie', 'குழந்தை ஃப்ராக் / Kids frock', 'சட்டை / Shirt', 'பேன்ட் / Pant', 'ஸ்கூல் யூனிஃபார்ம் / School uniform', 'புடவை / Saree'],
+      fields: [['trial', 'ட்ரயல் தேதி / Trial date', 'date'], ['fabric', 'துணி விவரம் (நிறம், அளவு) / Fabric details', 'text']] },
+    { id: 'repair', icon: '📱', ta: 'மொபைல் / எலக்ட்ரானிக்ஸ் பழுது', en: 'Mobile & electronics repair',
+      svc: ['பழுது / Repair', 'உதிரிபாகம் / Part', 'சர்வீஸ் / Service', 'சோதனைக் கட்டணம் / Check-up'],
+      items: ['திரை / Screen', 'பேட்டரி / Battery', 'சார்ஜிங் போர்ட் / Charging port', 'ஸ்பீக்கர் / மைக் / Speaker / Mic', 'சாஃப்ட்வேர் / Software', 'தண்ணீர் சேதம் / Water damage', 'கேமரா / Camera', 'பின் கவர் / Back panel', 'டிவி / TV', 'மிக்ஸி / Mixie', 'ஃபேன் / Fan'],
+      fields: [['device', 'சாதனம் (பிராண்ட், மாடல்) / Device (brand, model)', 'text'], ['serial', 'IMEI / Serial எண்', 'text'], ['problem', 'என்ன பிரச்சனை / Problem', 'text'],
+        ['acc', 'பெற்ற பொருட்கள் / Received with', 'checks', ['சார்ஜர் / Charger', 'பேட்டரி / Battery', 'SIM', 'மெமரி கார்டு / Memory card', 'கவர் / Cover', 'பெட்டி / Box']], ['warranty', 'வாரண்டி (நாட்கள்) / Warranty (days)', 'num']],
+      hint: 'பூட்டு கடவுச்சொல் / PIN-ஐ இங்கே எழுத வேண்டாம். / Do not write the lock PIN or password here.' },
+    { id: 'vehicle', icon: '🛵', ta: 'வண்டி மெக்கானிக்', en: 'Two-wheeler / car mechanic',
+      svc: ['உழைப்புக் கூலி / Labour', 'உதிரிபாகம் / Part', 'ஆயில் / Oil'],
+      items: ['ஜெனரல் சர்வீஸ் / General service', 'இன்ஜின் ஆயில் / Engine oil', 'பிரேக் ஷூ / Brake shoe', 'கிளட்ச் பிளேட் / Clutch plate', 'செயின் செட் / Chain set', 'டயர் / Tyre', 'டியூப் / Tube', 'பஞ்சர் / Puncture', 'பேட்டரி / Battery', 'வாஷ் / Wash'],
+      fields: [['vno', 'வண்டி எண் / Vehicle no.', 'text'], ['km', 'கி.மீ ரீடிங் / Odometer km', 'num'], ['problem', 'புகார் / Complaint', 'text'], ['next', 'அடுத்த சர்வீஸ் தேதி / Next service', 'date']] },
+    { id: 'photo', icon: '📸', ta: 'போட்டோ / வீடியோ ஸ்டுடியோ', en: 'Photo & video studio',
+      svc: ['போட்டோ / Photo', 'வீடியோ / Video', 'ஆல்பம் / Album', 'டிரோன் / Drone', 'LED / Live', 'பிரிண்ட் / Print'],
+      items: ['திருமணம் / Wedding', 'நிச்சயதார்த்தம் / Engagement', 'வரவேற்பு / Reception', 'காதணி விழா / Ear-piercing function', 'பூப்புனித நீராட்டு / Puberty function', 'பிறந்தநாள் / Birthday', 'அவுட்டோர் ஷூட் / Outdoor shoot', 'பாஸ்போர்ட் போட்டோ / Passport photo', 'ஆல்பம் பக்கம் / Album page', 'ஃப்ரேம் / Frame'],
+      fields: [['edate', 'நிகழ்ச்சி தேதி / Event date', 'date'], ['etime', 'நேரம் / Time', 'time'], ['venue', 'இடம் / மண்டபம் / Venue', 'text']],
+      dueLabel: 'ஆல்பம் / வீடியோ கொடுக்கும் தேதி / Album delivery date' },
+    { id: 'flower', icon: '🌼', ta: 'பூக்கடை', en: 'Flower shop',
+      svc: ['முழம் / Per muzham', 'மாலை / Garland', 'கொத்து / Bouquet', 'அலங்காரம் / Decoration'],
+      items: ['மல்லிகை / Jasmine', 'முல்லை / Mullai', 'கனகாம்பரம் / Kanakambaram', 'ரோஜா / Rose', 'சம்பங்கி / Sampangi', 'மணமாலை ஜோடி / Wedding garland pair', 'சாமி மாலை / Temple garland', 'பூங்கொத்து / Bouquet', 'கார் அலங்காரம் / Car decoration', 'மேடை அலங்காரம் / Stage decoration'],
+      fields: [['dtime', 'கொடுக்கும் நேரம் / Delivery time', 'time'], ['addr', 'முகவரி / Address', 'text'], ['occ', 'நிகழ்ச்சி / Occasion', 'text']] },
+    { id: 'catering', icon: '🍛', ta: 'கேட்டரிங் / மெஸ் ஆர்டர்', en: 'Catering & mess orders',
+      svc: ['ஒரு இலைக்கு / Per plate', 'பார்சல் / Parcel', 'கிலோ / Per kg', 'சேவை / Service'],
+      items: ['சைவச் சாப்பாடு / Veg meals', 'அசைவச் சாப்பாடு / Non-veg meals', 'காலை டிஃபன் / Breakfast', 'பிரியாணி / Biryani', 'இனிப்பு / Sweet', 'தண்ணீர் பாட்டில் / Water bottle', 'பரிமாறும் ஆட்கள் / Serving staff', 'பாத்திர வாடகை / Vessel rent'],
+      fields: [['edate', 'நிகழ்ச்சி தேதி / Event date', 'date'], ['etime', 'நேரம் / Time', 'time'], ['venue', 'இடம் / Venue', 'text']] },
+    { id: 'service', icon: '🔧', ta: 'எலக்ட்ரீஷியன் / பிளம்பர் / AC', en: 'Electrician, plumber & AC service',
+      svc: ['உழைப்புக் கூலி / Labour', 'பொருள் / Material', 'வருகைக் கட்டணம் / Visit charge'],
+      items: ['ஃபேன் பொருத்துதல் / Fan fitting', 'லைட் பாயிண்ட் / Light point', 'சுவிட்ச் போர்டு / Switch board', 'வயரிங் / Wiring', 'மோட்டார் பழுது / Motor repair', 'குழாய் / Tap fitting', 'பைப் லைன் / Pipe line', 'AC சர்வீஸ் / AC service', 'கேஸ் நிரப்புதல் / Gas refill', 'இன்வெர்ட்டர் / Inverter'],
+      fields: [['addr', 'வேலை செய்யும் இடம் / Site address', 'text'], ['vdate', 'வருகை தேதி / Visit date', 'date'], ['warranty', 'வாரண்டி (நாட்கள்) / Warranty (days)', 'num']] },
+    { id: 'carpenter', icon: '🪚', ta: 'தச்சு / ஃபர்னிச்சர் ஆர்டர்', en: 'Carpentry & furniture orders',
+      svc: ['கூலி மட்டும் / Labour only', 'பொருளுடன் / With material', 'பாலிஷ் / Polish'],
+      items: ['கதவு / Door', 'ஜன்னல் / Window', 'கட்டில் / Cot', 'அலமாரி / Wardrobe', 'சமையலறை அலமாரி / Kitchen cabinet', 'மேஜை / Table', 'நாற்காலி பழுது / Chair repair', 'பூஜை அலமாரி / Pooja shelf'],
+      fields: [['size', 'அளவு, மர வகை / Size & wood', 'text'], ['addr', 'இடம் / Site', 'text']] },
+    { id: 'print', icon: '🖨️', ta: 'ஸ்டாம்ப் / அச்சகம்', en: 'Stamps & printing',
+      svc: ['ரப்பர் / Rubber', 'Self-ink', 'அச்சு / Print', 'டிசைன் / Design'],
+      items: ['வட்ட ஸ்டாம்ப் / Round stamp', 'செவ்வக ஸ்டாம்ப் / Rectangle stamp', 'தேதி ஸ்டாம்ப் / Date stamp', 'விசிட்டிங் கார்டு / Visiting card', 'பில் புக் / Bill book', 'லெட்டர்ஹெட் / Letterhead', 'ஃப்ளெக்ஸ் (ச.அடி) / Flex (sq.ft)', 'அழைப்பிதழ் / Invitation'],
+      fields: [['text', 'அச்சிட வேண்டிய வாசகம் / Text to print', 'text'], ['proof', 'Proof', 'checks', ['அனுப்பியது / Sent', 'சரி என்றார்கள் / Approved']]],
+      hint: 'அரசு, நீதிமன்றம், வங்கி அல்லது பிறர் முத்திரையைச் செய்ய ஆர்டர் எடுக்க வேண்டாம் — அது குற்றம். / Never take orders to copy a government, court, bank or someone else\'s seal.' },
+    { id: 'salon', icon: '💇', ta: 'அழகு நிலையம் / முன்பதிவு', en: 'Salon & bridal bookings',
+      svc: ['சேவை / Service', 'பேக்கேஜ் / Package', 'வீட்டிற்கு வந்து / Home visit'],
+      items: ['முடி வெட்டு / Haircut', 'ஷேவ் / Shave', 'ஃபேஷியல் / Facial', 'த்ரெட்டிங் / Threading', 'ஹேர் கலர் / Hair colour', 'மணமகள் ஒப்பனை / Bridal makeup', 'மெஹந்தி / Mehndi', 'புடவை கட்டுதல் / Saree draping'],
+      fields: [['bdate', 'முன்பதிவு தேதி / Booking date', 'date'], ['btime', 'நேரம் / Time', 'time']] },
+    { id: 'general', icon: '🏪', ta: 'மற்ற தொழில் (நானே எழுதுவேன்)', en: 'Any other trade',
+      svc: ['பொருள் / Item', 'சேவை / Service'], items: [], fields: [] }
+  ];
+  const MEASURES = {
+    blouse: { ta: 'ரவிக்கை / Blouse', f: ['நீளம் / Length', 'தோள் / Shoulder', 'மார்பு / Chest', 'இடுப்பு / Waist', 'கை நீளம் / Sleeve length', 'கை சுற்று / Sleeve round', 'ஆர்ம் ஹோல் / Armhole', 'முன் கழுத்து / Front neck', 'பின் கழுத்து / Back neck', 'பாயிண்ட் / Point'] },
+    churidar: { ta: 'சுடிதார் மேல் / Churidar top', f: ['நீளம் / Length', 'தோள் / Shoulder', 'மார்பு / Chest', 'இடுப்பு / Waist', 'ஹிப் / Hip', 'ஸ்லிட் / Slit', 'கை நீளம் / Sleeve length', 'கை சுற்று / Sleeve round', 'முன் கழுத்து / Front neck', 'பின் கழுத்து / Back neck'] },
+    bottom: { ta: 'கீழ் உடை / Bottom', f: ['நீளம் / Length', 'இடுப்பு / Waist', 'ஹிப் / Hip', 'தொடை / Thigh', 'முட்டி / Knee', 'கணுக்கால் / Ankle'] },
+    shirt: { ta: 'சட்டை / Shirt', f: ['நீளம் / Length', 'தோள் / Shoulder', 'மார்பு / Chest', 'இடுப்பு / Waist', 'கை நீளம் / Sleeve', 'கஃப் / Cuff', 'காலர் / Collar'] },
+    pant: { ta: 'பேன்ட் / Pant', f: ['நீளம் / Length', 'இடுப்பு / Waist', 'ஹிப் / Seat', 'தொடை / Thigh', 'முட்டி / Knee', 'அடி / Bottom', 'ஃபோர்க் / Fork'] }
+  };
+  function addDaysIso(iso, n) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); if (!m) return '';
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + (n || 0)));
+    return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+  }
+  const lineAmt = l => round2(n0(num(l.q)) * n0(num(l.r)));
+  function orderCalc(o) {
+    const lines = (o.l || []).filter(l => String(l.n || '').trim());
+    const sub = round2(lines.reduce((a, l) => a + lineAmt(l), 0));
+    const pcs = round2(lines.reduce((a, l) => a + n0(num(l.q)), 0));
+    const ex = round2(sub * n0(num(o.ex)) / 100), dis = round2(n0(num(o.dis)));
+    const total = round2(Math.max(0, sub + ex - dis));
+    const paid = round2((o.pay || []).reduce((a, p) => a + n0(num(p.a)), 0));
+    return { sub: sub, ex: ex, dis: dis, total: total, paid: paid, bal: round2(total - paid), pcs: pcs, lines: lines.length };
+  }
+  function itemSummary(o, en) {
+    const pick = s => { const p = String(s || '').split(' / '); return (en ? p[1] || p[0] : p[0]).trim(); };
+    const map = {};
+    (o.l || []).filter(l => String(l.n || '').trim()).forEach(l => { const k = pick(l.n); map[k] = round2((map[k] || 0) + n0(num(l.q))); });
+    return Object.keys(map).map(k => k + ' ×' + fmtNum(map[k], 2)).join(', ');
+  }
+  function isOverdue(o, today) { return (o.st === 'open' || o.st === 'ready') && !!o.due && o.due < today; }
+  function dayStats(orders, iso) {
+    const s = { orders: 0, pcs: 0, billed: 0, cash: 0, upi: 0, dueToday: 0, overdue: 0, readyWaiting: 0, toCollect: 0 };
+    (orders || []).forEach(o => {
+      if (o.st === 'cancel') return;
+      const c = orderCalc(o);
+      if (o.d === iso) { s.orders++; s.pcs += c.pcs; s.billed += c.total; }
+      (o.pay || []).forEach(p => { if (p.d === iso) { if (p.m === 'upi') s.upi += n0(num(p.a)); else s.cash += n0(num(p.a)); } });
+      if ((o.st === 'open' || o.st === 'ready') && o.due === iso) s.dueToday++;
+      if (isOverdue(o, iso)) s.overdue++;
+      if (o.st === 'ready') s.readyWaiting++;
+      if (o.st !== 'done' && c.bal > 0.004) s.toCollect += c.bal;
+    });
+    ['pcs', 'billed', 'cash', 'upi', 'toCollect'].forEach(k => { s[k] = round2(s[k]); });
+    return s;
+  }
+  const ST_LABEL = { open: ['வேலையில் உள்ளது', 'In progress'], ready: ['தயார்', 'Ready'], done: ['கொடுத்தாயிற்று', 'Delivered'], cancel: ['ரத்து', 'Cancelled'] };
+  function ordersCsv(orders) {
+    const rows = [['Token', 'Date', 'Customer', 'Phone', 'Items', 'Pieces/qty', 'Total', 'Paid', 'Balance', 'Due date', 'Status']];
+    (orders || []).forEach(o => { const c = orderCalc(o); rows.push([o.tok, o.d, (o.c || {}).n || '', (o.c || {}).ph || '', itemSummary(o, true), c.pcs, c.total, c.paid, c.bal, o.due || '', (ST_LABEL[o.st] || ['', o.st])[1]]); });
+    return rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+  }
+
   window.BizCore = {
     num: num, inr: inr, balanceOf: balanceOf, khataTotals: khataTotals, khataCsv: khataCsv,
     timberCft: timberCft, roundLogCft: roundLogCft, sheetsNeeded: sheetsNeeded, ftInToCm: ftInToCm, cmToFtIn: cmToFtIn,
-    tripBill: tripBill, priceFromCost: priceFromCost, priceFromMarkup: priceFromMarkup, profitOf: profitOf, withGst: withGst, withoutGst: withoutGst, breakEven: breakEven,
-    waNumber: waNumber, waLink: waLink, fillTemplate: fillTemplate, graphemes: graphemes, mmToPx: mmToPx, nextToken: nextToken, MESSAGES: MESSAGES, PRESETS: PRESETS
+    tripBill: tripBill, tripFare: tripFare, cutListCft: cutListCft, cutListCost: cutListCost, priceFromCost: priceFromCost, priceFromMarkup: priceFromMarkup, profitOf: profitOf, withGst: withGst, withoutGst: withoutGst, breakEven: breakEven,
+    waNumber: waNumber, waLink: waLink, fillTemplate: fillTemplate, graphemes: graphemes, mmToPx: mmToPx, nextToken: nextToken, MESSAGES: MESSAGES, PRESETS: PRESETS,
+    TRADES: TRADES, MEASURES: MEASURES, addDaysIso: addDaysIso, lineAmt: lineAmt, orderCalc: orderCalc, itemSummary: itemSummary, isOverdue: isOverdue, dayStats: dayStats, ordersCsv: ordersCsv
   };
   if (typeof TOOL_IMPL === 'undefined') return;
 
@@ -207,6 +329,17 @@
   .bz-chk{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;font-weight:700;cursor:pointer}.bz-chk input{width:22px;height:22px;flex:0 0 22px}
   .bz-ent{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
   .bz-ent:last-child{border-bottom:0}
+  .bz-ol{border:1.5px solid var(--line);border-radius:14px;padding:10px;background:#fff;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .bz-ol .full{grid-column:1/-1}.bz-ol input,.bz-ol select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:12px;padding:6px 10px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+        .bz-qty{display:grid;grid-template-columns:44px 1fr 44px;gap:6px}.bz-qty button{min-height:44px;border:0;border-radius:12px;background:var(--chip);font-size:22px;font-weight:900;cursor:pointer;color:var(--ink)}
+        .bz-ol .amt{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:900}
+        .bz-badge{display:inline-block;min-width:22px;padding:0 6px;border-radius:11px;background:var(--brand);color:#fff;font-size:12px;line-height:22px;text-align:center;margin-left:6px}
+        .bz-card{border:1.5px solid var(--line);border-radius:14px;background:#fff;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;font-family:inherit;font-size:14.5px;color:var(--ink);cursor:pointer}
+        .bz-card b{font-size:15.5px}.bz-card small{display:block;color:var(--sub);font-weight:600;margin-top:2px}
+        .bz-st{display:inline-block;border-radius:10px;padding:2px 8px;font-size:12px;font-weight:800;background:var(--chip)}.bz-st.ready{background:#E3F6EC;color:#176B45}.bz-st.done{background:#EEF0F3;color:#566070}.bz-st.late{background:#FDEDEC;color:#9B2C20}
+        .bz-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.bz-stat{border:1.5px solid var(--line);border-radius:14px;padding:12px;background:#fff}.bz-stat b{display:block;font-size:22px}.bz-stat span{font-size:12.5px;color:var(--sub);font-weight:700}
+        .bz-det{border:1.5px solid var(--line);border-radius:14px;background:#fff;margin-top:8px}.bz-det summary{padding:12px 14px;font-weight:800;cursor:pointer;min-height:44px}.bz-det .in{padding:0 14px 12px}
+        .bz-chk2{display:flex;flex-wrap:wrap;gap:8px}.bz-chk2 label{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:12px;padding:6px 10px;min-height:44px;font-size:14px;font-weight:700}
   @media (max-width:420px){.bz-grid.three{grid-template-columns:1fr 1fr}.bz-item{grid-template-columns:1fr 92px 44px}}`;
   function makeRoot(body) {
     if (!document.getElementById('bz-style')) { const s = document.createElement('style'); s.id = 'bz-style'; s.textContent = CSS; document.head.appendChild(s); }
@@ -514,25 +647,36 @@
           tabs([['timber', T('பலகை cft', 'Timber cft')], ['log', T('உருளை மரம்', 'Round log')], ['ply', T('பிளைவுட்', 'Plywood')], ['conv', T('அடி ↔ செ.மீ', 'ft-in ↔ cm')]], S.tab) + '<div data-k="pane"></div><div data-k="out"></div>';
         $$(root, '[data-tab]').forEach(b => { b.onclick = () => { S.tab = b.getAttribute('data-tab'); draw(); }; });
         const pane = $(root, '[data-k=pane]');
-        if (S.tab === 'timber') pane.innerHTML = '<div class="bz-grid three">' + field(T('நீளம் (அடி)', 'Length (ft)'), 'len', S.len) + field(T('அகலம் (அங்குலம்)', 'Width (in)'), 'wid', S.wid) + field(T('கனம் (அங்குலம்)', 'Thickness (in)'), 'thk', S.thk) + '</div><div class="bz-grid">' + field(T('எண்ணிக்கை', 'Pieces'), 'qty', S.qty) + field(T('1 cft விலை (₹)', 'Rate per cft (₹)'), 'rate', S.rate) + '</div>';
+        if (!Array.isArray(S.rows) || !S.rows.length) S.rows = [{ nm: '', len: S.len || '', wid: S.wid || '', thk: S.thk || '', qty: S.qty || '1' }];
+        if (S.tab === 'timber') {
+          pane.innerHTML = '<div class="bz-info">' + T('கதவு, ஜன்னல், கட்டில் — ஒவ்வொரு அளவுக்கும் ஒரு வரி (நீளம் அடி × அகலம் அங் × கனம் அங் × எண்ணிக்கை). மொத்த cft கீழே.', 'One row per size (length ft × width in × thickness in × pieces). Total cft below.') + '</div>' +
+            S.rows.map((r, i) => '<div class="bz-ol" style="margin-top:8px"><input class="full" type="text" data-ri="' + i + '" data-rf="nm" value="' + esc(r.nm || '') + '" placeholder="' + esc(T('எதற்கு (எ.கா. கதவு சட்டம்)', 'For (e.g. door frame)')) + '">' +
+              ['len', 'wid', 'thk', 'qty'].map(f => '<div class="bz-f" style="margin:0"><label>' + { len: T('நீளம் (அடி)', 'Length (ft)'), wid: T('அகலம் (அங்)', 'Width (in)'), thk: T('கனம் (அங்)', 'Thick (in)'), qty: T('எண்ணிக்கை', 'Pieces') }[f] + '</label><input type="text" inputmode="decimal" data-ri="' + i + '" data-rf="' + f + '" value="' + esc(r[f] || '') + '"></div>').join('') +
+              '<div class="amt full"><span data-rcft="' + i + '">' + fmtNum(timberCft(num(r.len), num(r.wid), num(r.thk), num(r.qty) || 1), 3) + ' cft</span><button type="button" class="bz-x" data-rrm="' + i + '" aria-label="remove">✕</button></div></div>').join('') +
+            '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="addr">➕ ' + T('வரி சேர்', 'Add row') + '</button></div><div class="bz-grid one">' + field(T('1 cft விலை (₹)', 'Rate per cft (₹)'), 'rate', S.rate) + '</div>';
+          $$(pane, '[data-rf]').forEach(inp => inp.addEventListener('input', () => { const i = +inp.getAttribute('data-ri'), r = S.rows[i]; r[inp.getAttribute('data-rf')] = inp.value; lsSet(KEY, S); const sp = $(pane, '[data-rcft="' + i + '"]'); if (sp) sp.textContent = fmtNum(timberCft(num(r.len), num(r.wid), num(r.thk), num(r.qty) || 1), 3) + ' cft'; calc(); }));
+          $$(pane, '[data-rrm]').forEach(b => { b.onclick = () => { S.rows.splice(+b.getAttribute('data-rrm'), 1); lsSet(KEY, S); draw(); }; });
+          $(pane, '[data-act=addr]').onclick = () => { S.rows.push({ nm: '', len: '', wid: '', thk: '', qty: '1' }); lsSet(KEY, S); draw(); };
+        }
         else if (S.tab === 'log') pane.innerHTML = '<div class="bz-grid">' + field(T('சுற்றளவு (அங்குலம்)', 'Girth (in)'), 'girth', S.girth) + field(T('நீளம் (அடி)', 'Length (ft)'), 'rlen', S.rlen) + '</div><div class="bz-grid one">' + field(T('1 cft விலை (₹)', 'Rate per cft (₹)'), 'rate', S.rate) + '</div>';
         else if (S.tab === 'ply') pane.innerHTML = '<div class="bz-grid">' + field(T('மொத்தப் பரப்பு (சதுர அடி)', 'Total area (sq.ft)'), 'area', S.area) + field(T('வீணாகும் % (வெட்டும்போது)', 'Wastage %'), 'waste', S.waste) + field(T('ஷீட் அகலம் (அடி)', 'Sheet width (ft)'), 'sw', S.sw) + field(T('ஷீட் நீளம் (அடி)', 'Sheet length (ft)'), 'sl', S.sl) + '</div><div class="bz-grid one">' + field(T('1 ஷீட் விலை (₹)', 'Price per sheet (₹)'), 'prate', S.prate) + '</div>';
         else pane.innerHTML = '<div class="bz-grid">' + field(T('அடி', 'Feet'), 'ft', S.ft) + field(T('அங்குலம்', 'Inches'), 'inch', S.inch) + '</div><div class="bz-grid one">' + field(T('அல்லது செ.மீ', 'or centimetres'), 'cm', S.cm) + '</div><div class="bz-grid">' + field(T('பரப்பு (சதுர அடி) — விலை கணக்கிட', 'Area (sq.ft) for costing'), 'ar', S.ar) + field(T('1 சதுர அடி விலை (₹)', 'Rate per sq.ft (₹)'), 'arate', S.arate) + '</div>';
-        bindInputs(pane, (k, v) => { S[k] = v; lsSet(KEY, S); calc(); });
+        bindInputs(pane, (k, v) => { if (k == null) return; S[k] = v; lsSet(KEY, S); calc(); });
         calc();
       }
       function calc() {
         const out = $(root, '[data-k=out]'), P = k => num(S[k]);
         if (S.tab === 'timber') {
-          const L = P('len'), Wd = P('wid'), Th = P('thk'), q = P('qty') || 1, r = P('rate');
-          if (!(L > 0 && Wd > 0 && Th > 0)) { out.innerHTML = '<div class="bz-info">' + T('நீளம், அகலம், கனம் எழுதுங்கள்.', 'Enter length, width and thickness.') + '</div>'; return; }
-          const c = timberCft(L, Wd, Th, q);
-          out.innerHTML = resCard(T('மொத்தம்', 'Total'), fmtNum(c, 3) + ' cft', r > 0 ? T('விலை ', 'Cost ') + inr(c * r) : '', 'ok') + '<div class="bz-info">' + T('சூத்திரம்: நீளம்(அடி) × அகலம்(அங்) × கனம்(அங்) ÷ 144. ஒரு பலகை = ', 'Formula: length(ft) × width(in) × thickness(in) ÷ 144. One piece = ') + fmtNum(timberCft(L, Wd, Th, 1), 3) + ' cft</div>';
+          const c = cutListCft(S.rows), r = P('rate');
+          if (!(c > 0)) { out.innerHTML = '<div class="bz-info">' + T('நீளம், அகலம், கனம் எழுதுங்கள்.', 'Enter length, width and thickness.') + '</div>'; return; }
+          const lines = S.rows.filter(x => num(x.len) > 0 && num(x.wid) > 0 && num(x.thk) > 0).map(x => [esc((x.nm || '').trim() || (x.len + "' × " + x.wid + '" × ' + x.thk + '"')) + ' × ' + esc(String(num(x.qty) || 1)), fmtNum(timberCft(num(x.len), num(x.wid), num(x.thk), num(x.qty) || 1), 3) + ' cft']);
+          out.innerHTML = resCard(T('மொத்தம்', 'Total'), fmtNum(c, 3) + ' cft', r > 0 ? T('விலை ', 'Cost ') + inr(cutListCost(S.rows, r)) : '', 'ok') + table(lines.concat([[T('மொத்தம்', 'Total'), fmtNum(c, 3) + ' cft', true]]).concat(r > 0 ? [[T('விலை', 'Cost') + ' (' + inr(r) + ' / cft)', inr(cutListCost(S.rows, r)), true]] : [])) +
+            '<div class="bz-info">' + T('சூத்திரம்: நீளம்(அடி) × அகலம்(அங்) × கனம்(அங்) ÷ 144 × எண்ணிக்கை.', 'Formula: length(ft) × width(in) × thickness(in) ÷ 144 × pieces.') + '</div>';
         } else if (S.tab === 'log') {
           const g = P('girth'), L = P('rlen'), r = P('rate');
           if (!(g > 0 && L > 0)) { out.innerHTML = '<div class="bz-info">' + T('சுற்றளவும் நீளமும் எழுதுங்கள்.', 'Enter girth and length.') + '</div>'; return; }
           const c = roundLogCft(g, L);
-          out.innerHTML = resCard(T('மர அளவு', 'Log volume'), fmtNum(c, 3) + ' cft', r > 0 ? T('விலை ', 'Cost ') + inr(c * r) : '', 'ok') + '<div class="bz-info">' + T('கால்-சுற்றளவு முறை: (சுற்றளவு ÷ 4)² × நீளம் ÷ 144. மரக்கடையில் அவர்கள் பயன்படுத்தும் முறையைச் சரிபார்த்துக்கொள்ளுங்கள்.', 'Quarter-girth rule: (girth ÷ 4)² × length ÷ 144. Check which rule your timber depot uses.') + '</div>';
+          out.innerHTML = resCard(T('மர அளவு', 'Log volume'), fmtNum(c, 3) + ' cft', r > 0 ? T('விலை ', 'Cost ') + inr(round2((g / 4) * (g / 4) * L / 144 * r)) : '', 'ok') + '<div class="bz-info">' + T('கால்-சுற்றளவு முறை: (சுற்றளவு ÷ 4)² × நீளம் ÷ 144. மரக்கடையில் அவர்கள் பயன்படுத்தும் முறையைச் சரிபார்த்துக்கொள்ளுங்கள்.', 'Quarter-girth rule: (girth ÷ 4)² × length ÷ 144. Check which rule your timber depot uses.') + '</div>';
         } else if (S.tab === 'ply') {
           const a = P('area'), sw = P('sw'), sl = P('sl'), w = P('waste') || 0, pr = P('prate');
           if (!(a > 0 && sw > 0 && sl > 0)) { out.innerHTML = '<div class="bz-info">' + T('பரப்பு, ஷீட் அளவு எழுதுங்கள்.', 'Enter the area and sheet size.') + '</div>'; return; }
@@ -553,41 +697,71 @@
   /* ===================================================================== 5. tripcalc — driver / taxi trip bill */
   TOOL_IMPL.tripcalc = {
     mount(body) {
-      const root = makeRoot(body), KEY = 'bz_trip_v1';
-      const S = Object.assign({ owner: '', phone: '', veh: '', cust: '', route: '', date: todayIso(), startKm: '', endKm: '', days: '1', ratePerKm: '', minKmPerDay: '', waitHours: '', waitRate: '', battaPerDay: '', toll: '', parking: '', permit: '', other: '', gstPct: '', advance: '' }, lsGet(KEY, {}));
-      let cv = null, last = null;
+      const root = makeRoot(body), KEY = 'bz_trip_v1', LOG = 'bz_triplog_v1';
+      const S = Object.assign({ mode: 'km', owner: '', phone: '', veh: '', cust: '', cphone: '', route: '', date: todayIso(), startKm: '', endKm: '', days: '1', ratePerKm: '', minKmPerDay: '', hours: '', pkgHours: '8', pkgKm: '80', pkgPrice: '', extraHrRate: '', extraKmRate: '', fixedPrice: '', waitHours: '', waitRate: '', battaPerDay: '', toll: '', parking: '', permit: '', other: '', gstPct: '', advance: '' }, lsGet(KEY, {}));
+      let log = lsGet(LOG, []); if (!Array.isArray(log)) log = [];
+      let cv = null, flash = '', cur = null;
       function draw() {
-        root.innerHTML = purpose('வாடகை வாகன ஓட்டுநர்களுக்கு: ஓடிய கி.மீ, குறைந்தபட்ச கி.மீ, காத்திருப்பு, இரவு பேட்டா, டோல் எல்லாம் சேர்த்து பயணக் கட்டணம் — படமாகவோ WhatsApp செய்தியாகவோ கொடுக்கலாம்.',
-          'For taxi and rental drivers: km run, minimum km, waiting, night batta and toll added into one trip bill — share as a picture or WhatsApp text.') +
-          '<div class="bz-grid">' + textField(T('உரிமையாளர் / ஓட்டுநர் பெயர்', 'Owner / driver'), 'owner', S.owner) + field(T('போன்', 'Phone'), 'phone', S.phone, { mode: 'tel' }) + textField(T('வாகன எண்', 'Vehicle no.'), 'veh', S.veh) + textField(T('வாடிக்கையாளர்', 'Customer'), 'cust', S.cust) + textField(T('பயணம் (இருந்து — வரை)', 'Route (from — to)'), 'route', S.route) + field(T('தேதி', 'Date'), 'date', S.date, { type: 'date', mode: 'text' }) + '</div>' +
-          '<div class="bz-h">' + T('ஓடிய தூரம்', 'Distance') + '</div><div class="bz-grid three">' + field(T('தொடக்க கி.மீ', 'Start km'), 'startKm', S.startKm) + field(T('முடிவு கி.மீ', 'End km'), 'endKm', S.endKm) + field(T('நாட்கள்', 'Days'), 'days', S.days) + '</div>' +
-          '<div class="bz-h">' + T('கட்டண விகிதம்', 'Rates') + '</div><div class="bz-grid three">' + field(T('1 கி.மீ (₹)', 'Per km (₹)'), 'ratePerKm', S.ratePerKm) + field(T('குறைந்தபட்ச கி.மீ / நாள்', 'Min km / day'), 'minKmPerDay', S.minKmPerDay) + field(T('இரவு பேட்டா / நாள் (₹)', 'Night batta / day'), 'battaPerDay', S.battaPerDay) + field(T('காத்திருப்பு (மணி)', 'Waiting (hours)'), 'waitHours', S.waitHours) + field(T('காத்திருப்பு ₹ / மணி', 'Waiting ₹ / hour'), 'waitRate', S.waitRate) + field('GST %', 'gstPct', S.gstPct) + '</div>' +
-          '<div class="bz-h">' + T('மற்ற செலவுகள்', 'Other charges') + '</div><div class="bz-grid three">' + field('Toll (₹)', 'toll', S.toll) + field('Parking (₹)', 'parking', S.parking) + field('Permit (₹)', 'permit', S.permit) + field(T('மற்றவை (₹)', 'Other (₹)'), 'other', S.other) + field(T('முன்பணம் (₹)', 'Advance (₹)'), 'advance', S.advance) + '</div>' +
-          '<div data-k="out"></div><canvas class="bz-canvas" data-k="cv" hidden></canvas><div class="bz-actions" data-k="acts" hidden></div>';
-        cv = $(root, '[data-k=cv]');
-        bindInputs(root, (k, v) => { S[k] = v; lsSet(KEY, S); calc(); });
+        const M = S.mode;
+        root.innerHTML = purpose('வாடகை வாகன ஓட்டுநர்களுக்கு: கி.மீ கணக்கு, உள்ளூர் பேக்கேஜ் (8 மணி / 80 கி.மீ போல), நிலையான கட்டணம் (ஏர்போர்ட், டிராப்) — காத்திருப்பு, பேட்டா, டோல் சேர்த்து பில்; பயணப் பதிவேட்டில் மாத மொத்தம்.',
+          'For taxi and rental drivers: per-km trips, local packages (like 8 hr / 80 km), fixed fares (airport, drop) — with waiting, batta and toll; trip diary with monthly totals.') +
+          tabs([['km', '🛣️ ' + T('கி.மீ கணக்கு', 'Per km')], ['local', '🕗 ' + T('உள்ளூர் பேக்கேஜ்', 'Local package')], ['fixed', '✈️ ' + T('நிலையான கட்டணம்', 'Fixed fare')], ['log', '📒 ' + T('பயணப் பதிவேடு', 'Trip diary') + (log.length ? ' (' + log.length + ')' : '')]], M) +
+          (flash ? '<div class="bz-msg">' + esc(flash) + '</div>' : '') + '<div data-k="pane"></div>';
+        $$(root, '[data-tab]').forEach(b => { b.onclick = () => { S.mode = b.getAttribute('data-tab'); flash = ''; lsSet(KEY, S); draw(); }; });
+        const pane = $(root, '[data-k=pane]');
+        if (M === 'log') return drawLog(pane);
+        pane.innerHTML = '<div class="bz-grid">' + textField(T('உரிமையாளர் / ஓட்டுநர் பெயர்', 'Owner / driver'), 'owner', S.owner) + field(T('போன்', 'Phone'), 'phone', S.phone, { mode: 'tel' }) + textField(T('வாகன எண்', 'Vehicle no.'), 'veh', S.veh) + field(T('தேதி', 'Date'), 'date', S.date, { type: 'date', mode: 'text' }) + textField(T('வாடிக்கையாளர்', 'Customer'), 'cust', S.cust) + field(T('வாடிக்கையாளர் போன்', 'Customer phone'), 'cphone', S.cphone, { mode: 'tel' }) + '</div><div class="bz-grid one">' + textField(T('பயணம் (இருந்து — வரை)', 'Route (from — to)'), 'route', S.route) + '</div>' +
+          (M === 'fixed' ? '<div class="bz-h">' + T('கட்டணம்', 'Fare') + '</div><div class="bz-grid">' + field(T('நிலையான கட்டணம் (₹)', 'Fixed fare (₹)'), 'fixedPrice', S.fixedPrice) + field(T('நாட்கள்', 'Days'), 'days', S.days) + '</div>'
+            : '<div class="bz-h">' + T('ஓடிய தூரம்', 'Distance') + '</div><div class="bz-grid three">' + field(T('தொடக்க கி.மீ', 'Start km'), 'startKm', S.startKm) + field(T('முடிவு கி.மீ', 'End km'), 'endKm', S.endKm) + (M === 'km' ? field(T('நாட்கள்', 'Days'), 'days', S.days) : field(T('மொத்த மணி நேரம்', 'Total hours'), 'hours', S.hours)) + '</div>' +
+              (M === 'km' ? '<div class="bz-h">' + T('கட்டண விகிதம்', 'Rates') + '</div><div class="bz-grid">' + field(T('1 கி.மீ (₹)', 'Per km (₹)'), 'ratePerKm', S.ratePerKm) + field(T('குறைந்தபட்ச கி.மீ / நாள்', 'Min km / day'), 'minKmPerDay', S.minKmPerDay) + '</div>'
+                : '<div class="bz-h">' + T('பேக்கேஜ்', 'Package') + '</div><div class="bz-grid three">' + field(T('பேக்கேஜ் மணி', 'Package hours'), 'pkgHours', S.pkgHours) + field(T('பேக்கேஜ் கி.மீ', 'Package km'), 'pkgKm', S.pkgKm) + field(T('பேக்கேஜ் விலை (₹)', 'Package price (₹)'), 'pkgPrice', S.pkgPrice) + field(T('கூடுதல் மணி ₹', 'Extra hour ₹'), 'extraHrRate', S.extraHrRate) + field(T('கூடுதல் கி.மீ ₹', 'Extra km ₹'), 'extraKmRate', S.extraKmRate) + field(T('நாட்கள்', 'Days'), 'days', S.days) + '</div>')) +
+          '<div class="bz-h">' + T('மற்ற கட்டணங்கள்', 'Other charges') + '</div><div class="bz-grid three">' + field(T('காத்திருப்பு (மணி)', 'Waiting (hours)'), 'waitHours', S.waitHours) + field(T('காத்திருப்பு ₹ / மணி', 'Waiting ₹ / hour'), 'waitRate', S.waitRate) + field(T('ஓட்டுநர் பேட்டா / நாள் (₹)', 'Driver batta / day'), 'battaPerDay', S.battaPerDay) + field('Toll (₹)', 'toll', S.toll) + field('Parking (₹)', 'parking', S.parking) + field(T('பர்மிட் / மாநில வரி (₹)', 'Permit / state tax (₹)'), 'permit', S.permit) + field(T('மற்றவை (₹)', 'Other (₹)'), 'other', S.other) + field('GST %', 'gstPct', S.gstPct) + field(T('முன்பணம் (₹)', 'Advance (₹)'), 'advance', S.advance) + '</div>' +
+          '<div data-k="out"></div><canvas class="bz-canvas" data-k="cv" hidden></canvas><div class="bz-actions" data-k="acts" hidden>' +
+          '<button type="button" class="bz-btn" data-act="dl">⬇️ ' + T('படம் (PNG)', 'Picture (PNG)') + '</button><button type="button" class="bz-btn sec" data-act="cp">📋 ' + T('செய்தி நகலெடு', 'Copy text') + '</button><a class="bz-btn green" data-k="wa" target="_blank" rel="noopener" href="#">💬 WhatsApp</a><button type="button" class="bz-btn sec" data-act="logit">📒 ' + T('பதிவேட்டில் சேர்', 'Save to diary') + '</button></div>' +
+          '<div class="bz-info">' + T('GST, பர்மிட் விகிதங்களை நாங்கள் நிர்ணயிக்கவில்லை — உங்களுக்குப் பொருந்துவதை நீங்களே எழுதுங்கள்.', 'We do not set GST or permit rates — type what applies to you.') + '</div>';
+        cv = $(pane, '[data-k=cv]');
+        $(pane, '[data-act=dl]').onclick = () => saveCanvas(cv, 'trip-bill.png');
+        $(pane, '[data-act=cp]').onclick = function () { if (cur) copyText(cur.txt, this); };
+        $(pane, '[data-act=logit]').onclick = function () { if (!cur) return; const r = cur.r; log.push({ id: uid(), d: S.date || todayIso(), cust: S.cust, route: S.route, veh: S.veh, km: S.mode === 'fixed' ? 0 : r.km, total: r.total, adv: num(S.advance) || 0, paid: false }); lsSet(LOG, log); this.textContent = '✓ ' + T('சேர்க்கப்பட்டது', 'Saved'); };
+        bindInputs(pane, (k, v) => { S[k] = v; lsSet(KEY, S); calc(); });
         calc();
       }
       function calc() {
-        const out = $(root, '[data-k=out]'), acts = $(root, '[data-k=acts]'), P = k => num(S[k]) || 0;
-        if (!(P('endKm') > P('startKm')) && !(P('minKmPerDay') > 0)) { out.innerHTML = '<div class="bz-info">' + T('தொடக்க, முடிவு கி.மீ மற்றும் ஒரு கி.மீ கட்டணத்தை எழுதுங்கள்.', 'Enter start km, end km and the rate per km.') + '</div>'; cv.hidden = true; acts.hidden = true; return; }
-        const r = tripBill({ startKm: P('startKm'), endKm: P('endKm'), days: P('days'), ratePerKm: P('ratePerKm'), minKmPerDay: P('minKmPerDay'), waitHours: P('waitHours'), waitRate: P('waitRate'), battaPerDay: P('battaPerDay'), toll: P('toll'), parking: P('parking'), permit: P('permit'), other: P('other'), gstPct: P('gstPct'), advance: P('advance') });
-        last = r;
-        const rows = [[T('ஓடிய தூரம்', 'Distance run'), fmtNum(r.km, 1) + ' km'], [T('கட்டணம் செலுத்தும் தூரம்', 'Billable km') + (r.minApplied ? ' (' + T('குறைந்தபட்சம்', 'minimum') + ')' : ''), fmtNum(r.billKm, 1) + ' km'], [T('வாடகை', 'Fare') + ' (' + fmtNum(r.billKm, 1) + ' × ' + inr(P('ratePerKm')) + ')', inr(r.fare)]];
-        if (r.wait) rows.push([T('காத்திருப்பு', 'Waiting'), inr(r.wait)]); if (r.batta) rows.push([T('இரவு பேட்டா', 'Night batta'), inr(r.batta)]); if (r.other) rows.push([T('டோல் / பார்க்கிங் / மற்றவை', 'Toll / parking / other'), inr(r.other)]);
+        const out = $(root, '[data-k=out]'), acts = $(root, '[data-k=acts]'), P = k => num(S[k]) || 0, M = S.mode;
+        const ready = M === 'fixed' ? P('fixedPrice') > 0 : M === 'local' ? P('pkgPrice') > 0 : (P('endKm') > P('startKm') || P('minKmPerDay') > 0) && P('ratePerKm') > 0;
+        if (!ready) { out.innerHTML = '<div class="bz-info">' + (M === 'fixed' ? T('நிலையான கட்டணத்தை எழுதுங்கள்.', 'Enter the fixed fare.') : M === 'local' ? T('பேக்கேஜ் விலை, ஓடிய கி.மீ, மணி நேரம் எழுதுங்கள்.', 'Enter the package price, km and hours.') : T('தொடக்க, முடிவு கி.மீ மற்றும் ஒரு கி.மீ கட்டணத்தை எழுதுங்கள்.', 'Enter start km, end km and the rate per km.')) + '</div>'; cv.hidden = true; acts.hidden = true; cur = null; return; }
+        const o = {}; Object.keys(S).forEach(k => { o[k] = k === 'mode' ? S.mode : P(k); });
+        const r = tripFare(o), rows = [];
+        if (M !== 'fixed') rows.push([T('ஓடிய தூரம்', 'Distance run'), fmtNum(r.km, 1) + ' km']);
+        if (M === 'km') { rows.push([T('கட்டணம் செலுத்தும் தூரம்', 'Billable km') + (r.minApplied ? ' (' + T('குறைந்தபட்சம்', 'minimum') + ')' : ''), fmtNum(r.billKm, 1) + ' km']); rows.push([T('வாடகை', 'Fare') + ' (' + fmtNum(r.billKm, 1) + ' × ' + inr(P('ratePerKm')) + ')', inr(r.fare)]); }
+        else if (M === 'local') { rows.push([T('பேக்கேஜ்', 'Package') + ' (' + fmtNum(P('pkgHours'), 1) + T(' மணி / ', ' hr / ') + fmtNum(P('pkgKm'), 0) + ' km)', inr(P('pkgPrice'))]); if (r.exHr) rows.push([T('கூடுதல் மணி', 'Extra hours') + ' (' + fmtNum(r.exHr, 2) + ' × ' + inr(P('extraHrRate')) + ')', inr(r.exHr * P('extraHrRate'))]); if (r.exKm) rows.push([T('கூடுதல் கி.மீ', 'Extra km') + ' (' + fmtNum(r.exKm, 1) + ' × ' + inr(P('extraKmRate')) + ')', inr(r.exKm * P('extraKmRate'))]); }
+        else rows.push([T('நிலையான கட்டணம்', 'Fixed fare'), inr(r.fare)]);
+        if (r.wait) rows.push([T('காத்திருப்பு', 'Waiting'), inr(r.wait)]); if (r.batta) rows.push([T('ஓட்டுநர் பேட்டா', 'Driver batta'), inr(r.batta)]); if (r.other) rows.push([T('டோல் / பார்க்கிங் / பர்மிட் / மற்றவை', 'Toll / parking / permit / other'), inr(r.other)]);
         if (r.tax) rows.push(['GST ' + fmtNum(P('gstPct'), 2) + '%', inr(r.tax)]);
         rows.push([T('மொத்தம்', 'Total'), inr(r.total), true]); if (P('advance')) { rows.push([T('முன்பணம்', 'Advance'), '− ' + inr(P('advance'))]); rows.push([T('செலுத்த வேண்டியது', 'Balance to pay'), inr(r.due), true]); }
-        out.innerHTML = resCard(P('advance') ? T('செலுத்த வேண்டியது', 'Balance to pay') : T('மொத்தக் கட்டணம்', 'Total bill'), inr(P('advance') ? r.due : r.total), fmtNum(r.billKm, 1) + ' km', 'ok') + table(rows);
+        out.innerHTML = resCard(P('advance') ? T('செலுத்த வேண்டியது', 'Balance to pay') : T('மொத்தக் கட்டணம்', 'Total bill'), inr(P('advance') ? r.due : r.total), M === 'fixed' ? '' : fmtNum(r.km, 1) + ' km', 'ok') + table(rows);
         acts.hidden = false; cv.hidden = false; paintBill(rows);
-        const txt = billText(rows);
-        acts.innerHTML = '<button type="button" class="bz-btn" data-act="dl">⬇️ ' + T('படம் (PNG)', 'Picture (PNG)') + '</button><button type="button" class="bz-btn sec" data-act="cp">📋 ' + T('செய்தி நகலெடு', 'Copy text') + '</button>' + waBtn('', txt, T('WhatsApp', 'WhatsApp'));
-        $(acts, '[data-act=dl]').onclick = () => saveCanvas(cv, 'trip-bill.png');
-        $(acts, '[data-act=cp]').onclick = function () { copyText(txt, this); };
+        const txt = billText(rows); cur = { r: r, txt: txt };
+        $(acts, '[data-k=wa]').href = waLink(S.cphone, txt);
+        const lg = $(acts, '[data-act=logit]'); if (lg.textContent.indexOf('✓') === 0) lg.textContent = '📒 ' + T('பதிவேட்டில் சேர்', 'Save to diary');
       }
       function billText(rows) {
         const L = [(S.owner || 'Trip bill') + (S.phone ? ' · ' + S.phone : ''), (S.veh ? S.veh + ' · ' : '') + dmy(S.date)];
         if (S.cust) L.push(T('வாடிக்கையாளர்', 'Customer') + ': ' + S.cust); if (S.route) L.push(S.route);
         rows.forEach(r => L.push(String(r[0]).replace(/<[^>]+>/g, '') + ': ' + String(r[1]))); return L.join('\n');
+      }
+      function drawLog(pane) {
+        const months = {};
+        log.forEach(x => { const m = String(x.d || '').slice(0, 7); months[m] = months[m] || { n: 0, km: 0, total: 0, pend: 0 }; months[m].n++; months[m].km += n0(x.km); months[m].total += n0(x.total); if (!x.paid) months[m].pend += round2(n0(x.total) - n0(x.adv)); });
+        const mk = Object.keys(months).sort().reverse();
+        pane.innerHTML = (log.length ? '' : '<div class="bz-info">' + T('பில் போட்ட பிறகு "📒 பதிவேட்டில் சேர்" தட்டினால் இங்கே வரும்.', 'After making a bill, tap "📒 Save to diary" and it appears here.') + '</div>') +
+          mk.map(m => table([[T('மாதம் ', 'Month ') + m, months[m].n + T(' பயணம்', ' trips'), true], [T('மொத்த கி.மீ', 'Total km'), fmtNum(months[m].km, 1) + ' km'], [T('மொத்த வருமானம்', 'Total billed'), inr(months[m].total)], [T('இன்னும் வர வேண்டியது', 'Still to collect'), inr(round2(months[m].pend))]])).join('') +
+          '<div class="bz-list">' + log.slice().sort((a, b) => String(b.d).localeCompare(String(a.d))).map(x => '<div class="bz-row" style="cursor:default"><span><b>' + esc(dmy(x.d)) + ' · ' + esc(x.cust || '') + '</b><small>' + esc(x.route || '') + (x.km ? ' · ' + fmtNum(x.km, 1) + ' km' : '') + '</small></span><span style="text-align:right"><span class="bz-amt ' + (x.paid ? 'adv' : 'owe') + '">' + inr(x.total) + '</span><br><button type="button" class="bz-btn sec sm" data-paid="' + x.id + '">' + (x.paid ? '✓ ' + T('பெற்றது', 'Paid') : T('பணம் வந்தது', 'Mark paid')) + '</button> <button type="button" class="bz-x" data-rm="' + x.id + '" aria-label="delete">✕</button></span></div>').join('') + '</div>' +
+          (log.length ? '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="csv">📊 Excel (.csv)</button></div>' : '');
+        $$(pane, '[data-paid]').forEach(b => { b.onclick = () => { const x = log.find(y => y.id === b.getAttribute('data-paid')); if (x) { x.paid = !x.paid; lsSet(LOG, log); drawLog(pane); } }; });
+        $$(pane, '[data-rm]').forEach(b => { b.onclick = () => { if (!window.confirm(T('இந்தப் பயணத்தை நீக்கவா?', 'Delete this trip?'))) return; log = log.filter(y => y.id !== b.getAttribute('data-rm')); lsSet(LOG, log); draw(); }; });
+        const c = $(pane, '[data-act=csv]');
+        if (c) c.onclick = () => { const rows = [['Date', 'Customer', 'Route', 'Vehicle', 'Km', 'Total', 'Advance', 'Paid']].concat(log.map(x => [x.d, x.cust, x.route, x.veh, x.km, x.total, x.adv, x.paid ? 'yes' : 'no'])); const b = new Blob(['﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }); if (typeof downloadBlob === 'function') downloadBlob(b, 'trip-diary-' + todayIso() + '.csv'); };
       }
       function paintBill(rows) {
         const W = 900, pad = 50, rowH = 64, head = 230, H = head + rows.length * rowH + 130, ctx = cv.getContext('2d');
@@ -609,71 +783,342 @@
     }
   };
 
-  /* ===================================================================== 6. shopslip — token / delivery slip */
+  /* ===================================================================== 6. shopslip — order book + token slip for every trade */
   TOOL_IMPL.shopslip = {
     mount(body) {
-      const root = makeRoot(body), KEY = 'bz_slip_v1';
-      const S = Object.assign({ shop: '', phone: '', token: 1, cust: '', cphone: '', due: '', advance: '', note: '', width: '576', items: [{ n: '', q: '1', r: '' }] }, lsGet(KEY, {}));
-      if (!Array.isArray(S.items) || !S.items.length) S.items = [{ n: '', q: '1', r: '' }];
-      let cv = null;
-      function layout() {
-        root.innerHTML = purpose('சலவை, தையல், பழுதுபார்ப்பு, போட்டோ லேப் போன்ற கடைகளுக்கு: டோக்கன் ரசீது — வாடிக்கையாளர் பெயர், பொருட்கள், முன்பணம், கொடுக்கும் தேதி. டோக்கன் எண் தானாக ஏறும்.',
-          'Token slip for laundry, tailor, repair and photo-lab shops — customer, items, advance, delivery date. The token number counts up by itself.') +
-          '<div class="bz-grid">' + textField(T('கடை பெயர்', 'Shop name'), 'shop', S.shop) + field(T('கடை போன்', 'Shop phone'), 'phone', S.phone, { mode: 'tel' }) + field(T('டோக்கன் எண்', 'Token no.'), 'token', S.token) + selectField(T('ரசீது அகலம்', 'Slip width'), 'width', [['384', '58 mm thermal'], ['576', '80 mm thermal'], ['800', T('போன் / WhatsApp படம்', 'Phone / WhatsApp picture')]], S.width) + textField(T('வாடிக்கையாளர் பெயர்', 'Customer'), 'cust', S.cust) + field(T('வாடிக்கையாளர் போன்', 'Customer phone'), 'cphone', S.cphone, { mode: 'tel' }) + field(T('கொடுக்கும் தேதி', 'Delivery date'), 'due', S.due, { type: 'date', mode: 'text' }) + field(T('முன்பணம் (₹)', 'Advance (₹)'), 'advance', S.advance) + '</div>' +
-          '<div class="bz-h">' + T('பொருட்கள்', 'Items') + '</div><div class="bz-items" data-k="items"></div><div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="addrow">➕ ' + T('வரி சேர்', 'Add row') + '</button></div>' +
-          '<div class="bz-grid one">' + textField(T('குறிப்பு', 'Note'), 'note', S.note) + '</div>' +
-          '<canvas class="bz-canvas" data-k="cv"></canvas><div data-k="tot"></div>' +
-          '<div class="bz-actions"><button type="button" class="bz-btn" data-act="dl">⬇️ ' + T('படம் (PNG)', 'Picture (PNG)') + '</button><button type="button" class="bz-btn green" data-act="next">➕ ' + T('அடுத்த டோக்கன்', 'Next token') + '</button><span data-k="wa"></span></div>' +
-          '<div class="bz-info">' + T('Thermal printer இருந்தால் PNG-ஐ அதன் app-ல் திறந்து அச்சிடலாம்.', 'With a thermal printer, open the PNG in its app and print.') + '</div>';
-        drawItems(); cv = $(root, '[data-k=cv]');
-        bindInputs(root, (k, v) => { if (k in S) { S[k] = k === 'token' ? (num(v) > 0 ? Math.floor(num(v)) : v) : v; persist(); paint(); } });
-        $(root, '[data-act=addrow]').onclick = () => { S.items.push({ n: '', q: '1', r: '' }); persist(); drawItems(); };
-        $(root, '[data-act=dl]').onclick = () => saveCanvas(cv, 'token-' + S.token + '.png');
-        $(root, '[data-act=next]').onclick = () => { S.token = nextToken(num(S.token)); S.cust = ''; S.cphone = ''; S.due = ''; S.advance = ''; S.note = ''; S.items = [{ n: '', q: '1', r: '' }]; persist(); layout(); };
-        paint();
+      const root = makeRoot(body), KEY = 'bz_orders_v1';
+      const D = { v: 1, prof: 'laundry', shop: { n: '', ph: '', ad: '' }, next: 1, width: '576', rates: {}, extra: {}, orders: [], cust: [] };
+      let db = Object.assign({}, D, lsGet(KEY, {}));
+      if (!Array.isArray(db.orders)) db.orders = []; if (!Array.isArray(db.cust)) db.cust = [];
+      if (!db.shop || typeof db.shop !== 'object') db.shop = { n: '', ph: '', ad: '' };
+      if (!db.rates || typeof db.rates !== 'object') db.rates = {}; if (!db.extra || typeof db.extra !== 'object') db.extra = {};
+      // carry over the old simple slip settings (UPDATE_69 first version)
+      const old = lsGet('bz_slip_v1', null);
+      if (old && !db.orders.length && !db.shop.n) { db.shop.n = old.shop || ''; db.shop.ph = old.phone || ''; db.next = Math.max(1, Math.floor(num(old.token)) || 1); db.width = String(old.width || '576'); }
+      let view = 'new', curId = null, filter = 'pending', q = '', flash = '', form = null, mType = 'blouse', mCust = null;
+      const save = () => { if (!lsSet(KEY, db)) flash = T('சேமிக்க முடியவில்லை — browser இடம் நிரம்பியிருக்கலாம். Backup எடுத்து பழைய ஆர்டர்களை நீக்குங்கள்.', 'Could not save — storage may be full. Take a backup and delete old orders.'); };
+      const trade = () => TRADES.find(t => t.id === db.prof) || TRADES[0];
+      const sh = s => { const p = String(s || '').split(' / '); return (isEn() ? p[1] || p[0] : p[0]).trim(); };
+      const rKey = (n, s) => String(n).trim() + '|' + String(s || '').trim();
+      const rates = () => (db.rates[db.prof] = db.rates[db.prof] || {});
+      const extraItems = () => (db.extra[db.prof] = db.extra[db.prof] || []);
+      const allItems = () => trade().items.concat(extraItems());
+      const byId = id => db.orders.find(o => o.id === id);
+      const now = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+      const stHtml = o => { const t = todayIso(); if (isOverdue(o, t)) return '<span class="bz-st late">⏰ ' + T('தாமதம்', 'Overdue') + '</span>'; const L = ST_LABEL[o.st] || ST_LABEL.open; return '<span class="bz-st ' + esc(o.st) + '">' + T(L[0], L[1]) + '</span>'; };
+
+      function blankForm() { return { id: null, c: { n: '', ph: '' }, f: {}, l: [], ex: '', dis: '', adv: '', mode: 'cash', due: addDaysIso(todayIso(), trade().id === 'laundry' ? 2 : 3), note: '' }; }
+      function nav() {
+        const pend = db.orders.filter(o => o.st === 'open' || o.st === 'ready').length, t = trade();
+        const items = [['new', '➕ ' + T('புதிய ஆர்டர்', 'New order')], ['list', '📋 ' + T('ஆர்டர்கள்', 'Orders') + (pend ? '<span class="bz-badge">' + pend + '</span>' : '')], ['today', '📊 ' + T('இன்று', 'Today')], ['rates', '🏷️ ' + T('விலைகள்', 'Rates')]];
+        if (t.measure) items.push(['meas', '📏 ' + T('அளவுகள்', 'Measurements')]);
+        items.push(['set', '⚙️ ' + T('அமைப்பு', 'Settings')]);
+        return '<div class="bz-tabs">' + items.map(i => '<button type="button" class="bz-tab' + (i[0] === view ? ' on' : '') + '" data-view="' + i[0] + '">' + i[1] + '</button>').join('') + '</div>';
       }
-      function persist() { lsSet(KEY, S); }
-      function drawItems() {
-        const box = $(root, '[data-k=items]');
-        box.innerHTML = S.items.map((it, i) => '<div class="bz-item q"><input type="text" data-i="' + i + '" data-f="n" value="' + esc(it.n) + '" placeholder="' + esc(T('பொருள்', 'Item')) + '"><input type="text" inputmode="decimal" data-i="' + i + '" data-f="q" value="' + esc(it.q) + '" placeholder="' + esc(T('எண்', 'Qty')) + '"><input type="text" inputmode="decimal" data-i="' + i + '" data-f="r" value="' + esc(it.r) + '" placeholder="₹"><button type="button" class="bz-x" data-rm="' + i + '" aria-label="remove">✕</button></div>').join('');
-        $$(box, 'input').forEach(inp => { inp.addEventListener('input', () => { S.items[+inp.getAttribute('data-i')][inp.getAttribute('data-f')] = inp.value; persist(); paint(); }); });
-        $$(box, '[data-rm]').forEach(b => { b.onclick = () => { S.items.splice(+b.getAttribute('data-rm'), 1); if (!S.items.length) S.items.push({ n: '', q: '1', r: '' }); persist(); drawItems(); paint(); }; });
+      function draw() {
+        const t = trade();
+        root.innerHTML = purpose('ஆர்டர் புத்தகம் — ' + t.ta + '. வாடிக்கையாளர் கொடுக்கும் ஒவ்வொரு பொருளையும் (எ.கா. 5 பேன்ட், 3 சட்டை) எண்ணிக்கை, சேவை, விலையுடன் பதிவு செய்து டோக்கன் ரசீது கொடுங்கள்; தயார் ஆனதும் WhatsApp, கொடுக்கும்போது எண்ணிக்கை சரிபார்ப்பு, மீதப் பணம். எல்லாம் இந்த phone-லேயே இருக்கும்.',
+          'Order book — ' + t.en + '. Record every item a customer hands over (e.g. 5 pants, 3 shirts) with count, service and rate, give a token slip, send a "ready" WhatsApp, check the count at delivery and collect the balance. Everything stays on this phone.') +
+          selectField(T('உங்கள் தொழில்', 'Your trade'), 'prof', TRADES.map(x => [x.id, x.icon + ' ' + x.ta + ' · ' + x.en]), db.prof) +
+          nav() + (flash ? '<div class="bz-msg">' + esc(flash) + '</div>' : '') + '<div data-k="pane"></div>';
+        $(root, '[data-k=prof]').addEventListener('change', e => { db.prof = e.target.value; save(); form = null; if (view === 'meas' && !trade().measure) view = 'new'; draw(); });
+        $$(root, '[data-view]').forEach(b => { b.onclick = () => { view = b.getAttribute('data-view'); flash = ''; if (view === 'new' && !(form && form.id)) form = form || blankForm(); draw(); }; });
+        const pane = $(root, '[data-k=pane]');
+        if (view === 'new') drawForm(pane); else if (view === 'list') drawList(pane); else if (view === 'order') drawOrder(pane);
+        else if (view === 'today') drawToday(pane); else if (view === 'rates') drawRates(pane); else if (view === 'meas') drawMeas(pane); else drawSettings(pane);
       }
-      function paint() {
-        const W = +S.width || 576, sc = W / 576, pad = Math.round(24 * sc), items = S.items.filter(i => i.n.trim());
-        const lines = items.map(i => { const q = num(i.q) || 1, r = num(i.r) || 0; return { n: i.n.trim(), q: q, r: r, a: round2(q * r) }; });
-        const sum = lines.reduce((a, l) => a + l.a, 0), adv = num(S.advance) || 0, bal = round2(sum - adv);
-        const fs = Math.round(26 * sc), lh = Math.round(40 * sc), big = Math.round(46 * sc);
-        const probe = document.createElement('canvas').getContext('2d');
-        const H = Math.round((150 + lines.length * 46 + 260 + (S.note ? 50 : 0) + (S.cust ? 40 : 0) + (S.due ? 40 : 0)) * sc);
-        cv.width = W; cv.height = H; const ctx = cv.getContext('2d'); void probe;
-        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#000000'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
-        let y = Math.round(40 * sc);
-        fitFont(ctx, S.shop.trim() || T('கடை பெயர்', 'Shop name'), W - 2 * pad, big, '800', 16); ctx.fillText(S.shop.trim() || T('கடை பெயர்', 'Shop name'), W / 2, y); y += lh;
-        if (S.phone.trim()) { fitFont(ctx, S.phone.trim(), W - 2 * pad, fs, '500', 14); ctx.fillText(S.phone.trim(), W / 2, y); y += lh; }
-        ctx.fillRect(pad, y - lh / 2 + 6, W - 2 * pad, 2); y += Math.round(18 * sc);
-        fitFont(ctx, T('டோக்கன் எண்: ', 'Token: ') + S.token, W - 2 * pad, Math.round(54 * sc), '800', 20); ctx.fillText(T('டோக்கன் எண்: ', 'Token: ') + S.token, W / 2, y + 10); y += Math.round(60 * sc);
-        ctx.textAlign = 'left'; ctx.font = '500 ' + fs + 'px ' + FONT;
-        ctx.fillText(T('தேதி: ', 'Date: ') + dmy(todayIso()), pad, y); y += lh;
-        if (S.cust.trim()) { fitFont(ctx, T('பெயர்: ', 'Name: ') + S.cust.trim() + (S.cphone.trim() ? ' (' + S.cphone.trim() + ')' : ''), W - 2 * pad, fs, '600', 14); ctx.fillText(T('பெயர்: ', 'Name: ') + S.cust.trim() + (S.cphone.trim() ? ' (' + S.cphone.trim() + ')' : ''), pad, y); y += lh; }
-        ctx.fillRect(pad, y - lh / 2 + 8, W - 2 * pad, 1); y += Math.round(10 * sc);
-        lines.forEach(l => {
-          ctx.textAlign = 'left'; fitFont(ctx, l.n + (l.q !== 1 ? ' × ' + fmtNum(l.q, 2) : ''), W - 2 * pad - Math.round(150 * sc), fs, '600', 14); ctx.fillText(l.n + (l.q !== 1 ? ' × ' + fmtNum(l.q, 2) : ''), pad, y);
-          if (l.r) { ctx.textAlign = 'right'; ctx.font = '700 ' + fs + 'px ' + FONT; ctx.fillText(fmtNum(l.a, 2), W - pad, y); } y += Math.round(46 * sc);
+
+      /* ---------- new / edit order */
+      function addItem(name) {
+        const t = trade(), s = t.svc[0];
+        const ex = form.l.find(l => l.n === name && l.s === s);
+        if (ex) ex.q = String(round2(n0(num(ex.q)) + 1));
+        else form.l.push({ n: name, s: s, q: '1', r: rates()[rKey(name, s)] != null ? String(rates()[rKey(name, s)]) : '', note: '' });
+      }
+      function drawForm(pane) {
+        if (!form) form = blankForm();
+        const t = trade(), counts = {};
+        form.l.forEach(l => { counts[l.n] = round2((counts[l.n] || 0) + n0(num(l.q))); });
+        const custOpts = db.cust.map(c => '<option value="' + esc(c.n) + '">' + esc(c.ph || '') + '</option>').join('');
+        let fieldsHtml = '';
+        (t.fields || []).forEach(f => {
+          const v = form.f[f[0]];
+          if (f[2] === 'checks') fieldsHtml += '<div class="bz-f full"><label>' + esc(T(f[1].split(' / ')[0], f[1].split(' / ')[1] || f[1])) + '</label><div class="bz-chk2">' + f[3].map(o => '<label><input type="checkbox" data-fc="' + f[0] + '" value="' + esc(o) + '"' + ((v || []).indexOf(o) >= 0 ? ' checked' : '') + '> ' + esc(sh(o)) + '</label>').join('') + '</div></div>';
+          else fieldsHtml += field(esc(T(f[1].split(' / ')[0], f[1].split(' / ')[1] || f[1])), 'f_' + f[0], v || '', { type: f[2] === 'date' ? 'date' : f[2] === 'time' ? 'time' : 'text', mode: f[2] === 'num' ? 'decimal' : 'text' });
         });
-        if (sum > 0) {
-          ctx.fillRect(pad, y - lh / 2 + 8, W - 2 * pad, 1); y += Math.round(14 * sc);
-          const row = (a, b, strong) => { ctx.textAlign = 'left'; ctx.font = (strong ? '800 ' : '500 ') + fs + 'px ' + FONT; ctx.fillText(a, pad, y); ctx.textAlign = 'right'; ctx.fillText(b, W - pad, y); y += lh; };
-          row(T('மொத்தம்', 'Total'), inr(sum), true); if (adv) { row(T('முன்பணம்', 'Advance'), inr(adv)); row(T('மீதம்', 'Balance'), inr(bal), true); }
-        }
-        if (S.due) { ctx.textAlign = 'left'; ctx.font = '800 ' + fs + 'px ' + FONT; ctx.fillText(T('கொடுக்கும் தேதி: ', 'Delivery: ') + dmy(S.due), pad, y); y += lh; }
-        if (S.note.trim()) { ctx.textAlign = 'left'; fitFont(ctx, S.note.trim(), W - 2 * pad, fs, '500', 14); ctx.fillText(S.note.trim(), pad, y); y += lh; }
-        ctx.textAlign = 'center'; ctx.fillStyle = '#6B7280'; ctx.font = '500 ' + Math.round(20 * sc) + 'px ' + FONT; ctx.fillText(T('இந்த ரசீதைக் கொண்டு வரவும் · நன்றி', 'Please bring this slip · Thank you'), W / 2, y + Math.round(10 * sc));
-        $(root, '[data-k=tot]').innerHTML = sum > 0 ? resCard(adv ? T('மீதம்', 'Balance') : T('மொத்தம்', 'Total'), inr(adv ? bal : sum), '', 'ok') : '';
-        const msg = fillTemplate(MESSAGES[0].t, { name: S.cust, item: lines.map(l => l.n).join(', '), shop: S.shop });
-        $(root, '[data-k=wa]').innerHTML = S.cphone.trim() ? waBtn(S.cphone, msg, T('"தயார்" செய்தி', '"Ready" message')) : '';
+        const dueLbl = t.dueLabel ? T(t.dueLabel.split(' / ')[0], t.dueLabel.split(' / ')[1]) : T('கொடுக்கும் தேதி', 'Delivery date');
+        pane.innerHTML = (form.id ? '<div class="bz-info">✏️ ' + T('டோக்கன் ' + (byId(form.id) || {}).tok + ' திருத்துகிறீர்கள்', 'Editing token ' + (byId(form.id) || {}).tok) + '</div>' : '') +
+          (t.hint ? '<div class="bz-info">ℹ️ ' + esc(T(t.hint.split(' / ')[0], t.hint.split(' / ')[1] || t.hint)) + '</div>' : '') +
+          '<div class="bz-h">' + T('வாடிக்கையாளர்', 'Customer') + '</div><div class="bz-grid">' +
+          '<div class="bz-f"><label>' + T('பெயர்', 'Name') + '</label><input type="text" list="bz-ob-cust" data-k="cn" value="' + esc(form.c.n) + '" autocomplete="off"><datalist id="bz-ob-cust">' + custOpts + '</datalist></div>' +
+          field(T('போன் (WhatsApp)', 'Phone (WhatsApp)'), 'cph', form.c.ph, { mode: 'tel' }) + '</div>' +
+          (fieldsHtml ? '<div class="bz-grid">' + fieldsHtml.replace(/class="bz-f full"/g, 'class="bz-f" style="grid-column:1/-1"') + '</div>' : '') +
+          '<div class="bz-h">' + T('பொருட்களைத் தட்டுங்கள் (ஒவ்வொரு தட்டும் +1)', 'Tap items (each tap adds 1)') + '</div><div class="bz-chips">' +
+          allItems().map(n => '<button type="button" class="bz-chip" data-add="' + esc(n) + '">' + esc(sh(n)) + (counts[n] ? '<span class="bz-badge">' + fmtNum(counts[n], 2) + '</span>' : '') + '</button>').join('') +
+          '<button type="button" class="bz-chip" data-act="custom">✍️ ' + T('வேறு பொருள்', 'Other item') + '</button></div>' +
+          '<div class="bz-items" data-k="lines"></div>' +
+          '<div class="bz-h">' + T('கணக்கு', 'Bill') + '</div><div class="bz-grid">' +
+          (t.express ? field(T('அவசரக் கட்டணம் % (Express)', 'Express charge %'), 'ex', form.ex, { ph: '0' }) : '') +
+          field(T('தள்ளுபடி (₹)', 'Discount (₹)'), 'dis', form.dis, { ph: '0' }) +
+          (form.id ? '' : field(T('முன்பணம் (₹)', 'Advance (₹)'), 'adv', form.adv, { ph: '0' }) + selectField(T('பணம் எப்படி', 'Paid by'), 'mode', [['cash', T('ரொக்கம்', 'Cash')], ['upi', 'UPI / GPay']], form.mode)) +
+          '</div><div class="bz-grid">' + field(dueLbl, 'due', form.due, { type: 'date', mode: 'text' }) + textField(T('குறிப்பு', 'Note'), 'note', form.note) + '</div>' +
+          '<div class="bz-chips">' + [[0, T('இன்று', 'Today')], [1, T('நாளை', 'Tomorrow')], [2, '+2'], [3, '+3'], [7, '+7']].map(d => '<button type="button" class="bz-chip" data-due="' + d[0] + '">' + d[1] + '</button>').join('') + '</div>' +
+          '<div data-k="tot">' + totCard() + '</div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn" data-act="save">💾 ' + (form.id ? T('மாற்றங்களைச் சேமி', 'Save changes') : T('சேமித்து டோக்கன் கொடு', 'Save & give token')) + '</button><button type="button" class="bz-btn sec" data-act="clear">🧹 ' + (form.id ? T('திருத்தத்தை ரத்து செய்', 'Cancel edit') : T('காலி செய்', 'Clear')) + '</button></div>';
+        drawLines();
+        const cn = $(pane, '[data-k=cn]');
+        cn.addEventListener('input', () => { form.c.n = cn.value; const m = db.cust.find(x => x.n === cn.value); if (m && m.ph && !form.c.ph) { form.c.ph = m.ph; $(pane, '[data-k=cph]').value = m.ph; } });
+        $(pane, '[data-k=cph]').addEventListener('input', e => { form.c.ph = e.target.value; });
+        (t.fields || []).forEach(f => { const i = $(pane, '[data-k=f_' + f[0] + ']'); if (i) i.addEventListener('input', () => { form.f[f[0]] = i.value; }); });
+        $$(pane, '[data-fc]').forEach(i => { i.onchange = () => { const k = i.getAttribute('data-fc'); form.f[k] = $$(pane, '[data-fc="' + k + '"]').filter(x => x.checked).map(x => x.value); }; });
+        ['ex', 'dis', 'adv', 'mode', 'due', 'note'].forEach(k => { const i = $(pane, '[data-k=' + k + ']'); if (i) { i.addEventListener('input', () => { form[k] = i.value; if (k !== 'note' && k !== 'due') refreshTotal(); }); i.addEventListener('change', () => { form[k] = i.value; }); } });
+        $$(pane, '[data-add]').forEach(b => { b.onclick = () => { addItem(b.getAttribute('data-add')); keepScroll(() => drawForm(pane)); }; });
+        $(pane, '[data-act=custom]').onclick = () => { form.l.push({ n: '', s: t.svc[0], q: '1', r: '', note: '' }); drawLines(); const ins = $$(pane, '[data-lf=n]'); if (ins.length) ins[ins.length - 1].focus(); };
+        $$(pane, '[data-due]').forEach(b => { b.onclick = () => { form.due = addDaysIso(todayIso(), +b.getAttribute('data-due')); $(pane, '[data-k=due]').value = form.due; }; });
+        $(pane, '[data-act=clear]').onclick = () => { form = blankForm(); flash = ''; draw(); };
+        $(pane, '[data-act=save]').onclick = saveForm;
       }
-      layout();
+      function totCard() {
+        const c = orderCalc({ l: form.l, ex: form.ex, dis: form.dis, pay: form.id ? (byId(form.id) || {}).pay : (num(form.adv) > 0 ? [{ a: form.adv }] : []) });
+        return resCard(T('மொத்தம்', 'Total') + ' · ' + fmtNum(c.pcs, 2) + ' ' + T('எண்ணிக்கை', 'pcs/qty'), inr(c.total), (c.ex ? T('அவசரம் ', 'Express ') + inr(c.ex) + ' · ' : '') + (c.dis ? T('தள்ளுபடி ', 'Discount ') + inr(c.dis) + ' · ' : '') + (c.paid ? T('பெற்றது ', 'Paid ') + inr(c.paid) + ' · ' : '') + T('மீதம் ', 'Balance ') + inr(c.bal), 'ok');
+      }
+      function keepScroll(fn) { const y = window.scrollY; fn(); window.scrollTo(0, y); }
+      function refreshTotal() {
+        const tot = $(root, '[data-k=tot]'); if (tot) tot.innerHTML = totCard();
+        form.l.forEach((l, i) => { const a = $(root, '[data-amt="' + i + '"]'); if (a) a.textContent = inr(lineAmt(l)); });
+      }
+      function drawLines() {
+        const box = $(root, '[data-k=lines]'); if (!box) return; const t = trade();
+        if (!form.l.length) { box.innerHTML = '<div class="bz-info">' + T('மேலே உள்ள பொருளைத் தட்டுங்கள். 5 பேன்ட் என்றால் "பேன்ட்"-ஐ 5 முறை தட்டுங்கள் அல்லது எண்ணிக்கையை எழுதுங்கள்.', 'Tap an item above. For 5 pants, tap "Pant" 5 times or type the count.') + '</div>'; return; }
+        box.innerHTML = form.l.map((l, i) => {
+          const svcs = t.svc.indexOf(l.s) >= 0 || !l.s ? t.svc : t.svc.concat([l.s]);
+          return '<div class="bz-ol"><input class="full" type="text" data-li="' + i + '" data-lf="n" value="' + esc(l.n) + '" placeholder="' + esc(T('பொருள் / சேவை', 'Item / service')) + '">' +
+            '<select class="full" data-li="' + i + '" data-lf="s">' + svcs.map(s => '<option value="' + esc(s) + '"' + (s === l.s ? ' selected' : '') + '>' + esc(sh(s)) + '</option>').join('') + '</select>' +
+            '<div class="bz-qty"><button type="button" data-step="-1" data-li="' + i + '" aria-label="minus">−</button><input type="text" inputmode="decimal" data-li="' + i + '" data-lf="q" value="' + esc(l.q) + '" aria-label="qty"><button type="button" data-step="1" data-li="' + i + '" aria-label="plus">+</button></div>' +
+            '<input type="text" inputmode="decimal" data-li="' + i + '" data-lf="r" value="' + esc(l.r) + '" placeholder="' + esc(T('ஒன்றுக்கு ₹', '₹ each')) + '">' +
+            '<div class="amt"><span data-amt="' + i + '">' + inr(lineAmt(l)) + '</span><button type="button" class="bz-x" data-rmline="' + i + '" aria-label="remove">✕</button></div>' +
+            '<input class="full" type="text" data-li="' + i + '" data-lf="note" value="' + esc(l.note || '') + '" placeholder="' + esc(T('குறிப்பு: நிறம், கறை, கிழிசல், பட்டன் இல்லை…', 'Note: colour, stain, tear, missing button…')) + '"></div>';
+        }).join('');
+        $$(box, '[data-lf]').forEach(inp => {
+          const ev = inp.tagName === 'SELECT' ? 'change' : 'input';
+          inp.addEventListener(ev, () => {
+            const l = form.l[+inp.getAttribute('data-li')], f = inp.getAttribute('data-lf'); l[f] = inp.value;
+            if (f === 's' || f === 'n') { const r = rates()[rKey(l.n, l.s)]; if (r != null) { l.r = String(r); const ri = $(box, '[data-li="' + inp.getAttribute('data-li') + '"][data-lf="r"]'); if (ri) ri.value = l.r; } refreshTotal(); }
+            else if (f === 'q' || f === 'r') refreshTotal();
+          });
+        });
+        $$(box, '[data-step]').forEach(b => { b.onclick = () => { const l = form.l[+b.getAttribute('data-li')]; l.q = String(Math.max(0, round2(n0(num(l.q)) + +b.getAttribute('data-step')))); if (n0(num(l.q)) === 0) form.l.splice(+b.getAttribute('data-li'), 1); keepScroll(() => drawForm($(root, '[data-k=pane]'))); }; });
+        $$(box, '[data-rmline]').forEach(b => { b.onclick = () => { form.l.splice(+b.getAttribute('data-rmline'), 1); keepScroll(() => drawForm($(root, '[data-k=pane]'))); }; });
+      }
+      function saveForm() {
+        const lines = form.l.filter(l => String(l.n).trim() && n0(num(l.q)) > 0).map(l => ({ n: String(l.n).trim(), s: l.s || '', q: String(round2(n0(num(l.q)))), r: String(num(l.r) >= 0 ? round2(n0(num(l.r))) : ''), note: String(l.note || '').trim(), back: !!l.back }));
+        if (!lines.length) { flash = T('குறைந்தது ஒரு பொருளைச் சேருங்கள்', 'Add at least one item'); draw(); return; }
+        lines.forEach(l => { if (num(l.r) > 0) rates()[rKey(l.n, l.s)] = num(l.r); if (allItems().indexOf(l.n) < 0 && l.n.length <= 60) extraItems().push(l.n); });
+        const name = String(form.c.n || '').trim(), ph = String(form.c.ph || '').trim();
+        if (name || ph) { let cu = db.cust.find(x => (ph && x.ph === ph) || (!ph && x.n === name)); if (!cu) { cu = { id: uid(), n: name, ph: ph, m: {} }; db.cust.push(cu); } else { if (name) cu.n = name; if (ph) cu.ph = ph; } }
+        let o;
+        if (form.id) { o = byId(form.id); if (!o) { form = blankForm(); draw(); return; } Object.assign(o, { c: { n: name, ph: ph }, f: form.f, l: lines, ex: form.ex, dis: form.dis, due: form.due, note: form.note }); }
+        else {
+          o = { id: uid(), tok: db.next, d: todayIso(), t: now(), p: db.prof, c: { n: name, ph: ph }, f: form.f, l: lines, ex: form.ex, dis: form.dis, pay: [], due: form.due, st: 'open', note: form.note };
+          if (num(form.adv) > 0) o.pay.push({ d: todayIso(), a: round2(num(form.adv)), m: form.mode === 'upi' ? 'upi' : 'cash', k: 'adv' });
+          db.orders.push(o); db.next = (Math.floor(num(db.next)) || 1) + 1;
+        }
+        save(); form = blankForm(); curId = o.id; view = 'order'; flash = ''; draw();
+      }
+
+      /* ---------- order list */
+      function drawList(pane) {
+        const t0 = todayIso();
+        const F = { pending: o => o.st === 'open' || o.st === 'ready', ready: o => o.st === 'ready', late: o => isOverdue(o, t0), done: o => o.st === 'done', all: () => true };
+        const s = q.trim().toLowerCase();
+        const rows = db.orders.filter(o => o.st !== 'cancel' || filter === 'all').filter(F[filter] || F.all).filter(o => !s || String(o.tok) === s || ((o.c || {}).n || '').toLowerCase().indexOf(s) >= 0 || ((o.c || {}).ph || '').indexOf(s) >= 0)
+          .sort((a, b) => filter === 'done' || filter === 'all' ? b.tok - a.tok : String(a.due || '9').localeCompare(String(b.due || '9')) || a.tok - b.tok);
+        pane.innerHTML = '<div class="bz-chips">' + [['pending', T('கொடுக்க வேண்டியவை', 'Pending')], ['ready', T('தயார்', 'Ready')], ['late', T('தாமதம்', 'Overdue')], ['done', T('கொடுத்தவை', 'Delivered')], ['all', T('எல்லாம்', 'All')]].map(f => '<button type="button" class="bz-chip' + (f[0] === filter ? ' on' : '') + '" data-flt="' + f[0] + '">' + f[1] + '</button>').join('') + '</div>' +
+          '<div class="bz-f"><input type="text" data-k="q" value="' + esc(q) + '" placeholder="' + esc(T('டோக்கன் எண் / பெயர் / போன் தேடு', 'Search token / name / phone')) + '"></div><div class="bz-list" data-k="rows"></div>';
+        const box = $(pane, '[data-k=rows]');
+        box.innerHTML = rows.length ? rows.slice(0, 300).map(o => { const c = orderCalc(o); return '<button type="button" class="bz-card" data-oid="' + o.id + '"><span><b>#' + o.tok + ' · ' + esc((o.c || {}).n || T('பெயர் இல்லை', 'No name')) + '</b><small>' + esc(itemSummary(o, isEn())) + '</small><small>' + (o.due ? T('கொடுக்கும் தேதி ', 'Due ') + esc(dmy(o.due)) : '') + '</small></span><span style="text-align:right">' + stHtml(o) + (c.bal > 0.004 ? '<br><span class="bz-amt owe">' + inr(c.bal) + '</span>' : '') + '</span></button>'; }).join('') :
+          '<div class="bz-info">' + T('இங்கே ஆர்டர் இல்லை.', 'No orders here.') + '</div>';
+        $$(pane, '[data-flt]').forEach(b => { b.onclick = () => { filter = b.getAttribute('data-flt'); draw(); }; });
+        $(pane, '[data-k=q]').addEventListener('input', e => { q = e.target.value; const y = window.scrollY; drawList(pane); window.scrollTo(0, y); const i = $(pane, '[data-k=q]'); i.focus(); i.setSelectionRange(q.length, q.length); });
+        $$(box, '[data-oid]').forEach(b => { b.onclick = () => { curId = b.getAttribute('data-oid'); view = 'order'; draw(); window.scrollTo(0, 0); }; });
+      }
+
+      /* ---------- one order */
+      function msgFor(o, kind) {
+        const c = orderCalc(o), shop = db.shop.n || '', items = itemSummary(o, false), en = isEn();
+        const L = [];
+        if (kind === 'recv') {
+          L.push(T('வணக்கம் ', 'Hello ') + ((o.c || {}).n || '') + ',', (shop ? shop + ' — ' : '') + T('உங்கள் ஆர்டர் பெறப்பட்டது.', 'we have received your order.'), T('டோக்கன்: ', 'Token: ') + o.tok, T('பொருட்கள்: ', 'Items: ') + itemSummary(o, en) + ' (' + fmtNum(c.pcs, 2) + ')');
+          L.push(T('மொத்தம்: ', 'Total: ') + inr(c.total) + (c.paid ? ' · ' + T('பெற்றது: ', 'Paid: ') + inr(c.paid) : '') + (c.bal > 0.004 ? ' · ' + T('மீதம்: ', 'Balance: ') + inr(c.bal) : ''));
+          if (o.due) L.push(T('கொடுக்கும் தேதி: ', 'Delivery: ') + dmy(o.due));
+        } else if (kind === 'ready') {
+          L.push(T('வணக்கம் ', 'Hello ') + ((o.c || {}).n || '') + ',', T('உங்கள் ஆர்டர் (டோக்கன் ', 'your order (token ') + o.tok + ') ' + T('தயாராக உள்ளது: ', 'is ready: ') + itemSummary(o, en) + '.');
+          if (c.bal > 0.004) L.push(T('மீதம் செலுத்த வேண்டியது: ', 'Balance to pay: ') + inr(c.bal));
+          L.push(T('டோக்கன் ரசீதுடன் வந்து பெற்றுக்கொள்ளுங்கள்.', 'Please bring the token slip when you collect.'));
+        } else if (kind === 'due') {
+          L.push(T('வணக்கம் ', 'Hello ') + ((o.c || {}).n || '') + ',', T('டோக்கன் ', 'Token ') + o.tok + T(' — மீதம் ', ' — balance ') + inr(c.bal) + T(' நிலுவை உள்ளது. வசதிப்படி செலுத்தவும்.', ' is pending. Please pay at your convenience.'));
+        } else {
+          L.push(T('வணக்கம் ', 'Hello ') + ((o.c || {}).n || '') + ',', T('டோக்கன் ', 'Token ') + o.tok + T(' பெற்றுக்கொண்டதற்கு நன்றி! மீண்டும் வாருங்கள்.', ' delivered — thank you! Please visit again.'));
+        }
+        if (shop) L.push('— ' + shop + (db.shop.ph ? ' · ' + db.shop.ph : ''));
+        void items; return L.join('\n');
+      }
+      function drawOrder(pane) {
+        const o = byId(curId); if (!o) { view = 'list'; return draw(); }
+        const c = orderCalc(o), t = TRADES.find(x => x.id === o.p) || trade(), ph = (o.c || {}).ph || '';
+        const fieldRows = (t.fields || []).filter(f => o.f && o.f[f[0]] && String(o.f[f[0]]).length).map(f => [esc(sh(f[1])), esc(Array.isArray(o.f[f[0]]) ? o.f[f[0]].map(sh).join(', ') : f[2] === 'date' ? dmy(o.f[f[0]]) : o.f[f[0]])]);
+        const allBack = o.l.length && o.l.every(l => l.back);
+        pane.innerHTML = '<div class="bz-actions" style="margin-top:4px"><button type="button" class="bz-btn sec sm" data-act="back">← ' + T('ஆர்டர்கள்', 'Orders') + '</button><button type="button" class="bz-btn sec sm" data-act="edit">✏️ ' + T('திருத்து', 'Edit') + '</button></div>' +
+          resCard(T('டோக்கன் ', 'Token ') + o.tok + ' · ' + esc((o.c || {}).n || ''), c.bal > 0.004 ? T('மீதம் ', 'Balance ') + inr(c.bal) : T('முழுதும் பெற்றது', 'Fully paid'), T('மொத்தம் ', 'Total ') + inr(c.total) + ' · ' + fmtNum(c.pcs, 2) + ' ' + T('எண்ணிக்கை', 'pcs') + ' · ' + T('ஆர்டர் ', 'Ordered ') + dmy(o.d) + (o.due ? ' · ' + T('கொடுக்க ', 'Due ') + dmy(o.due) : ''), c.bal > 0.004 ? 'warn' : 'ok') +
+          '<div style="margin-top:10px">' + stHtml(o) + (ph ? ' <small>📞 ' + esc(ph) + '</small>' : '') + '</div>' +
+          (fieldRows.length ? table(fieldRows) : '') +
+          '<div class="bz-h">' + T('பொருட்கள் — கொடுக்கும்போது ஒவ்வொன்றையும் சரிபார்த்து ✓ போடுங்கள்', 'Items — tick each one as you hand it back') + '</div>' +
+          '<div class="bz-list">' + o.l.map((l, i) => '<label class="bz-row" style="cursor:pointer"><span style="display:flex;gap:10px;align-items:center"><input type="checkbox" data-ret="' + i + '"' + (l.back ? ' checked' : '') + ' style="width:24px;height:24px;flex:0 0 24px"><span><b>' + esc(sh(l.n)) + ' ×' + esc(fmtNum(num(l.q), 2)) + '</b><small>' + esc(sh(l.s)) + (num(l.r) ? ' · ' + inr(num(l.r)) + T(' ஒன்றுக்கு', ' each') : '') + (l.note ? ' · ' + esc(l.note) : '') + '</small></span></span><span class="bz-amt">' + inr(lineAmt(l)) + '</span></label>').join('') + '</div>' +
+          (o.l.length > 0 ? '<div class="bz-info">' + (allBack ? '✅ ' + T('எல்லாப் பொருட்களும் சரிபார்க்கப்பட்டன', 'All items checked') : T('சரிபார்த்தவை: ', 'Checked: ') + o.l.filter(l => l.back).length + ' / ' + o.l.length) + '</div>' : '') +
+          table([[T('பொருட்கள்', 'Items'), inr(c.sub)], c.ex ? [T('அவசரக் கட்டணம்', 'Express'), inr(c.ex)] : null, c.dis ? [T('தள்ளுபடி', 'Discount'), '− ' + inr(c.dis)] : null, [T('மொத்தம்', 'Total'), inr(c.total), true]].concat((o.pay || []).map(p => [(p.k === 'adv' ? T('முன்பணம்', 'Advance') : T('பணம் பெற்றது', 'Payment')) + ' · ' + dmy(p.d) + ' · ' + (p.m === 'upi' ? 'UPI' : T('ரொக்கம்', 'Cash')), '− ' + inr(p.a)])).concat([[T('மீதம்', 'Balance'), inr(c.bal), true]]).filter(Boolean)) +
+          (o.note ? '<div class="bz-info">📝 ' + esc(o.note) + '</div>' : '') +
+          (o.st !== 'done' && o.st !== 'cancel' ? '<div class="bz-h">' + T('பணம் பெறு', 'Take payment') + '</div><div class="bz-grid">' + field(T('தொகை (₹)', 'Amount (₹)'), 'pay', c.bal > 0.004 ? String(c.bal) : '') + selectField(T('எப்படி', 'How'), 'pmode', [['cash', T('ரொக்கம்', 'Cash')], ['upi', 'UPI / GPay']], 'cash') + '</div><div class="bz-actions"><button type="button" class="bz-btn sec" data-act="pay">💵 ' + T('பணம் பெற்றேன்', 'Payment received') + '</button></div>' : '') +
+          '<div class="bz-h">' + T('நிலை', 'Status') + '</div><div class="bz-actions">' +
+          (o.st === 'open' ? '<button type="button" class="bz-btn green" data-act="ready">✅ ' + T('தயார் ஆனது', 'Mark ready') + '</button>' : '') +
+          (o.st === 'open' || o.st === 'ready' ? '<button type="button" class="bz-btn" data-act="done">📦 ' + (c.bal > 0.004 ? T('மீதம் ' + inr(c.bal) + ' பெற்று கொடுத்தேன்', 'Collect ' + inr(c.bal) + ' & deliver') : T('கொடுத்தாயிற்று', 'Mark delivered')) + '</button>' : '') +
+          (o.st === 'done' || o.st === 'cancel' ? '<button type="button" class="bz-btn sec" data-act="reopen">↩️ ' + T('மீண்டும் திற', 'Re-open') + '</button>' : '') +
+          (o.st !== 'cancel' && o.st !== 'done' ? '<button type="button" class="bz-btn sec" data-act="cancel">🚫 ' + T('ரத்து', 'Cancel order') + '</button>' : '') + '</div>' +
+          '<div class="bz-h">WhatsApp</div><div class="bz-actions">' +
+          (ph ? waBtn(ph, msgFor(o, 'recv'), T('ஆர்டர் பெற்றோம்', 'Order received')) + waBtn(ph, msgFor(o, 'ready'), T('தயார்', 'Ready')) + (c.bal > 0.004 ? waBtn(ph, msgFor(o, 'due'), T('மீதப் பணம்', 'Balance due')) : '') + (o.st === 'done' ? waBtn(ph, msgFor(o, 'thanks'), T('நன்றி', 'Thank you')) : '') : '<div class="bz-info">' + T('போன் எண் சேர்த்தால் WhatsApp செய்தி அனுப்பலாம் (✏️ திருத்து).', 'Add a phone number to send WhatsApp messages (✏️ Edit).') + '</div>') + '</div>' +
+          '<div class="bz-h">' + T('டோக்கன் ரசீது', 'Token slip') + '</div><canvas class="bz-canvas" data-k="cv"></canvas>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn" data-act="dl">⬇️ ' + T('ரசீது படம் (PNG)', 'Slip picture (PNG)') + '</button><button type="button" class="bz-btn green" data-act="sh">📤 ' + T('பகிர்', 'Share') + '</button><button type="button" class="bz-btn sec" data-act="cp">📋 ' + T('ரசீது உரை நகலெடு', 'Copy slip text') + '</button></div>' +
+          '<div class="bz-info">' + T('Thermal printer (58 / 80 mm) இருந்தால் PNG-ஐ அதன் app-ல் திறந்து அச்சிடலாம். அகலத்தை ⚙️ அமைப்பில் மாற்றலாம்.', 'With a 58 / 80 mm thermal printer, open the PNG in its app and print. Change the width in ⚙️ Settings.') + '</div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="del">🗑️ ' + T('இந்த ஆர்டரை நீக்கு', 'Delete this order') + '</button></div>';
+        const cv = $(pane, '[data-k=cv]'); paintSlip(cv, o);
+        const set = (st, extra) => { o.st = st; if (extra) extra(); save(); drawOrder(pane); };
+        $(pane, '[data-act=back]').onclick = () => { view = 'list'; draw(); };
+        $(pane, '[data-act=edit]').onclick = () => { form = { id: o.id, c: { n: (o.c || {}).n || '', ph: ph }, f: JSON.parse(JSON.stringify(o.f || {})), l: o.l.map(l => Object.assign({}, l)), ex: o.ex || '', dis: o.dis || '', adv: '', mode: 'cash', due: o.due || '', note: o.note || '' }; if (o.p !== db.prof) { db.prof = o.p; save(); } view = 'new'; draw(); window.scrollTo(0, 0); };
+        $$(pane, '[data-ret]').forEach(cb => { cb.onchange = () => { o.l[+cb.getAttribute('data-ret')].back = cb.checked; save(); const y = window.scrollY; drawOrder(pane); window.scrollTo(0, y); }; });
+        const payBtn = $(pane, '[data-act=pay]');
+        if (payBtn) payBtn.onclick = () => { const a = num($(pane, '[data-k=pay]').value); if (!(a > 0)) return; o.pay = o.pay || []; o.pay.push({ d: todayIso(), a: round2(a), m: $(pane, '[data-k=pmode]').value === 'upi' ? 'upi' : 'cash', k: 'bal' }); save(); drawOrder(pane); };
+        const b = sel => $(pane, '[data-act=' + sel + ']');
+        if (b('ready')) b('ready').onclick = () => set('ready', () => { o.rdAt = todayIso(); });
+        if (b('done')) b('done').onclick = () => {
+          if (!allBack && o.l.length && !window.confirm(T('எல்லாப் பொருட்களும் ✓ சரிபார்க்கப்படவில்லை. இருந்தாலும் கொடுத்ததாகக் குறிக்கவா?', 'Not every item is ticked. Mark as delivered anyway?'))) return;
+          set('done', () => { const cc = orderCalc(o); if (cc.bal > 0.004) { o.pay = o.pay || []; o.pay.push({ d: todayIso(), a: cc.bal, m: (($(pane, '[data-k=pmode]') || {}).value === 'upi') ? 'upi' : 'cash', k: 'bal' }); } o.doneAt = todayIso(); });
+        };
+        if (b('reopen')) b('reopen').onclick = () => set('open');
+        if (b('cancel')) b('cancel').onclick = () => { if (window.confirm(T('இந்த ஆர்டரை ரத்து செய்யவா?', 'Cancel this order?'))) set('cancel'); };
+        b('del').onclick = () => { if (!window.confirm(T('இந்த ஆர்டர் முழுதும் நீக்கப்படும். தொடரவா?', 'This order will be deleted completely. Continue?'))) return; db.orders = db.orders.filter(x => x.id !== o.id); save(); view = 'list'; draw(); };
+        b('dl').onclick = () => saveCanvas(cv, 'token-' + o.tok + '.png');
+        b('sh').onclick = async () => { if (!(await shareCanvas(cv, 'token-' + o.tok + '.png', msgFor(o, 'recv')))) saveCanvas(cv, 'token-' + o.tok + '.png'); };
+        b('cp').onclick = function () { copyText(msgFor(o, 'recv'), this); };
+      }
+      function paintSlip(cv, o) {
+        const W = +db.width || 576, sc = W / 576, pad = Math.round(22 * sc), c = orderCalc(o), t = TRADES.find(x => x.id === o.p) || trade();
+        const fs = Math.round(25 * sc), lh = Math.round(38 * sc), ops = [];
+        const C = (txt, size, wt) => ops.push({ k: 'c', a: txt, s: size, w: wt }), LR = (a, b2, wt) => ops.push({ k: 'lr', a: a, b: b2, w: wt }), Lf = (txt, wt) => ops.push({ k: 'l', a: txt, w: wt }), HR = () => ops.push({ k: 'hr' });
+        C(db.shop.n.trim() || T('கடை பெயர்', 'Shop name'), Math.round(42 * sc), '800');
+        if (db.shop.ph.trim()) C('📞 ' + db.shop.ph.trim(), fs, '600'); if (db.shop.ad.trim()) C(db.shop.ad.trim(), Math.round(21 * sc), '500');
+        HR(); C(T('டோக்கன் ', 'Token ') + o.tok, Math.round(58 * sc), '900');
+        LR(T('தேதி ', 'Date ') + dmy(o.d), o.t || '', '500');
+        if ((o.c || {}).n || (o.c || {}).ph) Lf(((o.c || {}).n || '') + ((o.c || {}).ph ? '  ' + o.c.ph : ''), '700');
+        (t.fields || []).forEach(f => { const v = o.f && o.f[f[0]]; if (v && String(v).length) Lf(sh(f[1]) + ': ' + (Array.isArray(v) ? v.map(sh).join(', ') : f[2] === 'date' ? dmy(v) : v), '500'); });
+        HR();
+        o.l.forEach(l => { LR(sh(l.n) + ' ×' + fmtNum(num(l.q), 2) + (l.s && t.svc.length > 1 ? ' (' + sh(l.s) + ')' : ''), num(l.r) ? fmtNum(lineAmt(l), 2) : '', '600'); if (l.note) Lf('   ' + l.note, '500'); });
+        HR(); LR(T('மொத்த எண்ணிக்கை', 'Total pieces'), fmtNum(c.pcs, 2), '700');
+        if (c.ex) LR(T('அவசரக் கட்டணம்', 'Express'), inr(c.ex), '500'); if (c.dis) LR(T('தள்ளுபடி', 'Discount'), '− ' + inr(c.dis), '500');
+        if (c.total) { LR(T('மொத்தம்', 'Total'), inr(c.total), '800'); if (c.paid) LR(T('பெற்றது', 'Paid'), inr(c.paid), '500'); LR(T('மீதம்', 'Balance'), inr(c.bal), '900'); }
+        if (o.due) { HR(); Lf((t.dueLabel ? sh(t.dueLabel) : T('கொடுக்கும் தேதி', 'Delivery')) + ': ' + dmy(o.due), '800'); }
+        if (o.note) Lf(o.note, '500');
+        ops.push({ k: 'foot' });
+        const H = Math.round(30 * sc) + ops.reduce((a, op) => a + (op.k === 'hr' ? Math.round(18 * sc) : op.k === 'c' ? Math.round(op.s * 1.45) : op.k === 'foot' ? Math.round(56 * sc) : lh), 0);
+        cv.width = W; cv.height = H; const ctx = cv.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#000000'; ctx.textBaseline = 'middle';
+        let y = Math.round(20 * sc);
+        ops.forEach(op => {
+          if (op.k === 'hr') { ctx.fillRect(pad, y + Math.round(8 * sc), W - 2 * pad, Math.max(1, Math.round(2 * sc))); y += Math.round(18 * sc); return; }
+          if (op.k === 'c') { const hh = Math.round(op.s * 1.45); ctx.textAlign = 'center'; fitFont(ctx, op.a, W - 2 * pad, op.s, op.w, 12); ctx.fillText(op.a, W / 2, y + hh / 2); y += hh; return; }
+          if (op.k === 'foot') { ctx.textAlign = 'center'; ctx.fillStyle = '#444'; fitFont(ctx, T('இந்த ரசீதைக் கொண்டு வரவும் · நன்றி', 'Please bring this slip · Thank you'), W - 2 * pad, Math.round(20 * sc), '500', 11); ctx.fillText(T('இந்த ரசீதைக் கொண்டு வரவும் · நன்றி', 'Please bring this slip · Thank you'), W / 2, y + Math.round(28 * sc)); ctx.fillStyle = '#000'; y += Math.round(56 * sc); return; }
+          const my = y + lh / 2;
+          if (op.k === 'l') { ctx.textAlign = 'left'; fitFont(ctx, op.a, W - 2 * pad, fs, op.w, 11); ctx.fillText(op.a, pad, my); }
+          else { ctx.font = op.w + ' ' + fs + 'px ' + FONT; const bw = op.b ? ctx.measureText(op.b).width : 0; ctx.textAlign = 'right'; if (op.b) ctx.fillText(op.b, W - pad, my); ctx.textAlign = 'left'; fitFont(ctx, op.a, W - 2 * pad - bw - Math.round(14 * sc), fs, op.w, 11); ctx.fillText(op.a, pad, my); }
+          y += lh;
+        });
+      }
+
+      /* ---------- today */
+      function drawToday(pane) {
+        const iso = todayIso(), s = dayStats(db.orders, iso);
+        const dueRows = db.orders.filter(o => (o.st === 'open' || o.st === 'ready') && o.due && o.due <= iso).sort((a, b) => String(a.due).localeCompare(String(b.due)));
+        pane.innerHTML = '<div class="bz-stats">' +
+          [[s.orders, T('இன்றைய ஆர்டர்', "Today's orders")], [fmtNum(s.pcs, 2), T('இன்று வந்த எண்ணிக்கை', 'Pieces / qty in')], [inr(s.billed), T('இன்றைய பில் தொகை', 'Billed today')], [inr(round2(s.cash + s.upi)), T('இன்று பெற்ற பணம்', 'Collected today') + ' (' + T('ரொக்கம் ', 'cash ') + inr(s.cash) + ' · UPI ' + inr(s.upi) + ')'], [s.dueToday, T('இன்று கொடுக்க வேண்டியவை', 'Due today')], [s.overdue, T('தாமதமானவை', 'Overdue')], [s.readyWaiting, T('தயார் — வாங்க வரவில்லை', 'Ready, not collected')], [inr(s.toCollect), T('மொத்தம் வர வேண்டிய பணம்', 'Total balance to collect')]]
+            .map(x => '<div class="bz-stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>').join('') + '</div>' +
+          '<div class="bz-h">' + T('இன்று / தாமதமாகக் கொடுக்க வேண்டியவை', 'Due today / overdue') + '</div><div class="bz-list">' +
+          (dueRows.length ? dueRows.map(o => '<button type="button" class="bz-card" data-oid="' + o.id + '"><span><b>#' + o.tok + ' · ' + esc((o.c || {}).n || '') + '</b><small>' + esc(itemSummary(o, isEn())) + '</small></span><span>' + stHtml(o) + '</span></button>').join('') : '<div class="bz-info">' + T('இன்று கொடுக்க வேண்டியது எதுவும் இல்லை 👍', 'Nothing due today 👍') + '</div>') + '</div>' +
+          '<div class="bz-h">' + T('Excel / Backup', 'Excel / backup') + '</div><div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="csv">📊 ' + T('எல்லா ஆர்டர்களும் (.csv)', 'All orders (.csv)') + '</button><button type="button" class="bz-btn sec sm" data-act="bk">💾 Backup (.json)</button><label class="bz-btn sec sm" style="cursor:pointer">📂 ' + T('மீட்டெடு', 'Restore') + '<input type="file" accept=".json,application/json" data-act="rs" hidden></label></div>' +
+          '<div class="bz-info">' + T('தகவல் இந்த browser-ல் மட்டும் இருக்கும். phone மாற்றும்போது அல்லது browser data அழிக்கும் முன் Backup எடுங்கள்.', 'Data lives only in this browser. Take a backup before changing phones or clearing browser data.') + '</div>';
+        $$(pane, '[data-oid]').forEach(b => { b.onclick = () => { curId = b.getAttribute('data-oid'); view = 'order'; draw(); window.scrollTo(0, 0); }; });
+        $(pane, '[data-act=csv]').onclick = () => { const b = new Blob(['﻿' + ordersCsv(db.orders)], { type: 'text/csv;charset=utf-8' }); if (typeof downloadBlob === 'function') downloadBlob(b, 'orders-' + iso + '.csv'); };
+        $(pane, '[data-act=bk]').onclick = () => { const b = new Blob([JSON.stringify(db)], { type: 'application/json' }); if (typeof downloadBlob === 'function') downloadBlob(b, 'order-book-backup-' + iso + '.json'); };
+        $(pane, '[data-act=rs]').onchange = e => {
+          const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader();
+          r.onload = () => { try { const v = JSON.parse(String(r.result)); if (!v || !Array.isArray(v.orders)) throw new Error('bad'); if (!window.confirm(T('இப்போது உள்ள ஆர்டர்கள் இந்த Backup-ஆல் மாற்றப்படும். தொடரவா?', 'Current orders will be replaced by this backup. Continue?'))) return; db = Object.assign({}, D, v); save(); flash = T('மீட்டெடுக்கப்பட்டது', 'Restored'); draw(); } catch (err) { flash = T('இது சரியான Backup file இல்லை', 'This is not a valid backup file'); draw(); } };
+          r.readAsText(f);
+        };
+      }
+
+      /* ---------- rates (the owner's own price list) */
+      function drawRates(pane) {
+        const t = trade(), R = rates();
+        pane.innerHTML = '<div class="bz-info">' + T('உங்கள் விலைகளை ஒருமுறை இங்கே எழுதினால், ஆர்டரில் தானாக வரும். ஆர்டரில் மாற்றிய விலையும் இங்கே நினைவில் இருக்கும். (இயல்பு விலை எதுவும் நாங்கள் வைக்கவில்லை — உங்கள் கடை விலையே.)', 'Type your prices once and they fill in automatically. A price you change in an order is remembered too. (We never preset prices — they are your own.)') + '</div>' +
+          allItems().map((n, i) => '<details class="bz-det"' + (i < 2 ? ' open' : '') + '><summary>' + esc(sh(n)) + (extraItems().indexOf(n) >= 0 ? ' <small>(' + T('நீங்கள் சேர்த்தது', 'yours') + ')</small>' : '') + '</summary><div class="in"><div class="bz-grid">' +
+            t.svc.map(s => '<div class="bz-f"><label>' + esc(sh(s)) + ' (₹)</label><input type="text" inputmode="decimal" data-rate="' + esc(rKey(n, s)) + '" value="' + esc(R[rKey(n, s)] != null ? R[rKey(n, s)] : '') + '"></div>').join('') + '</div>' +
+            (extraItems().indexOf(n) >= 0 ? '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-rmitem="' + esc(n) + '">🗑️ ' + T('இந்தப் பொருளை நீக்கு', 'Remove this item') + '</button></div>' : '') + '</div></details>').join('') +
+          '<div class="bz-h">' + T('புதிய பொருள் / சேவை சேர்', 'Add your own item / service') + '</div><div class="bz-grid">' + textField(T('பெயர்', 'Name'), 'newitem', '') + '<div class="bz-f"><label>&nbsp;</label><button type="button" class="bz-btn" data-act="additem" style="width:100%">➕ ' + T('சேர்', 'Add') + '</button></div></div>' +
+          '<div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="tocard">🏷️ ' + T('இந்த விலைகளை விலைப்பட்டியல் படமாக்கு', 'Make a price-list picture from these') + '</button></div>';
+        $$(pane, '[data-rate]').forEach(i => { i.addEventListener('input', () => { const v = num(i.value); if (i.value.trim() === '') delete R[i.getAttribute('data-rate')]; else if (v >= 0) R[i.getAttribute('data-rate')] = v; save(); }); });
+        $$(pane, '[data-rmitem]').forEach(b => { b.onclick = () => { db.extra[db.prof] = extraItems().filter(x => x !== b.getAttribute('data-rmitem')); save(); drawRates(pane); }; });
+        $(pane, '[data-act=additem]').onclick = () => { const v = $(pane, '[data-k=newitem]').value.trim(); if (v && allItems().indexOf(v) < 0) { extraItems().push(v.slice(0, 60)); save(); } drawRates(pane); };
+        $(pane, '[data-act=tocard]').onclick = () => {
+          const items = []; allItems().forEach(n => t.svc.forEach(s => { const r = R[rKey(n, s)]; if (r != null) items.push({ n: sh(n) + (t.svc.length > 1 ? ' — ' + sh(s) : ''), p: String(r) }); }));
+          if (!items.length) { flash = T('முதலில் விலைகளை எழுதுங்கள்', 'Type some prices first'); draw(); return; }
+          const rc = lsGet('bz_ratecard_v1', {}) || {}; rc.preset = 'blank'; rc.items = items; if (!rc.shop) rc.shop = db.shop.n; if (!rc.phone) rc.phone = db.shop.ph; if (!rc.addr) rc.addr = db.shop.ad; lsSet('bz_ratecard_v1', rc);
+          try { if (typeof openTool === 'function') { openTool('ratecard'); return; } } catch (e) { /* fall back */ }
+          location.href = '/?tool=ratecard';
+        };
+      }
+
+      /* ---------- tailor measurements */
+      function drawMeas(pane) {
+        const list = db.cust.slice().sort((a, b) => String(a.n).localeCompare(String(b.n)));
+        const cu = db.cust.find(x => x.id === mCust);
+        pane.innerHTML = '<div class="bz-info">' + T('வாடிக்கையாளர் அளவுகளை ஒருமுறை எழுதி வைத்தால் அடுத்த முறை தேட வேண்டாம். அளவு அங்குலத்தில் (அல்லது நீங்கள் பயன்படுத்தும் அலகில்).', 'Save each customer\'s measurements once; no need to re-measure next time. Inches (or the unit you use).') + '</div>' +
+          '<div class="bz-grid">' + selectField(T('வாடிக்கையாளர்', 'Customer'), 'mc', [['', T('— தேர்ந்தெடு —', '— choose —')]].concat(list.map(c => [c.id, c.n + (c.ph ? ' · ' + c.ph : '')])), mCust || '') +
+          '<div class="bz-f"><label>' + T('அல்லது புதியவர்', 'or new') + '</label><input type="text" data-k="mnew" placeholder="' + esc(T('பெயர்', 'Name')) + '"></div></div><div class="bz-actions"><button type="button" class="bz-btn sec sm" data-act="mnew">➕ ' + T('புதியவரைச் சேர்', 'Add new') + '</button></div>' +
+          (cu ? tabs(Object.keys(MEASURES).map(k => [k, sh(MEASURES[k].ta)]), mType) + '<div class="bz-grid three">' + MEASURES[mType].f.map((f, i) => field(esc(sh(f)), 'm' + i, ((cu.m || {})[mType] || {})[f] || '')).join('') + '</div>' +
+            textField(T('குறிப்பு (டிசைன், கழுத்து மாடல்…)', 'Note (design, neck style…)'), 'mnote', ((cu.m || {})[mType] || {})._note || '') +
+            '<div class="bz-actions"><button type="button" class="bz-btn sec" data-act="mcp">📋 ' + T('அளவுகளை நகலெடு', 'Copy measurements') + '</button>' + (cu.ph ? waBtn(cu.ph, measText(cu), T('வாடிக்கையாளருக்கு அனுப்பு', 'Send to customer')) : '') + '</div>' : '');
+        $(pane, '[data-k=mc]').addEventListener('change', e => { mCust = e.target.value || null; drawMeas(pane); });
+        $(pane, '[data-act=mnew]').onclick = () => { const n = $(pane, '[data-k=mnew]').value.trim(); if (!n) return; const c = { id: uid(), n: n, ph: '', m: {} }; db.cust.push(c); save(); mCust = c.id; drawMeas(pane); };
+        if (!cu) return;
+        $$(pane, '[data-tab]').forEach(b => { b.onclick = () => { mType = b.getAttribute('data-tab'); drawMeas(pane); }; });
+        MEASURES[mType].f.forEach((f, i) => { $(pane, '[data-k=m' + i + ']').addEventListener('input', e => { cu.m = cu.m || {}; cu.m[mType] = cu.m[mType] || {}; cu.m[mType][f] = e.target.value; save(); }); });
+        $(pane, '[data-k=mnote]').addEventListener('input', e => { cu.m = cu.m || {}; cu.m[mType] = cu.m[mType] || {}; cu.m[mType]._note = e.target.value; save(); });
+        $(pane, '[data-act=mcp]').onclick = function () { copyText(measText(cu), this); };
+      }
+      function measText(cu) {
+        const L = [cu.n + (cu.ph ? ' · ' + cu.ph : '')];
+        Object.keys(MEASURES).forEach(k => { const m = (cu.m || {})[k]; if (!m) return; const parts = MEASURES[k].f.filter(f => m[f]).map(f => sh(f) + ' ' + m[f]); if (parts.length || m._note) L.push(sh(MEASURES[k].ta) + ': ' + parts.join(', ') + (m._note ? ' (' + m._note + ')' : '')); });
+        return L.join('\n');
+      }
+
+      /* ---------- settings */
+      function drawSettings(pane) {
+        pane.innerHTML = '<div class="bz-grid">' + textField(T('கடை பெயர்', 'Shop name'), 'sn', db.shop.n) + field(T('கடை போன்', 'Shop phone'), 'sp', db.shop.ph, { mode: 'tel' }) + '</div>' +
+          '<div class="bz-grid one">' + textField(T('முகவரி (ரசீதில் வரும்)', 'Address (printed on the slip)'), 'sa', db.shop.ad) + '</div>' +
+          '<div class="bz-grid">' + field(T('அடுத்த டோக்கன் எண்', 'Next token number'), 'nx', db.next) + selectField(T('ரசீது அகலம்', 'Slip width'), 'sw', [['384', '58 mm thermal'], ['576', '80 mm thermal'], ['800', T('போன் / WhatsApp படம்', 'Phone / WhatsApp picture')]], db.width) + '</div>' +
+          '<div class="bz-info">' + T('இந்த ஆர்டர் புத்தகம் இந்த phone-ன் browser-ல் மட்டும் சேமிக்கப்படுகிறது; எங்கள் server-க்கு எதுவும் வராது. 📊 இன்று பகுதியில் Backup எடுக்கலாம்.', 'This order book is stored only in this phone\'s browser; nothing reaches our server. Take backups from 📊 Today.') + '</div>';
+        const map = { sn: v => { db.shop.n = v; }, sp: v => { db.shop.ph = v; }, sa: v => { db.shop.ad = v; }, nx: v => { const n = Math.floor(num(v)); if (n > 0) db.next = n; }, sw: v => { db.width = v; } };
+        Object.keys(map).forEach(k => { const i = $(pane, '[data-k=' + k + ']'); const h = () => { map[k](i.value); save(); }; i.addEventListener('input', h); i.addEventListener('change', h); });
+      }
+      if (!db.orders.length && !db.shop.n) view = 'set';
+      form = blankForm(); draw();
     }
   };
 
@@ -697,10 +1142,10 @@
         bindInputs(root, (k, v) => { if (k === 'msg') { text = v; edited = true; acts(); return; } S[k] = v; lsSet(KEY, S); if (!edited) { text = build(); $(root, '[data-k=msg]').value = text; } acts(); });
         text = build(); $(root, '[data-k=msg]').value = text; acts();
       }
-      function acts() {
+      function acts() { // update in place: re-creating the buttons on blur would swallow the tap
         const a = $(root, '[data-k=acts]');
-        a.innerHTML = waBtn(S.phone, text) + '<button type="button" class="bz-btn sec" data-act="cp">📋 ' + T('நகலெடு', 'Copy') + '</button>';
-        $(a, '[data-act=cp]').onclick = function () { copyText(text, this); };
+        if (!$(a, '[data-act=cp]')) { a.innerHTML = waBtn(S.phone, text) + '<button type="button" class="bz-btn sec" data-act="cp">📋 ' + T('நகலெடு', 'Copy') + '</button>'; $(a, '[data-act=cp]').onclick = function () { copyText(text, this); }; }
+        $(a, 'a.bz-btn').href = waLink(S.phone, text);
       }
       draw();
     }

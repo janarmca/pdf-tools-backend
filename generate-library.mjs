@@ -15,6 +15,19 @@ const SECTIONS = [
   ['Project Gutenberg','Project Gutenberg','பொதுக்களத்து (அமெரிக்கா) உலக இலக்கியம் — இந்தியாவில் ஒவ்வொரு நூலின் உரிமையைப் பார்க்கவும்','https://www.gutenberg.org','classics english novels public domain'],
   ['தமிழ் விக்கிப்பீடியா','Tamil Wikipedia','தமிழில் கலைக்களஞ்சியம் — யார், என்ன, எங்கே என்று தேட','https://ta.wikipedia.org','encyclopedia kalaikalanjiyam'],
  ]},
+ { id:'gov', icon:'🏛️', ta:'அரசு சேவைகள் — அதிகாரப்பூர்வ இணையதளங்கள்', en:'Government services — official websites', items:[
+  ['இ-சேவை (TN e-Sevai)','Tamil Nadu e-Sevai','சாதி, வருமானம், இருப்பிடம் போன்ற சான்றிதழ் விண்ணப்பங்கள், பல அரசு சேவைகள்','https://tnesevai.tn.gov.in','certificate community income nativity சான்றிதழ் சாதி வருமானம் இருப்பிடம் esevai'],
+  ['நிலப் பதிவுகள் — பட்டா / சிட்டா','TN e-Services (land records)','பட்டா, சிட்டா, அ-பதிவேடு விவரங்களைப் பார்க்க','https://eservices.tn.gov.in','patta chitta land record a register fmb பட்டா சிட்டா நிலம்'],
+  ['பத்திரப் பதிவுத் துறை (TNREGINET)','TN Registration Department','வில்லங்கச் சான்று (EC), பத்திரப் பதிவு விவரங்கள், வழிகாட்டி மதிப்பு','https://tnreginet.gov.in','ec encumbrance certificate guideline value registration வில்லங்கம் பத்திரம்'],
+  ['பொது விநியோகத் திட்டம் (TNPDS)','TN Public Distribution System','குடும்ப அட்டை (ரேஷன் கார்டு) விண்ணப்பம், திருத்தம், நிலை','https://www.tnpds.gov.in','ration card smart card ரேஷன் குடும்ப அட்டை'],
+  ['TNPSC','Tamil Nadu Public Service Commission','அரசுப் பணித் தேர்வு அறிவிப்புகள், ஹால் டிக்கெட், முடிவுகள்','https://www.tnpsc.gov.in','group 4 group 2 exam hall ticket result tnpsc வேலை தேர்வு'],
+  ['TNUSRB','TN Uniformed Services Recruitment Board','காவல், சிறை, தீயணைப்புப் பணித் தேர்வுகள்','https://tnusrb.tn.gov.in','police constable si recruitment காவலர் தேர்வு'],
+  ['TRB','Teachers Recruitment Board','ஆசிரியர் பணித் தேர்வுகள், TET அறிவிப்புகள்','https://trb.tn.gov.in','teacher tet recruitment ஆசிரியர் தேர்வு'],
+  ['அமைப்புசாரா தொழிலாளர் நலவாரியம்','TN Unorganised Workers Welfare Boards','கட்டுமானம் உட்பட நலவாரியப் பதிவு, புதுப்பித்தல்','https://tnuwwb.tn.gov.in','welfare board construction worker registration நலவாரியம் தொழிலாளர்'],
+  ['e-Shram','e-Shram (Govt. of India)','அமைப்புசாரா தொழிலாளர் தேசியப் பதிவு — இலவசம்','https://eshram.gov.in','eshram card unorganised worker'],
+  ['Udyam பதிவு','Udyam Registration','குறு, சிறு, நடுத்தர நிறுவனப் பதிவு — அரசு தளத்தில் இலவசம்','https://udyamregistration.gov.in','msme udyam registration small business சிறுதொழில் பதிவு'],
+  ['வாக்காளர் சேவை','Voters\' Service Portal','வாக்காளர் அடையாள அட்டை பதிவு, திருத்தம், தேடல்','https://voters.eci.gov.in','voter id epic வாக்காளர் அட்டை'],
+ ]},
  { id:'school', icon:'🎒', ta:'பள்ளி பாடநூல்கள்', en:'School textbooks', items:[
   ['தமிழ்நாடு பாடநூல் கழகம்','TN Textbook & Educational Services Corp.','சமச்சீர் கல்வி பாடநூல்கள் — 1 முதல் 12 வகுப்பு','https://textbookcorp.tn.gov.in','samacheer kalvi books class 1 to 12 பாடநூல் சமச்சீர் கல்வி வகுப்பு 10ஆம் 12ஆம் புத்தகம்'],
   ['NCERT பாடநூல்கள்','NCERT','CBSE / தேசியப் பாடநூல்கள் — இலவசப் பதிவிறக்கம்','https://ncert.nic.in/textbook.php','ncert cbse textbooks'],
@@ -78,7 +91,7 @@ ${secHtml}
 <section class="section faq"><h2>தெரிந்துகொள்ளுங்கள்<small>Good to know</small></h2>
 <h3>இங்கே புத்தகங்கள் சேமிக்கப்பட்டுள்ளனவா?</h3><p>இல்லை. இது அசல் தளங்களுக்கான வழிகாட்டி. நூல்கள் அந்தந்தத் தளங்களிலேயே உள்ளன; ஒவ்வொன்றின் உரிம விதிகளும் அங்கேயே பொருந்தும்.</p>
 <h3>பதிப்புரிமை</h3><p>இந்தப் பக்கம் இணைப்புகளை மட்டுமே தருகிறது; எந்த நூலும் உள்ளடக்கமும் எங்களுடையது அல்ல. ஒவ்வொரு தளத்திலும் உள்ள உரிம விதிகளே பொருந்தும். பதிப்புரிமை உள்ள நூல்களை அனுமதியின்றி நகலெடுக்கவோ பகிரவோ வேண்டாம். உங்கள் உரிமைப் படைப்பு தவறாகக் குறிப்பிடப்பட்டிருந்தால் support@pdftoolsindia.com-க்கு எழுதுங்கள்; உடனே நீக்குவோம்.</p>
-<h3>இணைப்புகள் சரிபார்ப்பு</h3><p>தளங்களின் முகவரிகள் மாறலாம். ஒரு இணைப்பு வேலை செய்யாவிட்டால் support@pdftoolsindia.com-க்குத் தெரிவியுங்கள்.</p></section>
+<h3>இது அரசு தளமா?</h3><p>இல்லை. pdftoolsindia.com ஒரு தனியார் இலவசத் தளம்; எந்த அரசுத் துறையுடனும் தொடர்பு இல்லை. அரசு சேவைகளுக்கு மேலே உள்ள அதிகாரப்பூர்வ தளங்களில் மட்டுமே விண்ணப்பியுங்கள்; கட்டணமும் விதிகளும் அங்கே உள்ளபடியே. உங்கள் ஆதார் எண், OTP, கடவுச்சொல்லை யாருக்கும் சொல்லாதீர்கள்.</p><h3>இணைப்புகள் சரிபார்ப்பு</h3><p>தளங்களின் முகவரிகள் மாறலாம். ஒரு இணைப்பு வேலை செய்யாவிட்டால் support@pdftoolsindia.com-க்குத் தெரிவியுங்கள்.</p></section>
 </main>
 <script>(function(){var q=document.getElementById('q'),none=document.getElementById('none');q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),any=false;document.querySelectorAll('.it').forEach(function(a){var m=!v||a.dataset.q.indexOf(v)>-1;a.style.display=m?'':'none';if(m)any=true;});document.querySelectorAll('section[id]').forEach(function(s){var vis=s.querySelectorAll('.it:not([style*="none"])').length;s.style.display=vis?'':'none';});none.style.display=any?'none':'block';});})();</script>
 </body></html>`;

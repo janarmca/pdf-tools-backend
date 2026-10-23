@@ -479,10 +479,10 @@
       }
       function paint() {
         root.innerHTML = purpose('இது எதற்கு? மதிப்பெண்களைக் கூட்டி சதவீதம் (Percentage), CGPA, இலக்கு மதிப்பெண் ஆகியவற்றைக் கண்டுபிடிக்க.', 'Total marks, percentage, CGPA and target marks.') +
-          tabsHtml([['marks', T('மதிப்பெண் %', 'Marks %')], ['cgpa', 'CGPA ↔ %'], ['target', T('இலக்கு மதிப்பெண்', 'Target')]], tab) +
+          tabsHtml([['marks', T('மதிப்பெண் %', 'Marks %')], ['cgpa', 'CGPA ↔ %'], ['target', T('இலக்கு மதிப்பெண்', 'Target')], ['neg', T('நெகட்டிவ் மதிப்பெண்', 'Negative marking')]], tab) +
           '<div data-k="body"></div>';
         bindTabs(root, t => { tab = t; paint(); });
-        ({ marks: paintMarks, cgpa: paintCgpa, target: paintTarget })[tab]();
+        ({ marks: paintMarks, cgpa: paintCgpa, target: paintTarget, neg: paintNeg })[tab]();
       }
 
       function paintMarks() {
@@ -591,6 +591,28 @@
               tableHtml([['இதுவரை', fmt(got, 2) + ' / ' + fmt(gotOut, 2)], ['மொத்த மதிப்பெண் (இறுதி)', fmt(gotOut + remOut, 2)], ['இலக்கு', fmt(target, 2) + ' %']]);
             lastText = target + '% பெற மீதமுள்ளவற்றில் ' + fmt(needR, 2) + '/' + fmt(remOut, 2) + ' தேவை';
           }
+        }
+        b.addEventListener('input', calc); calc();
+        b.appendChild(actionsEl(() => lastText));
+      }
+      const ng = { total: '100', correct: '', wrong: '', plus: '1', minus: '0.25' };
+      function paintNeg() { // objective tests: +marks for a right answer, −marks for a wrong one, 0 for unanswered
+        const b = $(root, '[data-k=body]');
+        b.innerHTML = '<div class="cx-info">' + T('தேர்வு அறிவிப்பில் உள்ள விதியை (சரிக்கு எத்தனை, தவறுக்கு எத்தனை குறைப்பு) நீங்களே எழுதுங்கள் — தேர்வுக்குத் தேர்வு மாறும்.', 'Type the rule from your exam notice (marks for right, deduction for wrong) — it differs between exams.') + '</div>' +
+          '<div class="cx-grid">' + field(T('மொத்த வினாக்கள்', 'Total questions'), 'total', ng.total) + field(T('சரியான விடைகள்', 'Right answers'), 'correct', ng.correct) + field(T('தவறான விடைகள்', 'Wrong answers'), 'wrong', ng.wrong) + field(T('சரிக்கு மதிப்பெண் (+)', 'Marks per right (+)'), 'plus', ng.plus) + '</div>' +
+          '<div class="cx-grid one">' + field(T('தவறுக்குக் குறைப்பு (−)', 'Deduction per wrong (−)'), 'minus', ng.minus) + '</div><div data-k="out"></div>';
+        let lastText = '';
+        function calc() {
+          Object.keys(ng).forEach(k => { ng[k] = $(b, '[data-k=' + k + ']').value; });
+          const tq = parseNum(ng.total), c = parseNum(ng.correct), w = parseNum(ng.wrong) || 0, pl = parseNum(ng.plus), mi = parseNum(ng.minus) || 0, out = $(b, '[data-k=out]');
+          if (!(tq > 0 && c >= 0 && w >= 0 && pl > 0 && mi >= 0) || !isFinite(c)) { out.innerHTML = '<div class="cx-info">' + T('மொத்த வினா, சரியான விடை எண்ணிக்கை எழுதுங்கள்.', 'Enter total questions and right answers.') + '</div>'; lastText = ''; return; }
+          if (c + w > tq) { out.innerHTML = msgHtml(T('சரி + தவறு, மொத்த வினாக்களை விட அதிகம்', 'Right + wrong is more than the total')); lastText = ''; return; }
+          const score = round2(c * pl - w * mi), max = round2(tq * pl), skip = tq - c - w, lost = round2(w * mi);
+          const acc = c + w > 0 ? round2(c / (c + w) * 100) : 0;
+          out.innerHTML = resCard(T('உங்கள் மதிப்பெண்', 'Your score'), fmt(score, 2) + ' / ' + fmt(max, 2), fmt(round2(score / max * 100), 2) + ' %', score / max * 100, score >= 0 ? 'ok' : 'bad') +
+            tableHtml([[T('சரி', 'Right') + ' (' + fmt(c, 0) + ' × ' + fmt(pl, 2) + ')', '+' + fmt(round2(c * pl), 2)], [T('தவறு', 'Wrong') + ' (' + fmt(w, 0) + ' × ' + fmt(mi, 2) + ')', '−' + fmt(lost, 2)], [T('விடை எழுதாதவை', 'Not answered'), fmt(skip, 0)], [T('துல்லியம் (எழுதியவற்றில் சரி)', 'Accuracy (of attempted)'), fmt(acc, 2) + ' %']]) +
+            (mi > 0 && w > 0 ? '<div class="cx-info">' + T('தவறுகளால் இழந்தது ', 'Lost to wrong answers: ') + fmt(lost, 2) + T(' மதிப்பெண். ஒரு வினாவுக்கு சரியாகும் வாய்ப்பு ', ' marks. Guessing only pays off when your chance of being right is above ') + fmt(round2(mi / (pl + mi) * 100), 1) + T('%-க்கு மேல் இருந்தால் மட்டுமே ஊகித்து எழுதுவது லாபம்.', '%.') + '</div>' : '');
+          lastText = T('மதிப்பெண் ', 'Score ') + fmt(score, 2) + '/' + fmt(max, 2);
         }
         b.addEventListener('input', calc); calc();
         b.appendChild(actionsEl(() => lastText));
@@ -3651,31 +3673,31 @@
     mount(body) {
       AS_injectStyle();
       const root = makeRoot(body);
-      const S = Object.assign({ tab: 'buy', w: '8', rate: '', rk: '22', va: '12', mk: '0', mkType: 'g', stone: '0', gst: '3', ow: '', ok: '22', ded: '2', lw: '', lk: '22', ltv: '75', lr: '', li: '12', lm: '12' }, lsGet('goldcalc', {}));
+      const S = Object.assign({ tab: 'buy', w: '8', rate: '', rk: '22', va: '12', mk: '0', mkType: 'g', stone: '0', gst: '3', ow: '', ok: '22', ded: '2', lw: '', lk: '22', ltv: '75', lr: '', li: '12', lm: '12', wu: 'g' }, lsGet('goldcalc', {}));
       function draw() {
         root.innerHTML = purpose('இது எதற்கு? நகை வாங்கும்போது சேதாரம் (VA), செய்கூலி, கல் விலை, GST சேர்த்து சரியான விலை; பழைய நகைக்கு எவ்வளவு கிடைக்கும்; நகைக் கடனில் எவ்வளவு பணம், எவ்வளவு வட்டி — கடையில் பில் வாங்கும் முன் நீங்களே சரிபார்க்கலாம்.',
           'Jewellery price with wastage (VA), making charge, stones and GST; old-gold exchange value; gold-loan amount and interest. Check the bill yourself before you pay.') +
-          tabsHtml([['buy', T('நகை விலை', 'Jewellery price')], ['old', T('பழைய நகை மாற்று', 'Old gold')], ['loan', T('நகைக் கடன்', 'Gold loan')]], S.tab) + '<div data-k="pane"></div><div data-k="out"></div>';
+          tabsHtml([['buy', T('நகை விலை', 'Jewellery price')], ['old', T('பழைய நகை மாற்று', 'Old gold')], ['loan', T('நகைக் கடன்', 'Gold loan')]], S.tab) + selectField(T('எடை அலகு', 'Weight unit'), 'wu', [['g', T('கிராம்', 'Grams')], ['pv', T('பவுன் / சவரன் (1 பவுன் = 8 கிராம்)', 'Pavun / sovereign (1 = 8 g)')]], S.wu) + '<div data-k="pane"></div><div data-k="out"></div>';
         bindTabs(root, t => { S.tab = t; draw(); });
-        const pane = $(root, '[data-k=pane]'), purOpts = GC_PUR.map(p => [p[0], p[1]]);
-        if (S.tab === 'buy') pane.innerHTML = '<div class="cx-grid">' + field(T('எடை (கிராம்)', 'Weight (grams)'), 'w', S.w) + selectField(T('தூய்மை', 'Purity'), 'rk', purOpts, S.rk) + '</div>' +
+        const pane = $(root, '[data-k=pane]'), purOpts = GC_PUR.map(p => [p[0], p[1]]), WU = S.wu === 'pv' ? [' (பவுன்)', ' (pavun)'] : [' (கிராம்)', ' (grams)'];
+        if (S.tab === 'buy') pane.innerHTML = '<div class="cx-grid">' + field(T('எடை' + WU[0], 'Weight' + WU[1]), 'w', S.w) + selectField(T('தூய்மை', 'Purity'), 'rk', purOpts, S.rk) + '</div>' +
           '<div class="cx-grid one">' + field(T('இன்றைய தங்க விலை — இந்தத் தூய்மைக்கு, 1 கிராம் (₹)', 'Today\'s rate for this purity, per gram (₹)'), 'rate', S.rate, { ph: '9500' }) + '</div>' +
           '<div class="cx-grid">' + field(T('சேதாரம் / VA (%)', 'Wastage / VA (%)'), 'va', S.va) + field(T('கல் / மற்ற கட்டணம் (₹)', 'Stones / other (₹)'), 'stone', S.stone) + '</div>' +
           '<div class="cx-grid">' + field(T('செய்கூலி', 'Making charge'), 'mk', S.mk) + selectField(T('செய்கூலி வகை', 'Making charge type'), 'mkType', [['g', T('₹ / கிராம்', '₹ per gram')], ['p', T('% தங்க மதிப்பில்', '% of gold value')], ['f', T('மொத்தம் ₹', 'Flat ₹')]], S.mkType) + '</div>' +
           '<div class="cx-grid one">' + field(T('GST (%)', 'GST (%)'), 'gst', S.gst) + '</div>';
-        else if (S.tab === 'old') pane.innerHTML = '<div class="cx-grid">' + field(T('பழைய நகை எடை (கிராம்)', 'Old gold weight (grams)'), 'ow', S.ow) + selectField(T('தூய்மை', 'Purity'), 'ok', purOpts, S.ok) + '</div>' +
+        else if (S.tab === 'old') pane.innerHTML = '<div class="cx-grid">' + field(T('பழைய நகை எடை' + WU[0], 'Old gold weight' + WU[1]), 'ow', S.ow) + selectField(T('தூய்மை', 'Purity'), 'ok', purOpts, S.ok) + '</div>' +
           '<div class="cx-grid">' + field(T('இன்றைய 24K விலை / கிராம் (₹)', 'Today\'s 24K rate per gram (₹)'), 'rate', S.rate, { ph: '10300' }) + field(T('கடை கழிவு (%)', 'Shop deduction (%)'), 'ded', S.ded) + '</div>';
-        else pane.innerHTML = '<div class="cx-grid">' + field(T('நகை எடை (கிராம்)', 'Jewel weight (grams)'), 'lw', S.lw) + selectField(T('தூய்மை', 'Purity'), 'lk', purOpts, S.lk) + '</div>' +
+        else pane.innerHTML = '<div class="cx-grid">' + field(T('நகை எடை' + WU[0], 'Jewel weight' + WU[1]), 'lw', S.lw) + selectField(T('தூய்மை', 'Purity'), 'lk', purOpts, S.lk) + '</div>' +
           '<div class="cx-grid">' + field(T('வங்கி மதிப்பிடும் 22K விலை / கிராம் (₹)', 'Bank\'s 22K value per gram (₹)'), 'lr', S.lr, { ph: '9000' }) + field(T('கடன் விகிதம் LTV (%)', 'Loan-to-value (%)'), 'ltv', S.ltv) + '</div>' +
           '<div class="cx-grid">' + field(T('வட்டி (% ஆண்டுக்கு)', 'Interest (% per year)'), 'li', S.li) + field(T('காலம் (மாதம்)', 'Period (months)'), 'lm', S.lm) + '</div>';
         root.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('input', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
-        root.querySelectorAll('select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; calc(); }));
+        root.querySelectorAll('select[data-k]').forEach(i => i.addEventListener('change', () => { S[i.getAttribute('data-k')] = i.value; if (i.getAttribute('data-k') === 'wu') { lsSet('goldcalc', S); draw(); return; } calc(); }));
         calc();
       }
       let txt = '';
       function calc() {
         lsSet('goldcalc', S);
-        const out = $(root, '[data-k=out]'), P = k => parseNum(S[k]);
+        const out = $(root, '[data-k=out]'), P = k => { const v = parseNum(S[k]); return (k === 'w' || k === 'ow' || k === 'lw') && S.wu === 'pv' ? v * 8 : v; };
         const pur = k => (GC_PUR.find(p => p[0] === S[k]) || GC_PUR[0]);
         if (S.tab === 'buy') {
           const w = P('w'), rate = P('rate'), va = P('va') || 0, mk = P('mk') || 0, stone = P('stone') || 0, gst = P('gst') || 0;

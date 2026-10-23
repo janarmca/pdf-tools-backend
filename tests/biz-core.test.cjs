@@ -65,4 +65,44 @@ t('rate-card presets are complete', () => {
   assert.ok(C.PRESETS.length >= 10); C.PRESETS.forEach(p => { assert.ok(p.id && p.ta && p.en && p.items.length >= 5, p.id); });
   assert.strictEqual(new Set(C.PRESETS.map(p => p.id)).size, C.PRESETS.length);
 });
+t('order book: 5 pants + 3 shirts, express, discount, advance, balance', () => {
+  const o = { l: [{ n: 'பேன்ட் / Pant', s: 'x', q: '5', r: '15' }, { n: 'சட்டை / Shirt', s: 'x', q: '3', r: '12' }, { n: '', q: '9', r: '9' }], ex: '50', dis: '10', pay: [{ a: 50 }] };
+  const c = C.orderCalc(o);
+  assert.deepStrictEqual(c, { sub: 111, ex: 55.5, dis: 10, total: 156.5, paid: 50, bal: 106.5, pcs: 8, lines: 2 });
+  assert.strictEqual(C.itemSummary(o, false), 'பேன்ட் ×5, சட்டை ×3');
+  assert.strictEqual(C.itemSummary({ l: [{ n: 'சட்டை / Shirt', q: 2 }, { n: 'சட்டை / Shirt', q: 1 }] }, true), 'Shirt ×3');
+  assert.strictEqual(C.orderCalc({ l: [{ n: 'A', q: '1', r: '10' }], dis: '50' }).total, 0); // discount never makes it negative
+});
+t('order book: dates, overdue and day summary', () => {
+  assert.strictEqual(C.addDaysIso('2026-12-30', 3), '2027-01-02'); assert.strictEqual(C.addDaysIso('2028-02-28', 1), '2028-02-29'); assert.strictEqual(C.addDaysIso('bad', 1), '');
+  const today = '2026-10-24';
+  const os = [
+    { d: today, st: 'open', due: today, l: [{ n: 'a', q: 5, r: 10 }], pay: [{ d: today, a: 20, m: 'cash' }] },
+    { d: '2026-10-20', st: 'open', due: '2026-10-22', l: [{ n: 'b', q: 2, r: 30 }], pay: [{ d: today, a: 10, m: 'upi' }] },
+    { d: '2026-10-21', st: 'ready', due: '2026-10-25', l: [{ n: 'c', q: 1, r: 100 }], pay: [] },
+    { d: today, st: 'cancel', due: today, l: [{ n: 'd', q: 9, r: 9 }], pay: [{ d: today, a: 999, m: 'cash' }] },
+    { d: '2026-10-01', st: 'done', due: '2026-10-02', l: [{ n: 'e', q: 1, r: 40 }], pay: [{ d: '2026-10-02', a: 40 }] }
+  ];
+  assert.ok(C.isOverdue(os[1], today)); assert.ok(!C.isOverdue(os[0], today)); assert.ok(!C.isOverdue(os[4], today));
+  assert.deepStrictEqual(C.dayStats(os, today), { orders: 1, pcs: 5, billed: 50, cash: 20, upi: 10, dueToday: 1, overdue: 1, readyWaiting: 1, toCollect: 180 });
+  const csv = C.ordersCsv([Object.assign({ tok: 7, c: { n: 'Ravi, K', ph: '98' } }, os[0])]);
+  assert.ok(csv.split('\r\n')[1].startsWith('7,2026-10-24,"Ravi, K",98,a ×5,5,50,20,30,2026-10-24,In progress'), csv);
+});
+t('order-book trades and tailor measurements are well formed', () => {
+  assert.ok(C.TRADES.length >= 12); assert.strictEqual(new Set(C.TRADES.map(x => x.id)).size, C.TRADES.length);
+  C.TRADES.forEach(x => { assert.ok(x.ta && x.en && x.icon && x.svc.length >= 1, x.id); (x.fields || []).forEach(f => assert.ok(['text', 'date', 'time', 'num', 'checks'].indexOf(f[2]) >= 0, x.id + f[0])); x.items.forEach(i => assert.ok(/ \/ /.test(i), x.id + ': ' + i)); });
+  Object.keys(C.MEASURES).forEach(k => assert.ok(C.MEASURES[k].f.length >= 6, k));
+});
+t('trip fares: local package with extra hours/km, fixed fare, per-km unchanged', () => {
+  const a = C.tripFare({ mode: 'local', startKm: 1000, endKm: 1100, hours: 10, pkgHours: 8, pkgKm: 80, pkgPrice: 2000, extraHrRate: 150, extraKmRate: 14, battaPerDay: 300, days: 1, toll: 50, advance: 500 });
+  assert.strictEqual(a.exHr, 2); assert.strictEqual(a.exKm, 20); assert.strictEqual(a.fare, 2580); assert.strictEqual(a.total, 2930); assert.strictEqual(a.due, 2430);
+  const b = C.tripFare({ mode: 'local', startKm: 0, endKm: 50, hours: 5, pkgHours: 8, pkgKm: 80, pkgPrice: 2000, extraHrRate: 150, extraKmRate: 14 });
+  assert.strictEqual(b.fare, 2000); // inside the package: no extras
+  const f = C.tripFare({ mode: 'fixed', fixedPrice: 1200, toll: 100, gstPct: 5 }); assert.strictEqual(f.total, 1365);
+  assert.deepStrictEqual(C.tripFare({ mode: 'km', startKm: 1000, endKm: 1180, ratePerKm: 12, minKmPerDay: 250, battaPerDay: 300 }), C.tripBill({ startKm: 1000, endKm: 1180, ratePerKm: 12, minKmPerDay: 250, battaPerDay: 300 }));
+});
+t('carpenter cut list adds every row, skips incomplete rows', () => {
+  assert.strictEqual(C.cutListCft([{ len: '10', wid: '6', thk: '2', qty: '1' }, { len: '7', wid: '4', thk: '3', qty: '4' }, { len: '', wid: '5', thk: '2', qty: '9' }]), 3.167);
+  assert.strictEqual(C.cutListCost([{ len: '10', wid: '6', thk: '2' }, { len: '7', wid: '4', thk: '3', qty: '4' }], 2400), 7600); // not 3.167 × 2400 = 7600.80
+});
 console.log(n + ' tests passed');

@@ -405,3 +405,10 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Hub `/for-small-business` (`audience-hubs.mjs` hub `smallbiz`, 10 trade sections, 138 trades), homepage card, sitemap, 8 generated /tools pages. Patched minified `index.html` by script (remin.py not in repo). sw v103, loadCategoryScript ?v=20261024a.
 - Verified only in headless desktop Chromium (390px viewport); not on a real phone. No licence/FSSAI/Udyam facts included (unverified). Khata data is per-browser — users must use Backup.
 - promo-news `small-biz-hub` (17 Nov).
+
+## UPDATE_70 — trade workflows (24 Oct)
+- `shopslip` is now **Order Book & Token Slip** (`category-biz.js`, storage `bz_orders_v1`, migrates shop name/token from `bz_slip_v1`): 12 trade profiles (`TRADES`: laundry, tailor, repair, vehicle, photo, flower, catering, service, carpenter, print, salon, general) with their own items, services and extra fields; tap items to count (5 pants, 3 shirts), per-line service/qty/rate/note, rates remembered per item+service (owner's own — no preset prices), express %, discount, advance; token slip PNG (58/80 mm/phone), WhatsApp received/ready/balance/thanks, delivery count check, payments, status open→ready→done, today summary, CSV, JSON backup; tailor measurement book (`MEASURES`); rates → price-list picture (writes `bz_ratecard_v1`).
+- PITFALL: the host has global click handlers for `[data-open]` (openTool) and `[data-back]` (goHome) — never use those attributes inside a tool (we use `data-oid` / `data-ret`). Also do not re-create buttons inside an input's `change` handler: the blur fires before the click and the tap is lost (tripcalc, wamsg now update in place).
+- `tripcalc`: per-km / local package (hours+km, extra hr/km) / fixed fare + trip diary with monthly totals (`bz_triplog_v1`). `woodcalc`: multi-row cut list (cost from the exact volume). `goldcalc`: weight unit grams or pavun (8 g). `cgpacalc`: negative-marking tab.
+- `tamil-library`: added official TN/India government service sites (links only + "private site, not government" note).
+- Tests: `node tests/biz-core.test.cjs` (16). Versions: category scripts `?v=20261024c`, sw v106. promo-news `order-book`.
