@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>தொழில் App — இலவசம் | PDF Tools India</title>
+<meta name="description" content="சிறுதொழில், கடை, தொழிலாளர்களுக்கு இலவச App — ஆர்டர், பில் + UPI QR, உதார் கணக்கு, வரவு-செலவு, வேலையாள் வருகை & கூலி, முன்பதிவு, சரக்கு இருப்பு, நினைவூட்டல். பணம் இல்லை, பதிவு இல்லை, தகவல் உங்கள் போனிலேயே.">
+<link rel="canonical" href="https://pdftoolsindia.com/app">
+<link rel="manifest" href="/app-manifest.json">
+<meta name="theme-color" content="#176B45">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="தொழில் App">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="/fonts/tamil.css">
+<style>
+  :root{--ink:#1F2933;--sub:#5B6673;--line:#E3E7EC;--bg:#F4F6F5;--brand:#176B45;--brand-dark:#0F4D31;--chip:#EEF4F0}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:10px}
+  .top .ic{font-size:26px}.top b{display:block;font-size:17px;line-height:1.25}.top small{opacity:.9;font-size:12px;font-weight:600}
+  .top .sp{flex:1;min-width:0}
+  .top button{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:10px;min-height:40px;padding:6px 10px;font:800 13px inherit;font-family:inherit;cursor:pointer}
+  main{max-width:720px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
+  .nav button{background:none;border:0;min-height:58px;font:700 11.5px/1.2 inherit;font-family:inherit;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px}
+  .nav button i{font-style:normal;font-size:22px}.nav button.on{color:var(--brand)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .tile{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:4px}
+  .tile i{font-style:normal;font-size:26px}.tile b{font-size:15px}.tile span{font-size:12.5px;color:var(--sub);font-weight:600}
+  .stat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer}
+  .stat b{display:block;font-size:22px;font-weight:900}.stat span{font-size:12.5px;color:var(--sub);font-weight:700}.stat.warn b{color:#C0392B}
+  h2{font-size:16px;margin:18px 0 0;font-weight:900}
+  .hello{background:linear-gradient(135deg,#176B45,#0F4D31);color:#fff;border-radius:18px;padding:16px}
+  .hello b{font-size:18px}.hello p{margin:6px 0 0;font-size:13.5px;opacity:.95}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:8px 16px;border-radius:12px;border:0;background:var(--brand);color:#fff;font:800 14.5px/1.2 inherit;font-family:inherit;cursor:pointer;text-decoration:none}
+  .btn.sec{background:#fff;color:var(--brand-dark);border:2px solid var(--line)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .note{background:#FFF8E6;border:1px solid #F3DFA2;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-top:12px}
+  .back{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .mod-h{font-size:18px;font-weight:900}
+  input[type=text]{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px;font-family:inherit}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><span class="ic" id="tIcon">🏪</span><span class="sp"><b id="tName">தொழில் App</b><small id="tSub">இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்</small></span><button type="button" id="langBtn">EN</button></header>
+<main id="main"><div class="note">ஏற்றுகிறது… / Loading…</div></main>
+<nav class="nav" id="nav" hidden></nav>
+<script>
+  // host helpers the shared business tools expect
+  var TOOL_IMPL = {};
+  var __appLang = (function () { try { return localStorage.getItem('bzapp_lang') || 'ta'; } catch (e) { return 'ta'; } })();
+  function downloadBlob(blob, name) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  var __jsqrP = null;
+  function ensureJsQr() { return __jsqrP || (__jsqrP = new Promise(function (res, rej) { if (window.jsQR) return res(window.jsQR); var s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js'; s.onload = function () { res(window.jsQR); }; s.onerror = function () { __jsqrP = null; rej(new Error('jsQR')); }; document.head.appendChild(s); })); }
+  function openTool(id) { if (window.__bzOpen) window.__bzOpen(id); else location.href = '/?tool=' + id; }
+</script>
+<script src="/category-biz.js?v=20261024e"></script>
+<script src="/category-bizapp.js?v=20261024e"></script>
+<script>
+(function () {
+  'use strict';
+  var KEY = 'bzapp_v1';
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  var en = function () { return __appLang === 'en'; };
+  function T(ta, e) { return en() ? e : ta; }
+  var esc = escapeHtml;
+  var MODS = {
+    quickbill: ['🛒', 'பில் + UPI', 'Bill + UPI', 'WhatsApp ஆர்டர் → பில், QR', 'WhatsApp order → bill, QR'],
+    shopslip: ['📒', 'ஆர்டர்கள்', 'Orders', 'டோக்கன், தயார், கொடுத்தது', 'Token, ready, delivered'],
+    khata: ['📕', 'உதார் கணக்கு', 'Credit book', 'யார் எவ்வளவு தர வேண்டும்', 'Who owes how much'],
+    cashbook: ['💵', 'வரவு-செலவு', 'Cash book', 'இன்று வந்தது / போனது', 'Money in / out today'],
+    staffbook: ['👷', 'வேலையாட்கள்', 'Workers', 'வருகை, கூலி, முன்பணம்', 'Attendance, wages'],
+    bookings: ['📅', 'முன்பதிவு', 'Bookings', 'நாள்காட்டி, நினைவூட்டல்', 'Calendar, reminders'],
+    stockbook: ['📦', 'சரக்கு', 'Stock', 'இருப்பு, குறைந்தவை', 'Stock, running low'],
+    docremind: ['⏰', 'நினைவூட்டல்', 'Renewals', 'உரிமம், காப்பீடு, EMI', 'Licence, insurance, EMI'],
+    tripcalc: ['🚖', 'பயணக் கட்டணம்', 'Trip bill', 'கி.மீ, பேக்கேஜ், பதிவேடு', 'Km, package, diary'],
+    woodcalc: ['🪚', 'மரக் கணக்கு', 'Timber', 'cft, பிளைவுட்', 'cft, plywood'],
+    ratecard: ['🏷️', 'விலைப்பட்டியல்', 'Price list', 'படமாக WhatsApp-ல்', 'Picture for WhatsApp'],
+    wamsg: ['💬', 'WhatsApp செய்திகள்', 'Messages', 'தயார், நிலுவை, வாழ்த்து', 'Ready, due, wishes'],
+    profitcalc: ['📈', 'லாபக் கணக்கு', 'Profit', 'விற்பனை விலை, லாபம்', 'Price & profit'],
+    stampmaker: ['🔵', 'ஸ்டாம்ப் டிசைன்', 'Stamp design', 'ரப்பர் ஸ்டாம்ப் படம்', 'Rubber stamp art']
+  };
+  var TRADES = [
+    ['veg', '🥬', 'காய்கறி / பழம் / மளிகை', 'Vegetables, fruit & grocery', ['quickbill', 'khata', 'cashbook', 'stockbook', 'ratecard', 'staffbook', 'wamsg'], 'general'],
+    ['laundry', '👕', 'சலவை / இஸ்திரி', 'Laundry & ironing', ['shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook', 'wamsg'], 'laundry'],
+    ['tailor', '🧵', 'தையல் கடை', 'Tailor', ['shopslip', 'bookings', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'tailor'],
+    ['driver', '🚖', 'ஓட்டுநர் / வாடகை வண்டி', 'Driver & taxi', ['tripcalc', 'bookings', 'cashbook', 'docremind', 'khata', 'wamsg'], null],
+    ['construction', '🧱', 'மேஸ்திரி / கட்டுமானம் / பெயிண்டர்', 'Mason, construction, painter', ['staffbook', 'shopslip', 'cashbook', 'khata', 'stockbook', 'profitcalc'], 'service'],
+    ['electric', '🔧', 'எலக்ட்ரீஷியன் / பிளம்பர் / AC', 'Electrician, plumber, AC', ['shopslip', 'bookings', 'stockbook', 'cashbook', 'khata', 'docremind'], 'service'],
+    ['carpenter', '🪚', 'தச்சர் / ஃபர்னிச்சர்', 'Carpenter & furniture', ['shopslip', 'woodcalc', 'staffbook', 'cashbook', 'khata', 'stockbook'], 'carpenter'],
+    ['photo', '📸', 'போட்டோ / வீடியோ', 'Photo & video', ['bookings', 'shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'photo'],
+    ['repair', '📱', 'மொபைல் / எலக்ட்ரானிக்ஸ் பழுது', 'Mobile & electronics repair', ['shopslip', 'stockbook', 'khata', 'cashbook', 'wamsg', 'ratecard'], 'repair'],
+    ['mechanic', '🛵', 'வண்டி மெக்கானிக்', 'Mechanic', ['shopslip', 'stockbook', 'khata', 'cashbook', 'docremind', 'staffbook'], 'vehicle'],
+    ['salon', '💇', 'சலூன் / அழகு நிலையம்', 'Salon & beauty', ['bookings', 'shopslip', 'cashbook', 'staffbook', 'ratecard', 'stockbook'], 'salon'],
+    ['food', '🍛', 'டீக்கடை / மெஸ் / கேட்டரிங்', 'Tea shop, mess, catering', ['shopslip', 'quickbill', 'stockbook', 'staffbook', 'cashbook', 'khata', 'bookings'], 'catering'],
+    ['flower', '🌼', 'பூக்கடை', 'Flower shop', ['quickbill', 'shopslip', 'bookings', 'khata', 'cashbook', 'ratecard'], 'flower'],
+    ['print', '🖨️', 'ஸ்டாம்ப் / அச்சகம் / ஜெராக்ஸ்', 'Stamps, printing, xerox', ['shopslip', 'stampmaker', 'cashbook', 'khata', 'ratecard', 'stockbook'], 'print'],
+    ['shop', '🏪', 'பெட்டிக்கடை / பொதுக் கடை', 'General shop', ['quickbill', 'khata', 'stockbook', 'cashbook', 'profitcalc', 'staffbook'], 'general'],
+    ['farm', '🌾', 'விவசாயம் / பண்ணை / பால்', 'Farm & dairy', ['cashbook', 'staffbook', 'stockbook', 'quickbill', 'khata', 'docremind'], 'general'],
+    ['tuition', '📚', 'டியூஷன் / பயிற்சி வகுப்பு', 'Tuition & classes', ['bookings', 'khata', 'cashbook', 'wamsg', 'staffbook'], null],
+    ['other', '🛠️', 'மற்ற தொழில் / வேலை', 'Any other work', ['shopslip', 'khata', 'cashbook', 'bookings', 'staffbook', 'stockbook', 'docremind'], 'general']
+  ];
+  var st = Object.assign({ trade: null, name: '' }, lsGet(KEY, {}));
+  var cur = 'home', main = document.getElementById('main'), nav = document.getElementById('nav');
+  var trade = function () { return TRADES.filter(function (t) { return t[0] === st.trade; })[0] || null; };
+  var mods = function () { var t = trade(); return t ? t[4] : []; };
+  var mName = function (id) { var m = MODS[id]; return m ? T(m[1], m[2]) : id; };
+  var deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredInstall = e; if (cur === 'more') draw(); });
+
+  function header() {
+    var t = trade();
+    document.getElementById('tIcon').textContent = t ? t[1] : '🏪';
+    document.getElementById('tName').textContent = st.name || (t ? T(t[2], t[3]) : T('தொழில் App', 'Business App'));
+    document.getElementById('tSub').textContent = T('இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்', 'Free · no payments · data stays on your phone');
+    document.getElementById('langBtn').textContent = en() ? 'தமிழ்' : 'EN';
+  }
+  function drawNav() {
+    if (!trade()) { nav.hidden = true; return; }
+    var m = mods(), items = [['home', '🏠', T('இன்று', 'Today')]].concat(m.slice(0, 3).map(function (id) { return [id, MODS[id][0], mName(id)]; })).concat([['more', '☰', T('மேலும்', 'More')]]);
+    nav.hidden = false;
+    nav.innerHTML = items.map(function (i) { return '<button type="button" data-go="' + i[0] + '" class="' + (cur === i[0] || (i[0] === 'more' && cur !== 'home' && m.slice(0, 3).indexOf(cur) < 0) ? 'on' : '') + '"><i>' + i[1] + '</i>' + esc(i[2]) + '</button>'; }).join('');
+    Array.prototype.forEach.call(nav.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+  }
+  function go(id) { cur = id; draw(); window.scrollTo(0, 0); try { history.replaceState(null, '', id === 'home' ? '/app' : '/app#' + id); } catch (e) { /* ignore */ } }
+  window.__bzOpen = function (id) { if (TOOL_IMPL[id]) go(id); else location.href = '/?tool=' + id; };
+
+  function pickTrade() {
+    main.innerHTML = '<div class="hello"><b>' + T('வணக்கம்! உங்கள் தொழில் என்ன?', 'Hello! What is your work?') + '</b><p>' + T('ஒருமுறை தேர்ந்தெடுங்கள் — உங்கள் தொழிலுக்குத் தேவையான கருவிகள் மட்டும் வரும். பிறகு மாற்றலாம்.', 'Choose once — you get the tools your work needs. You can change it later.') + '</p></div>' +
+      '<div class="grid">' + TRADES.map(function (t) { return '<button type="button" class="tile" data-t="' + t[0] + '"><i>' + t[1] + '</i><b>' + esc(T(t[2], t[3])) + '</b><span>' + t[4].slice(0, 3).map(mName).map(esc).join(' · ') + '</span></button>'; }).join('') + '</div>';
+    Array.prototype.forEach.call(main.querySelectorAll('[data-t]'), function (b) {
+      b.onclick = function () {
+        st.trade = b.getAttribute('data-t'); lsSet(KEY, st);
+        var prof = trade()[5]; if (prof) { var o = lsGet('bz_orders_v1', {}) || {}; o.prof = prof; lsSet('bz_orders_v1', o); }
+        go('home');
+      };
+    });
+  }
+
+  function stats() { // read every module's saved data on this phone
+    var t0 = (window.BizUI && BizUI.todayIso()) || new Date().toISOString().slice(0, 10), C = window.BizCore || {}, A = window.BizAppCore || {}, out = [], m = mods(), inr = function (v) { return window.BizUI ? BizUI.inr(v) : '₹ ' + v; };
+    function add(mod, big, label, warn) { if (m.indexOf(mod) >= 0) out.push([mod, big, label, warn]); }
+    try { var ob = lsGet('bz_orders_v1', {}) || {}, os = (ob.orders || []).filter(function (o) { return o.st === 'open' || o.st === 'ready'; }); var late = os.filter(function (o) { return C.isOverdue(o, t0); }).length, today = os.filter(function (o) { return o.due === t0; }).length, ready = os.filter(function (o) { return o.st === 'ready'; }).length; add('shopslip', String(os.length), T('கொடுக்க வேண்டிய ஆர்டர்கள்', 'Orders pending') + (today ? ' · ' + T('இன்று ', 'today ') + today : '') + (ready ? ' · ' + T('தயார் ', 'ready ') + ready : ''), late > 0); if (late) add('shopslip', String(late), T('தாமதமான ஆர்டர்கள்', 'Overdue orders'), true); } catch (e) { /* no data */ }
+    try { var qb = lsGet('bz_qbill_v1', {}) || {}, bills = qb.bills || [], unpaid = bills.filter(function (b) { return !b.paid; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0), todayB = bills.filter(function (b) { return b.d === t0; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0); add('quickbill', inr(Math.round(todayB * 100) / 100), T('இன்றைய பில்கள்', "Today's bills")); if (unpaid > 0) add('quickbill', inr(Math.round(unpaid * 100) / 100), T('பில் பணம் வர வேண்டியது', 'Bill payments pending'), true); } catch (e) { /* no data */ }
+    try { var kh = lsGet('bz_khata_v1', {}) || {}; if (Array.isArray(kh.c) && C.khataTotals) { var k = C.khataTotals(kh.c); add('khata', inr(k.owed), k.owing + T(' பேரிடம் வர வேண்டும்', ' customers owe you'), k.owed > 0); } } catch (e) { /* no data */ }
+    try { var cb = lsGet('bz_cash_v1', {}) || {}; if (A.cashSummary) { var cs = A.cashSummary(cb.e || [], t0, t0); add('cashbook', inr(cs.net), T('இன்று: வரவு ', 'Today: in ') + inr(cs.in) + T(' · செலவு ', ' · out ') + inr(cs.out), cs.net < 0); } } catch (e) { /* no data */ }
+    try { var sb = lsGet('bz_staff_v1', {}) || {}, ws = (sb.w || []).filter(function (w) { return !w.off; }), mk = (sb.att || {})[t0] || {}, pres = ws.filter(function (w) { return mk[w.id] && (mk[w.id].s === 'P' || mk[w.id].s === 'H'); }).length; if (ws.length) add('staffbook', pres + ' / ' + ws.length, T('இன்று வேலைக்கு வந்தவர்கள்', 'At work today')); else add('staffbook', '0', T('வேலையாட்கள் சேர்க்கவும்', 'Add your workers')); } catch (e) { /* no data */ }
+    try { var bk = lsGet('bz_book_v1', {}) || {}, bb = (bk.b || []).filter(function (x) { return x.st === 'booked' && x.d >= t0; }); var bt = bb.filter(function (x) { return x.d === t0; }).length, nx = bb.sort(function (a, b) { return (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')); })[0]; add('bookings', String(bt), T('இன்றைய முன்பதிவுகள்', "Today's bookings") + (nx ? ' · ' + T('அடுத்து ', 'next ') + (window.BizUI ? BizUI.dmy(nx.d) : nx.d) + (nx.t ? ' ' + nx.t : '') : '')); } catch (e) { /* no data */ }
+    try { var sk = lsGet('bz_stock_v1', {}) || {}; if (A.stockQty) { var low = (sk.it || []).filter(function (it) { return +it.min > 0 && A.stockQty(it, sk.mv || []) <= +it.min; }).length; add('stockbook', String(low), T('குறைந்த சரக்குகள்', 'Items running low'), low > 0); } } catch (e) { /* no data */ }
+    try { var dc = lsGet('bz_docs_v1', {}) || {}; if (A.daysLeft) { var soon = (dc.d || []).filter(function (d) { return A.daysLeft(A.nextRepeat(d.date, d.rep, t0), t0) <= (+d.before || 30); }).length; add('docremind', String(soon), T('விரைவில் புதுப்பிக்க வேண்டியவை', 'Renewals due soon'), soon > 0); } } catch (e) { /* no data */ }
+    try { var tl = lsGet('bz_triplog_v1', []) || [], mo = t0.slice(0, 7), mt = tl.filter(function (x) { return String(x.d || '').slice(0, 7) === mo; }); add('tripcalc', inr(mt.reduce(function (a, x) { return a + (+x.total || 0); }, 0)), T('இந்த மாதப் பயண வருமானம் · ', 'Trips this month · ') + mt.length); } catch (e) { /* no data */ }
+    return out;
+  }
+  function home() {
+    var t = trade(), s = stats();
+    main.innerHTML = '<div class="hello"><b>' + T('இன்று', 'Today') + ' — ' + esc(new Date().toLocaleDateString(en() ? 'en-IN' : 'ta-IN', { weekday: 'long', day: 'numeric', month: 'long' })) + '</b><p>' + esc(T(t[2], t[3])) + '</p></div>' +
+      (s.length ? '<div class="grid">' + s.map(function (x) { return '<button type="button" class="stat' + (x[3] ? ' warn' : '') + '" data-go="' + x[0] + '"><b>' + esc(x[1]) + '</b><span>' + MODS[x[0]][0] + ' ' + esc(x[2]) + '</span></button>'; }).join('') + '</div>' : '') +
+      '<h2>' + T('உங்கள் கருவிகள்', 'Your tools') + '</h2><div class="grid">' + mods().map(function (id) { var m = MODS[id]; return '<button type="button" class="tile" data-go="' + id + '"><i>' + m[0] + '</i><b>' + esc(T(m[1], m[2])) + '</b><span>' + esc(T(m[3], m[4])) + '</span></button>'; }).join('') + '</div>' +
+      '<div class="note">' + T('எல்லாத் தகவலும் இந்த போனில் மட்டுமே சேமிக்கப்படும் — எங்கள் server-க்கு எதுவும் வராது. "மேலும் → எல்லாவற்றையும் Backup" மூலம் அடிக்கடி Backup எடுங்கள்.', 'All data is saved only on this phone — nothing reaches our server. Use "More → Back up everything" often.') + '</div>';
+    Array.prototype.forEach.call(main.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+  }
+  function more() {
+    var m = mods(), others = Object.keys(MODS).filter(function (id) { return m.indexOf(id) < 0; });
+    var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    main.innerHTML = '<h2 style="margin-top:4px">' + T('உங்கள் கருவிகள்', 'Your tools') + '</h2><div class="grid">' + m.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') + '</div>' +
+      '<h2>' + T('மற்ற கருவிகள்', 'Other tools') + '</h2><div class="grid">' + others.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') +
+      [['quotepo', '🧾', 'பில் / Quotation / GST', 'Invoice / quotation / GST'], ['receipts', '🧾', 'ரசீது / வவுச்சர்', 'Receipts & vouchers'], ['businesscard', '🪪', 'விசிட்டிங் கார்டு', 'Visiting card'], ['postermaker', '🖼️', 'போஸ்டர் / பேனர்', 'Poster / banner'], ['gstcalc', '🧮', 'GST கணக்கு', 'GST calculator'], ['emicalc', '🏦', 'EMI / வட்டி', 'EMI / interest'], ['goldcalc', '🪙', 'தங்கம் / நகைக் கடன்', 'Gold & gold loan'], ['unitconv', '📐', 'நில அளவு மாற்றி', 'Land / unit converter']].map(function (x) { return '<a class="tile" style="text-decoration:none" href="/?tool=' + x[0] + '"><i>' + x[1] + '</i><b>' + esc(T(x[2], x[3])) + '</b><span>pdftoolsindia.com ↗</span></a>'; }).join('') + '</div>' +
+      '<h2>' + T('அமைப்பு', 'Settings') + '</h2>' +
+      '<div style="margin-top:8px"><label style="font-size:13px;font-weight:700;color:var(--sub)">' + T('கடை / உங்கள் பெயர் (மேலே காட்ட)', 'Shop / your name (shown on top)') + '</label><input type="text" id="nm" value="' + esc(st.name) + '"></div>' +
+      '<div class="row"><button type="button" class="btn sec" id="chg">🔄 ' + T('தொழிலை மாற்று', 'Change my work') + '</button><button type="button" class="btn" id="bk">💾 ' + T('எல்லாவற்றையும் Backup', 'Back up everything') + '</button><label class="btn sec" style="cursor:pointer">📂 ' + T('Backup-லிருந்து மீட்டெடு', 'Restore from backup') + '<input type="file" id="rs" accept=".json,application/json" hidden></label></div>' +
+      '<div class="row">' + (deferredInstall ? '<button type="button" class="btn" id="inst">📲 ' + T('போனில் App ஆக நிறுவு', 'Install on this phone') + '</button>' : '') + '</div>' +
+      '<div class="note">' + (ios ? T('iPhone / iPad-ல் App ஆக வைக்க: Safari-ல் "Share" (⬆️) → "Add to Home Screen".', 'On iPhone / iPad: in Safari tap Share (⬆️) → "Add to Home Screen".') : T('Android-ல்: Chrome மெனு (⋮) → "Add to Home screen" / "Install app".', 'On Android: Chrome menu (⋮) → "Add to Home screen" / "Install app".')) + '</div>' +
+      '<div class="note">' + T('இந்த App இலவசம்; பதிவு, கட்டணம், விளம்பரச் சிக்கல் எதுவும் இல்லை. தகவல் இந்த போனின் browser-ல் மட்டும் — browser data-வை அழித்தால் போய்விடும், அதனால் Backup file-ஐ WhatsApp / Drive-ல் வைத்திருங்கள்.', 'This app is free — no sign-up, no fees. Data lives only in this phone\'s browser; clearing browser data removes it, so keep the backup file in WhatsApp / Drive.') + '</div>' +
+      '<div class="row"><a class="btn sec" href="/">🏠 pdftoolsindia.com</a><a class="btn sec" href="/for-small-business">🏪 ' + T('எல்லா சிறுதொழில் கருவிகள்', 'All small-business tools') + '</a></div>';
+    Array.prototype.forEach.call(main.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+    document.getElementById('nm').addEventListener('input', function (e) { st.name = e.target.value; lsSet(KEY, st); header(); });
+    document.getElementById('chg').onclick = function () { st.trade = null; lsSet(KEY, st); cur = 'home'; draw(); };
+    document.getElementById('bk').onclick = function () {
+      var all = { app: 'pdftoolsindia-business-app', v: 1, at: new Date().toISOString(), data: {} };
+      for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && (k.indexOf('bz_') === 0 || k === KEY)) all.data[k] = localStorage.getItem(k); }
+      downloadBlob(new Blob([JSON.stringify(all)], { type: 'application/json' }), 'business-app-backup-' + new Date().toISOString().slice(0, 10) + '.json');
+    };
+    document.getElementById('rs').onchange = function (e) {
+      var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader();
+      r.onload = function () { try { var v = JSON.parse(String(r.result)); if (!v || v.app !== 'pdftoolsindia-business-app' || !v.data) throw new Error('bad'); if (!confirm(T('இப்போது உள்ள தகவல் இந்த Backup-ஆல் மாற்றப்படும். தொடரவா?', 'Current data will be replaced by this backup. Continue?'))) return; Object.keys(v.data).forEach(function (k) { if (k.indexOf('bz_') === 0 || k === KEY) localStorage.setItem(k, String(v.data[k])); }); st = Object.assign({ trade: null, name: '' }, lsGet(KEY, {})); cur = 'home'; draw(); alert(T('மீட்டெடுக்கப்பட்டது', 'Restored')); } catch (err) { alert(T('இது இந்த App-ன் Backup file இல்லை', 'This is not a backup of this app')); } };
+      r.readAsText(f);
+    };
+    var ib = document.getElementById('inst'); if (ib) ib.onclick = function () { deferredInstall.prompt(); deferredInstall.userChoice.then(function () { deferredInstall = null; draw(); }); };
+  }
+  function module(id) {
+    main.innerHTML = '<div class="back"><button type="button" class="btn sec" id="bk2">← ' + T('இன்று', 'Today') + '</button><span class="mod-h">' + MODS[id][0] + ' ' + esc(mName(id)) + '</span></div><div id="mod"></div>';
+    document.getElementById('bk2').onclick = function () { go('home'); };
+    var box = document.getElementById('mod');
+    try { TOOL_IMPL[id].mount(box); } catch (e) { box.innerHTML = '<div class="note">' + T('இந்தக் கருவியைத் திறக்க முடியவில்லை. பக்கத்தை மீண்டும் ஏற்றுங்கள்.', 'Could not open this tool. Reload the page.') + '</div>'; }
+  }
+  function draw() {
+    header();
+    if (!trade()) { nav.hidden = true; pickTrade(); return; }
+    drawNav();
+    if (cur === 'home') home(); else if (cur === 'more') more(); else if (TOOL_IMPL[cur]) module(cur); else { cur = 'home'; home(); }
+  }
+  document.getElementById('langBtn').onclick = function () { __appLang = en() ? 'ta' : 'en'; try { localStorage.setItem('bzapp_lang', __appLang); } catch (e) { /* ignore */ } document.documentElement.lang = __appLang; draw(); };
+  var h = location.hash.replace('#', ''); if (h && (MODS[h] || h === 'more')) cur = h;
+  draw();
+  if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () { /* offline support is optional */ }); }); }
+})();
+</script>
+</body>
+</html>

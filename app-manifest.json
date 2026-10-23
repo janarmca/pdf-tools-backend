@@ -1,0 +1,17 @@
+{
+  "name": "தொழில் App — PDF Tools India",
+  "short_name": "தொழில் App",
+  "description": "Free business app for Tamil Nadu workers and small shops: orders, bills with UPI QR, credit book, cash book, workers' wages, bookings, stock, reminders. Data stays on your phone.",
+  "id": "/app",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F6F5",
+  "theme_color": "#176B45",
+  "orientation": "portrait-primary",
+  "lang": "ta",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

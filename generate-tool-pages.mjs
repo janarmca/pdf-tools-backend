@@ -289,6 +289,7 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/for-government-employees`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/for-students`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/tamil-library`, freq: 'weekly', pri: '0.9' },
+    { loc: `${SITE}/app`, freq: 'weekly', pri: '0.9' },
     { loc: `${SITE}/for-small-business`, freq: 'weekly', pri: '0.8' },
     ...Object.values(AUDIENCE_HUBS).flatMap(h => hubSections(h).map(x => ({ loc: `${SITE}/${h.slug}/${x.key}`, freq: 'weekly', pri: '0.7' }))),
     { loc: `${SITE}/learn/`, freq: 'weekly', pri: '0.8' },

@@ -19,6 +19,12 @@
 /manifest.json
   Cache-Control: no-cache
 
+/app
+  Cache-Control: no-cache
+
+/app-manifest.json
+  Cache-Control: no-cache
+
 # kids-arcade.html, number-jungle-game-engine.html, etc. are also
 # frequently-updated app files, not static assets — same rule applies.
 /*.html

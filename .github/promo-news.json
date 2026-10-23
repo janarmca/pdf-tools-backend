@@ -441,5 +441,18 @@
       "பில்லை WhatsApp-ல் அனுப்புங்கள்"
     ],
     "url": "pdftoolsindia.com/?tool=quickbill"
+  },
+  {
+    "id": "business-app",
+    "date": "2026-11-21",
+    "icon": "📲",
+    "title": "தொழில் App — முழுதும் இலவசம்!",
+    "line": "உங்கள் தொழிலைத் தேர்ந்தெடுங்கள்: ஆர்டர், பில் + UPI QR, உதார், வரவு-செலவு, வேலையாள் கூலி, முன்பதிவு, சரக்கு — ஒரே App-ல், போனிலேயே.",
+    "steps": [
+      "pdftoolsindia.com/app திறங்கள்",
+      "உங்கள் தொழிலைத் தேர்ந்தெடுங்கள்",
+      "'Add to Home screen' செய்யுங்கள்"
+    ],
+    "url": "pdftoolsindia.com/app"
   }
 ]

@@ -639,6 +639,7 @@
     if (cur) lines.push(cur); return lines;
   }
   const waBtn = (phone, text, label) => '<a class="bz-btn green" target="_blank" rel="noopener" href="' + esc(waLink(phone, text)) + '">💬 ' + (label || T('WhatsApp-ல் அனுப்பு', 'Send on WhatsApp')) + '</a>';
+  window.BizUI = { T: T, isEn: isEn, esc: esc, $: $, $$: $$, lsGet: lsGet, lsSet: lsSet, uid: uid, makeRoot: makeRoot, purpose: purpose, field: field, textField: textField, selectField: selectField, tabs: tabs, table: table, resCard: resCard, bindInputs: bindInputs, copyText: copyText, saveCanvas: saveCanvas, shareCanvas: shareCanvas, waBtn: waBtn, fitFont: fitFont, wrapText: wrapText, FONT: FONT, todayIso: todayIso, dmy: dmy, inr: inr, fmtNum: fmtNum, num: num, n0: n0, round2: round2, csvCell: csvCell, waLink: waLink, waNumber: waNumber, addDaysIso: addDaysIso };
 
   /* ===================================================================== 1. khata — customer credit book */
   TOOL_IMPL.khata = {
