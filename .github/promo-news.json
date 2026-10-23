@@ -1,97 +1,393 @@
 [
   {
     "_note": "Add one entry for every NEW user-visible feature. The daily run posts it as a 'new update' Short (logo, what is new, 3 steps, then our contact + social names) on the first free day, then never again. id must be unique; date = first day it may be posted (YYYY-MM-DD, IST). Keep text short, true and in Tamil; steps = exactly 3.",
-    "id": "_template", "date": "2999-01-01", "icon": "🆕", "title": "தலைப்பு", "line": "ஒரு வரி விளக்கம்", "steps": ["படி 1", "படி 2", "படி 3"], "url": "pdftoolsindia.com"
-  },
-  {
-    "id": "dsc-tick", "date": "2026-10-17", "icon": "✅", "title": "கையொப்பம் சரியா? Tick உடன் புதிய PDF!",
-    "line": "DSC / e-Sign சரிபார்ப்பில் எல்லா கையொப்பமும் சரி என்றால், tick குறியுடன் புதிய PDF கிடைக்கும் — அசல் கோப்பு மாறாது.",
-    "steps": ["கையொப்பமிட்ட PDF-ஐப் போடுங்கள்", "எல்லாம் சரி என்றால் Tick பட்டனைத் தட்டுங்கள்", "Tick உடன் புதிய PDF பதிவிறக்கம்"],
-    "url": "pdftoolsindia.com/?tool=dscverify"
-  },
-  {
-    "id": "gov-hub", "date": "2026-10-19", "icon": "🏛️", "title": "அரசு ஊழியர்களுக்கு தனிப் பக்கம்!",
-    "line": "DA நிலுவை, வருமான வரி, கடிதங்கள் — அரசு ஊழியர் கருவிகள் எல்லாம் ஒரே பக்கத்தில்.",
-    "steps": ["pdftoolsindia.com திறங்கள்", "'அரசு ஊழியர்' அட்டையைத் தட்டுங்கள்", "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"],
-    "url": "pdftoolsindia.com/for-government-employees"
-  },
-  {
-    "id": "student-hub", "date": "2026-10-21", "icon": "🎓", "title": "மாணவர்களுக்கு தனிப் பக்கம்!",
-    "line": "Cut-off, மதிப்பெண், படிவங்கள், Resume — மாணவர் கருவிகள் எல்லாம் ஒரே பக்கத்தில். எந்தத் தகவலும் சேகரிக்கப்படாது.",
-    "steps": ["pdftoolsindia.com திறங்கள்", "'மாணவர்கள்' அட்டையைத் தட்டுங்கள்", "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"],
-    "url": "pdftoolsindia.com/for-students"
-  },
-  {
-    "id": "poster-maker", "date": "2026-10-20", "icon": "🖼️", "title": "தமிழில் போஸ்டர் — இலவசம்!",
-    "line": "பொங்கல், தீபாவளி, தள்ளுபடி, திறப்பு விழா போஸ்டர்கள் — உங்கள் கடைப் பெயர், போன், UPI QR உடன். Watermark இல்லை.",
-    "steps": ["ஒரு வடிவத்தைத் தேர்ந்தெடுங்கள்", "எழுத்தையும் படத்தையும் மாற்றுங்கள்", "PNG / PDF பதிவிறக்குங்கள்"],
-    "url": "pdftoolsindia.com/poster-maker"
-  },
-  {
-    "id": "whatsapp-share", "date": "2026-10-21", "icon": "📲", "title": "Download ஆனதும் WhatsApp-ல் share!",
-    "line": "எந்த tool-ஐப் பயன்படுத்தினாலும் முடிவில் ஒரு தட்டலில் நண்பர்களுக்கு WhatsApp-ல் அனுப்பலாம்.",
-    "steps": ["ஏதாவது ஒரு tool-ல் கோப்பு உருவாக்குங்கள்", "பச்சை WhatsApp பொத்தானைத் தட்டுங்கள்", "நண்பரைத் தேர்ந்து அனுப்புங்கள்"],
+    "id": "_template",
+    "date": "2999-01-01",
+    "icon": "🆕",
+    "title": "தலைப்பு",
+    "line": "ஒரு வரி விளக்கம்",
+    "steps": [
+      "படி 1",
+      "படி 2",
+      "படி 3"
+    ],
     "url": "pdftoolsindia.com"
   },
   {
-    "id": "photo-resizer", "date": "2026-10-22", "icon": "📐", "title": "படிவப் படம் 20KB-க்குள் — இலவசம்!",
+    "id": "dsc-tick",
+    "date": "2026-10-17",
+    "icon": "✅",
+    "title": "கையொப்பம் சரியா? Tick உடன் புதிய PDF!",
+    "line": "DSC / e-Sign சரிபார்ப்பில் எல்லா கையொப்பமும் சரி என்றால், tick குறியுடன் புதிய PDF கிடைக்கும் — அசல் கோப்பு மாறாது.",
+    "steps": [
+      "கையொப்பமிட்ட PDF-ஐப் போடுங்கள்",
+      "எல்லாம் சரி என்றால் Tick பட்டனைத் தட்டுங்கள்",
+      "Tick உடன் புதிய PDF பதிவிறக்கம்"
+    ],
+    "url": "pdftoolsindia.com/?tool=dscverify"
+  },
+  {
+    "id": "gov-hub",
+    "date": "2026-10-19",
+    "icon": "🏛️",
+    "title": "அரசு ஊழியர்களுக்கு தனிப் பக்கம்!",
+    "line": "DA நிலுவை, வருமான வரி, கடிதங்கள் — அரசு ஊழியர் கருவிகள் எல்லாம் ஒரே பக்கத்தில்.",
+    "steps": [
+      "pdftoolsindia.com திறங்கள்",
+      "'அரசு ஊழியர்' அட்டையைத் தட்டுங்கள்",
+      "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"
+    ],
+    "url": "pdftoolsindia.com/for-government-employees"
+  },
+  {
+    "id": "student-hub",
+    "date": "2026-10-21",
+    "icon": "🎓",
+    "title": "மாணவர்களுக்கு தனிப் பக்கம்!",
+    "line": "Cut-off, மதிப்பெண், படிவங்கள், Resume — மாணவர் கருவிகள் எல்லாம் ஒரே பக்கத்தில். எந்தத் தகவலும் சேகரிக்கப்படாது.",
+    "steps": [
+      "pdftoolsindia.com திறங்கள்",
+      "'மாணவர்கள்' அட்டையைத் தட்டுங்கள்",
+      "தேவையான கருவியைத் தேர்ந்தெடுங்கள்"
+    ],
+    "url": "pdftoolsindia.com/for-students"
+  },
+  {
+    "id": "poster-maker",
+    "date": "2026-10-20",
+    "icon": "🖼️",
+    "title": "தமிழில் போஸ்டர் — இலவசம்!",
+    "line": "பொங்கல், தீபாவளி, தள்ளுபடி, திறப்பு விழா போஸ்டர்கள் — உங்கள் கடைப் பெயர், போன், UPI QR உடன். Watermark இல்லை.",
+    "steps": [
+      "ஒரு வடிவத்தைத் தேர்ந்தெடுங்கள்",
+      "எழுத்தையும் படத்தையும் மாற்றுங்கள்",
+      "PNG / PDF பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/poster-maker"
+  },
+  {
+    "id": "whatsapp-share",
+    "date": "2026-10-21",
+    "icon": "📲",
+    "title": "Download ஆனதும் WhatsApp-ல் share!",
+    "line": "எந்த tool-ஐப் பயன்படுத்தினாலும் முடிவில் ஒரு தட்டலில் நண்பர்களுக்கு WhatsApp-ல் அனுப்பலாம்.",
+    "steps": [
+      "ஏதாவது ஒரு tool-ல் கோப்பு உருவாக்குங்கள்",
+      "பச்சை WhatsApp பொத்தானைத் தட்டுங்கள்",
+      "நண்பரைத் தேர்ந்து அனுப்புங்கள்"
+    ],
+    "url": "pdftoolsindia.com"
+  },
+  {
+    "id": "photo-resizer",
+    "date": "2026-10-22",
+    "icon": "📐",
+    "title": "படிவப் படம் 20KB-க்குள் — இலவசம்!",
     "line": "தேர்வு, வேலை விண்ணப்பப் படிவங்களுக்கு படம், கையொப்பத்தை KB, px அளவில் மாற்றுங்கள். Upload இல்லை.",
-    "steps": ["படத்தைத் தேர்ந்தெடுங்கள்", "KB, px அளவைக் கொடுங்கள்", "மாற்றியதைப் பதிவிறக்குங்கள்"],
+    "steps": [
+      "படத்தைத் தேர்ந்தெடுங்கள்",
+      "KB, px அளவைக் கொடுங்கள்",
+      "மாற்றியதைப் பதிவிறக்குங்கள்"
+    ],
     "url": "pdftoolsindia.com/photo-resizer"
   },
   {
-    "id": "tnpsc-photo", "date": "2026-10-23", "icon": "🪪", "title": "TNPSC படம், கையொப்பம் — ஒரே தட்டில்!",
+    "id": "tnpsc-photo",
+    "date": "2026-10-23",
+    "icon": "🪪",
+    "title": "TNPSC படம், கையொப்பம் — ஒரே தட்டில்!",
     "line": "TNPSC விண்ணப்பத்துக்கான புகைப்படம் 20–50 KB, கையொப்பம் 10–20 KB — இலவசம், Upload இல்லை.",
-    "steps": ["படத்தைத் தேர்ந்தெடுங்கள்", "TNPSC பொத்தானைத் தட்டுங்கள்", "மாற்றியதைப் பதிவிறக்குங்கள்"],
+    "steps": [
+      "படத்தைத் தேர்ந்தெடுங்கள்",
+      "TNPSC பொத்தானைத் தட்டுங்கள்",
+      "மாற்றியதைப் பதிவிறக்குங்கள்"
+    ],
     "url": "pdftoolsindia.com/tnpsc-photo-signature"
   },
   {
-    "id": "ai-foundation", "date": "2026-10-25", "icon": "🏛️", "title": "AI எப்படி உருவானது? தமிழில் கற்போம்!",
+    "id": "ai-foundation",
+    "date": "2026-10-25",
+    "icon": "🏛️",
+    "title": "AI எப்படி உருவானது? தமிழில் கற்போம்!",
     "line": "Logic gates, compiler, AI-யின் கணக்கு, AI எப்படிப் பேசுகிறது — தொட்டுப் பார்த்துக் கற்கும் 5 பாடங்கள். இலவசம்.",
-    "steps": ["கல்வி களஞ்சியம் திறங்கள்", "'அடித்தளம்' பகுதியைத் தட்டுங்கள்", "ஒரு பாடத்தைத் தேர்ந்தெடுங்கள்"],
+    "steps": [
+      "கல்வி களஞ்சியம் திறங்கள்",
+      "'அடித்தளம்' பகுதியைத் தட்டுங்கள்",
+      "ஒரு பாடத்தைத் தேர்ந்தெடுங்கள்"
+    ],
     "url": "pdftoolsindia.com/learn/#/future"
   },
   {
-    "id": "uzhavar-tools", "date": "2026-10-27", "icon": "🌾", "title": "உழவர் கருவிப்பெட்டி — இலவசம்!",
+    "id": "uzhavar-tools",
+    "date": "2026-10-27",
+    "icon": "🌾",
+    "title": "உழவர் கருவிப்பெட்டி — இலவசம்!",
     "line": "சென்ட், ஏக்கர், குழி மாற்றி; உர மூட்டைக் கணக்கு; செலவு, சமநிலை விலை; சோதனை நிலப் பதிவு. உள்நுழைவு இல்லை.",
-    "steps": ["pdftoolsindia.com/uzhavar-tools திறங்கள்", "தேவையான கருவியைத் தட்டுங்கள்", "அளவுகளை உள்ளிட்டுப் பாருங்கள்"],
+    "steps": [
+      "pdftoolsindia.com/uzhavar-tools திறங்கள்",
+      "தேவையான கருவியைத் தட்டுங்கள்",
+      "அளவுகளை உள்ளிட்டுப் பாருங்கள்"
+    ],
     "url": "pdftoolsindia.com/uzhavar-tools"
   },
-  {"id": "sign-place", "date": "2026-10-28", "icon": "✍️", "title": "PDF-ல் கையெழுத்து — நீங்கள் விரும்பும் இடத்தில்!", "line": "PDF பக்கத்தைப் பார்த்து, கையெழுத்தை இழுத்து சரியான இடத்தில் வையுங்கள். அளவையும் மாற்றலாம். இலவசம், கோப்பு வெளியே போகாது.", "steps": ["pdftoolsindia.com-ல் Sign PDF திறங்கள்", "PDF போட்டு கையெழுத்து வரையுங்கள்", "இழுத்து இடத்தில் வைத்து பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/tools/sign-pdf"},
-  {"id": "video-cut-crop", "date": "2026-10-29", "icon": "✂️", "title": "வீடியோ Trim, Crop, Resize — இலவசம்!", "line": "Timeline-ல் இழுத்து வீடியோவை வெட்டுங்கள்; Reels அளவுக்கு Crop/Resize; கணினித் திரையை ஒலியுடன் பதிவு செய்யுங்கள். கோப்பு வெளியே போகாது.", "steps": ["pdftoolsindia.com-ல் Video Tools திறங்கள்", "Trim, Crop, Resize அல்லது Screen Recorder", "முடிவைப் பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/video-tools"},
-  {"id": "audio-tools", "date": "2026-10-30", "icon": "🎵", "title": "ஆடியோ கருவிகள் — MP3 வெட்டு, இணை, மாற்று!", "line": "Ringtone செய், பாடலை வெட்டு, MP3 ஆக மாற்று, சத்தம் கூட்டு, குரல் பதிவு — இலவசம், கோப்பு வெளியே போகாது.", "steps": ["pdftoolsindia.com-ல் Video Tools திறங்கள்", "Audio Cutter அல்லது Converter தேர்வு", "MP3 ஆகப் பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/video-tools"},
-  {"id": "poster-pro", "date": "2026-10-31", "icon": "🖼️", "title": "போஸ்டர் மேக்கர் — 33 டிசைன் + AI!", "line": "பண்டிகை, கடை Offer, மெனு, வேலைவாய்ப்பு, Tuition டிசைன்கள்; Stickers, Badge, Effects; விருப்பமான AI படம்.", "steps": ["pdftoolsindia.com/poster-maker திறங்கள்", "டிசைன் தேர்ந்து உங்கள் விவரம் எழுதுங்கள்", "PNG / PDF ஆகப் பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/poster-maker"},
-  {"id": "img-blur-split", "date": "2026-11-01", "icon": "🫥", "title": "ஆதார் எண்ணை மறைக்க — இலவசம்!", "line": "படத்தில் ஆதார் எண், முகம், வண்டி எண்ணை Blur செய்யுங்கள்; Instagram-க்கு 3×3 Grid ஆகப் பிரியுங்கள்.", "steps": ["pdftoolsindia.com-ல் Image Tools திறங்கள்", "Blur / Hide அல்லது Split Grid தேர்வு", "பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/image-tools"},
-  {"id": "photo-art-ai", "date": "2026-11-02", "icon": "🪄", "title": "புகைப்படம் → ஓவியம் & Anime!", "line": "14 இலவச styles: பென்சில், கார்ட்டூன், Comic, Oil, Watercolour. AI Photo Style: Anime, 3D, தஞ்சாவூர் ஓவியம்.", "steps": ["pdftoolsindia.com-ல் Image Tools திறங்கள்", "Photo → Sketch & Art தேர்வு", "Style தேர்ந்து பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/image-tools"},
-  {"id": "tts-audio-pro", "date": "2026-11-03", "icon": "🗣️", "title": "தமிழ் Text to Speech + Karaoke!", "line": "உரையை இயல்பான தமிழ் குரலில் MP3 ஆக்குங்கள்; பாடலிலிருந்து குரல் நீக்கம், இரைச்சல் குறைப்பு, Pitch, Equalizer, Green screen.", "steps": ["pdftoolsindia.com-ல் Video Tools திறங்கள்", "Text to Speech அல்லது Vocal Remover", "MP3 / MP4 பதிவிறக்குங்கள்"], "url": "pdftoolsindia.com/video-tools"},
   {
-    "id": "pdf-edit-samefont", "date": "2026-11-04", "icon": "✏️", "title": "PDF எழுத்தை அதே font-ல் மாற்றுங்கள்!",
+    "id": "sign-place",
+    "date": "2026-10-28",
+    "icon": "✍️",
+    "title": "PDF-ல் கையெழுத்து — நீங்கள் விரும்பும் இடத்தில்!",
+    "line": "PDF பக்கத்தைப் பார்த்து, கையெழுத்தை இழுத்து சரியான இடத்தில் வையுங்கள். அளவையும் மாற்றலாம். இலவசம், கோப்பு வெளியே போகாது.",
+    "steps": [
+      "pdftoolsindia.com-ல் Sign PDF திறங்கள்",
+      "PDF போட்டு கையெழுத்து வரையுங்கள்",
+      "இழுத்து இடத்தில் வைத்து பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/tools/sign-pdf"
+  },
+  {
+    "id": "video-cut-crop",
+    "date": "2026-10-29",
+    "icon": "✂️",
+    "title": "வீடியோ Trim, Crop, Resize — இலவசம்!",
+    "line": "Timeline-ல் இழுத்து வீடியோவை வெட்டுங்கள்; Reels அளவுக்கு Crop/Resize; கணினித் திரையை ஒலியுடன் பதிவு செய்யுங்கள். கோப்பு வெளியே போகாது.",
+    "steps": [
+      "pdftoolsindia.com-ல் Video Tools திறங்கள்",
+      "Trim, Crop, Resize அல்லது Screen Recorder",
+      "முடிவைப் பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/video-tools"
+  },
+  {
+    "id": "audio-tools",
+    "date": "2026-10-30",
+    "icon": "🎵",
+    "title": "ஆடியோ கருவிகள் — MP3 வெட்டு, இணை, மாற்று!",
+    "line": "Ringtone செய், பாடலை வெட்டு, MP3 ஆக மாற்று, சத்தம் கூட்டு, குரல் பதிவு — இலவசம், கோப்பு வெளியே போகாது.",
+    "steps": [
+      "pdftoolsindia.com-ல் Video Tools திறங்கள்",
+      "Audio Cutter அல்லது Converter தேர்வு",
+      "MP3 ஆகப் பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/video-tools"
+  },
+  {
+    "id": "poster-pro",
+    "date": "2026-10-31",
+    "icon": "🖼️",
+    "title": "போஸ்டர் மேக்கர் — 33 டிசைன் + AI!",
+    "line": "பண்டிகை, கடை Offer, மெனு, வேலைவாய்ப்பு, Tuition டிசைன்கள்; Stickers, Badge, Effects; விருப்பமான AI படம்.",
+    "steps": [
+      "pdftoolsindia.com/poster-maker திறங்கள்",
+      "டிசைன் தேர்ந்து உங்கள் விவரம் எழுதுங்கள்",
+      "PNG / PDF ஆகப் பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/poster-maker"
+  },
+  {
+    "id": "img-blur-split",
+    "date": "2026-11-01",
+    "icon": "🫥",
+    "title": "ஆதார் எண்ணை மறைக்க — இலவசம்!",
+    "line": "படத்தில் ஆதார் எண், முகம், வண்டி எண்ணை Blur செய்யுங்கள்; Instagram-க்கு 3×3 Grid ஆகப் பிரியுங்கள்.",
+    "steps": [
+      "pdftoolsindia.com-ல் Image Tools திறங்கள்",
+      "Blur / Hide அல்லது Split Grid தேர்வு",
+      "பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/image-tools"
+  },
+  {
+    "id": "photo-art-ai",
+    "date": "2026-11-02",
+    "icon": "🪄",
+    "title": "புகைப்படம் → ஓவியம் & Anime!",
+    "line": "14 இலவச styles: பென்சில், கார்ட்டூன், Comic, Oil, Watercolour. AI Photo Style: Anime, 3D, தஞ்சாவூர் ஓவியம்.",
+    "steps": [
+      "pdftoolsindia.com-ல் Image Tools திறங்கள்",
+      "Photo → Sketch & Art தேர்வு",
+      "Style தேர்ந்து பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/image-tools"
+  },
+  {
+    "id": "tts-audio-pro",
+    "date": "2026-11-03",
+    "icon": "🗣️",
+    "title": "தமிழ் Text to Speech + Karaoke!",
+    "line": "உரையை இயல்பான தமிழ் குரலில் MP3 ஆக்குங்கள்; பாடலிலிருந்து குரல் நீக்கம், இரைச்சல் குறைப்பு, Pitch, Equalizer, Green screen.",
+    "steps": [
+      "pdftoolsindia.com-ல் Video Tools திறங்கள்",
+      "Text to Speech அல்லது Vocal Remover",
+      "MP3 / MP4 பதிவிறக்குங்கள்"
+    ],
+    "url": "pdftoolsindia.com/video-tools"
+  },
+  {
+    "id": "pdf-edit-samefont",
+    "date": "2026-11-04",
+    "icon": "✏️",
+    "title": "PDF எழுத்தை அதே font-ல் மாற்றுங்கள்!",
     "line": "PDF Editor-ல் உள்ள எழுத்தைத் தொட்டு மாற்றினால், அதே font, அளவு, நிறத்தில் மாறும் — வெள்ளை box இல்லை, பக்கம் தெளிவாகவே இருக்கும்.",
-    "steps": ["PDF Editor-ல் PDF-ஐப் போடுங்கள்", "மாற்ற வேண்டிய எழுத்தைத் தொடுங்கள்", "புதிய எழுத்து → Download"],
+    "steps": [
+      "PDF Editor-ல் PDF-ஐப் போடுங்கள்",
+      "மாற்ற வேண்டிய எழுத்தைத் தொடுங்கள்",
+      "புதிய எழுத்து → Download"
+    ],
     "url": "pdftoolsindia.com/?tool=pdfeditor"
   },
   {
-    "id": "poster-editor-v2", "date": "2026-11-05", "icon": "🖼️", "title": "போஸ்டர் Maker — புதிய Editor!",
+    "id": "poster-editor-v2",
+    "date": "2026-11-05",
+    "icon": "🖼️",
+    "title": "போஸ்டர் Maker — புதிய Editor!",
     "line": "இடப்பக்கம் எல்லா கருவிகளும், 40+ தமிழ் வடிவங்கள், காலி பக்கம் — போனிலும் எளிதாக போஸ்டர் செய்யுங்கள்.",
-    "steps": ["Poster Maker திறங்கள்", "வடிவம் அல்லது காலி பக்கம் தேர்வு", "எழுத்து மாற்றி PNG / PDF"],
+    "steps": [
+      "Poster Maker திறங்கள்",
+      "வடிவம் அல்லது காலி பக்கம் தேர்வு",
+      "எழுத்து மாற்றி PNG / PDF"
+    ],
     "url": "pdftoolsindia.com/poster-maker"
   },
   {
-    "id": "video-wm-drag", "date": "2026-11-06", "icon": "💧", "title": "வீடியோவில் Logo / எழுத்து — இழுத்து வைக்கலாம்!",
+    "id": "video-wm-drag",
+    "date": "2026-11-06",
+    "icon": "💧",
+    "title": "வீடியோவில் Logo / எழுத்து — இழுத்து வைக்கலாம்!",
     "line": "Video Watermark-ல் உங்கள் logo அல்லது தமிழ் எழுத்தை வீடியோ மேலே இழுத்து, அளவு மாற்றி, சரியான இடத்தில் வையுங்கள்.",
-    "steps": ["Video Watermark-ல் வீடியோ போடுங்கள்", "Logo / எழுத்தை இழுத்து வையுங்கள்", "Download — MP4 தயார்"],
+    "steps": [
+      "Video Watermark-ல் வீடியோ போடுங்கள்",
+      "Logo / எழுத்தை இழுத்து வையுங்கள்",
+      "Download — MP4 தயார்"
+    ],
     "url": "pdftoolsindia.com/?tool=videowatermark"
   },
   {
-    "id": "ai-transcribe", "date": "2026-11-07", "icon": "📝", "title": "பேச்சு → தமிழ் எழுத்து & Subtitle!",
+    "id": "ai-transcribe",
+    "date": "2026-11-07",
+    "icon": "📝",
+    "title": "பேச்சு → தமிழ் எழுத்து & Subtitle!",
     "line": "ஆடியோ / வீடியோவில் பேசியதை AI தமிழ் எழுத்தாகவும் YouTube-க்கு SRT subtitle-ஆகவும் மாற்றும்.",
-    "steps": ["Speech to Text-ல் file போடுங்கள்", "Text அல்லது Subtitle தேர்வு", "சரிபார்த்து Download"],
+    "steps": [
+      "Speech to Text-ல் file போடுங்கள்",
+      "Text அல்லது Subtitle தேர்வு",
+      "சரிபார்த்து Download"
+    ],
     "url": "pdftoolsindia.com/?tool=aitranscribe"
   },
   {
-    "id": "poster-ai-design", "date": "2026-11-08", "icon": "🪄", "title": "AI Design — 3 போஸ்டர் வடிவம் உடனே!",
+    "id": "poster-ai-design",
+    "date": "2026-11-08",
+    "icon": "🪄",
+    "title": "AI Design — 3 போஸ்டர் வடிவம் உடனே!",
     "line": "Poster Maker-ல் உங்கள் கடை / நிகழ்ச்சி விவரம் எழுதினால், AI 3 முழு போஸ்டர் வடிவமைப்பைத் தமிழில் தரும்.",
-    "steps": ["Poster Maker → ✨ AI", "விவரம் எழுதி AI Design தட்டுங்கள்", "பிடித்ததைத் தேர்ந்து திருத்துங்கள்"],
+    "steps": [
+      "Poster Maker → ✨ AI",
+      "விவரம் எழுதி AI Design தட்டுங்கள்",
+      "பிடித்ததைத் தேர்ந்து திருத்துங்கள்"
+    ],
     "url": "pdftoolsindia.com/poster-maker"
+  },
+  {
+    "id": "pdf-live-edit",
+    "date": "2026-11-09",
+    "icon": "✏️",
+    "title": "PDF-ல் நேரடியாக எழுத்தை மாற்றுங்கள்!",
+    "line": "PDF Editor-ல் எந்த எழுத்தையும் தட்டினால் அதே இடத்தில் type செய்து மாற்றலாம். Tick, Highlight, கையெழுத்தும் உண்டு.",
+    "steps": [
+      "PDF Editor-ல் PDF போடுங்கள்",
+      "எழுத்தைத் தட்டி type செய்யுங்கள்",
+      "Download PDF"
+    ],
+    "url": "pdftoolsindia.com/?tool=pdfeditor"
+  },
+  {
+    "id": "exam-presets",
+    "date": "2026-11-10",
+    "icon": "🎓",
+    "title": "தேர்வு வாரியாக Photo அளவு — UPSC, NEET",
+    "line": "தேர்வைத் தேர்ந்தெடுத்தால் சரியான px, KB அளவு தானாக வரும். பெயர் + தேதி, 3 கையொப்பப் படமும் உண்டு.",
+    "steps": [
+      "தேர்வு, படவகையைத் தேர்ந்தெடுங்கள்",
+      "படத்தைப் போட்டு சரிசெய்யுங்கள்",
+      "Download"
+    ],
+    "url": "pdftoolsindia.com/?tool=exampresets"
+  },
+  {
+    "id": "card-print",
+    "date": "2026-11-11",
+    "icon": "🪪",
+    "title": "ஆதார் / PAN அட்டையை உண்மை அளவில் அச்சிடுங்கள்",
+    "line": "முன், பின் பக்கத்தை 85.6 × 54 mm அளவில் A4-இல் ஒரே PDF ஆக்குங்கள். ஆதார் எண்ணை மறைக்கவும் முடியும்.",
+    "steps": [
+      "முன், பின் படங்களைப் போடுங்கள்",
+      "அட்டையைச் சுற்றி பெட்டியை இழுங்கள்",
+      "PDF அச்சிடுங்கள் (100% அளவு)"
+    ],
+    "url": "pdftoolsindia.com/?tool=cardprint"
+  },
+  {
+    "id": "pdf-auto-redact",
+    "date": "2026-11-12",
+    "icon": "🔒",
+    "title": "PDF-ல் ஆதார், PAN எண்ணைத் தானாக மறையுங்கள்",
+    "line": "PDF-ல் உள்ள ஆதார், PAN, மொபைல் எண்களைத் தானாகக் கண்டு கருப்பாக்கும். உங்கள் போனிலேயே — upload இல்லை.",
+    "steps": [
+      "PDF போடுங்கள்",
+      "எதை மறைக்க வேண்டும் என்று தேர்ந்தெடுங்கள்",
+      "Black out & Download"
+    ],
+    "url": "pdftoolsindia.com/?tool=pdfautoredact"
+  },
+  {
+    "id": "more-languages",
+    "date": "2026-11-13",
+    "icon": "🌐",
+    "title": "இப்போது हिन्दी, తెలుగు, ಕನ್ನಡ, മലയാളം!",
+    "line": "மேலே உள்ள 🌐 பொத்தானில் உங்கள் மொழியைத் தேர்ந்தெடுங்கள் — கருவிகளின் பெயர்கள் அந்த மொழியில் வரும்.",
+    "steps": [
+      "pdftoolsindia.com திறங்கள்",
+      "மேலே 🌐 தட்டுங்கள்",
+      "உங்கள் மொழியைத் தேர்ந்தெடுங்கள்"
+    ],
+    "url": "pdftoolsindia.com"
+  },
+  {
+    "id": "pdf-new-tools",
+    "date": "2026-11-14",
+    "icon": "🧰",
+    "title": "10 புதிய PDF கருவிகள் — இலவசம்!",
+    "line": "இருபக்க scan இணைப்பு, A4 அளவு, லெட்டர்ஹெட், Bates எண், வெற்றுப் பக்கம் நீக்கு, PDF → ஒரே படம் மற்றும் பல.",
+    "steps": [
+      "PDF பிரிவைத் திறங்கள்",
+      "புதிய கருவியைத் தேர்ந்தெடுங்கள்",
+      "PDF போட்டு Download"
+    ],
+    "url": "pdftoolsindia.com/pdf-tools"
+  },
+  {
+    "id": "gif-social",
+    "date": "2026-11-15",
+    "icon": "🎞️",
+    "title": "GIF Maker + எல்லா Social Media அளவுகளும்",
+    "line": "படங்களை GIF ஆக்குங்கள்; ஒரே படத்தை Instagram, WhatsApp Status, YouTube அளவுகளில் ஒரே ZIP-ஆகப் பெறுங்கள்.",
+    "steps": [
+      "படத்தைத் தேர்ந்தெடுங்கள்",
+      "அளவுகளைத் தேர்ந்தெடுங்கள்",
+      "ZIP Download"
+    ],
+    "url": "pdftoolsindia.com/?tool=socialresize"
+  },
+  {
+    "id": "pdf-preview-fixes",
+    "date": "2026-11-16",
+    "icon": "🖍️",
+    "title": "PDF Highlight Undo + பக்க Preview",
+    "line": "Highlight-ல் Undo/Redo, முழு PDF-லும் சொல் தேடல்; Crop, Blank Page, Logo-வில் எல்லாப் பக்கமும் தெரியும்.",
+    "steps": [
+      "PDF-ஐத் தேர்ந்தெடுங்கள்",
+      "பக்கங்களைப் பார்த்து மாற்றுங்கள்",
+      "Download"
+    ],
+    "url": "pdftoolsindia.com/?tool=pdfhighlight"
   }
 ]
