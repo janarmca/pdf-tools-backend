@@ -488,6 +488,14 @@ const TOOLS = [
   {id:'incometaxcalc', name:'Income Tax Calculator', desc:'Old vs New regime comparison — see which saves you more, FY 2026-27 slabs', icon:'🧾', color:'#8A3A1A', cat:'business'},
   {id:'hracalc', name:'HRA Exemption Calculator', desc:'Tax-free part of house rent allowance — 2026 rule with 8 cities at 50%', icon:'🏠', color:'#2B8A3E', cat:'business', cost:0, lazy:'examx'},
   {id:'examage', name:'Exam Age Eligibility & Relaxation', desc:'Am I eligible? Age on the cut-off date, OBC/SC/ST/PwBD relaxation, born-between dates', icon:'🎂', color:'#5F3DC4', cat:'education', cost:0, lazy:'examx'},
+  {id:'khata', name:'Customer Credit Book (Udhar Khata)', desc:'Who owes you how much: entries, WhatsApp reminder, backup. For any small shop', icon:'📒', color:'#B45309', cat:'business', cost:0, lazy:'biz'},
+  {id:'ratecard', name:'Price List / Rate Card Maker', desc:'Price-list picture for laundry, flowers, photo studio, tailor, driver and more', icon:'🏷️', color:'#1F4E79', cat:'business', cost:0, lazy:'biz'},
+  {id:'stampmaker', name:'Rubber Stamp Designer', desc:'Round, rectangle or oval stamp at real mm size, with mirror image for the stamp maker', icon:'🔵', color:'#5B2A86', cat:'business', cost:0, lazy:'biz'},
+  {id:'woodcalc', name:'Carpenter & Timber Calculator', desc:'Timber cft, round log, plywood sheets needed, area cost, feet-inch to cm', icon:'🪚', color:'#8A5A2B', cat:'business', cost:0, lazy:'biz'},
+  {id:'tripcalc', name:'Trip Bill for Drivers & Taxi', desc:'Km, minimum km, waiting, night batta, toll: bill picture and WhatsApp text', icon:'🚖', color:'#2B8A3E', cat:'business', cost:0, lazy:'biz'},
+  {id:'shopslip', name:'Token / Delivery Slip Maker', desc:'Token slip for laundry, tailor, repair and photo shops: 58 mm, 80 mm or phone picture', icon:'🎫', color:'#0B7285', cat:'business', cost:0, lazy:'biz'},
+  {id:'wamsg', name:'WhatsApp Messages for Shops', desc:'Ready customer messages: order ready, payment due, booking, festival wishes', icon:'💬', color:'#1E8E5A', cat:'business', cost:0, lazy:'biz'},
+  {id:'profitcalc', name:'Profit & Selling Price Calculator', desc:'Cost to selling price, margin vs markup, GST price, break-even units', icon:'📈', color:'#C2255C', cat:'business', cost:0, lazy:'biz'},
   {id:'agecalc', name:'Age Calculator', desc:'Exact age in years, months, days — plus days until your next birthday', icon:'🎂', color:'#C2185B', cat:'business'},
   {id:'percentcalc', name:'Percentage Calculator', desc:'X% of Y, what % is X of Y, and percentage increase/decrease', icon:'💯', color:'#00838F', cat:'business'},
   {id:'hrattendance', name:'HR Attendance Register', desc:'Daily attendance with weekly off / holiday, paid days and wages, month grid, Excel muster roll, print, backup — works offline', icon:'📇', color:'#1F2A44', cat:'business',lazy:'docs'},
@@ -1429,7 +1437,7 @@ sigstrip3:['3 கையொப்பப் படம் (UPSC)','மூன்ற�
 photosignjoin:['புகைப்படம் + கையொப்பம் இணை','இரண்டையும் ஒரே படமாக்கு'],
 cardprint:['ஆதார் / PAN அட்டை அச்சு','முன், பின் பக்கம் உண்மை அளவில் A4-இல்'],
 hracalc:['HRA வரிவிலக்கு கணிப்பான்','வீட்டு வாடகைப் படியில் வரி இல்லாத பகுதி — 2026 விதி'],
-examage:['தேர்வு வயது தகுதி','வயது வரம்பு, சலுகை, பிறந்த தேதி வரம்பு'],
+examage:['தேர்வு வயது தகுதி','வயது வரம்பு, சலுகை, பிறந்த தேதி வரம்பு'],khata:['உதார் கணக்குப் புத்தகம்','யார் எவ்வளவு தர வேண்டும் — பதிவு, WhatsApp நினைவூட்டல், Backup'],ratecard:['விலைப்பட்டியல் தயாரிப்பு','கடைக்கான விலைப்பட்டியல் படம் — WhatsApp-ல் பகிர, ஒட்ட'],stampmaker:['ரப்பர் ஸ்டாம்ப் வடிவமைப்பு','வட்டம், செவ்வகம், நீள்வட்டம் — உண்மை அளவில், கண்ணாடிப் பிம்பத்துடன்'],woodcalc:['தச்சு — மர அளவு கணக்கு','பலகை cft, உருளை மரம், பிளைவுட் ஷீட், அடி ↔ செ.மீ'],tripcalc:['வாகனப் பயணக் கட்டணம்','கி.மீ, காத்திருப்பு, பேட்டா, டோல் — பில் படம், WhatsApp செய்தி'],shopslip:['டோக்கன் ரசீது','சலவை, தையல், பழுதுக் கடைகளுக்கு — தானாக ஏறும் டோக்கன் எண்'],wamsg:['கடைக்கான WhatsApp செய்திகள்','ஆர்டர் தயார், பணம் நிலுவை, பண்டிகை வாழ்த்து — ஒரே தொடுதலில்'],profitcalc:['லாபம் & விற்பனை விலை கணிப்பான்','வாங்கிய விலையிலிருந்து விற்பனை விலை, லாப %, break-even'],
 gifmaker:['படங்கள் → GIF','பல படங்களை அசையும் GIF ஆக்கு'],
 gifedit:['GIF திருத்து','அளவு, வேகம், பின்னோக்கு, எழுத்து சேர்'],
 socialresize:['சமூக ஊடக அளவுகள்','ஒரு படம் → Instagram, Status, YouTube அளவுகள் அனைத்தும்'],
@@ -1626,6 +1634,14 @@ numsys:['எண் முறை மாற்றி','தசம, இரும, �
 
 const TOOL_ALIAS = {
   pdfaltmix:'duplex scan odd even pages interleave alternate mix front back scanner', pdfsplithalf:'split page half a3 to a4 book scan two pages one sheet', pdfresize:'resize pdf a4 size page size letter legal scale', pdfbates:'bates numbering legal court document number exhibit', pdfletterhead:'letterhead company pad overlay background', pdfremoveblank:'blank pages empty page remove scan', pdfautoredact:'aadhaar mask hide pan number phone redact auto privacy masked aadhaar', pdf2md:'pdf to markdown md html web page', md2pdf:'markdown to pdf md text to pdf notes', pdflongimg:'pdf to long image one image whatsapp screenshot',
+  khata:'udhar khata credit book customer balance baki kadan ledger shop உதார் கடன் கணக்கு பாக்கி',
+  ratecard:'price list rate card menu board tariff laundry flower photo studio tailor driver விலைப்பட்டியல் ரேட் கார்டு',
+  stampmaker:'rubber stamp seal round company stamp mirror design ஸ்டாம்ப் சீல் முத்திரை ரப்பர்',
+  woodcalc:'carpenter timber wood cft cubic feet plywood sheet log feet inch cm தச்சு மரம் பலகை கன அடி',
+  tripcalc:'driver taxi cab trip bill km waiting batta toll rental vehicle ஓட்டுநர் டாக்ஸி வாடகை வாகனம் பயணம்',
+  shopslip:'token slip receipt laundry tailor repair delivery thermal 58mm 80mm டோக்கன் ரசீது சலவை தையல்',
+  wamsg:'whatsapp message template customer reminder greeting pongal deepavali வாட்ஸ்அப் செய்தி வாழ்த்து',
+  profitcalc:'profit margin markup selling price cost gst break even shop லாபம் விற்பனை விலை',
   exampresets:'upsc ssc ibps sbi neet rrb photo size kb signature thumb impression declaration postcard exam photo', sigclean:'signature clean white background black ink enhance', sigstrip3:'upsc three signature 3 signature strip', photosignjoin:'photo signature join combine one image', cardprint:'aadhaar print pan card print voter id driving licence front back a4 real size', hracalc:'hra exemption house rent allowance tax calculator metro', examage:'age limit eligibility relaxation obc sc st pwd exam age calculator born between', gifmaker:'gif maker animation photos to gif', gifedit:'gif resize speed reverse boomerang frames', socialresize:'instagram size whatsapp status youtube thumbnail facebook cover social media resize',
   merge:'join combine இணை சேர் ஒன்றாக்கு', split:'separate பிரி', compress:'reduce size smaller சுருக்கு kuraikka', pdf2word:'word doc convert',
   img2pdf:'jpg png photo to pdf', imgcompress:'reduce photo size jpg jpeg photo சுருக்கு', bgremove:'background remove பின்னணி cutout', videocompress:'video size reduce சுருக்கு',
@@ -1883,6 +1899,7 @@ const CATEGORY_GRADIENTS = {
 const AUDIENCE_CARDS = [
   {href:'/for-government-employees', icon:'🏛️', c1:'#1F4E79', c2:'#14304D', ta:'அரசு ஊழியர்கள்', en:'Government employees', sta:'DA நிலுவை · வரி · கடிதங்கள்', sen:'DA arrears · tax · letters'},
   {href:'/for-students', icon:'🎓', c1:'#2E7D5B', c2:'#1B4D37', ta:'மாணவர்கள்', en:'Students', sta:'கட்-ஆஃப் · வருகை · Resume', sen:'Cut-off · attendance · Resume'},
+  {href:'/for-small-business', icon:'🏪', c1:'#B45309', c2:'#7A3B06', ta:'சிறுதொழில்', en:'Small business', sta:'உதார் கணக்கு · விலைப்பட்டியல் · ஸ்டாம்ப்', sen:'Credit book · price list · stamps'},
   {href:'/uzhavar-tools', icon:'🌾', c1:'#6B8E23', c2:'#3F5A12', ta:'உழவர்கள்', en:'Farmers', sta:'நில அளவு · உரம் · செலவு · சோதனை நிலம்', sen:'Land · fertiliser · cost · trial plot'},
   {href:'/learn/', icon:'📚', c1:'#E8894A', c2:'#C96A2C', ta:'கல்வி களஞ்சியம்', en:'Learning hub', sta:'1–10 வகுப்பு · விளையாடிக் கற்றல்', sen:'Classes 1–10 · learn by playing'},
 ];
@@ -2142,7 +2159,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261023b`;
+    s.src = `category-${cat}.js?v=20261024a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);

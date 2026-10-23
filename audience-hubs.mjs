@@ -80,6 +80,70 @@ export const AUDIENCE_HUBS = {
     ],
     remind: { events: 'custom', label: 'என் தேர்வு / விண்ணப்பத் தேதியை calendar-ல் சேர்', note: '' },
   },
+  smallbiz: {
+    file: 'for-small-business.html', slug: 'for-small-business',
+    title: 'சிறுதொழில் செய்பவர்களுக்கான இலவசக் கருவிகள் — உதார் கணக்கு, பில், விலைப்பட்டியல், ரப்பர் ஸ்டாம்ப் | PDF Tools India',
+    desc: 'Free tools for small businesses and trades in Tamil Nadu — customer credit book (udhar khata), bills and quotations, price list maker, rubber stamp designer, carpenter timber calculator, driver trip bill, token slips, WhatsApp messages. No signup, nothing to pay, works on mobile.',
+    h1: 'சிறுதொழில் செய்பவர்களுக்காக', en: 'For small businesses and trades in Tamil Nadu',
+    grad: 'linear-gradient(135deg,#B45309,#7A3B06)', icon: '🏪',
+    intro: 'போட்டோகிராபர், ஓட்டுநர், தச்சர், சலவைத் தொழிலாளி, ரப்பர் ஸ்டாம்ப் செய்பவர், பூக்கடை, மளிகைக் கடை உட்பட 100-க்கும் மேற்பட்ட தொழில்களுக்கு: உதார் கணக்கு, பில், விலைப்பட்டியல், டோக்கன் ரசீது, WhatsApp செய்தி — எல்லாம் இலவசம்.',
+    introEn: 'For photographers, drivers, carpenters, laundry owners, stamp makers, flower shops, grocers and 100+ other trades: credit book, bills, price lists, token slips and WhatsApp messages. Free, no signup, no hidden charge.',
+    quick: ['khata', 'quotepo', 'ratecard', 'wamsg', 'shopslip', 'stampmaker'],
+    sections: [
+      { ta: 'புகைப்படம், வீடியோ, அலங்காரம்', en: 'Photo, video and events',
+        trades: ['புகைப்படக் கலைஞர் (Photographer)', 'வீடியோகிராபர்', 'போட்டோ ஸ்டுடியோ', 'ஆல்பம் டிசைனர்', 'ட்ரோன் ஆபரேட்டர்', 'DJ / ஒலி-ஒளி அமைப்பு', 'மேடை அலங்காரம்', 'திருமண மண்டப அலங்காரம்', 'பந்தல் / சாமியானா', 'ஈவெண்ட் ஆர்கனைசர்', 'பேண்ட் / மேளக் குழு', 'வீடியோ எடிட்டர்'],
+        tools: [['ratecard', 'Package விலைப்பட்டியல் படம்'], ['quotepo', 'Quotation / பில் / advance ரசீது'], ['imgwatermark', 'போட்டோவில் உங்கள் பெயர் watermark'], ['imgcollage', 'Collage / ஆல்பம் பக்கம்'], ['imgpassport', 'பாஸ்போர்ட் / ID photo தாள்'], ['postermaker', 'போஸ்டர் & விளம்பரம்'], ['wamsg', 'booking உறுதி, delivery செய்தி'], ['khata', 'முன்பணம் / நிலுவை கணக்கு']] },
+      { ta: 'வாகனம் & பயணம்', en: 'Drivers and transport',
+        trades: ['கார் / டாக்ஸி ஓட்டுநர்', 'ஆட்டோ ஓட்டுநர்', 'லாரி உரிமையாளர்', 'டெம்போ / மினி லோடு', 'பள்ளி வேன் ஓட்டுநர்', 'ஆம்புலன்ஸ் ஓட்டுநர்', 'JCB / கிரேன் ஆபரேட்டர்', 'டிராவல்ஸ் உரிமையாளர்', 'சுற்றுலா வழிகாட்டி', 'பைக் வாடகை', 'டிரைவிங் ஸ்கூல்', 'கூரியர் / பார்சல் ஏஜென்ட்'],
+        tools: [['tripcalc', 'கி.மீ, காத்திருப்பு, பேட்டா, டோல் — பயணக் கட்டணம்'], ['quotepo', 'வாடகை பில் / டிரிப் ஷீட்'], ['khata', 'வாடிக்கையாளர் பாக்கி கணக்கு'], ['ratecard', 'கி.மீ கட்டண அட்டை'], ['emicalc', 'வாகனக் கடன் EMI'], ['wamsg', 'booking, நிலுவை செய்தி'], ['receipts', 'பணம் பெற்ற ரசீது'], ['expensetracker', 'டீசல், பழுது செலவுக் கணக்கு']] },
+      { ta: 'கட்டுமானம், தச்சு, மின்சாரம்', en: 'Building, carpentry and fitting',
+        trades: ['தச்சர் (Carpenter)', 'கொத்தனார் (Mason)', 'பெயிண்டர்', 'பிளம்பர்', 'எலக்ட்ரீஷியன்', 'வெல்டர் / கிரில் செய்பவர்', 'டைல்ஸ் வேலை', 'கண்ணாடி / அலுமினியம் ஃபேப்ரிகேஷன்', 'இன்டீரியர் டிசைனர்', 'சிவில் கான்ட்ராக்டர்', 'போர்வெல் / மோட்டார் பழுது', 'கூரை வேலை', 'கதவு ஜன்னல் செய்பவர்', 'சாலை / பாலிஷ் வேலை'],
+        tools: [['woodcalc', 'மர cft, பிளைவுட் ஷீட், அடி ↔ செ.மீ'], ['quotepo', 'Estimate / Quotation / பில்'], ['unitconv', 'சதுர அடி, சென்ட், அலகு மாற்றம்'], ['khata', 'வேலை நிலுவை, முன்பணம்'], ['receipts', 'முன்பணம் / கூலி ரசீது'], ['ratecard', 'கூலி விலைப்பட்டியல்'], ['tnrentagreement', 'வாடகை ஒப்பந்தம்'], ['wamsg', 'வேலை முடிந்த செய்தி']] },
+      { ta: 'சலவை, தையல், அழகு', en: 'Laundry, tailoring and beauty',
+        trades: ['சலவைத் தொழிலாளி (Dhobi)', 'இஸ்திரி கடை', 'ட்ரை கிளீனிங்', 'தையல் கலைஞர் (Tailor)', 'பொட்டிக்', 'எம்ப்ராய்டரி / ஆரி வேலை', 'சேலை பால்ஸ் / ஃபால்', 'முடிதிருத்தும் நிலையம்', 'அழகு நிலையம் (Beauty parlour)', 'மெஹந்தி கலைஞர்', 'மணமகள் ஒப்பனை', 'ஸ்பா / மசாஜ்', 'டாட்டூ கலைஞர்'],
+        tools: [['shopslip', 'டோக்கன் ரசீது (துணி / தையல்)'], ['ratecard', 'விலைப்பட்டியல் படம்'], ['khata', 'மாதக் கணக்கு வாடிக்கையாளர்'], ['wamsg', '"தயார்" / "இன்று டெலிவரி" செய்தி'], ['quotepo', 'பில் / Cash bill'], ['businesscard', 'Visiting card'], ['receipts', 'முன்பணம் ரசீது'], ['profitcalc', 'விலை நிர்ணயம், லாபம்']] },
+      { ta: 'உணவு & பானம்', en: 'Food and drinks',
+        trades: ['தேநீர்க் கடை', 'உணவகம் / மெஸ்', 'டிபன் கடை', 'பேக்கரி', 'இனிப்பு / கார வகைக் கடை', 'ஜூஸ் கடை', 'கேட்டரிங்', 'வீட்டு உணவு / டிபன் சர்வீஸ்', 'தெரு உணவுக் கடை', 'ஐஸ்கிரீம் / குளிர்பானம்', 'மீன் / இறைச்சிக் கடை', 'பிரியாணி கடை', 'ஊறுகாய் / அப்பளம் வீட்டுத் தொழில்'],
+        tools: [['profitcalc', 'விற்பனை விலை, லாப %, break-even'], ['ratecard', 'மெனு / விலைப் பலகை'], ['quotepo', 'கேட்டரிங் Quotation / பில்'], ['khata', 'கடன் வாடிக்கையாளர் கணக்கு'], ['wamsg', 'ஆர்டர் தயார், பண்டிகை வாழ்த்து'], ['discountcalc', 'தள்ளுபடி கணிப்பான்'], ['gstcalc', 'GST கணிப்பான்'], ['expensetracker', 'தினசரி செலவு']] },
+      { ta: 'கடைகள் & வியாபாரம்', en: 'Shops and retail',
+        trades: ['மளிகைக் கடை', 'பூக்கடை (Flower shop)', 'பழம் / காய்கறிக் கடை', 'ஸ்டேஷனரி', 'மொபைல் கடை', 'மருந்துக் கடை', 'ஹார்டுவேர் / எலக்ட்ரிக்கல்', 'ஜவுளிக் கடை', 'செருப்புக் கடை', 'பரிசுப் பொருள் கடை', 'பூஜைப் பொருள் கடை', 'பாத்திரக் கடை', 'நகைக் கடை', 'உரம் / விதைக் கடை', 'செல்லப்பிராணிக் கடை', 'மரச்சாமான் கடை', 'பொம்மைக் கடை'],
+        tools: [['khata', 'உதார் கணக்குப் புத்தகம்'], ['profitcalc', 'லாபம், விற்பனை விலை'], ['quotepo', 'GST பில் / Cash bill / Quotation'], ['ratecard', 'விலைப்பட்டியல் / தள்ளுபடி அறிவிப்பு'], ['gstcalc', 'GST கணிப்பான்'], ['discountcalc', 'தள்ளுபடி'], ['goldcalc', 'நகை விலை, சேதாரம்'], ['wamsg', 'வாடிக்கையாளர் செய்திகள்'], ['qrgen', 'UPI QR code படம்']] },
+      { ta: 'அச்சு, டிசைன், ஸ்டாம்ப்', en: 'Printing, design and stamps',
+        trades: ['ரப்பர் ஸ்டாம்ப் செய்பவர்', 'ஜெராக்ஸ் / நெட் சென்டர்', 'ஃப்ளெக்ஸ் / பேனர் அச்சு', 'டிடிபி / கிராபிக் டிசைனர்', 'போர்டு எழுத்தாளர் (Signboard)', 'பெயர்ப் பலகை / எங்க்ரேவிங்', 'லேசர் கட்டிங்', 'திருமண அழைப்பிதழ் அச்சகம்', 'டி-ஷர்ட் அச்சு', 'ஸ்டிக்கர் / வினைல்', 'லேமினேஷன் / பைண்டிங்', 'புகைப்பட பிரேம்'],
+        tools: [['stampmaker', 'ரப்பர் ஸ்டாம்ப் வடிவமைப்பு (மி.மீ அளவு, கண்ணாடிப் பிம்பம்)'], ['postermaker', 'போஸ்டர் / பேனர் வடிவமைப்பு'], ['businesscard', 'Visiting card'], ['invitation', 'அழைப்பிதழ்'], ['ratecard', 'விலைப்பட்டியல்'], ['imgcompresskb', 'படத்தை KB அளவுக்குக் குறை'], ['img2pdf', 'படங்கள் → PDF'], ['merge', 'PDF இணை'], ['quotepo', 'Quotation / பில்'], ['shopslip', 'ஆர்டர் டோக்கன்']] },
+      { ta: 'பழுது & சேவை', en: 'Repair and service',
+        trades: ['மொபைல் பழுது', 'TV / ஃப்ரிட்ஜ் மெக்கானிக்', 'AC மெக்கானிக்', 'இருசக்கர வாகன மெக்கானிக்', 'சைக்கிள் கடை', 'கடிகாரப் பழுது', 'கம்ப்யூட்டர் சர்வீஸ்', 'CCTV பொருத்துபவர்', 'இன்வெர்ட்டர் / பேட்டரி', 'வாஷிங் மெஷின் பழுது', 'மோட்டார் / பம்ப்செட் பழுது', 'பஞ்சர் / டயர் கடை', 'சாவி செய்பவர்', 'செருப்புத் தைப்பவர்', 'பூச்சிக்கட்டுப்பாடு', 'குடிநீர் கேன் சப்ளை'],
+        tools: [['shopslip', 'பழுது ரசீது / டோக்கன்'], ['ratecard', 'சேவைக் கட்டண அட்டை'], ['khata', 'பாக்கி கணக்கு'], ['quotepo', 'பில் / Quotation'], ['wamsg', '"பழுது முடிந்தது" செய்தி'], ['receipts', 'பணம் பெற்ற ரசீது'], ['tripcalc', 'சர்வீஸ் வண்டி கி.மீ கட்டணம்'], ['profitcalc', 'உதிரிபாக விலை நிர்ணயம்']] },
+      { ta: 'கைவினை, உழவு சார்ந்தவை', en: 'Crafts and farm-linked work',
+        trades: ['குயவர் (மண்பாண்டம்)', 'நெசவாளர் / கைத்தறி', 'கூடை முடைபவர்', 'கொல்லர் (Blacksmith)', 'தங்க நகை ஆசாரி', 'வெள்ளி வேலை', 'சிற்பி', 'தென்னை நார் / கயிறு', 'பனை ஓலைப் பொருட்கள்', 'பால் பண்ணை', 'கோழிப் பண்ணை', 'ஆடு / மாடு வளர்ப்பு', 'தேன் வளர்ப்பு', 'நர்சரி / செடி விற்பனை', 'மீன் வளர்ப்பு', 'கரும்புச் சாறு கடை'],
+        tools: [['uzhavartools', 'நில அளவு, உரம், செலவு — உழவர் கருவிப்பெட்டி'], ['goldcalc', 'நகை எடை, சேதாரம்'], ['profitcalc', 'விலை, லாபம், break-even'], ['khata', 'வாடிக்கையாளர் பாக்கி'], ['ratecard', 'விலைப்பட்டியல்'], ['quotepo', 'பில் / Quotation'], ['unitconv', 'அலகு மாற்றம்'], ['wamsg', 'ஆர்டர் செய்திகள்']] },
+      { ta: 'கல்வி & பிற சேவைகள்', en: 'Teaching and other services',
+        trades: ['டியூஷன் ஆசிரியர்', 'இசை / நடன வகுப்பு', 'யோகா பயிற்சியாளர்', 'தட்டச்சு / கணினிப் பயிற்சி', 'இன்சூரன்ஸ் ஏஜென்ட்', 'சீட்டு / சேமிப்புத் திட்ட முகவர்', 'ஜோதிடர்', 'பூசாரி / புரோகிதர்', 'திருமணத் தரகர்', 'மொழிபெயர்ப்பாளர்', 'தட்டச்சு / ஆவண எழுத்தர்', 'வரி ஆலோசகர் உதவியாளர்', 'வீட்டு வாடகை உரிமையாளர்'],
+        tools: [['receipts', 'கட்டண ரசீது (tuition, வாடகை)'], ['ratecard', 'கட்டண விவரப் படம்'], ['khata', 'மாதக் கட்டண பாக்கி'], ['wamsg', 'நினைவூட்டல், வாழ்த்து செய்திகள்'], ['biodata', 'திருமண Biodata'], ['invitation', 'அழைப்பிதழ்'], ['resumebuilder', 'Resume உருவாக்கு'], ['tamiltyping', 'தமிழ் தட்டச்சு'], ['rupeewords', 'தொகை → எழுத்தில்']] },
+    ],
+    verified: [
+      ['பலகை cft', 'நீளம்(அடி) × அகலம்(அங்) × கனம்(அங்) ÷ 144 — இந்திய மரக்கடைகளில் பரவலாகப் பயன்படும் தூய கணிதம்; கருவியின் சோதனையில் 10 அடி × 6 × 2 = 0.833 cft சரியாக வந்தது.'],
+      ['உருளை மரம்', 'கால்-சுற்றளவு முறை (சுற்றளவு ÷ 4)² × நீளம் ÷ 144. சில மரக்கடைகள் வேறு முறை (கழிவுக் கழிப்பு) பயன்படுத்துவார்கள் — உங்கள் கடையின் முறையைக் கேட்டுக்கொள்ளுங்கள்.'],
+      ['பயணக் கட்டணம்', 'கி.மீ × கட்டணம்; குறைந்தபட்ச கி.மீ/நாள் பொருந்தினால் அதுவே கணக்கு. காத்திருப்பு, பேட்டா, டோல் கூட்டல் மட்டுமே — உங்கள் ஒப்பந்தக் கட்டணத்தை நீங்கள்தான் எழுதுகிறீர்கள்.'],
+      ['லாபம்', 'Margin = (விற்பனை − செலவு) ÷ விற்பனை; Markup = (விற்பனை − செலவு) ÷ செலவு. இரண்டும் வேறு எண்கள் — கருவி இரண்டையும் காட்டும்.'],
+      ['ரப்பர் ஸ்டாம்ப் படம்', 'மி.மீ அளவு × 300 DPI. அச்சகங்கள் தங்கள் இயந்திரத்துக்கு வேறு அளவு கேட்கலாம்; முதலில் அவர்களிடம் கேளுங்கள்.'],
+    ],
+    notYet: [
+      'தொழில் உரிமம் / Udyam / FSSAI / கடை பதிவு விதிகள் — அதிகாரப்பூர்வ அரசு அறிவிப்புகளைச் சரிபார்க்க முடியாததால் எண்கள், கட்டணங்களை எழுதவில்லை. உங்கள் உள்ளாட்சி அலுவலகத்தில் உறுதிசெய்யுங்கள்.',
+      'சரக்கு இருப்பு (stock) பதிவேடு — இன்னும் கட்டப்படவில்லை. இப்போது உதார் கணக்கும் பில்லும் மட்டும்.',
+      'தொழில் வாரியான GST விகிதங்கள் — மாறக்கூடியவை; GST கணிப்பானில் உங்கள் பொருளுக்கான % நீங்களே எழுதவும்.',
+      'e-invoice / GST portal இணைப்பு — அதற்கு GST portal API தேவை, இலவசமாக இங்கே சாத்தியமில்லை.',
+    ],
+    privacy: 'இந்தப் பக்கத்தின் கருவிகள் உங்கள் வாடிக்கையாளர் பெயர், போன், தொகை எதையும் எங்கள் server-க்கு அனுப்புவதில்லை. எல்லாம் உங்கள் phone / browser-லேயே இருக்கும். அதனால் browser data அழித்தால் உதார் கணக்கும் அழியும் — அடிக்கடி Backup (.json) எடுங்கள்.',
+    faqs: [
+      ['எந்தக் கருவிக்கும் பணம் கட்ட வேண்டுமா?', 'இல்லை. இந்தப் பக்கத்தில் உள்ள எல்லாக் கருவிகளும் இலவசம், பதிவு தேவையில்லை. AI தேவைப்படும் சில கருவிகள் மட்டும் வேறு பிரிவில் credit கேட்கும்.'],
+      ['என் தொழில் பட்டியலில் இல்லையே?', 'தொழில் பெயர் முக்கியமில்லை. உதார் கணக்கு, பில், விலைப்பட்டியல், டோக்கன் ரசீது, WhatsApp செய்தி — இவை எந்தத் தொழிலுக்கும் பொருந்தும். உங்கள் தொழிலுக்குத் தனிக் கருவி வேண்டுமானால் support@pdftoolsindia.com-க்கு எழுதுங்கள்.'],
+      ['உதார் கணக்கு தகவல் எங்கே இருக்கும்?', 'உங்கள் phone-ன் browser-ல் மட்டும். வேறு phone-க்கு மாற்ற "Backup" எடுத்து "மீட்டெடு" செய்யுங்கள்.'],
+      ['பில் போட GST எண் வேண்டுமா?', 'GST பதிவு இல்லாதவர்களும் Cash bill / Bill of Supply போடலாம். GST எண் இருந்தால் Tax Invoice-ல் சேர்க்கலாம். விதிகளுக்கு உங்கள் ஆடிட்டரிடம் கேளுங்கள்.'],
+      ['ரப்பர் ஸ்டாம்ப் படத்தை அச்சகத்தில் கொடுக்கலாமா?', 'ஆம். "கண்ணாடிப் பிம்பம்" தேர்வு செய்து PNG சேமித்து, ஸ்டாம்ப் செய்பவரிடம் கொடுங்கள். சில கடைகள் தாங்களே பிம்பத்தைத் திருப்புவார்கள் — முதலில் கேளுங்கள்.'],
+    ],
+    remind: { events: 'custom', label: 'என் கடை புதுப்பிப்பு / பணம் வசூல் தேதியை calendar-ல் சேர்', note: '' },
+  },
 };
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -98,6 +162,8 @@ const HUB_CSS = `
   .hb-btn{min-height:48px;margin-top:12px;padding:10px 20px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:800 15px inherit;font-family:inherit;cursor:pointer}
   .hb-priv{background:#F0FAF4;border:1px solid #CDEBDA;color:#175C3B;border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:600;margin-top:18px;line-height:1.6}
   #favs[hidden]{display:none}
+  .hb-trades{font-size:13px;line-height:1.5;margin:6px 0 4px;color:#444} .hb-trades b{display:block;margin-bottom:6px;font-weight:900;color:#20242B} .hb-trades small{font-weight:600;color:var(--sub)}
+  .hb-trades span{display:inline-block;margin:0 6px 6px 0;padding:5px 11px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:12.5px;color:#333}
   .hb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:10px}
   .hb-tile{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:16px;text-decoration:none;color:inherit;min-height:84px;transition:transform .12s,box-shadow .12s,border-color .12s}
   .hb-tile:hover{border-color:var(--brand);box-shadow:0 6px 18px rgba(55,82,166,.14);transform:translateY(-1px)}
@@ -175,6 +241,7 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
   const crumbHtml = ['<a href="/?home=1">PDF Tools India</a>'].concat(cur ? [`<a href="/${hub.slug}">${esc(hub.h1)}</a>`, esc(cur.about ? 'விதிகள்' : cur.ta)] : [esc(hub.h1)]).join(' › ');
   const tile = (x, i) => `<a class="hb-tile" href="/${hub.slug}/${x.key}"><span class="hb-ti">${x.icon}</span><span class="hb-tt"><b>${esc(x.ta)}</b><small>${esc(x.en)}</small><em>${x.tools.slice(0, 3).map(([id]) => esc((TA_TOOL[id] || [byId[id].name])[0])).join(' · ')}</em></span><span class="hb-go" aria-hidden="true">›</span></a>`;
   const others = (skip) => `<div class="section hb-sec"><h2>மற்ற தலைப்புகள் <small>Other topics</small></h2><div class="hb-tiles">${secs.map((x, i) => i === skip ? '' : tile(x, i)).join('')}</div></div>`;
+  const tradesHtml = x => x.trades && x.trades.length ? `<p class="hb-trades"><b>இந்தத் தொழில்களுக்கு <small>For these trades</small>:</b> ${x.trades.map(t => `<span>${esc(t)}</span>`).join('')}</p>` : '';
   const allCards = `<div id="allc" hidden>${secs.flatMap(x => x.tools.map(([id, why]) => card(id, why))).join('')}</div>`;
   const favBox = `<div class="section hb-sec" id="favs" hidden><h2>⭐ என் பிடித்தவை <small>My favourites — this device only</small></h2><div class="grid" id="favgrid" style="margin-top:10px"></div></div>`;
   const pills = `<div class="pills"><span class="pill">✓ இலவசம்</span><span class="pill">🔒 கோப்பு உங்கள் சாதனத்திலேயே</span><span class="pill">🚫 பதிவு தேவையில்லை</span></div>`;
@@ -189,7 +256,7 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
     </div>
     ${favBox}
     <div class="hb-chips" id="chips" role="tablist"><button type="button" class="on" data-k="all">அனைத்தும் <small>All</small></button>${secs.map(x => `<button type="button" data-k="${x.key}">${x.icon} ${esc(x.ta)}</button>`).join('')}</div>
-    ${secs.map(x => `<div class="section hb-sec hb-blk" data-sec="${x.key}" id="${x.key}"><h2>${x.icon} ${esc(x.ta)} <small>${esc(x.en)}</small></h2><div class="grid" style="margin-top:10px">${x.tools.map(([id, why]) => card(id, why)).join('')}</div></div>`).join('\n    ')}
+    ${secs.map(x => `<div class="section hb-sec hb-blk" data-sec="${x.key}" id="${x.key}"><h2>${x.icon} ${esc(x.ta)} <small>${esc(x.en)}</small></h2>${tradesHtml(x)}<div class="grid" style="margin-top:10px">${x.tools.map(([id, why]) => card(id, why)).join('')}</div></div>`).join('\n    ')}
     ${hub.privacy ? `<div class="hb-priv">🛡️ ${esc(hub.privacy)}</div>` : ''}
     <div class="section hb-sec"><h2>நினைவூட்டல் <small>Calendar reminder</small></h2>${rem}</div>
     <div class="section faq hb-sec"><h2>அடிக்கடி கேட்கப்படும் கேள்விகள் <small>FAQ</small></h2>${hub.faqs.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join('\n      ')}</div>
@@ -203,6 +270,7 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
     body = `
     <a class="hb-back" href="/${hub.slug}">‹ ${esc(hub.h1)}</a>
     <div class="hb-shead" style="background:${hub.grad}"><span class="hb-ti">${cur.icon}</span><div><h1>${esc(cur.ta)}</h1><div class="en">${esc(cur.en)}</div></div></div>
+    ${tradesHtml(cur)}
     <div class="grid" style="margin-top:14px">${cur.tools.map(([id, why]) => card(id, why)).join('')}</div>
     ${favBox}
     ${others(page)}`;
@@ -244,7 +312,8 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
 
 const SEC_ICONS = ['💰', '🧾', '🏢', '✉️', '📄', '🏠'];
 const STU_ICONS = ['🎯', '📝', '📚', '⏱️', '💼', '🧒'];
+const SMB_ICONS = ['📸', '🚖', '🧱', '👗', '🍽️', '🛒', '🖨️', '🔧', '🧶', '🎓'];
 export function hubSections(hub) {
-  const icons = hub.slug === 'for-students' ? STU_ICONS : SEC_ICONS;
+  const icons = hub.slug === 'for-students' ? STU_ICONS : hub.slug === 'for-small-business' ? SMB_ICONS : SEC_ICONS;
   return hub.sections.map((x, i) => ({ ...x, icon: icons[i] || '📌', key: x.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }));
 }

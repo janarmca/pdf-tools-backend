@@ -399,3 +399,9 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - `category-image.js` exifremove: reads real EXIF/XMP/IPTC, lossless JPEG/PNG strip, re-scans the result and reports.
 - PDF editor: tools 📋 Copy text (tap/drag, auto-copy, page / whole PDF) and 📥 Paste text (click to place) + Ctrl+V of text or pictures.
 - Tests: Playwright scripts used were in the scratchpad (not in repo). `sw.js` v102, category scripts `?v=20261023b`.
+
+## UPDATE_69 — small-business tools + hub (24 Oct)
+- New lazy `category-biz.js` (`lazy:'biz'`, cat business): khata (udhar book, localStorage `bz_khata_v1`, WhatsApp reminder, JSON backup, CSV), ratecard (PNG price list, 10 trade presets), stampmaker (round/rect/oval, mm at 300 DPI, mirror), woodcalc, tripcalc, shopslip (58/80 mm), wamsg, profitcalc. Pure helpers `window.BizCore`; test `node tests/biz-core.test.cjs`.
+- Hub `/for-small-business` (`audience-hubs.mjs` hub `smallbiz`, 10 trade sections, 138 trades), homepage card, sitemap, 8 generated /tools pages. Patched minified `index.html` by script (remin.py not in repo). sw v103, loadCategoryScript ?v=20261024a.
+- Verified only in headless desktop Chromium (390px viewport); not on a real phone. No licence/FSSAI/Udyam facts included (unverified). Khata data is per-browser — users must use Backup.
+- promo-news `small-biz-hub` (17 Nov).
