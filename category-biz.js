@@ -436,6 +436,7 @@
           '<label class="bz-chk"><input type="checkbox" data-k="mirror"' + (S.mirror ? ' checked' : '') + '> ' + T('கண்ணாடிப் பிம்பம் (ஸ்டாம்ப் தகடுக்கு)', 'Mirror image (for the stamp plate)') + '</label>' +
           '<label class="bz-chk"><input type="checkbox" data-k="white"' + (S.white ? ' checked' : '') + '> ' + T('வெள்ளைப் பின்னணி (இல்லையெனில் தெளிவான பின்னணி)', 'White background (otherwise transparent)') + '</label>' +
           '<canvas class="bz-canvas chk" data-k="cv"></canvas><div class="bz-info" data-k="size"></div>' +
+          '<div class="bz-info">⚠️ ' + T('உங்கள் சொந்த நிறுவனத்தின் பெயருக்கு மட்டும் பயன்படுத்துங்கள். அரசு அலுவலகம், நீதிமன்றம், வங்கி, பிறர் பெயர் அல்லது அதிகாரப்பூர்வ முத்திரையைப் போலியாகச் செய்வது சட்டப்படி குற்றம்.', 'Use only for your own business name. Copying a government, court, bank or someone else\'s seal is a crime.') + '</div>' +
           '<div class="bz-actions"><button type="button" class="bz-btn" data-act="dl">⬇️ ' + T('PNG சேமி (300 DPI)', 'Save PNG (300 DPI)') + '</button></div>';
         cv = $(root, '[data-k=cv]');
         $$(root, '[data-tab]').forEach(b => { b.onclick = () => { S.shape = b.getAttribute('data-tab'); if (S.shape === 'round') S.h = S.w; else if (S.h === S.w) S.h = Math.round(S.w * 0.6); persist(); layout(); }; });
