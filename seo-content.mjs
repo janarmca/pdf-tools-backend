@@ -82,7 +82,7 @@ export const SEO_EXTRA = {
     faqs: [['Can the AI be wrong?', 'Yes. AI can misread a scanned or complicated page, so check important answers (amounts, dates, legal clauses) against the original document.']]
   },
   pdf2word: {
-    title: 'PDF to Word Converter Free — Editable .docx Online | PDF Tools India',
+    title: 'PDF to Word Free — PDF-ஐ Word ஆக மாற்ற | PDF Tools India',
     desc: 'Convert a PDF into an editable Word (.docx) file free online. No signup, no watermark, works on mobile and desktop, Tamil text supported.',
     intro: 'Turn a PDF into a Word document you can edit. Text, headings and paragraphs are carried across so you can correct, reformat and reuse the content.',
     steps: ['Open PDF → Word and choose your PDF.', 'Wait for the conversion to finish.', 'Download the .docx file and open it in Word, Google Docs or LibreOffice.'],
@@ -90,7 +90,7 @@ export const SEO_EXTRA = {
     faqs: [['Will the layout be identical?', 'Simple text documents convert very closely. Complex layouts with many columns, tables or images may need small manual adjustments in Word.'], ['What about scanned PDFs?', 'A scanned PDF is a picture of text. Use Image → Text (OCR) first to read the text, then paste it into Word.']]
   },
   merge: {
-    title: 'Merge PDF Files Free — Combine PDFs into One Online | PDF Tools India',
+    title: 'Merge PDF Free — பல PDF இணைக்க | PDF Tools India',
     desc: 'Combine several PDF files into one document free online. Drag to reorder, no signup, no watermark, files stay in your browser.',
     intro: 'Join multiple PDFs into a single file in the order you choose. Useful for application forms, certificates, invoices and anything else that has to be sent as one document.',
     steps: ['Open Merge PDF and add two or more PDF files.', 'Arrange them in the order you want.', 'Click merge and download the combined PDF.'],
@@ -98,7 +98,7 @@ export const SEO_EXTRA = {
     faqs: [['Is there a file size limit?', 'Because the work happens in your browser, the limit is your device memory. Very large files may be slow on older phones.'], ['Will the PDF quality drop?', 'No. Merging only joins the pages; it does not recompress them.']]
   },
   compress: {
-    title: 'Compress PDF Free — Reduce PDF File Size Online | PDF Tools India',
+    title: 'Compress PDF Free — PDF அளவு சுருக்க | PDF Tools India',
     desc: 'Shrink a PDF to a smaller file size free online, ideal for email and WhatsApp upload limits. No signup, runs in your browser.',
     intro: 'Make a large PDF smaller so it fits an upload form, email or WhatsApp limit, while keeping it readable.',
     steps: ['Open Compress PDF and choose your file.', 'Select the compression level.', 'Download the smaller PDF and check that it is still clear.'],
@@ -114,7 +114,7 @@ export const SEO_EXTRA = {
     faqs: [['Does the original file change?', 'No. Your original PDF is untouched; you download a new file.']]
   },
   img2pdf: {
-    title: 'JPG to PDF — Convert Images to PDF Free Online | PDF Tools India',
+    title: 'JPG to PDF Free — படம் PDF ஆக மாற்ற | PDF Tools India',
     desc: 'Turn JPG and PNG photos into a single PDF free online. Reorder pages, no signup, works on mobile.',
     intro: 'Combine photos of documents, certificates or notes into one neat PDF straight from your phone gallery.',
     steps: ['Open Image → PDF and select your pictures.', 'Put them in order.', 'Download the PDF.'],
@@ -122,7 +122,7 @@ export const SEO_EXTRA = {
     faqs: [['Can I add many images?', 'Yes, add as many pages as your device can handle.']]
   },
   imgcompress: {
-    title: 'Compress Image Online Free — Reduce JPG & PNG Size | PDF Tools India',
+    title: 'Compress Image Free — படம் சுருக்க | PDF Tools India',
     desc: 'Reduce JPG and PNG file size free online, no signup and no quality surprises. Runs in your browser.',
     intro: 'Make photos smaller for forms, websites and messaging while keeping them sharp enough to read.',
     steps: ['Open Compress Image and choose a photo.', 'Pick the quality level.', 'Compare, then download the smaller file.'],
@@ -130,7 +130,7 @@ export const SEO_EXTRA = {
     faqs: [['Is my photo uploaded?', 'No. The compression happens in your browser, so the photo stays on your device.']]
   },
   word2pdf: {
-    title: 'Word to PDF Converter Free — DOCX to PDF Online | PDF Tools India',
+    title: 'Word to PDF Free — Word-ஐ PDF ஆக்க | PDF Tools India',
     desc: 'Convert a Word .docx file to PDF free online with fonts preserved. No signup, no watermark.',
     intro: 'Save a Word document as a PDF so it looks the same on every phone and computer.',
     steps: ['Open Word → PDF and choose your .docx file.', 'Wait for the conversion.', 'Download the PDF.'],
@@ -146,7 +146,7 @@ export const SEO_EXTRA = {
     faqs: [['How is EMI calculated?', 'EMI = P × R × (1+R)^n ÷ [(1+R)^n − 1], where R is the monthly rate and n the number of months. Our guide "How is EMI calculated" walks through an example.']]
   },
   incometaxcalc: {
-    title: 'Income Tax Calculator FY 2026-27 — Old vs New Regime | PDF Tools India',
+    title: 'Income Tax Calculator 2026-27 — வருமான வரி | PDF Tools India',
     desc: 'Compare old and new income tax regimes for FY 2026-27 and see which one saves you more. Free, no signup.',
     intro: 'Enter your income and deductions to see the tax under both regimes side by side so you can choose the cheaper one before filing.',
     steps: ['Enter your annual income.', 'Add your deductions such as 80C, HRA and standard deduction.', 'Compare tax under the old and new regimes.'],
@@ -202,7 +202,7 @@ export const SEO_EXTRA = {
     faqs: [['Can I check age on a past or future date?', 'Yes, choose the date to calculate against.']]
   },
   sign: {
-    title: 'Sign PDF Online Free — Draw Your Signature on a PDF | PDF Tools India',
+    title: 'Sign PDF Online Free — PDF கையொப்பம் | PDF Tools India',
     desc: 'Draw your signature and place it on any PDF page free online. No signup, no watermark.',
     intro: 'Sign forms and agreements from your phone or computer without printing.',
     steps: ['Open Sign PDF and add the document.', 'Draw your signature.', 'Place it where you need it and download the signed PDF.'],
@@ -514,7 +514,7 @@ export const SEO_EXTRA = {
     faqs: [['Does the tool know each exam\'s rules?', 'No. You enter the numbers from the official notification, so the result matches the current rule.'], ['Is my photo uploaded?', 'No, it is processed in your browser.']]
   },
   imgcompresskb: {
-    title: 'Compress Image to Target KB Free — Reduce Photo to 20KB, 50KB, 100KB | PDF Tools India',
+    title: 'Photo to 20KB, 50KB, 100KB — படம் சுருக்க | PDF Tools India',
     desc: 'Shrink a JPG or PNG to the file size in KB that a form requires. Free, automatic quality search, runs in your browser.',
     intro: 'Forms often say "photo must be under 50 KB". Enter the number and the tool tries qualities automatically to get as close as possible without going over.',
     steps: ['Open Compress to Target KB and choose your image.', 'Enter the maximum size in KB.', 'Download the compressed image and check it still looks clear.'],
@@ -570,7 +570,7 @@ export const SEO_EXTRA = {
     faqs: [['What does ATS-friendly mean?', 'A simple layout that recruiting software can read reliably — avoid heavy graphics.'], ['Is my information uploaded?', 'Your details are saved on your device.']]
   },
   salaryslip: {
-    title: 'Salary Slip Generator Free — Payslip with PF, ESI and LOP | PDF Tools India',
+    title: 'Salary Slip Generator — சம்பளச் சீட்டு (Payslip) | PDF Tools India',
     desc: 'Create a salary slip with LOP days, PF and ESI calculation, allowances and saved employees in Tamil or English. Free PDF.',
     intro: 'Small businesses can produce a clear payslip in minutes. Enter earnings and deductions; PF and ESI can be calculated, and loss-of-pay days are accounted for. (சம்பளச் சீட்டு.)',
     steps: ['Open Salary Slip Generator.', 'Enter employee, month, earnings and deductions.', 'Check PF / ESI and LOP amounts.', 'Download the PDF.'],

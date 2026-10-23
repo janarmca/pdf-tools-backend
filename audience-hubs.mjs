@@ -220,6 +220,9 @@ export function audienceHtml(hub, tools, TA_TOOL, SITE, slugify, page) {
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
 <meta property="og:site_name" content="PDF Tools India">
+<meta property="og:image" content="${SITE}/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og-image.png">
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">${ld}</script>
 <style>${BASE_CSS}${HUB_CSS}</style>

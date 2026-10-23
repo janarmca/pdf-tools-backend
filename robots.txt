@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /health-check
 
 Sitemap: https://pdftoolsindia.com/sitemap.xml

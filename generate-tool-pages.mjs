@@ -129,6 +129,9 @@ function pageHtml(t, slug, related) {
 <meta property="og:description" content="${escapeHtml(metaDesc2)}">
 <meta property="og:url" content="${SITE}/tools/${slug}">
 <meta property="og:site_name" content="PDF Tools India">
+<meta property="og:image" content="${SITE}/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og-image.png">
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">${ld}</script>
 <style>${BASE_CSS}
@@ -237,6 +240,9 @@ function hubHtml(cat, items) {
 <meta property="og:description" content="${escapeHtml(m.desc)}">
 <meta property="og:url" content="${SITE}/${m.file.replace('.html','')}">
 <meta property="og:site_name" content="PDF Tools India">
+<meta property="og:image" content="${SITE}/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og-image.png">
 <link rel="icon" href="/favicon.ico">
 <script type="application/ld+json">${ld}</script>
 <style>${BASE_CSS}</style>
@@ -311,7 +317,8 @@ function buildSitemap(toolEntries) {
   ];
   const toolUrls = toolEntries.map(slug => ({ loc: `${SITE}/tools/${slug}`, freq: 'monthly', pri: '0.6' }));
   // Cloudflare Pages 308-redirects /x.html to /x, and every page's canonical is the clean /x — so the sitemap must list the clean URL (a .html URL here shows up in Search Console as "Page with redirect").
-  staticUrls.push({ loc: `${SITE}/health-check`, freq: 'monthly', pri: '0.6' });
+  // /health-check is a monitoring page: deliberately NOT in the sitemap (and Disallowed in robots.txt)
+  Object.values(AUDIENCE_HUBS).forEach(h => staticUrls.push({ loc: `${SITE}/${h.slug}/about`, freq: 'monthly', pri: '0.6' }));
   const all = [...staticUrls, ...toolUrls].map(u => ({ ...u, loc: u.loc.replace(/\.html$/, '') }));
   const body = all.map(u =>
     `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${new Date().toISOString().slice(0,10)}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>${(u.alts || []).map(([l, h]) => `\n    <xhtml:link rel="alternate" hreflang="${l}" href="${h}"/>`).join('')}\n  </url>`
