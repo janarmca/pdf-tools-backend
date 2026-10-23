@@ -113,9 +113,28 @@
   /* ===================================================================== SPLIT INTO GRID */
   TOOL_IMPL.imgsplit = {
     mount: function (container) {
-      let file = null, img = null, rows = 1, cols = 3, square = true;
+      let file = null, img = null, rows = 1, cols = 3, smode = 'whole', fill = 'blur';
       const body = el('<div></div>'); container.appendChild(body);
-      const PRE = [[1, 2], [1, 3], [2, 2], [2, 3], [3, 3], [3, 1]];
+      const PRE = [[1, 2], [1, 3], [2, 2], [2, 3], [3, 3], [3, 1], [4, 3]];
+      // the picture that is actually cut: 'whole' = every pixel kept, the picture sits in the middle of a bigger square-tile canvas and the
+      // extra space is filled (blurred copy / white / black); 'trim' = square tiles, edges cut off; 'rect' = tiles of the picture's own shape
+      function source(max) {
+        const W = img.naturalWidth, H = img.naturalHeight;
+        if (smode !== 'whole') return { src: img, W: W, H: H, sq: smode === 'trim' };
+        let s = Math.ceil(Math.max(W / cols, H / rows)), k = 1;
+        const big = Math.max(s * cols, s * rows); if (max && big > max) k = max / big;
+        const PW = Math.max(cols, Math.round(s * cols * k)), PH = Math.max(rows, Math.round(s * rows * k));
+        const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; const g = cv.getContext('2d');
+        const dw = Math.round(W * k), dh = Math.round(H * k), dx = Math.round((PW - dw) / 2), dy = Math.round((PH - dh) / 2);
+        if (fill === 'blur') {
+          const cover = Math.max(PW / W, PH / H);
+          g.save(); try { g.filter = 'blur(' + Math.round(Math.max(PW, PH) / 40) + 'px)'; } catch (e) {}
+          const bw = W * cover * 1.08, bh = H * cover * 1.08; g.drawImage(img, (PW - bw) / 2, (PH - bh) / 2, bw, bh); g.restore();
+          g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(0, 0, PW, PH);
+        } else { g.fillStyle = fill === 'black' ? '#000' : '#fff'; g.fillRect(0, 0, PW, PH); }
+        g.drawImage(img, dx, dy, dw, dh);
+        return { src: cv, W: PW, H: PH, sq: false };
+      }
       function paint() {
         body.innerHTML = '';
         if (!img) { mountUploader(body, { accept: 'image/*', label: 'Drop a picture here, or tap to choose', sublabel: 'Cut it into tiles for an Instagram carousel or a 3×3 profile grid', onAdd: async function (fl) { file = fl[0]; try { img = await loadImg(file); paint(); } catch (e) { paint(); err(body, e.message); } } }); return; }
@@ -124,28 +143,34 @@
         PRE.forEach(function (p) { chips.appendChild(el('<button class="filter-chip ' + (rows === p[0] && cols === p[1] ? 'active' : '') + '" data-r="' + p[0] + '" data-c="' + p[1] + '">' + p[0] + ' × ' + p[1] + '</button>')); });
         chips.addEventListener('click', function (e) { const b = e.target.closest('[data-r]'); if (!b) return; rows = +b.getAttribute('data-r'); cols = +b.getAttribute('data-c'); paint(); });
         body.appendChild(chips);
-        const sq = el('<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px;"><input type="checkbox" ' + (square ? 'checked' : '') + '> Square tiles (best for Instagram) — the edges are trimmed evenly</label>'); body.appendChild(sq);
-        sq.querySelector('input').onchange = function (e) { square = e.target.checked; paint(); };
-        const cv = document.createElement('canvas'); cv.style.cssText = 'width:100%;height:auto;display:block;border-radius:10px;margin-top:10px;background:#eee'; body.appendChild(cv);
-        const sc = Math.min(1, 1400 / Math.max(img.naturalWidth, img.naturalHeight)); cv.width = Math.round(img.naturalWidth * sc); cv.height = Math.round(img.naturalHeight * sc);
-        const g = cv.getContext('2d'); g.drawImage(img, 0, 0, cv.width, cv.height);
-        const T = tiles(cv.width, cv.height, rows, cols, square);
-        g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0, 0, cv.width, cv.height);
-        T.forEach(function (t, i) { g.drawImage(img, t.x / sc, t.y / sc, t.w / sc, t.h / sc, t.x, t.y, t.w, t.h); g.strokeStyle = '#fff'; g.lineWidth = 3; g.strokeRect(t.x, t.y, t.w, t.h); g.fillStyle = '#fff'; g.font = 'bold ' + Math.round(t.h / 6) + 'px system-ui'; g.fillText(String(i + 1), t.x + t.w / 14, t.y + t.h / 5); });
-        const full = tiles(img.naturalWidth, img.naturalHeight, rows, cols, square);
-        body.appendChild(el('<div class="note">' + full.length + ' tiles of ' + full[0].w + ' × ' + full[0].h + ' px. For an Instagram grid, post them from the LAST number to the first so they line up on your profile.</div>'));
+        const modeRow = el('<div class="opts"><div class="field"><label>How to cut</label><select id="spMode"><option value="whole">Whole picture — nothing cut off (square tiles)</option><option value="trim">Square tiles — trim the edges</option><option value="rect">Tiles in the picture\'s own shape</option></select></div><div class="field" id="spFillBox"><label>Extra space is filled with</label><select id="spFill"><option value="blur">Blurred copy of the picture</option><option value="white">White</option><option value="black">Black</option></select></div></div>');
+        modeRow.querySelector('#spMode').value = smode; modeRow.querySelector('#spFill').value = fill;
+        modeRow.querySelector('#spFillBox').style.display = smode === 'whole' ? '' : 'none';
+        modeRow.querySelector('#spMode').onchange = function (e) { smode = e.target.value; paint(); };
+        modeRow.querySelector('#spFill').onchange = function (e) { fill = e.target.value; paint(); };
+        body.appendChild(modeRow);
+        // live preview: the picture the tiles are cut from, with the grid lines and tile numbers on top
+        const S = source(1400), cv = document.createElement('canvas'); cv.style.cssText = 'width:100%;height:auto;display:block;border-radius:10px;margin-top:10px;background:#eee'; body.appendChild(cv);
+        const sc = Math.min(1, 1400 / Math.max(S.W, S.H)); cv.width = Math.max(1, Math.round(S.W * sc)); cv.height = Math.max(1, Math.round(S.H * sc));
+        const g = cv.getContext('2d'); g.drawImage(S.src, 0, 0, cv.width, cv.height);
+        const T = tiles(cv.width, cv.height, rows, cols, S.sq);
+        if (S.sq) { g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0, 0, cv.width, cv.height); T.forEach(function (t) { g.drawImage(S.src, t.x / sc, t.y / sc, t.w / sc, t.h / sc, t.x, t.y, t.w, t.h); }); }
+        T.forEach(function (t, i) { g.strokeStyle = '#fff'; g.lineWidth = 3; g.strokeRect(t.x, t.y, t.w, t.h); g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 1; g.strokeRect(t.x + 2, t.y + 2, t.w - 4, t.h - 4); g.font = 'bold ' + Math.round(t.h / 6) + 'px system-ui'; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeText(String(i + 1), t.x + t.w / 14, t.y + t.h / 5); g.fillStyle = '#fff'; g.fillText(String(i + 1), t.x + t.w / 14, t.y + t.h / 5); });
+        const full = tiles(S.W, S.H, rows, cols, S.sq);
+        const rw = smode === 'whole' ? Math.ceil(Math.max(img.naturalWidth / cols, img.naturalHeight / rows)) : 0, ft0 = smode === 'whole' ? { w: rw, h: rw } : tiles(img.naturalWidth, img.naturalHeight, rows, cols, smode === 'trim')[0];
+        body.appendChild(el('<div class="note">' + full.length + ' tiles of ' + ft0.w + ' × ' + ft0.h + ' px' + (smode === 'whole' ? ' — the whole picture is inside, nothing is cut off' : smode === 'trim' ? ' — the outer edges are trimmed to make them square' : '') + '. For an Instagram grid, post them from the LAST number to the first so they line up on your profile.</div>'));
         const row = el('<div class="btn-row"><button class="btn">⬇ Download tiles (ZIP)</button></div>'); body.appendChild(row);
         row.querySelector('button').onclick = async function () {
           const btn = this; btn.disabled = true;
           try {
             if (!window.JSZip) await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-            const zip = new window.JSZip(), t = outType(file), ext = extOf(t);
-            for (let i = 0; i < full.length; i++) {
-              const f = full[i], c = document.createElement('canvas'); c.width = f.w; c.height = f.h; c.getContext('2d').drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+            const zip = new window.JSZip(), t = outType(file), ext = extOf(t), F = source(9000), ft = tiles(F.W, F.H, rows, cols, F.sq);
+            for (let i = 0; i < ft.length; i++) {
+              const f = ft[i], c = document.createElement('canvas'); c.width = f.w; c.height = f.h; c.getContext('2d').drawImage(F.src, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
               zip.file(baseName(file) + '-' + String(i + 1).padStart(2, '0') + '.' + ext, await toBlob(c, t));
             }
             downloadBlob(await zip.generateAsync({ type: 'blob' }), baseName(file) + '-grid-' + rows + 'x' + cols + '.zip');
-            mountResult(body, 'Done — ' + full.length + ' tiles downloaded in one ZIP file.');
+            mountResult(body, 'Done — ' + ft.length + ' tiles downloaded in one ZIP file.');
           } catch (e) { err(body, e.message || e); }
           btn.disabled = false;
         };

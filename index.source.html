@@ -2142,7 +2142,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261023a`;
+    s.src = `category-${cat}.js?v=20261023b`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -2371,7 +2371,7 @@ async function signedPdfWarning(container, files){
 // category: most image tools only showed filename/size text, identical to
 // how a PDF tool would, even though a visual thumbnail is far more useful
 // when the input IS a picture.
-function mountImageFileList(container, files, onRemove){
+function mountImageFileList(container, files, onRemove, onMove){
   const wrap = el(`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; margin:10px 0;"></div>`);
   files.forEach((f, idx)=>{
     const url = URL.createObjectURL(f);
@@ -2379,6 +2379,9 @@ function mountImageFileList(container, files, onRemove){
       <div style="position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden; aspect-ratio:1/1; background:#f4f4f6;">
         <img src="${url}" alt="" style="width:100%; height:100%; object-fit:cover; display:block;">
         <button data-del="${idx}" style="position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; border:none; background:rgba(0,0,0,.55); color:#fff; font-size:12px; line-height:1; cursor:pointer;">✕</button>
+        ${onMove ? `<span style="position:absolute; top:3px; left:3px; min-width:18px; height:18px; border-radius:9px; background:var(--brand); color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 4px;">${idx+1}</span>
+        <button data-mv="${idx}:-1" title="Move earlier" style="position:absolute; bottom:18px; left:3px; width:22px; height:22px; border-radius:6px; border:none; background:rgba(255,255,255,.9); font-size:11px; cursor:pointer;">◀</button>
+        <button data-mv="${idx}:1" title="Move later" style="position:absolute; bottom:18px; right:3px; width:22px; height:22px; border-radius:6px; border:none; background:rgba(255,255,255,.9); font-size:11px; cursor:pointer;">▶</button>` : ''}
         <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,.55); color:#fff; font-size:9px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(f.name)}</div>
       </div>
     `);
@@ -2386,10 +2389,96 @@ function mountImageFileList(container, files, onRemove){
   });
   wrap.addEventListener('click', (e)=>{
     const del = e.target.closest('[data-del]');
-    if(del) onRemove(Number(del.getAttribute('data-del')));
+    if(del) return onRemove(Number(del.getAttribute('data-del')));
+    const mv = e.target.closest('[data-mv]');
+    if(mv && onMove){ const [i,d] = mv.getAttribute('data-mv').split(':').map(Number); onMove(i, d); }
   });
   container.appendChild(wrap);
   return wrap;
+}
+
+/* ---- UPDATE_68: shared previews (images + PDF pages) so every tool shows what was loaded ---- */
+const __PV_CACHE = new WeakMap();
+async function getPvDoc(buf){
+  let r = __PV_CACHE.get(buf);
+  if(!r){ r = { doc: await loadPdfJs(buf), urls: {} }; __PV_CACHE.set(buf, r); }
+  return r;
+}
+// one page as a canvas, `width` CSS px wide (sharp on phones too)
+async function pvCanvas(buf, p, width, dprCap){
+  const r = await getPvDoc(buf);
+  const page = await r.doc.getPage(p);
+  const v1 = page.getViewport({scale:1});
+  const k = width / v1.width * Math.min(dprCap || 2, window.devicePixelRatio || 1);
+  const vp = page.getViewport({scale:k});
+  const c = document.createElement('canvas'); c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+  const g = c.getContext('2d', {willReadFrequently:true}); g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height);
+  await page.render({canvasContext:g, viewport:vp}).promise;
+  return c;
+}
+async function pvThumb(buf, p, width){
+  const r = await getPvDoc(buf), key = p+'@'+width;
+  if(!r.urls[key]){ const c = await pvCanvas(buf, p, width); r.urls[key] = { url: c.toDataURL('image/jpeg', 0.82), ar: c.height / c.width }; }
+  return r.urls[key];
+}
+// A scrolling strip with a thumbnail of every page (max 80). opts: {width, gap(i)->node placed before page i+1 (i = 0..n), onPick(p), current}
+function mountPdfStrip(container, buf, opts){
+  opts = opts || {};
+  const W = opts.width || 96, MAX = opts.max || 80;
+  const wrap = el(`<div class="pv-strip" style="display:flex; gap:8px; overflow-x:auto; padding:8px 2px 10px; margin:8px 0; -webkit-overflow-scrolling:touch; align-items:flex-start;"><div style="color:var(--sub); font-size:12px; padding:20px 6px;">⏳ Loading page preview…</div></div>`);
+  container.appendChild(wrap);
+  let curFilter = '', curPage = opts.current || 0;
+  const api = { wrap, n: 0, setFilter(f){ curFilter = f || ''; wrap.querySelectorAll('.pvbox img').forEach(i=>{ i.style.filter = curFilter; }); },
+    setCurrent(p){ curPage = p; wrap.querySelectorAll('.pvc').forEach(c=>{ const on = +c.dataset.p === p; c.querySelector('.pvbox').style.outline = on ? '3px solid var(--brand)' : 'none'; }); } };
+  api.ready = (async ()=>{
+    try{
+      const r = await getPvDoc(buf), n = r.doc.numPages; api.n = n;
+      const shown = Math.min(n, MAX);
+      wrap.innerHTML = '';
+      for(let i = 0; i <= shown; i++){
+        if(opts.gap){ const gnode = opts.gap(i, n); if(gnode) wrap.appendChild(gnode); }
+        if(i < shown){
+          const cell = el(`<div class="pvc" data-p="${i+1}" style="flex:0 0 auto; width:${W}px; text-align:center; font-size:11px; color:var(--sub); ${opts.onPick?'cursor:pointer;':''}"><div class="pvbox" style="width:${W}px; height:${Math.round(W*1.4)}px; border:1px solid var(--line); border-radius:6px; background:#fff; overflow:hidden; display:flex; align-items:center; justify-content:center; color:#bbb;">…</div><div style="margin-top:3px;">${i+1}</div></div>`);
+          if(opts.onPick) cell.onclick = ()=> opts.onPick(i+1);
+          wrap.appendChild(cell);
+        }
+      }
+      if(n > shown) wrap.appendChild(el(`<div style="flex:0 0 auto; align-self:center; color:var(--sub); font-size:12px; padding:0 10px;">+${n-shown} more pages</div>`));
+      api.setCurrent(curPage);
+      for(let i = 1; i <= shown; i++){
+        if(!wrap.isConnected) return;
+        try{
+          const t = await pvThumb(buf, i, W), box = wrap.querySelector(`.pvc[data-p="${i}"] .pvbox`);
+          if(!box) continue;
+          box.style.height = 'auto'; box.innerHTML = '';
+          const im = el(`<img src="${t.url}" alt="Page ${i}" style="width:100%; display:block;${curFilter?'filter:'+curFilter+';':''}">`);
+          box.appendChild(im);
+        }catch(e){}
+      }
+    }catch(e){ wrap.innerHTML = `<div class="note" style="background:#FDEDEC;">Could not show the pages (${escapeHtml(e.message||String(e))}). The tool still works.</div>`; }
+  })();
+  return api;
+}
+// small thumbnail inside every file row: the photo itself, or the first page of a PDF
+function attachFileThumb(box, f){
+  try{
+    const isImg = /^image\//.test(f.type||'') || /\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f.name||'');
+    const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name||'');
+    if(isImg){
+      f._thumbUrl = f._thumbUrl || URL.createObjectURL(f);
+      box.style.cssText += 'width:44px;height:44px;background:#eee;overflow:hidden;padding:0;';
+      box.innerHTML = `<img src="${f._thumbUrl}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+    } else if(isPdf && typeof pdfjsLib !== 'undefined'){
+      box.style.cssText += 'width:34px;height:46px;background:#fff;border:1px solid var(--line);overflow:hidden;padding:0;color:var(--brand);';
+      (async ()=>{
+        try{
+          const buf = f._buf || (f._buf = await readFileAsArrayBuffer(f));
+          const t = await pvThumb(buf, 1, 60);
+          if(box.isConnected) box.innerHTML = `<img src="${t.url}" alt="" style="width:100%;display:block;">`;
+        }catch(e){}
+      })();
+    }
+  }catch(e){}
 }
 
 function mountFileList(container, files, onRemove, onMove){
@@ -2399,13 +2488,14 @@ function mountFileList(container, files, onRemove, onMove){
     const row = el(`
       <div class="file-row">
         <div class="fi">${ext}</div>
-        <div class="fname">${f.name}</div>
+        <div class="fname">${escapeHtml(f.name)}</div>
         <div class="fsize">${fmtBytes(f.size)}</div>
         ${onMove ? `<button class="fmove" data-up="${idx}">↑</button><button class="fmove" data-down="${idx}">↓</button>` : ''}
         <button class="fdel" data-del="${idx}">✕</button>
       </div>
     `);
     wrap.appendChild(row);
+    attachFileThumb(row.querySelector('.fi'), f);
   });
   wrap.addEventListener('click', (e)=>{
     const del = e.target.closest('[data-del]');
@@ -3548,10 +3638,10 @@ const TOOL_LIBS = {
   expensetracker:['xlsx'], extractpages:['pdflib'], img2pdf:['pdflib'],
   leaveletter:['pdflib'], merge:['pdflib'], ocr:['docx','html2canvas','pdfjs','tesseract'], pagenum:['pdflib'],
   pdf2excel:['pdfjs','xlsx'], pdf2img:['jszip','pdfjs'], pdf2png:['jszip','pdfjs'],
-  pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdflib'],
+  pdf2ppt:['pdfjs','pptxgenjs'], pdf2text:['pdfjs'], pdf2word:['docx','pdfjs'], pdfblankpage:['pdfjs','pdflib'],
   pdfbookmark:['pdflib'], pdfcompare:['pdfjs'], pdfcrop:['pdfjs','pdflib'], pdfeditor:['pdfjs','pdflib'],
   pdfflatten:['pdfjs','pdflib'], pdfform:['pdflib'], pdfgray:['pdfjs','pdflib'], pdfheaderfooter:['pdflib'],
-  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], daarrears:['hubcore'], attendcalc:['hubcore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'], tdslatefee:['tdscore'],
+  pdfhighlight:['pdfjs','pdflib'], pdfimgwm:['pdfjs','pdflib'], pdfmeta:['pdflib'], pdfmetaremove:['pdflib'], dscverify:['dscverify','pdflib','dscstamp'], dscbulk:['dscverify','jszip','tdscore'], daarrears:['hubcore'], attendcalc:['hubcore'], pantan:['tdscore'], tdsdates:['tdscore'], tdsinterest:['tdscore'], tdslatefee:['tdscore'],
   pdfnup:['pdflib'], pdfocrsearchable:['pdfjs','pdflib','tesseract'], pdfqrstamp:['pdflib'],
   pdfredact:['pdfjs','pdflib'], pdfrepair:['pdfjs','pdflib'], pdfsplitsize:['jszip','pdflib'],
   hrattendance:['xlsx'], pdfstamp:['pdflib'], ppt2pdf:['pdflib'], prescription:['pdflib'], quotepo:['docx','pdflib','xlsx'],
@@ -4273,7 +4363,8 @@ TOOL_IMPL.img2pdf = {
         }
       });
       if(files.length){
-        mountFileList(body, files,
+        body.appendChild(el(`<div class="note">👇 Your pictures (page order = left to right). Use ◀ ▶ on a picture to change the order.</div>`));
+        mountImageFileList(body, files,
           (idx)=>{ files.splice(idx,1); paint(); },
           (idx,dir)=>{ const j=idx+dir; if(j<0||j>=files.length) return; const t=files[idx]; files[idx]=files[j]; files[j]=t; paint(); }
         );
@@ -7931,6 +8022,9 @@ TOOL_IMPL.pdfgray = {
       });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        const gStrip = mountPdfStrip(body, file._buf, {width:100});
+        gStrip.ready.then(()=> gStrip.setFilter(mode==='bw' ? 'grayscale(1) contrast(7) brightness(1.15)' : 'grayscale(1)'));
+        body.appendChild(el(`<div class="note" style="margin-top:2px;">👆 Preview of how your pages will look. Pick Grayscale or Black-White below.</div>`));
         body.appendChild(el(`<div class="note" style="margin-top:12px;">⚠️ <b>Note:</b> This process rasterizes the PDF pages into images. Text may no longer be selectable or searchable in the output — if you need to keep selectable text, this isn't the right tool.</div>`));
         const filterRow = el(`<div class="filter-row" style="margin-top:16px;"></div>`);
         [['gray','🌫️ Grayscale'],['bw','⚫ Black-White (B&W)']].forEach(([m,label])=>{
@@ -8514,93 +8608,97 @@ TOOL_IMPL.qrgen = {
 /* imgcrop — moved to category-image.js (lazy-loaded) */
 TOOL_IMPL.pdfcrop = {
   mount(container){
-    let file = null, previewUrl = null, previewCanvas = null;
-    let selector = null;
+    let file = null, curPage = 1, nPages = 1, mode = 'same';   // same | perpage | auto
+    let shared = {fx0:0.06, fy0:0.06, fx1:0.94, fy1:0.94}, rects = {}, selector = null, curCanvas = null, strip = null;
     const body = el(`<div></div>`); container.appendChild(body);
+    function detect(canvas){
+      // first row/column from each edge that is not near-white = the content box
+      const w = canvas.width, h = canvas.height, data = canvas.getContext('2d').getImageData(0,0,w,h).data, T = 245;
+      const px = (x,y)=>{ const i=(y*w+x)*4; return data[i]<T || data[i+1]<T || data[i+2]<T; };
+      const rowHas = (y)=>{ for(let x=0;x<w;x+=2) if(px(x,y)) return true; return false; };
+      const colHas = (x)=>{ for(let y=0;y<h;y+=2) if(px(x,y)) return true; return false; };
+      let top=0, bottom=h-1, left=0, right=w-1;
+      while(top<h-1 && !rowHas(top)) top++;
+      while(bottom>top && !rowHas(bottom)) bottom--;
+      while(left<w-1 && !colHas(left)) left++;
+      while(right>left && !colHas(right)) right--;
+      if(bottom<=top || right<=left) return null;
+      const pad = Math.round(Math.min(w,h)*0.015);
+      return { fx0:Math.max(0,left-pad)/w, fy0:Math.max(0,top-pad)/h, fx1:Math.min(w,right+pad)/w, fy1:Math.min(h,bottom+pad)/h };
+    }
+    function saveCurrent(){ if(!selector) return; const r = selector.getRect(); if(mode==='perpage') rects[curPage] = r; else shared = r; }
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">Mark the area you want to keep with the box — the White space/margin outside it will be removed on every page.</div>`));
+      body.appendChild(el(`<div class="note">Upload a PDF, then drag the orange box over the part you want to <b>keep</b>. Use ◀ ▶ or tap a page below to look at every page. Everything outside the box is removed.</div>`));
       mountUploader(body, { accept:'application/pdf', label:'Drag & drop or tap to upload a PDF', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
-          const pdfjsDoc = await loadPdfJs(file._buf);
-          const page = await pdfjsDoc.getPage(1);
-          const viewport = page.getViewport({scale: Math.min(1.6, 720/page.getViewport({scale:1}).width)});
-          const canvas = document.createElement('canvas'); canvas.width=viewport.width; canvas.height=viewport.height;
-          await page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
-          previewCanvas = canvas; // kept (not just the dataURL) so auto-detect can read pixel data
-          previewUrl = canvas.toDataURL('image/jpeg',0.85);
-          paint();
+          try{ nPages = (await getPvDoc(file._buf)).doc.numPages; }catch(e){ nPages = 1; }
+          curPage = 1; rects = {}; shared = {fx0:0.06, fy0:0.06, fx1:0.94, fy1:0.94}; mode = 'same';
+          paintEditor();
         }});
-      if(file && previewUrl){
-        mountFileList(body, [file], ()=>{ file=null; previewUrl=null; previewCanvas=null; paint(); });
-        selector = mountRectSelector(body, previewUrl, {fx0:0.06, fy0:0.06, fx1:0.94, fy1:0.94});
-        const autoRow = el(`<div class="btn-row" style="margin:8px 0;"></div>`);
-        const autoBtn = el(`<button class="btn secondary">🔍 Auto-detect Margins (automatically finds empty space)</button>`);
-        autoBtn.onclick = doAutoDetect;
-        autoRow.appendChild(autoBtn);
-        body.appendChild(autoRow);
-        const row = el(`<div class="btn-row"></div>`);
-        const btn = el(`<button class="btn">📐 Crop Do</button>`);
-        btn.onclick = doCrop;
-        row.appendChild(btn);
-        body.appendChild(row);
-      }
     }
-    function doAutoDetect(){
-      // Scans page 1's rendered pixels from each edge inward for the first
-      // row/column that isn't near-white — the standard technique every
-      // competitor's "auto-crop"/"auto-detect margins" feature uses.
-      const ctx = previewCanvas.getContext('2d');
-      const {width:w, height:h} = previewCanvas;
-      const data = ctx.getImageData(0,0,w,h).data;
-      const THRESHOLD = 245; // a pixel counts as "content" if any channel dips below this — tolerant of slight JPEG noise in true-white margins
-      function isContentPixel(x,y){
-        const i = (y*w+x)*4;
-        return data[i] < THRESHOLD || data[i+1] < THRESHOLD || data[i+2] < THRESHOLD;
+    async function paintEditor(){
+      body.innerHTML = '';
+      mountFileList(body, [file], ()=>{ file=null; selector=null; paint(); });
+      const modes = [['same','▭ Same box on every page'],['perpage','📄 Different box for each page'],['auto','🔍 Auto-trim every page']];
+      const mrow = el(`<div class="filter-row" style="margin:10px 0; flex-wrap:wrap;"></div>`);
+      modes.forEach(([m,l])=> mrow.appendChild(el(`<button class="filter-chip ${mode===m?'active':''}" data-m="${m}">${l}</button>`)));
+      mrow.addEventListener('click', (e)=>{ const b = e.target.closest('[data-m]'); if(!b) return; saveCurrent(); mode = b.dataset.m; if(mode==='perpage' && !rects[curPage]) rects[curPage] = {...shared}; paintEditor(); });
+      body.appendChild(mrow);
+      const nav = el(`<div class="btn-row" style="justify-content:center; align-items:center; gap:14px; margin:6px 0;"></div>`);
+      const prev = el(`<button class="btn secondary" style="padding:6px 14px;" ${curPage<=1?'disabled':''}>◀</button>`);
+      const lbl = el(`<div style="font-weight:800; font-size:13px;">Page ${curPage} / ${nPages}</div>`);
+      const next = el(`<button class="btn secondary" style="padding:6px 14px;" ${curPage>=nPages?'disabled':''}>▶</button>`);
+      const go = (p)=>{ if(p<1||p>nPages||p===curPage) return; saveCurrent(); curPage = p; if(mode==='perpage' && !rects[p]) rects[p] = {...shared}; paintEditor(); };
+      prev.onclick = ()=> go(curPage-1); next.onclick = ()=> go(curPage+1);
+      nav.appendChild(prev); nav.appendChild(lbl); nav.appendChild(next); body.appendChild(nav);
+      strip = mountPdfStrip(body, file._buf, { width:70, current:curPage, onPick:go });
+      const holder = el(`<div></div>`); body.appendChild(holder);
+      holder.innerHTML = '<div style="color:var(--sub); font-size:12px; padding:20px; text-align:center;">⏳ Loading page…</div>';
+      try{
+        curCanvas = await pvCanvas(file._buf, curPage, 720, 1.6);
+      }catch(e){ holder.innerHTML = ''; mountResult(holder, 'Could not show this page: '+escapeHtml(e.message||String(e))).style.background='#FDEDEC'; return; }
+      holder.innerHTML = '';
+      const init = mode==='perpage' ? (rects[curPage]||shared) : shared;
+      selector = mountRectSelector(holder, curCanvas.toDataURL('image/jpeg',0.85), init);
+      if(mode==='auto'){
+        const r = detect(curCanvas); if(r) selector.setRect(r);
+        selector.el.style.pointerEvents = 'none';
+        holder.appendChild(el(`<div class="note">Every page is trimmed to its own content when you press Crop — the box above shows the result for this page.</div>`));
+      } else {
+        const autoRow = el(`<div class="btn-row" style="margin:8px 0;"></div>`);
+        const autoBtn = el(`<button class="btn secondary">🔍 Auto-detect margins of this page</button>`);
+        autoBtn.onclick = ()=>{ const r = detect(curCanvas); if(!r){ mountResult(holder,'This page looks blank — nothing to detect.').style.background='#FFF3E0'; return; } selector.setRect(r); };
+        autoRow.appendChild(autoBtn); holder.appendChild(autoRow);
       }
-      function rowHasContent(y){ for(let x=0;x<w;x+=2) if(isContentPixel(x,y)) return true; return false; } // step by 2px — plenty accurate, halves the scan cost
-      function colHasContent(x){ for(let y=0;y<h;y+=2) if(isContentPixel(x,y)) return true; return false; }
-      let top=0, bottom=h-1, left=0, right=w-1;
-      while(top<h-1 && !rowHasContent(top)) top++;
-      while(bottom>top && !rowHasContent(bottom)) bottom--;
-      while(left<w-1 && !colHasContent(left)) left++;
-      while(right>left && !colHasContent(right)) right--;
-      if(bottom<=top || right<=left){
-        mountResult(body, 'Could not detect any content on this page — it may be completely blank.').style.background='#FFF3E0';
-        return;
-      }
-      const pad = Math.round(Math.min(w,h)*0.015); // a small padding around the detected content, matching "trim tight with a small padding"
-      const fx0 = Math.max(0,(left-pad))/w, fx1 = Math.min(w,(right+pad))/w;
-      const fy0 = Math.max(0,(top-pad))/h, fy1 = Math.min(h,(bottom+pad))/h;
-      selector.setRect({fx0, fy0, fx1, fy1});
+      const row = el(`<div class="btn-row"></div>`);
+      const btn = el(`<button class="btn">📐 Crop all ${nPages} page${nPages>1?'s':''} & Download</button>`);
+      btn.onclick = doCrop; row.appendChild(btn); body.appendChild(row);
     }
     async function doCrop(){
-      const rect = selector.getRect();
+      saveCurrent();
       const prog = mountProgress(body);
       try{
-        prog.set(10,'Reading…');
+        prog.set(5,'Reading…');
         const srcDoc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const outDoc = await PDFDocument.create();
         const srcPages = srcDoc.getPages();
         const embedded = await outDoc.embedPages(srcPages);
-        embedded.forEach((ep, idx)=>{
-          prog.set(10 + (idx/embedded.length)*75, `page ${idx+1}/${embedded.length}…`);
-          const w = ep.width, h = ep.height;
-          const x0 = rect.fx0*w, x1 = rect.fx1*w;
-          const y0 = rect.fy0*h, y1 = rect.fy1*h; // fy measured from the TOP of the page
-          const cropW = Math.max(1, x1-x0), cropH = Math.max(1, y1-y0);
-          const newPage = outDoc.addPage([cropW, cropH]);
-          // Draw the full original page shifted so only the cropped region falls
-          // within the new (smaller) page boundary — this physically removes the
-          // rest, unlike setCropBox which many viewers simply ignore.
-          newPage.drawPage(ep, { x: -x0, y: -(h - y1), width: w, height: h });
-        });
-        prog.set(90,'Preparing…');
+        for(let idx=0; idx<embedded.length; idx++){
+          prog.set(10 + (idx/embedded.length)*80, `page ${idx+1}/${embedded.length}…`);
+          let rect = mode==='perpage' ? (rects[idx+1] || shared) : shared;
+          if(mode==='auto'){ try{ rect = detect(await pvCanvas(file._buf, idx+1, 600, 1)) || {fx0:0,fy0:0,fx1:1,fy1:1}; }catch(e){ rect = {fx0:0,fy0:0,fx1:1,fy1:1}; } }
+          const ep = embedded[idx], w = ep.width, h = ep.height;
+          const x0 = rect.fx0*w, x1 = rect.fx1*w, y0 = rect.fy0*h, y1 = rect.fy1*h;
+          const newPage = outDoc.addPage([Math.max(1,x1-x0), Math.max(1,y1-y0)]);
+          newPage.drawPage(ep, { x:-x0, y:-(h-y1), width:w, height:h });
+        }
+        prog.set(92,'Preparing…');
         const bytes = await outDoc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-cropped.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Cropped PDF downloaded — every page cropped, works reliably in every viewer.');
+        mountResult(body, `Cropped PDF downloaded — ${embedded.length} page(s) cropped.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -8961,7 +9059,7 @@ TOOL_IMPL.txt2pdf = {
 /* ===================== TEXT TO HTML ===================== */
 TOOL_IMPL.txt2html = {
   mount(container){
-    let files = [];
+    let files = [], t2hDraft = '', pasteCount = 0;
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
@@ -8971,6 +9069,16 @@ TOOL_IMPL.txt2html = {
         label:'.txt file(s) drag & drop or tap', sublabel:'You can attach more than one — all go into 1 HTML',
         onAdd: (fl)=>{ files = files.concat(fl.filter(f=>/\.txt$/i.test(f.name) || f.type==='text/plain')); paint(); }
       });
+      // paste / type text instead of (or in addition to) files
+      const pasteBox = el(`<div style="margin:12px 0; padding:12px; border:1.5px dashed var(--line); border-radius:12px; background:#fafbfc;">
+        <div style="font-weight:800; font-size:13px; margin-bottom:6px;">✍️ Or paste / type your text here</div>
+        <textarea id="t2hPaste" rows="6" placeholder="Paste text here (Ctrl+V / long-press → Paste)…" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+        <div class="btn-row" style="margin-top:8px;"><button class="btn secondary" id="t2hClip" style="padding:8px 14px; font-size:12px;">📋 Paste from clipboard</button><button class="btn" id="t2hAdd" style="padding:8px 14px; font-size:12px;">➕ Add this text</button></div>
+      </div>`);
+      const ta = pasteBox.querySelector('#t2hPaste'); ta.value = t2hDraft; ta.addEventListener('input', ()=>{ t2hDraft = ta.value; });
+      pasteBox.querySelector('#t2hClip').onclick = async ()=>{ try{ const t = await navigator.clipboard.readText(); if(t){ ta.value = (ta.value ? ta.value + '\n' : '') + t; t2hDraft = ta.value; } else showToast('Clipboard is empty','warn'); }catch(e){ showToast('The browser blocked clipboard access — long-press in the box and choose Paste','warn'); ta.focus(); } };
+      pasteBox.querySelector('#t2hAdd').onclick = ()=>{ const t = ta.value; if(!t.trim()){ showToast('Type or paste some text first','warn'); return; } pasteCount++; files.push(new File([t], 'pasted-text'+(pasteCount>1?'-'+pasteCount:'')+'.txt', {type:'text/plain'})); t2hDraft = ''; paint(); };
+      body.appendChild(pasteBox);
       if(files.length){
         mountFileList(body, files, (i)=>{ files.splice(i,1); paint(); }, (i,d)=>{
           const j=i+d; if(j<0||j>=files.length) return;
@@ -10127,10 +10235,10 @@ TOOL_IMPL.pdfimgwm = {
     const body = el(`<div></div>`); container.appendChild(body);
     function paint(){
       body.innerHTML = '';
-      mountUploader(body, { accept:'application/pdf', label:'Drag & drop or tap to upload a PDF', sublabel:'',
+      mountUploader(body, { accept:'application/pdf', label:'① Drag & drop or tap to upload a PDF', sublabel:'',
         onAdd: async (fl)=>{ pdfFile = fl[0]; pdfFile._buf = await readFileAsArrayBuffer(pdfFile); paint(); } });
       if(pdfFile) mountFileList(body, [pdfFile], ()=>{ pdfFile=null; paint(); });
-      mountUploader(body, { accept:'image/png,image/jpeg', label:'Drag & drop or tap to upload a logo/image', sublabel:'PNG (transparent is best) / JPG',
+      mountUploader(body, { accept:'image/png,image/jpeg', label:'② Drag & drop or tap to upload a logo/image', sublabel:'PNG (transparent is best) / JPG',
         onAdd: async (fl)=>{
           logoFile = fl[0];
           logoDataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(logoFile); });
@@ -10147,7 +10255,26 @@ TOOL_IMPL.pdfimgwm = {
             <div class="field"><label>Opacity %</label><input type="number" id="pwOpac" value="70" min="10" max="100"></div>
           </div>
         `);
+        // live preview: page 1 with the logo exactly where it will be stamped
+        const pv = el(`<div style="position:relative; max-width:360px; margin:12px auto; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; line-height:0; box-shadow:0 2px 10px rgba(0,0,0,.08);"><img class="pvbase" alt="Page 1" style="width:100%; display:block; min-height:120px;"><img class="pvlogo" alt="Logo" style="position:absolute; display:block;"></div>`);
+        const base = pv.querySelector('.pvbase'), lg = pv.querySelector('.pvlogo');
+        lg.src = logoDataUrl;
+        const upd = ()=>{
+          const pos = opts.querySelector('#pwPos').value, size = Math.max(5, Math.min(80, +opts.querySelector('#pwSize').value || 20)), op = Math.max(10, Math.min(100, +opts.querySelector('#pwOpac').value || 70));
+          const par = (base.naturalHeight && base.naturalWidth) ? base.naturalHeight / base.naturalWidth : 1.414;
+          const padX = 3, padY = 3 / par;
+          lg.style.width = size + '%'; lg.style.opacity = op / 100; lg.style.transform = '';
+          lg.style.left = lg.style.right = lg.style.top = lg.style.bottom = 'auto';
+          if(pos==='center'){ lg.style.left = '50%'; lg.style.top = '50%'; lg.style.transform = 'translate(-50%,-50%)'; }
+          else { if(pos[1]==='r') lg.style.right = padX+'%'; else lg.style.left = padX+'%'; if(pos[0]==='b') lg.style.bottom = padY+'%'; else lg.style.top = padY+'%'; }
+        };
+        base.onload = upd;
+        pvThumb(pdfFile._buf, 1, 360).then(t=>{ base.src = t.url; }).catch(()=>{ base.alt = 'Page preview not available'; });
+        opts.addEventListener('input', upd); opts.addEventListener('change', upd);
+        body.appendChild(el(`<div class="note" style="text-align:center;">Live preview (page 1) — the logo is stamped on every page like this.</div>`));
+        body.appendChild(pv);
         body.appendChild(opts);
+        upd();
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn">🖼️ Add & Download</button>`);
         btn.onclick = doApply;
@@ -11246,14 +11373,28 @@ TOOL_IMPL.pdfblankpage = {
         onAdd: async (fl)=>{ file = fl[0]; file._buf = await readFileAsArrayBuffer(file); paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
+        body.appendChild(el(`<div class="note">👇 Your pages are shown below. Tap a <b>＋</b> between two pages to put a blank page there (tap again to remove). You can also type the page numbers.</div>`));
         const opts = el(`
-          <div class="opts one">
+          <div class="opts">
             <div class="field">
-              <label>After which page should blank pages be added? (separate with commas, 0 = at the start)</label>
-              <input type="text" id="bpPositions" placeholder="e.g.. 0, 3, 5" value="0">
+              <label>After which page? (commas, 0 = at the very start)</label>
+              <input type="text" id="bpPositions" placeholder="e.g. 0, 3, 5" value="0">
+            </div>
+            <div class="field">
+              <label>Blank pages at each place</label>
+              <input type="number" id="bpCount" min="1" max="20" value="1">
             </div>
           </div>
         `);
+        const inp = opts.querySelector('#bpPositions');
+        const getSet = ()=> new Set(inp.value.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n)&&n>=0));
+        const mark = ()=>{ const s = getSet(); strip.wrap.querySelectorAll('[data-pos]').forEach(b=>{ const on = s.has(+b.dataset.pos); b.style.background = on ? 'var(--brand)' : '#fff'; b.style.color = on ? '#fff' : 'var(--sub)'; b.style.borderStyle = on ? 'solid' : 'dashed'; b.textContent = on ? '▯' : '＋'; }); };
+        const strip = mountPdfStrip(body, file._buf, { width:90, gap:(i)=>{
+          const b = el(`<button type="button" data-pos="${i}" title="Blank page after page ${i}" style="flex:0 0 auto; align-self:center; width:30px; height:56px; border-radius:8px; border:1.5px dashed var(--line); background:#fff; font-size:18px; cursor:pointer; color:var(--sub);">＋</button>`);
+          b.onclick = ()=>{ const s = getSet(); if(s.has(i)) s.delete(i); else s.add(i); inp.value = [...s].sort((a,b)=>a-b).join(', '); mark(); };
+          return b; } });
+        strip.ready.then(mark);
+        inp.addEventListener('input', mark);
         body.appendChild(opts);
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn">➕ Add Blank page</button>`);
@@ -11264,28 +11405,28 @@ TOOL_IMPL.pdfblankpage = {
     }
     async function doInsert(){
       const positions = (body.querySelector('#bpPositions').value||'').split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n)&&n>=0);
-      if(!positions.length){ mountResult(body,'Please specify at least one position.').style.background='#FDEDEC'; return; }
+      const count = Math.max(1, Math.min(20, parseInt(body.querySelector('#bpCount').value,10) || 1));
+      if(!positions.length){ mountResult(body,'Please choose at least one place (tap a ＋ between pages).').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         prog.set(15,'Reading…');
         const src = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const totalPages = src.getPageCount();
-        const firstPage = src.getPage(0);
-        const {width,height} = firstPage.getSize();
         const outDoc = await PDFDocument.create();
-        const sortedPos = new Set(positions);
+        const at = new Set(positions);
+        const addBlanks = (refIdx)=>{ const {width,height} = src.getPage(Math.max(0, Math.min(totalPages-1, refIdx))).getSize(); for(let k=0;k<count;k++) outDoc.addPage([width,height]); };
         prog.set(30,'Arranging pages…');
-        if(sortedPos.has(0)) outDoc.addPage([width,height]);
+        if(at.has(0)) addBlanks(0);
         for(let p=0;p<totalPages;p++){
           const [copied] = await outDoc.copyPages(src, [p]);
           outDoc.addPage(copied);
-          if(sortedPos.has(p+1)) outDoc.addPage([width,height]);
+          if(at.has(p+1)) addBlanks(p);
         }
         prog.set(90,'Preparing…');
         const bytes = await outDoc.save();
         downloadBlob(new Blob([bytes],{type:'application/pdf'}), file.name.replace(/\.pdf$/i,'')+'-blank.pdf');
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'PDF with blank pages added downloaded.');
+        mountResult(body, `PDF with ${outDoc.getPageCount()-totalPages} blank page(s) added downloaded.`);
       }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
     }
     paint();
@@ -12089,7 +12230,7 @@ TOOL_IMPL.pdfeditor = {
     const scale = 1.5;
     // live-editing settings (UPDATE_67): zoom, "show editable text" outlines, pen / new-text defaults
     let lastCommitAt = 0, zoom = 1, showEditable = true, penColor = '#D32F2F', penWidth = 3, liveEditor = null;
-    let newTextSize = 14, newTextColor = '#1a1a1a', newTextFont = 'sans';
+    let newTextSize = 14, newTextColor = '#1a1a1a', newTextFont = 'sans', pasteDraft = '';
     const body = el(`<div></div>`); container.appendChild(body);
 
     // Keyboard Delete/Backspace for the currently-selected element — a
@@ -12110,6 +12251,55 @@ TOOL_IMPL.pdfeditor = {
         elementsByPage[curPage] = (elementsByPage[curPage]||[]).filter(e=>e.id!==selectedId);
         selectedId = null;
         paintEditor();
+      }
+    });
+
+    // ---- copy / paste (UPDATE_68) ----
+    async function copyToClipboard(text, what){
+      text = String(text||'');
+      if(!text.trim()){ showToast('There is no text to copy here (scanned / image-only page?)','warn'); return; }
+      let ok = false;
+      try{ await navigator.clipboard.writeText(text); ok = true; }catch(e){}
+      if(!ok){ try{ const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:0;'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove(); }catch(e){} }
+      showToast(ok ? `📋 ${what||'Text'} copied (${text.length} characters)` : 'Could not copy automatically — select the text and press Ctrl+C', ok ? undefined : 'warn');
+    }
+    async function pdfPageText(pn){
+      const doc = renderDoc || pdfjsDoc, pg = await doc.getPage(pn), tc = await pg.getTextContent();
+      let s = '', lastY = null;
+      tc.items.forEach(it=>{
+        if(typeof it.str !== 'string') return;
+        const y = it.transform ? it.transform[5] : null;
+        if(lastY !== null && y !== null && Math.abs(y - lastY) > 3 && s && !/\n$/.test(s)) s += '\n';
+        s += it.str; if(it.hasEOL && !/\n$/.test(s)) s += '\n';
+        if(y !== null) lastY = y;
+      });
+      return s.replace(/[ \t]+\n/g,'\n').trim();
+    }
+    // Ctrl+V anywhere on the editor (not inside a text box): a copied picture or text lands on the page as a movable element
+    document.addEventListener('paste', async function pdfEditorPasteHandler(ev){
+      if(!document.body.contains(body)){ document.removeEventListener('paste', pdfEditorPasteHandler); return; }
+      if(!pageData || !currentCanvasEl) return;
+      const a = document.activeElement;
+      if(a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA' || a.tagName==='SELECT' || a.isContentEditable)) return;
+      const cd = ev.clipboardData; if(!cd) return;
+      const imgItem = Array.from(cd.items||[]).find(i=> i.kind==='file' && /^image\//.test(i.type));
+      const cw = pageData.canvas.width, chh = pageData.canvas.height;
+      if(imgItem){
+        ev.preventDefault();
+        const f = imgItem.getAsFile(); if(!f) return;
+        const src = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+        const im = new Image(); await new Promise(r=>{ im.onload=r; im.onerror=r; im.src=src; });
+        const w = Math.min(cw*0.5, im.naturalWidth || 160), h = w * ((im.naturalHeight||1)/(im.naturalWidth||1));
+        snapshotForUndo(); selectedId = newEl({ type:'image', x:cw*0.25, y:chh*0.25, w, h, src }).id; paintEditor();
+        showToast('🖼️ Picture pasted — drag it where you want');
+        return;
+      }
+      const t = cd.getData('text');
+      if(t && t.trim()){
+        ev.preventDefault();
+        const fs = newTextSize*scale, sz = textBoxSize(t, fs);
+        snapshotForUndo(); selectedId = newEl({ type:'text', x:cw*0.12, y:chh*0.2, w:sz.w, h:sz.h, text:t, fontSize:fs, color:newTextColor, font:newTextFont }).id; paintEditor();
+        showToast('📋 Text pasted — drag it where you want, or tap ✏️ Edit text');
       }
     });
 
@@ -12267,7 +12457,8 @@ TOOL_IMPL.pdfeditor = {
       const TOOLS = [
         ['select','↖️ Edit text / Select'], ['text','🅰️ Add Text'], ['image','🖼️ Image'], ['signature','✍️ Signature'],
         ['highlight','🖍️ Highlight'], ['draw','✏️ Draw'], ['check','✔ Tick'], ['cross','✖ Cross'],
-        ['shape-rect','▭ Rect'], ['shape-ellipse','⬭ Ellipse'], ['shape-line','／ Line'], ['whiteout','⬜ Whiteout']
+        ['shape-rect','▭ Rect'], ['shape-ellipse','⬭ Ellipse'], ['shape-line','／ Line'], ['whiteout','⬜ Whiteout'],
+        ['copy','📋 Copy text'], ['paste','📥 Paste text']
       ];
       TOOLS.forEach(([key,label])=>{
         const btn = el(`<button style="padding:7px 11px; border-radius:8px; border:1.5px solid ${tool===key?'var(--brand-dark)':'var(--line)'}; background:${tool===key?'var(--brand-dark)':'#fff'}; color:${tool===key?'#fff':'var(--ink)'}; font-size:12px; font-weight:700; cursor:pointer;">${label}</button>`);
@@ -12292,6 +12483,20 @@ TOOL_IMPL.pdfeditor = {
         se.querySelector('input').onchange = (ev)=>{ showEditable = ev.target.checked; paintEditor(); };
         opt.appendChild(se);
       }
+      if(tool==='copy'){
+        const cp = el(`<span style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;"><button data-k="cpPage" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font-size:12px; font-weight:800; cursor:pointer;">📄 Copy this page's text</button><button data-k="cpAll" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--brand-dark); background:#fff; color:var(--brand-dark); font-size:12px; font-weight:800; cursor:pointer;">📚 Copy whole PDF text</button></span>`);
+        cp.querySelector('[data-k=cpPage]').onclick = async ()=>{ const t = await pdfPageText(curPage); copyToClipboard(t, 'This page\'s text'); };
+        cp.querySelector('[data-k=cpAll]').onclick = async ()=>{ showToast('Collecting the text of all pages…'); let all=[]; for(let p=1;p<=numPages;p++) all.push(await pdfPageText(p)); copyToClipboard(all.join('\n\n'), 'All '+numPages+' pages of text'); };
+        opt.appendChild(cp);
+      }
+      if(tool==='paste'){
+        const pp = el(`<div style="flex-basis:100%; display:flex; flex-direction:column; gap:6px;"><textarea data-k="pasteTxt" rows="3" placeholder="Paste (Ctrl+V / long-press → Paste) or type the text here, then click on the page where it should go" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:13px; font-family:inherit;"></textarea><span style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;"><button data-k="pasteClip" style="padding:5px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;">📋 Paste from clipboard</button>Size <input data-k="size" type="number" min="6" max="96" value="${newTextSize}" style="width:54px; padding:4px; border:1px solid var(--line); border-radius:6px; font-size:12px;"> Colour <input data-k="color" type="color" value="${newTextColor}" style="width:30px; height:24px; border:1px solid var(--line); border-radius:6px; padding:0;"></span></div>`);
+        const pta = pp.querySelector('[data-k=pasteTxt]'); pta.value = pasteDraft; pta.oninput = ()=>{ pasteDraft = pta.value; };
+        pp.querySelector('[data-k=pasteClip]').onclick = async ()=>{ try{ const t = await navigator.clipboard.readText(); if(t){ pta.value = t; pasteDraft = t; showToast('Pasted — now click on the page'); } else showToast('Clipboard is empty','warn'); }catch(e){ showToast('The browser blocked clipboard access — long-press in the box and choose Paste','warn'); pta.focus(); } };
+        pp.querySelector('[data-k=size]').onchange = (ev)=>{ newTextSize = Math.max(6, Math.min(96, +ev.target.value||14)); };
+        pp.querySelector('[data-k=color]').oninput = (ev)=>{ newTextColor = ev.target.value; };
+        opt.appendChild(pp);
+      }
       if(tool==='text'){
         const tOpt = el(`<span style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">Font
           <select data-k="font" style="padding:4px 6px; border:1px solid var(--line); border-radius:6px; font-size:12px;"><option value="sans">Sans (Arial-like)</option><option value="serif">Serif (Times-like)</option><option value="mono">Mono (Courier)</option></select>
@@ -12311,7 +12516,7 @@ TOOL_IMPL.pdfeditor = {
         opt.appendChild(dOpt);
       }
       const hint = { select:'Click any text to change it on the page.', text:'Click on the page where the new text should start.', highlight:'Click to place a highlight; drag the blue dot to size it.',
-        draw:'Draw with your finger or mouse; each stroke becomes one piece you can move.', check:'Click to place a tick mark.', cross:'Click to place a cross mark.' }[tool];
+        draw:'Draw with your finger or mouse; each stroke becomes one piece you can move.', copy:'Tap a line to copy it, or drag across the text to select and copy (it is copied automatically).', paste:'Paste text above, then click on the page to place it.', check:'Click to place a tick mark.', cross:'Click to place a cross mark.' }[tool];
       if(hint) opt.appendChild(el(`<span style="color:var(--sub);">· ${hint}</span>`));
       body.appendChild(opt);
 
@@ -12434,6 +12639,21 @@ TOOL_IMPL.pdfeditor = {
       // subtly highlighted on hover so it's clear this text is editable
       // (these were previously completely invisible, even on hover, which
       // left no visual cue that clicking here does anything).
+      if(tool==='copy'){
+        const ds = displayScale(), cw = pageData.canvas.width, ch = pageData.canvas.height;
+        const layer = el(`<div data-copy-layer="1" style="position:absolute; left:0; top:0; width:100%; height:100%; -webkit-user-select:text; user-select:text; touch-action:pan-y;"></div>`);
+        pageData.items.forEach((it,idx)=>{
+          const fsPx = Math.max(6, (it.fontSize || it.h*0.8) * ds);
+          const span = el(`<span data-copy-idx="${idx}" style="position:absolute; left:${it.x/cw*100}%; top:${it.y/ch*100}%; font-size:${fsPx}px; line-height:${Math.max(it.h*ds,fsPx)}px; color:transparent; white-space:pre; cursor:text; transform-origin:0 0; background:rgba(21,101,192,.08); border-radius:2px;"></span>`);
+          span.textContent = it.str;
+          layer.appendChild(span);
+          requestAnimationFrame(()=>{ const nat = span.getBoundingClientRect().width; if(nat>0 && it.w>0) span.style.transform = `scaleX(${(it.w*ds)/nat})`; });
+          span.onclick = ()=>{ const sel = window.getSelection(); if(sel && !sel.isCollapsed) return; const r = document.createRange(); r.selectNodeContents(span); sel.removeAllRanges(); sel.addRange(r); copyToClipboard(it.str, 'Text'); };
+        });
+        const autoCopy = ()=> setTimeout(()=>{ const sel = window.getSelection(); if(sel && !sel.isCollapsed && layer.contains(sel.anchorNode)) copyToClipboard(sel.toString(), 'Selected text'); }, 60);
+        layer.addEventListener('mouseup', autoCopy); layer.addEventListener('touchend', autoCopy);
+        wrap.appendChild(layer);
+      }
       if(tool==='select'){
         pageData.items.forEach((it,idx)=>{
           const hit = el(`<div data-existing-text-idx="${idx}" title="Click to edit this text" style="position:absolute; left:${(it.x/pageData.canvas.width)*100}%; top:${(it.y/pageData.canvas.height)*100}%; width:${(it.w/pageData.canvas.width)*100}%; height:${(it.h/pageData.canvas.height)*100}%; cursor:text; transition:background-color 0.1s; border-radius:2px; ${showEditable?'outline:1px dashed rgba(21,101,192,.35);':''}"></div>`);
@@ -12672,6 +12892,13 @@ TOOL_IMPL.pdfeditor = {
     function handleCanvasClick(x,y){
       if(tool==='text'){
         inlineNewText(x,y);
+      } else if(tool==='paste'){
+        const t = pasteDraft;
+        if(!t.trim()){ showToast('Paste or type some text in the box first, then click on the page','warn'); return; }
+        snapshotForUndo();
+        const fs = newTextSize*scale, sz = textBoxSize(t, fs);
+        selectedId = newEl({ type:'text', x, y: y - fs*0.9, w: sz.w, h: sz.h, text: t, fontSize: fs, color: newTextColor, font: newTextFont }).id;
+        paintEditor();
       } else if(tool==='highlight'){
         snapshotForUndo();
         selectedId = newEl({ type:'highlight', x:x-60, y:y-12, w:120, h:24, color:'#FFEB3B' }).id;
@@ -13178,22 +13405,40 @@ TOOL_IMPL.pdfhighlight = {
     let file = null, pdfjsDoc = null, numPages = 0, curPage = 1;
     let highlightsByPage = {}; // { pageNum: [{x,y,w,h,color}] } — x,y,w,h in PDF points
     let pageData = null;       // current page's {canvas, items, pageWidthPt, pageHeightPt}
-    let activeColor = 'yellow';
-    let eraseMode = false;
+    let activeColor = 'yellow', eraseMode = false, boxMode = false;
+    let hist = [], redoH = [], redrawFn = null, updateFn = null;
+    let sQuery = '', sScope = 'all', sWhole = false;
     const scale = 1.5;
     const body = el(`<div></div>`); container.appendChild(body);
     const COLORS = { yellow:'rgba(255,224,60,.55)', green:'rgba(105,240,174,.55)', pink:'rgba(255,138,178,.55)', blue:'rgba(130,177,255,.55)' };
     const COLORS_SOLID = { yellow:'#FFE03C', green:'#69F0AE', pink:'#FF8AB2', blue:'#82B1FF' };
     const PDF_COLORS = { yellow:[1,0.878,0.235], green:[0.41,0.94,0.68], pink:[1,0.54,0.7], blue:[0.51,0.69,1] };
+    const clone = (o)=> JSON.parse(JSON.stringify(o));
+    const totalCount = ()=> Object.values(highlightsByPage).reduce((s,a)=>s+a.length,0);
+    function snap(){ hist.push(clone(highlightsByPage)); if(hist.length>100) hist.shift(); redoH = []; syncHist(); }
+    function undo(){ if(!hist.length) return; redoH.push(clone(highlightsByPage)); highlightsByPage = hist.pop(); afterHist(); }
+    function redo(){ if(!redoH.length) return; hist.push(clone(highlightsByPage)); highlightsByPage = redoH.pop(); afterHist(); }
+    function afterHist(){ syncHist(); if(redrawFn) redrawFn(); if(updateFn) updateFn(); }
+    let undoBtnEl = null, redoBtnEl = null;
+    function syncHist(){
+      if(undoBtnEl){ undoBtnEl.disabled = !hist.length; undoBtnEl.style.opacity = hist.length ? 1 : .4; }
+      if(redoBtnEl){ redoBtnEl.disabled = !redoH.length; redoBtnEl.style.opacity = redoH.length ? 1 : .4; }
+    }
+    document.addEventListener('keydown', function hlKeys(ev){
+      if(!document.body.contains(body)){ document.removeEventListener('keydown', hlKeys); return; }
+      const a = document.activeElement; if(a && (a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT')) return;
+      if((ev.ctrlKey||ev.metaKey) && !ev.shiftKey && ev.key.toLowerCase()==='z'){ ev.preventDefault(); undo(); }
+      else if((ev.ctrlKey||ev.metaKey) && (ev.key.toLowerCase()==='y' || (ev.shiftKey && ev.key.toLowerCase()==='z'))){ ev.preventDefault(); redo(); }
+    });
 
     function paintUpload(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">See the actual PDF and drag over any text to highlight it — just like a real highlighter pen. Works on selectable text; scanned/image-only PDFs won't have selectable words.</div>`));
+      body.appendChild(el(`<div class="note">See the actual PDF and mark text like a real highlighter: <b>drag or tap over words</b>, <b>search a word</b> and highlight every match (this page or the whole PDF), or use <b>▭ Box</b> to draw a highlight (works on scanned pages too). Made a mistake? Use ↩ Undo.</div>`));
       mountUploader(body, { accept:'application/pdf', label:'Drop a PDF file', sublabel:'',
         onAdd: async (fl)=>{
           file = fl[0]; file._buf = await readFileAsArrayBuffer(file);
           pdfjsDoc = await loadPdfJs(file._buf);
-          numPages = pdfjsDoc.numPages; curPage = 1; highlightsByPage = {};
+          numPages = pdfjsDoc.numPages; curPage = 1; highlightsByPage = {}; hist = []; redoH = [];
           await paintViewer();
         }});
     }
@@ -13213,11 +13458,18 @@ TOOL_IMPL.pdfhighlight = {
       });
       return { canvas, items, pageWidthPt: viewport.width/scale, pageHeightPt: viewport.height/scale };
     }
-    function pdfRectToDom(r){
-      return { x: r.x*scale, y: (pageData.pageHeightPt - r.y - r.h)*scale, w: r.w*scale, h: r.h*scale };
-    }
-    function domToPdfRect(r){
-      return { x: r.x/scale, y: pageData.pageHeightPt - (r.y/scale) - (r.h/scale), w: r.w/scale, h: r.h/scale };
+    function pdfRectToDom(r){ return { x: r.x*scale, y: (pageData.pageHeightPt - r.y - r.h)*scale, w: r.w*scale, h: r.h*scale }; }
+    function domToPdfRect(r){ return { x: r.x/scale, y: pageData.pageHeightPt - (r.y/scale) - (r.h/scale), w: r.w/scale, h: r.h/scale }; }
+    // rectangles (PDF points) of every match of `q` inside one text item — only the matched letters, not the whole run
+    function matchRects(it, q, whole){
+      const out = [], s = it.str.toLowerCase(); let from = 0, k;
+      while((k = s.indexOf(q, from)) !== -1){
+        from = k + Math.max(1, q.length);
+        if(whole){ const b = s[k-1], a = s[k+q.length]; if((b && /[\p{L}\p{N}]/u.test(b)) || (a && /[\p{L}\p{N}]/u.test(a))) continue; }
+        const per = it.w / it.str.length;
+        out.push({ x: it.x + per*k, y: it.y - it.h*0.2, w: per*q.length, h: it.h*1.1 });
+      }
+      return out;
     }
 
     async function paintViewer(){
@@ -13234,20 +13486,29 @@ TOOL_IMPL.pdfhighlight = {
       body.appendChild(nav);
 
       const toolRow = el(`<div style="display:flex; gap:8px; justify-content:center; align-items:center; margin:12px 0; flex-wrap:wrap;"></div>`);
+      const bStyle = 'padding:7px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;';
       Object.keys(COLORS).forEach(c=>{
-        const sw = el(`<button data-color="${c}" title="${c}" style="width:32px; height:32px; border-radius:50%; border:2px solid ${c===activeColor?'#20242B':'transparent'}; background:${COLORS_SOLID[c]}; cursor:pointer;"></button>`);
-        sw.onclick = ()=>{ activeColor=c; eraseMode=false; toolRow.querySelectorAll('[data-color]').forEach(b=>b.style.border='2px solid transparent'); sw.style.border='2px solid #20242B'; eraseBtn.style.background='#fff'; };
+        const sw = el(`<button data-color="${c}" title="${c}" style="width:32px; height:32px; border-radius:50%; border:2px solid ${c===activeColor&&!eraseMode?'#20242B':'transparent'}; background:${COLORS_SOLID[c]}; cursor:pointer;"></button>`);
+        sw.onclick = ()=>{ activeColor=c; eraseMode=false; toolRow.querySelectorAll('[data-color]').forEach(b=>b.style.border='2px solid transparent'); sw.style.border='2px solid #20242B'; eraseBtn.style.background='#fff'; if(redrawFn) redrawFn(); };
         toolRow.appendChild(sw);
       });
-      const eraseBtn = el(`<button style="padding:7px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:12px; font-weight:700; cursor:pointer;">🧹 Erase</button>`);
-      eraseBtn.onclick = ()=>{ eraseMode=!eraseMode; eraseBtn.style.background = eraseMode?'#FDEDEC':'#fff'; };
-      toolRow.appendChild(eraseBtn);
+      const eraseBtn = el(`<button style="${bStyle} background:${eraseMode?'#FDEDEC':'#fff'};">🧹 Erase</button>`);
+      eraseBtn.onclick = ()=>{ eraseMode=!eraseMode; eraseBtn.style.background = eraseMode?'#FDEDEC':'#fff'; if(redrawFn) redrawFn(); };
+      const boxBtn = el(`<button style="${bStyle} background:${boxMode?'#E8F5E9':'#fff'};" title="Drag a rectangle to highlight (also for scanned pages)">▭ Box</button>`);
+      boxBtn.onclick = ()=>{ boxMode=!boxMode; boxBtn.style.background = boxMode?'#E8F5E9':'#fff'; setBoxLayer(); };
+      undoBtnEl = el(`<button style="${bStyle}">↩ Undo</button>`); redoBtnEl = el(`<button style="${bStyle}">↪ Redo</button>`);
+      undoBtnEl.onclick = undo; redoBtnEl.onclick = redo;
+      [eraseBtn, boxBtn, undoBtnEl, redoBtnEl].forEach(b=>toolRow.appendChild(b));
+      syncHist();
       body.appendChild(toolRow);
 
-      const searchRow = el(`<div style="display:flex; gap:8px; margin-bottom:12px;">
-        <input type="text" id="phSearch" placeholder="Find a word on this page…" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:12.5px;">
+      const searchRow = el(`<div><div style="display:flex; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+        <input type="text" id="phSearch" placeholder="Find a word…" value="${escapeHtml(sQuery)}" style="flex:1; min-width:140px; border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:12.5px;">
+        <select id="phScope" style="border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px;"><option value="page">This page</option><option value="all">Whole PDF</option></select>
         <button class="btn secondary" id="phSearchBtn" style="padding:8px 14px; font-size:12px;">Highlight all</button>
-      </div>`);
+      </div>
+      <label style="display:flex; gap:6px; align-items:center; font-size:12px; color:var(--sub); margin-bottom:10px;"><input type="checkbox" id="phWhole" ${sWhole?'checked':''}> Whole word only</label></div>`);
+      searchRow.querySelector('#phScope').value = sScope;
       body.appendChild(searchRow);
 
       const pageWrap = el(`<div style="position:relative; max-width:100%; overflow:auto; border:1px solid var(--line); border-radius:14px; margin:0 auto; -webkit-user-select:text; user-select:text; touch-action:pan-y;"></div>`);
@@ -13264,67 +13525,125 @@ TOOL_IMPL.pdfhighlight = {
       pageWrap.appendChild(hlLayer);
       const textLayer = el(`<div style="position:absolute; left:0; top:0; width:100%; height:100%;"></div>`);
       pageWrap.appendChild(textLayer);
+      // the pictures and the highlight boxes are laid out in the page's own pixels (width = canvas width); the wrapper is
+      // scaled by CSS on small screens, so every coordinate is mapped through k = displayed / natural width
+      const k = ()=> pageWrap.clientWidth / pageData.canvas.width || 1;
 
       pageData.items.forEach(it=>{
         const d = pdfRectToDom(it);
-        const span = el(`<span style="position:absolute; left:${d.x}px; top:${d.y}px; width:${d.w}px; height:${d.h}px; font-size:${d.h}px; line-height:${d.h}px; color:transparent; white-space:pre; cursor:text;"></span>`);
+        const span = el(`<span style="position:absolute; left:${d.x/pageData.canvas.width*100}%; top:${d.y/pageData.canvas.height*100}%; font-size:${d.h}px; line-height:${d.h}px; color:transparent; white-space:pre; cursor:text; transform-origin:0 0;"></span>`);
         span.textContent = it.str;
+        span.style.fontSize = (d.h*k()) + 'px'; span.style.lineHeight = (d.h*k()) + 'px';
         textLayer.appendChild(span);
         requestAnimationFrame(()=>{
           const natural = span.getBoundingClientRect().width;
-          if(natural>0 && d.w>0){ span.style.transformOrigin = '0 0'; span.style.transform = `scaleX(${d.w/natural})`; }
+          if(natural>0 && d.w>0) span.style.transform = `scaleX(${(d.w*k())/natural})`;
         });
       });
 
       function redrawHighlights(){
         hlLayer.innerHTML = '';
         (highlightsByPage[curPage]||[]).forEach((h,idx)=>{
-          const d = pdfRectToDom(h);
-          const box = el(`<div style="position:absolute; left:${d.x}px; top:${d.y}px; width:${d.w}px; height:${d.h}px; background:${COLORS[h.color]}; border-radius:2px; pointer-events:${eraseMode?'auto':'none'}; cursor:${eraseMode?'pointer':'default'};"></div>`);
-          if(eraseMode) box.onclick = ()=>{ highlightsByPage[curPage].splice(idx,1); redrawHighlights(); updateCount(); };
+          const d = pdfRectToDom(h), W = pageData.canvas.width, H = pageData.canvas.height;
+          const box = el(`<div style="position:absolute; left:${d.x/W*100}%; top:${d.y/H*100}%; width:${d.w/W*100}%; height:${d.h/H*100}%; background:${COLORS[h.color]}; border-radius:2px; mix-blend-mode:multiply; pointer-events:${eraseMode?'auto':'none'}; cursor:${eraseMode?'pointer':'default'}; ${eraseMode?'outline:1px dashed #c62828;':''}"></div>`);
+          if(eraseMode) box.onclick = ()=>{ snap(); highlightsByPage[curPage].splice(idx,1); redrawHighlights(); updateCount(); };
           hlLayer.appendChild(box);
         });
       }
-      function addHighlightFromDomRect(domRect, color){
-        if(domRect.w<1 || domRect.h<1) return;
+      redrawFn = redrawHighlights;
+      function addRect(domRect, color){
+        if(domRect.w<2 || domRect.h<2) return false;
         if(!highlightsByPage[curPage]) highlightsByPage[curPage]=[];
         highlightsByPage[curPage].push({ ...domToPdfRect(domRect), color });
+        return true;
       }
       function commitSelectionAsHighlight(){
-        if(eraseMode) return;
+        if(eraseMode || boxMode) return;
         const sel = window.getSelection();
-        if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+        if(!sel || sel.rangeCount===0) return;
+        if(sel.isCollapsed) return;
         const range = sel.getRangeAt(0);
         if(!textLayer.contains(range.commonAncestorContainer)) return;
-        const wrapRect = pageWrap.getBoundingClientRect();
-        const rects = Array.from(range.getClientRects());
+        const wr = pageWrap.getBoundingClientRect(), kk = k();
+        const rects = Array.from(range.getClientRects()).filter(r=>r.width>1 && r.height>1);
         if(!rects.length) return;
-        rects.forEach(r=> addHighlightFromDomRect({
-          x: (r.left-wrapRect.left)+pageWrap.scrollLeft, y: (r.top-wrapRect.top)+pageWrap.scrollTop, w:r.width, h:r.height
-        }, activeColor));
+        snap();
+        rects.forEach(r=> addRect({ x: ((r.left-wr.left)+pageWrap.scrollLeft)/kk, y: ((r.top-wr.top)+pageWrap.scrollTop)/kk, w:r.width/kk, h:r.height/kk }, activeColor));
         sel.removeAllRanges();
         redrawHighlights(); updateCount();
       }
-      pageWrap.addEventListener('mouseup', commitSelectionAsHighlight);
-      pageWrap.addEventListener('touchend', ()=> setTimeout(commitSelectionAsHighlight, 60));
-
-      searchRow.querySelector('#phSearchBtn').onclick = ()=>{
-        const q = (searchRow.querySelector('#phSearch').value||'').trim().toLowerCase();
-        if(!q) return;
-        pageData.items.forEach(it=>{
-          if(it.str.toLowerCase().includes(q)){
-            if(!highlightsByPage[curPage]) highlightsByPage[curPage]=[];
-            highlightsByPage[curPage].push({ x:it.x, y:it.y, w:it.w, h:it.h, color:activeColor });
-          }
-        });
+      // a plain tap/click on a word (no drag) highlights that word
+      function tapWord(ev){
+        if(eraseMode || boxMode) return;
+        const sel = window.getSelection(); if(sel && !sel.isCollapsed) return;
+        const t = ev.changedTouches ? ev.changedTouches[0] : ev;
+        let node = null, off = 0;
+        if(document.caretRangeFromPoint){ const r = document.caretRangeFromPoint(t.clientX, t.clientY); if(r){ node = r.startContainer; off = r.startOffset; } }
+        else if(document.caretPositionFromPoint){ const p = document.caretPositionFromPoint(t.clientX, t.clientY); if(p){ node = p.offsetNode; off = p.offset; } }
+        if(!node || node.nodeType!==3 || !textLayer.contains(node)) return;
+        const s = node.textContent; let a = off, b = off;
+        const isW = (c)=> /[\p{L}\p{N}\p{M}_]/u.test(c||'');
+        while(a>0 && isW(s[a-1])) a--; while(b<s.length && isW(s[b])) b++;
+        if(b<=a) return;
+        const rg = document.createRange(); rg.setStart(node,a); rg.setEnd(node,b);
+        const wr = pageWrap.getBoundingClientRect(), kk = k();
+        snap();
+        let any = false;
+        Array.from(rg.getClientRects()).forEach(r=>{ if(addRect({ x:((r.left-wr.left)+pageWrap.scrollLeft)/kk, y:((r.top-wr.top)+pageWrap.scrollTop)/kk, w:r.width/kk, h:r.height/kk }, activeColor)) any = true; });
+        if(!any){ hist.pop(); syncHist(); return; }
         redrawHighlights(); updateCount();
+      }
+      pageWrap.addEventListener('mouseup', ()=> setTimeout(()=>{ const sel = window.getSelection(); if(sel && !sel.isCollapsed) commitSelectionAsHighlight(); }, 0));
+      pageWrap.addEventListener('click', (ev)=>{ setTimeout(()=>tapWord(ev), 0); });
+      pageWrap.addEventListener('touchend', ()=> setTimeout(()=>{ const sel = window.getSelection(); if(sel && !sel.isCollapsed) commitSelectionAsHighlight(); }, 80));
+
+      // ▭ Box mode: drag a rectangle (mouse or finger)
+      let boxLayer = null;
+      function setBoxLayer(){
+        if(boxLayer){ boxLayer.remove(); boxLayer = null; }
+        if(!boxMode) return;
+        boxLayer = el(`<div style="position:absolute; inset:0; cursor:crosshair; touch-action:none; z-index:5;"></div>`);
+        let start = null, tmp = null;
+        const pos = (e)=>{ const r = pageWrap.getBoundingClientRect(); return { x: (e.clientX-r.left)+pageWrap.scrollLeft, y: (e.clientY-r.top)+pageWrap.scrollTop }; };
+        boxLayer.addEventListener('pointerdown', (e)=>{ e.preventDefault(); try{ boxLayer.setPointerCapture(e.pointerId); }catch(x){} start = pos(e); tmp = el(`<div style="position:absolute; border:2px solid #20242B; background:${COLORS[activeColor]};"></div>`); boxLayer.appendChild(tmp); });
+        boxLayer.addEventListener('pointermove', (e)=>{ if(!start) return; const p = pos(e); tmp.style.left = Math.min(start.x,p.x)+'px'; tmp.style.top = Math.min(start.y,p.y)+'px'; tmp.style.width = Math.abs(p.x-start.x)+'px'; tmp.style.height = Math.abs(p.y-start.y)+'px'; });
+        const end = (e)=>{ if(!start) return; const p = pos(e), kk = k(); const r = { x:Math.min(start.x,p.x)/kk, y:Math.min(start.y,p.y)/kk, w:Math.abs(p.x-start.x)/kk, h:Math.abs(p.y-start.y)/kk }; start = null; if(tmp){ tmp.remove(); tmp = null; } if(r.w>=3 && r.h>=3){ snap(); addRect(r, activeColor); redrawHighlights(); updateCount(); } };
+        boxLayer.addEventListener('pointerup', end); boxLayer.addEventListener('pointercancel', ()=>{ start = null; if(tmp){ tmp.remove(); tmp = null; } });
+        pageWrap.appendChild(boxLayer);
+      }
+      setBoxLayer();
+
+      searchRow.querySelector('#phSearchBtn').onclick = async ()=>{
+        const q = (searchRow.querySelector('#phSearch').value||'').trim().toLowerCase();
+        sQuery = searchRow.querySelector('#phSearch').value||''; sScope = searchRow.querySelector('#phScope').value; sWhole = searchRow.querySelector('#phWhole').checked;
+        if(!q){ countNote.textContent = 'Type a word to search for.'; return; }
+        const pages = sScope==='all' ? Array.from({length:numPages}, (_,i)=>i+1) : [curPage];
+        snap();
+        let found = 0, onPages = 0;
+        const pr = mountProgress(body);
+        try{
+          for(let pi=0; pi<pages.length; pi++){
+            const pn = pages[pi]; pr.set(pi/pages.length*95, `Searching page ${pn}/${numPages}…`);
+            let items;
+            if(pn===curPage) items = pageData.items;
+            else {
+              const pg = await pdfjsDoc.getPage(pn), vp = pg.getViewport({scale}), tc = await pg.getTextContent();
+              items = tc.items.filter(it=>it.str && it.str.length).map(it=>({ str:it.str, x:it.transform[4], y:it.transform[5], h:Math.abs(it.transform[3])||10, w:it.width || (it.str.length*(it.transform[0]||6)*0.5) }));
+            }
+            let here = 0;
+            items.forEach(it=> matchRects(it, q, sWhole).forEach(r=>{ if(!highlightsByPage[pn]) highlightsByPage[pn]=[]; highlightsByPage[pn].push({ ...r, color:activeColor }); here++; }));
+            if(here){ found += here; onPages++; }
+          }
+        } finally { pr.remove(); }
+        if(!found){ hist.pop(); syncHist(); countNote.textContent = `"${sQuery}" was not found${sScope==='all'?' in this PDF':' on this page'}. (Scanned/image-only pages have no searchable text — use ▭ Box.)`; return; }
+        redrawHighlights(); updateCount(`${found} match${found===1?'':'es'} on ${onPages} page${onPages===1?'':'s'} highlighted.`);
       };
 
       redrawHighlights();
 
       const actionRow = el(`<div class="btn-row"></div>`);
       const clearBtn = el(`<button class="btn secondary">Clear this page</button>`);
-      clearBtn.onclick = ()=>{ highlightsByPage[curPage]=[]; redrawHighlights(); updateCount(); };
+      clearBtn.onclick = ()=>{ if(!(highlightsByPage[curPage]||[]).length) return; snap(); highlightsByPage[curPage]=[]; redrawHighlights(); updateCount(); };
       const saveBtn = el(`<button class="btn">💾 Save &amp; Download PDF</button>`);
       saveBtn.onclick = doExport;
       actionRow.appendChild(clearBtn); actionRow.appendChild(saveBtn);
@@ -13332,28 +13651,31 @@ TOOL_IMPL.pdfhighlight = {
 
       const countNote = el(`<div class="note" style="text-align:center;"></div>`);
       body.appendChild(countNote);
-      function updateCount(){
-        const total = Object.values(highlightsByPage).reduce((s,a)=>s+a.length,0);
-        countNote.textContent = `${total} highlight${total===1?'':'s'} across this document so far.`;
+      function updateCount(msg){
+        const total = totalCount();
+        countNote.textContent = (msg ? msg + ' ' : '') + `${total} highlight${total===1?'':'s'} in this PDF so far.`;
       }
+      updateFn = ()=> updateCount();
       updateCount();
     }
 
     async function doExport(){
-      const total = Object.values(highlightsByPage).reduce((s,a)=>s+a.length,0);
-      if(total===0){ mountResult(body,'Add at least one highlight first — drag over some text.').style.background='#FDEDEC'; return; }
+      const total = totalCount();
+      if(total===0){ mountResult(body,'Add at least one highlight first — drag over some text, tap a word, or search for one.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
       try{
         prog.set(10,'Reading…');
         const doc = await PDFDocument.load(file._buf, {ignoreEncryption:true});
         const pages = doc.getPages();
+        const BM = (window.PDFLib && window.PDFLib.BlendMode) ? window.PDFLib.BlendMode.Multiply : undefined;
         Object.keys(highlightsByPage).forEach(pnStr=>{
-          const pn = Number(pnStr);
-          const page = pages[pn-1];
+          const page = pages[Number(pnStr)-1];
           if(!page) return;
           (highlightsByPage[pnStr]||[]).forEach(h=>{
             const c = PDF_COLORS[h.color] || PDF_COLORS.yellow;
-            page.drawRectangle({ x:h.x, y:h.y, width:h.w, height:h.h, color: rgb(c[0],c[1],c[2]), opacity: 0.42 });
+            const o = { x:h.x, y:h.y, width:h.w, height:h.h, color: rgb(c[0],c[1],c[2]), opacity: BM ? 0.85 : 0.42 };
+            if(BM) o.blendMode = BM;
+            page.drawRectangle(o);
           });
         });
         prog.set(85,'Preparing…');
@@ -13372,72 +13694,149 @@ TOOL_IMPL.pdfhighlight = {
 TOOL_IMPL.videosubtitle = {
   mount(container){
     ensureFFmpeg().catch(()=>{}); // pre-warm engine in background for speed
-    let file = null;
+    let file = null, vurl = null, vw = 0, vh = 0, dur = 0;
+    let st = { size:6, color:'#ffffff', box:true, pos:'bottom' }, capsText = '00:00-00:04: Hello!\n00:04-00:08: வணக்கம்!';
     const body = el(`<div></div>`); container.appendChild(body);
+    const t2s = (s)=>{ const p = s.replace(',', '.').split(':').map(Number); return p.length===3 ? p[0]*3600+p[1]*60+p[2] : p[0]*60+p[1]; };
+    // accepts our own  mm:ss-mm:ss: text  lines AND pasted .srt blocks (00:00:01,000 --> 00:00:04,000)
+    function parseCaps(txt){
+      const out = [], lines = String(txt||'').replace(/\r/g,'').split('\n');
+      for(let i=0;i<lines.length;i++){
+        const l = lines[i].trim(); if(!l) continue;
+        let m = l.match(/^(\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?)\s*-->\s*(\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?)/);
+        if(m){ const tx = []; while(i+1<lines.length && lines[i+1].trim()){ tx.push(lines[++i].trim()); } if(tx.length) out.push({ start:t2s(m[1]), end:t2s(m[2]), text:tx.join('\n') }); continue; }
+        m = l.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*-\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*:\s*(.+)$/);
+        if(m) out.push({ start:t2s(m[1]), end:t2s(m[2]), text:m[3] });
+      }
+      return out.filter(c=> c.end > c.start);
+    }
     function paint(){
       body.innerHTML = '';
-      body.appendChild(el(`<div class="note">One caption per line — format: <b>mm:ss-mm:ss: text</b> (e.g.. 00:00-00:04: Hello!)</div>`));
+      body.appendChild(el(`<div class="note">Burn typed captions into the video. One caption per line: <b>mm:ss-mm:ss: text</b> (e.g. 00:00-00:04: Hello!) — or paste an <b>.srt</b> file's text. Tamil, Hindi and English letters all work. The preview below shows exactly how they will look.</div>`));
       mountUploader(body, { accept:'video/*', label:'the video drag & drop or tap', sublabel:'',
-        onAdd:(fl)=>{ file=fl[0]; paint(); } });
+        onAdd:(fl)=>{ file=fl[0]; vurl && URL.revokeObjectURL(vurl); vurl = URL.createObjectURL(file); vw = vh = dur = 0; paint(); } });
       if(file){
         mountFileList(body, [file], ()=>{ file=null; paint(); });
-        body.appendChild(el(`<video src="${URL.createObjectURL(file)}" controls style="width:100%; border-radius:10px; margin:6px 0 10px; background:#000;"></video>`));
-        mountFastServerNote(body, 2, 'vsubFast', file.size);
+        const stage = el(`<div style="position:relative; width:100%; max-width:720px; margin:6px auto 10px; border-radius:10px; overflow:hidden; background:#000; line-height:0;"><video src="${vurl}" controls playsinline style="width:100%; display:block;"></video><div class="capprev" style="position:absolute; left:0; right:0; text-align:center; pointer-events:none; line-height:1.25; padding:0 4%; white-space:pre-line;"></div></div>`);
+        body.appendChild(stage);
+        const vid = stage.querySelector('video'), prev = stage.querySelector('.capprev');
+        const place = ()=>{
+          const h = vid.clientHeight || 300, fs = Math.max(10, h * st.size / 100);
+          prev.style.fontSize = fs + 'px';
+          prev.style.top = prev.style.bottom = 'auto';
+          if(st.pos==='top') prev.style.top = (h*0.06)+'px'; else if(st.pos==='middle') prev.style.top = (h*0.5 - fs)+'px'; else prev.style.bottom = (h*0.12)+'px';
+        };
+        const show = ()=>{
+          place();
+          const t = vid.currentTime, c = parseCaps(body.querySelector('#vsCaps').value).find(x=> t >= x.start && t <= x.end);
+          if(!c){ prev.innerHTML = ''; return; }
+          const span = document.createElement('span'); span.textContent = c.text;
+          span.style.cssText = `color:${st.color}; font-weight:700; font-family:"Noto Sans Tamil",system-ui,sans-serif; ${st.box ? 'background:rgba(0,0,0,.6); padding:.1em .45em; border-radius:.25em; -webkit-box-decoration-break:clone; box-decoration-break:clone;' : 'text-shadow:0 0 4px #000,0 0 4px #000,1px 1px 2px #000;'}`;
+          prev.innerHTML = ''; prev.appendChild(span);
+        };
+        vid.addEventListener('loadedmetadata', ()=>{ vw = vid.videoWidth; vh = vid.videoHeight; dur = vid.duration; show(); });
+        vid.addEventListener('timeupdate', show); vid.addEventListener('seeked', show);
         const opts = el(`
-          <div class="opts one">
-            <div class="field">
-              <label>Captions</label>
-              <textarea id="vsCaps" rows="5" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;" placeholder="00:00-00:04: Hello!&#10;00:04-00:08: This is a Caption">00:00-00:04: Hello!</textarea>
+          <div>
+            <div class="opts one">
+              <div class="field">
+                <label>Captions <span style="font-weight:400; color:var(--sub);">(time-stamps match the video's time bar)</span></label>
+                <textarea id="vsCaps" rows="6" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;" placeholder="00:00-00:04: Hello!&#10;00:04-00:08: This is a Caption"></textarea>
+              </div>
             </div>
-          </div>
-        `);
+            <div class="opts">
+              <div class="field"><label>Text size (% of video height)</label><input type="number" id="vsSize" min="2" max="14" step="0.5" value="${st.size}"></div>
+              <div class="field"><label>Colour</label><input type="color" id="vsColor" value="${st.color}" style="height:38px; width:100%;"></div>
+              <div class="field"><label>Place</label><select id="vsPos"><option value="bottom">Bottom</option><option value="middle">Middle</option><option value="top">Top</option></select></div>
+              <div class="field"><label>Dark box behind text</label><select id="vsBox"><option value="1">Yes (easy to read)</option><option value="0">No (outline only)</option></select></div>
+            </div>
+          </div>`);
+        opts.querySelector('#vsCaps').value = capsText;
+        opts.querySelector('#vsPos').value = st.pos; opts.querySelector('#vsBox').value = st.box ? '1' : '0';
+        const sync = ()=>{ capsText = opts.querySelector('#vsCaps').value; st.size = Math.max(2, Math.min(14, +opts.querySelector('#vsSize').value || 6)); st.color = opts.querySelector('#vsColor').value; st.pos = opts.querySelector('#vsPos').value; st.box = opts.querySelector('#vsBox').value === '1'; show(); };
+        opts.addEventListener('input', sync); opts.addEventListener('change', sync);
         body.appendChild(opts);
+        const pill = el(`<div class="note" id="vsCount"></div>`); body.appendChild(pill);
+        const cnt = ()=>{ const n = parseCaps(opts.querySelector('#vsCaps').value).length; pill.textContent = n ? `${n} caption${n===1?'':'s'} ready.` : 'No valid caption lines yet — use  00:00-00:04: your text'; };
+        opts.querySelector('#vsCaps').addEventListener('input', cnt); cnt();
         const row = el(`<div class="btn-row"></div>`);
         const btn = el(`<button class="btn">💬 Caption stamp it</button>`);
         btn.onclick = doBurn;
         row.appendChild(btn);
         body.appendChild(row);
+        setTimeout(show, 300);
       }
     }
-    function escDrawtext(s){
-      return s.replace(/\\/g,'\\\\\\\\').replace(/:/g,'\\:').replace(/'/g,"\u2019");
-    }
-    function parseCaptionLines(){
-      const lines = (body.querySelector('#vsCaps').value||'').split('\n').map(l=>l.trim()).filter(Boolean);
-      const parsed = [];
-      lines.forEach(line=>{
-        const m = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)-(\d{1,2}:\d{2}(?::\d{2})?):\s*(.+)$/);
-        if(m) parsed.push({ start: parseTimeToSec(m[1]), end: parseTimeToSec(m[2]), text: m[3] });
+    // each caption becomes a transparent PNG (so Tamil/Hindi work and no font file is needed inside the video engine)
+    async function capPng(text, W, H){
+      const fs = Math.max(12, Math.round(H * st.size / 100));
+      try{ await document.fonts.load(`700 ${fs}px "Noto Sans Tamil"`); }catch(e){}
+      const font = `700 ${fs}px "Noto Sans Tamil", system-ui, sans-serif`;
+      const m = document.createElement('canvas').getContext('2d'); m.font = font;
+      const maxW = Math.round(W * 0.92), padX = Math.round(fs*0.45), padY = Math.round(fs*0.18), lh = Math.round(fs*1.3);
+      const lines = [];
+      String(text).split('\n').forEach(par=>{
+        let cur = '';
+        par.split(/(\s+)/).forEach(tok=>{ const t = cur + tok; if(cur && m.measureText(t).width > maxW - padX*2){ lines.push(cur.trim()); cur = tok.trimStart(); } else cur = t; });
+        if(cur.trim()) lines.push(cur.trim());
       });
-      return parsed;
+      if(!lines.length) lines.push(' ');
+      const w = Math.ceil(Math.max(...lines.map(l=>m.measureText(l).width))) + padX*2, h = lh*lines.length + padY*2;
+      const cv = document.createElement('canvas'); cv.width = Math.max(2, w); cv.height = Math.max(2, h);
+      const g = cv.getContext('2d');
+      if(st.box){ g.fillStyle = 'rgba(0,0,0,0.62)'; const r = Math.round(fs*0.25); g.beginPath(); g.roundRect ? g.roundRect(0,0,cv.width,cv.height,r) : g.rect(0,0,cv.width,cv.height); g.fill(); }
+      g.font = font; g.textBaseline = 'top'; g.textAlign = 'center'; g.fillStyle = st.color;
+      if(!st.box){ g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = fs*0.14; g.lineWidth = Math.max(2, fs*0.12); g.strokeStyle = '#000'; g.lineJoin = 'round'; }
+      lines.forEach((l,i)=>{ const x = cv.width/2, y = padY + i*lh + Math.round(fs*0.08); if(!st.box) g.strokeText(l, x, y); g.fillText(l, x, y); });
+      return new Uint8Array(await (await fetch(cv.toDataURL('image/png'))).arrayBuffer());
     }
     async function doBurn(){
-      const captions = parseCaptionLines();
-      if(!captions.length){ mountResult(body,'The caption lines are not in the right format (mm:ss-mm:ss: text).').style.background='#FDEDEC'; return; }
+      const captions = parseCaps(body.querySelector('#vsCaps').value);
+      if(!captions.length){ mountResult(body,'The caption lines are not in the right format — use  mm:ss-mm:ss: text  (for example 00:00-00:04: Hello!)').style.background='#FDEDEC'; return; }
+      if(captions.length > 80){ mountResult(body,'Please use at most 80 captions in one video (you have '+captions.length+'). Do the video in two parts.').style.background='#FDEDEC'; return; }
       const prog = mountProgress(body);
-      if(AUTH_CONFIGURED && isFastModeChecked('vsubFast')){
-        try{
-          const blob = await callVideoProcessMultiServer([file], 'subtitle', {captions}, prog, file.name.replace(/\.[^.]+$/,'')+'-captioned.mp4');
-          mountResult(body, `⚡ Caption applied using Fast Server Mode.`);
-        }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message+' — please try browser mode.').style.background='#FDEDEC'; }
-        return;
-      }
       try{
         prog.set(5,'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
-        const ext = (file.name.split('.').pop()||'mp4').toLowerCase();
+        const ext = (file.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'') || 'mp4';
         await ffmpeg.writeFile('in.'+ext, await fetchFile(file));
-        const filters = captions.map(c=>
-          `drawtext=text='${escDrawtext(c.text)}':fontsize=32:fontcolor=white:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-th-40:enable='between(t,${c.start},${c.end})'`
-        );
-        prog.set(20,'Applying caption…');
-        await ffmpeg.exec(['-i','in.'+ext,'-vf', filters.join(','), '-c:a','copy','out.mp4']);
+        if(!vw || !vh){
+          // the browser could not read the size (some formats) — ask the video engine itself
+          const lines = []; const lg = ({message})=> lines.push(message);
+          try{ ffmpeg.on('log', lg); await ffmpeg.exec(['-hide_banner','-i','in.'+ext]).catch(()=>{}); }catch(e){} finally{ try{ ffmpeg.off('log', lg); }catch(e){} }
+          const m = lines.join('\n').match(/Video:[^\n]*?(\d{2,5})x(\d{2,5})/);
+          if(m){ vw = +m[1]; vh = +m[2]; } else { vw = 1280; vh = 720; }
+        }
+        prog.set(12,'Drawing captions…');
+        for(let i=0;i<captions.length;i++) await ffmpeg.writeFile(`c${i}.png`, await capPng(captions[i].text, vw, vh));
+        const mY = Math.round(vh*0.06);
+        const yExpr = st.pos==='top' ? String(mY) : st.pos==='middle' ? '(H-h)/2' : `H-h-${Math.round(vh*0.08)}`;
+        let chain = '', last = '0:v';
+        captions.forEach((c,i)=>{
+          chain += `[${last}][${i+1}:v]overlay=x=(W-w)/2:y=${yExpr}:enable='between(t,${c.start.toFixed(3)},${c.end.toFixed(3)})'[v${i+1}];`;
+          last = `v${i+1}`;
+        });
+        chain += `[${last}]scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p[vout]`;
+        const keep = /^(mp4|m4v|mov)$/.test(ext), outExt = keep ? (ext==='m4v' ? 'mp4' : ext) : 'mp4';
+        const args = ['-i','in.'+ext];
+        captions.forEach((c,i)=> args.push('-i', `c${i}.png`));
+        args.push('-filter_complex', chain, '-map','[vout]','-map','0:a?','-c:v','libx264','-preset','veryfast','-crf','21');
+        args.push.apply(args, keep ? ['-c:a','copy'] : ['-c:a','aac','-b:a','160k']);
+        args.push('-movflags','+faststart','out.'+outExt);
+        prog.set(20,'Adding captions…');
+        const onProg = ({progress})=>{ if(progress>0 && progress<=1) prog.set(20 + progress*68, 'Adding captions… '+Math.round(progress*100)+'%'); };
+        try{ ffmpeg.on && ffmpeg.on('progress', onProg); }catch(e){}
+        try{ await ffmpeg.exec(args); } finally { try{ ffmpeg.off && ffmpeg.off('progress', onProg); }catch(e){} }
         prog.set(90,'Preparing…');
-        const data = await ffmpeg.readFile('out.mp4');
-        downloadBlob(new Blob([data],{type:'video/mp4'}), file.name.replace(/\.[^.]+$/,'')+'-captioned.mp4');
+        const data = await ffmpeg.readFile('out.'+outExt);
+        if(!data || !data.length) throw new Error('the video engine made an empty file — please try a shorter / smaller video');
+        const blob = new Blob([data],{type: outExt==='mov' ? 'video/quicktime' : 'video/mp4'});
+        downloadBlob(blob, file.name.replace(/\.[^.]+$/,'')+'-captioned.'+outExt);
+        try{ await ffmpeg.deleteFile('in.'+ext); await ffmpeg.deleteFile('out.'+outExt); for(let i=0;i<captions.length;i++) await ffmpeg.deleteFile(`c${i}.png`); }catch(e){}
         prog.set(100,'Done'); prog.remove();
-        mountResult(body, 'Video with caption applied downloaded.');
-      }catch(err){ prog.remove(); mountResult(body,'Error: '+err.message).style.background='#FDEDEC'; }
+        mountResult(body, `Video with ${captions.length} caption(s) downloaded (${(blob.size/1048576).toFixed(1)} MB). Preview:`);
+        body.appendChild(el(`<video src="${URL.createObjectURL(blob)}" controls playsinline style="width:100%; max-width:720px; display:block; margin:8px auto; border-radius:10px; background:#000;"></video>`));
+      }catch(err){ prog.remove(); mountResult(body,'Error: '+escapeHtml(err.message||String(err))+' — try a smaller/shorter video if this keeps failing.').style.background='#FDEDEC'; }
     }
     paint();
   }

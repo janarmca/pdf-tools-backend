@@ -390,3 +390,12 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - **Languages:** தமிழ் | EN | 🌐 (हिन्दी, తెలుగు, ಕನ್ನಡ, മലയാളം). `lang/<code>.js` packs (tool names + descriptions + home text), loaded only when chosen; search also matches pack names. Inside a tool, Chrome/Edge desktop can turn the rest of the English text into the language on the device (built-in `Translator` API, no server); phones get the "Chrome ⋮ → Translate" tip. NOT verified: the Translator API path (not available in headless Chromium here) and Indic font rendering on real phones (the sandbox has no Telugu/Kannada/Malayalam/Devanagari fonts). Hindi used to be a separate button — it is now in 🌐.
 - AI tools now show a notice at the top: "the AI part needs credits (from N; the exact amount is shown before anything is charged)".
 - Versions: category scripts `?v=20261023a`, sw `v101`, gifkit `?v=1`, lang packs `?v=1`. Checked: all 209 tools open on desktop and 390 px phone (only the 3 iframe games show no panel text, as before).
+
+## UPDATE_68 (owner bug list, 11 items)
+- Shared preview helpers in `index.source.html` (`mountPdfStrip`, `pvThumb`, `pvCanvas`, `attachFileThumb`): every file list now shows a thumbnail (photo / PDF page 1); `mountImageFileList(..., onMove)` adds numbered reorder arrows.
+- Rewritten tools: `pdfhighlight` (Undo/Redo + Ctrl+Z, whole-PDF search of matched letters only, tap a word, ▭ Box mode, multiply blend), `pdfcrop` (all pages: strip + ◀▶, same / per-page / auto-trim), `pdfblankpage` (tap ＋ between pages), `pdfimgwm` (live preview), `pdfgray` (preview), `img2pdf` (thumbnails + reorder), `txt2html` (paste box), `videosubtitle` (captions drawn as PNG overlays: Tamil works, no font file; the old `drawtext` made 0 KB files because ffmpeg.wasm has no font; sizes probed from the engine when the browser cannot read them).
+- `category-pdfx.js` letterhead: image letterhead crashed (`lh.embed` exists on images too) → `lhIsPage` flag.
+- `category-imgx.js` imgsplit: modes Whole picture (default, padded with blur/white/black) / Trim / Original shape.
+- `category-image.js` exifremove: reads real EXIF/XMP/IPTC, lossless JPEG/PNG strip, re-scans the result and reports.
+- PDF editor: tools 📋 Copy text (tap/drag, auto-copy, page / whole PDF) and 📥 Paste text (click to place) + Ctrl+V of text or pictures.
+- Tests: Playwright scripts used were in the scratchpad (not in repo). `sw.js` v102, category scripts `?v=20261023b`.

@@ -423,8 +423,8 @@
           const mode = body.querySelector('#lhMode').value, which = body.querySelector('#lhPages').value, fit = body.querySelector('#lhFit').value;
           const src = await PDFDocument.load(doc._buf, { ignoreEncryption: true });
           const out = await PDFDocument.create();
-          let lh, lw, lhh;
-          if (/pdf/i.test(head.type) || /\.pdf$/i.test(head.name)) { const hd = await PDFDocument.load(head._buf, { ignoreEncryption: true }); lh = await out.embedPage(hd.getPage(0)); }
+          let lh, lw, lhh, lhIsPage = false;
+          if (/pdf/i.test(head.type) || /\.pdf$/i.test(head.name)) { const hd = await PDFDocument.load(head._buf, { ignoreEncryption: true }); lh = await out.embedPage(hd.getPage(0)); lhIsPage = true; }
           else lh = /png/i.test(head.type) || /\.png$/i.test(head.name) ? await out.embedPng(head._buf) : await out.embedJpg(head._buf);
           lw = lh.width; lhh = lh.height;
           const pages = src.getPages();
@@ -438,7 +438,7 @@
             const drawHead = function () {
               if (!apply) return;
               const o = fit === 'full' ? { x: 0, y: 0, width: W, height: H } : { x: 0, y: H - W * lhh / lw, width: W, height: W * lhh / lw };
-              if (lh.embed) pg.drawPage(lh, o); else pg.drawImage(lh, o);
+              if (lhIsPage) pg.drawPage(lh, o); else pg.drawImage(lh, o);
             };
             if (mode === 'under') drawHead();
             if (rot === 0) pg.drawPage(emb, { x: 0, y: 0 });
