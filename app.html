@@ -52,7 +52,20 @@
   // host helpers the shared business tools expect
   var TOOL_IMPL = {};
   var __appLang = (function () { try { return localStorage.getItem('bzapp_lang') || 'ta'; } catch (e) { return 'ta'; } })();
-  function downloadBlob(blob, name) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
+  function downloadBlob(blob, name) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 60000);
+    // after the download: send the same file on WhatsApp (phones that can share files) — the person taps, nothing is sent automatically
+    var file = null; try { file = new File([blob], name, { type: blob.type || 'application/octet-stream' }); } catch (e) { /* old browser */ }
+    var ok = !!(file && navigator.canShare && (function () { try { return navigator.canShare({ files: [file] }); } catch (e) { return false; } })());
+    var old = document.getElementById('dlSheet'); if (old) old.remove();
+    var en = (typeof __appLang !== 'undefined' && __appLang === 'en'), s = document.createElement('div'); s.id = 'dlSheet';
+    s.style.cssText = 'position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;justify-content:center;padding:0 10px;pointer-events:none';
+    s.innerHTML = '<div style="pointer-events:auto;width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 -6px 26px rgba(15,30,60,.25);padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1 1 160px;min-width:0;font-weight:800;font-size:14px">✅ ' + (en ? 'Saved' : 'சேமிக்கப்பட்டது') + '<small style="display:block;color:#5B6673;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(name) + '</small></span><button type="button" id="dlShare" style="min-height:46px;border:0;border-radius:12px;background:#25D366;color:#fff;font:800 14px inherit;font-family:inherit;padding:0 14px;cursor:pointer">💬 ' + (ok ? (en ? 'Send on WhatsApp' : 'WhatsApp-ல் அனுப்பு') : 'WhatsApp') + '</button><button type="button" id="dlX" aria-label="close" style="border:0;background:#F1F3F5;border-radius:50%;width:36px;height:36px;cursor:pointer">✕</button></div>';
+    document.body.appendChild(s);
+    var t = setTimeout(function () { s.remove(); }, 15000);
+    document.getElementById('dlX').onclick = function () { clearTimeout(t); s.remove(); };
+    document.getElementById('dlShare').onclick = function () { clearTimeout(t); if (ok) navigator.share({ files: [file], title: name }).catch(function () {}); else window.open('https://wa.me/', '_blank', 'noopener'); };
+  }
   function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   var __jsqrP = null;
   function ensureJsQr() { return __jsqrP || (__jsqrP = new Promise(function (res, rej) { if (window.jsQR) return res(window.jsQR); var s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js'; s.onload = function () { res(window.jsQR); }; s.onerror = function () { __jsqrP = null; rej(new Error('jsQR')); }; document.head.appendChild(s); })); }

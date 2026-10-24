@@ -17013,7 +17013,8 @@ if('serviceWorker' in navigator){
 }
 </script>
 <script>
-/* UPDATE_75: home page order — 1 quick start, 2 recently used, 3 categories, 4 pages for you, 5 "choose a file", then the rest */
+/* UPDATE_75/76: home page order (quick start → recently used → categories → pages for you → rest; the "choose your file" box is removed)
+   and, after every download, a sheet with "send this file on WhatsApp" + smart next-step suggestions (simple rules, no AI cost). */
 (function(){
   function homeOrder(){
     try{
@@ -17021,7 +17022,8 @@ if('serviceWorker' in navigator){
       var h = document.getElementById('__homeBody'); if(!h) return;
       var kids = Array.prototype.slice.call(h.children);
       var pick = function(sel){ for(var i = 0; i < kids.length; i++){ if(kids[i].querySelector && kids[i].querySelector(sel)) return kids[i]; } return null; };
-      var order = [pick('.qt-grid'), pick('.rc-row'), pick('.cat2-grid'), pick('.aud-grid'), pick('#__upzDrop')].filter(Boolean);
+      var up = pick('#__upzDrop'); if(up){ up.remove(); kids = kids.filter(function(k){ return k !== up; }); }
+      var order = [pick('.qt-grid'), pick('.rc-row'), pick('.cat2-grid'), pick('.aud-grid')].filter(Boolean);
       order.forEach(function(k){ h.appendChild(k); });
       kids.filter(function(k){ return order.indexOf(k) < 0; }).forEach(function(k){ h.appendChild(k); });
     }catch(e){ /* keep the default order */ }
@@ -17031,6 +17033,71 @@ if('serviceWorker' in navigator){
     renderHomeBody = function(){ var r = orig.apply(this, arguments); homeOrder(); return r; };
   }
   homeOrder();
+
+  // ---------- after-download sheet
+  var ta = function(){ try{ return typeof taOn === 'function' ? taOn() : true; }catch(e){ return true; } };
+  var T = function(t, e){ return ta() ? t : e; };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  var size = function(n){ return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+  var MIME = { pdf:'application/pdf', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', mp4:'video/mp4', webm:'video/webm', mp3:'audio/mpeg', wav:'audio/wav', m4a:'audio/mp4', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation', csv:'text/csv', txt:'text/plain', zip:'application/zip', json:'application/json', ics:'text/calendar' };
+  // what people usually do next with this kind of file (only tools that exist are shown, never the one just used)
+  function nextSteps(ext, bytes, cur){
+    var big = bytes > 1024 * 1024, ids = [];
+    if(ext === 'pdf') ids = (big ? ['compress'] : []).concat(['pdf2word', 'sign', 'merge', 'pdfprotect', 'compress']);
+    else if(/^(jpe?g|png|webp|heic)$/.test(ext)) ids = (big ? ['imgcompresskb'] : []).concat(['img2pdf', 'imgcompresskb', 'bgremove', 'photoresize']);
+    else if(/^(mp4|webm|mov)$/.test(ext)) ids = (big ? ['videocompress'] : []).concat(['videotomp3', 'videotrim', 'videocompress']);
+    else if(/^(mp3|wav|m4a|ogg)$/.test(ext)) ids = ['audiocut', 'audioconvert'];
+    else if(/^(docx?|xlsx?|pptx?)$/.test(ext)) ids = ext[0] === 'd' ? ['word2pdf'] : ext[0] === 'x' ? ['excel2pdf'] : ['ppt2pdf'];
+    var seen = {}, out = [];
+    ids.forEach(function(id){ if(seen[id] || id === cur) return; seen[id] = 1; if(typeof TOOLS !== 'undefined' && TOOLS.some(function(t){ return t.id === id; })) out.push(id); });
+    return out.slice(0, 3);
+  }
+  function toolName(id){ try{ var t = TOOLS.find(function(x){ return x.id === id; }); if(!t) return id; var n = (typeof splitName === 'function') ? splitName(t).main : t.name; return t.icon + ' ' + n; }catch(e){ return id; } }
+  var sheet = null, hideT = null;
+  function closeSheet(){ if(!sheet) return; var s = sheet; sheet = null; s.style.transform = 'translateY(120%)'; setTimeout(function(){ s.remove(); }, 250); }
+  function showSheet(blob, filename){
+    closeSheet();
+    var ext = (String(filename).split('.').pop() || '').toLowerCase(), cur = (typeof state !== 'undefined' && state && state.tool) || '';
+    var file = null; try{ file = new File([blob], filename, { type: blob.type || MIME[ext] || 'application/octet-stream' }); }catch(e){ /* very old browser */ }
+    var canShareFile = !!(file && navigator.canShare && (function(){ try{ return navigator.canShare({ files: [file] }); }catch(e){ return false; } })());
+    var steps = nextSteps(ext, blob.size || 0, cur);
+    var s = document.createElement('div');
+    s.setAttribute('role', 'status');
+    s.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;justify-content:center;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));pointer-events:none;transform:translateY(120%);transition:transform .25s ease';
+    s.innerHTML = '<div class="tamil" style="pointer-events:auto;width:100%;max-width:520px;background:#fff;color:#1F2933;border-radius:18px;box-shadow:0 -6px 30px rgba(15,30,60,.25);padding:14px;font-family:inherit">' +
+      '<div style="display:flex;align-items:center;gap:10px"><span style="width:38px;height:38px;flex:0 0 38px;border-radius:12px;background:#E3F6EC;display:flex;align-items:center;justify-content:center;font-size:20px">✅</span>' +
+      '<span style="flex:1;min-width:0"><b style="display:block;font-size:15px">' + T('கோப்பு சேமிக்கப்பட்டது', 'File saved') + '</b><small style="display:block;color:#5B6673;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(filename) + (blob.size ? ' · ' + size(blob.size) : '') + '</small></span>' +
+      '<button type="button" data-x aria-label="close" style="border:0;background:#F1F3F5;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer">✕</button></div>' +
+      '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
+      '<button type="button" data-share style="flex:1 1 200px;min-height:48px;border:0;border-radius:12px;background:#25D366;color:#fff;font:800 15px inherit;font-family:inherit;cursor:pointer">💬 ' + (canShareFile ? T('WhatsApp-ல் கோப்பை அனுப்பு', 'Send file on WhatsApp') : T('WhatsApp-ல் அனுப்பு', 'Send on WhatsApp')) + '</button>' +
+      (canShareFile ? '<button type="button" data-more style="flex:0 0 auto;min-height:48px;border:2px solid #E3E7EC;border-radius:12px;background:#fff;font:800 14px inherit;font-family:inherit;cursor:pointer;padding:0 14px">📤 ' + T('மற்றவை', 'Other apps') + '</button>' : '') + '</div>' +
+      (canShareFile ? '' : '<div style="margin-top:8px;font-size:12.5px;color:#6B4E00;background:#FFF8E6;border-radius:10px;padding:8px 10px;font-weight:600">' + T('இந்த browser கோப்பை நேரடியாகப் பகிர விடாது. WhatsApp-ல் 📎 → Document / Gallery → Downloads-ல் உள்ள இந்தக் கோப்பைத் தேர்ந்தெடுங்கள்.', 'This browser cannot share the file directly. In WhatsApp tap 📎 → Document / Gallery and pick this file from Downloads.') + '</div>') +
+      (steps.length ? '<div style="margin-top:12px;font-size:12.5px;font-weight:800;color:#5B6673">✨ ' + T('அடுத்து செய்யலாம்', 'Next you can') + '</div><div style="display:flex;gap:8px;margin-top:6px;overflow-x:auto;padding-bottom:2px">' + steps.map(function(id){ return '<button type="button" data-next="' + id + '" style="flex:0 0 auto;min-height:40px;border:1.5px solid #D5DCE6;border-radius:20px;background:#F7F9FC;font:700 13px inherit;font-family:inherit;cursor:pointer;padding:0 12px;white-space:nowrap">' + esc(toolName(id)) + '</button>'; }).join('') + '</div>' : '') +
+      '</div>';
+    document.body.appendChild(s); sheet = s;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ s.style.transform = 'translateY(0)'; }); });
+    var keep = function(){ clearTimeout(hideT); };
+    s.addEventListener('pointerdown', keep); s.addEventListener('focusin', keep);
+    clearTimeout(hideT); hideT = setTimeout(closeSheet, 15000);
+    s.querySelector('[data-x]').onclick = closeSheet;
+    s.querySelector('[data-share]').onclick = function(){
+      try{ if(typeof trackEvent === 'function') trackEvent('whatsapp_share'); }catch(e){}
+      if(canShareFile){ navigator.share({ files: [file], title: filename, text: filename }).catch(function(){ /* cancelled */ }); return; }
+      window.open('https://wa.me/', '_blank', 'noopener'); // the browser cannot hand over the file: open WhatsApp, the person attaches it from Downloads
+    };
+    var more = s.querySelector('[data-more]'); if(more) more.onclick = function(){ navigator.share({ files: [file], title: filename }).catch(function(){}); };
+    Array.prototype.forEach.call(s.querySelectorAll('[data-next]'), function(b){ b.onclick = function(){ closeSheet(); if(typeof openTool === 'function') openTool(b.getAttribute('data-next')); }; });
+  }
+  if(typeof downloadBlob === 'function'){
+    downloadBlob = async function(blob, filename){
+      try{ if(typeof trackEvent === 'function') trackEvent('tool_download'); }catch(e){}
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ try{ a.remove(); }catch(e){} URL.revokeObjectURL(url); }, 60000);
+      try{ showSheet(blob, filename); }catch(e){ try{ showDownloadToast(filename); }catch(e2){} }
+    };
+  }
 })();
 </script>
 </body>
