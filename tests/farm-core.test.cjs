@@ -37,4 +37,18 @@ near(c.test.yield, 2000, 1e-9, 'per-acre yield'); near(c.yieldDiffPct, -100 / 11
 near(c.netDiff, (40000 - 15000) - (44000 - 22000), 1e-6, 'net diff'); near(c.labourDiff, 400 - 300, 1e-9, 'labour diff');
 ok(F.comparePlots({areaCent: 0, yield: 1, price: 1, cost: 1}, {areaCent: 10, yield: 1, price: 1, cost: 1}) === null, 'zero area -> null');
 ok(F.SEASONS.length === 4, 'seasons');
+// organic inputs (TNAU / NIOS figures)
+const pg = F.scaleRecipe('panchagavya', 1); ok(pg.length === 9, 'panchagavya has 9 ingredients');
+near(pg.find(i => i.en === 'Cow dung').q, 7, 1e-9, 'dung 7 kg'); near(pg.find(i => i.en === 'Cow ghee').q, 1, 1e-9, 'ghee 1 kg');
+near(F.scaleRecipe('panchagavya', 2).find(i => i.en === 'Jaggery').q, 6, 1e-9, 'x2 jaggery 6 kg'); near(F.scaleRecipe('panchagavya', 0.5).find(i => i.u === 'no').q, 6, 1e-9, 'half = 6 bananas');
+ok(F.scaleRecipe('panchagavya', 0) === null && F.scaleRecipe('nope', 1) === null, 'bad input -> null');
+near(F.stockNeeded(3, 100), 3, 1e-9, '3 L per 100 L'); near(F.stockNeeded(3, 10) * 1000, 300, 1e-9, '300 ml per 10 L tank');
+const jv = F.scaleRecipe('jeevamirtha' in F.RECIPES ? 'jeevamirtha' : 'jeevamrita', 2); near(jv[0].q, 400, 1e-9, 'jeevamrita x2 = 400 L water');
+near(F.recipeNeed('amudham', 2).min, 40, 1e-9, 'amudham 20 L/acre x2'); near(F.recipeNeed('amudham', 2).max, 60, 1e-9, 'amudham 30 L/acre x2'); ok(F.recipeNeed('panchagavya', 1) === null, 'no per-acre range for panchagavya');
+for(const id of Object.keys(F.RECIPES)){ const r = F.RECIPES[id]; ok(F.SOURCES[r.src], id + ' has a source'); ok(r.steps.ta.length === r.steps.en.length, id + ' steps in both languages'); }
+const gm = F.greenManureSeed('dhaincha', 1); near(gm.min, 50 * F.HA_PER_ACRE, 1e-9, 'dhaincha 50 kg/ha -> ~20 kg/acre'); near(gm.min, 20.23, 0.01, 'dhaincha per acre');
+near(F.greenManureSeed('sunnhemp', 1).max, 35 * F.HA_PER_ACRE, 1e-9, 'sunnhemp max'); ok(F.greenManureSeed('x', 1) === null, 'unknown crop');
+ok(F.GREEN_MANURE.length === 6, 'six green manures');
+ok(F.VARIETIES.length === 5 && F.VARIETIES.every(v => F.SOURCES[v.src] && v.ta && v.en && v.days), 'varieties sourced');
+ok(F.VARIETIES.find(v => v.id === 'mapillai').yieldTxt === null, 'unstated yield stays null (never invented)');
 console.log('OK — ' + n + ' farm-core checks passed');

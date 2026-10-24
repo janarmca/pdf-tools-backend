@@ -16,7 +16,7 @@
 <style>
 *{box-sizing:border-box}
 :root{--ink:#16301f;--sub:#4f6657;--line:#d8e6da;--bg:#f3f8f3;--card:#fff;--brand:#2f7d32;--brand2:#e8f5e9;--warn:#fff7e3;--bad:#b42318;--ok:#127a3e}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.65;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.65;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
 .top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
 .top a{color:var(--ink);text-decoration:none;font-weight:800;font-size:.9rem}
 .sp{flex:1}
@@ -62,7 +62,7 @@ ul.links{padding-left:18px;margin:6px 0}
   <div id="panel"></div>
   <p class="foot" id="foot"></p>
 </div>
-<script src="/farm-core.js?v=1"></script>
+<script src="/farm-core.js?v=2"></script>
 <script>
 (function(){
 'use strict';
@@ -80,7 +80,7 @@ const store = {
 
 const TABS = [
   ['land', '📐', 'நிலம்', 'Land'], ['plant', '🌱', 'நடவு', 'Planting'], ['fert', '🧂', 'உரம்', 'Fertiliser'], ['mix', '🧪', 'கரைசல்', 'Spray mix'],
-  ['cost', '💰', 'செலவு', 'Cost'], ['trial', '📒', 'சோதனை நிலம்', 'Trial plot'], ['season', '🗓️', 'பருவம்', 'Season'], ['help', '☎️', 'உதவி', 'Help'], ['proof', '🔬', 'சான்று', 'Evidence']
+  ['cost', '💰', 'செலவு', 'Cost'], ['trial', '📒', 'சோதனை நிலம்', 'Trial plot'], ['organic', '🌿', 'இயற்கை', 'Organic'], ['season', '🗓️', 'பருவம்', 'Season'], ['help', '☎️', 'உதவி', 'Help'], ['proof', '🔬', 'சான்று', 'Evidence']
 ];
 let tab = 'land';
 const SRC = (ta, en) => `<div class="src">${T(ta, en)}</div>`;
@@ -239,6 +239,76 @@ function panelTrial(){
   show();
 }
 
+
+function panelOrganic(){
+  const st = store.get('pti-farm-org', {sec: 'recipe', rid: 'panchagavya', f: 1, gm: 'dhaincha', ac: 1});
+  const sec = (k, ta, en) => `<button data-s="${k}" class="${st.sec === k ? 'on' : ''}">${T(ta, en)}</button>`;
+  const nav = `<div class="tabs" id="osec">${sec('recipe', 'இடுபொருள் செய்முறை', 'Input recipes')}${sec('green', 'பசுந்தாள் உரம்', 'Green manure')}${sec('rice', 'பாரம்பரிய நெல்', 'Traditional rice')}${sec('why', 'ஏன் இயற்கை?', 'Why organic?')}</div>`;
+  const q = x => fmt(x, x < 10 && x % 1 ? 2 : 1);
+  const unit = u => ({kg: 'kg', L: 'L', no: T('எண்', 'nos'), handful: T('கைப்பிடி', 'handful')}[u] || u);
+  let body = '';
+  if(st.sec === 'recipe'){
+    const r = F.RECIPES[st.rid];
+    body = `<div class="card"><h2>${T('பாரம்பரிய இடுபொருள் அளவுக் கணக்கு', 'Traditional input quantity calculator')}</h2>
+      <label>${T('எந்த இடுபொருள்?', 'Which input?')}</label><select id="rid">${Object.keys(F.RECIPES).map(k => `<option value="${k}" ${k === st.rid ? 'selected' : ''}>${T(F.RECIPES[k].ta, F.RECIPES[k].en)}</option>`).join('')}</select>
+      <label>${st.rid === 'jeevamrita' ? T('எத்தனை ஏக்கருக்கு? (1 ஏக்கர் = 200 L)', 'For how many acres? (1 acre = 200 L)') : T('எத்தனை மடங்கு தயாரிக்க? (1 = கீழே உள்ள அடிப்படை அளவு)', 'How many batches? (1 = the base batch shown below)')}</label>
+      <input id="of" type="number" inputmode="decimal" min="0" step="any" value="${st.f}">
+      <div class="res" id="or"></div>
+      <div style="margin:10px 0"><b>${T('செய்முறை', 'Method')}</b><ol style="margin:6px 0 0 18px;padding:0">${r.steps[LANG === 'ta' ? 'ta' : 'en'].map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
+      <div class="note"><b>${T('பயன்படுத்தும் முறை', 'How to use')}:</b> ${esc(T(r.use.ta, r.use.en))}</div>
+      ${r.note ? `<div class="src">${esc(T(r.note.ta, r.note.en))}</div>` : ''}
+      <div id="spraybox"></div>
+      ${SRC('மூலம்: ' + F.SOURCES[r.src] + '. அளவுகள் மூலத்தில் உள்ளபடியே; மாற்றப்படவில்லை. தயாரிப்பு நாட்கள்: ' + r.days + '.', 'Source: ' + F.SOURCES[r.src] + '. Quantities are exactly as in the source; none altered. Days to prepare: ' + r.days + '.')}</div>`;
+  } else if(st.sec === 'green'){
+    const g = F.GREEN_MANURE.find(x => x.id === st.gm);
+    body = `<div class="card"><h2>${T('பசுந்தாள் உரம் — விதை அளவு', 'Green manure — seed quantity')}</h2>
+      <p class="src" style="margin-top:0">${T('உழுது மண்ணில் சேர்க்கும் பயிர்கள் மண்ணுக்கு இயற்கைச் சத்தும் அங்ககப் பொருளும் தரும்.', 'Crops ploughed back into the soil add organic matter and nutrients.')}</p>
+      <label>${T('பயிர்', 'Crop')}</label><select id="gm">${F.GREEN_MANURE.map(x => `<option value="${x.id}" ${x.id === st.gm ? 'selected' : ''}>${T(x.ta, x.en)}</option>`).join('')}</select>
+      <label>${T('நிலம் (ஏக்கர்)', 'Land (acre)')}</label><input id="gac" type="number" inputmode="decimal" min="0" step="any" value="${st.ac}">
+      <div class="res" id="gr"></div>
+      ${SRC('மூலம்: ' + F.SOURCES.tnauGreen + '. ஹெக்டேர் அளவை ஏக்கராக மாற்றியது நம் கணக்கு (1 ha = 2.471 ac).', 'Source: ' + F.SOURCES.tnauGreen + '. Conversion from per-hectare to per-acre is our arithmetic (1 ha = 2.471 ac).')}</div>`;
+  } else if(st.sec === 'rice'){
+    body = `<div class="card"><h2>${T('பாரம்பரிய நெல் ரகங்கள்', 'Traditional rice varieties')}</h2>
+      <p class="src" style="margin-top:0">${T('கீழுள்ள எண்கள் TNAU பாரம்பரிய அறிவு (ITK) பக்கங்களில் உள்ளபடியே. அந்தப் பக்கத்தில் இல்லாத விவரம் "—" என்று விடப்பட்டுள்ளது; ஊகம் எதுவும் சேர்க்கவில்லை. மருத்துவக் குணங்கள் பாரம்பரியக் கூற்றுகள் — மருந்துக்கு மாற்று அல்ல.', 'Figures are exactly as on the TNAU traditional-knowledge (ITK) pages. Details not stated there are left as "—"; nothing is guessed. Health properties are traditional claims — not a substitute for medicine.')}</p>
+      ${F.VARIETIES.map(v => `<div style="border-top:1px solid #e5e7eb;padding:10px 0"><b style="font-size:16px">${T(v.ta, v.en)}</b>
+        <table><tr><td>${T('வயது (நாள்)', 'Duration (days)')}</td><td class="n">${v.days}</td></tr><tr><td>${T('பருவம்', 'Season')}</td><td class="n">${v.season ? esc(T(v.season.ta, v.season.en)) : '—'}</td></tr><tr><td>${T('மகசூல்', 'Yield')}</td><td class="n">${v.yieldTxt ? esc(T(v.yieldTxt.ta, v.yieldTxt.en)) : '—'}</td></tr></table>
+        <div class="src">${esc(T(v.claim.ta, v.claim.en))}</div></div>`).join('')}
+      ${SRC('மூலங்கள்: ' + [F.SOURCES.tnauKullakar, F.SOURCES.tnauKavuni, F.SOURCES.tnauMapillai].join(' · '), 'Sources: ' + [F.SOURCES.tnauKullakar, F.SOURCES.tnauKavuni, F.SOURCES.tnauMapillai].join(' · '))}
+      <div class="note">${T('பாரம்பரிய ரகத்தை முதலில் சிறு நிலத்தில் (சோதனை நிலம் tab) பயிரிட்டு விளைச்சலையும் விற்பனை விலையையும் ஒப்பிடுங்கள்.', 'Grow a traditional variety first on a small plot (Trial plot tab) and compare yield and selling price.')}</div></div>`;
+  } else {
+    body = `<div class="card"><h2>${T('ஏன் இயற்கை / பாரம்பரிய முறை?', 'Why organic / traditional methods?')}</h2>
+      <div style="margin:10px 0"><span class="tag est">${T('நிறுவப்பட்டது', 'Established')}</span><div>${T('மண்ணில் அங்ககப் பொருள் (சாணம், பசுந்தாள், தழை) சேர்ப்பது மண்ணின் நீர் பிடிப்பையும் நுண்ணுயிரையும் காக்கும் — இது வேளாண் அறிவியலில் ஏற்கப்பட்ட அடிப்படை.', 'Adding organic matter (dung, green manure, leaf) helps soil hold water and feed soil life — an accepted basic in agronomy.')}</div></div>
+      <div style="margin:10px 0"><span class="tag est">${T('நிறுவப்பட்டது', 'Established')}</span><div>${T('அளவுக்கு மீறிய யூரியா நிலத்தடி நீரில் நைட்ரேட்டை உயர்த்தலாம்; பூச்சிமருந்து தெளிப்பவர்கள் பாதுகாப்பு உடை அணிய வேண்டும் (சான்று tab-ஐப் பாருங்கள்).', 'Excess urea can raise nitrate in groundwater; people who spray pesticide should wear protection (see the Evidence tab).')}</div></div>
+      <div style="margin:10px 0"><span class="tag unp">${T('நிரூபிக்கப்படவில்லை', 'Not proven')}</span><div>${T('"செயற்கை உரம் அடுத்த தலைமுறைக்கு நோய்களைத் தருகிறது" என்பதற்குத் தனியான உறுதியான ஆய்வுச் சான்று இன்னும் இல்லை. நாம் இதை உண்மையாகச் சொல்ல மாட்டோம்; தெரிந்ததை மட்டும் சொல்கிறோம்.', 'There is no solid study yet showing that synthetic fertiliser causes disease in the next generation. We will not state it as fact; we only say what is known.')}</div></div>
+      <div style="margin:10px 0"><span class="tag ass">${T('ஒரு ஆய்வு', 'One study')}</span><div>${T('இயற்கை வேளாண்மையில் வெளியிடு செலவு குறையலாம்; விளைச்சல் எப்போதும் சமமாக இருக்காது — அதனால் சோதனை நிலத்தில் சோதித்து முடிவு செய்யுங்கள்.', 'Organic farming can cut input cost, but yield is not always equal — so test it on a trial plot before deciding.')}</div></div>
+      <div class="note">${T('நல்ல உணவு முறைக்கு: பாரம்பரிய முழுத் தானியம் / சிறுதானியம், காய்கறி, பருப்பு. உடல்நலக் கேள்விகளுக்கு மருத்துவரை அணுகுங்கள்.', 'For a good diet: traditional whole grains / millets, vegetables, pulses. For health questions see a doctor.')}</div>
+      ${SRC('இயற்கை முறைக்கு மாறுவோர் ஒரே பருவத்தில் முழு நிலத்தையும் மாற்ற வேண்டாம்; ஒரு பகுதியில் தொடங்குங்கள்.', 'If switching, do not convert the whole farm in one season; start with one part.')}</div>`;
+  }
+  $('#panel').innerHTML = nav + body + CHECK();
+  document.querySelectorAll('#osec button').forEach(b => b.onclick = () => { st.sec = b.dataset.s; store.set('pti-farm-org', st); panelOrganic(); });
+  if(st.sec === 'recipe'){
+    const run = () => {
+      st.rid = $('#rid').value; st.f = num($('#of').value, 1); store.set('pti-farm-org', st);
+      const rows = F.scaleRecipe(st.rid, st.f);
+      $('#or').innerHTML = rows ? '<table>' + rows.map(i => `<tr><td>${esc(T(i.ta, i.en))}</td><td class="n">${q(i.q)} ${unit(i.u)}</td></tr>`).join('') + '</table>' : T('அளவை உள்ளிடுங்கள்', 'Enter a quantity');
+      const need = F.recipeNeed(st.rid, st.f);
+      $('#spraybox').innerHTML = need ? `<div class="note">${T('இவ்வளவு ஏக்கருக்குத் தேவை', 'Needed for this many acres')}: <b>${fmt(need.min, 0)}–${fmt(need.max, 0)} L</b></div>` : (st.rid === 'panchagavya' ? `<div class="note">${T('10 L தெளிப்பானுக்கு 3% = ', '3% for a 10 L sprayer = ')}<b>${fmt(F.stockNeeded(3, 10) * 1000, 0)} ml</b> ${T('(மேலும் கணக்கு: "கரைசல்" tab)', '(more sums: "Spray mix" tab)')}</div>` : '');
+    };
+    $('#rid').onchange = () => { if($('#rid').value === 'jeevamrita') $('#of').value = 1; run(); render(); };
+    $('#of').oninput = run; run();
+  } else if(st.sec === 'green'){
+    const run = () => {
+      st.gm = $('#gm').value; st.ac = num($('#gac').value, 1); store.set('pti-farm-org', st);
+      const g = F.GREEN_MANURE.find(x => x.id === st.gm), s = F.greenManureSeed(st.gm, st.ac);
+      $('#gr').innerHTML = s ? `<table><tr><td>${T('விதை (TNAU, கிலோ/ஹெக்டேர்)', 'Seed (TNAU, kg/ha)')}</td><td class="n">${g.kgHa[0] === g.kgHa[1] ? g.kgHa[0] : g.kgHa[0] + '–' + g.kgHa[1]}</td></tr>
+        <tr><td>${T('உங்கள் நிலத்துக்கு விதை', 'Seed for your land')}</td><td class="n"><b>${fmt(s.min, 1)}${s.min === s.max ? '' : '–' + fmt(s.max, 1)} kg</b></td></tr>
+        <tr><td>${T('மண்ணில் உழும் நாள் (விதைத்தபின்)', 'Plough in (days after sowing)')}</td><td class="n">${g.dasMin ? g.dasMin + '–' : T('≤ ', 'within ')}${g.dasMax}</td></tr>
+        <tr><td>${T('பசுந்தாள் எடை (டன்/ஹெ)', 'Green biomass (t/ha)')}</td><td class="n">${g.bioT}</td></tr></table>` : T('நிலத்தை உள்ளிடுங்கள்', 'Enter the land area');
+    };
+    $('#gm').onchange = run; $('#gac').oninput = run; run();
+  }
+}
+
 function panelSeason(){
   $('#panel').innerHTML = `<div class="card"><h2>${T('நெல் பருவங்கள் — தமிழ்நாடு (TNAU)', 'Rice seasons — Tamil Nadu (TNAU)')}</h2>
     <table>${F.SEASONS.map(s => `<tr><td><b>${s[LANG === 'ta' ? 'ta' : 'en']}</b></td><td class="n">${s.months[LANG === 'ta' ? 'ta' : 'en']}</td></tr>`).join('')}</table>
@@ -277,7 +347,7 @@ function panelProof(){
     ${SRC('மூலங்கள்: CSE (Soil Health Card பகுப்பாய்வு), Frontiers in Plant Science 2024 (பெங்களூரு சோதனை), CGWB நிலத்தடி நீர்த் தர அறிக்கை 2024, FSSAI (மாநிலங்களவைப் பதில், 6 ஆகஸ்ட் 2025), JAMA Internal Medicine 2018 (NutriNet-Santé), ICMR-INDIAB (Nature Medicine 2025; Down To Earth வழி), NITI Aayog / ICAR-NAARM இயற்கை வேளாண்மை ஆய்வு (2020), Reddy மற்றும் பலர் (Indian Journal of Agricultural Economics, 2019). சில எண்கள் இரண்டாம்நிலை மூலம் வழி வந்தவை; அசல் மூலங்களை உறுதிசெய்யும் பணி நடந்து வருகிறது.', 'Sources: CSE (Soil Health Card analysis), Frontiers in Plant Science 2024 (Bengaluru trial), CGWB Ground Water Quality Report 2024, FSSAI (Rajya Sabha reply, 6 Aug 2025), JAMA Internal Medicine 2018 (NutriNet-Santé), ICMR-INDIAB (Nature Medicine 2025; via Down To Earth), NITI Aayog / ICAR-NAARM natural-farming study (2020), Reddy et al. (Indian Journal of Agricultural Economics, 2019). Some figures came via secondary reports; checking the originals is ongoing.')}</div>`;
 }
 
-const PANELS = {land: panelLand, plant: panelPlant, fert: panelFert, mix: panelMix, cost: panelCost, trial: panelTrial, season: panelSeason, help: panelHelp, proof: panelProof};
+const PANELS = {land: panelLand, plant: panelPlant, fert: panelFert, mix: panelMix, cost: panelCost, trial: panelTrial, organic: panelOrganic, season: panelSeason, help: panelHelp, proof: panelProof};
 function render(){
   document.documentElement.lang = LANG === 'ta' ? 'ta' : 'en';
   $('#ttl').textContent = T('🌾 உழவர் கருவிப்பெட்டி', '🌾 Farmer Toolbox');

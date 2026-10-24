@@ -5,7 +5,7 @@
 // (i.e. loading the app itself). It does not touch any other request type,
 // so it can never interfere with blob: URLs, downloads, CDN library loads,
 // backend API calls, or anything a tool does while running.
-const CACHE_NAME = 'pdf-tools-shell-v108';
+const CACHE_NAME = 'pdf-tools-shell-v109';
 // The business app (/app) also works offline: its page and the few script files it needs are kept (network first, cache when offline).
 const APP_FILES = ['/category-biz.js', '/category-bizapp.js', '/libs/qrcode-generator.js', '/app-manifest.json'];
 

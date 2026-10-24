@@ -1405,7 +1405,7 @@ function renderTopbar(){
   if(!AUTH_CONFIGURED){
     widget.appendChild(el(`<div class="free-badge">✓ No limits</div>`));
   } else if(!authState.session){
-    const btn = el(`<button class="btn tamil" style="padding:8px 16px; font-size:12.5px;">Sign In</button>`);
+    const btn = el(`<button class="btn tamil" style="padding:8px 16px; font-size:12.5px; min-height:40px;">Sign In</button>`);
     btn.onclick = ()=> mountAuthModal();
     widget.appendChild(btn);
   } else {
