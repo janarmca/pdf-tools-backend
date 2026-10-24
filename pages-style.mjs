@@ -4,9 +4,14 @@ export const CAT_THEME = {
   pdf:       { g:'linear-gradient(135deg,#4263EB,#2B3F9E)', icon:'📄', ta:'PDF கருவிகள்', en:'PDF Tools',       line:'PDF-ஐ இணை, பிரி, சுருக்கு, மாற்று, கையொப்பமிடு' },
   image:     { g:'linear-gradient(135deg,#9C36B5,#5F2A8A)', icon:'🖼️', ta:'படக் கருவிகள்', en:'Image Tools',     line:'படத்தைச் சுருக்கு, மாற்று, Background நீக்கு' },
   video:     { g:'linear-gradient(135deg,#C2410C,#9A3412)', icon:'🎬', ta:'வீடியோ கருவிகள்', en:'Video Tools',   line:'வீடியோ வெட்டு, இணை, சுருக்கு, GIF ஆக்கு' },
-  business:  { g:'linear-gradient(135deg,#1F7A38,#14532D)', icon:'💼', ta:'வணிகக் கருவிகள்', en:'Business Tools', line:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்' },
+  business:  { g:'linear-gradient(135deg,#1F7A38,#14532D)', icon:'🏪', ta:'தொழில் & கடைக் கருவிகள்', en:'Shop & Trade Tools', line:'GST பில், கணிப்பான்கள், படிவங்கள், ஆவணங்கள்' },
   ai:        { g:'linear-gradient(135deg,#0E7C86,#0B5563)', icon:'🤖', ta:'AI கருவிகள்', en:'AI Tools',          line:'AI உதவியுடன் படி, சுருக்கு, மொழிபெயர் (credit தேவை)' },
   education: { g:'linear-gradient(135deg,#C2255C,#9C1F4E)', icon:'🎓', ta:'கல்விக் கருவிகள்', en:'Education Tools', line:'கல்வி களஞ்சியம், விளையாட்டு, தமிழ் மற்றும் மாணவர் கருவிகள்' },
+  calc: { g:'linear-gradient(135deg,#1864AB,#0B4483)', icon:'🧮', ta:'கணிப்பான்கள்', en:'Calculators', line:'EMI, வட்டி, GST, தங்கம், மின் கட்டணம், வயது, தேதி' },
+  office: { g:'linear-gradient(135deg,#5F3DC4,#3B2391)', icon:'🏛️', ta:'அலுவலகம், வரி, சம்பளம்', en:'Office, tax & salary', line:'வருமான வரி, TDS, சம்பளச் சீட்டு, DA நிலுவை, PF, விடுப்புக் கடிதம்' },
+  docs: { g:'linear-gradient(135deg,#A61E4D,#7A1238)', icon:'📝', ta:'ஆவணங்கள் & கடிதங்கள்', en:'Documents & letters', line:'Resume, திருமண பயோடேட்டா, அழைப்பிதழ், வாடகை ஒப்பந்தம், கிரயப் பத்திரம்' },
+  farm: { g:'linear-gradient(135deg,#5C940D,#3B6A06)', icon:'🌾', ta:'விவசாயம்', en:'Farming', line:'நில அளவு, உரம், செலவு, இயற்கை இடுபொருள், பாரம்பரிய நெல்' },
+  utility: { g:'linear-gradient(135deg,#495057,#2B3035)', icon:'🧰', ta:'தினசரிக் கருவிகள்', en:'Everyday tools', line:'QR, தமிழ் நூலகம், ஜோதிடம், உரைக் கருவிகள், கடவுச்சொல்' },
 };
 export const BASE_CSS = `@import url('/fonts/tamil.css');
   :root{--ink:#20242B;--sub:#566070;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;}

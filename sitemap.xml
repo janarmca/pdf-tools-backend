@@ -49,6 +49,36 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/calc-tools</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/office-tools</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/docs-tools</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/farm-tools</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/utility-tools</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/for-government-employees</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -451,6 +481,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/extract-pages</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/multiple-pages-per-sheet</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -463,7 +499,49 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/split-pages-in-half</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/merge-two-sided-scans-alternate-mix</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/insert-blank-page</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/remove-blank-pages</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/resize-pdf-pages-to-a4</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pdf-one-long-image</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/add-page-numbers</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pdf-bookmark-adder</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -487,49 +565,31 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/flatten-pdf</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/repair-pdf</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ocr-pdf-searchable-pdf</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/edit-pdf-info</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/dsc-e-sign-verifier</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/bulk-form-16-130-signature-check</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/pan-tan-checker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/tds-due-date-calendar</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/tds-late-filing-fee-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/tds-late-interest-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/dsc-token-help</loc>
+    <loc>https://pdftoolsindia.com/tools/pdf-metadata-remover</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -553,13 +613,19 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/powerpoint-pdf</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/text-pdf</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-image</loc>
+    <loc>https://pdftoolsindia.com/tools/markdown-text-pdf</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -577,7 +643,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-text</loc>
+    <loc>https://pdftoolsindia.com/tools/pdf-image</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -589,31 +655,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/extract-pages</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/flatten-pdf</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/repair-pdf</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-metadata-remover</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/ocr-pdf-searchable-pdf</loc>
+    <loc>https://pdftoolsindia.com/tools/pdf-text</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -625,7 +667,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/powerpoint-pdf</loc>
+    <loc>https://pdftoolsindia.com/tools/pdf-markdown-html</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -685,12 +727,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/add-page-numbers</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/pdf-header-footer</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -703,7 +739,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-bookmark-adder</loc>
+    <loc>https://pdftoolsindia.com/tools/add-letterhead-to-pdf</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/bates-numbering</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -733,37 +775,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/merge-two-sided-scans-alternate-mix</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/split-pages-in-half</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/resize-pdf-pages-to-a4</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/bates-numbering</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/add-letterhead-to-pdf</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/remove-blank-pages</loc>
+    <loc>https://pdftoolsindia.com/tools/redact-pdf</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -775,253 +787,19 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-markdown-html</loc>
+    <loc>https://pdftoolsindia.com/tools/dsc-e-sign-verifier</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/markdown-text-pdf</loc>
+    <loc>https://pdftoolsindia.com/tools/dsc-token-help</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pdf-one-long-image</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/redact-pdf</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/qr-code-generator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/scan-qr-barcode</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/read-aloud</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/obituary-death-announcement</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/quotation-bill-po-proforma</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/receipts-vouchers-all-in-one</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/salary-slip-generator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/emi-loan-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/income-tax-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/hra-exemption-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/exam-age-eligibility-relaxation</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/customer-credit-book-udhar-khata</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/price-list-rate-card-maker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/rubber-stamp-designer</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/carpenter-timber-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/trip-bill-for-drivers-taxi</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/order-book-token-slip</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/whatsapp-order-to-bill-upi-qr</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/daily-cash-book-income-expense</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/workers-attendance-wages</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/bookings-appointments-calendar</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/stock-book-inventory</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/renewal-reminders-licence-insurance-emi</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/whatsapp-messages-for-shops</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/profit-selling-price-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/age-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/percentage-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/hr-attendance-register</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/leave-application-letter</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/business-card-maker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/prescription-pad-generator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/resume-builder</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/expense-tracker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/gst-checking-books-vs-gstr-2b</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/statement-reconciliation</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/astrology-vedic-birth-chart</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/tn-property-registration-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/compress-image</loc>
+    <loc>https://pdftoolsindia.com/tools/bulk-form-16-130-signature-check</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1033,13 +811,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/convert-image-format</loc>
+    <loc>https://pdftoolsindia.com/tools/compress-image</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/image-excel</loc>
+    <loc>https://pdftoolsindia.com/tools/convert-image-format</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1051,43 +829,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/remove-background</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/batch-background-remove</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/remove-watermark</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/image-enhancer</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/ai-image-upscaler</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/crop-resize-image</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/passport-id-photo</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1099,49 +841,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/add-border-to-image</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/photo-filters</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/strip-photo-privacy-data</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/watermark-an-image</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/image-collage</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/photo-sketch-art</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/meme-maker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/blur-hide-part-of-photo</loc>
+    <loc>https://pdftoolsindia.com/tools/social-media-image-sizes</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1153,7 +853,25 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/image-excel</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/exam-photo-signature-resizer</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/exam-photo-size-by-exam-upsc-ssc-ibps-neet</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/passport-id-photo</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1183,6 +901,96 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/remove-background</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/batch-background-remove</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-background-replace</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/remove-watermark</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/image-enhancer</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-image-upscaler</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/blur-hide-part-of-photo</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/strip-photo-privacy-data</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/image-collage</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/add-border-to-image</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/photo-filters</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/watermark-an-image</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/photo-sketch-art</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/meme-maker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/sticker-cutout</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/photos-gif-maker</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -1195,19 +1003,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/social-media-image-sizes</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/sticker-cutout</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/color-picker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/trim-cut-video</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1225,13 +1027,19 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/compress-video</loc>
+    <loc>https://pdftoolsindia.com/tools/crop-video</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://pdftoolsindia.com/tools/rotate-flip-video</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/resize-video</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1255,7 +1063,49 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://pdftoolsindia.com/tools/remove-green-screen-chroma-key</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/compress-video</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/video-to-mp3</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/video-gif</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/video-thumbnail</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/screen-recorder</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://pdftoolsindia.com/tools/video-voice</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/video-captions-subtitles</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1291,48 +1141,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/video-captions-subtitles</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/video-gif</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/video-thumbnail</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/trim-cut-video</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/crop-video</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/resize-video</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/screen-recorder</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/audio-cutter-ringtone-maker</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -1345,12 +1153,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/video-to-mp3</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/merge-audio-join-mp3</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
@@ -1358,24 +1160,6 @@
   </url>
   <url>
     <loc>https://pdftoolsindia.com/tools/audio-volume-effects</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/voice-recorder</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/text-to-speech-mp3</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/audio-video-text-subtitles-ai</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1405,85 +1189,301 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/remove-green-screen-chroma-key</loc>
+    <loc>https://pdftoolsindia.com/tools/voice-recorder</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ask-ai-about-document</loc>
+    <loc>https://pdftoolsindia.com/tools/text-to-speech-mp3</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-summarize</loc>
+    <loc>https://pdftoolsindia.com/tools/whatsapp-order-to-bill-upi-qr</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-translate-document</loc>
+    <loc>https://pdftoolsindia.com/tools/order-book-token-slip</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/receipt-invoice-excel</loc>
+    <loc>https://pdftoolsindia.com/tools/quotation-bill-po-proforma</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-resume-reviewer</loc>
+    <loc>https://pdftoolsindia.com/tools/receipts-vouchers-all-in-one</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-compare-excel-files</loc>
+    <loc>https://pdftoolsindia.com/tools/price-list-rate-card-maker</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/image-text-ocr</loc>
+    <loc>https://pdftoolsindia.com/tools/customer-credit-book-udhar-khata</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/camera-scanner</loc>
+    <loc>https://pdftoolsindia.com/tools/daily-cash-book-income-expense</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/handwriting-text</loc>
+    <loc>https://pdftoolsindia.com/tools/expense-tracker</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/live-speech-translator</loc>
+    <loc>https://pdftoolsindia.com/tools/profit-selling-price-calculator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-photo-style-anime-3d-tanjore</loc>
+    <loc>https://pdftoolsindia.com/tools/workers-attendance-wages</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/text-image</loc>
+    <loc>https://pdftoolsindia.com/tools/stock-book-inventory</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/ai-background-replace</loc>
+    <loc>https://pdftoolsindia.com/tools/bookings-appointments-calendar</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/renewal-reminders-licence-insurance-emi</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/trip-bill-for-drivers-taxi</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/carpenter-timber-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/rubber-stamp-designer</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/business-card-maker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/whatsapp-messages-for-shops</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/emi-loan-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/interest-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/sip-fd-rd-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/gold-price-gold-loan</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/gst-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/gst-checking-books-vs-gstr-2b</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/discount-profit-loss</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/percentage-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/amount-in-words</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/statement-reconciliation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/tneb-bill-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/tn-property-registration-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/age-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/date-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/income-tax-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/hra-exemption-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/tds-due-date-calendar</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/tds-late-filing-fee-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/tds-late-interest-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pan-tan-checker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/salary-slip-generator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/pf-gratuity-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/da-dr-arrears-calculator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/hr-attendance-register</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/leave-application-letter</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/resume-builder</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/marriage-biodata-maker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/wedding-invitation-maker</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/obituary-death-announcement</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/prescription-pad-generator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1502,6 +1502,12 @@
   </url>
   <url>
     <loc>https://pdftoolsindia.com/tools/tamil-handwriting-tracing</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/multiplication-tables</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1543,25 +1549,25 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/exam-photo-signature-resizer</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://pdftoolsindia.com/tools/marks-percentage-cgpa</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/unit-land-area-converter</loc>
+    <loc>https://pdftoolsindia.com/tools/tnea-cut-off-calculator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/multiplication-tables</loc>
+    <loc>https://pdftoolsindia.com/tools/exam-age-eligibility-relaxation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/attendance-calculator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1579,73 +1585,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/sip-fd-rd-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/unit-land-area-converter</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/gst-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/discount-profit-loss</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/date-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/strong-password-generator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/amount-in-words</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/interest-calculator</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/text-case-clean-up</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/marriage-biodata-maker</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/json-formatter-json</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/base64-converter-base64</loc>
-    <lastmod>2026-10-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://pdftoolsindia.com/tools/compare-two-texts</loc>
+    <loc>https://pdftoolsindia.com/tools/number-systems</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1663,19 +1609,19 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/number-systems</loc>
+    <loc>https://pdftoolsindia.com/tools/qr-code-generator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/tnea-cut-off-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/scan-qr-barcode</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/attendance-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/read-aloud</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1693,31 +1639,115 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/gold-price-gold-loan</loc>
+    <loc>https://pdftoolsindia.com/tools/astrology-vedic-birth-chart</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/pf-gratuity-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/text-case-clean-up</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/da-dr-arrears-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/compare-two-texts</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/tneb-bill-calculator</loc>
+    <loc>https://pdftoolsindia.com/tools/strong-password-generator</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://pdftoolsindia.com/tools/wedding-invitation-maker</loc>
+    <loc>https://pdftoolsindia.com/tools/json-formatter-json</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/base64-converter-base64</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ask-ai-about-document</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-summarize</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-translate-document</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/live-speech-translator</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/audio-video-text-subtitles-ai</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/image-text-ocr</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/camera-scanner</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/handwriting-text</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/receipt-invoice-excel</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-resume-reviewer</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-compare-excel-files</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/ai-photo-style-anime-3d-tanjore</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pdftoolsindia.com/tools/text-image</loc>
     <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

@@ -431,3 +431,9 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Content policy kept: "synthetic fertiliser causes disease in the next generation" is NOT stated as fact (no solid study); jeevamrita is labelled ZBNF tradition → compare on a trial plot. Beejamrita NOT added (no verified source found). Owner: have a Tamil reader + local KVK confirm recipes.
 - promo-news `uzhavar-organic`, sw.js v109 (merged after UPDATE_72).
 - Mobile pass (24 Oct): every new page/tool checked at 360 px and 320 px (no sideways scroll); hub/tool page hero titles wrap long Tamil words (`pages-style.mjs`, all generated pages regenerated); uzhavar-tools long source URLs wrap; header "Sign In" button 40 px tall; /app tiles two per row at 320 px.
+
+## UPDATE_74 — tools arranged into 11 categories with groups (24 Oct)
+- Categories (order = CATEGORY_META): pdf, image, video (video & audio), business (now "தொழில் & கடை / Shop & trades"), calc, office, docs, farm, education, utility, ai. New hub pages calc-tools, office-tools, docs-tools, farm-tools, utility-tools (+ sitemap). TOOLS array re-ordered to match; image/education tools never change category (their code is lazy-loaded by category).
+- `CAT_GROUPS` + `renderCatSections()` in index: a category shows its tools under small headings; a group may also list related tools from another category (e.g. farm shows unitconv, staffbook, cashbook…). Tools not in any group fall into "மற்றவை".
+- New standalone entries: `bizapp` → /app, `iyarkai` → /uzhavar-tools#organic, `tamillibrary` → /tamil-library (TOOL_STANDALONE_PAGES + mountEmbeddedTool; generator STANDALONE_IDS/HREF).
+- Script used: scratchpad `arrange.py` + `gen_patch.py` (not in repo). sw v110.

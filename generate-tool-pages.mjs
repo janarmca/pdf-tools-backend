@@ -32,12 +32,17 @@ const SITE = 'https://pdftoolsindia.com';
 const OUT_DIR = './tools';
 
 const CATEGORY_LABEL = {
-  pdf: 'PDF', business: 'Business', image: 'Image',
+  pdf: 'PDF', business: 'Shop & trades', calc: 'Calculators', office: 'Office & tax', docs: 'Documents', farm: 'Farming', utility: 'Everyday tools', image: 'Image',
   video: 'Video', ai: 'AI', education: 'Education',
 };
 const CATEGORY_BLURB = {
   pdf: 'Runs entirely in your browser — your file is never uploaded to a server.',
-  business: 'GST, invoicing, HR and accounting tools built for Indian small businesses.',
+  business: 'Orders, bills with UPI QR, credit book, cash book, wages and stock for shops and every trade.',
+  calc: 'Instant, free calculators for money, GST and dates.',
+  office: 'Income tax, TDS, salary and office paperwork tools.',
+  docs: 'Fill-in formats for resumes, biodata, invitations and agreements.',
+  farm: 'Free tools for Tamil farmers, including organic inputs.',
+  utility: 'Small everyday helpers — QR, library, astrology and text tools.',
   image: 'Runs entirely in your browser — your photo is never uploaded to a server.',
   video: 'Free by default, with an optional paid Fast Server upgrade for large files.',
   ai: 'Powered by AI — reads, writes or generates content a simple script cannot.',
@@ -54,7 +59,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
-const STANDALONE_IDS = new Set(['uzhavartools', 'photoresize', 'postermaker', 'tnrentagreement', 'tnsaledeed', 'kalvikalanjiyam']); // real root pages — no generated /tools/ duplicate
+const STANDALONE_IDS = new Set(['bizapp', 'iyarkai', 'tamillibrary', 'uzhavartools', 'photoresize', 'postermaker', 'tnrentagreement', 'tnsaledeed', 'kalvikalanjiyam']); // real root pages — no generated /tools/ duplicate
 function readTools(all = false) {
   const src = fs.readFileSync('index.source.html', 'utf8');
   const m = src.match(/const TOOLS = \[([\s\S]*?)\n\];/);
@@ -191,8 +196,28 @@ ${SEO_TA[t.id] ? `    <div class="section">
 `;
 }
 
-const STANDALONE_HREF = { uzhavartools: '/uzhavar-tools', photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' };
+const STANDALONE_HREF = { bizapp: '/app', iyarkai: '/uzhavar-tools#organic', tamillibrary: '/tamil-library', uzhavartools: '/uzhavar-tools', photoresize: '/photo-resizer', postermaker: '/poster-maker', tnrentagreement: '/tn-rent-agreement', tnsaledeed: '/tn-sale-deed', kalvikalanjiyam: '/learn/' };
 const HUB_META = {
+  calc: { file: 'calc-tools.html', title: 'Free Calculators — EMI, Interest, GST, Gold, EB Bill | PDF Tools India',
+    desc: 'Free online calculators in Tamil and English — EMI, loan interest, SIP, GST, discount, percentage, gold price, TNEB bill, age and date. No signup.',
+    ta: 'EMI, வட்டி, SIP, GST, தள்ளுபடி, தங்க விலை, மின் கட்டணம், வயது, தேதி — உடனடிக் கணிப்பான்கள். பதிவு இல்லை, கட்டணம் இல்லை.',
+    en: 'Everyday money and date calculators — loan EMI, interest, SIP, GST, discounts, gold, Tamil Nadu electricity bill, age and dates — instant and free.' },
+  office: { file: 'office-tools.html', title: 'Income Tax, TDS, Salary & Office Tools | PDF Tools India',
+    desc: 'Free office tools — income tax calculator, HRA, TDS due dates and late fee, salary slip, PF, DA arrears, attendance register and leave letters.',
+    ta: 'வருமான வரி, HRA, TDS தேதி & தாமதக் கட்டணம், சம்பளச் சீட்டு, PF, DA நிலுவை, வருகைப் பதிவேடு, விடுப்புக் கடிதம்.',
+    en: 'For employees, offices and accountants — income tax and HRA, TDS dates and late fees, payslips, PF, DA arrears, attendance and leave letters.' },
+  docs: { file: 'docs-tools.html', title: 'Resume, Marriage Biodata, Invitation & Agreement Formats | PDF Tools India',
+    desc: 'Free document makers — resume, marriage biodata, invitations, obituary notice, Tamil Nadu rent agreement and sale deed drafts, prescription format.',
+    ta: 'Resume, திருமண பயோடேட்டா, அழைப்பிதழ், இரங்கல் அறிவிப்பு, வாடகை ஒப்பந்தம், கிரயப் பத்திர வரைவு — நிரப்பி அச்சிடுங்கள்.',
+    en: 'Ready formats you fill in and print — resume, marriage biodata, invitations, notices, rent agreement and sale deed drafts. Drafts are not legal advice.' },
+  farm: { file: 'farm-tools.html', title: 'Free Farmer Tools in Tamil — Land, Fertiliser, Organic Inputs | PDF Tools India',
+    desc: 'Free Tamil farmer tools — cent/acre/kuzhi converter, fertiliser bags, spray mix, cost and break-even, organic inputs like Panchagavya and Jeevamrita, traditional rice.',
+    ta: 'நில அளவு, உர மூட்டை, தெளிப்புக் கலவை, செலவு, இயற்கை இடுபொருள் (பஞ்சகவ்யம், ஜீவாமிர்தம்), பாரம்பரிய நெல் — உழவர்களுக்கு இலவசம்.',
+    en: 'For Tamil farmers — land units, fertiliser and spray amounts, costs, organic inputs with their sources, and traditional rice varieties.' },
+  utility: { file: 'utility-tools.html', title: 'Everyday Tools — QR Code, Tamil Library, Astrology, Text Tools | PDF Tools India',
+    desc: 'Free everyday tools — QR code maker and scanner, Tamil library of free books, birth star and marriage matching, case converter, text compare, password generator.',
+    ta: 'QR உருவாக்கு / படி, தமிழ் நூலகம், நட்சத்திரம் & பொருத்தம், உரைக் கருவிகள், கடவுச்சொல் — தினசரி உதவிக் கருவிகள்.',
+    en: 'Small everyday helpers — QR codes, a library of free Tamil books, astrology, text tools and secure passwords.' },
   pdf:       { file: 'pdf-tools.html',       title: 'PDF Tools Online Free | PDF Tools India',
     desc: 'Free PDF tools online — merge, split, compress, convert PDF to Word/Excel/Image, sign and more. No signup, works on mobile & desktop. தமிழிலும் கிடைக்கும்.',
     ta: 'PDF வேலைகள் அனைத்தும் ஒரே இடத்தில் — இணை, பிரி, சுருக்கு, Word/Excel ஆக மாற்று, கையொப்பமிடு, கடவுச்சொல் இடு. எந்த கணக்கும் தேவையில்லை; உங்கள் கோப்பு உங்கள் சாதனத்தை விட்டு வெளியே போகாது.',
@@ -201,7 +226,7 @@ const HUB_META = {
     desc: 'Free image tools online — compress, convert, crop, resize, remove background and edit photos. No signup, works on mobile & desktop.',
     ta: 'படத்தைச் சுருக்கு, வடிவம் மாற்று, வெட்டு, Background நீக்கு, Passport அளவு தயாரி. எல்லாம் உங்கள் போனிலேயே நடக்கும்; படம் எங்கும் பதிவேறாது.',
     en: 'Compress, convert, crop, resize, remove backgrounds and add watermarks — all in your browser, with no premium tier hiding basic edits.' },
-  business:  { file: 'business-tools.html',  title: 'Free Business Tools for India | PDF Tools India',
+  business:  { file: 'business-tools.html',  title: 'Free Shop & Trade Tools — Orders, Bills + UPI, Credit Book | PDF Tools India',
     desc: 'Free business tools for Indian businesses — GST invoice generator, EMI calculator, rent receipt, quotation maker, amount in words and more.',
     ta: 'GST பில், EMI / வட்டிக் கணிப்பான், வாடகை ரசீது, விலைப்புள்ளி, ரூபாய் எழுத்தில் — சிறு வணிகர்களுக்கும் எல்லோருக்கும் தேவையான இந்திய வடிவக் கருவிகள்; இலவசம்.',
     en: 'Built around Indian formats and tax rules — GST invoices with CGST/SGST/IGST, EMI and interest calculators, receipts, quotations and everyday utilities.' },
@@ -286,6 +311,11 @@ function buildSitemap(toolEntries) {
     { loc: `${SITE}/video-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/ai-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/education-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/calc-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/office-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/docs-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/farm-tools`, freq: 'weekly', pri: '0.8' },
+    { loc: `${SITE}/utility-tools`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/for-government-employees`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/for-students`, freq: 'weekly', pri: '0.8' },
     { loc: `${SITE}/tamil-library`, freq: 'weekly', pri: '0.9' },
