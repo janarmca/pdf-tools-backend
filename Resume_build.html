@@ -280,6 +280,7 @@ input[type=color]{width:36px;height:28px;padding:2px;border:1px solid #d7dee8;
 @media print{
   html,body{background:#fff!important;height:auto!important}
   .topbar,.editor,.toast{display:none!important}
+  body>*:not(.app){display:none!important} /* no site footer, close button or any other text on the resume PDF */
   .app{display:block!important;height:auto!important}
   .stage{padding:0!important;overflow:visible!important;background:#fff!important}
   .preview{max-width:none!important;width:100%!important;min-height:auto!important;
@@ -290,6 +291,7 @@ input[type=color]{width:36px;height:28px;padding:2px;border:1px solid #d7dee8;
   .r-item,.r-section{break-inside:avoid}
 }
 </style>
+<style>@media print{.site-trust,#__jamtCloseHint{display:none!important}}</style>
 </head>
 <body>
 <button onclick="try{window.close();}catch(e){} setTimeout(function(){var h=document.getElementById('__jamtCloseHint'); if(h) h.style.display='block';},350);" title="Close" style="position:fixed; top:10px; right:10px; z-index:999999; width:34px; height:34px; border-radius:50%; border:none; background:#0f172a; color:#fff; font-size:15px; line-height:1; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3);">✕</button>

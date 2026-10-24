@@ -454,3 +454,6 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - Home: the "Choose your file / உங்கள் கோப்பைத் தேர்ந்தெடுங்கள்" box is removed (homeOrder() drops `#__upzDrop`).
 - `downloadBlob` is replaced (script before `</body>` in both index files): same download, then a bottom sheet "✅ கோப்பு சேமிக்கப்பட்டது · 💬 WhatsApp-ல் கோப்பை அனுப்பு" using the Web Share API with the actual file (phones: WhatsApp appears in the share list; nothing is sent without the person's tap). Browsers that cannot share files get a note to attach it from Downloads. "✨ அடுத்து செய்யலாம்" chips = simple rules by file type and size (big PDF → compress, PDF → Word, sign; photo → PDF, KB compress, background; video → MP3, trim) — no AI, no cost. /app has its own smaller sheet. sw v112.
 - Verified in headless Chromium only; the file share sheet itself needs a real phone (Android Chrome / iOS Safari support sharing files).
+
+## UPDATE_77 — clean printed PDFs (24 Oct)
+- Resume Builder "⬇ PDF" (window.print) printed the site footer (support e-mail, Contact · Privacy …). Print CSS now hides everything outside `.app` in Resume_build.html, and `.site-trust` is hidden in print on tn-rent-agreement, tn-sale-deed and health-check too. Checked by printing the sample resume to PDF in headless Chromium: no site text left. Resume PDFs never carried a watermark.
