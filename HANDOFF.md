@@ -9,7 +9,7 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 2. Bump `CACHE_NAME` in `sw.js` (now `pdf-tools-shell-v54`).
 3. Lazy category scripts load with a version query: `category-${cat}.js?v=2026101xx` inside `loadCategoryScript` in `index.source.html`. Change that string whenever `category-docs.js` / `category-extra.js` changes, or browsers keep the old file.
 4. After catalog changes (`TOOLS` array) run `node generate-tool-pages.mjs` (rewrites `/tools/*.html`, hub pages, `sitemap.xml`) and `node generate-promo-catalog.mjs` (updates `cloudflare/src/promo-catalog.js`). Removing a tool = also delete its `/tools/<slug>.html` and add a 301 in `_redirects`.
-5. Push to **both** `main` and `claude/merge-pending-upload-files-k4v19o` (same commits). Never force-push. If rejected (the sitemap bot commits to main): `git fetch origin main && git merge --no-edit origin/main`, push again.
+5. Push to `main` only (Cloudflare deploys `main`). The old branch `claude/merge-pending-upload-files-k4v19o` stopped at UPDATE_66 and is no longer updated. Never force-push. If a push is rejected: `git fetch origin main`, rebase / merge, push again.
 6. Commit trailers: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` and `Claude-Session: <session url>`.
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
