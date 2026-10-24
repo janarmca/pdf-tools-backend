@@ -337,6 +337,31 @@
   }
 </style>
 <link rel="stylesheet" href="/fonts/tamil.css">
+<style id="home-v3">
+/* UPDATE_75: calmer home page — compact category tiles (no clipped titles), 2-column "pages for you", same look on every phone */
+#__homeBody .cat2-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.cat2{min-height:0;padding:14px;display:grid;grid-template-columns:44px 1fr;grid-template-areas:"ico t" "ico n" "s s";column-gap:12px;row-gap:2px;align-items:center;justify-content:stretch;border-radius:18px}
+.cat2 .big{display:none}
+.cat2 .ico{grid-area:ico;font-size:26px;margin:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border-radius:12px}
+.cat2 .t{grid-area:t;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.cat2 .n{grid-area:n;position:static;background:none;padding:0;font-size:12px;opacity:.92;justify-self:start}
+.cat2 .s{grid-area:s;margin-top:6px;font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cat2:hover{transform:translateY(-2px)}
+@media (max-width:760px){
+  #__homeBody .cat2-grid{grid-template-columns:1fr 1fr}
+  .cat2{grid-template-columns:1fr;grid-template-areas:"ico" "t" "n";padding:12px;row-gap:4px;align-content:start}
+  .cat2 .ico{width:36px;height:36px;font-size:20px;border-radius:10px;margin-bottom:2px}
+  .cat2 .t{font-size:15px;overflow-wrap:break-word}
+  .cat2 .s{display:none}
+  .aud-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .aud{padding:12px;min-height:70px;gap:8px;border-radius:16px}
+  .aud .ai{font-size:24px}
+  .aud .at b{font-size:14px}
+  .aud .at small{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .aud .ag{display:none}
+}
+@media (max-width:340px){ #__homeBody .cat2-grid,.aud-grid{grid-template-columns:1fr} }
+</style>
 </head>
 <body>
 <h1 id="seoH1" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">PDF Tools India — இலவச PDF, Image, Video &amp; GST கருவிகள்</h1>
@@ -1119,7 +1144,10 @@ const TOOL_MOVED = {gstinvoice:'quotepo', rentreceipt:'receipts', tuitionreceipt
 // counts which tools are used (owner's dashboard /admin): one tiny request per tool opened; signed-in users are counted
 // per account, others anonymously. Nothing about the files is sent.
 function trackToolOpen(id){ try{ const h = {'Content-Type':'application/json'}; if(authState && authState.session) h.Authorization = 'Bearer '+authState.session.access_token; fetch(APP_CONFIG.BACKEND_URL + '/api/track', { method:'POST', headers:h, body: JSON.stringify({ toolId:id }), keepalive:true }).catch(()=>{}); }catch(e){} }
-function openTool(id){ id = TOOL_MOVED[id] || id; stopAnyActiveCamera(); recordRecentTool(id); trackToolOpen(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
+function openTool(id){ id = TOOL_MOVED[id] || id;
+  // standalone pages (farmer toolbox, business app, poster maker …) open in this same tab, so the phone's Back button returns here
+  if(TOOL_STANDALONE_PAGES[id]){ recordRecentTool(id); trackToolOpen(id); try{ sessionStorage.removeItem(LAST_TOOL_KEY); }catch(e){} location.href = TOOL_STANDALONE_PAGES[id]; return; }
+  stopAnyActiveCamera(); recordRecentTool(id); trackToolOpen(id); state = {view:'tool', tool:id, unlocked:false}; try{ sessionStorage.setItem(LAST_TOOL_KEY, id); }catch(e){} render(); window.scrollTo(0,0); }
 
 // Social profiles — fill in the full https URLs and they appear in the footer automatically (empty = hidden).
 const SOCIAL_LINKS = { instagram:'https://www.instagram.com/pdftoolsindia/', youtube:'https://www.youtube.com/@pdftoolsindia', facebook:'https://www.facebook.com/profile.php?id=61595156705561' }; // keep in sync with pages-style.mjs SOCIAL
@@ -1149,13 +1177,21 @@ function render(){
     <div style="margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/?cat=pdf" style="color:var(--sub);">PDF Tools</a>
       <a href="/?cat=image" style="color:var(--sub);">Image Tools</a>
-      <a href="/?cat=business" style="color:var(--sub);">Business Tools</a>
+      <a href="/?cat=business" style="color:var(--sub);">Shop & Trade Tools</a>
       <a href="/?cat=video" style="color:var(--sub);">Video Tools</a>
       <a href="/?cat=ai" style="color:var(--sub);">AI Tools</a>
       <a href="/?cat=education" style="color:var(--sub);">Education Tools</a>
+      <a href="/?cat=calc" style="color:var(--sub);">Calculators</a>
+      <a href="/?cat=office" style="color:var(--sub);">Office & Tax</a>
+      <a href="/?cat=docs" style="color:var(--sub);">Documents</a>
+      <a href="/?cat=farm" style="color:var(--sub);">Farming</a>
+      <a href="/?cat=utility" style="color:var(--sub);">Everyday Tools</a>
       <a href="/for-government-employees" style="color:var(--sub);">அரசு ஊழியர்</a>
       <a href="/for-students" style="color:var(--sub);">மாணவர்</a>
       <a href="/uzhavar-tools" style="color:var(--sub);">உழவர்</a>
+      <a href="/for-small-business" style="color:var(--sub);">சிறுதொழில்</a>
+      <a href="/app" style="color:var(--sub);">தொழில் App</a>
+      <a href="/tamil-library" style="color:var(--sub);">தமிழ் களஞ்சியம்</a>
     </div>
     <div style="margin-top:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:11.5px;">
       <a href="/learn/" style="color:var(--sub);">கல்வி களஞ்சியம்</a>
@@ -16891,6 +16927,7 @@ render();
     if(deepLinkTool && TOOLS.some(t=>t.id===deepLinkTool)){
       // /?tool=<id> is the same page as the static /tools/<slug> landing page — point Google at that one.
       try{ const c = document.querySelector('link[rel="canonical"]'); const tt = TOOLS.find(t=>t.id===deepLinkTool); if(c && tt) c.setAttribute('href', 'https://pdftoolsindia.com/tools/' + toolSlug(tt)); }catch(e){}
+      if(TOOL_STANDALONE_PAGES[deepLinkTool]){ location.replace(TOOL_STANDALONE_PAGES[deepLinkTool]); return; } // no Back-button loop
       openTool(deepLinkTool);
       return;
     }
@@ -16907,7 +16944,7 @@ render();
       return;
     }
     const lastTool = sessionStorage.getItem(LAST_TOOL_KEY);
-    if(lastTool && TOOLS.some(t=>t.id===lastTool)) openTool(lastTool);
+    if(lastTool && !TOOL_STANDALONE_PAGES[lastTool] && TOOLS.some(t=>t.id===lastTool)) openTool(lastTool);
   }catch(e){ /* malformed URL params / sessionStorage unavailable — just show the homepage as normal */ }
 })();
 initAuth().then(async ()=>{
@@ -16974,6 +17011,27 @@ if('serviceWorker' in navigator){
     }).catch(()=>{}); // silently skip if sw.js isn't hosted alongside this file
   });
 }
+</script>
+<script>
+/* UPDATE_75: home page order — 1 quick start, 2 recently used, 3 categories, 4 pages for you, 5 "choose a file", then the rest */
+(function(){
+  function homeOrder(){
+    try{
+      if(typeof __activeCategory === 'undefined' || __activeCategory !== 'all' || String(__searchQuery || '').trim()) return;
+      var h = document.getElementById('__homeBody'); if(!h) return;
+      var kids = Array.prototype.slice.call(h.children);
+      var pick = function(sel){ for(var i = 0; i < kids.length; i++){ if(kids[i].querySelector && kids[i].querySelector(sel)) return kids[i]; } return null; };
+      var order = [pick('.qt-grid'), pick('.rc-row'), pick('.cat2-grid'), pick('.aud-grid'), pick('#__upzDrop')].filter(Boolean);
+      order.forEach(function(k){ h.appendChild(k); });
+      kids.filter(function(k){ return order.indexOf(k) < 0; }).forEach(function(k){ h.appendChild(k); });
+    }catch(e){ /* keep the default order */ }
+  }
+  if(typeof renderHomeBody === 'function'){
+    var orig = renderHomeBody;
+    renderHomeBody = function(){ var r = orig.apply(this, arguments); homeOrder(); return r; };
+  }
+  homeOrder();
+})();
 </script>
 </body>
 </html>

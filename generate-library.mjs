@@ -80,7 +80,7 @@ const html = `<!DOCTYPE html>
 .tl{display:flex;flex-direction:column;gap:2px;text-decoration:none;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;min-width:0;} .tl i{font-style:normal;font-size:22px;} .tl b{font-size:14px;} .tl small{color:var(--sub);font-size:12px;}
 .none{display:none;margin-top:14px;color:var(--sub);font-weight:700;}
 </style></head><body>
-<div class="top"><a href="/"><img src="/logo.png" alt="PDF Tools India" onerror="this.style.display='none'"></a><a class="home" href="/">🏠 முகப்பு</a></div>
+<div class="top"><a href="/?home=1"><img src="/logo.png" alt="PDF Tools India" onerror="this.style.display='none'"></a><a class="home" href="/?home=1">🏠 முகப்பு</a></div>
 <main class="wrap">
 <div class="hero"><div class="row"><div class="big">📖</div><div><h1>தமிழ் களஞ்சியம்</h1><div class="en">Tamil Library — links to free official and open sites for books, textbooks, laws &amp; courses</div></div></div>
 <p>நூல், பாடநூல், அரசாணை, சட்டம், படிப்பு — பணம் கேட்காமல் படிக்கக்கூடிய அதிகாரப்பூர்வ, திறந்த தளங்களுக்கான இணைப்புகளை ஒரே பக்கத்தில் சேர்த்துள்ளோம். கீழே தேடுங்கள்; பிறகு எங்கள் கருவிகளால் அதைப் படிக்க, சுருக்க, உரையாக மாற்ற, கேட்க முடியும்.</p>

@@ -13,6 +13,12 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 6. Commit trailers: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` and `Claude-Session: <session url>`.
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
+## Update numbers and sessions (read before you start)
+- **Latest update: UPDATE_75** (24 Oct 2026). The next session uses **UPDATE_76**, then 77 … Never reuse a number.
+- On 24 Oct two sessions worked at the same time and both called their work "UPDATE_70". They were merged by hand: in this file **UPDATE_69–72 and 74–75** are the small-business / business-app work and **UPDATE_73** is the farmer-toolbox organic tab (it was called UPDATE_70 in the other session's zip — same content).
+- Only ONE session should change the repo at a time. Start every session with `git fetch origin main` and work on top of it; never upload an older zip of `index.html`, `index.source.html`, `sw.js`, `.github/promo-news.json` or `HANDOFF.md` over newer ones — merge only the real change.
+- `remin.py` is not in the repo: since UPDATE_69 the served `index.html` has been patched in the same way as `index.source.html` by small scripts (search for the same text, change both). Check both files after every edit.
+
 ## Where the tools live
 | File | Contents |
 |---|---|
@@ -437,3 +443,9 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 - `CAT_GROUPS` + `renderCatSections()` in index: a category shows its tools under small headings; a group may also list related tools from another category (e.g. farm shows unitconv, staffbook, cashbook…). Tools not in any group fall into "மற்றவை".
 - New standalone entries: `bizapp` → /app, `iyarkai` → /uzhavar-tools#organic, `tamillibrary` → /tamil-library (TOOL_STANDALONE_PAGES + mountEmbeddedTool; generator STANDALONE_IDS/HREF).
 - Script used: scratchpad `arrange.py` + `gen_patch.py` (not in repo). sw v110.
+
+## UPDATE_75 — Back button + home page clean-up (24 Oct)
+- Bug: opening the Farmer Toolbox (or any standalone page) from the site opened a new tab, and coming back to "/" re-opened the last tool from sessionStorage — so "back" looked broken. Now `openTool()` sends standalone tools (TOOL_STANDALONE_PAGES) to their page in the SAME tab, `?tool=<standalone>` uses `location.replace` (no back loop), the last-tool restore skips standalone ids, and every standalone page's "← PDF Tools India" link goes to `/?home=1`.
+- /app: entering a tool pushes a history entry, so the phone's Back returns to "Today".
+- Home page: `<style id="home-v3">` (compact category tiles — icon above the title on phones so whole Tamil words fit, 2-column "pages for you") and a small script before `</body>` that wraps `renderHomeBody` and orders the home sections: quick start → recently used → categories → pages for you → choose a file → rest. Footer links now include the new categories, /for-small-business, /app and /tamil-library. sw v111.
+

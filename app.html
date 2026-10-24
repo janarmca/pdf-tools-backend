@@ -127,7 +127,12 @@
     nav.innerHTML = items.map(function (i) { return '<button type="button" data-go="' + i[0] + '" class="' + (cur === i[0] || (i[0] === 'more' && cur !== 'home' && m.slice(0, 3).indexOf(cur) < 0) ? 'on' : '') + '"><i>' + i[1] + '</i>' + esc(i[2]) + '</button>'; }).join('');
     Array.prototype.forEach.call(nav.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
   }
-  function go(id) { cur = id; draw(); window.scrollTo(0, 0); try { history.replaceState(null, '', id === 'home' ? '/app' : '/app#' + id); } catch (e) { /* ignore */ } }
+  function go(id, fromHistory) { // the phone's Back button returns to "Today" from any tool
+    cur = id; draw(); window.scrollTo(0, 0);
+    if (fromHistory) return;
+    try { if (id === 'home') history.replaceState(null, '', '/app'); else if (location.hash) history.replaceState(null, '', '/app#' + id); else history.pushState(null, '', '/app#' + id); } catch (e) { /* ignore */ }
+  }
+  window.addEventListener('popstate', function () { var h = location.hash.replace('#', ''); go(h && (MODS[h] || h === 'more') ? h : 'home', true); });
   window.__bzOpen = function (id) { if (TOOL_IMPL[id]) go(id); else location.href = '/?tool=' + id; };
 
   function pickTrade() {
@@ -176,7 +181,7 @@
       '<div class="row">' + (deferredInstall ? '<button type="button" class="btn" id="inst">📲 ' + T('போனில் App ஆக நிறுவு', 'Install on this phone') + '</button>' : '') + '</div>' +
       '<div class="note">' + (ios ? T('iPhone / iPad-ல் App ஆக வைக்க: Safari-ல் "Share" (⬆️) → "Add to Home Screen".', 'On iPhone / iPad: in Safari tap Share (⬆️) → "Add to Home Screen".') : T('Android-ல்: Chrome மெனு (⋮) → "Add to Home screen" / "Install app".', 'On Android: Chrome menu (⋮) → "Add to Home screen" / "Install app".')) + '</div>' +
       '<div class="note">' + T('இந்த App இலவசம்; பதிவு, கட்டணம், விளம்பரச் சிக்கல் எதுவும் இல்லை. தகவல் இந்த போனின் browser-ல் மட்டும் — browser data-வை அழித்தால் போய்விடும், அதனால் Backup file-ஐ WhatsApp / Drive-ல் வைத்திருங்கள்.', 'This app is free — no sign-up, no fees. Data lives only in this phone\'s browser; clearing browser data removes it, so keep the backup file in WhatsApp / Drive.') + '</div>' +
-      '<div class="row"><a class="btn sec" href="/">🏠 pdftoolsindia.com</a><a class="btn sec" href="/for-small-business">🏪 ' + T('எல்லா சிறுதொழில் கருவிகள்', 'All small-business tools') + '</a></div>';
+      '<div class="row"><a class="btn sec" href="/?home=1">🏠 pdftoolsindia.com</a><a class="btn sec" href="/for-small-business">🏪 ' + T('எல்லா சிறுதொழில் கருவிகள்', 'All small-business tools') + '</a></div>';
     Array.prototype.forEach.call(main.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     document.getElementById('nm').addEventListener('input', function (e) { st.name = e.target.value; lsSet(KEY, st); header(); });
     document.getElementById('chg').onclick = function () { st.trade = null; lsSet(KEY, st); cur = 'home'; draw(); };
