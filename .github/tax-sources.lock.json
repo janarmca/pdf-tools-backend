@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-10-19T08:58:42.189Z",
+  "checkedAt": "2026-10-26T09:01:29.326Z",
   "allDownStreak": 0,
   "sources": {
     "transition-faq": {
       "hash": "0b21c7063d19a81c91b5e2a8911458c003589c2a023c262954dea7fb968917ce",
       "bytes": 4533716,
       "kind": "pdf",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -14,7 +14,7 @@
       "hash": "c23f30205a1d4a49007c1d1c992f7dea536b7d5c0abb65547decd7d195916639",
       "bytes": 264871,
       "kind": "pdf",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -22,7 +22,7 @@
       "hash": "75568b889489a28d9c77e3afd2b5de8e4e00c271a7778ff1bc56aba59eddbaed",
       "bytes": 333437,
       "kind": "pdf",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -30,31 +30,31 @@
       "hash": "735c5fce1b94cd6d9d66eaed3499b3c5fabda2a8ce91c1d6d103d6d94fd8e746",
       "bytes": 532207,
       "kind": "pdf",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
     "s427": {
       "hash": "741bcae491c6cde3d473ea3fb8afacf4a56b13c65d737d05f942aa2e1ecfaa7e",
-      "bytes": 604334,
+      "bytes": 617096,
       "kind": "html",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
     "late-fee-page": {
       "hash": "5d01d8f93e6d9d0fcd14aae6e74a1aaf4098c9085c3bbc129421d217500f62b3",
-      "bytes": 638133,
+      "bytes": 647299,
       "kind": "html",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
     "forms-list": {
       "hash": "992774ea592216f2106e909961b0f033b4ea19f2197a43a58a40e10fce2de845",
-      "bytes": 694620,
+      "bytes": 694914,
       "kind": "html",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -62,7 +62,7 @@
       "hash": "f565e0f5ff3bf8f717daeb507f5e8569e720abc3309e6719f6f085889c9b802f",
       "bytes": 10111559,
       "kind": "pdf",
-      "checkedAt": "2026-10-19T08:58:42.189Z",
+      "checkedAt": "2026-10-26T09:01:29.326Z",
       "changedAt": null,
       "failStreak": 0
     }
