@@ -14,38 +14,89 @@
 <link rel="icon" href="/icon-192.png">
 <link rel="stylesheet" href="/fonts/tamil.css">
 <style>
-  :root{--ink:#1F2933;--sub:#5B6673;--line:#E3E7EC;--bg:#F4F6F5;--brand:#176B45;--brand-dark:#0F4D31;--chip:#EEF4F0}
+  :root{--ink:#1F2933;--sub:#5B6673;--line:#E3E7EC;--bg:#F4F6F5;--brand:#176B45;--brand-dark:#0F4D31;--chip:#EEF4F0;--card:#FFFFFF;--warn:#C0392B}
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
-  .top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:10px}
-  .top .ic{font-size:26px}.top b{display:block;font-size:17px;line-height:1.25}.top small{opacity:.9;font-size:12px;font-weight:600}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil',-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.55;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .top{position:sticky;top:0;z-index:40;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+  .top .top-home{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:800;font-size:13px;padding:6px 12px;border-radius:10px;min-height:40px;border:1px solid rgba(255,255,255,.25);transition:background .15s}
+  .top .top-home:hover{background:rgba(255,255,255,.28)}
+  .top .ic{font-size:26px;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);flex-shrink:0}
   .top .sp{flex:1;min-width:0}
-  .top button{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:10px;min-height:40px;padding:6px 10px;font:800 13px inherit;font-family:inherit;cursor:pointer}
-  main{max-width:720px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
-  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
-  .nav button{background:none;border:0;min-height:58px;font:700 11.5px/1.2 inherit;font-family:inherit;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px}
-  .nav button i{font-style:normal;font-size:22px}.nav button.on{color:var(--brand)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;margin-top:12px}
-  .tile{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:4px}
-  .tile i{font-style:normal;font-size:26px}.tile b{font-size:15px}.tile span{font-size:12.5px;color:var(--sub);font-weight:600}
-  .stat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer}
-  .stat b{display:block;font-size:22px;font-weight:900}.stat span{font-size:12.5px;color:var(--sub);font-weight:700}.stat.warn b{color:#C0392B}
-  h2{font-size:16px;margin:18px 0 0;font-weight:900}
-  .hello{background:linear-gradient(135deg,#176B45,#0F4D31);color:#fff;border-radius:18px;padding:16px}
-  .hello b{font-size:18px}.hello p{margin:6px 0 0;font-size:13.5px;opacity:.95}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:8px 16px;border-radius:12px;border:0;background:var(--brand);color:#fff;font:800 14.5px/1.2 inherit;font-family:inherit;cursor:pointer;text-decoration:none}
-  .btn.sec{background:#fff;color:var(--brand-dark);border:2px solid var(--line)}
-  .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .note{background:#FFF8E6;border:1px solid #F3DFA2;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-top:12px}
-  .back{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .mod-h{font-size:18px;font-weight:900}
-  input[type=text]{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px;font-family:inherit}
+  .top b{display:block;font-size:16.5px;line-height:1.25;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top small{opacity:.92;font-size:12px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top .top-actions{display:flex;align-items:center;gap:8px}
+  .top button{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;min-height:40px;padding:6px 12px;font:800 13px inherit;font-family:inherit;cursor:pointer;transition:background .15s}
+  .top button:hover{background:rgba(255,255,255,.28)}
+  main{max-width:920px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
+  .nav{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:620px;bottom:0;z-index:50;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(15,30,60,.12);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .nav button{background:none;border:0;min-height:56px;font:800 11.5px/1.2 inherit;font-family:inherit;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px;border-radius:12px;transition:color .12s,background .12s}
+  .nav button:hover{color:var(--brand)}
+  .nav button i{font-style:normal;font-size:22px;line-height:1}
+  .nav button.on{color:var(--brand);background:#EAF3ED}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;margin-top:14px}
+  @media (min-width:640px){.grid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}}
+  .tile{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;min-height:96px;display:flex;flex-direction:column;gap:5px;transition:transform .12s,box-shadow .12s,border-color .12s}
+  .tile:hover{transform:translateY(-2px);border-color:var(--brand);box-shadow:0 6px 18px rgba(23,107,69,.12)}
+  .tile i{font-style:normal;font-size:26px;line-height:1}
+  .tile b{font-size:15px;font-weight:900;line-height:1.25}
+  .tile span{font-size:12px;color:var(--sub);font-weight:600;line-height:1.4}
+  .stat{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;text-align:left;font-family:inherit;color:var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .stat:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,30,60,.1)}
+  .stat b{display:block;font-size:23px;font-weight:900;letter-spacing:-0.5px}
+  .stat span{font-size:12.5px;color:var(--sub);font-weight:700;display:block;margin-top:3px}
+  .stat.warn b{color:var(--warn)}
+  .stat.good b{color:#176B45}
+  h2{font-size:17px;margin:22px 0 8px;font-weight:900;color:var(--ink)}
+  .hello{background:linear-gradient(135deg,#176B45,#0F4D31);color:#fff;border-radius:20px;padding:20px 22px;box-shadow:0 8px 24px rgba(23,107,69,.22)}
+  .hello b{font-size:19px;font-weight:900;display:block}
+  .hello p{margin:6px 0 0;font-size:14px;opacity:.94;line-height:1.5}
+  .qa-wrap{margin-top:14px}
+  .qa-title{font-size:13px;font-weight:800;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .qa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .qa-btn{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;min-height:54px;font-family:inherit;cursor:pointer;text-align:left;color:var(--ink);transition:all .12s}
+  .qa-btn:hover{border-color:var(--brand);background:#F3FAF6;transform:translateY(-1px)}
+  .qa-btn i{font-style:normal;font-size:24px;flex-shrink:0}
+  .qa-btn div{min-width:0;flex:1}
+  .qa-btn b{display:block;font-size:14px;font-weight:900;line-height:1.2}
+  .qa-btn small{display:block;font-size:11px;color:var(--sub);font-weight:600}
+  .demo-banner{background:#E8F5E9;border:1.5px dashed #4CAF50;border-radius:16px;padding:14px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .demo-banner div b{display:block;font-size:14.5px;font-weight:900;color:#1B5E20}
+  .demo-banner div span{font-size:12.5px;color:#2E7D32;font-weight:600}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:9px 18px;border-radius:12px;border:0;background:var(--brand);color:#fff;font:800 14px/1.2 inherit;font-family:inherit;cursor:pointer;text-decoration:none;transition:background .12s,transform .12s}
+  .btn:hover{background:var(--brand-dark);transform:translateY(-1px)}
+  .btn.sec{background:#fff;color:var(--brand-dark);border:1.5px solid var(--line)}
+  .btn.sec:hover{border-color:var(--brand);background:#F9FBFA}
+  .btn.sm{min-height:38px;padding:6px 12px;font-size:13px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .note{background:#FFF9E6;border:1px solid #F2DF99;color:#6B4E00;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;margin-top:14px;line-height:1.6}
+  .back-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;background:#fff;padding:10px 14px;border:1px solid var(--line);border-radius:14px}
+  .back-left{display:flex;align-items:center;gap:10px}
+  .mod-h{font-size:17px;font-weight:900;color:var(--ink)}
+  .mod-tools-quick{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+  .mod-tool-btn{border:1px solid var(--line);background:#F7F9F8;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:800;color:var(--sub);cursor:pointer;white-space:nowrap}
+  .mod-tool-btn.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  input[type=text],input[type=search]{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink);outline:none;transition:border-color .15s}
+  input[type=text]:focus,input[type=search]:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(23,107,69,.12)}
+  .trade-filter-chips{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px;margin-top:8px;scrollbar-width:none}
+  .trade-filter-chips::-webkit-scrollbar{display:none}
+  .trade-filter-chips button{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:7px 14px;font:800 13px inherit;font-family:inherit;cursor:pointer;min-height:38px;white-space:nowrap;transition:all .12s}
+  .trade-filter-chips button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .card-box{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}
+  .card-box h3{margin:0 0 10px;font-size:16px;font-weight:900}
   [hidden]{display:none!important}
 </style>
 </head>
 <body>
-<header class="top"><span class="ic" id="tIcon">🏪</span><span class="sp"><b id="tName">தொழில் App</b><small id="tSub">இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்</small></span><button type="button" id="langBtn">EN</button></header>
+<header class="top">
+  <a href="/?home=1" class="top-home" title="முகப்புப் பக்கம் / Home">🏠 முகப்பு</a>
+  <span class="ic" id="tIcon">🏪</span>
+  <span class="sp"><b id="tName">தொழில் App</b><small id="tSub">இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்</small></span>
+  <div class="top-actions">
+    <button type="button" id="tradeBtn" title="தொழில் மாற்றம் / Change work">🔄 தொழில்</button>
+    <button type="button" id="langBtn">EN</button>
+  </div>
+</header>
 <main id="main"><div class="note">ஏற்றுகிறது… / Loading…</div></main>
 <nav class="nav" id="nav" hidden></nav>
 <script>
@@ -54,13 +105,12 @@
   var __appLang = (function () { try { return localStorage.getItem('bzapp_lang') || 'ta'; } catch (e) { return 'ta'; } })();
   function downloadBlob(blob, name) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 60000);
-    // after the download: send the same file on WhatsApp (phones that can share files) — the person taps, nothing is sent automatically
     var file = null; try { file = new File([blob], name, { type: blob.type || 'application/octet-stream' }); } catch (e) { /* old browser */ }
     var ok = !!(file && navigator.canShare && (function () { try { return navigator.canShare({ files: [file] }); } catch (e) { return false; } })());
     var old = document.getElementById('dlSheet'); if (old) old.remove();
     var en = (typeof __appLang !== 'undefined' && __appLang === 'en'), s = document.createElement('div'); s.id = 'dlSheet';
-    s.style.cssText = 'position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;justify-content:center;padding:0 10px;pointer-events:none';
-    s.innerHTML = '<div style="pointer-events:auto;width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 -6px 26px rgba(15,30,60,.25);padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1 1 160px;min-width:0;font-weight:800;font-size:14px">✅ ' + (en ? 'Saved' : 'சேமிக்கப்பட்டது') + '<small style="display:block;color:#5B6673;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(name) + '</small></span><button type="button" id="dlShare" style="min-height:46px;border:0;border-radius:12px;background:#25D366;color:#fff;font:800 14px inherit;font-family:inherit;padding:0 14px;cursor:pointer">💬 ' + (ok ? (en ? 'Send on WhatsApp' : 'WhatsApp-ல் அனுப்பு') : 'WhatsApp') + '</button><button type="button" id="dlX" aria-label="close" style="border:0;background:#F1F3F5;border-radius:50%;width:36px;height:36px;cursor:pointer">✕</button></div>';
+    s.style.cssText = 'position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;justify-content:center;padding:0 10px;pointer-events:none';
+    s.innerHTML = '<div style="pointer-events:auto;width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 -6px 26px rgba(15,30,60,.25);padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1 1 160px;min-width:0;font-weight:800;font-size:14px">✅ ' + (en ? 'Saved' : 'சேமிக்கப்பட்டது') + '<small style="display:block;color:#5B6673;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(name) + '</small></span><button type="button" id="dlShare" style="min-height:44px;border:0;border-radius:12px;background:#25D366;color:#fff;font:800 14px inherit;font-family:inherit;padding:0 14px;cursor:pointer">💬 ' + (ok ? (en ? 'Send on WhatsApp' : 'WhatsApp-ல் அனுப்பு') : 'WhatsApp') + '</button><button type="button" id="dlX" aria-label="close" style="border:0;background:#F1F3F5;border-radius:50%;width:36px;height:36px;cursor:pointer">✕</button></div>';
     document.body.appendChild(s);
     var t = setTimeout(function () { s.remove(); }, 15000);
     document.getElementById('dlX').onclick = function () { clearTimeout(t); s.remove(); };
@@ -99,24 +149,24 @@
     stampmaker: ['🔵', 'ஸ்டாம்ப் டிசைன்', 'Stamp design', 'ரப்பர் ஸ்டாம்ப் படம்', 'Rubber stamp art']
   };
   var TRADES = [
-    ['veg', '🥬', 'காய்கறி / பழம் / மளிகை', 'Vegetables, fruit & grocery', ['quickbill', 'khata', 'cashbook', 'stockbook', 'ratecard', 'staffbook', 'wamsg'], 'general'],
-    ['laundry', '👕', 'சலவை / இஸ்திரி', 'Laundry & ironing', ['shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook', 'wamsg'], 'laundry'],
-    ['tailor', '🧵', 'தையல் கடை', 'Tailor', ['shopslip', 'bookings', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'tailor'],
-    ['driver', '🚖', 'ஓட்டுநர் / வாடகை வண்டி', 'Driver & taxi', ['tripcalc', 'bookings', 'cashbook', 'docremind', 'khata', 'wamsg'], null],
-    ['construction', '🧱', 'மேஸ்திரி / கட்டுமானம் / பெயிண்டர்', 'Mason, construction, painter', ['staffbook', 'shopslip', 'cashbook', 'khata', 'stockbook', 'profitcalc'], 'service'],
-    ['electric', '🔧', 'எலக்ட்ரீஷியன் / பிளம்பர் / AC', 'Electrician, plumber, AC', ['shopslip', 'bookings', 'stockbook', 'cashbook', 'khata', 'docremind'], 'service'],
-    ['carpenter', '🪚', 'தச்சர் / ஃபர்னிச்சர்', 'Carpenter & furniture', ['shopslip', 'woodcalc', 'staffbook', 'cashbook', 'khata', 'stockbook'], 'carpenter'],
-    ['photo', '📸', 'போட்டோ / வீடியோ', 'Photo & video', ['bookings', 'shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'photo'],
-    ['repair', '📱', 'மொபைல் / எலக்ட்ரானிக்ஸ் பழுது', 'Mobile & electronics repair', ['shopslip', 'stockbook', 'khata', 'cashbook', 'wamsg', 'ratecard'], 'repair'],
-    ['mechanic', '🛵', 'வண்டி மெக்கானிக்', 'Mechanic', ['shopslip', 'stockbook', 'khata', 'cashbook', 'docremind', 'staffbook'], 'vehicle'],
-    ['salon', '💇', 'சலூன் / அழகு நிலையம்', 'Salon & beauty', ['bookings', 'shopslip', 'cashbook', 'staffbook', 'ratecard', 'stockbook'], 'salon'],
-    ['food', '🍛', 'டீக்கடை / மெஸ் / கேட்டரிங்', 'Tea shop, mess, catering', ['shopslip', 'quickbill', 'stockbook', 'staffbook', 'cashbook', 'khata', 'bookings'], 'catering'],
-    ['flower', '🌼', 'பூக்கடை', 'Flower shop', ['quickbill', 'shopslip', 'bookings', 'khata', 'cashbook', 'ratecard'], 'flower'],
-    ['print', '🖨️', 'ஸ்டாம்ப் / அச்சகம் / ஜெராக்ஸ்', 'Stamps, printing, xerox', ['shopslip', 'stampmaker', 'cashbook', 'khata', 'ratecard', 'stockbook'], 'print'],
-    ['shop', '🏪', 'பெட்டிக்கடை / பொதுக் கடை', 'General shop', ['quickbill', 'khata', 'stockbook', 'cashbook', 'profitcalc', 'staffbook'], 'general'],
-    ['farm', '🌾', 'விவசாயம் / பண்ணை / பால்', 'Farm & dairy', ['cashbook', 'staffbook', 'stockbook', 'quickbill', 'khata', 'docremind'], 'general'],
-    ['tuition', '📚', 'டியூஷன் / பயிற்சி வகுப்பு', 'Tuition & classes', ['bookings', 'khata', 'cashbook', 'wamsg', 'staffbook'], null],
-    ['other', '🛠️', 'மற்ற தொழில் / வேலை', 'Any other work', ['shopslip', 'khata', 'cashbook', 'bookings', 'staffbook', 'stockbook', 'docremind'], 'general']
+    ['veg', '🥬', 'காய்கறி / பழம் / மளிகை', 'Vegetables, fruit & grocery', ['quickbill', 'khata', 'cashbook', 'stockbook', 'ratecard', 'staffbook', 'wamsg'], 'general', 'shop'],
+    ['laundry', '👕', 'சலவை / இஸ்திரி', 'Laundry & ironing', ['shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook', 'wamsg'], 'laundry', 'service'],
+    ['tailor', '🧵', 'தையல் கடை', 'Tailor', ['shopslip', 'bookings', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'tailor', 'tailor'],
+    ['driver', '🚖', 'ஓட்டுநர் / வாடகை வண்டி', 'Driver & taxi', ['tripcalc', 'bookings', 'cashbook', 'docremind', 'khata', 'wamsg'], null, 'vehicle'],
+    ['construction', '🧱', 'மேஸ்திரி / கட்டுமானம் / பெயிண்டர்', 'Mason, construction, painter', ['staffbook', 'shopslip', 'cashbook', 'khata', 'stockbook', 'profitcalc'], 'service', 'build'],
+    ['electric', '🔧', 'எலக்ட்ரீஷியன் / பிளம்பர் / AC', 'Electrician, plumber, AC', ['shopslip', 'bookings', 'stockbook', 'cashbook', 'khata', 'docremind'], 'service', 'service'],
+    ['carpenter', '🪚', 'தச்சர் / ஃபர்னிச்சர்', 'Carpenter & furniture', ['shopslip', 'woodcalc', 'staffbook', 'cashbook', 'khata', 'stockbook'], 'carpenter', 'build'],
+    ['photo', '📸', 'போட்டோ / வீடியோ', 'Photo & video', ['bookings', 'shopslip', 'khata', 'cashbook', 'ratecard', 'staffbook'], 'photo', 'service'],
+    ['repair', '📱', 'மொபைல் / எலக்ட்ரானிக்ஸ் பழுது', 'Mobile & electronics repair', ['shopslip', 'stockbook', 'khata', 'cashbook', 'wamsg', 'ratecard'], 'repair', 'service'],
+    ['mechanic', '🛵', 'வண்டி மெக்கானிக்', 'Mechanic', ['shopslip', 'stockbook', 'khata', 'cashbook', 'docremind', 'staffbook'], 'vehicle', 'service'],
+    ['salon', '💇', 'சலூன் / அழகு நிலையம்', 'Salon & beauty', ['bookings', 'shopslip', 'cashbook', 'staffbook', 'ratecard', 'stockbook'], 'salon', 'service'],
+    ['food', '🍛', 'டீக்கடை / மெஸ் / கேட்டரிங்', 'Tea shop, mess, catering', ['shopslip', 'quickbill', 'stockbook', 'staffbook', 'cashbook', 'khata', 'bookings'], 'catering', 'food'],
+    ['flower', '🌼', 'பூக்கடை', 'Flower shop', ['quickbill', 'shopslip', 'bookings', 'khata', 'cashbook', 'ratecard'], 'flower', 'shop'],
+    ['print', '🖨️', 'ஸ்டாம்ப் / அச்சகம் / ஜெராக்ஸ்', 'Stamps, printing, xerox', ['shopslip', 'stampmaker', 'cashbook', 'khata', 'ratecard', 'stockbook'], 'print', 'shop'],
+    ['shop', '🏪', 'பெட்டிக்கடை / பொதுக் கடை', 'General shop', ['quickbill', 'khata', 'stockbook', 'cashbook', 'profitcalc', 'staffbook'], 'general', 'shop'],
+    ['farm', '🌾', 'விவசாயம் / பண்ணை / பால்', 'Farm & dairy', ['cashbook', 'staffbook', 'stockbook', 'quickbill', 'khata', 'docremind'], 'general', 'farm'],
+    ['tuition', '📚', 'டியூஷன் / பயிற்சி வகுப்பு', 'Tuition & classes', ['bookings', 'khata', 'cashbook', 'wamsg', 'staffbook'], null, 'service'],
+    ['other', '🛠️', 'மற்ற தொழில் / வேலை', 'Any other work', ['shopslip', 'khata', 'cashbook', 'bookings', 'staffbook', 'stockbook', 'docremind'], 'general', 'other']
   ];
   var st = Object.assign({ trade: null, name: '' }, lsGet(KEY, {}));
   var cur = 'home', main = document.getElementById('main'), nav = document.getElementById('nav');
@@ -130,8 +180,9 @@
     var t = trade();
     document.getElementById('tIcon').textContent = t ? t[1] : '🏪';
     document.getElementById('tName').textContent = st.name || (t ? T(t[2], t[3]) : T('தொழில் App', 'Business App'));
-    document.getElementById('tSub').textContent = T('இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்', 'Free · no payments · data stays on your phone');
+    document.getElementById('tSub').textContent = t ? (st.name ? T(t[2], t[3]) + ' · ' : '') + T('இலவசம் · தகவல் போனில்', 'Free · data on phone') : T('இலவசம் · பணம் இல்லை · தகவல் உங்கள் போனில்', 'Free · no payments · data stays on your phone');
     document.getElementById('langBtn').textContent = en() ? 'தமிழ்' : 'EN';
+    document.getElementById('tradeBtn').onclick = function () { st.trade = null; lsSet(KEY, st); cur = 'home'; draw(); };
   }
   function drawNav() {
     if (!trade()) { nav.hidden = true; return; }
@@ -140,7 +191,7 @@
     nav.innerHTML = items.map(function (i) { return '<button type="button" data-go="' + i[0] + '" class="' + (cur === i[0] || (i[0] === 'more' && cur !== 'home' && m.slice(0, 3).indexOf(cur) < 0) ? 'on' : '') + '"><i>' + i[1] + '</i>' + esc(i[2]) + '</button>'; }).join('');
     Array.prototype.forEach.call(nav.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
   }
-  function go(id, fromHistory) { // the phone's Back button returns to "Today" from any tool
+  function go(id, fromHistory) {
     cur = id; draw(); window.scrollTo(0, 0);
     if (fromHistory) return;
     try { if (id === 'home') history.replaceState(null, '', '/app'); else if (location.hash) history.replaceState(null, '', '/app#' + id); else history.pushState(null, '', '/app#' + id); } catch (e) { /* ignore */ }
@@ -149,52 +200,138 @@
   window.__bzOpen = function (id) { if (TOOL_IMPL[id]) go(id); else location.href = '/?tool=' + id; };
 
   function pickTrade() {
-    main.innerHTML = '<div class="hello"><b>' + T('வணக்கம்! உங்கள் தொழில் என்ன?', 'Hello! What is your work?') + '</b><p>' + T('ஒருமுறை தேர்ந்தெடுங்கள் — உங்கள் தொழிலுக்குத் தேவையான கருவிகள் மட்டும் வரும். பிறகு மாற்றலாம்.', 'Choose once — you get the tools your work needs. You can change it later.') + '</p></div>' +
-      '<div class="grid">' + TRADES.map(function (t) { return '<button type="button" class="tile" data-t="' + t[0] + '"><i>' + t[1] + '</i><b>' + esc(T(t[2], t[3])) + '</b><span>' + t[4].slice(0, 3).map(mName).map(esc).join(' · ') + '</span></button>'; }).join('') + '</div>';
-    Array.prototype.forEach.call(main.querySelectorAll('[data-t]'), function (b) {
-      b.onclick = function () {
-        st.trade = b.getAttribute('data-t'); lsSet(KEY, st);
-        var prof = trade()[5]; if (prof) { var o = lsGet('bz_orders_v1', {}) || {}; o.prof = prof; lsSet('bz_orders_v1', o); }
-        go('home');
-      };
-    });
+    var filterKey = 'all', searchVal = '';
+    function renderGrid() {
+      var filtered = TRADES.filter(function (t) {
+        var matchFilter = (filterKey === 'all' || t[6] === filterKey);
+        var q = searchVal.trim().toLowerCase();
+        var matchSearch = !q || t[2].toLowerCase().indexOf(q) >= 0 || t[3].toLowerCase().indexOf(q) >= 0;
+        return matchFilter && matchSearch;
+      });
+      var html = '<div class="hello"><b>' + T('👋 வணக்கம்! உங்கள் தொழில் அல்லது கடை எது?', '👋 Hello! What is your business or work?') + '</b><p>' + T('உங்கள் தொழிலுக்குத் தேவையான கருவிகள் மட்டும் முகப்பில் தோன்றும். எந்த நேரத்திலும் மாற்றலாம்.', 'Get only the tools your work needs. You can change this anytime.') + '</p>' +
+        '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="quickStartBtn" style="background:#fff;color:#176B45;border:0;font-weight:900">⚡ ' + T('உடனே தொடங்கு (பொதுக் கடை)', 'Quick start (General store)') + '</button></div>' +
+        '</div>' +
+        '<div style="margin-top:14px"><input type="search" id="tradeSearch" placeholder="' + esc(T('🔍 உங்கள் தொழிலைத் தேடுங்கள்... (எ.கா: மளிகை, தையல், ஓட்டுநர், போட்டோ)', '🔍 Search your work... (e.g. grocery, tailor, driver, photo)')) + '" value="' + esc(searchVal) + '"></div>' +
+        '<div class="trade-filter-chips">' +
+        [['all', T('அனைத்தும்', 'All')], ['shop', T('🛒 கடைகள்', 'Shops')], ['service', T('🔧 சேவை / பழுது', 'Services')], ['vehicle', T('🚖 வாகனம்', 'Transport')], ['food', T('🍽️ உணவு', 'Food')], ['tailor', T('👗 தையல்', 'Tailor')], ['build', T('🧱 கட்டுமானம்', 'Build')], ['farm', T('🌾 விவசாயம்', 'Farm')]].map(function (c) {
+          return '<button type="button" class="' + (filterKey === c[0] ? 'on' : '') + '" data-c="' + c[0] + '">' + esc(c[1]) + '</button>';
+        }).join('') + '</div>' +
+        '<div class="grid">' +
+        (filtered.length ? filtered.map(function (t) {
+          return '<button type="button" class="tile" data-t="' + t[0] + '"><i>' + t[1] + '</i><b>' + esc(T(t[2], t[3])) + '</b><span>' + t[4].slice(0, 3).map(mName).map(esc).join(' · ') + '</span></button>';
+        }).join('') : '<div class="note" style="grid-column:1/-1">' + T('பொருத்தமான தொழில் இல்லை. வேறு வார்த்தையைத் தேடுங்கள் அல்லது "மற்ற தொழில்" தேர்ந்தெடுக்கவும்.', 'No matching work found. Try another search or choose "Any other work".') + '</div>') +
+        '</div>';
+      main.innerHTML = html;
+      var qs = document.getElementById('quickStartBtn');
+      if (qs) qs.onclick = function () { selectTrade('shop'); };
+      var sIn = document.getElementById('tradeSearch');
+      if (sIn) {
+        sIn.focus();
+        sIn.oninput = function () { searchVal = sIn.value; renderGrid(); };
+      }
+      Array.prototype.forEach.call(main.querySelectorAll('[data-c]'), function (btn) {
+        btn.onclick = function () { filterKey = btn.getAttribute('data-c'); renderGrid(); };
+      });
+      Array.prototype.forEach.call(main.querySelectorAll('[data-t]'), function (b) {
+        b.onclick = function () { selectTrade(b.getAttribute('data-t')); };
+      });
+    }
+    function selectTrade(tid) {
+      st.trade = tid; lsSet(KEY, st);
+      var prof = trade()[5]; if (prof) { var o = lsGet('bz_orders_v1', {}) || {}; o.prof = prof; lsSet('bz_orders_v1', o); }
+      go('home');
+    }
+    renderGrid();
   }
 
-  function stats() { // read every module's saved data on this phone
+  function stats() {
     var t0 = (window.BizUI && BizUI.todayIso()) || new Date().toISOString().slice(0, 10), C = window.BizCore || {}, A = window.BizAppCore || {}, out = [], m = mods(), inr = function (v) { return window.BizUI ? BizUI.inr(v) : '₹ ' + v; };
-    function add(mod, big, label, warn) { if (m.indexOf(mod) >= 0) out.push([mod, big, label, warn]); }
+    function add(mod, big, label, warn, good) { if (m.indexOf(mod) >= 0) out.push([mod, big, label, warn, good]); }
     try { var ob = lsGet('bz_orders_v1', {}) || {}, os = (ob.orders || []).filter(function (o) { return o.st === 'open' || o.st === 'ready'; }); var late = os.filter(function (o) { return C.isOverdue(o, t0); }).length, today = os.filter(function (o) { return o.due === t0; }).length, ready = os.filter(function (o) { return o.st === 'ready'; }).length; add('shopslip', String(os.length), T('கொடுக்க வேண்டிய ஆர்டர்கள்', 'Orders pending') + (today ? ' · ' + T('இன்று ', 'today ') + today : '') + (ready ? ' · ' + T('தயார் ', 'ready ') + ready : ''), late > 0); if (late) add('shopslip', String(late), T('தாமதமான ஆர்டர்கள்', 'Overdue orders'), true); } catch (e) { /* no data */ }
-    try { var qb = lsGet('bz_qbill_v1', {}) || {}, bills = qb.bills || [], unpaid = bills.filter(function (b) { return !b.paid; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0), todayB = bills.filter(function (b) { return b.d === t0; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0); add('quickbill', inr(Math.round(todayB * 100) / 100), T('இன்றைய பில்கள்', "Today's bills")); if (unpaid > 0) add('quickbill', inr(Math.round(unpaid * 100) / 100), T('பில் பணம் வர வேண்டியது', 'Bill payments pending'), true); } catch (e) { /* no data */ }
+    try { var qb = lsGet('bz_qbill_v1', {}) || {}, bills = qb.bills || [], unpaid = bills.filter(function (b) { return !b.paid; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0), todayB = bills.filter(function (b) { return b.d === t0; }).reduce(function (a, b) { return a + (+b.total || 0); }, 0); add('quickbill', inr(Math.round(todayB * 100) / 100), T('இன்றைய பில்கள்', "Today's bills"), false, todayB > 0); if (unpaid > 0) add('quickbill', inr(Math.round(unpaid * 100) / 100), T('பில் பணம் வர வேண்டியது', 'Bill dues pending'), true); } catch (e) { /* no data */ }
     try { var kh = lsGet('bz_khata_v1', {}) || {}; if (Array.isArray(kh.c) && C.khataTotals) { var k = C.khataTotals(kh.c); add('khata', inr(k.owed), k.owing + T(' பேரிடம் வர வேண்டும்', ' customers owe you'), k.owed > 0); } } catch (e) { /* no data */ }
-    try { var cb = lsGet('bz_cash_v1', {}) || {}; if (A.cashSummary) { var cs = A.cashSummary(cb.e || [], t0, t0); add('cashbook', inr(cs.net), T('இன்று: வரவு ', 'Today: in ') + inr(cs.in) + T(' · செலவு ', ' · out ') + inr(cs.out), cs.net < 0); } } catch (e) { /* no data */ }
-    try { var sb = lsGet('bz_staff_v1', {}) || {}, ws = (sb.w || []).filter(function (w) { return !w.off; }), mk = (sb.att || {})[t0] || {}, pres = ws.filter(function (w) { return mk[w.id] && (mk[w.id].s === 'P' || mk[w.id].s === 'H'); }).length; if (ws.length) add('staffbook', pres + ' / ' + ws.length, T('இன்று வேலைக்கு வந்தவர்கள்', 'At work today')); else add('staffbook', '0', T('வேலையாட்கள் சேர்க்கவும்', 'Add your workers')); } catch (e) { /* no data */ }
+    try { var cb = lsGet('bz_cash_v1', {}) || {}; if (A.cashSummary) { var cs = A.cashSummary(cb.e || [], t0, t0); add('cashbook', inr(cs.net), T('இன்று: வரவு ', 'Today: in ') + inr(cs.in) + T(' · செலவு ', ' · out ') + inr(cs.out), cs.net < 0, cs.net > 0); } } catch (e) { /* no data */ }
+    try { var sb = lsGet('bz_staff_v1', {}) || {}, ws = (sb.w || []).filter(function (w) { return !w.off; }), mk = (sb.att || {})[t0] || {}, pres = ws.filter(function (w) { return mk[w.id] && (mk[w.id].s === 'P' || mk[w.id].s === 'H'); }).length; if (ws.length) add('staffbook', pres + ' / ' + ws.length, T('இன்று வேலைக்கு வந்தவர்கள்', 'At work today'), false, pres > 0); else add('staffbook', '0', T('வேலையாட்கள் சேர்க்கவும்', 'Add workers')); } catch (e) { /* no data */ }
     try { var bk = lsGet('bz_book_v1', {}) || {}, bb = (bk.b || []).filter(function (x) { return x.st === 'booked' && x.d >= t0; }); var bt = bb.filter(function (x) { return x.d === t0; }).length, nx = bb.sort(function (a, b) { return (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')); })[0]; add('bookings', String(bt), T('இன்றைய முன்பதிவுகள்', "Today's bookings") + (nx ? ' · ' + T('அடுத்து ', 'next ') + (window.BizUI ? BizUI.dmy(nx.d) : nx.d) + (nx.t ? ' ' + nx.t : '') : '')); } catch (e) { /* no data */ }
     try { var sk = lsGet('bz_stock_v1', {}) || {}; if (A.stockQty) { var low = (sk.it || []).filter(function (it) { return +it.min > 0 && A.stockQty(it, sk.mv || []) <= +it.min; }).length; add('stockbook', String(low), T('குறைந்த சரக்குகள்', 'Items running low'), low > 0); } } catch (e) { /* no data */ }
     try { var dc = lsGet('bz_docs_v1', {}) || {}; if (A.daysLeft) { var soon = (dc.d || []).filter(function (d) { return A.daysLeft(A.nextRepeat(d.date, d.rep, t0), t0) <= (+d.before || 30); }).length; add('docremind', String(soon), T('விரைவில் புதுப்பிக்க வேண்டியவை', 'Renewals due soon'), soon > 0); } } catch (e) { /* no data */ }
     try { var tl = lsGet('bz_triplog_v1', []) || [], mo = t0.slice(0, 7), mt = tl.filter(function (x) { return String(x.d || '').slice(0, 7) === mo; }); add('tripcalc', inr(mt.reduce(function (a, x) { return a + (+x.total || 0); }, 0)), T('இந்த மாதப் பயண வருமானம் · ', 'Trips this month · ') + mt.length); } catch (e) { /* no data */ }
     return out;
   }
+
+  function tryDemoSample() {
+    var t0 = new Date().toISOString().slice(0, 10);
+    var qb = lsGet('bz_qbill_v1', {}) || {};
+    if (!qb.vpa) qb.vpa = 'shop@upi';
+    if (!qb.shop) qb.shop = st.name || 'ஸ்ரீ கணேஷ் ஸ்டோர்ஸ்';
+    if (!Array.isArray(qb.bills)) qb.bills = [];
+    var demoBill = {
+      id: 'demo_' + Date.now(),
+      no: qb.bills.length + 1,
+      d: t0,
+      cust: 'கார்த்திக்',
+      cph: '9876543210',
+      paid: false,
+      text: 'தக்காளி 2 கிலோ\nவெங்காயம் 1 கிலோ\nபச்சை மிளகாய் 100 கிராம்\nபுதினா 1 கட்டு',
+      lines: [
+        { name: 'தக்காளி', qty: '2', unit: 'kg', rate: '35', total: 70 },
+        { name: 'வெங்காயம்', qty: '1', unit: 'kg', rate: '40', total: 40 },
+        { name: 'பச்சை மிளகாய்', qty: '100', unit: 'g', rate: '60', total: 6 },
+        { name: 'புதினா', qty: '1', unit: 'pc', rate: '10', total: 10 }
+      ],
+      sub: 126,
+      delivery: '0',
+      discount: '0',
+      roundOff: true,
+      total: 126
+    };
+    qb.bills.unshift(demoBill);
+    lsSet('bz_qbill_v1', qb);
+    go('quickbill');
+  }
+
   function home() {
     var t = trade(), s = stats();
-    main.innerHTML = '<div class="hello"><b>' + T('இன்று', 'Today') + ' — ' + esc(new Date().toLocaleDateString(en() ? 'en-IN' : 'ta-IN', { weekday: 'long', day: 'numeric', month: 'long' })) + '</b><p>' + esc(T(t[2], t[3])) + '</p></div>' +
-      (s.length ? '<div class="grid">' + s.map(function (x) { return '<button type="button" class="stat' + (x[3] ? ' warn' : '') + '" data-go="' + x[0] + '"><b>' + esc(x[1]) + '</b><span>' + MODS[x[0]][0] + ' ' + esc(x[2]) + '</span></button>'; }).join('') + '</div>' : '') +
+    var dateFmt = new Date().toLocaleDateString(en() ? 'en-IN' : 'ta-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    main.innerHTML = '<div class="hello"><b>' + T('இன்று', 'Today') + ' · ' + esc(dateFmt) + '</b><p>' + esc(T(t[2], t[3])) + (st.name ? ' — <b>' + esc(st.name) + '</b>' : '') + '</p></div>' +
+      '<div class="qa-wrap"><div class="qa-title">⚡ ' + T('தினசரி விரைவுச் செயல்கள்', 'Daily quick actions') + '</div>' +
+      '<div class="qa-grid">' +
+      '<button type="button" class="qa-btn" data-go="quickbill"><i>🛒</i><div><b>' + T('பில் + UPI', 'Bill + UPI') + '</b><small>' + T('WhatsApp பில், QR', 'Bill & Pay QR') + '</small></div></button>' +
+      '<button type="button" class="qa-btn" data-go="shopslip"><i>📒</i><div><b>' + T('ஆர்டர்கள்', 'Orders') + '</b><small>' + T('டோக்கன், டெலிவரி', 'Token & Delivery') + '</small></div></button>' +
+      '<button type="button" class="qa-btn" data-go="cashbook"><i>💵</i><div><b>' + T('வரவு-செலவு', 'Cash Book') + '</b><small>' + T('இன்றைய ரொக்கம்', 'Today cash') + '</small></div></button>' +
+      '<button type="button" class="qa-btn" data-go="khata"><i>📕</i><div><b>' + T('உதார் கணக்கு', 'Credit Book') + '</b><small>' + T('பாக்கி வசூல்', 'Pending dues') + '</small></div></button>' +
+      '</div></div>' +
+      (s.length ? '<div class="grid">' + s.map(function (x) { return '<button type="button" class="stat' + (x[3] ? ' warn' : (x[4] ? ' good' : '')) + '" data-go="' + x[0] + '"><b>' + esc(x[1]) + '</b><span>' + MODS[x[0]][0] + ' ' + esc(x[2]) + '</span></button>'; }).join('') + '</div>' : '') +
+      '<div class="demo-banner"><div><b>✨ ' + T('புதியவரா? மாதிரி பில்லை இயக்கிப் பாருங்கள்', 'New here? Try a sample demo bill') + '</b><span>' + T('ஒரே தொடுதலில் மாதிரி பில், QR, WhatsApp இணைப்பு தோன்றும்', 'One-tap sample bill, QR code and WhatsApp pay link') + '</span></div><button type="button" class="btn sm" id="demoBtn">👉 ' + T('மாதிரி பில் போடு', 'Try demo') + '</button></div>' +
       '<h2>' + T('உங்கள் கருவிகள்', 'Your tools') + '</h2><div class="grid">' + mods().map(function (id) { var m = MODS[id]; return '<button type="button" class="tile" data-go="' + id + '"><i>' + m[0] + '</i><b>' + esc(T(m[1], m[2])) + '</b><span>' + esc(T(m[3], m[4])) + '</span></button>'; }).join('') + '</div>' +
-      '<div class="note">' + T('எல்லாத் தகவலும் இந்த போனில் மட்டுமே சேமிக்கப்படும் — எங்கள் server-க்கு எதுவும் வராது. "மேலும் → எல்லாவற்றையும் Backup" மூலம் அடிக்கடி Backup எடுங்கள்.', 'All data is saved only on this phone — nothing reaches our server. Use "More → Back up everything" often.') + '</div>';
+      '<div class="note">🔒 ' + T('எல்லாத் தகவலும் இந்த போனில் மட்டுமே சேமிக்கப்படும் — எங்கள் server-க்கு எதுவும் வராது. "மேலும் → எல்லாவற்றையும் Backup" மூலம் அடிக்கடி Backup கோப்பைப் பாதுகாப்பாக வையுங்கள்.', 'All data is saved locally on this phone — nothing reaches any server. Use "More → Back up everything" regularly.') + '</div>';
+
     Array.prototype.forEach.call(main.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
+    var db = document.getElementById('demoBtn');
+    if (db) db.onclick = tryDemoSample;
   }
+
   function more() {
     var m = mods(), others = Object.keys(MODS).filter(function (id) { return m.indexOf(id) < 0; });
     var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    main.innerHTML = '<h2 style="margin-top:4px">' + T('உங்கள் கருவிகள்', 'Your tools') + '</h2><div class="grid">' + m.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') + '</div>' +
-      '<h2>' + T('மற்ற கருவிகள்', 'Other tools') + '</h2><div class="grid">' + others.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') +
+    main.innerHTML = '<div class="card-box"><h3>🏪 ' + T('கடை & தொழில் அமைப்பு', 'Shop & Profile Settings') + '</h3>' +
+      '<label style="font-size:13px;font-weight:700;color:var(--sub);display:block;margin-bottom:6px">' + T('கடை / உங்கள் பெயர் (பில் மற்றும் மேலே காட்ட)', 'Shop / your name (shown on bills & top bar)') + '</label>' +
+      '<input type="text" id="nm" value="' + esc(st.name) + '" placeholder="' + esc(T('எ.கா: ஸ்ரீ முருகன் ஸ்டோர்ஸ்', 'e.g. Sri Murugan Stores')) + '">' +
+      '<div class="row"><button type="button" class="btn sec" id="chg">🔄 ' + T('தொழிலை மாற்று', 'Change my trade') + '</button></div>' +
+      '</div>' +
+      '<div class="card-box"><h3>💾 ' + T('தகவல் பாதுகாப்பு & Backup', 'Data Safety & Backup') + '</h3>' +
+      '<p style="margin:0 0 12px;font-size:13.5px;color:var(--sub)">' + T('உங்கள் தொலைபேசியை மாற்றினாலோ அல்லது Browser data-வை அழித்தாலோ உங்கள் கணக்குகள் அழியாமல் இருக்க அடிக்கடி Backup எடுங்கள்.', 'Take backups regularly so your records remain safe when changing phones or clearing browser data.') + '</p>' +
+      '<div class="row"><button type="button" class="btn" id="bk">💾 ' + T('எல்லாவற்றையும் Backup', 'Download full backup') + '</button><label class="btn sec" style="cursor:pointer">📂 ' + T('Backup-லிருந்து மீட்டெடு', 'Restore from backup') + '<input type="file" id="rs" accept=".json,application/json" hidden></label></div>' +
+      '</div>' +
+      '<div class="card-box"><h3>📲 ' + T('போனில் App ஆக நிறுவுதல்', 'Install as Phone App (PWA)') + '</h3>' +
+      (deferredInstall ? '<div class="row"><button type="button" class="btn" id="inst">📲 ' + T('இப்போது App-ஐ நிறுவு', 'Install App now') + '</button></div>' : '') +
+      '<div class="note" style="margin-top:8px">' + (ios ? T('iPhone / iPad-ல் App ஆக வைக்க: Safari-ல் கீழே உள்ள "Share" (⬆️) → "Add to Home Screen" தட்டுங்கள்.', 'On iPhone / iPad: in Safari tap Share (⬆️) → "Add to Home Screen".') : T('Android-ல்: Chrome மெனு (⋮) → "Add to Home screen" / "Install app" தட்டுங்கள்.', 'On Android: Chrome menu (⋮) → "Add to Home screen" / "Install app".')) + '</div>' +
+      '</div>' +
+      '<h2>' + T('உங்கள் முக்கிய கருவிகள்', 'Your main tools') + '</h2><div class="grid">' + m.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') + '</div>' +
+      '<h2>' + T('மற்ற எல்லாக் கருவிகளும்', 'All other shop tools') + '</h2><div class="grid">' + others.map(function (id) { return '<button type="button" class="tile" data-go="' + id + '"><i>' + MODS[id][0] + '</i><b>' + esc(mName(id)) + '</b></button>'; }).join('') +
       [['quotepo', '🧾', 'பில் / Quotation / GST', 'Invoice / quotation / GST'], ['receipts', '🧾', 'ரசீது / வவுச்சர்', 'Receipts & vouchers'], ['businesscard', '🪪', 'விசிட்டிங் கார்டு', 'Visiting card'], ['postermaker', '🖼️', 'போஸ்டர் / பேனர்', 'Poster / banner'], ['gstcalc', '🧮', 'GST கணக்கு', 'GST calculator'], ['emicalc', '🏦', 'EMI / வட்டி', 'EMI / interest'], ['goldcalc', '🪙', 'தங்கம் / நகைக் கடன்', 'Gold & gold loan'], ['unitconv', '📐', 'நில அளவு மாற்றி', 'Land / unit converter']].map(function (x) { return '<a class="tile" style="text-decoration:none" href="/?tool=' + x[0] + '"><i>' + x[1] + '</i><b>' + esc(T(x[2], x[3])) + '</b><span>pdftoolsindia.com ↗</span></a>'; }).join('') + '</div>' +
-      '<h2>' + T('அமைப்பு', 'Settings') + '</h2>' +
-      '<div style="margin-top:8px"><label style="font-size:13px;font-weight:700;color:var(--sub)">' + T('கடை / உங்கள் பெயர் (மேலே காட்ட)', 'Shop / your name (shown on top)') + '</label><input type="text" id="nm" value="' + esc(st.name) + '"></div>' +
-      '<div class="row"><button type="button" class="btn sec" id="chg">🔄 ' + T('தொழிலை மாற்று', 'Change my work') + '</button><button type="button" class="btn" id="bk">💾 ' + T('எல்லாவற்றையும் Backup', 'Back up everything') + '</button><label class="btn sec" style="cursor:pointer">📂 ' + T('Backup-லிருந்து மீட்டெடு', 'Restore from backup') + '<input type="file" id="rs" accept=".json,application/json" hidden></label></div>' +
-      '<div class="row">' + (deferredInstall ? '<button type="button" class="btn" id="inst">📲 ' + T('போனில் App ஆக நிறுவு', 'Install on this phone') + '</button>' : '') + '</div>' +
-      '<div class="note">' + (ios ? T('iPhone / iPad-ல் App ஆக வைக்க: Safari-ல் "Share" (⬆️) → "Add to Home Screen".', 'On iPhone / iPad: in Safari tap Share (⬆️) → "Add to Home Screen".') : T('Android-ல்: Chrome மெனு (⋮) → "Add to Home screen" / "Install app".', 'On Android: Chrome menu (⋮) → "Add to Home screen" / "Install app".')) + '</div>' +
-      '<div class="note">' + T('இந்த App இலவசம்; பதிவு, கட்டணம், விளம்பரச் சிக்கல் எதுவும் இல்லை. தகவல் இந்த போனின் browser-ல் மட்டும் — browser data-வை அழித்தால் போய்விடும், அதனால் Backup file-ஐ WhatsApp / Drive-ல் வைத்திருங்கள்.', 'This app is free — no sign-up, no fees. Data lives only in this phone\'s browser; clearing browser data removes it, so keep the backup file in WhatsApp / Drive.') + '</div>' +
-      '<div class="row"><a class="btn sec" href="/?home=1">🏠 pdftoolsindia.com</a><a class="btn sec" href="/for-small-business">🏪 ' + T('எல்லா சிறுதொழில் கருவிகள்', 'All small-business tools') + '</a></div>';
+      '<div class="row" style="margin-top:20px"><a class="btn sec" href="/?home=1">🏠 pdftoolsindia.com முதன்மைப் பக்கம்</a><a class="btn sec" href="/for-small-business">🏪 ' + T('எல்லா சிறுதொழில் கருவிகள்', 'All small-business tools') + '</a></div>';
+
     Array.prototype.forEach.call(main.querySelectorAll('[data-go]'), function (b) { b.onclick = function () { go(b.getAttribute('data-go')); }; });
     document.getElementById('nm').addEventListener('input', function (e) { st.name = e.target.value; lsSet(KEY, st); header(); });
     document.getElementById('chg').onclick = function () { st.trade = null; lsSet(KEY, st); cur = 'home'; draw(); };
@@ -205,17 +342,32 @@
     };
     document.getElementById('rs').onchange = function (e) {
       var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader();
-      r.onload = function () { try { var v = JSON.parse(String(r.result)); if (!v || v.app !== 'pdftoolsindia-business-app' || !v.data) throw new Error('bad'); if (!confirm(T('இப்போது உள்ள தகவல் இந்த Backup-ஆல் மாற்றப்படும். தொடரவா?', 'Current data will be replaced by this backup. Continue?'))) return; Object.keys(v.data).forEach(function (k) { if (k.indexOf('bz_') === 0 || k === KEY) localStorage.setItem(k, String(v.data[k])); }); st = Object.assign({ trade: null, name: '' }, lsGet(KEY, {})); cur = 'home'; draw(); alert(T('மீட்டெடுக்கப்பட்டது', 'Restored')); } catch (err) { alert(T('இது இந்த App-ன் Backup file இல்லை', 'This is not a backup of this app')); } };
+      r.onload = function () { try { var v = JSON.parse(String(r.result)); if (!v || v.app !== 'pdftoolsindia-business-app' || !v.data) throw new Error('bad'); if (!confirm(T('இப்போது உள்ள தகவல் இந்த Backup-ஆல் மாற்றப்படும். தொடரவா?', 'Current data will be replaced by this backup. Continue?'))) return; Object.keys(v.data).forEach(function (k) { if (k.indexOf('bz_') === 0 || k === KEY) localStorage.setItem(k, String(v.data[k])); }); st = Object.assign({ trade: null, name: '' }, lsGet(KEY, {})); cur = 'home'; draw(); alert(T('மீட்டெடுக்கப்பட்டது', 'Restored successfully')); } catch (err) { alert(T('இது இந்த App-ன் Backup file இல்லை', 'This is not a backup file of this app')); } };
       r.readAsText(f);
     };
     var ib = document.getElementById('inst'); if (ib) ib.onclick = function () { deferredInstall.prompt(); deferredInstall.userChoice.then(function () { deferredInstall = null; draw(); }); };
   }
+
   function module(id) {
-    main.innerHTML = '<div class="back"><button type="button" class="btn sec" id="bk2">← ' + T('இன்று', 'Today') + '</button><span class="mod-h">' + MODS[id][0] + ' ' + esc(mName(id)) + '</span></div><div id="mod"></div>';
+    var mList = mods();
+    var quickTools = mList.map(function (mid) {
+      return '<button type="button" class="mod-tool-btn' + (mid === id ? ' on' : '') + '" data-sw="' + mid + '">' + MODS[mid][0] + ' ' + esc(mName(mid)) + '</button>';
+    }).join('');
+
+    main.innerHTML = '<div class="back-bar">' +
+      '<div class="back-left"><button type="button" class="btn sec sm" id="bk2">← ' + T('இன்று', 'Today') + '</button><span class="mod-h">' + MODS[id][0] + ' ' + esc(mName(id)) + '</span></div>' +
+      '<div class="mod-tools-quick">' + quickTools + '</div>' +
+      '</div><div id="mod"></div>';
+
     document.getElementById('bk2').onclick = function () { go('home'); };
+    Array.prototype.forEach.call(main.querySelectorAll('[data-sw]'), function (btn) {
+      btn.onclick = function () { go(btn.getAttribute('data-sw')); };
+    });
+
     var box = document.getElementById('mod');
     try { TOOL_IMPL[id].mount(box); } catch (e) { box.innerHTML = '<div class="note">' + T('இந்தக் கருவியைத் திறக்க முடியவில்லை. பக்கத்தை மீண்டும் ஏற்றுங்கள்.', 'Could not open this tool. Reload the page.') + '</div>'; }
   }
+
   function draw() {
     header();
     if (!trade()) { nav.hidden = true; pickTrade(); return; }

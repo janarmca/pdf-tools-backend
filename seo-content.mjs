@@ -138,12 +138,27 @@ export const SEO_EXTRA = {
     faqs: [['Are Tamil fonts kept?', 'Fonts are preserved in the converted PDF.']]
   },
   emicalc: {
-    title: 'EMI Calculator — Home, Car & Personal Loan EMI with Schedule | PDF Tools India',
-    desc: 'Calculate loan EMI, total interest and the full month-by-month repayment schedule for home, car and personal loans. Free, no signup.',
-    intro: 'Enter the loan amount, annual interest rate and tenure to get the monthly EMI, the total interest you will pay and a full amortisation schedule showing principal and interest in each instalment.',
-    steps: ['Enter the loan amount.', 'Enter the annual interest rate (reducing balance).', 'Choose the tenure in years or months.', 'Read the EMI, total interest and the schedule.'],
-    uses: ['Comparing home loan offers from different banks', 'Checking whether a personal loan EMI fits your salary', 'Seeing how a part-prepayment cuts interest'],
-    faqs: [['How is EMI calculated?', 'EMI = P × R × (1+R)^n ÷ [(1+R)^n − 1], where R is the monthly rate and n the number of months. Our guide "How is EMI calculated" walks through an example.']]
+    title: 'How is EMI Calculated on Personal Loan — Free Loan EMI Calculator & Formula | PDF Tools India',
+    desc: 'How is EMI calculated on a personal loan? Free personal loan & home loan EMI calculator with monthly formula, interest breakdown, and repayment schedule.',
+    intro: 'Wondering how EMI is calculated on a personal loan or home loan? Enter the loan amount, interest rate and tenure to get your monthly EMI, the exact mathematical formula, total interest and full month-by-month repayment schedule instantly.',
+    steps: ['Enter the loan amount (Principal P).', 'Enter the annual interest rate (R).', 'Choose the loan tenure in years or months (N).', 'Instantly see how your EMI is calculated with the reducing balance formula and full amortisation schedule.'],
+    uses: ['Understanding how EMI is calculated on personal loans', 'Comparing personal loan and home loan offers across banks', 'Checking how part-prepayment reduces total loan interest', 'Printing a full month-by-month repayment schedule'],
+    faqs: [
+      ['How is EMI calculated on a personal loan?', 'EMI on a personal loan is calculated using the formula: EMI = [P × R × (1+R)^n] ÷ [(1+R)^n − 1], where P is Principal loan amount, R is monthly interest rate (Annual rate ÷ 12 ÷ 100), and n is loan tenure in months. Our calculator works this out automatically with a full schedule.'],
+      ['What is the EMI formula with an example?', 'For a personal loan of ₹1,00,000 at 12% annual interest for 1 year (12 months): Monthly rate R = 1%, tenure n = 12. Using the formula, your monthly EMI comes to approximately ₹8,885. Total interest paid is ₹6,619.']
+    ]
+  },
+  photoresize: {
+    title: 'Photo Width and Height Compressor — Resize in px/cm & Compress to 20KB, 50KB Free | PDF Tools India',
+    desc: 'Free online photo width and height compressor: resize photo width and height in px or cm, compress photo to 20KB, 50KB, 100KB for exam forms, TNPSC, UPSC, SSC and applications.',
+    intro: 'Need to resize a photo\'s width and height or compress it to an exact KB size for an online form? Enter the required width and height in pixels or centimeters, pick target file size (e.g. 20KB, 50KB, 100KB), and get an application-ready photo in seconds.',
+    steps: ['Upload your photo or signature.', 'Enter the required width and height in pixels (px) or centimeters (cm).', 'Select your target maximum file size (e.g. 20 KB or 50 KB).', 'Click Resize and download your perfectly formatted photo.'],
+    uses: ['TNPSC, UPSC, SSC, IBPS, NEET and Railway exam application forms', 'Resizing passport photos to exact width and height in cm', 'Compressing signatures to 10KB - 20KB without blur', 'Adjusting photo pixel dimensions for portal uploads'],
+    faqs: [
+      ['How to resize photo width and height in px or cm?', 'Upload your photo, type the required width and height, choose pixel or cm units, set the target KB and click Resize.'],
+      ['Can I compress photo to 20KB or 50KB?', 'Yes! Select the 20KB or 50KB preset button, or type any custom KB limit. The tool optimizes image compression while preserving facial clarity.'],
+      ['Is my photo uploaded to any server?', 'No. All processing happens 100% locally inside your browser, ensuring complete privacy.']
+    ]
   },
   incometaxcalc: {
     title: 'Income Tax Calculator 2026-27 — வருமான வரி | PDF Tools India',
@@ -274,12 +289,17 @@ export const SEO_EXTRA = {
     faqs: [['Can it unlock a PDF without the password?', 'This tool needs the current password. Use it only on files you own or are allowed to open.'], ['Is the password stored?', 'No. It is used inside your browser and not sent anywhere.']]
   },
   pdfeditor: {
-    title: 'Free PDF Text Editor Online — Add Text, Images, Shapes and Signature | PDF Tools India',
-    desc: 'Edit a PDF online: change existing text in the same font, add text, images, signatures and shapes. Free, no signup, runs in your browser.',
-    intro: 'Fill in a form, add a line of text, place a signature or draw a shape on a PDF without installing software.',
-    steps: ['Open PDF Editor and choose your PDF.', 'Pick text, image, signature or shape and place it on the page.', 'Download the edited PDF.'],
-    uses: ['Filling a printed-style form on a phone', 'Adding a signature or stamp image', 'Writing a note on a document before returning it', 'Covering a small area with a shape'],
-    faqs: [['Is this a free online PDF text editor?', 'Yes — tap any existing text to change it: the PDF\'s own text is rewritten in the same font, size and colour when that font has the letters you type (otherwise the closest standard font is used). You can also add new text, images, shapes and a signature. The rest of the page stays sharp and selectable.'], ['Can I change the existing text of a scanned PDF?', 'Scanned pages are pictures, so they have no text to change — you can still add new text, images and shapes on top.'], ['Is the editing free?', 'Core editing is free.']]
+    title: 'Free PDF Text Editor Online — Edit Text, Type & Sign in PDF Free | PDF Tools India',
+    desc: 'Free online PDF text editor: edit existing text in PDF with matching font, type new text, insert images, signature and shapes. 100% free, no signup, no watermark.',
+    intro: 'Need a free PDF text editor online? Edit existing text in your PDF with matching font, type new text anywhere on the page, fill forms, insert signatures and draw shapes without installing software. 100% free in your browser.',
+    steps: ['Open PDF Text Editor and choose your PDF.', 'Tap any existing text to edit it, or click Type Text to add new text.', 'Add images, signatures or shapes if needed.', 'Download your edited PDF free with intact original layout.'],
+    uses: ['Editing text in PDF without converting to Word', 'Typing into application forms and official documents', 'Adding signatures and company seals to PDFs', 'Correcting names, dates, or numbers on existing PDFs'],
+    faqs: [
+      ['Is this a free online PDF text editor?', 'Yes! You can edit existing PDF text in the exact same font, size, and colour, or type new text anywhere on the page. You can also add signatures, images, and shapes completely free without signup.'],
+      ['Can I type in PDF online for free?', 'Yes, select the Text tool, click anywhere on your PDF page, and start typing. You can choose font family, font size, bold, italic, colour, and alignment.'],
+      ['Can I change existing text in a scanned PDF?', 'Scanned documents are stored as images without digital text. For scanned files, you can type new text on top or use our OCR tool to extract editable text first.'],
+      ['Is my document private and safe?', 'Yes. All PDF editing runs locally inside your browser using WebAssembly. Your files are never uploaded to any server.']
+    ]
   },
   pdfocrsearchable: {
     title: 'OCR PDF to Searchable PDF Free — Make Scans Searchable | PDF Tools India',
@@ -660,5 +680,5 @@ export const SEO_EXTRA = {
 };
 export const PAGE_TITLES = {
   'tn-rent-agreement': ['Rent Agreement Format in Tamil (வாடகை ஒப்பந்தம்) — Free Tamil Nadu Draft', 'Free Tamil Nadu rent agreement format in Tamil or English (வீட்டு வாடகை ஒப்பந்தம்) following the TN Regulation of Rights and Responsibilities of Landlords and Tenants Act, 2017. Print-ready, no signup.'],
-  'tn-sale-deed': ['Sale Deed Format in Tamil (கிரைய சாசனம்) — Free Tamil Nadu Draft', 'Free Tamil Nadu sale deed (கிரைய சாசனம்) draft in Tamil or English with vendor, purchaser, title history, payment and property schedule. Print-ready, no signup.'],
+  'tn-sale-deed': ['Kiraya Sasanam in Tamil — Sale Deed Format & Document in Tamil Nadu (கிரைய சாசனம் PDF) | PDF Tools India', 'Free Tamil Nadu sale deed & kiraya sasanam (கிரைய சாசனம்) draft in Tamil or English with vendor, purchaser, title history, payment and property schedule. Print-ready, no signup.'],
 };

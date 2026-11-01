@@ -1493,6 +1493,10 @@
         const t = qbTotals(bill), opts = GOODS.map(g => '<option value="' + esc(nm(g)) + '"></option>').join('');
         pane.innerHTML = (db.vpa ? '' : '<div class="bz-info">⚙️ ' + T('"கடை & UPI" பகுதியில் உங்கள் UPI ID-ஐ ஒருமுறை சேமித்தால், பில்லுடன் பணம் செலுத்தும் இணைப்பும் QR-உம் வரும்.', 'Save your UPI ID once in "Shop & UPI" to add a pay link and QR to every bill.') + '</div>') +
           '<div class="bz-f"><label>' + T('வாடிக்கையாளர் அனுப்பிய ஆர்டர் (WhatsApp-ல் இருந்து நகலெடுத்து இங்கே ஒட்டுங்கள்)', 'Customer\'s order (copy from WhatsApp and paste here)') + '</label><textarea data-k="text" placeholder="' + esc('தக்காளி 2 கிலோ\nvendaka 250 gm\nputhina 10 rs') + '">' + esc(bill.text) + '</textarea></div>' +
+          '<div class="bz-actions" style="margin-top:6px;gap:6px;align-items:center"><small style="font-weight:800;color:var(--sub)">💡 ' + T('மாதிரி ஆர்டர்கள்:', 'Sample orders:') + '</small>' +
+          '<button type="button" class="bz-btn sec sm" data-sample="veg">🥬 ' + T('காய்கறி', 'Vegetables') + '</button>' +
+          '<button type="button" class="bz-btn sec sm" data-sample="tea">☕ ' + T('டீ & சிற்றுண்டி', 'Tea & snacks') + '</button>' +
+          '<button type="button" class="bz-btn sec sm" data-sample="flower">🌸 ' + T('பூக்கடை', 'Flowers') + '</button></div>' +
           '<div class="bz-actions"><button type="button" class="bz-btn" data-act="parse">➡️ ' + T('அட்டவணை போடு', 'Make the table') + '</button><button type="button" class="bz-btn sec" data-act="paste">📋 ' + T('ஒட்டு (Paste)', 'Paste') + '</button><button type="button" class="bz-btn sec" data-act="new">🧹 ' + T('புதிய பில்', 'New bill') + '</button></div>' +
           '<div class="bz-grid">' + textField(T('வாடிக்கையாளர் பெயர்', 'Customer name'), 'cust', bill.cust) + field(T('வாடிக்கையாளர் WhatsApp', 'Customer WhatsApp'), 'cph', bill.cph, { mode: 'tel' }) + '</div>' +
           '<datalist id="bz-qb-goods">' + opts + '</datalist><div class="bz-items" data-k="lines"></div>' +
@@ -1505,6 +1509,21 @@
           '<div class="bz-info">' + T('விலைகள் உங்களுடையவை — ஒருமுறை எழுதினால் அடுத்த பில்லில் தானாக வரும். ⚠️ குறியிட்ட பொருளை ஒருமுறை சரிபாருங்கள்.', 'Prices are yours — type once and they come back next time. Check rows marked ⚠️.') + '</div>';
         drawLines(); refresh();
         const ta = $(pane, '[data-k=text]'); ta.addEventListener('input', () => { bill.text = ta.value; });
+        const samples = {
+          veg: 'தக்காளி 2 கிலோ\nவெங்காயம் 1 கிலோ\nபச்சை மிளகாய் 100 கிராம்\nபுதினா 1 கட்டு',
+          tea: 'டீ 4\nகாபி 2\nவடை 4',
+          flower: 'மல்லி 2 முழம்\nரோஜா மாலை 1\nதுளசி 1 கட்டு'
+        };
+        $$(pane, '[data-sample]').forEach(b => {
+          b.onclick = () => {
+            const k = b.getAttribute('data-sample');
+            if (samples[k]) {
+              bill.text = samples[k];
+              ta.value = bill.text;
+              $(pane, '[data-act=parse]').click();
+            }
+          };
+        });
         $(pane, '[data-act=parse]').onclick = () => { bill.text = ta.value; const add = fromText(bill.text); if (!add.length) { flash = T('பொருள் எதுவும் கண்டுபிடிக்க முடியவில்லை. ஒவ்வொரு பொருளையும் தனி வரியில் அல்லது காற்புள்ளியுடன் எழுதுங்கள்.', 'No items found. Put each item on its own line or separate with commas.'); draw(); return; } bill.lines = bill.lines.filter(l => String(l.name).trim()).concat(add); flash = ''; drawBill(pane); };
         $(pane, '[data-act=paste]').onclick = async () => { try { const v = await navigator.clipboard.readText(); if (v) { bill.text = v; ta.value = v; $(pane, '[data-act=parse]').click(); } } catch (e) { ta.focus(); flash = T('நேரடியாக ஒட்ட முடியவில்லை — பெட்டியை நீண்ட நேரம் அழுத்தி "Paste" தட்டுங்கள்.', 'Could not paste directly — long-press the box and tap Paste.'); draw(); } };
         $(pane, '[data-act=new]').onclick = () => { bill = newBill(); flash = ''; drawBill(pane); };
