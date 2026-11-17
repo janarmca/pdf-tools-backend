@@ -6328,13 +6328,16 @@ const Img2Xls = (function(){
     // 2. straighten (rotation, or a perspective-like fan of slopes)
     let fieldB = false;
     if(!opts.noDeskew){
-      const fld = slopeField(inkPoints(inkMask(g0, sw, sh), sw, sh), sw, sh);
-      if(fld.a || fld.b){
+      // two passes: the first rotation is never exact, and a leftover half-degree is enough to hide the grid lines from the detector
+      for(let pass = 0; pass < 2; pass++){
+        const fld = slopeField(inkPoints(inkMask(g0, sw, sh), sw, sh), sw, sh);
+        if(!(fld.a || fld.b)) break;
         const bg0 = modeGray(g0);
-        if(Math.abs(fld.b) * sh > 0.006){ g0 = warpRows(g0, sw, sh, fld.a, fld.b, bg0); fieldB = true; notes.push('perspective fixed'); }
-        else { putGray(c0, g0, sw, sh); const c2 = document.createElement('canvas'); c2.width = sw; c2.height = sh; const x2 = c2.getContext('2d', {willReadFrequently: true});
-          x2.fillStyle = 'rgb(' + bg0 + ',' + bg0 + ',' + bg0 + ')'; x2.fillRect(0, 0, sw, sh); x2.translate(sw / 2, sh / 2); x2.rotate(-Math.atan(fld.a)); x2.drawImage(cv0, -sw / 2, -sh / 2);
-          g0 = grayOf(x2.getImageData(0, 0, sw, sh)); notes.push('rotated ' + (Math.atan(fld.a) * 180 / Math.PI).toFixed(1) + '°'); }
+        if(Math.abs(fld.b) * sh > 0.006){ g0 = warpRows(g0, sw, sh, fld.a, fld.b, bg0); fieldB = true; notes.push('perspective fixed'); break; }
+        if(pass && Math.abs(Math.atan(fld.a)) * 180 / Math.PI < 0.15) break;
+        putGray(c0, g0, sw, sh); const c2 = document.createElement('canvas'); c2.width = sw; c2.height = sh; const x2 = c2.getContext('2d', {willReadFrequently: true});
+        x2.fillStyle = 'rgb(' + bg0 + ',' + bg0 + ',' + bg0 + ')'; x2.fillRect(0, 0, sw, sh); x2.translate(sw / 2, sh / 2); x2.rotate(-Math.atan(fld.a)); x2.drawImage(cv0, -sw / 2, -sh / 2);
+        g0 = grayOf(x2.getImageData(0, 0, sw, sh)); notes.push('rotated ' + (Math.atan(fld.a) * 180 / Math.PI).toFixed(1) + '°');
       }
     }
     // 3. where is the table? (drops the Excel ribbon / status bar of a photographed screen)
@@ -6342,6 +6345,12 @@ const Img2Xls = (function(){
     // only cut when the evenly-spaced rows ARE most of the text (a ribbon / status bar around a table); a table with tall multi-line rows or a title must stay whole
     if(reg && reg.lines < reg.total * 0.55) reg = null;
     if(reg && (reg.y0 > reg.pitch * 1.5 || sh - reg.y1 > reg.pitch * 1.5)){ cy0 = reg.y0; cy1 = reg.y1; notes.push('table area found'); }
+    if(reg && cy0 > 0){ // white-on-colour header text has no 'ink', so the table area starts below a coloured header band — take the band back in
+      const bgm = modeGray(g0), rowMean = yy => { let t = 0, n = 0; for(let x = 0; x < sw; x += 3){ t += g0[yy * sw + x]; n++; } return t / n; };
+      let yy = cy0 - 1, top = cy0; const lim = Math.max(0, cy0 - Math.round(reg.pitch * 3));
+      while(yy >= lim && Math.abs(rowMean(yy) - bgm) > 22){ top = yy; yy--; }
+      if(top < cy0 && cy0 - top >= reg.pitch * 0.5){ cy0 = top; notes.push('header band kept'); }
+    }
     else if(reg && !fieldB) reg = null;
     // 4. enlarge so the text is comfortable for OCR
     let scale = sw < 700 ? 3 : sw < 1100 ? 2 : sw < 1800 ? 1.5 : 1;
@@ -6373,8 +6382,12 @@ const Img2Xls = (function(){
       // no ruled grid: flip dark-filled bands (e.g. a white-on-green header row)
       const b = grid.box; let y = b.y0;
       while(y <= b.y1){ let s = 0; for(let x = b.x0; x <= b.x1; x += 3) s += g[y * w + x]; const m = s / Math.ceil((b.x1 - b.x0 + 1) / 3);
-        if(m < 120){ let y2 = y; while(y2 <= b.y1){ let s2 = 0; for(let x = b.x0; x <= b.x1; x += 3) s2 += g[y2 * w + x]; if(s2 / Math.ceil((b.x1 - b.x0 + 1) / 3) >= 120) break; y2++; }
-          if(y2 - y > 8 * scale / 2) { normaliseRect(g, w, b.x0, y, b.x1 + 1, y2, 0); notes.push('header band flipped'); } y = y2; } else y++; }
+        if(m < 150){ let y2 = y; while(y2 <= b.y1){ let s2 = 0; for(let x = b.x0; x <= b.x1; x += 3) s2 += g[y2 * w + x]; if(s2 / Math.ceil((b.x1 - b.x0 + 1) / 3) >= 150) break; y2++; }
+          if(y2 - y > 8 * scale / 2) { for(let yy = y; yy < y2; yy++) for(let xx = b.x0; xx <= b.x1; xx++) g[yy * w + xx] = 255 - g[yy * w + xx]; notes.push('header band flipped');
+            // the flipped band is still mid-grey, and OCR then treats it as a picture and skips the whole header row — lift its background to paper white
+            const hist = new Uint32Array(256); for(let yy = y; yy < y2; yy++) for(let xx = b.x0; xx <= b.x1; xx++) hist[g[yy * w + xx]]++;
+            let bgB = 255, bm = 0; for(let v = 100; v < 256; v++) if(hist[v] > bm){ bm = hist[v]; bgB = v; }
+            if(bgB < 247 && bgB >= 100){ const kB = 255 / bgB; for(let yy = y; yy < y2; yy++) for(let xx = b.x0; xx <= b.x1; xx++){ const ii = yy * w + xx, nv = g[ii] * kB; g[ii] = nv > 255 ? 255 : nv; } } } y = y2; } else y++; }
     }
     if(reg && !(grid && grid.lines)){ // uneven light on a photographed screen (darker towards one side) makes OCR's global threshold swallow text — divide by the local background
       const R = Math.max(20, Math.round(reg.pitch * scale * 2.2)), W1 = w + 1, I = new Float64Array(W1 * (h + 1));
@@ -6384,6 +6397,15 @@ const Img2Xls = (function(){
         const m = (I[y1 * W1 + x1] - I[y0 * W1 + x1] - I[y1 * W1 + x0] + I[y0 * W1 + x0]) / ((y1 - y0) * (x1 - x0)); o[y * w + x] = Math.min(255, g[y * w + x] / Math.max(m, 1) * 215); } }
       g = o; notes.push('light evened');
     }
+    if(!(grid && grid.lines) && notes.some(n => /^(rotated|perspective)/.test(n))){ // photo only: table lines the grid finder could not lock onto (tilted / blurred photo) would be read as '|' and '_' garbage — rub out long straight runs of ink
+      const bgE = modeGray(g), thrE = bgE * 0.78, minRun = Math.max(60, Math.round(Math.min(w, h) * 0.06)); let erased = 0;
+      const wipe = (len, at, put) => { for(let i = 0; i < len; i++){ put(at + i); } };
+      for(let y = 0; y < h; y++){ let x = 0; while(x < w){ if(g[y * w + x] < thrE){ let x2 = x; while(x2 < w && g[y * w + x2] < thrE) x2++;
+        if(x2 - x >= minRun){ for(let xx = x; xx < x2; xx++) for(let dy = -2; dy <= 2; dy++){ const yy = y + dy; if(yy >= 0 && yy < h && g[yy * w + xx] < bgE * 0.93){ g[yy * w + xx] = bgE; erased++; } } } x = x2; } else x++; } }
+      for(let x = 0; x < w; x++){ let y = 0; while(y < h){ if(g[y * w + x] < thrE){ let y2 = y; while(y2 < h && g[y2 * w + x] < thrE) y2++;
+        if(y2 - y >= minRun){ for(let yy = y; yy < y2; yy++) for(let dx = -2; dx <= 2; dx++){ const xx = x + dx; if(xx >= 0 && xx < w && g[yy * w + xx] < bgE * 0.93){ g[yy * w + xx] = bgE; erased++; } } } y = y2; } else y++; } }
+      if(erased > w * h * 0.002) notes.push('lines removed');
+    }
     putGray(ctx, g, w, h);
     return {canvas: cv, grid: grid && grid.lines ? grid : null, scale, notes, width: w, height: h};
   }
@@ -6391,7 +6413,7 @@ const Img2Xls = (function(){
   /* ---------- words → table ---------- */
   const JUNK = /^[|_\-—–=~.:;,'"`¦!\\/\[\]{}()<>]+$/;
   function cleanWords(words){
-    const tidy = t => { t = t.replace(/^[|\\\/\[\]{}!¦~_»«>]+(?=.)/, ''); if(t.length > 2 && /\d/.test(t)) t = t.replace(/[.,;:'|\]}]+$/, ''); return t.trim(); };
+    const tidy = t => { t = t.replace(/^[|\\\/\[\]{}!¦~_»«>]+(?=.)/, ''); t = t.replace(/¥(?=\d)/g, '₹'); if(t.length > 2 && /\d/.test(t)) t = t.replace(/[.,;:'|\]}]+$/, ''); return t.trim(); };
     const out = [];
     for(const w of words){
       const t = tidy(String(w.text || '').trim()); if(!t || !(w.bbox.x1 > w.bbox.x0)) continue;
@@ -6425,7 +6447,9 @@ const Img2Xls = (function(){
     // columns by vertical white-space gutters (only rows with 2+ words vote, so a one-cell title row can't hide them)
     const minX = Math.min(...words.map(w => w.x0)), maxX = Math.max(...words.map(w => w.x1)), W = Math.ceil(maxX - minX) + 2;
     const cov = new Int32Array(W); let voters = 0;
-    for(const L of lines){ if(L.ws.length < 2) continue; voters++; for(const w of L.ws) for(let x = Math.floor(w.x0 - minX); x <= Math.ceil(w.x1 - minX) && x < W; x++) cov[x]++; }
+    // header cells are often left- or centre-aligned over right-aligned numbers, which opens false gutters (or hides real ones): the first line(s) take no part in finding the columns and are placed afterwards
+    const headCount = lines.length >= 7 ? 2 : lines.length >= 5 ? 1 : 0;
+    for(const L of lines.slice(headCount)){ if(L.ws.length < 2) continue; voters++; for(const w of L.ws) for(let x = Math.floor(w.x0 - minX); x <= Math.ceil(w.x1 - minX) && x < W; x++) cov[x]++; }
     if(!voters){ // single column list
       return trim({rows: lines.map(L => [joinWords(L.ws)]), conf: lines.map(L => [Math.min(...L.ws.map(w => w.c))]), mode: 'list'});
     }
@@ -6450,7 +6474,23 @@ const Img2Xls = (function(){
       cuts.sort((a, b) => a - b); if(!added) break;
     }
     const C = cuts.length + 1; const rows = [], conf = [];
-    for(const L of lines){ const cells = Array.from({length: C}, () => []); for(const w of L.ws) cells[colOf(w)].push(w);
+    // where the body text of each column really sits (used to place header words that are aligned differently from their data)
+    const ext = Array.from({length: C}, () => null);
+    for(const L of lines.slice(headCount)) for(const w of L.ws){ const c = colOf(w); if(!ext[c]) ext[c] = {x0: w.x0, x1: w.x1}; else { if(w.x0 < ext[c].x0) ext[c].x0 = w.x0; if(w.x1 > ext[c].x1) ext[c].x1 = w.x1; } }
+    const headCol = (x0, x1) => { let best = -1, bo = 0, nd = 1e9, nc = 0;
+      for(let c = 0; c < C; c++){ const e = ext[c]; if(!e) continue; const ov = Math.min(x1, e.x1) - Math.max(x0, e.x0); if(ov > bo){ bo = ov; best = c; } const d = ov > 0 ? 0 : -ov; if(d < nd){ nd = d; nc = c; } }
+      return best >= 0 ? best : nc; };
+    // a header line = word groups (a group is words only a space apart, e.g. "Unit Price"): one group per column when the counts agree, else by overlap with the column's data
+    const groupsOf = (L, f) => { const ws = L.ws.slice().sort((a, b) => a.x0 - b.x0), lh = median(ws.map(w => w.y1 - w.y0)) || mh, groups = [];
+      for(const w of ws){ const G = groups[groups.length - 1]; if(G && w.x0 - G.x1 <= Math.max(lh, mh) * f){ G.ws.push(w); G.x1 = Math.max(G.x1, w.x1); } else groups.push({ws: [w], x0: w.x0, x1: w.x1}); }
+      return groups; };
+    const placeHeader = (L, li) => { const groups = groupsOf(L, 0.65), ws = L.ws, map = new Map();
+      // a sentence-like first line (words only a space apart, even across columns) sitting above a real header line is a TITLE: keep it in one cell
+      if(li === 0 && headCount === 2 && ws.length >= 3 && C >= 3 && groupsOf(L, 1.3).length === 1 && groupsOf(lines[1], 0.65).length === C){ const c0 = colOf(ws.slice().sort((a, b) => a.x0 - b.x0)[0]); for(const w of ws) map.set(w, c0); return map; }
+      if(groups.length === 1 && ws.length >= 2 && C >= 3 && li === 0){ const c0 = colOf(ws.slice().sort((a, b) => a.x0 - b.x0)[0]); for(const w of ws) map.set(w, c0); return map; }
+      for(let gi = 0; gi < groups.length; gi++){ const c = groups.length === C ? gi : headCol(groups[gi].x0, groups[gi].x1); for(const w of groups[gi].ws) map.set(w, c); }
+      return map; };
+    for(let li = 0; li < lines.length; li++){ const L = lines[li]; const cells = Array.from({length: C}, () => []); const hm = li < headCount ? placeHeader(L, li) : null; for(const w of L.ws) cells[hm ? hm.get(w) : colOf(w)].push(w);
       rows.push(cells.map(ws => ws.length ? joinWords(ws) : '')); conf.push(cells.map(ws => ws.length ? Math.min(...ws.map(w => w.c)) : 100)); }
     return repairCodes(stripTitles(stripSheetChrome(trim(denoise({rows, conf, mode: 'gutter'})))));
   }
@@ -6461,7 +6501,8 @@ const Img2Xls = (function(){
       if(r0.length >= 2 && r0.length >= Math.max(2, t.rows[k].length - 3) && r0.every(x => /^[A-Za-z]{1,2}$/.test(x)) && r0.slice(1).every((x, i) => x.toUpperCase().charCodeAt(0) > r0[i].toUpperCase().charCodeAt(0) || x.length === 2 || r0[i].length === 2)){
         t.rows.splice(0, k + 1); t.conf.splice(0, k + 1); t.chrome = (t.chrome || []).concat('letters'); break; } }
     const col = t.rows.map(r => r[0]); const nums = col.map(x => /^\d{1,4}$/.test(x) ? +x : null); const ok = nums.filter(x => x != null);
-    if(t.chrome && t.rows[0].length > 1 && ok.length === col.length && ok.length >= 3 && ok.every((x, i) => i === 0 || x > ok[i - 1])){ t.rows = t.rows.map(r => r.slice(1)); t.conf = t.conf.map(r => r.slice(1)); t.chrome = (t.chrome || []).concat('numbers'); }
+    const consec = ok.length === col.length && ok.length >= 4 && t.rows[0].length > 2 && ok.every((x, i) => i === 0 || x === ok[i - 1] + 1); // 1,2,3… down the first column with no header text = spreadsheet row numbers
+    if(((t.chrome && t.rows[0].length > 1 && ok.length >= 3) || consec) && ok.length === col.length && ok.every((x, i) => i === 0 || x > ok[i - 1])){ t.rows = t.rows.map(r => r.slice(1)); t.conf = t.conf.map(r => r.slice(1)); t.chrome = (t.chrome || []).concat('numbers'); }
     return t;
   }
   function trim(t){
@@ -6667,7 +6708,7 @@ TOOL_IMPL.img2excel = {
   mount(container){
     const body = el(`<div></div>`); container.appendChild(body);
     const S = { items: [], lang: 'eng', header: 'auto', dayFirst: true, indian: true, highlight: true, totals: false, combine: false, busy: false, worker: null, workerLang: '' };
-    const LANGS = [['eng', 'English (numbers, names, invoices)'], ['tam+eng', 'தமிழ் + English'], ['hin+eng', 'हिन्दी + English']];
+    const LANGS = [['eng', 'English'], ['tam+eng', 'தமிழ் + English'], ['hin+eng', 'हिन्दी + English']];
     const NOTE_TXT = { dark: '🌙 dark mode fixed', 'header band flipped': '🎨 coloured header fixed' };
     const noteText = n => NOTE_TXT[n] || (/^grid/.test(n) ? '▦ ' + n.replace('grid ', 'grid ') + ' cells found' : /^rotated/.test(n) ? '↻ straightened ' + n.replace('rotated ', '') : n);
     const esc = s => escapeHtml(String(s == null ? '' : s));
@@ -6940,9 +6981,8 @@ TOOL_IMPL.img2excel = {
       // options
       const opts = el(`<div style="border:1px solid var(--line); border-radius:14px; padding:12px; background:#FAFCFB; margin:8px 0;"></div>`);
       const r1 = el(`<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;"></div>`);
-      r1.append(select('Language in the image', 'lang', LANGS), select('First row is a header?', 'header', [['auto', 'Auto-detect'], ['yes', 'Yes, first row = header'], ['no', 'No header']]));
-      const r2 = el(`<div style="display:flex; flex-wrap:wrap; gap:8px 18px;"></div>`);
-      r2.append(check('Dates are day/month/year', 'dayFirst'), check('Indian number grouping (12,34,567)', 'indian'), check('Highlight uncertain cells', 'highlight'), check('Add a TOTAL row (formulas)', 'totals'));
+      r1.append(select('Language in the image', 'lang', LANGS));
+      const r2 = el(`<div style=\"display:flex; flex-wrap:wrap; gap:8px 18px;\"></div>`);
       if(S.items.length > 1) r2.append(check('Combine all images into one sheet', 'combine'));
       opts.append(r1, r2); body.appendChild(opts);
       if(!S.busy && S.items.some(i => i.status === 'queued')){
