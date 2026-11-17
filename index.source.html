@@ -2784,7 +2784,7 @@ function renderHomeBody(){
       <a class="aud-m tamil" href="/matrimony/"><span>💍</span><b>ஸ்ரீ சௌடேஸ்வரி திருமண அமைப்பகம்</b><small>திருமணத் தகவல் மையம்</small><i>→</i></a></div>`));
 
     // 3. Quick start (the 12 most common jobs)
-    const sec1 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'என்ன செய்ய வேண்டும்?':'Quick start'}</b><span>${ta?'ஒரே தட்டில் தொடங்கு':'One tap to begin'}</span></div></div>`);
+    const sec1 = el(`<div class="sec2"><div class="sec2-h tamil"><b>${ta?'விரைவு தொடக்கம்':'Quick start'}</b><span>${ta?'ஒரே தட்டில் தொடங்கு':'One tap to begin'}</span></div></div>`);
     const g1 = el(`<div class="qt-grid"></div>`);
     QUICK_TASK_IDS.slice(0,6).map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean).forEach(t=> g1.appendChild(renderToolCardCompact(t)));
     sec1.appendChild(g1); holder.appendChild(sec1);

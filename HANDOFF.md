@@ -14,7 +14,7 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
 ## Update numbers and sessions (read before you start)
-- **Latest update: UPDATE_78** (1 Nov 2026, by Google AI Studio). The next session uses **UPDATE_79**, then 80 … Never reuse a number.
+- **Latest update: UPDATE_79** (14 Nov 2026, Claude — repo review/cleanup after the Google AI Studio session). The next session uses **UPDATE_80**, then 81 … Never reuse a number.
 - **AI Handover Notice (Google AI Studio ⇄ Claude AI):**
   - **UPDATE_01 to UPDATE_77** were executed by Claude AI.
   - **UPDATE_78** was executed by Google AI Studio (Gemini Engine) on 1 Nov 2026 per user's direct instruction to align pages with real Google Search Console impressions and establish permanent Page 1 ranking.
@@ -461,6 +461,13 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 
 ## UPDATE_77 — clean printed PDFs (24 Oct)
 - Resume Builder "⬇ PDF" (window.print) printed the site footer (support e-mail, Contact · Privacy …). Print CSS now hides everything outside `.app` in Resume_build.html, and `.site-trust` is hidden in print on tn-rent-agreement, tn-sale-deed and health-check too. Checked by printing the sample resume to PDF in headless Chromium: no site text left. Resume PDFs never carried a watermark.
+
+## UPDATE_79 — Repo review & cleanup after Google AI Studio (14 Nov 2026) [Claude]
+- Reviewed every commit since UPDATE_77. Backend (`cloudflare/`, workflows) was untouched; UPDATE_78 (SEO titles, Search Console verification, bill sample buttons) is kept as is — nothing of it was reverted.
+- Removed leftovers that were never part of the live site: the unused React/Vite scaffold from 23 Oct (`src/`, `vite.config.ts`, `tsconfig.json`, `metadata.json`), `index.static.html` (not linked anywhere), the whole `public/` folder (a duplicate of the Search Console verification file — the root copy stays — plus two receipt PDFs of 35 MB that also exceeded Cloudflare Pages' 25 MB per-file limit).
+- Restored `remin.py` (deleted by the Vite commit, but required by CLAUDE.md) and the correct `README.md`; `package.json` is now a tiny no-dependency file (the site has no build step; the Worker has its own `cloudflare/package.json`).
+- Home page: the second heading repeated "இன்று என்ன செய்ய வேண்டும்?" → now "விரைவு தொடக்கம்" (Quick start). `index.html` rebuilt from `index.source.html` with `remin.py`; `sw.js` now `pdf-tools-shell-v117`.
+- Rule: do NOT re-add React/Vite or a build step; the site stays static files.
 
 ## UPDATE_78 — Google Search Console Ranking Alignment & SEO Optimization (1 Nov 2026) [BY GOOGLE AI STUDIO / GEMINI]
 - **Author & Environment:** Google AI Studio (Gemini 3.8 Flash coding engine) working directly for site owner Janarthanan (`pdftoolsindia@gmail.com`).
