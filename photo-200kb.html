@@ -16,8 +16,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Resize Photo to 200KB Online Free","url":"https://pdftoolsindia.com/photo-200kb","applicationCategory":"MultimediaApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"படத்தை 200 KB-க்குள் எப்படிக் கொண்டுவருவது?","acceptedAnswer":{"@type":"Answer","text":"படத்தைத் தேர்ந்தெடுத்து, அதிகபட்ச அளவில் 200 என்று வைத்து “அளவு மாற்று” அழுத்துங்கள். முடிவின் KB அளவு உடனே காட்டப்படும்."}},{"@type":"Question","name":"படம் மங்கலாகுமா?","acceptedAnswer":{"@type":"Answer","text":"KB குறைய குறைய தரம் சற்றுக் குறையும். படிவம் அனுமதிக்கும் பெரிய KB-ஐ வைத்தால் தெளிவு அதிகம். முகம் அல்லது கையொப்பம் தெளிவாக இருக்கிறதா என்று முன்னோட்டத்தில் பாருங்கள்."}},{"@type":"Question","name":"px அளவையும் மாற்ற முடியுமா?","acceptedAnswer":{"@type":"Answer","text":"ஆம். அகலம், உயரம் இரண்டையும் உள்ளிடுங்கள். படிவம் கேட்கும் சரியான px அளவைப் படிவ வழிமுறையில் பார்த்து உள்ளிடுங்கள்."}},{"@type":"Question","name":"என் படம் எங்காவது அனுப்பப்படுமா?","acceptedAnswer":{"@type":"Answer","text":"இல்லை. எல்லாம் உங்கள் சாதனத்தின் browser-க்குள் நடக்கிறது."}}]}]}</script>
 <style>
 *{box-sizing:border-box}
-:root{--ink:#14213d;--sub:#5b6b80;--line:#dde4ee;--bg:#f2f5fa;--brand:#1b2f6e;--ok:#16794a}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil','Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+:root{--ink:#20242B;--sub:#566070;--line:#E6E8EC;--bg:#F6F7FB;--brand:#3752A6;--ok:#1E8E5A}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter','Noto Sans Tamil',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 .top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line)}
 .top a.logo{display:flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-weight:900;font-size:1rem}
 .top a.logo img{height:30px;width:auto;display:block}
@@ -25,9 +25,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil
 .wrap{max-width:640px;margin:0 auto;padding:14px}
 h1{font-size:1.25rem;margin:4px 0 12px;line-height:1.35}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 4px 18px #0b1b330a}
-.drop{border:2px dashed #9fb4c9;border-radius:14px;padding:26px 12px;text-align:center;cursor:pointer;background:#f8fbff}
-.drop b{display:block;font-size:1rem}.drop span{font-size:.8rem;color:var(--sub)}
-.drop.has{border-style:solid;border-color:var(--ok);background:#f2faf5}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;border:2px dashed #9DB4E8;border-radius:22px;padding:22px 16px 18px;background:linear-gradient(180deg,#F3F7FF,#E8F0FE);cursor:pointer;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--brand);background:#e3ecff}
+.drop .ic{width:64px;height:64px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(55,82,166,.18);display:flex;align-items:center;justify-content:center;font-size:30px}
+.drop .t{font-weight:800;font-size:15.5px;line-height:1.4;word-break:break-word}.drop .d{font-size:12.5px;color:var(--sub);line-height:1.5}
+.drop .pick{width:100%;max-width:340px;min-height:50px;padding:12px 20px;border:0;border-radius:14px;background:var(--brand);color:#fff;font:inherit;font-weight:800;font-size:15.5px;cursor:pointer;box-shadow:0 3px 10px rgba(55,82,166,.3);margin-top:4px}
+.drop .priv{font-size:11.5px;color:var(--sub)}
+.drop.has{border-style:solid;border-color:var(--ok);background:linear-gradient(180deg,#F5FBF7,#EAF6EE)}
+.drop.has .pick{background:#fff;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none}
 label{display:block;font-size:.78rem;font-weight:800;color:#475569;margin:14px 0 4px}
 input[type=number]{width:100%;padding:11px;border:1px solid #d3dbe7;border-radius:11px;font:inherit;font-size:.95rem}
 .row{display:flex;gap:10px}.row>*{flex:1}
@@ -60,7 +65,7 @@ details.seo summary{cursor:pointer;font-weight:800;font-size:.86rem;color:var(--
   <p class="sub">பெரிய படத்தை 200 KB வரம்புக்குள் கொண்டுவர இங்கே பயன்படுத்துங்கள்.</p>
 
   <div class="card">
-    <div class="drop" id="drop"><b>📷 படத்தைத் தேர்ந்தெடுங்கள்</b><span>JPG, PNG, WEBP · உங்கள் போனிலேயே செயல்படும், எங்கும் அனுப்பப்படாது</span></div>
+    <div class="drop" id="drop"></div>
     <input type="file" id="file" accept="image/*" hidden>
     <div class="chips" id="presetChips"></div>
     <label for="kb">அதிகபட்ச அளவு (KB)</label>
@@ -122,13 +127,20 @@ chips('pxChips',PXS,function(x,c){$('w').value=x[1];$('h').value=x[2];mark('pxCh
 $('kb').oninput=function(){mark('kbChips',null);mark('presetChips',null)};
 // a size typed in the URL (?kb=20&w=140&h=60) pre-fills the form
 try{var q=new URLSearchParams(location.search);if(q.get('kb'))$('kb').value=q.get('kb');if(q.get('w')){$('w').value=q.get('w');$('more').open=true}if(q.get('h'))$('h').value=q.get('h')}catch(e){}
+function renderDrop(f,im){var d=$('drop');
+  if(!f){d.classList.remove('has');d.innerHTML='<div class="ic">📤</div><div class="t">படத்தை இங்கே போடுங்கள்</div><div class="d">JPG · PNG · WEBP</div><button type="button" class="pick">📁 படத்தைத் தேர்ந்தெடு · Choose photo</button><div class="priv">🔒 படம் உங்கள் சாதனத்தை விட்டு வெளியே போகாது</div>'}
+  else{d.classList.add('has');d.innerHTML='<div class="ic">✅</div><div class="t">'+f.name.replace(/[<>&]/g,'')+'</div><div class="d">'+im.naturalWidth+'×'+im.naturalHeight+' px · '+Math.round(f.size/1024)+' KB</div><button type="button" class="pick">📁 வேறு படம் · Change photo</button>'}}
+renderDrop(null);
 $('drop').onclick=function(){$('file').click()};
-function setImage(f,im){imgEl=im;$('go').disabled=false;$('drop').classList.add('has');$('drop').innerHTML='<b>✅ '+f.name.replace(/</g,'')+'</b><span>'+im.naturalWidth+'×'+im.naturalHeight+' px · '+Math.round(f.size/1024)+' KB — வேறு படம் தேர்ந்தெடுக்க இங்கே தொடுங்கள்</span>'}
-$('file').onchange=function(){var f=this.files[0];if(!f)return;srcName=f.name.replace(/\.[^.]+$/,'')||'photo';
+['dragenter','dragover'].forEach(function(ev){$('drop').addEventListener(ev,function(e){e.preventDefault();this.classList.add('over')})});
+['dragleave','drop'].forEach(function(ev){$('drop').addEventListener(ev,function(e){e.preventDefault();this.classList.remove('over')})});
+$('drop').addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)load(f)});
+function load(f){srcName=f.name.replace(/\.[^.]+$/,'')||'photo';
   var u=URL.createObjectURL(f),im=new Image();
-  im.onload=function(){setImage(f,im)};
+  im.onload=function(){imgEl=im;$('go').disabled=false;renderDrop(f,im)};
   im.onerror=function(){alert('இந்தப் படத்தை திறக்க முடியவில்லை. (iPhone HEIC படம் என்றால் Screenshot எடுத்தோ JPG ஆகவோ மாற்றி முயற்சிக்கவும்.)')};
-  im.src=u};
+  im.src=u}
+$('file').onchange=function(){if(this.files[0])load(this.files[0])};
 function draw(w,h,crop){var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
   var sw=imgEl.naturalWidth,sh=imgEl.naturalHeight;x.imageSmoothingQuality='high';
   if(crop){var k=Math.max(w/sw,h/sh),dw=sw*k,dh=sh*k;x.drawImage(imgEl,(w-dw)/2,(h-dh)/2,dw,dh)}else{x.drawImage(imgEl,0,0,w,h)}
