@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-11-16T11:30:36.986Z",
+  "checkedAt": "2026-11-23T12:55:32.954Z",
   "allDownStreak": 0,
   "sources": {
     "transition-faq": {
       "hash": "0b21c7063d19a81c91b5e2a8911458c003589c2a023c262954dea7fb968917ce",
       "bytes": 4533716,
       "kind": "pdf",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -14,7 +14,7 @@
       "hash": "c23f30205a1d4a49007c1d1c992f7dea536b7d5c0abb65547decd7d195916639",
       "bytes": 264871,
       "kind": "pdf",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -22,7 +22,7 @@
       "hash": "75568b889489a28d9c77e3afd2b5de8e4e00c271a7778ff1bc56aba59eddbaed",
       "bytes": 333437,
       "kind": "pdf",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": null,
       "failStreak": 0
     },
@@ -30,31 +30,31 @@
       "hash": "735c5fce1b94cd6d9d66eaed3499b3c5fabda2a8ce91c1d6d103d6d94fd8e746",
       "bytes": 532207,
       "kind": "pdf",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": null,
       "failStreak": 0
     },
     "s427": {
-      "hash": "e601031dd86a37660f8acfbdc578a68f5f85a64d60b7347e43f4a85340dfd605",
-      "bytes": 619910,
+      "hash": "ab8b3dc697efac896a50edd7635a739a2c66eb9832037d70f1fe82fa1703d371",
+      "bytes": 611758,
       "kind": "html",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
-      "changedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
+      "changedAt": "2026-11-23T12:55:32.954Z",
       "failStreak": 0
     },
     "late-fee-page": {
       "hash": "c4fdf0d8623dfcb531bc5ed56521480182a4425d74b58c246373a4d708c0c420",
-      "bytes": 647574,
+      "bytes": 650750,
       "kind": "html",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": "2026-11-16T11:30:36.986Z",
       "failStreak": 0
     },
     "forms-list": {
       "hash": "b4642c672d6f6d31e4d174c7483be42354b2f98b14a9d73d6ac60a75fc5039ca",
-      "bytes": 704033,
+      "bytes": 697998,
       "kind": "html",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": "2026-11-16T11:30:36.986Z",
       "failStreak": 0
     },
@@ -62,7 +62,7 @@
       "hash": "f565e0f5ff3bf8f717daeb507f5e8569e720abc3309e6719f6f085889c9b802f",
       "bytes": 10111559,
       "kind": "pdf",
-      "checkedAt": "2026-11-16T11:30:36.986Z",
+      "checkedAt": "2026-11-23T12:55:32.954Z",
       "changedAt": null,
       "failStreak": 0
     }
