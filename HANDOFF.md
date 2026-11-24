@@ -14,7 +14,7 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
 ## Update numbers and sessions (read before you start)
-- **Latest update: UPDATE_80** (25 Nov 2026, Claude — Gemini Watermark Remover + YouTube/Gemini video presets, on top of the UPDATE_79 cleanup). The next session uses **UPDATE_81**, then 82 … Never reuse a number.
+- **Latest update: UPDATE_80** (25 Nov 2026, Claude — Gemini Watermark Remover + YouTube/Gemini video presets, on top of the UPDATE_79 cleanup; detection rule re-calibrated on real Gemini samples). The next session uses **UPDATE_81**, then 82 … Never reuse a number.
 - **AI Handover Notice (Google AI Studio ⇄ Claude AI):**
   - **UPDATE_01 to UPDATE_77** were executed by Claude AI.
   - **UPDATE_78** was executed by Google AI Studio (Gemini Engine) on 1 Nov 2026 per user's direct instruction to align pages with real Google Search Console impressions and establish permanent Page 1 ranking.
@@ -464,10 +464,10 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 
 ## UPDATE_80 — Gemini Watermark Remover + video presets (25 Nov 2026) [Claude]
 - New image tool `geminiwmremove` (TOOLS `lazy:'imgx'`, code in `category-imgx.js`, engine `libs/gemini-wm.min.js` + `libs/gemini-wm.LICENSE.txt`). Engine = open-source "gemini-watermark-remover" (GargantuaX, MIT © 2025 Jad / © 2024 AllenK) bundled with esbuild from its `src/sdk/image-data.js`; exact reverse alpha blending, runs in a Web Worker built from a Blob, nothing uploaded. To update the engine: clone the repo, rebundle `removeWatermarkFromImageDataSync` (+ expose `window.GWR={remove}`), replace the lib, bump `?v=` in `gwmWorker()`.
-- Safety net in the tool: the engine's own `applied` is only trusted when its original spatial AND gradient match scores are ≥ 0.35 (real marks score 0.75–1.0); a clean synthetic image produced a false positive (a dark star) at 0.24 gradient. Weak matches show "Not sure…" with an "Apply anyway" button; clean images are never altered. The invisible SynthID mark is NOT removed and the UI says so.
-- Tested on generated images (watermark added with the engine's own alpha maps at the catalogue geometry): error inside the mark box 20–30 → 0.5–0.75 grey levels (8-bit rounding). Real Gemini files were not available — verify with one real Nano Banana image after deploy.
+- Safety net in the tool (`sure` in `geminiwmremove`), CALIBRATED ON REAL DATA — the open-source repo ships 5 real Gemini images (`docs/1..5.webp`) with their true originals (`docs/unwatermarked_1..5.webp`): the engine restores them to a mean error of 0.007–0.019 grey levels (of 255) over the whole picture. Real marks score only 0.31–0.88 on the engine's spatial/gradient match, so a score threshold alone failed (it rejected real images 4 and 5). What separates real from fake: a real mark is found at Gemini's own catalogue size/position (`meta.source` starts with "standard"); a clean synthetic picture only matched through the free adaptive search (odd 56 px size, source "adaptive+…", gradient 0.24). Rule: accept if source starts with "standard" AND spatial ≥ 0.25 AND gradient ≥ 0.10, or if both scores ≥ 0.6; otherwise the picture is left unchanged with "Not sure…" and an "Apply anyway" button. Clean images are never altered. The invisible SynthID mark is NOT removed and the UI says so.
+- Tested on generated images (watermark added with the engine's own alpha maps at the catalogue geometry): error inside the mark box 20–30 → 0.5–0.75 grey levels (8-bit rounding). Also verified on the 5 real samples above.
 - Video Watermark Remover (`videowmremove`): one-tap boxes "✨ Gemini / Veo ✦" (Veo sparkle ≈72 px at 1080p, margin 108/144 px, from the engine's `videoWatermarkCatalog.js`) and "▶️ YouTube watermark" (bottom-right). They only place a box; the removal is the existing delogo/plate pipeline. A YouTube channel watermark is normally just a player overlay, not in the file — the UI says so.
-- `.github/promo-news.json` entry `gemini-wm-remover`; `sw.js` v118; category scripts `?v=20261117a`.
+- `.github/promo-news.json` entry `gemini-wm-remover`; `sw.js` v119; category scripts `?v=20261125a`.
 
 ## UPDATE_79 — Repo review & cleanup after Google AI Studio (14 Nov 2026) [Claude]
 - Reviewed every commit since UPDATE_77. Backend (`cloudflare/`, workflows) was untouched; UPDATE_78 (SEO titles, Search Console verification, bill sample buttons) is kept as is — nothing of it was reverted.

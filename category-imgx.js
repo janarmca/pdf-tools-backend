@@ -486,7 +486,7 @@
   function gwmWorker() {
     if (__gwmEngine) return __gwmEngine;
     __gwmEngine = fetch('libs/gemini-wm.min.js?v=1').then(function (r) { if (!r.ok) throw new Error('Could not load the Gemini engine — check your internet connection and try again.'); return r.text(); }).then(function (src) {
-      const code = 'var window=self;' + src + ';self.onmessage=function(e){var d=e.data;try{var im=new ImageData(new Uint8ClampedArray(d.buf),d.w,d.h);var r=self.GWR.remove(im,{});var o=(r&&r.imageData)||r;var m=(r&&r.meta)||{};var dt=m.detection||{};var b=o.data.buffer;self.postMessage({id:d.id,ok:true,applied:!!m.applied,size:m.size||0,sp:dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr:dt.originalGradientScore==null?-1:dt.originalGradientScore,w:o.width,h:o.height,buf:b},[b])}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
+      const code = 'var window=self;' + src + ';self.onmessage=function(e){var d=e.data;try{var im=new ImageData(new Uint8ClampedArray(d.buf),d.w,d.h);var r=self.GWR.remove(im,{});var o=(r&&r.imageData)||r;var m=(r&&r.meta)||{};var dt=m.detection||{};var b=o.data.buffer;self.postMessage({id:d.id,ok:true,applied:!!m.applied,src:(m.source?""+m.source:""),size:m.size||0,sp:dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr:dt.originalGradientScore==null?-1:dt.originalGradientScore,w:o.width,h:o.height,buf:b},[b])}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
       const w = new Worker(URL.createObjectURL(new Blob([code], { type: 'text/javascript' })));
       w.onmessage = function (e) { const p = __gwmWait[e.data.id]; if (!p) return; delete __gwmWait[e.data.id]; if (e.data.ok) p.res(e.data); else p.rej(new Error(e.data.err)); };
       w.onerror = function () { Object.keys(__gwmWait).forEach(function (k) { const p = __gwmWait[k]; delete __gwmWait[k]; p.rej(new Error('The Gemini engine stopped unexpectedly. Please try again.')); }); __gwmEngine = null; };
@@ -520,8 +520,10 @@
             const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0);
             const r = await gwmRun(g.getImageData(0, 0, W, H));
             it.w = W; it.h = H;
-            // safety net on top of the engine: a real Gemini mark matches the template strongly (spatial AND edge match ≈ 0.75–1.0); a weak match on an ordinary picture would "un-blend" a star that was never there
-            const sure = r.applied && r.sp >= 0.35 && r.gr >= 0.35;
+            // safety net on top of the engine. Calibrated on the five REAL Gemini samples of the open-source project (match scores there are only 0.31–0.88, so the score alone cannot tell
+            // real from fake): a real mark is found at Gemini's own catalogue position/size ("standard…" source); a clean picture only "matched" through the free adaptive search
+            // (odd size such as 56 px, source "adaptive…") with a weak edge score. So: catalogue position needs a minimal match; any other position needs a strong one.
+            const sure = r.applied && ((/^standard/.test(r.src) && r.sp >= 0.25 && r.gr >= 0.10) || (r.sp >= 0.6 && r.gr >= 0.6));
             if (r.applied) { g.putImageData(new ImageData(new Uint8ClampedArray(r.buf), r.w, r.h), 0, 0); it.cv = cv; it.px = r.size; it.match = Math.round(Math.min(r.sp, r.gr) * 100); it.state = sure ? 'done' : 'weak'; }
             else it.state = 'none';
           } catch (e) { it.state = 'error'; it.msg = e.message; }
