@@ -4,6 +4,7 @@
  *   imgborder  — Add border / frame (solid, double, polaroid, shadow card, gradient, square) with a LIVE preview
  *   imgenhance — Image enhancer with a before/after slider (sharpen, denoise, contrast, brightness, colour, upscale)
  *   aiupscale  — AI upscaler (UpscalerJS, in the browser) with a before/after slider
+ *   geminiwmremove — Gemini ✦ watermark remover (exact reverse alpha blending, Web Worker, libs/gemini-wm.min.js)
  * All in the browser (canvas), nothing uploaded. Host globals: TOOL_IMPL, el, mountUploader, mountFileList, mountResult,
  * downloadBlob, escapeHtml, loadScriptOnce. Pure maths exported on window.ImgxCore for tests.
  */
@@ -474,4 +475,105 @@
       paint();
     }
   };
+
+  /* ===================================================================== GEMINI WATERMARK REMOVER
+   * Removes the visible Gemini ✦ sparkle (Nano Banana / Gemini images) with REVERSE ALPHA BLENDING — the same maths the mark was
+   * added with:  original = (watermarked − α·255) / (1 − α).  It restores the real pixels; nothing is "painted over" or guessed.
+   * Engine = "gemini-watermark-remover" (MIT, © 2025 Jad, © 2024 AllenK / Kwyshell — https://github.com/GargantuaX/gemini-watermark-remover),
+   * bundled as libs/gemini-wm.min.js (licence: libs/gemini-wm.LICENSE.txt). Runs in a Web Worker, nothing is uploaded.
+   * The invisible SynthID mark is NOT touched (and this tool does not claim to). */
+  let __gwmEngine = null, __gwmSeq = 0; const __gwmWait = {};
+  function gwmWorker() {
+    if (__gwmEngine) return __gwmEngine;
+    __gwmEngine = fetch('libs/gemini-wm.min.js?v=1').then(function (r) { if (!r.ok) throw new Error('Could not load the Gemini engine — check your internet connection and try again.'); return r.text(); }).then(function (src) {
+      const code = 'var window=self;' + src + ';self.onmessage=function(e){var d=e.data;try{var im=new ImageData(new Uint8ClampedArray(d.buf),d.w,d.h);var r=self.GWR.remove(im,{});var o=(r&&r.imageData)||r;var m=(r&&r.meta)||{};var dt=m.detection||{};var b=o.data.buffer;self.postMessage({id:d.id,ok:true,applied:!!m.applied,size:m.size||0,sp:dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr:dt.originalGradientScore==null?-1:dt.originalGradientScore,w:o.width,h:o.height,buf:b},[b])}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
+      const w = new Worker(URL.createObjectURL(new Blob([code], { type: 'text/javascript' })));
+      w.onmessage = function (e) { const p = __gwmWait[e.data.id]; if (!p) return; delete __gwmWait[e.data.id]; if (e.data.ok) p.res(e.data); else p.rej(new Error(e.data.err)); };
+      w.onerror = function () { Object.keys(__gwmWait).forEach(function (k) { const p = __gwmWait[k]; delete __gwmWait[k]; p.rej(new Error('The Gemini engine stopped unexpectedly. Please try again.')); }); __gwmEngine = null; };
+      return w;
+    });
+    __gwmEngine.catch(function () { __gwmEngine = null; });
+    return __gwmEngine;
+  }
+  function gwmRun(imageData) {
+    return gwmWorker().then(function (w) { return new Promise(function (res, rej) { const id = ++__gwmSeq; __gwmWait[id] = { res: res, rej: rej }; w.postMessage({ id: id, w: imageData.width, h: imageData.height, buf: imageData.data.buffer }, [imageData.data.buffer]); }); });
+  }
+
+  TOOL_IMPL.geminiwmremove = {
+    mount: function (container) {
+      const items = []; let busy = false;
+      const body = el('<div></div>'); container.appendChild(body);
+      const note = el('<div class="note"><b>✦ Gemini படத்தின் watermark நீக்கு.</b> Gemini / Nano Banana படத்தின் வலது-கீழ் மூலையிலுள்ள ✦ குறியை, அது சேர்க்கப்பட்ட அதே கணிதத்தைத் திருப்பிப் போட்டு (reverse alpha blending) நீக்குகிறது — படம் மங்காது, “வரைந்து மூடுவது” இல்லை. Free, in your browser, nothing is uploaded. <br><span style="color:#8a8f98">ℹ️ The invisible SynthID mark stays. Use only on images you created or have the right to edit. Works on the original downloaded image — not on screenshots, resized or re-saved copies.</span></div>');
+      const ups = el('<div></div>'); const list = el('<div></div>');
+      body.appendChild(note); body.appendChild(ups); body.appendChild(list);
+      mountUploader(ups, { accept: 'image/*', multiple: true, label: 'Drop Gemini images here, or tap to choose', sublabel: 'JPG · PNG · WEBP — several at once is fine',
+        onAdd: function (fl) { for (let i = 0; i < fl.length; i++) items.push({ file: fl[i], state: 'wait', url: URL.createObjectURL(fl[i]) }); paint(); run(); } });
+
+      async function run() {
+        if (busy) return; busy = true;
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i]; if (it.state !== 'wait') continue;
+          it.state = 'working'; paint();
+          try {
+            const im = await loadImg(it.file);
+            const W = im.naturalWidth, H = im.naturalHeight, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+            const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0);
+            const r = await gwmRun(g.getImageData(0, 0, W, H));
+            it.w = W; it.h = H;
+            // safety net on top of the engine: a real Gemini mark matches the template strongly (spatial AND edge match ≈ 0.75–1.0); a weak match on an ordinary picture would "un-blend" a star that was never there
+            const sure = r.applied && r.sp >= 0.35 && r.gr >= 0.35;
+            if (r.applied) { g.putImageData(new ImageData(new Uint8ClampedArray(r.buf), r.w, r.h), 0, 0); it.cv = cv; it.px = r.size; it.match = Math.round(Math.min(r.sp, r.gr) * 100); it.state = sure ? 'done' : 'weak'; }
+            else it.state = 'none';
+          } catch (e) { it.state = 'error'; it.msg = e.message; }
+          paint();
+        }
+        busy = false;
+      }
+      const nm = function (it, ext) { return baseName(it.file) + '-no-watermark.' + ext; };
+      function paint() {
+        list.innerHTML = '';
+        items.forEach(function (it, idx) {
+          const chip = it.state === 'done' ? '<span style="color:#1E8E5A;font-weight:800;">✅ Watermark removed</span>'
+            : it.state === 'none' ? '<span style="color:#C0770B;font-weight:800;">ℹ️ No Gemini ✦ mark found — image left unchanged</span>'
+            : it.state === 'weak' ? '<span style="color:#C0770B;font-weight:800;">❓ Not sure there is a Gemini ✦ mark — image left unchanged</span>'
+            : it.state === 'error' ? '<span style="color:#C0392B;font-weight:800;">⚠️ ' + escapeHtml(it.msg || 'Failed') + '</span>'
+            : '<span style="color:#566070;font-weight:700;">⏳ ' + (it.state === 'working' ? 'Removing…' : 'Waiting…') + '</span>';
+          const card = el('<div style="border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;background:#fff;"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;"><b style="word-break:break-all;">' + escapeHtml(it.file.name) + (it.w ? ' <span style="color:#8a8f98;font-weight:600;">' + it.w + '×' + it.h + '</span>' : '') + '</b>' + chip + '</div></div>');
+          if (it.state === 'done' || it.state === 'none' || it.state === 'weak') {
+            const wrap = el('<div style="position:relative;margin-top:8px;line-height:0;touch-action:none;user-select:none;-webkit-user-select:none;"></div>');
+            const o = new Image(); o.src = it.url; o.style.cssText = 'width:100%;height:auto;display:block;border-radius:10px;background:#eee;'; wrap.appendChild(o);
+            if (it.state === 'done') {
+              const v = it.cv.cloneNode(); v.getContext('2d').drawImage(it.cv, 0, 0); v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border-radius:10px;';
+              const show = function (on) { v.style.visibility = on ? 'visible' : 'hidden'; };
+              ['pointerdown'].forEach(function (ev) { wrap.addEventListener(ev, function () { show(false); }); });
+              ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { wrap.addEventListener(ev, function () { show(true); }); });
+              wrap.appendChild(v);
+              card.appendChild(wrap);
+              card.appendChild(el('<div style="font-size:11.5px;color:#8a8f98;margin-top:4px;">Tap and hold the picture to see the original.</div>'));
+              const row = el('<div class="btn-row"><button class="btn" data-f="png">⬇️ PNG (lossless)</button><button class="btn secondary" data-f="jpg">⬇️ JPG (smaller)</button></div>');
+              row.addEventListener('click', async function (e) { const b = e.target.closest('[data-f]'); if (!b) return; const f = b.getAttribute('data-f'); downloadBlob(await toBlob(it.cv, f === 'png' ? 'image/png' : 'image/jpeg'), nm(it, f)); });
+              card.appendChild(row);
+            } else if (it.state === 'weak') {
+              card.appendChild(wrap);
+              const wk = el('<div class="note" style="margin-top:8px;">Something faint in the bottom-right corner looks a little like the Gemini sparkle (match ' + it.match + '%), but not clearly enough. To avoid damaging the picture it was left as it is. If you can see the ✦ mark yourself, you can apply the removal anyway.<div class="btn-row"><button class="btn secondary">Apply anyway</button></div></div>');
+              wk.querySelector('button').onclick = function () { it.state = 'done'; paint(); };
+              card.appendChild(wk);
+            } else {
+              card.appendChild(wrap);
+              card.appendChild(el('<div class="note" style="margin-top:8px;">The Gemini sparkle was not found in the usual place. This happens when the picture was already cleaned, cropped, resized, screenshotted or re-saved after download, or if it did not come from Gemini. Try the original file from Gemini.</div>'));
+            }
+          }
+          list.appendChild(card);
+        });
+        const done = items.filter(function (i) { return i.state === 'done'; });
+        if (done.length > 1 && !busy) {
+          const zb = el('<div class="btn-row"><button class="btn">⬇️ All ' + done.length + ' images as ZIP (PNG)</button></div>');
+          zb.querySelector('button').onclick = async function () { try { await ensureJsZip(); } catch (e) { err(body, e.message); return; } const z = new JSZip(); for (let i = 0; i < done.length; i++) z.file(nm(done[i], 'png'), await toBlob(done[i].cv, 'image/png')); downloadBlob(await z.generateAsync({ type: 'blob' }), 'gemini-no-watermark.zip'); };
+          list.appendChild(zb);
+        }
+        if (items.length) { const clr = el('<div class="btn-row"><button class="btn secondary">🗑 Clear all</button></div>'); clr.querySelector('button').onclick = function () { items.splice(0).forEach(function (i) { URL.revokeObjectURL(i.url); }); paint(); }; list.appendChild(clr); }
+      }
+    }
+  };
+
 })();
