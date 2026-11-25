@@ -11409,11 +11409,12 @@ TOOL_IMPL.videowmremove = {
       // ---------- one-tap starting boxes: Gemini / Veo ✦ and YouTube channel watermark (bottom-right) ----------
       // Gemini/Veo: sparkle ≈72 px at 1920×1080 with a 108 px (standard) or 144 px (inset) margin — one box covers both, scaled to any size.
       // YouTube: the channel watermark sits bottom-right of the player (≤150 px, 5–8 % in from the edges).
-      const PRESET_BOX = { gemini: { x:0.879, y:0.790, w:0.073, h:0.120 }, youtube: { x:0.875, y:0.775, w:0.115, h:0.195 } };
+      const PRESET_BOX = { youtube: { x:0.875, y:0.775, w:0.115, h:0.195 } };
       const presets = el(`<div style="margin:8px 0 2px; font-size:12.5px;">
           <div style="font-weight:800; margin-bottom:5px;">⚡ One-tap start (puts a box in the usual place — then nudge it exactly onto the mark)</div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            <button type="button" class="btn secondary wmr-pre" data-pre="gemini" style="padding:7px 12px;">✨ Gemini / Veo ✦</button>
+            <button type="button" class="btn secondary wmr-pre" data-pre="gemini" style="padding:7px 12px;">✨ Gemini / Veo ✦ (exact)</button>
+            <button type="button" class="btn secondary wmr-pre" data-pre="veotext" style="padding:7px 12px;">🅥 “Veo” text</button>
             <button type="button" class="btn secondary wmr-pre" data-pre="youtube" style="padding:7px 12px;">▶️ YouTube watermark</button>
           </div>
           <div style="color:#8a8f98; margin-top:5px;">ℹ️ A YouTube channel watermark is normally only an overlay on the player, not part of the video file — use this when it is burned into your video (screen recording, re-upload). Gemini <i>pictures</i>: use the <b>Gemini Watermark Remover</b> tool.</div>
@@ -11421,8 +11422,17 @@ TOOL_IMPL.videowmremove = {
       body.appendChild(presets);
       presets.addEventListener('click', (e)=>{
         const b = e.target.closest('[data-pre]'); if(!b || busy) return;
+        const kind = b.getAttribute('data-pre');
+        const setMethod = m=>{ const sel = body.querySelector('#wmrMethod'); sel.value = m; sel.dispatchEvent(new Event('change', {bubbles:true})); };
+        if(kind === 'gemini'){ setMethod('gemini'); showToastSafe('✦ exact method selected — no box needed. Tap Preview this frame, then Remove watermark.'); return; }
         if(regions.length >= MAX_REGIONS){ showToastSafe('Maximum '+MAX_REGIONS+' boxes — delete one first.'); return; }
-        const q = PRESET_BOX[b.getAttribute('data-pre')];
+        let q = PRESET_BOX[kind];
+        if(kind === 'veotext'){ // the small “Veo” word: 23×10 px (≤900 px), 68×30 px (≤1500 px) or 99×43 px, 15–68 px in from the bottom-right corner
+          const m = Math.min(vw || 0, vh || 0); const T = m <= 900 ? [23, 10, 15, 16] : (m <= 1500 ? [68, 30, 44, 48] : [99, 43, 64, 68]);
+          if(!vw || !vh){ showToastSafe('Wait until the video has loaded.'); return; }
+          q = { x:(vw - T[2] - T[0] - 5) / vw, y:(vh - T[3] - T[1] - 5) / vh, w:(T[0] + 10) / vw, h:(T[1] + 10) / vh };
+          setMethod('delogo');
+        }
         regions.push({ x:q.x, y:q.y, w:q.w, h:q.h, from:'', to:'', track:false, kf:[] });
         renderRegions();
         showToastSafe('Box placed bottom-right — drag it exactly over the mark, then tap Remove watermark.');
@@ -11577,6 +11587,7 @@ TOOL_IMPL.videowmremove = {
           <div class="field">
             <label>How to remove it</label>
             <select id="wmrMethod">
+              <option value="gemini">✦ Gemini / Veo watermark — exact removal, frame by frame (best quality for Gemini videos)</option>
               <option value="delogo">✨ Smart fill — best for logos & text (recommended)</option>
               <option value="plate">🧩 Clean-background match — best for running / moving text when the background stays still (slow, maximum result)</option>
               <option value="eraser">🔤 See-through text eraser — light/dark text on drawings & photos</option>
@@ -11584,6 +11595,10 @@ TOOL_IMPL.videowmremove = {
               <option value="pixelate">🔲 Pixelate the area</option>
               <option value="crop">✂️ Crop out (watermark near an edge)</option>
             </select>
+          </div>
+          <div class="note wmr-gemini-opt" style="display:none; margin:6px 0 10px; grid-column:1 / -1;">
+            <b>How this works:</b> the Gemini / Veo ✦ is a see-through white star blended into every frame. This method finds the star and its strength <b>in each frame</b> and calculates the picture underneath — it restores the real pixels instead of painting over them, so texture and sharpness stay. Only a small box around the star changes. No box needed. It works on videos downloaded from Gemini / Veo as they are (not screen recordings or videos that were resized or re-encoded after download). It runs fully in your browser — about 1–3 minutes for an 8-second clip. Use <b>Preview this frame</b> first.
+            <br><span style="color:#8a8f98;">ℹ️ The invisible SynthID mark stays. Use only on videos you created or may edit. A small “Veo” text mark is different — use <b>🅥 “Veo” text</b> above, then Smart fill.</span>
           </div>
           <div class="note wmr-plate-opt" style="display:none; margin:6px 0 10px;">
             <b>How this works:</b> the tool finds a clean copy of the background from the moments when the watermark is somewhere else, then puts it back wherever a see-through white watermark sits — no blur, original sharpness kept. It looks at the whole frame, so you do <b>not</b> need to draw boxes. Needs a <b>still camera / still background</b> (cartoons, slideshows, lectures, static shots). It is slow and runs fully in your browser: expect roughly 5–10 minutes for a 30-second phone video, and keep this tab open. Use <b>Preview this frame</b> first (about a minute).
@@ -11618,6 +11633,7 @@ TOOL_IMPL.videowmremove = {
         opts.querySelector('#wmrZoomWrap').style.display = methodSel.value === 'crop' ? '' : 'none';
         opts.querySelectorAll('.wmr-eraser-opt').forEach(f=>{ f.style.display = methodSel.value === 'eraser' ? '' : 'none'; });
         opts.querySelectorAll('.wmr-plate-opt').forEach(f=>{ f.style.display = methodSel.value === 'plate' ? '' : 'none'; });
+        opts.querySelectorAll('.wmr-gemini-opt').forEach(f=>{ f.style.display = methodSel.value === 'gemini' ? '' : 'none'; });
       });
 
       const row = el(`<div class="btn-row"></div>`);
@@ -11894,6 +11910,138 @@ TOOL_IMPL.videowmremove = {
       }
     }
 
+    // ---------- Gemini / Veo ✦ : exact removal, frame by frame ----------
+    // The ✦ is a see-through white star composited into every frame:  frame = α·white + (1−α)·picture.  The open-source engine in libs/gemini-wm.min.js
+    // (MIT, © 2025 Jad, © 2024 AllenK — see libs/gemini-wm.LICENSE.txt) finds the star and its strength in each frame and solves the equation backwards.
+    // Only a small box around the star is replaced; the rest of the video is re-encoded but not edited. Workers run frames in parallel.
+    const GM_WORKER = 'var W=0,H=0,full=null;self.onmessage=function(e){var d=e.data;try{' +
+      'if(d.op==="init"){W=d.W;H=d.H;full=new Uint8ClampedArray(W*H*4);for(var i=0;i<full.length;i+=4){full[i]=128;full[i+1]=128;full[i+2]=128;full[i+3]=255}self.postMessage({id:d.id,ok:true});return}' +
+      'var C=d.C,p=new Uint8ClampedArray(d.patch),ox=W-C,oy=H-C;for(var y=0;y<C;y++)full.set(p.subarray(y*C*4,(y+1)*C*4),((oy+y)*W+ox)*4);' +
+      'var im=new ImageData(new Uint8ClampedArray(full),W,H);var r=self.GWR.remove(im,{adaptiveMode:d.mode});var m=r.meta||{},dt=m.detection||{},o=(r.imageData||r).data;' +
+      'var src=m.source?""+m.source:"",sp=dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr=dt.originalGradientScore==null?-1:dt.originalGradientScore;' +
+      'var sure=!!m.applied&&((/^standard/.test(src)&&sp>=0.25&&gr>=0.1)||(sp>=0.6&&gr>=0.6));' +
+      'var bw=d.bw,bh=d.bh,out=new Uint8Array(bw*bh*3),k=0,sb=sure?o:full;for(var y2=0;y2<bh;y2++)for(var x2=0;x2<bw;x2++){var q=((d.by+y2)*W+d.bx+x2)*4;out[k++]=sb[q];out[k++]=sb[q+1];out[k++]=sb[q+2]}' +
+      'var pos=m.position||{};self.postMessage({id:d.id,ok:true,sure:sure,applied:!!m.applied,src:src,sp:sp,gr:gr,x:pos.x==null?-1:pos.x,y:pos.y==null?-1:pos.y,size:m.size||0,box:out.buffer},[out.buffer]);' +
+      '}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
+    async function gmPool(W, H, n){
+      const r = await fetch('libs/gemini-wm.min.js?v=1');
+      if(!r.ok) throw new Error('Could not load the Gemini engine — check your connection and try again.');
+      const url = URL.createObjectURL(new Blob(['var window=self;' + (await r.text()) + ';' + GM_WORKER], {type:'text/javascript'}));
+      const ws = [], wait = {}; let seq = 0;
+      const failAll = msg=>{ Object.keys(wait).forEach(k=>{ const q = wait[k]; delete wait[k]; q.rej(new Error(msg)); }); };
+      for(let i = 0; i < n; i++){
+        const w = new Worker(url);
+        w.onmessage = e=>{ const q = wait[e.data.id]; if(!q) return; delete wait[e.data.id]; if(e.data.ok) q.res(e.data); else q.rej(new Error(e.data.err)); };
+        w.onerror = ()=>failAll('The Gemini engine stopped unexpectedly. Please try again.');
+        ws.push(w);
+      }
+      const call = (w, msg, tr)=>new Promise((res, rej)=>{ const id = ++seq; wait[id] = {res, rej}; w.postMessage(Object.assign({id}, msg), tr || []); });
+      const pool = { n, job:(i, msg, tr)=>call(ws[i % n], Object.assign({op:'job'}, msg), tr), close:()=>{ ws.forEach(w=>w.terminate()); URL.revokeObjectURL(url); } };
+      await Promise.all(ws.map(w=>call(w, {op:'init', W, H})));
+      return pool;
+    }
+    async function probeInfo(ffmpeg){
+      const lines = []; const h = ({message})=>{ lines.push(message); };
+      ffmpeg.on('log', h);
+      try{ await ffmpeg.exec(['-i', inputName]); }catch(e){}
+      try{ ffmpeg.off('log', h); }catch(e){}
+      const t = lines.join('\n'); const m = t.match(/(\d+(?:\.\d+)?) fps/); const f = m ? parseFloat(m[1]) : 30;
+      const mat = /bt709/.test(t.split('Video:')[1] || '') ? 'bt709' : (/(smpte170m|bt470bg|smpte240m)/.test((t.split('Video:')[1] || '').replace(/smpte170m\/smpte170m\/bt709/g, 'bt709')) ? 'bt601' : (vh >= 720 || vw >= 1280 ? 'bt709' : 'bt601'));
+      return { fps: (f >= 5 && f <= 120) ? f : 30, mat, range: /yuvj|\bpc\b/.test((t.split('Video:')[1] || '').slice(0, 160)) ? 'pc' : 'tv' };
+    }
+    async function doGemini(preview, out, prog, o){
+      if(!dur || !vw || !vh) throw new Error('Wait until the video has loaded, then try again.');
+      if(Math.min(vw, vh) < 320) throw new Error('This video is too small for the Gemini ✦ method (shortest side under 320 px).');
+      if(dur > 40) throw new Error('This method works on clips up to 40 seconds (Gemini / Veo clips are about 8 seconds). Trim the video first, then run it again.');
+      prog.set(3, 'Loading video engine…');
+      const { ffmpeg, fetchFile } = await ensureFFmpeg();
+      const logs = []; const unlog = attachLog(ffmpeg, logs);
+      const rm = async n=>{ try{ await ffmpeg.deleteFile(n); }catch(e){} };
+      const run = async (args, text, a)=>{ if(a != null) prog.set(a, text); logs.length = 0; const c = await ffmpeg.exec(args); if(c !== 0) throw new Error('Could not process this video (' + (logs.slice(-2).join(' ').slice(0,160) || 'unknown') + ')'); };
+      const files = ['gm_c.raw', 'gm_box.raw', 'gm_f.png', 'wm_out.mp4'];
+      let pool = null;
+      try{
+        await ensureInput(ffmpeg, fetchFile, prog);
+        const info = await probeInfo(ffmpeg); const F = Number(info.fps.toFixed(3));
+        const C = Math.max(224, Math.min(320, Math.round(Math.min(vw, vh) * 0.3) & ~1));
+        const OX = vw - C, OY = vh - C, toRgb = `scale=in_range=${info.range}:in_color_matrix=${info.mat}:out_range=pc,format=rgb24`;
+        const frameBytes = C * C * 3, nExp = Math.ceil(dur * F) + 2;
+        if(!preview && frameBytes * nExp > 110 * 1048576) throw new Error('This clip is too long for the in-browser engine at its frame rate (about ' + Math.floor(110 * 1048576 / frameBytes / F) + ' seconds is the limit). Trim it and run again.');
+        for(const n of files) await rm(n);
+        // 1) the bottom-right corner of every frame (or one frame for the preview) as raw RGB
+        const tPrev = Math.min(Math.max(0, curT()), Math.max(0, dur - 0.05));
+        const seekArgs = preview ? ['-ss', tPrev.toFixed(3)] : [];
+        await run(['-y', ...seekArgs, '-i', inputName, '-an', '-vf', `fps=${F},crop=${C}:${C}:${OX}:${OY},${toRgb}`, ...(preview ? ['-frames:v', '1'] : []), '-f', 'rawvideo', 'gm_c.raw'], 'Step 1/4 · reading the corner of every frame…', 6);
+        const raw = await ffmpeg.readFile('gm_c.raw'); await rm('gm_c.raw');
+        const cnt = Math.floor(raw.length / frameBytes);
+        if(!cnt) throw new Error('Could not read frames from this video.');
+        const patchOf = i=>{ const a = new Uint8ClampedArray(C * C * 4); const b = raw.subarray(i * frameBytes, (i + 1) * frameBytes); for(let k = 0, q = 0, t = 0; k < C * C; k++){ a[q++] = b[t++]; a[q++] = b[t++]; a[q++] = b[t++]; a[q++] = 255; } return a; };
+        // 2) find the star (several frames, in case the first one is unlucky)
+        prog.set(14, 'Step 2/4 · looking for the ✦ …');
+        pool = await gmPool(vw, vh, preview ? 1 : Math.max(1, Math.min(4, navigator.hardwareConcurrency || 2)));
+        let det = null;
+        for(const i of [0, Math.floor(cnt / 2), cnt - 1, Math.floor(cnt / 4), Math.floor(cnt * 3 / 4)]){
+          const a = patchOf(i);
+          const r = await pool.job(0, { patch: a.buffer, C, mode: 'auto', bx: OX, by: OY, bw: C, bh: C }, [a.buffer]);
+          if(r.sure && r.size > 0 && r.x >= 0){ det = r; break; }
+        }
+        if(!det) throw new Error('No Gemini ✦ mark was found in this video. It may not be a Gemini / Veo video, it may have been resized or re-encoded after download, or it may carry the small “Veo” text mark instead (use 🅥 “Veo” text, then Smart fill).');
+        const pad = 8, even = v=>v & ~1;
+        const bx = Math.max(OX & ~1, even(det.x - pad)), by = Math.max(OY & ~1, even(det.y - pad));
+        const bw = Math.min(even(det.size + 2 * pad + 1), vw - bx), bh = Math.min(even(det.size + 2 * pad + 1), vh - by);
+        const mode = /^standard/.test(det.src) ? 'never' : 'auto';
+        // 3) every frame, in parallel
+        const boxes = new Uint8Array(cnt * bw * bh * 3); let next = 0, doneN = 0, fixedN = 0;
+        const workers = Array.from({length: pool.n}, (_, wi)=>(async ()=>{
+          for(;;){
+            const i = next++; if(i >= cnt) break;
+            const a = patchOf(i);
+            let r = await pool.job(wi, { patch: a.buffer, C, mode, bx, by, bw, bh }, [a.buffer]);
+            if(!r.sure && mode === 'never'){ const a2 = patchOf(i); r = await pool.job(wi, { patch: a2.buffer, C, mode: 'auto', bx, by, bw, bh }, [a2.buffer]); } // second try with the wider search before giving a frame up
+            boxes.set(new Uint8Array(r.box), i * bw * bh * 3); if(r.sure) fixedN++;
+            doneN++; prog.set(16 + 70 * doneN / cnt, 'Step 3/4 · removing the ✦ · frame ' + doneN + ' of ' + cnt);
+          }
+        })());
+        await Promise.all(workers);
+        pool.close(); pool = null;
+        if(preview){
+          // before / after, enlarged, plus the whole frame
+          await run(['-y', ...seekArgs, '-i', inputName, '-an', '-vf', `fps=${F},${toRgb}`, '-frames:v', '1', 'gm_f.png'], 'Rendering preview…', 92);
+          const url = URL.createObjectURL(new Blob([await ffmpeg.readFile('gm_f.png')], {type:'image/png'}));
+          const img = await new Promise((res, rej)=>{ const im = new Image(); im.onload = ()=>res(im); im.onerror = ()=>rej(new Error('Preview failed')); im.src = url; });
+          const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight; const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
+          const before = document.createElement('canvas'); before.width = bw; before.height = bh; before.getContext('2d').drawImage(cv, bx, by, bw, bh, 0, 0, bw, bh);
+          const px = g.createImageData(bw, bh); for(let k = 0, q = 0, t = 0; k < bw * bh; k++){ px.data[q++] = boxes[t++]; px.data[q++] = boxes[t++]; px.data[q++] = boxes[t++]; px.data[q++] = 255; } g.putImageData(px, bx, by);
+          const after = document.createElement('canvas'); after.width = bw; after.height = bh; after.getContext('2d').drawImage(cv, bx, by, bw, bh, 0, 0, bw, bh);
+          const zoomCss = 'width:48%; image-rendering:pixelated; border-radius:8px; border:1px solid #E6E8EC; background:#eee;';
+          prog.remove();
+          const box = el(`<div style=\"margin:8px 0;\"><div style=\"font-size:12.5px; font-weight:700; margin-bottom:6px;\">Preview at ${fmtTime(tPrev)} — ${fixedN ? '✅ ✦ found and removed' : '⚠️ the ✦ was not clear in this frame'}. Looks good? Run <b>Remove watermark</b> for the whole video.</div><div style=\"display:flex; gap:4%; justify-content:space-between;\"></div><div style=\"font-size:11.5px; color:#8a8f98; margin:4px 0 8px;\">Left: before · Right: after (enlarged)</div></div>`);
+          const row = box.children[1]; before.style.cssText = zoomCss; after.style.cssText = zoomCss; row.appendChild(before); row.appendChild(after);
+          const whole = new Image(); whole.src = cv.toDataURL('image/png'); whole.style.cssText = 'width:100%; border-radius:10px; border:1px solid #E6E8EC;'; box.appendChild(whole);
+          out.appendChild(box); return;
+        }
+        // 4) put the cleaned boxes back and encode
+        prog.set(88, 'Step 4/4 · writing the video…');
+        await ffmpeg.writeFile('gm_box.raw', boxes);
+        const fc = `[0:v]fps=${F},format=yuv420p[b];[1:v]scale=in_range=pc:out_range=${info.range}:out_color_matrix=${info.mat},format=yuv420p[p];[b][p]overlay=${bx}:${by}:eof_action=pass:repeatlast=0,scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p[vout]`;
+        const base = ['-y', '-i', inputName, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', bw + 'x' + bh, '-framerate', String(F), '-i', 'gm_box.raw', '-filter_complex', fc, '-map', '[vout]', '-map', '0:a?', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', o.crf, '-pix_fmt', 'yuv420p'];
+        try{ await run([...base, '-c:a', 'copy', '-movflags', '+faststart', 'wm_out.mp4'], 'Step 4/4 · writing the video…', 90); }
+        catch(e){ await rm('wm_out.mp4'); await run([...base, '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', 'wm_out.mp4'], 'Step 4/4 · writing the video…', 90); }
+        prog.set(97, 'Preparing file…');
+        const data = await ffmpeg.readFile('wm_out.mp4');
+        const name = file.name.replace(/\.[^.]+$/, '') + '-no-watermark.mp4';
+        const blob = new Blob([data], {type:'video/mp4'});
+        downloadBlob(blob, name);
+        prog.set(100, 'Done'); prog.remove();
+        mountResult(out, `Done — ${name} (${(blob.size/1048576).toFixed(1)}MB) downloaded. The ✦ was cleaned in ${fixedN} of ${cnt} frames` + (fixedN < cnt ? ` — the other ${cnt - fixedN} frames were left as they were because the star was not clear enough to remove safely.` : '.'));
+        await freeInput();
+      } finally {
+        if(pool) pool.close();
+        unlog();
+        for(const n of files) await rm(n);
+      }
+    }
+
     // ---------- single-frame preview ----------
     async function doPreview(){
       if(busy) return;
@@ -11904,6 +12052,7 @@ TOOL_IMPL.videowmremove = {
         setBusy(true);
         const o = readOpts();
         if(o.method === 'plate'){ await doPlate(true, out, prog, o); return; }
+        if(o.method === 'gemini'){ await doGemini(true, out, prog, o); return; }
         const tPrev = Math.min(Math.max(0, curT()), Math.max(0, dur - 0.05));
         const graph = buildGraph(o.method, o.margin, o.zoomBack, true, tPrev, o); // preview shows every box regardless of time range
         prog.set(3, 'Loading video engine…');
@@ -11933,6 +12082,7 @@ TOOL_IMPL.videowmremove = {
         setBusy(true);
         const o = readOpts();
         if(o.method === 'plate'){ await doPlate(false, out, prog, o); return; }
+        if(o.method === 'gemini'){ await doGemini(false, out, prog, o); return; }
         const graph = buildGraph(o.method, o.margin, o.zoomBack, false, null, o);
         prog.set(3, 'Loading video engine…');
         const { ffmpeg, fetchFile } = await ensureFFmpeg();
