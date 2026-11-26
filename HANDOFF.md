@@ -14,7 +14,7 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
 ## Update numbers and sessions (read before you start)
-- **Latest update: UPDATE_82** (Claude — exact frame-by-frame Gemini/Veo ✦ video method, on top of UPDATE_80/81). The next session uses **UPDATE_83**, then 84 … Never reuse a number.
+- **Latest update: UPDATE_83** (Claude — SEO copy for the new Gemini/Veo/YouTube video + Gemini image tools and the improved Image→Excel, on top of UPDATE_82). The next session uses **UPDATE_84**, then 85 … Never reuse a number.
 - **AI Handover Notice (Google AI Studio ⇄ Claude AI):**
   - **UPDATE_01 to UPDATE_77** were executed by Claude AI.
   - **UPDATE_78** was executed by Google AI Studio (Gemini Engine) on 1 Nov 2026 per user's direct instruction to align pages with real Google Search Console impressions and establish permanent Page 1 ranking.
@@ -461,6 +461,11 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 
 ## UPDATE_77 — clean printed PDFs (24 Oct)
 - Resume Builder "⬇ PDF" (window.print) printed the site footer (support e-mail, Contact · Privacy …). Print CSS now hides everything outside `.app` in Resume_build.html, and `.site-trust` is hidden in print on tn-rent-agreement, tn-sale-deed and health-check too. Checked by printing the sample resume to PDF in headless Chromium: no site text left. Resume PDFs never carried a watermark.
+
+## UPDATE_83 — SEO for the Gemini / Veo / YouTube / Image→Excel work (Claude)
+- `seo-content.mjs`: new entries `geminiwmremove` and `videowmremove`, rewritten `img2excel` (coloured headers, ₹, title rows, honest accuracy, Tamil language). `seo-content-ta.mjs`: Tamil intro/tips/FAQ for the two new tools. Then `node generate-tool-pages.mjs` regenerated `tools/gemini-watermark-remover.html`, `tools/video-watermark-remover.html`, `tools/image-excel.html` and `image-tools.html`.
+- Claims are limited to what was measured: Gemini images restored to <0.02/255 mean error on the project's real samples; Veo ✦ removal tested on real sample clips (faint outline can remain); YouTube = Smart fill only, no exact method; SynthID is NOT removed; "own / permitted content only" is stated. Keep it that way when editing.
+- `sitemap.xml`: the generator bumps every `<lastmod>` to today — only the 3 changed tool pages were bumped by hand; the other URLs keep their dates (292 URLs, none lost).
 
 ## UPDATE_82 — Exact Gemini / Veo ✦ removal in the video tool (Claude)
 - New method `gemini` in `videowmremove` (index.source.html, `doGemini`): "✦ Gemini / Veo watermark — exact removal, frame by frame". The Gemini app puts the SAME ✦ (48 px, 96 px in from the right/bottom at 720p) into videos, as a see-through white star in every frame. Real sample videos come from the open-source repo (`src/assets/video-samples/*.mp4`); on them the star's apparent strength varies from frame to frame (engine gain 0.4–1.3), so one fixed strength for the whole video was tried and REJECTED (stars came out dark or still bright). Per-frame engine = right answer; the old Smart fill smears the whole 64 px box (kills texture).
