@@ -2946,7 +2946,7 @@ function loadCategoryScript(cat){
   if(__categoryScriptLoading[cat]) return __categoryScriptLoading[cat];
   return (__categoryScriptLoading[cat] = new Promise((resolve, reject)=>{
     const s = document.createElement('script');
-    s.src = `category-${cat}.js?v=20261125a`;
+    s.src = `category-${cat}.js?v=20261126a`;
     s.onload = ()=>{ __loadedCategoryScripts.add(cat); resolve(); };
     s.onerror = ()=>{ delete __categoryScriptLoading[cat]; s.remove(); reject(new Error(`Could not load ${cat} tools — check your internet connection and try again.`)); };
     document.head.appendChild(s);
@@ -11914,19 +11914,56 @@ TOOL_IMPL.videowmremove = {
     // The ✦ is a see-through white star composited into every frame:  frame = α·white + (1−α)·picture.  The open-source engine in libs/gemini-wm.min.js
     // (MIT, © 2025 Jad, © 2024 AllenK — see libs/gemini-wm.LICENSE.txt) finds the star and its strength in each frame and solves the equation backwards.
     // Only a small box around the star is replaced; the rest of the video is re-encoded but not edited. Workers run frames in parallel.
-    const GM_WORKER = 'var W=0,H=0,full=null;self.onmessage=function(e){var d=e.data;try{' +
-      'if(d.op==="init"){W=d.W;H=d.H;full=new Uint8ClampedArray(W*H*4);for(var i=0;i<full.length;i+=4){full[i]=128;full[i+1]=128;full[i+2]=128;full[i+3]=255}self.postMessage({id:d.id,ok:true});return}' +
-      'var C=d.C,p=new Uint8ClampedArray(d.patch),ox=W-C,oy=H-C;for(var y=0;y<C;y++)full.set(p.subarray(y*C*4,(y+1)*C*4),((oy+y)*W+ox)*4);' +
-      'var im=new ImageData(new Uint8ClampedArray(full),W,H);var r=self.GWR.remove(im,{adaptiveMode:d.mode});var m=r.meta||{},dt=m.detection||{},o=(r.imageData||r).data;' +
-      'var src=m.source?""+m.source:"",sp=dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr=dt.originalGradientScore==null?-1:dt.originalGradientScore;' +
-      'var sure=!!m.applied&&((/^standard/.test(src)&&sp>=0.25&&gr>=0.1)||(sp>=0.6&&gr>=0.6));' +
-      'var bw=d.bw,bh=d.bh,out=new Uint8Array(bw*bh*3),k=0,sb=sure?o:full;for(var y2=0;y2<bh;y2++)for(var x2=0;x2<bw;x2++){var q=((d.by+y2)*W+d.bx+x2)*4;out[k++]=sb[q];out[k++]=sb[q+1];out[k++]=sb[q+2]}' +
-      'var pos=m.position||{};self.postMessage({id:d.id,ok:true,sure:sure,applied:!!m.applied,src:src,sp:sp,gr:gr,x:pos.x==null?-1:pos.x,y:pos.y==null?-1:pos.y,size:m.size||0,box:out.buffer},[out.buffer]);' +
-      '}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
+    // Runs INSIDE the worker (shipped with Function.toString — must not use anything from the page).
+    // After the engine, a light clean-up that only touches the star: the reverse blend multiplies the video's compression noise by 1/(1−α) (up to 2×), which leaves
+    // a faint speckled star-shaped patch and a thin outline. (1) inside the star, blend a little of a 0.7 px blur, strongest where α is high; (2) on the thin edge band
+    // of the star, take the 0.8 px blurred value. On the real Veo sample the star area's texture energy was 1.36× its surroundings (target 1.0) and its outline 1.45× — this brings both to ≈1.
+    function gmWorkerMain(){
+      var W = 0, H = 0, full = null;
+      function kern(sig){ var r = 2, k = [], t = 0; for(var i = -r; i <= r; i++){ var v = Math.exp(-i * i / (2 * sig * sig)); k.push(v); t += v; } return k.map(function(v){ return v / t; }); }
+      var K7 = kern(0.7), K8 = kern(0.8);
+      function blur(src, w, h, k){ var r = 2, tmp = new Float32Array(src.length), out = new Float32Array(src.length);
+        for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){ var s = 0; for(var i = -r; i <= r; i++){ var xx = Math.min(w - 1, Math.max(0, x + i)); s += src[y * w + xx] * k[i + r]; } tmp[y * w + x] = s; }
+        for(var y2 = 0; y2 < h; y2++) for(var x2 = 0; x2 < w; x2++){ var s2 = 0; for(var j = -r; j <= r; j++){ var yy = Math.min(h - 1, Math.max(0, y2 + j)); s2 += tmp[yy * w + x2] * k[j + r]; } out[y2 * w + x2] = s2; }
+        return out; }
+      function cleanup(o, size, px, py){
+        var al; try { al = self.GWR.alpha(size); } catch(e) { return; } if(!al || al.length !== size * size) return;
+        var P = 3, w = size + 2 * P, A = new Float32Array(w * w);
+        for(var y = 0; y < size; y++) for(var x = 0; x < size; x++) A[(y + P) * w + x + P] = al[y * size + x];
+        if(px - P < 0 || py - P < 0 || px + size + P > W || py + size + P > H) return;
+        var edge = new Uint8Array(w * w);
+        for(var y1 = 1; y1 < w - 1; y1++) for(var x1 = 1; x1 < w - 1; x1++){ var gx = (A[y1 * w + x1 + 1] - A[y1 * w + x1 - 1]) / 2, gy = (A[(y1 + 1) * w + x1] - A[(y1 - 1) * w + x1]) / 2; if(Math.hypot(gx, gy) > 0.006) edge[y1 * w + x1] = 1; }
+        var ring = new Uint8Array(w * w);
+        for(var y3 = 0; y3 < w; y3++) for(var x3 = 0; x3 < w; x3++){ if(edge[y3 * w + x3]) for(var dy = -1; dy <= 1; dy++) for(var dx = -1; dx <= 1; dx++){ var yy = y3 + dy, xx = x3 + dx; if(yy >= 0 && yy < w && xx >= 0 && xx < w) ring[yy * w + xx] = 1; } }
+        for(var c = 0; c < 3; c++){
+          var ch = new Float32Array(w * w);
+          for(var yy2 = 0; yy2 < w; yy2++) for(var xx2 = 0; xx2 < w; xx2++) ch[yy2 * w + xx2] = o[((py - P + yy2) * W + px - P + xx2) * 4 + c];
+          var b7 = blur(ch, w, w, K7), b8 = blur(ch, w, w, K8), res = new Float32Array(w * w);
+          for(var i2 = 0; i2 < w * w; i2++){ var wt = Math.min(1, Math.max(0, (A[i2] - 0.08) / 0.32)) * 0.4; var v = ch[i2] * (1 - wt) + b7[i2] * wt; res[i2] = v; }
+          var b8b = blur(res, w, w, K8);
+          for(var i3 = 0; i3 < w * w; i3++){ var v2 = ring[i3] ? b8b[i3] : res[i3]; var yy3 = (i3 / w) | 0, xx3 = i3 - yy3 * w; o[((py - P + yy3) * W + px - P + xx3) * 4 + c] = v2 < 0 ? 0 : v2 > 255 ? 255 : v2; }
+        }
+      }
+      self.onmessage = function(e){ var d = e.data;
+        try {
+          if(d.op === 'init'){ W = d.W; H = d.H; full = new Uint8ClampedArray(W * H * 4); for(var i = 0; i < full.length; i += 4){ full[i] = 128; full[i + 1] = 128; full[i + 2] = 128; full[i + 3] = 255; } self.postMessage({ id: d.id, ok: true }); return; }
+          var C = d.C, p = new Uint8ClampedArray(d.patch), ox = W - C, oy = H - C;
+          for(var y = 0; y < C; y++) full.set(p.subarray(y * C * 4, (y + 1) * C * 4), ((oy + y) * W + ox) * 4);
+          var im = new ImageData(new Uint8ClampedArray(full), W, H); var r = self.GWR.remove(im, { adaptiveMode: d.mode }); var m = r.meta || {}, dt = m.detection || {}, o = (r.imageData || r).data;
+          var src = m.source ? '' + m.source : '', sp = dt.originalSpatialScore == null ? -1 : dt.originalSpatialScore, gr = dt.originalGradientScore == null ? -1 : dt.originalGradientScore;
+          var sure = !!m.applied && ((/^standard/.test(src) && sp >= 0.25 && gr >= 0.1) || (sp >= 0.6 && gr >= 0.6));
+          var pos = m.position || {};
+          if(sure && d.clean !== false && pos.x != null && m.size) cleanup(o, m.size, pos.x, pos.y);
+          var bw = d.bw, bh = d.bh, out = new Uint8Array(bw * bh * 3), k = 0, sb = sure ? o : full;
+          for(var y2 = 0; y2 < bh; y2++) for(var x2 = 0; x2 < bw; x2++){ var q = ((d.by + y2) * W + d.bx + x2) * 4; out[k++] = sb[q]; out[k++] = sb[q + 1]; out[k++] = sb[q + 2]; }
+          self.postMessage({ id: d.id, ok: true, sure: sure, applied: !!m.applied, src: src, sp: sp, gr: gr, x: pos.x == null ? -1 : pos.x, y: pos.y == null ? -1 : pos.y, size: m.size || 0, box: out.buffer }, [out.buffer]);
+        } catch(x) { self.postMessage({ id: d.id, ok: false, err: String((x && x.message) || x) }); }
+      };
+    }
     async function gmPool(W, H, n){
       const r = await fetch('libs/gemini-wm.min.js?v=1');
       if(!r.ok) throw new Error('Could not load the Gemini engine — check your connection and try again.');
-      const url = URL.createObjectURL(new Blob(['var window=self;' + (await r.text()) + ';' + GM_WORKER], {type:'text/javascript'}));
+      const url = URL.createObjectURL(new Blob(['var window=self;' + (await r.text()) + ';(' + gmWorkerMain.toString() + ')();'], {type:'text/javascript'}));
       const ws = [], wait = {}; let seq = 0;
       const failAll = msg=>{ Object.keys(wait).forEach(k=>{ const q = wait[k]; delete wait[k]; q.rej(new Error(msg)); }); };
       for(let i = 0; i < n; i++){

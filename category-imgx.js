@@ -483,10 +483,54 @@
    * bundled as libs/gemini-wm.min.js (licence: libs/gemini-wm.LICENSE.txt). Runs in a Web Worker, nothing is uploaded.
    * The invisible SynthID mark is NOT touched (and this tool does not claim to). */
   let __gwmEngine = null, __gwmSeq = 0; const __gwmWait = {};
+  // Runs INSIDE the worker (shipped with Function.toString — it must not use anything from this file).
+  // Besides the engine it double-checks the engine's choice of star size/position: on a real Gemini sample (1728×2464) the engine picked a 48 px star
+  // while the real mark was 96 px (64 px in from the edges) and left it almost untouched. We score the standard Gemini geometries by template match
+  // (brightness and edge correlation with the star shape); if a clearly matching geometry disagrees with the engine, we remove it ourselves by plain
+  // reverse alpha blending and keep whichever result leaves less of the star's outline behind.
+  function gwmWorkerMain() {
+    function ncc(a, b) { let ma = 0, mb = 0, n = a.length; for (let i = 0; i < n; i++) { ma += a[i]; mb += b[i]; } ma /= n; mb /= n; let s = 0, va = 0, vb = 0; for (let i = 0; i < n; i++) { const x = a[i] - ma, y = b[i] - mb; s += x * y; va += x * x; vb += y * y; } return s / (Math.sqrt(va * vb) + 1e-9); }
+    function lumOf(d, W, x0, y0, w, h) { const L = new Float64Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = ((y0 + y) * W + x0 + x) * 4; L[y * w + x] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; } return L; }
+    function grad(L, w, h) { const gx = new Float64Array(w * h), gy = new Float64Array(w * h); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { gx[y * w + x] = (L[y * w + x + 1] - L[y * w + x - 1]) / 2; gy[y * w + x] = (L[(y + 1) * w + x] - L[(y - 1) * w + x]) / 2; } return { gx, gy }; }
+    function score(d, W, H, s, mr, mb) { const x = W - mr - s, y = H - mb - s; if (x < 0 || y < 0) return null; const al = self.GWR.alpha(s), L = lumOf(d, W, x, y, s, s), g = grad(L, s, s), a = grad(al, s, s), m1 = new Float64Array(s * s), m2 = new Float64Array(s * s); for (let i = 0; i < s * s; i++) { m1[i] = Math.hypot(g.gx[i], g.gy[i]); m2[i] = Math.hypot(a.gx[i], a.gy[i]); } return { s: s, x: x, y: y, mr: mr, sp: ncc(L, al), gr: ncc(m1, m2) }; }
+    // how much of the star's outline is still in the picture (0 = nothing): |edge correlation| + excess edge energy on the star's outline
+    function residual(d, W, c, al) { const P = 6, s = c.s, w = s + 2 * P, x0 = c.x - P, y0 = c.y - P; if (x0 < 0 || y0 < 0) return 9; const L = lumOf(d, W, x0, y0, w, w), g = grad(L, w, w), A = new Float64Array(w * w); for (let y = 0; y < s; y++) for (let x = 0; x < s; x++) A[(y + P) * w + x + P] = al[y * s + x]; const a = grad(A, w, w);
+      let dot = 0, n1 = 0, n2 = 0, er = 0, nr = 0, eo = 0, no = 0;
+      for (let y = 1; y < w - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x, am = Math.hypot(a.gx[i], a.gy[i]), gm = Math.hypot(g.gx[i], g.gy[i]);
+        let near = false, far = true; if (am > 0.006) near = true; else { for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1; dx++) { const j = (y + dy) * w + x + dx; if (Math.hypot(a.gx[j], a.gy[j]) > 0.006) { near = true; break; } } }
+        if (near) { dot += g.gx[i] * a.gx[i] + g.gy[i] * a.gy[i]; n1 += gm * gm; n2 += am * am; er += gm; nr++; } else if (am < 0.0005 && (x < P + 2 || y < P + 2 || x > w - P - 3 || y > w - P - 3)) { eo += gm; no++; } }
+      if (!nr || !no) return 9; return Math.abs(dot / (Math.sqrt(n1 * n2) + 1e-9)) + Math.max(0, (er / nr) / ((eo / no) + 1e-6) - 1) * 0.25; }
+    function ownRemoval(d, W, c) { // plain reverse alpha blending, strength searched for the least leftover outline
+      const s = c.s, al = self.GWR.alpha(s); let best = null, bestR = 1e9;
+      for (let gi = 0; gi < 9; gi++) { const gain = 0.8 + gi * 0.05, out = new Uint8ClampedArray(d.length); out.set(d);
+        for (let y = 0; y < s; y++) for (let x = 0; x < s; x++) { const a = Math.min(0.99, al[y * s + x] * gain), i = ((c.y + y) * W + c.x + x) * 4; for (let k = 0; k < 3; k++) { const v = (d[i + k] - 255 * a) / (1 - a); out[i + k] = v < 0 ? 0 : v > 255 ? 255 : v; } }
+        const r = residual(out, W, c, al); if (r < bestR) { bestR = r; best = out; } }
+      return { out: best, r: bestR }; }
+    self.onmessage = function (e) {
+      const d = e.data;
+      try {
+        const orig = new Uint8ClampedArray(d.buf), W = d.w, H = d.h;
+        const r = self.GWR.remove(new ImageData(new Uint8ClampedArray(orig), W, H), {});
+        const o = r.imageData || r, m = r.meta || {}, dt = m.detection || {};
+        let applied = !!m.applied, src = m.source ? '' + m.source : '', size = m.size || 0, sp = dt.originalSpatialScore == null ? -1 : dt.originalSpatialScore, gr = dt.originalGradientScore == null ? -1 : dt.originalGradientScore, out = o.data, note = '';
+        // double-check the geometry
+        let best = null; [[96, 64], [48, 32], [48, 96], [96, 32], [96, 96], [48, 64]].forEach(function (g) { const c = score(orig, W, H, g[0], g[1], g[1]); if (c && (!best || c.sp + c.gr > best.sp + best.gr)) best = c; });
+        if (best && best.sp >= 0.28 && best.gr >= 0.12) {
+          const pos = m.position || {}, same = applied && size === best.s && Math.abs((pos.x == null ? -99 : pos.x) - best.x) <= 4 && Math.abs((pos.y == null ? -99 : pos.y) - best.y) <= 4;
+          if (!same) {
+            const own = ownRemoval(orig, W, best), al = self.GWR.alpha(best.s), eng = applied ? residual(out, W, best, al) : 9;
+            if (own.out && own.r < eng - 0.1) { out = own.out; applied = true; src = 'standard+verified'; size = best.s; sp = best.sp; gr = best.gr; note = 'geometry-corrected'; }
+          }
+        }
+        const buf = out.buffer === orig.buffer ? out.slice().buffer : out.buffer;
+        self.postMessage({ id: d.id, ok: true, applied: applied, src: src, size: size, sp: sp, gr: gr, note: note, w: W, h: H, buf: buf }, [buf]);
+      } catch (x) { self.postMessage({ id: d.id, ok: false, err: String((x && x.message) || x) }); }
+    };
+  }
   function gwmWorker() {
     if (__gwmEngine) return __gwmEngine;
     __gwmEngine = fetch('libs/gemini-wm.min.js?v=1').then(function (r) { if (!r.ok) throw new Error('Could not load the Gemini engine — check your internet connection and try again.'); return r.text(); }).then(function (src) {
-      const code = 'var window=self;' + src + ';self.onmessage=function(e){var d=e.data;try{var im=new ImageData(new Uint8ClampedArray(d.buf),d.w,d.h);var r=self.GWR.remove(im,{});var o=(r&&r.imageData)||r;var m=(r&&r.meta)||{};var dt=m.detection||{};var b=o.data.buffer;self.postMessage({id:d.id,ok:true,applied:!!m.applied,src:(m.source?""+m.source:""),size:m.size||0,sp:dt.originalSpatialScore==null?-1:dt.originalSpatialScore,gr:dt.originalGradientScore==null?-1:dt.originalGradientScore,w:o.width,h:o.height,buf:b},[b])}catch(x){self.postMessage({id:d.id,ok:false,err:String((x&&x.message)||x)})}};';
+      const code = 'var window=self;' + src + ';(' + gwmWorkerMain.toString() + ')();';
       const w = new Worker(URL.createObjectURL(new Blob([code], { type: 'text/javascript' })));
       w.onmessage = function (e) { const p = __gwmWait[e.data.id]; if (!p) return; delete __gwmWait[e.data.id]; if (e.data.ok) p.res(e.data); else p.rej(new Error(e.data.err)); };
       w.onerror = function () { Object.keys(__gwmWait).forEach(function (k) { const p = __gwmWait[k]; delete __gwmWait[k]; p.rej(new Error('The Gemini engine stopped unexpectedly. Please try again.')); }); __gwmEngine = null; };

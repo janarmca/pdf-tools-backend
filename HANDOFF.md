@@ -14,7 +14,7 @@ Rules that never change are in `CLAUDE.md` (no Supabase / Cloud Run, no password
 7. Never ask the owner to paste secrets in chat; secrets live only in GitHub repo secrets.
 
 ## Update numbers and sessions (read before you start)
-- **Latest update: UPDATE_83** (Claude — SEO copy for the new Gemini/Veo/YouTube video + Gemini image tools and the improved Image→Excel, on top of UPDATE_82). The next session uses **UPDATE_84**, then 85 … Never reuse a number.
+- **Latest update: UPDATE_84** (Claude — accuracy pass on the Gemini image + video removers, on top of UPDATE_83). The next session uses **UPDATE_85**, then 86 … Never reuse a number.
 - **AI Handover Notice (Google AI Studio ⇄ Claude AI):**
   - **UPDATE_01 to UPDATE_77** were executed by Claude AI.
   - **UPDATE_78** was executed by Google AI Studio (Gemini Engine) on 1 Nov 2026 per user's direct instruction to align pages with real Google Search Console impressions and establish permanent Page 1 ranking.
@@ -461,6 +461,12 @@ Full audit report: reports "மூன்று நாள் பணிகள் �
 
 ## UPDATE_77 — clean printed PDFs (24 Oct)
 - Resume Builder "⬇ PDF" (window.print) printed the site footer (support e-mail, Contact · Privacy …). Print CSS now hides everything outside `.app` in Resume_build.html, and `.site-trust` is hidden in print on tn-rent-agreement, tn-sale-deed and health-check too. Checked by printing the sample resume to PDF in headless Chromium: no site text left. Resume PDFs never carried a watermark.
+
+## UPDATE_84 — Accuracy pass: Gemini image + Veo video (Claude)
+- IMAGE (`category-imgx.js`, worker now `gwmWorkerMain` shipped with `Function.toString`): the 5 real Gemini samples of the open-source repo come with their true originals, which exposed a real failure — real image 4 (1728×2464) has a 96 px star 64 px from the edges but the engine chose a 48 px star elsewhere and left the mark almost untouched (error vs truth barely changed, max pixel error 121). Fix = a geometry double-check: template-match (brightness + edge correlation) the standard Gemini geometries; if one clearly matches (spatial ≥ 0.28 AND gradient ≥ 0.12 — the 5 real marks scored 0.30–0.87 / 0.125–0.89, clean originals ≤ 0.27 / ≤ 0.12) and the engine disagrees, remove it with plain reverse alpha blending (strength searched 0.8–1.2) and keep it only if it leaves clearly less star outline than the engine's own output. Result on the 5 real images: mean error vs the true originals 0.006–0.008 grey levels over the whole picture (image 4: 0.019 → 0.006, worst pixel 121 → 18). The 5 true originals (no mark) and the synthetic clean images are still left untouched.
+- Post-smoothing was tested on the images against truth and gave NO gain (5.20 → 5.16 mean error in the star box) — deliberately not used there.
+- VIDEO (`gmWorkerMain` in `doGemini`): the reverse blend multiplies compression noise by up to 2×; after the engine a light clean-up touches only the star (0.7 px blur blended by α inside, 0.8 px blur on the thin edge band). Measured on all 72 frames of a real Veo clip (outline correlation / outline energy ratio / texture energy ratio inside÷outside; ideal 0 / 1.0 / 1.0): engine only 0.167 / 1.448 / 1.362 → with clean-up 0.132 / 1.089 / 1.053. Unsure frames are retried once with the wide search. No ground-truth video exists, so these are proxy measures + visual checks.
+- NOT done / limits: the geometry double-check is image-only (video geometry looked right on the 4 samples; 1080p still unverified). `?v=` of category scripts 20261126a, `sw.js` v121.
 
 ## UPDATE_83 — SEO for the Gemini / Veo / YouTube / Image→Excel work (Claude)
 - `seo-content.mjs`: new entries `geminiwmremove` and `videowmremove`, rewritten `img2excel` (coloured headers, ₹, title rows, honest accuracy, Tamil language). `seo-content-ta.mjs`: Tamil intro/tips/FAQ for the two new tools. Then `node generate-tool-pages.mjs` regenerated `tools/gemini-watermark-remover.html`, `tools/video-watermark-remover.html`, `tools/image-excel.html` and `image-tools.html`.
